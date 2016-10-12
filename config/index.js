@@ -1,16 +1,29 @@
 const path = require('path');
-const nconf = require('nconf');
-
 const config = {};
 
 // for example NODE_ENV is development
 config.env = process.env.NODE_ENV;
+config.isTest = process.env.NODE_ENV === 'test';
 
 // at this moment environment variables will be imported from .env.development
 // if NODE_ENV not provided then dotenv will import variables from .env
 require('dotenv').config({
     path: path.join(__dirname, `.env${config.env ? `.${config.env}` : ''}`).normalize(),
 });
+
+// Heroku Compose.io addon variable
+const mongohqUrl = process.env.MONGOHQ_URL;
+const dbConfig = {
+    user : process.env.DB_USER,
+    password : process.env.DB_PASS,
+    host : process.env.DB_HOST,
+    port : process.env.DB_PORT,
+    name : process.env.DB_NAME
+};
+
+config.dbConfig = dbConfig;
+config.mongodbUri = mongohqUrl ? mongohqUrl :
+    `mongodb://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}`;
 
 /* following code is copied from vcs and modified */
 const mongoConfig = {
