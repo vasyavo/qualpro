@@ -66,7 +66,8 @@
   "scripts": {
     "test": "mocha tests/",
     "start": "node server.js",
-    "dev": "cross-env NODE_ENV=development node server.js"
+    "dev": "cross-env NODE_ENV=development node server.js",
+    "postinstall": "bower install"
   },
   "engines": {
     "node": "6.5.0",
