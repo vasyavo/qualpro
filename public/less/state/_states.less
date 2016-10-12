@@ -1,0 +1,395 @@
+#errorHandler{
+  position: fixed;
+  width: 300px;
+  right: 0;
+  height: 0;
+  z-index: 20000;
+
+  .error,
+  .notification,
+  .alert {
+    position: relative;
+    width: 300px;
+    padding: 20px 20px 20px 60px;
+    background-color: @errorBg;
+    border: 1px solid @errorBorderGray;
+    border-top: 0;
+    border-right: 0;
+    overflow: hidden;
+
+    &:after {
+      position: absolute;
+      font-family: @iconFamily-1;
+      display: block;
+      top: 14px;
+      left: 14px;
+      color: @red;
+      .pxToRem(30px);
+    }
+  }
+
+  .error {
+    &:after{
+      content: '\e93c';
+      color: @errorIconRed;
+    }
+  }
+
+  .notification {
+    &:after{
+      content: '\e93b';
+      color: @errorIconGreen;
+    }
+  }
+
+  .alert {
+    &:after{
+      content: '\e944';
+      color: @errorIconOrange;
+    }
+  }
+
+}
+
+.tableBlocked{
+
+  .categoryTableWrap{
+
+    &:after{
+      content: '';
+      position: absolute;
+      top: 30px;
+      bottom: 16px;
+      right: 0;
+      left: 0;
+      background-color: @tableDisabledBg;
+      z-index: 999;
+    }
+  }
+}
+
+.arabicDir {
+  direction: rtl !important;
+}
+
+// by Ivan Khartov
+/*--Switcher--*/
+.onoffswitch {
+  position: relative;
+  width: 35px;
+  float:left;
+  margin: 4px 0 0 10px;
+  .lh-user-select(none);
+}
+
+.onoffswitch-label {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  height: 14px;
+  width: 28px;
+  padding: 0;
+  margin: 0 !important;
+  line-height: 14px;
+  background-color: @login-off-switcher;
+  border: 0 solid transparent;
+  border-radius:20px;
+  z-index: 1;
+
+  &:before {
+    content: "";
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 14px;
+    background: @main-sub-color;
+    border-radius:50%;
+    box-shadow: 0 6px 12px 0px @gray3;
+    z-index: 10;
+  }
+}
+
+.onoffswitch-checkbox{
+  display: none!important;
+
+  &:checked{
+
+    + .onoffswitch-label {
+      background-color: @login-off-line;
+      border-color: @login-off-line;
+
+      &:before {
+        left: auto;
+        right: 0;
+        background-color: @login-oncircle-switcher;
+        box-shadow:3px 6px 18px 0 @transparentBlack2;
+      }
+
+      .onoffswitch-inner {
+        margin-left: 0;
+      }
+
+      &:before {
+        border-color: @login-off-line;
+      }
+    }
+  }
+}
+//personel create
+.onoffswitchBox{
+
+  .onoffswitch-label{
+    height: 18px;
+    width: 38px;
+
+    &:before{
+      width: 18px;
+    }
+  }
+}
+
+.redBtn {
+  background-color: @btn-warining;
+}
+
+.greenBtn {
+  background-color: @btn-success;
+}
+
+.greyBtn{
+  background-color: @login-change-password-color;
+}
+
+//start objectives border style
+.leftBorderB{
+  border-left: 5px solid @listnailsBorderBlue!important;
+}
+
+.leftBorderG{
+  border-left: 5px solid @listnailsBorderGreen!important;
+}
+
+.leftBorderY{
+  border-left: 5px solid @listnailsBorderYellow!important;
+}
+
+.blueBorder{
+  border: 3px solid @listnailsBorderBlue!important;
+}
+//end objectives border style
+
+.ui-dialog-buttonpane .ui-dialog-buttonset .cancelBtn,
+.cancelBtn{
+  background-color: @btn-warining;
+  border: 0!important;
+}
+
+.ui-widget-overlay{
+  background: @dialogOverlay;
+}
+
+// filter icon have change color when input is focused
+.searchInputWrap,
+.dialogCategoryInputWrap{
+
+  input{
+
+    &:focus,
+    &:active{
+      outline: 0;
+      box-shadow:0 0 3px 1px @filterIconFocus;
+
+      + label{
+
+        &:after{
+          color: @filterIconFocus;
+        }
+      }
+    }
+  }
+}
+
+.mandatory{
+  position: relative;
+  display: inline-block;
+
+  &:after{
+    content: '*';
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    color: @stateMandatory;
+    font-size: 22px;
+  }
+}
+
+.fontYellow {
+  color: @yellowDark;
+}
+
+//this is fix for blue background
+canvas,
+.topBarHolder,
+.viewBar,
+.createBtn,
+.linkBtn,
+.toogleFilters,
+.thumbnailImage,
+.ui-button-text,
+.changeContentView,
+.avatarImage,
+.logoImage,
+.dropDown,
+.filterElement,
+.clearBtn,
+.mainMenu,
+.childMenu,
+.ui-tabs-anchor,
+.greyBtn,
+.redBtn,
+.rateEmployee,
+.subtitleDescription,
+.titleDescription,
+.uploadValue,
+.changePassword,
+.btnCheckboxLabel {
+  &::-moz-selection {background: transparent;}
+}
+canvas,
+.topBarHolder,
+.viewBar,
+.createBtn,
+.linkBtn,
+.toogleFilters,
+.thumbnailImage,
+.ui-button-text,
+.changeContentView,
+.avatarImage,
+.logoImage,
+.dropDown,
+.filterElement,
+.clearBtn,
+.mainMenu,
+.childMenu,
+.ui-tabs-anchor,
+.greyBtn,
+.redBtn,
+.rateEmployee,
+.subtitleDescription,
+.titleDescription,
+.uploadValue,
+.changePassword,
+.btnCheckboxLabel {
+  &::selection {background: transparent;}
+}
+
+.sortedArrow{
+  position: relative;
+  height: 42px;
+  width: 100%;
+  line-height: 42px;
+  padding: 0 10px 0 8px;
+  .text-ellipsis;
+}
+
+.oe_sortable {
+  padding-right: 8px;
+  .sortedArrow {
+
+    &:after {
+      content: "\e945";
+      font-family: 'icomoon'!important;
+      position: absolute;
+      right: 0;
+      font-size: 12px;
+    }
+  }
+}
+
+.sorted{
+  padding: 0!important;
+
+  .sortedArrow{
+    padding: 0 26px 0 8px;
+  }
+
+  .sortedArrow[sort-type="-1"] {
+
+    &:after{
+      content: '\e910';
+    }
+  }
+
+  .sortedArrow[sort-type="1"] {
+
+    &:after{
+      content: '\e911';
+    }
+  }
+  .sortedArrow[sort-type="1"],
+  .sortedArrow[sort-type="-1"] {
+
+    &:after {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      display: inline-block;
+      font-family: @baseIconName-1;
+      .pxToRem(12px);
+      .lh-transform(translateY(-50%));
+    }
+  }
+}
+
+.contractStatus {
+  margin-right: 10px;
+
+  &.active {
+    color: @green;
+  }
+  &.draft {
+    color: @blue3;
+  }
+  &.expired {
+    color: @red;
+  }
+}
+
+.newBrand {
+  position: relative;
+
+  &:after {
+    content: 'new';
+    position: absolute;
+    padding: 0 3px;
+    background-color: @newBrand;
+    line-height: 13px;
+    color: @main-sub-color;
+    border-radius: 3px;
+    font-weight: bold;
+    .pxToRem(11px);
+  }
+}
+
+.cell {
+
+  .newBrand {
+
+    &:after {
+      top: -3px;
+      right: -32px;
+    }
+  }
+}
+
+.image_icon,
+.video_icon,
+.word_icon,
+.excel_icon,
+.pdf_icon {
+  font-size: 48px;
+  text-align: center;
+}

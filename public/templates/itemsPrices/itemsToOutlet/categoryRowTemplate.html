@@ -1,0 +1,11 @@
+<tr id="<%='categoryRow'+category._id%>"
+    data-categoryId="<%=category._id%>"
+    data-type="category"
+    class="listRow">
+    <td colspan="5"
+        class="fullWidthRow tableGrayDark">
+        <%= category.name || '' %>
+    </td>
+    <td class="icon <%= listType === 'items' ? 'arrowRight' : 'cross' %>">
+    </td>
+</tr>

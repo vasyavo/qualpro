@@ -1,0 +1,1342 @@
+/**OBJECTIVES**/
+.objectivesTopBtnBlock,
+.objectivesTopBtnBlockSmall{
+  height: 56px;
+  padding: 10px 20px;
+  //overflow: hidden;
+  .clearfix;
+
+  .createBtn{
+    float: right;
+  }
+}
+
+.objectivesTopBtnBlockSmall {
+  height: auto;
+  padding: 5px 20px;
+
+  .buttonsWrap {
+    input,
+    button {
+      vertical-align: top;
+    }
+  }
+}
+
+.subObjectives{
+  padding: 20px;
+  line-height: 36px;
+}
+
+.select{
+  position: relative;
+  float: right;
+
+  ul.newSelectList{
+    top: 30px;
+  }
+}
+
+.currentSelected {
+  display: inline-block;
+  width: 210px;
+  height: 28px;
+  line-height: 28px;
+  padding-left: 10px;
+  background-color: @login-input-color-bg;
+  border: 0;
+}
+
+.cell {
+  .currentSelected {
+    width: 210px;
+    line-height: 28px;
+    vertical-align: middle;
+
+    &.readonly {
+      padding-right: 30px;
+      .text-ellipsis;
+    }
+  }
+}
+
+ul.newSelectList{
+  position: absolute;
+  top: 41px;
+  width: 100%;
+  height: auto;
+  background-color: @main-sub-color;
+  line-height: normal;
+  border-radius: 3px;
+  box-shadow:0 0 3px @boxShadow;
+  z-index: 3;
+  .pxToRem(14);
+
+  li{
+    padding: 5px 20px;
+    cursor: pointer;
+  }
+
+  .prev,
+  .next{
+    color: @ListPrev;
+    .pxToRem(14);
+  }
+
+  .prev{
+    float: left;
+  }
+
+  .next{
+    float: right;
+  }
+
+  .miniStylePagination{
+    text-align: center;
+    line-height: 22px;
+    padding: 10px 15px;
+  }
+}
+
+.currencyBlock{
+  ul.newSelectList {
+    top: 40px;
+  }
+}
+
+.objectivesForm{
+  overflow: hidden;
+
+  .description{
+
+    .descriptionArContainer{
+      padding-top: 20px;
+    }
+  }
+}
+
+.attachmentsTitle{
+  padding: 10px 0 20px;
+  margin-bottom: 10px;
+}
+
+
+.blockObjective{
+  overflow: hidden;
+  height: 100%;
+
+  .attachmentsDescription{
+    line-height: 36px;
+  }
+
+  .table{
+
+    .row{
+
+      .cell {
+        max-width: 250px;
+        line-height: 35px;
+        vertical-align: middle;
+        .pxToRem(14px);
+
+        .textEllipsis {
+          display: block;
+        }
+
+        .arabicIcon, .englishIcon {
+          top: 4px;
+          right: -44px;
+        }
+
+        .assignDd{
+          height: 28px;
+          .pxToRem(14px);
+
+          &:after{
+            right: -42px;
+          }
+        }
+
+        .objectivesInput {
+          padding: 0 0 0 26px;
+        }
+        .grayDropdownInput,
+        .assignDd{
+          padding: 0 26px;
+        }
+
+        &:nth-child(odd){
+          font-family: @baseFontFamily3;
+        }
+
+        &:nth-child(odd){
+          min-width: 130px;
+        }
+
+        > * {
+          line-height: 35px!important;
+        }
+      }
+
+      .locationCell{
+        line-height: 20px;
+        vertical-align: top;
+        span{
+          //margin: 7px 0;
+          display: block;
+        }
+      }
+
+      &.doubleRole {
+
+        .cell {
+          line-height: 40px;
+
+          &:nth-child(2) {
+
+            span {
+
+              &:nth-child(2) {
+                position: absolute;
+                left: 0;
+                bottom: -12px;
+                color: @objectivesGrayFontColor;
+                .pxToRem(12px);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  //.block-left{
+  //  padding: 10px 60px 10px 30px;
+  //  border-right: 1px solid @objectivesDialogBorderGray;
+  //
+  //}
+
+  .block-right{
+    float: none;
+    overflow: hidden;
+
+  }
+
+  .calendarWrap{
+
+    input{
+      display: inline-block;
+      width: 120px;
+      height: 28px;
+      padding-left: 24px;
+      padding-right: 10px;
+      margin-right: 10px;
+      float: left;
+      border: none;
+      background-color: @objectivesInputBgGray;
+      font-family: @baseFontFamily3;
+    }
+  }
+}
+
+.showFilesBlock,
+.commentBottom {
+  display: inline-block;
+}
+
+.formBlock,
+.filesBlock{
+  display: none;
+}
+
+.filesTitle {
+  margin-left: 20px;
+  .pxToRem(12px);
+}
+
+.filesBlock,
+.formBlock,
+.showFilesBlock {
+
+  &:after {
+    clear: both;
+  }
+
+  &:before,
+  &:after{
+    content: " ";
+    display: table;
+  }
+}
+
+.objectivesTextarea{
+  display: block;
+  min-height: 80px;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: @objectivesTextareaBgGray;
+  border: 1px solid @objectivesTextareaBorderGray;
+  color: @objectivesTextareaColor;
+  resize: none;
+  .pxToRem(14px);
+}
+
+.objectivesPaddingBlock{
+  padding: 10px 20px;
+  overflow: hidden;
+
+  .descriptionBlock{
+    overflow: hidden;
+    padding-bottom: 10px;
+
+    .description{
+      line-height: 28px;
+      .pxToRem(14px);
+    }
+
+    .arabicIcon, .englishIcon{
+      position: static;
+    }
+  }
+}
+
+.fileThumbnail{
+  display: inline-block;
+  float: left;
+  width: 100%;
+  padding: 0 20px 10px 20px;
+
+  .objectivesFileName{
+    display: block;
+    height: 14px;
+    .text-ellipsis;
+
+  }
+}
+
+
+.fileThumbnailItem{
+  position: relative;
+  display: inline-block;
+  float: left;
+  margin-right: 10px;
+  padding-bottom: 15px;
+
+  .iconThumbnail{
+    width: 50px;
+    height: 75px;
+
+    &:after{
+      display: block;
+      .pxToRem(40px);
+    }
+  }
+
+  .objectivesFileName {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 15px;
+    width: 100%;
+    .text-ellipsis;
+  }
+
+  &:hover {
+
+    .objectivesFileName {
+      width: auto;
+      z-index: 9;
+    }
+  }
+}
+
+.commentWrap {
+
+  .fileThumbnailItem {
+
+    &:hover {
+
+      .objectivesFileName {
+        background-color: @lightGray2;
+      }
+    }
+  }
+}
+
+.descriptionValue {
+  display: inline-block;
+  height: 20px;
+  width: auto;
+  max-width: calc(~"100% - 25px");
+  margin-left: 20px;
+  float: left;
+  clear: both;
+  overflow: hidden;
+
+  * {
+    .pxToRem(14px);
+  }
+
+  ul, ol {
+
+    li {
+      list-style-type: inherit;
+    }
+  }
+}
+
+.multiEllipsis {
+  overflow: hidden;
+  height: 50px;
+}
+
+.questionnaireMultiEllipsis {
+  overflow: hidden;
+  height: 110px;
+  width: 200px;
+
+  &:before {
+    content: "";
+    float: left;
+    width: 5px;
+    height: 110px;
+  }
+
+  &:after {
+    content: "\02026";
+    position: relative;
+    top: -30px;
+    left: 100%;
+    width: 3em;
+    margin-left: -3em;
+    padding-right: 5px;
+    float: right;
+    text-align: right;
+    box-sizing: content-box;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+  }
+
+  .questionsStatus {
+    float: right;
+    width: 100%;
+    margin-left: -5px;
+  }
+}
+
+// this is hack for objectives stack view
+.templateWrap {
+
+  .multiEllipsis {
+
+    * {
+      text-align: left!important;
+      font-weight: normal!important;
+      font-style: normal!important;
+      text-decoration: none!important;
+      color: @gray18!important;
+      text-transform: none!important;
+      background-color: transparent!important;
+      .pxToRem(12px)!important;
+    }
+  }
+}
+
+.blockBottom{
+  min-height: 90px;
+  width: 100%;
+  float: left;
+  clear: both;
+
+  .objectivesProgressBlock{
+    width: 435px;
+    float: left;
+    padding-top: 30px;
+
+    .progressDescription{
+      float: left;
+    }
+  }
+
+  .objectivesTextareaWrap{
+    overflow: hidden;
+
+    .objectivesTextarea{
+      min-height: 70px;
+      width: 100%;
+      margin: 10px 0;
+      overflow:hidden;
+      resize: none;
+    }
+  }
+
+  .objectivesBtnBlock{
+    width: 225px;
+    margin: 10px 0 0 20px;
+    float: right;
+    font-size: 0;
+
+    > span{
+
+      &:first-child{
+        margin-right: 20px;
+      }
+    }
+  }
+}
+
+.fileBottom{
+  height: 35px;
+  line-height: 35px;
+
+  .attachment{
+    cursor: pointer;
+  }
+}
+
+.progressWrap{
+  display: inline-block;
+  width: 435px;
+  padding: 25px 0 0;
+  float: left;
+  clear: both;
+  overflow: hidden;
+
+  .progressValue{
+    float: left;
+    margin-left: 10px;
+    line-height: 30px;
+  }
+}
+
+// must be deleted?
+.progressSquare{
+  display: inline-block;
+  width: 245px;
+  margin: 0;
+  float: left;
+  overflow: hidden;
+
+  .rate-base-layer,
+  .rate-select-layer,
+  .rate-hover-layer{
+    line-height: 26px;
+    .pxToRem(38px);
+  }
+  .rate-base-layer{
+    z-index: 1;
+  }
+  .rate-select-layer,
+  .rate-hover-layer {
+    color: @squareProgressGreenInner;
+  }
+}
+
+// must be!
+// because firefox is awesome
+@-moz-document url-prefix() {
+
+  .progressSquare{
+
+    .rate-base-layer,
+    .rate-select-layer,
+    .rate-hover-layer{
+      .pxToRem(24px);
+    }
+
+  }
+
+}
+
+.objectivesPreview{
+
+  .flexBlock{
+    .lh-display(flex);
+    .lh-flex-grow(1);
+  }
+
+  .block-left{
+    position: relative;
+    width: 480px;
+    //padding: 0;
+    .lh-flex-shrink(0);
+
+    //.absoluteContent{
+    //  .table{
+    //    margin: 20px;
+    //  }
+    //}
+  }
+  .block-right{
+    position: relative;
+    .lh-flex-grow(1);
+
+  }
+  .absoluteContent{
+    width: 100%;
+    padding: 0;
+  }
+}
+
+.comment {
+
+  &Wrap {
+    min-height: 75px;
+    margin: 0 15px 20px 0;
+    background-color: @commentWrapBg;
+    border: 1px solid @commentBorder;
+    .lh-display(flex);
+
+    .user {
+
+      &ImgBig{
+        .lh-flex-shrink(0);
+      }
+
+      &Block {
+        width: 155px;
+        padding: 10px;
+        border-right: 1px solid @commentBorder;
+
+        span {
+          margin-left: 10px;
+        }
+      }
+
+      &Description {
+        position: relative;
+        margin-left: 10px;
+        min-width: 0;
+        .lh-flex-grow(1);
+
+        div {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          .text-ellipsis;
+
+          &:nth-child(n+2) {
+            top: 20px;
+          }
+
+          &:hover {
+            width: auto;
+            padding-right: 10px;
+            background-color: @commentWrapBg;
+            overflow: visible;
+          }
+        }
+      }
+    }
+
+    .commentDescription {
+      padding: 10px;
+      border-right: 1px solid @commentBorder;
+      overflow: hidden;
+    }
+
+    .timeBlock {
+      min-width: 45px;
+      padding: 10px;
+      text-align: center;
+      .lh-flex-shrink(0);
+    }
+  }
+
+  &Bottom {
+    line-height: normal;
+    margin: 15px 0 0;
+
+    .attachment {
+      cursor: pointer;
+
+      &:after {
+        line-height: 20px;
+        vertical-align: bottom;
+        .pxToRem(15px)
+      }
+    }
+
+    .commentCount {
+      .pxToRem(14px)
+    }
+  }
+
+  &Ellipsis {
+    height: 48px;
+    line-height: 20px;
+    overflow: hidden;
+
+    &:before {
+      content:"";
+      height: 48px;
+      width: 5px;
+      float: left;
+    }
+
+    > *:first-child {
+      width: 100%;
+      float: right;
+      margin-left: -5px;
+    }
+
+    .showDescription {
+
+      &:before {
+        display: inline-block;
+        width: 15px;
+        line-height: 15px;
+        text-align: center;
+        background-color: #f2f0f4;
+        font-size: 12px;
+        cursor: pointer;
+      }
+    }
+
+    &.showAllDescription {
+      position: relative;
+      height: auto;
+
+      .showDescription {
+        position: absolute;
+        top: auto;
+        bottom: 0;
+        right: -20px;
+        left: auto;
+        .lh-transform(rotate(180deg));
+
+        &:after  {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.showDescription {
+  position: relative;
+  top: -16px;
+  left: 100%;
+  float: right;
+  height: 20px;
+  width: 3em;
+  padding-right: 5px;
+  margin-left: -3em;
+  text-align: right;
+  box-sizing: content-box;
+  background-color: #f2f0f4;
+
+  &:before {
+    content: "\e912";
+    display: inline-block;
+    width: 15px;
+    line-height: 15px;
+    font-family: @baseIconName-1;
+    text-align: center;
+    background-color: #f2f0f4;
+    cursor: pointer;
+    .pxToRem(12px);
+  }
+
+  &:after {
+    content: '. . .';
+    position: absolute;
+    top: 0;
+    left: -5px;
+    height: 20px;
+    padding-left: 5px;
+    background-color: #f2f0f4;
+  }
+}
+
+.innerScroll{
+  position: relative;
+  display: none;
+  height: 300px;
+  padding: 0 20px;
+
+  .absoluteContent{
+    width: calc(~"100% - 35px")!important;
+  }
+
+  .commentWrap{
+
+    &:first-child{
+      margin-top: 20px;
+    }
+  }
+}
+
+.block-right{
+  position: relative;
+
+  .absoluteContent{
+    width: 100%;
+    padding: 0;
+  }
+}
+
+.objectivesCheckbox{
+  .customCheckbox {
+    &:not(.onoffswitch-checkbox) {
+      + label {
+        display: inline-block;
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
+.objectivesPreviewWrap{
+  height: calc(~"100% - 75px")!important;
+
+  .flexRowStretch{
+    height: calc(~"100% - 50px");
+  }
+}
+
+.flexRowStretch{
+  .thumbnailsInner{
+    position: relative;
+
+    &:nth-child(2){
+      border-left: 1px solid @objectivesDialogBorderGray;
+    }
+
+    .absoluteContent{
+      height: calc(~"100% - 77px");
+      width: 100%;
+      top: 77px;
+      //padding: 0 20px;
+    }
+  }
+}
+
+.objectivesPreviewTitleWrap{
+  line-height: 36px;
+  padding: 20px;
+  border-bottom: 1px solid @objectivesDialogBorderGray;
+}
+
+.thumbnailsInner{
+  min-width: 50%;
+}
+
+.questionnaireWrap{
+  width: 815px;
+  height: 331px;
+  overflow: hidden;
+
+  .attachmentBlock,
+  .commentBlock{
+    padding: 10px 20px;
+    display: inline-block;
+    float: left;
+  }
+
+  .attachmentBlock{
+
+  }
+
+  .commentBlock{
+
+  }
+
+  .attachmentTitle,
+  .commentTitle{
+    margin: 10px 0 20px;
+  }
+}
+
+.thumbnailsContainer{
+  .thumbnail{
+    margin: 8px 8px;
+  }
+}
+
+.banner {
+
+  &_wrap {
+    .lh-display(flex);
+    .lh-flex-wrap(wrap);
+
+    .bannerImage {
+      float: left;
+      clear: both;
+
+      img {
+        height: auto;
+        width: 100%;
+        margin: 0;
+      }
+    }
+  }
+
+  &_textBlock {
+    //margin: 0 20px;
+    float: left;
+
+    textarea{
+      height: 94px;
+      width: 280px;
+      padding: 10px;
+      border: 1px solid @objectivesTextareaBorderGray;
+      resize: none;
+    }
+
+    .uploadDescription{
+      line-height: 30px;
+    }
+
+  }
+
+  &Image {
+    float: left;
+    clear: both;
+
+    img {
+      height: auto;
+      width: 100%;
+      margin: 0;
+    }
+  }
+
+  &_inner{
+    width: 600px;
+    padding: 20px;
+    float: left;
+
+    &_top{
+      margin-bottom: 15px;
+    }
+
+    .bannerBig {
+      margin: 10px 20px 10px 20px;
+    }
+
+
+    .beforeTitle,
+    .afterTitle {
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .beforeTitle {
+      color: @visibilityFormTitleOrange;
+    }
+
+    .afterTitle {
+      color: @visibilityFormTitlegreen;
+    }
+  }
+
+  .bannerIcon{
+
+    &:after{
+      position: absolute;
+      margin: 0 10px;
+      color: @red;
+    }
+  }
+
+  &Big{
+    position: relative;
+    display: inline-block;
+    min-height: 123px;
+    width: 240px;
+    float: left;
+    padding-bottom: 29px;
+    border-radius: 2px;
+    box-shadow: 0 2px 10px 0 @bannerShadow;
+    //overflow: hidden;
+
+    .bannerIcon{
+
+      &:after{
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        color: @red;
+        .pxToRem(14px);
+      }
+    }
+
+    .bannerDescription{
+      position: absolute;
+      bottom: 0;
+      height: 35px;
+      width: 100%;
+      padding: 0 10px;
+      background-color: @bannerDescriptionBg;
+      .lh-display(flex);
+      .lh-align-items(center);
+
+      span {
+        margin-left: 10px;
+        .lh-order(1);
+        .text-ellipsis;
+
+        &:hover {
+          position: absolute;
+          left: 34px;
+          top: 8px;
+          margin-left: 0;
+          white-space: normal;
+          overflow: visible;
+        }
+      }
+
+      input[type="file"] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 0;
+      }
+
+      span.fontMedium {
+        position: absolute;
+        left: 25px;
+        top: 8px;
+        width: calc(~"100% - 45px");
+        .text-ellipsis;
+
+        &:hover {
+          left: 35px;
+          width: auto;
+          background-color: @bannerDescriptionBg;
+          overflow: visible;
+        }
+      }
+
+      .uploadValue{
+        line-height: 35px;
+        margin-left: 25px;
+      }
+    }
+  }
+
+  // must be finished yet
+  &Min{
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 2px;
+    box-shadow: 0 1px 5px 0 #CEC4C4;
+
+    .bannerImage{
+      height: 46px;
+      width: auto;
+      float: left;
+    }
+
+    .bannerIcon{
+
+      &:after{
+        margin-left: 5px;
+        .pxToRem(10px);
+      }
+    }
+
+    .bannerDescription{
+      position: relative;
+      height: 19px;
+      background-color: #F5F5F5;
+      float: left;
+      clear: both;
+      width: 100%;
+
+      input[type="file"] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+    }
+  }
+}
+
+.previewLocation{
+  .locationPath{
+    padding: 10px;
+    border-bottom: 1px solid @main-border-color;
+  }
+}
+
+.attachments {
+  padding: 10px 20px;
+}
+
+.attachmentsBlock{
+  min-height: 134px;
+
+  .attachmentsHeader {
+    padding: 10px 20px;
+
+    &:before,
+    &:after {
+      content: "";
+      display: table;
+    }
+
+    &:after {
+      clear: both;
+    }
+  }
+
+  .attachmentsDescription{
+    float: left;
+  }
+
+  .actionHolder{
+    float: right;
+    margin-bottom: 10px;
+
+    ul{
+      top: 38px;
+    }
+
+    .archiveBtn{
+      &:hover{
+        background-color: @redBtnHover;
+      }
+    }
+  }
+
+  .formBlock,
+  .filesBlock{
+    float: left;
+    clear: both;
+    width: 100%;
+  }
+}
+
+.formBlock {
+  padding: 10px 20px;
+}
+
+.objectivesEffortWrap {
+  color: @main-font-color;
+
+  .effortInput {
+    height: 28px;
+    border: 0;
+    outline: 0;
+  }
+
+  p {
+    color: @main-border-color;
+    .pxToRem(12px);
+  }
+
+}
+
+.objectivesFileName {
+  white-space: nowrap;
+  background-color: @main-sub-color;
+}
+
+.comentBody {
+  overflow: hidden;
+  height: 30px;
+}
+
+.ui-dialog {
+
+  .tabs {
+
+    .taskFlow {
+      padding: 0 20px;
+      height: calc(~"100% - 56px");
+    }
+
+    .taskFlowPreview {
+      padding: 0 10px;
+      height: calc(~"100% - 52px");
+
+      .templateWrap {
+        margin: 0 20px 25px;
+
+        &:first-child {
+          margin-top: 25px;
+        }
+      }
+    }
+  }
+}
+
+.showAllDescription {
+  height: auto!important;
+  min-height: 30px;
+}
+
+.personnelTasks {
+  #personnelTasks {
+    overflow: hidden;
+    .lh-display(flex);
+    .lh-flex-direction(column);
+
+    .stretchWrap {
+      .lh-flex-grow(1);
+    }
+
+    .filterBar {
+      height: 192px;
+    }
+
+    .filterBarCollapse {
+      height: 52px;
+    }
+  }
+}
+
+.taskPreview {
+  //height: calc(~"100% - 50px");
+
+  .blockObjective {
+    .table {
+      .row {
+        .cell {
+          &:nth-child(odd) {
+            vertical-align: baseline;
+          }
+        }
+      }
+    }
+  }
+}
+
+.formIconWrap {
+  span {
+    float: left;
+    clear: both;
+  }
+}
+
+.assignTo {
+
+  a {
+    position: relative;
+    display: block;
+    .pxToRem(12px);
+  }
+
+  .textOrange,
+  .textGreen,
+  .textRed {
+    position: absolute;
+    left: 0;
+    bottom: -15px;
+    .pxToRem(12px);
+  }
+
+  .textOrange {
+    color: #FF9900;
+  }
+
+  .textGreen {
+    color: #00c855;
+  }
+
+  .textRed {
+    color: #f44336;
+  }
+
+}
+
+.subObjectivesAttachments {
+
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+
+  &:after {
+    clear: both;
+  }
+
+  > * {
+    &:nth-child(1) {
+      float: left;
+    }
+    &:nth-child(2) {
+      float: right;
+    }
+  }
+}
+
+.clickableArea {
+  cursor: pointer;
+}
+
+.descriptionViewContent {
+  display: block;
+}
+
+.banner_inner {
+  &.bannerFullWidth {
+    .bannerBig,
+    .banner_textBlock {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .bannerBig {
+      width: 400px;
+    }
+
+    .banner_textBlock {
+      width: calc(~"100% - 442px");
+
+      &.uploadDescription {
+        line-height: 20px;
+      }
+    }
+  }
+}
+
+.objectivesDescValue {
+  height: 105px;
+  overflow: hidden;
+}
+
+.afterTextBlock {
+  width: calc(~"100% - 280px");
+}
+
+.blockObjective .table .row .cell:nth-child(odd) {
+  min-width: 90px;
+}
+
+.userBlock {
+  .top {
+    .description {
+      &.fontCovering {
+        margin-left: 0;
+      }
+    }
+  }
+}
+
+.description {
+  &.fontCovering {
+    color: @blue3;
+    margin-left: 20px;
+    max-width: 120px;
+    white-space: normal;
+  }
+}
+
+.banner_inner {
+  .beforeEdit {
+    .bannerBig,
+    .banner_textBlock {
+      width: 100%;
+      max-width: 520px;
+      margin: 5px;
+    }
+  }
+}
+

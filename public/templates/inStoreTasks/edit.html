@@ -1,0 +1,186 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<div class="form-holder personnelInfo largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= jsonModel.duplicate ? translation.duplicateInStore : translation.editInStore %></span>
+    </div>
+    <div class="objectivesForm smallHeightPreview">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left withTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.title %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div>
+                                    <input type="text"
+                                           data-parent="title"
+                                           data-property="en"
+                                           id="titleEn"
+                                           class="objectivesInput enInput"
+                                           value="<%= jsonModel.title.en %>"
+                                           maxlength="32"
+                                           placeholder="<%= translation.title %>"
+                                           dir="ltr"/>
+                                    <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                       data-id="title<%= anotherLanguage.capitalizer('firstCaps') %>"
+                                       href="javascript:;">
+                                    </a>
+                                </div>
+                                <div>
+                                    <input type="text"
+                                           id="titleAr"
+                                           class="objectivesInput arInput"
+                                           data-parent="title"
+                                           data-property="ar"
+                                           value="<%= jsonModel.title.ar %>"
+                                           placeholder="<%= translation.title %>"
+                                           maxlength="56"
+                                           dir="rtl">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.assignTo %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="selectInput">
+                                    <a id="assignDd"
+                                       class="assignDd textEllipsis hoverFullText"
+                                       href="javascript:;">
+                                        <% if (jsonModel.assignedTo.length) { %>
+                                        <%= _.map(jsonModel.assignedTo, function(personnel){
+                                        return personnel.firstName.currentLanguage + personnel.lastName.currentLanguage;
+                                        }).join(', ') %>
+                                        <% } else { %>
+                                        Select personnel
+                                        <% } %>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.status %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="statusDd" class=""
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.priority %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="priorityDd"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.location %></span>
+                            </div>
+                            <div class="cell locationCell hoverFullText mandatory">
+                                <span id="personnelLocation" class="textEllipsis"><%= jsonModel.location %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateStart"
+                                           value="<%= jsonModel.dateStart %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.dueDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateEnd"
+                                           value="<%= jsonModel.dateEnd %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%= translation.description %></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="descriptionEnContainer">
+                                <textarea type="text"
+                                          data-parent="description"
+                                          data-property="en"
+                                          id="descriptionEn"
+                                          class="objectivesTextarea"
+                                          value=""
+                                          maxlength="120"
+                                          placeholder="<%= translation.description %>"><%= jsonModel.description.en %>
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer"
+                             id="descriptionArContainer">
+                                <textarea id="descriptionAr"
+                                          class="objectivesTextarea"
+                                          data-parent="description"
+                                          data-property="ar"
+                                          value=""
+                                          placeholder="<%= translation.description %>"
+                                          maxlength="120"><%= jsonModel.description.ar %>
+                                </textarea>
+                        </div>
+                    </div>
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold floatLeft"><%= translation.attachments %></span>
+                            <% if (! jsonModel.duplicate) {%>
+                            <input id="attachFile" type="button" value="Attach files" class="btn greyBtn floatRight">
+                            <% } else { %>
+                            <div id="actionHolder" class="actionHolder actionBtn floatRight">
+                                <span class="dropDown downArrow triUp"><%= translation.action %></span>
+                                <ul class="dropDownContent">
+                                    <li id="attachFile" class="hasSubMenu"><%= translation.attachFiles %></li>
+                                    <li id="attachForm" class="archiveBtn hidden"><%= translation.linkForm %></li>
+                                </ul>
+                            </div>
+                            <% } %>
+                        </div>
+                        <div class="formBlock borderBottom objectivesPaddingBlock">
+                            <div id="objectiveFormThumbnail" class="formThumbnail"></div>
+                        </div>
+                        <div class="filesBlock borderBottom" id="filesBlock">
+                            <span class="filesTitle"><%= translation.files %></span>
+                            <form action="" method="post" id="mainForm"></form>
+                            <div id="fileThumbnail" class="fileThumbnail"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

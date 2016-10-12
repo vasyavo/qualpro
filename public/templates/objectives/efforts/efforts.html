@@ -1,0 +1,25 @@
+<div class="objectivesEffortWrap">
+    <div class="title">
+        <span class="titleDescription"><%= translation.effort %></span>
+    </div>
+    <div class="inner">
+        <table>
+            <colgroup>
+                <col width="35%">
+                <col width="65%">
+            </colgroup>
+            <thead>
+            <th><%= translation.employee %></th>
+            <th><%= translation.effort %> %</th>
+            </thead>
+            <% options.model.attributes.assignedTo.forEach(function(personnel, key){%>
+            <tr id = "<%=options.model.attributes._id%>" class = "tableRow">
+                <td id="<%=personnel._id%>Tab"><%=personnel.firstName.currentLanguage%> <%=personnel.lastName.currentLanguage%></td>
+                <td><input class="effortInput" id="<%=personnel._id%>EditEffort" type="text" value = "100"></td>
+                <% });%>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

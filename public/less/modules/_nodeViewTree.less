@@ -1,0 +1,131 @@
+.node {
+  padding: 0 20px;
+
+  &Connect{
+    position: relative;
+
+    &:before {
+      content: '';
+      position: absolute;
+      left: -55px;
+      top: -20px;
+      height: 208px;
+      width: 55px;
+      background-repeat: no-repeat;
+      background-position: 0 0;
+    }
+
+    &Yellow {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeConnectYellow.png');
+      }
+    }
+
+    &Blue {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeConnectBlue.png');
+      }
+    }
+
+    &Green {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeConnectGreen.png');
+      }
+    }
+    &Red {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeConnectRed.png');
+      }
+    }
+  }
+
+  &Last {
+    position: relative;
+
+    &:before {
+      content: '';
+      position: absolute;
+      left: -55px;
+      top: -20px;
+      height: 106px;
+      width: 55px;
+      background-repeat: no-repeat;
+      background-position: 0 0;
+    }
+
+    &Yellow {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeLastYellow.png');
+      }
+    }
+
+    &Blue {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeLastBlue.png');
+      }
+    }
+
+    &Green {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeLastGreen.png');
+      }
+    }
+    &Red {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeConnectRed.png');
+      }
+    }
+  }
+
+  &Line {
+
+    &:before{
+      content: '';
+      position: absolute;
+      left: -110px;
+      height: ~"calc( 100% + 20px )";
+      top: -10px;
+      width: 75px;
+      background-repeat: repeat-y;
+    }
+
+    &Yellow {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeLineYellow.png');
+      }
+    }
+
+    &Blue {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeLineBlue.png');
+      }
+    }
+
+    &Green {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeLineGreen.png');
+      }
+    }
+    &Red {
+      &:before {
+        background-image: url('../images/nodeViewImages/nodeConnectRed.png');
+      }
+    }
+  }
+
+  ul{
+    margin-left: 55px;
+    position: relative;
+
+    li{
+      font-size: 0;
+      margin: 20px 0;
+    }
+  }
+
+  .templateWrap{
+    height: 170px;
+    border-top: 1px solid @listnailsBorderGray;
+    min-width: 0;
+  }
+}

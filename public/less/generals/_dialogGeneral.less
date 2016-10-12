@@ -1,0 +1,600 @@
+//dialog options
+.avatar{
+  max-width: 150px;
+  float: left;
+  padding: 15px 0;
+  margin: 0 25px auto;
+
+  .avatarImage{
+    border-radius:50%;
+  }
+
+  canvas{
+    margin: 0 auto;
+    display: block;
+    border: 1px solid @login-sub-color;
+    border-radius:50%;
+    .lh-size(100px);
+  }
+
+  button{
+    width: 100%;
+    margin-top: 24px;
+    color: @main-sub-color;
+    white-space: nowrap;
+  }
+}
+
+.inner{
+  width: 100%;
+  float: left;
+  clear: both;
+  padding: 20px 25px;
+}
+
+.innerCountry{
+  min-height: 280px;
+  padding: 20px 0 0 0;
+}
+
+.descriptionContainer{
+  margin: 17px 50px 0 0 ;
+}
+
+.blockPersonel{
+  float: left;
+  margin: 0 30px;
+}
+
+.upload{
+  position: relative;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  margin: 24px 0 12px;
+  background-color: @grayDark;
+  line-height: 36px;
+  text-align: center;
+  color:@main-sub-color;
+  .pxToRem(16);
+
+  p{
+    line-height: 36px;
+    .pxToRem(16);
+  }
+}
+
+.tabs {
+  width: 100%;
+  float: left;
+  background-color: @ui-bg-tabs;
+  border: none;
+
+  > ul {
+    min-width: 280px;
+    float: left;
+    padding-bottom: 7px;
+    border: 1px solid @tabBorderGray1;
+    border-bottom: 0;
+    overflow: hidden;
+
+    li {
+      float: left;
+
+      a {
+        display: block;
+        min-width: 140px;
+        float: left;
+        padding: 0 20px;
+        background-color: @main-block-hover-bg;
+        border: none;
+        border-bottom: 1px solid @leftmenu-border-color;
+        line-height: 38px;
+        text-align: center;
+        text-transform: capitalize;
+        color: @main-font-color;
+        cursor: pointer;
+        .pxToRem(14);
+        .lh-box-sizing(border-box);
+      }
+
+      &:first-child {
+        border-right: 1px solid @main-border-color;
+      }
+    }
+  }
+}
+
+.previousRating{
+  margin: 0 20px;
+
+  table {
+
+    td {
+      border: 1px solid @previousRatingBorder;
+      text-align: center;
+    }
+
+    tbody {
+      tr {
+        td {
+          text-align: left;
+          padding-left: 8px;
+        }
+      }
+    }
+
+    .list {
+      td {
+        span {
+          display: inline-block;
+        }
+      }
+    }
+  }
+}
+
+//fix for title in title
+
+.subtitle{
+  padding: 20px 30px;
+  font-family: @baseFontFamily3;
+}
+
+.ratingWrap{
+  padding-bottom: 24px;
+}
+
+.currentRating{
+  width: 100%;
+  overflow: hidden;
+
+  .averageRating{
+    margin: 0 20px;
+    line-height: 40px;
+    overflow: hidden;
+
+    .rating{
+      float: right;
+    }
+  }
+
+  .needRate{
+    &:extend(.currentRating .rated);
+    overflow: hidden;
+
+    .needRateDescription{
+      float: left;
+      margin-right: 10px;
+      color: @red;
+    }
+
+    .rateEmployee{
+      float: right;
+    }
+
+    .vievDetails{
+      float: left;
+      clear: both;
+      color: @greenText;
+      text-decoration: underline;
+      .pxToRem(12);
+    }
+  }
+
+  .rated{
+    padding-bottom: 13px;
+    margin: 13px 21px;
+    line-height: 33px;
+
+    .rating{
+      width: 147px!important;
+      float: right;
+      text-align: right;
+
+      .rate-base-layer,
+      .rate-select-layer,
+      .rate-hover-layer{
+
+        span{
+          .pxToRem(33);
+        }
+      }
+    }
+
+    .viewDetails{
+      color: @green;
+      .pxToRem(12);
+    }
+  }
+
+  .notRated{
+    margin: 13px 21px;
+    padding-bottom: 15px;
+  }
+}
+
+.rating{
+  line-height: 38px;
+
+  .rate-select-layer{
+
+    span{
+      color: @starYellow;
+    }
+  }
+
+  .rate-base-layer{
+
+    span{
+      color: @starGray;
+    }
+  }
+
+  .rate-base-layer,
+  .rate-select-layer,
+  .rate-hover-layer{
+    //text-align: left;
+    //height: 37px!important;
+    //overflow: visible!important;
+
+    span{
+      .pxToRem(17);
+    }
+  }
+}
+
+.workflowHeader {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  background: @grayDark;
+  border-right: 0;
+  border-bottom: 2px solid @grayDark;
+  border-left: 0;
+  overflow: hidden;
+
+  ul {
+
+    li {
+      position: relative;
+      display: inline-block;
+      width: 33.333%;
+      float: left;
+      background: @main-sub-color;
+
+      a {
+        position: relative;
+        height: 38px;
+        width: 100%;
+        float: left;
+        line-height: 38px;
+        text-align: center;
+        text-decoration: none;
+        cursor: default;
+        z-index: 1;
+
+        &:after {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: -16px;
+          border-top: 19px solid transparent;
+          border-bottom: 19px solid transparent;
+          border-left: 16px solid @main-sub-color;
+        }
+
+        &:before{
+          content: "";
+          position: absolute;
+          top: -4px;
+          right: -19px;
+          border-top: 23px solid transparent;
+          border-bottom: 23px solid transparent;
+          border-left: 19px solid @grayDark;
+        }
+      }
+
+
+      &:last-child{
+
+        a{
+
+          &:after{
+            display: none;
+          }
+        }
+      }
+    }
+
+    .active{
+      background-color: @menuActive;
+
+      a{
+        color: @main-sub-color;
+        cursor: pointer;
+
+        &:after{
+          border-left-color: @menuActive;
+        }
+      }
+    }
+
+    .enabled {
+
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: @menuHover;
+
+        a {
+          color: @main-sub-color;
+          cursor: pointer;
+
+          &:after {
+            border-left-color: @menuHover;
+          }
+        }
+      }
+    }
+  }
+}
+
+// because i can !
+.create-objective-dialog,
+.full-height-dialog{
+  height: 90%!important;
+
+  //.personnelInfo{
+  //  height: calc(~"100% - 75px")!important;
+  //}
+
+  //.objectivesPreview{
+  //  height: calc(~"100% - 52px")!important;
+  //}
+
+  //.objectivesForm{
+  //  height: calc(~"100% - 50px")!important;
+  //}
+
+  .largeHeightPreview {
+    height: calc(~"100% - 75px")!important;
+  }
+
+  .middleHeightPreview {
+    height: calc(~"100% - 52px")!important;
+  }
+
+
+  .smallHeightPreview {
+    height: calc(~"100% - 50px")!important;
+  }
+}
+
+.treeDialog{
+  width: 400px!important;
+
+  .previewLocation{
+
+    .scrollable{
+      max-height: 350px;
+      width: 100%;
+    }
+
+    .scrollable-yx {
+      height: 250px;
+      max-height: 250px;
+      width: 100%;
+      overflow: auto;
+
+      //.mCSB_container_wrapper {
+      //  position: relative;
+      //}
+
+    }
+
+    .locationPath{
+      padding: 10px 0 10px 10px;
+      border-bottom: 1px solid @main-border-color;
+
+      .scrollable {
+        height: auto;
+        max-height: 200px;
+
+        span {
+          padding-right: 10px;
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+.previewDistribution{
+
+  .paginationHolder {
+    padding: 10px;
+  }
+}
+
+.user-profile-dialog {
+  height: 90%!important;
+  min-width: 1100px;
+
+  .form-holder {
+    height: calc(~"100% - 75px")!important;
+    overflow: hidden;
+
+    .previewPersonnel {
+      height: calc(~"100% - 50px");
+
+      .tabs {
+        height: 100%;
+
+        .previewPersonnelInner {
+          height: calc(~"100% - 47px");
+        }
+
+        .evaluationContainer {
+          height: calc(~"100% - 48px");
+          .lh-display(flex);
+
+          .personnelTasks {
+            width: 100%;
+            height: 100%;
+            border-left: 1px solid @main-border-color;
+
+            .filtersFullHolder {
+              border: 1px solid @main-border-color;
+              border-top: 0;
+            }
+
+            .paginationHolder {
+              float: none;
+              width: 100%;
+              height: 36px;
+              margin: 10px 0;
+            }
+          }
+
+          .personnelPerformance {
+            height: 100%;
+
+          }
+        }
+      }
+
+      .scrollable {
+        width: auto;
+      }
+    }
+  }
+
+  .ui-widget {
+    .ui-widget {
+      border-right: 0;
+    }
+  }
+}
+
+.evaluationPersonnel {
+  height: calc(~"100% - 62px");
+
+  .monthly,
+  .biYearly {
+    height: calc(~"100% - 47px");
+
+    > div {
+      height: 100%;
+
+      .currentRating {
+        .lh-flex-shrink(0);
+      }
+
+      .sub-form-holder {
+        height: 100%;
+        .lh-display(flex);
+        .lh-flex-direction(column);
+
+
+
+        .previousRating {
+          .lh-display(flex);
+          .lh-flex-direction(column);
+          .lh-flex-grow(1);
+
+          .absoluteWrap {
+            .lh-flex-grow(1);
+          }
+        }
+      }
+    }
+  }
+}
+
+#personnelTasks {
+  padding: 0 20px;
+  height: calc(~"100% - 62px");
+
+  .stretchWrap {
+    position: relative;
+    height: calc(~"100% - 235px");
+
+    .absoluteContent {
+      width: 100%;
+    }
+  }
+}
+
+.competitorBranding-dialog {
+  height: 90%!important;
+
+  .ui-dialog-content {
+    height: calc(~"100% - 75px")!important;
+  }
+}
+
+.stretchWrap {
+  border-top: 1px solid @main-border-color;
+}
+
+// fix before jQuery UI tabs border...
+.countryValues {
+  li {
+    width: auto!important;
+    border: 0!important;
+    padding: 5px 20px!important;
+  }
+}
+
+// fix for edge
+.domainDialog {
+  height: 550px!important;
+  width: 520px!important;
+}
+
+.editPersonnelForm {
+
+  .table {
+    .row {
+      .cell {
+        .domainDialogExecutor {
+          top: 10px;
+          line-height: 30px;
+
+          &:hover {
+            top: 9px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.allDialogsClass  {
+  .mediaDialogInner {
+    .pdfContainer {
+      height: 600px;
+    }
+  }
+}
+
+.itemPriceTable {
+  .dialogCategoryItem {
+    input:not([type="checkbox"]) {
+      width: calc(~"100% - 40px") !important;
+    }
+  }
+}
+
+
+
+@media screen and (max-height: 792px) {
+  .allDialogsClass  {
+    .mediaDialogInner {
+      .pdfContainer {
+        height: 400px;
+      }
+    }
+  }
+}

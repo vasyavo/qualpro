@@ -1,0 +1,13 @@
+<% collection.forEach(function(model){ %>
+    <tr class="priceSurveyCategory">
+        <td class="hoverFullText" ><%= model.category.name.currentLanguage %></td>
+    </tr>
+    <% model.brands.forEach(function(brand) { %>
+        <tr>
+            <td class="hoverFullText priceSurveyBrand"><%= brand.brand.name.currentLanguage %></td>
+        </tr>
+        <% for( var i = 1; i < brand.variants.length; i++) { %>
+            <tr><td class="hoverFullText priceSurveyBrand"></td></tr>
+        <% }; %>
+    <% }); %>
+<% }); %>

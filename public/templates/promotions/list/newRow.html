@@ -1,0 +1,70 @@
+<% var previewCount = model.attachments.length <= 2 ? model.attachments.length : 2 %>
+<div class="templateWrap listRow" data-id="<%= model._id %>">
+    <div class="userBlock flexColumn">
+        <div class="top flexRowStart bottomLine">
+            <div class="left flexColumn">
+                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+            </div>
+            <div class="right flexColumn">
+                <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ?
+                    model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage
+                    : '' %>
+                </div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.accessRole &&
+                    model.createdBy.user.accessRole.name) ? model.createdBy.user.accessRole.name.currentLanguage : '' %>
+                </div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.position &&
+                    model.createdBy.user.position.name) ? model.createdBy.user.position.name.currentLanguage : '' %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="locationBlock flexGrow flexColumn">
+        <div class="locationTop">
+            <div class="flexRow">
+                <div class="flexColumn locationTitleWrap">
+                    <div class="locationTitle">
+                        <%= translation.category + ' : ' + model.categoryString %>
+                    </div>
+                    <div class="fontSmall fontGray multiEllipsis">
+                        <%= translation.promotionType + ' : ' + model.promotionTypeString %>
+                    </div>
+                    <div class="fontSmall fontGray textEllipsis">
+                        <%= translation.displayType + ' : ' + model.displayTypeString %>
+                    </div>
+                </div>
+                <div class="bannerWrap">
+                    <% for(var i=0; i < previewCount; i++){ %>
+                    <div class="bannerMin bannerWithoutBorder">
+                        <div data-id="<%= model.attachments[i]._id %>"
+                             class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                            <div class="thumbnail_js thumbnailBody">
+                                <% if (model.attachments[i].preview) { %>
+                                <img src="<%= model.attachments[i].preview %>" class="bannerImage">
+                                <% } else {%>
+                                <div class="bannerImage iconThumbnail <%= model.attachments[i].type %>"></div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                    <span class="textSmall floatRight  <%= model.statusClass %>"><%= model.status && model.status.name.currentLanguage || '' %></span>
+                </div>
+            </div>
+        </div>
+        <div class="locationBottom flexRowStart">
+                <span class="location flexGrow textEllipsis fontGray hoverFullText">
+                   <%= translation.location + ' : ' + model.location %>
+                </span>
+            <span class="fontGray noShrink"><%= translation.endDate%></span>
+        </div>
+    </div>
+    <div class="dateBlock flexColumn">
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.dateStart || '' %></span>
+        </div>
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.dateEnd || '' %></span>
+        </div>
+    </div>
+</div>

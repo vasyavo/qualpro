@@ -1,0 +1,53 @@
+<div class="promotionItemsDialogWrap">
+    <div class="title">
+        <span class="titleDescription"><%= translation.brandingItemsTable%></span>
+    </div>
+    <div class="promotionTableWrap">
+        <div id="paginationHolder" class="paginationHolder"></div>
+        <table class="singleColor">
+            <colgroup>
+                <col width="13%">
+                <col width="29%">
+                <col width="29%">
+                <col width="29%">
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="oe_sortable" data-sort="outlet">
+                    <div sort-type="1" class="sortedArrow"><%= translation.outlet%></div>
+                </th>
+                <th class="oe_sortable" data-sort="branch">
+                    <div sort-type="1" class="sortedArrow"><%= translation.branch%></div>
+                </th>
+                <th>
+                    <div><%= translation.employee%></div>
+                </th>
+                <th>
+                    <div><%= translation.comment%></div>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="11" class="colspanFix">
+                    <div class="absoluteContent">
+                        <div class="scrollable">
+                            <table>
+                                <colgroup>
+                                    <col width="13%">
+                                    <col width="29%">
+                                    <col width="29%">
+                                    <col width="29%">
+                                </colgroup>
+                                <tbody id="promotionsItemsTbody" class="brandingDisplayTable">
+                                    <!-- table body -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

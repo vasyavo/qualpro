@@ -1,0 +1,25 @@
+<tr class="editting">
+    <td class="alignCenter">
+        <input data-key="_id" type="checkbox" id="false" class="customCheckbox">
+        <label for="false" class="checkboxLabel"></label>
+    </td>
+    <td>
+        <input
+                data-key="name"
+                data-language="currentLanguage"
+                class="displayable"
+                disabled>
+        <input
+                data-key="name"
+                data-language="<%= currentLanguage %>"
+                class="editable <%= currentLanguage === 'en' ? 'enInput' : 'arInput'%>"
+                placeholder="<%= (currentLanguage === 'en') ? translation.englishName : translation.arabicName %>"
+                dir="<%= currentLanguage === 'en' ? 'ltr' : 'rtl'%>">
+        <input
+                data-key="name"
+                data-language="<%= anotherLanguage %>"
+                class="editable <%= anotherLanguage === 'en' ? 'enInput' : 'arInput'%>"
+                placeholder="<%= (anotherLanguage === 'en') ? translation.englishName : translation.arabicName %>"
+                dir="<%= anotherLanguage === 'en' ? 'ltr' : 'rtl'%>">
+    </td>
+</tr>

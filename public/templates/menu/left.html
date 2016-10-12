@@ -1,0 +1,17 @@
+<ul class="scrollable">
+    <% rootModules.forEach(function(rootModule){%>
+        <li id="<%= rootModule._id %>" class="parentLeft">
+            <a href="#qualPro/<%=rootModule.href%>" class="mainMenu"><%= rootModule.name[currentLanguage]||rootModule.name[anotherLanguage] +'ppp' %></a>
+
+                <% if(getChild(rootModule._id)){%>
+                    <ul class="down">
+                        <% getChild(rootModule._id).forEach(function(childEl){%>
+                            <li id="<%= childEl._id %>">
+                                <a href="#qualPro/<%=childEl.href%>" data-module-id="<%=childEl._id%>" title="<%= childEl.name[currentLanguage]||rootModule.name[anotherLanguage] %>" class="childMenu"><%= childEl.name[currentLanguage]||rootModule.name[anotherLanguage]  %> </a>
+                            </li>
+                        <%});%>
+                    </ul>
+                <%}%>
+        </li>
+    <%})%>
+</ul>

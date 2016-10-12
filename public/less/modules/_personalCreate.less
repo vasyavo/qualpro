@@ -1,0 +1,450 @@
+.no-close {
+
+  .ui-dialog-titlebar-close {
+    display: none;
+  }
+}
+
+.ui-dialog {
+  margin: 0 auto;
+  background: @ui-bg;
+  color: white;
+  z-index: 1000;
+  .ui-widget-content {
+
+    a {
+      color: @main-font-color;
+      .pxToRem(16);
+    }
+  }
+
+  .ui-dialog-content {
+    position: relative;
+    border: 0;
+    padding: 0;
+    background: 0;
+
+    .title {
+      height: 50px;
+      padding-left: 30px;
+      background-color: @login-button-color;
+      line-height: 50px;
+
+      span {
+        line-height: 48px;
+        font-family: @baseFontFamily2;
+        color: @login-input-color-bg;
+        font-weight: 600;
+      }
+    }
+
+    .inner {
+
+      .block-left {
+
+        .upload {
+          position: relative;
+          width: 150px;
+          height: 35px;
+          margin-bottom: 5px;
+          border-radius: 1px;
+          line-height: 35px;
+          color: @main-sub-color;
+          font-weight: 400;
+          cursor: pointer;
+          .pxToRem(16);
+
+          p,
+          span {
+            line-height: 35px;
+            text-align: center;
+            color: @main-sub-color;
+            font-weight: 400;
+            .pxToRem(16);
+          }
+        }
+      }
+
+      .changePassword {
+        background-color: @login-button-color;
+      }
+
+      .block-center {
+        .half-block {
+
+          h3 {
+            margin-bottom: 10px;
+            color: @main-font-color;
+            font-weight: 600;
+            .pxToRem(18);
+          }
+        }
+      }
+
+      .block-right {
+
+        .half-block {
+
+          span {
+            display: block;
+            max-width: 300px;
+            .text-ellipsis;
+          }
+
+          h3 {
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: @main-font-color;
+            .pxToRem(18);
+          }
+        }
+      }
+    }
+  }
+}
+
+.personnelInfo{
+
+  .half-block{
+    width: 445px;
+  }
+
+  //.blockObjective {
+  //  .block-left {
+  //    padding: 0;
+  //  }
+  //}
+
+  //.notificationForm,
+  //.promotionForm {
+  //  .blockObjective {
+  //    .block-left {
+  //      padding: 20px;
+  //    }
+  //  }
+  //}
+}
+
+.personnelLocationManager {
+  .cell {
+    &:nth-child(even) {
+      width: 260px;
+    }
+  }
+}
+
+.createForm{
+  .inner{
+    .block {
+      .upload{
+        width: 120px;
+      }
+    }
+  }
+}
+
+.ui-widget-content{
+  .title-description {
+    padding: 21px;
+    line-height: 24px;
+    font-family: @baseFontFamily2;
+    font-weight: 400;
+    .pxToRem(16);
+  }
+
+  .changePassword{
+    .person-info{
+      label{
+        color: @login-change-password-color;
+      }
+    }
+
+    .table {
+      padding: 0 20px;
+      .row {
+        .cell {
+          float: left;
+          line-height: normal;
+          label {
+            line-height: 30px;
+          }
+        }
+      }
+    }
+
+    label{
+      line-height: 27px;
+      font-family: @baseFontFamily2;
+      font-weight: 400;
+      .pxToRem(14);
+    }
+  }
+}
+
+.formTitle{
+  height: 56px;
+  padding: 13px 0 13px 31px;
+  background-color: @main-bg-color;
+  color: @main-sub-color;
+}
+
+.cropImages{
+  overflow: hidden!important;
+}
+
+.block{
+
+  label{
+    float: left;
+    line-height: 30px;
+    font-weight: 400;
+    .pxToRem(15);
+  }
+
+  a{
+    display: inline-block;
+    float: left;
+  }
+
+  .currentSelected{
+    float: right;
+    line-height: 26px;
+  }
+
+  .showHideAr, .showHideTranslation{
+    float: left;
+  }
+
+  .nameAr{
+    float: right;
+  }
+}
+
+.lastNameAr,
+.firstNameAr{
+  float: right;
+  width: 100%;
+}
+
+.selectInput{
+  display: inline-block;
+  float: left;
+  overflow: visible;
+
+  a {
+    &:not(.next,.prev) {
+      margin: 0 !important;
+      display: inline-block;
+      padding-right: 35px;
+      .text-ellipsis;
+    }
+  }
+}
+
+.domainDialog
+.scrollable {
+  height: 500px;
+  width: 520px!important;
+}
+
+.onoffswitchBox{
+  height: 50px;
+  padding-top: 18px;
+}
+
+// by Ivan Khartov
+.blockPersonel {
+
+  &.block-right {
+
+    a:not(.prev):not(.next):not(.currentSelected):not(.formField) {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      padding-right: 25px;
+      .text-ellipsis;
+    }
+  }
+
+  .cell {
+
+    input {
+      width: 260px;
+    }
+  }
+
+  .table {
+    .row {
+      .cell {
+        max-width: 260px;
+      }
+    }
+  }
+}
+
+.arabicDropDownBlock {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.selectDropdown {
+  display: block;
+  height: 28px;
+  width: 100%;
+  min-width: 210px;
+  padding-left: 10px;
+  background-color: @selectInputBackground;
+}
+
+.table{
+  .row{
+    .cell{
+      .selectDropdown{
+        margin-top: 11px;
+        line-height: 28px;
+      }
+    }
+  }
+}
+
+.heightEighty{
+  height: 90%!important;
+
+  > .ui-dialog-content {
+    height: calc(~"100% - 75px")!important;
+
+    .listForSelectionWithoutTabs {
+      position: relative;
+      height: calc(~"100% - 50px");
+      .tabs {
+        height: 100%;
+
+        .colleagues {
+          height: 100%;
+          .lh-display(flex);
+          .lh-flex-direction(column);
+
+          &Inner {
+            position: relative;
+            overflow: hidden;
+            .lh-flex-grow(1);
+          }
+
+          .filterBar {
+            display: block;
+            height: auto;
+          }
+        }
+      }
+    }
+
+    .listForSelection{
+      position: relative;
+      height: calc(~"100% - 50px");
+
+      .tabs {
+        height: 100%;
+
+        .colleaguesWithoutTabs {
+          height: calc(~"100% - 47px");
+          .lh-display(flex);
+          .lh-flex-direction(column);
+
+          .colleaguesInner {
+            position: relative;
+            overflow: hidden;
+            .lh-flex-grow(1);
+          }
+
+          .filterBar {
+            display: block;
+            height: auto;
+          }
+        }
+      }
+    }
+  }
+}
+
+.flexDialog{
+  .lh-display(flex);
+  .lh-flex-grow(1);
+
+  .tabs{
+    .lh-display(flex);
+    .lh-flex-grow(1);
+    .lh-flex-direction(column);
+    .lh-align-items(flex-start);
+
+    .inner{
+      position: relative;
+      padding: 0;
+      overflow: hidden;
+      .lh-display(flex);
+      .lh-flex-direction(column);
+      .lh-flex-grow(1);
+
+      .absoluteContent{
+        height: calc(~"100% - 190px");
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+.temporaryEmployee{
+
+  .table{
+    padding: 20px;
+  }
+}
+
+.manageConfiguration{
+
+  .dialogCategoryItem {
+    position: relative;
+    .lh-flex-grow(1);
+  }
+}
+
+.row {
+  .cell {
+    &.coveredName {
+      width: auto;
+      .lh-display(flex);
+
+      .coveredItem {
+        min-width: 1px;
+        padding-right: 10px;
+        .text-ellipsis;
+      }
+    }
+  }
+}
+
+.countryRow,
+.regionRow,
+.subRegionRow,
+.branchRow {
+  .cell {
+    &:nth-child(2) {
+      width: 260px;
+    }
+  }
+}
+
+.descriptionContainer {
+  .cell {
+    input {
+      .text-ellipsis;
+    }
+  }
+}
+
+.personnelEditLeft {
+  margin-left: 0;
+}
+
+.personnelEditRight {
+  margin-right: 50px;
+}

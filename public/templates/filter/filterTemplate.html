@@ -1,0 +1,38 @@
+<div data-value="<%=filterName%>"
+     class="filterName <%= mandatory ? 'mandatory' : '' %> <%= currentFilter ? 'checkedGroup' : '' %> blackPlaceholder">
+    <input class="<%=filterName%>Input" placeholder="<%=filterDisplayName%>" value="<%= filterInputText %>"
+           data-val="<%= filterInputText %>" type="text">
+    <label></label>
+    <span class="pencil"></span>
+    <span class="triDown dropDown"></span>
+</div>
+<div class="allValuesContainer">
+    <div class="<%=filterName%>Values ulContent checked dropDownContent NotRemoveThisClass">
+
+        <ul class="filterValues <%=filterName%>Ul">
+        </ul>
+        <li class="miniStylePagination">
+            <a class="prev" href="javascript:;">&lt;<span data-translation="prev"><%= translation.prev %></span></a>
+            <span class="gridStart"></span>
+            -
+            <span class="gridEnd"></span>
+            <span data-translation="of"><%= translation.of %></span>
+            <span class="length"></span>
+            <a class="next" href="javascript:;"><span data-translation="next"><%= translation.next %></span>&gt;</a>
+        </li>
+    </div>
+    <div class="<%=filterName%>Values ulContent dropDownContent NotRemoveThisClass">
+
+        <ul class="filterValues <%=filterName%>Ul">
+        </ul>
+        <li class="miniStylePagination">
+            <a class="prev" href="javascript:;">&lt;<span data-translation="prev"><%= translation.prev %></span></a>
+            <span class="gridStart"></span>
+            -
+            <span class="gridEnd"></span>
+            <span data-translation="of"><%= translation.of %></span>
+            <span class="length"></span>
+            <a class="next" href="javascript:;"><span data-translation="next"><%= translation.next %></span>&gt;</a>
+        </li>
+    </div>
+</div>

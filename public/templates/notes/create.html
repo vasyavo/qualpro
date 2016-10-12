@@ -1,0 +1,36 @@
+<div class="form-holder notesCreateDialogWrap">
+    <div class="title">
+        <span class="titleDescription" data-translation="createTitle"><%=translation.createTitle %></span>
+    </div>
+    <div class="notesCreateDialog">
+        <div class="notesHead">
+            <div class="row">
+                <input type="text"
+                       class="inputWide"
+                       id="titleDb"
+                       value=""
+                       required
+                       maxlength="32"
+                       data-translation="titleOnly"
+                       placeholder="<%=translation.titleOnly %>"/>
+                <input type="text"
+                       class="inputWide"
+                       id="themeDb"
+                       value=""
+                       required
+                       maxlength="32"
+                       data-translation="theme"
+                       placeholder="<%=translation.theme %>"/>
+            </div>
+        </div>
+        <div class="notesBody">
+            <textarea id="description"
+                      class="noteTextarea"
+                      data-property="en"
+                      value="">
+
+            </textarea>
+        </div>
+        <form action="" method="post" id="mainForm"></form>
+    </div>
+</div>

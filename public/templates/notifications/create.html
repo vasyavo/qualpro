@@ -1,0 +1,138 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<div class="form-holder personnelInfo largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%=translation.createNotification%></span>
+    </div>
+    <div class="notificationForm">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="table">
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.country%></span>
+                        </div>
+                        <div class="cell mandatory">
+                            <a id="countryDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.region%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="regionDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.subRegion%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="subRegionDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.tradeChannel%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="retailSegmentDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.outlet%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="outletDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.branch%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="branchDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.position%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="positionDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <span><%=translation.employee%></span>
+                        </div>
+                        <div class="cell">
+                            <a id="personnelDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%=translation.description%></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="descriptionEnContainer">
+                                <textarea type="text"
+                                          data-parent="description"
+                                          data-property="en"
+                                          class="objectivesTextarea"
+                                          value=""
+                                          maxlength="120"
+                                          placeholder="<%= translation.description%>">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer"
+                             id="descriptionArContainer">
+                            <textarea class="objectivesTextarea"
+                                      data-parent="description"
+                                      data-property="ar"
+                                      value=""
+                                      placeholder="<%= translation.description %>"
+                                      maxlength="120">
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

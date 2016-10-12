@@ -1,0 +1,118 @@
+<div class="form-holder personnelInfo promotionView contractsYearlyView largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription" data-translation="preViewTitle"><%=translation.preViewTitle%></span>
+    </div>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap">
+        </div>
+    </div>
+    <div id="main" class="competitorBrandingPreview contractsYearlyPreview">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span data-translation="type"><%=translation.type%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="type"><%= jsonModel.type.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="country"><%=translation.country%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="country"><%= jsonModel.country.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="region"><%=translation.region%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="region" class="hoverFullText"><%= jsonModel.regionString || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="subRegion"><%=translation.subRegion%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="subRegion" class="hoverFullText"><%= jsonModel.subRegionString || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="retailSegment"><%=translation.retailSegment%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="retailSegment" class="hoverFullText"><%= jsonModel.retailSegmentString || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="outlet" ><%=translation.outlet%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="outlet" class="hoverFullText"><%= jsonModel.outletString || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="branch"><%=translation.branch%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="branch" class="hoverFullText"><%= jsonModel.branchString || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="status"><%=translation.status%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.status.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="startDate"><%=translation.startDate%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.dateStart || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="endDate"><%=translation.endDate%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.dateEnd || '' %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="objectivesPaddingBlock borderBottom">
+                        <div class="descriptionBlock floatBlock">
+                            <span data-translation="description"><%=translation.description%></span>
+                        </div>
+                        <span id="description" class="descriptionValue heightDescription fontBold fontMedium mCustomScrollbar"><%= jsonModel.description.currentLanguage || ''  %></span>
+                    </div>
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold" data-translation="attachments"><%=translation.attachments%></span>
+                        </div>
+                        <div class="promotionFilesBlock contractsYearlyFilesBlock">
+                            <div id="objectiveFileThumbnail" class="fileThumbnail masonryThumbnailsWrapper">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

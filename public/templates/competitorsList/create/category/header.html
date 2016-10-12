@@ -1,0 +1,45 @@
+<div class="dialogCategoryTitle">
+    <span class="categoryTitle"><%= title %></span>
+    <%if (editable){%>
+    <div class="categoryButtonWrap">
+        <a href="javascript:;" class="addBtn" title="Add New <%= title %>"></a>
+        <a href="javascript:;" class="deleteBtn" title="Delete <%= title %>"></a>
+        <a href="javascript:;" class="editBtn" title="Edit <%= title %>"></a>
+    </div>
+    <%}%>
+</div>
+<div class="categoryTableWrap">
+    <div class="absoluteContent clickableTable">
+        <table class="competitorCategoryTable">
+            <colgroup>
+                <col width="100%">
+            </colgroup>
+            <thead>
+            <tr>
+                <th><%= translation.name %></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="2" class="colspanFix">
+                    <div class="scrollable">
+                        <table>
+                            <colgroup>
+                                <col width="100%">
+                            </colgroup>
+                            <tbody class="listBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="floatButtonsContainer">
+        <a href="javascript:;" class="flowSaveBtn"></a>
+        <a href="javascript:;" class="flowCancelBtn"></a>
+    </div>
+
+</div>

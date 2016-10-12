@@ -1,0 +1,30 @@
+<% var level = App.currentUser.accessRole.level; %>
+<div class="thumbnail personnel" data-id="<%=model._id%>">
+    <div class="thumbnailTop">
+        <% if ((level <=2) || (level >= 8)) { %>
+        <input type="checkbox"
+               value="<%=model._id%>"
+               id="<%=model._id%>"
+               class="customCheckbox hidden">
+        <label for="<%=model._id%>"
+               class="checkboxLabel"></label>
+        <% } %>
+        <span class="status <%=model.status?model.status:''%>"></span>
+        <img class="thumbnailImage" src="<%=model.imageSrc%>">
+        <% if( personnel.accessRole.level > 2 && personnel.accessRole.level <8){ %>
+        <select class="rating">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <% } %>
+    </div>
+    <div class="thumbnailBottom">
+        <span class="userFullName"><%=model.firstName.currentLanguage + ' ' + model.lastName.currentLanguage%></span>
+        <span class="userPosition"><%=model.position?model.position.name.currentLanguage:'No position'%></span>
+        <span class="userCountry"><%=model.country.map(function(country) { return country.name.currentLanguage }).join(', ')%></span>
+    </div>
+</div>

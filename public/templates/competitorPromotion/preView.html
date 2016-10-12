@@ -1,0 +1,202 @@
+<div class="form-holder personnelInfo competitorBranding largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.title %></span>
+    </div>
+    <div id="main" class="competitorBrandingPreview">
+
+        <div class="blockObjective borderBottom">
+
+            <div class="block-left">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.category %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="category"><%= _.map(model.category, function(category) {return category.name.currentLanguage || 'No translation'} ).join(', ') %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.brand %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="brand"><%= model.brand.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.origin %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="origin"><%= _.map(model.origin, function(origin) {return origin.name && origin.name.currentLanguage || 'No translation'} ).join(', ') %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.description %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="promotion"><%= model.promotion %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.rsp %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="price"><%= model.price || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.packing %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="packing"><%= model.packing || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.expiry %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="expiry"><%= model.expiry || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row doubleRole">
+                            <div class="cell">
+                                <span><%= translation.employee %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="createdBy"><%= model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage %></span>
+                                <span id="accessRole"><%= model.createdBy.user.accessRole.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.country %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="country"><%= model.country.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.region %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="region"><%= model.region.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.subRegion %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="subRegion"><%= model.subRegion.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.tradeChannel %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="retailSegment"><%= model.retailSegment.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.outlet %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="outlet" class="hoverFullText"><%= model.outlet.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.branch %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span id="branch"><%= model.branch.name.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.displayType %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span><%= model.displayType && model.displayType.name && model.displayType.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span><%= model.dateStart %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate %></span>
+                            </div>
+                            <div class="cell textEllipsis hoverFullText">
+                                <span><%= model.dateEnd %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="absoluteContent">
+                    <div class="scrollable">
+                        <% if (model.description.currentLanguage) { %>
+                            <div class="objectivesPaddingBlock borderBottom">
+                                <div class="descriptionBlock floatBlock">
+                                    <span><%= translation.description %></span>
+                                </div>
+                                <span id="description" class="descriptionValue fontBold fontMedium textEllipsis hoverFullText"><%= model.description.currentLanguage %></span>
+                            </div>
+                        <% } %>
+
+                        <div id="attachments" class="attachments borderBottom">
+                            <div class="attachmentsHeader">
+                                <span class="attachmentsDescription fontBold"><%= translation.attachments %></span>
+                            </div>
+                            <div class="filesBlock">
+                                <span class="filesTitle"><%= translation.files %></span>
+                                <div id="objectiveFileThumbnail" class="fileThumbnail"></div>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock innerScroll">
+                            <div class="absoluteContent">
+                                <div class="scrollable">
+                                    <div class="commentWrapper" id="commentWrapper"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="blockBottom objectivesPaddingBlock">
+            <div class="objectivesBtnBlock">
+                <span class="greyBtn" id="attachFiles"><%= translation.attach %></span>
+                <span class="greyBtn" id="sendComment"><%= translation.send %></span>
+                <div class="fileBottom">
+                    <span class="attachment"></span>
+                    <span id="newCommentAttachments"></span>
+                    <div id="fileThumbnail"></div>
+                </div>
+            </div>
+            <div class="objectivesTextareaWrap">
+                <textarea class="objectivesTextarea" id="commentInput"></textarea>
+            </div>
+            <form action="" method="post" id="commentForm" style="display: none;"></form>
+        </div>
+
+    </div>
+</div>

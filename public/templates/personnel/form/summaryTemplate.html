@@ -1,0 +1,39 @@
+<div>
+    <div class="summaryWrap">
+        <div class="floatBlock halfWidth">
+            <span><%=ratings.planningAndOrganizationSkills.title%></span>
+            <span class="spanTotalValue">
+            <%=ratings.planningAndOrganizationSkills.result?ratings.planningAndOrganizationSkills.result.toFixed(1):''%>
+        </span>
+        </div>
+        <div class="floatBlock halfWidth">
+            <span><%=ratings.sellingSkills.title%></span>
+            <span class="spanTotalValue">
+            <%=ratings.sellingSkills.result?ratings.sellingSkills.result.toFixed(1):''%>
+        </span>
+        </div>
+        <div class="floatBlock halfWidth">
+            <span><%=ratings.reporting.title%></span>
+            <span class="spanTotalValue">
+            <%=ratings.reporting.result?ratings.reporting.result.toFixed(1):''%></span>
+        </div>
+        <div class="floatBlock halfWidth">
+            <span><%=ratings.personalSkills.title%></span>
+            <span class="spanTotalValue">
+            <%=ratings.personalSkills.result?ratings.personalSkills.result.toFixed(1):''%></span>
+        </div>
+    </div>
+</div>
+
+<div class="summaryWrap">
+    <div class="row">
+        <div id="<%= preview ? 'overallPerformanceRatingContainerPreview' : 'overallPerformanceRatingContainer' %>" class="halfWidth floatLeft">
+        </div>
+        <div id="<%= preview ? 'performanceContainerPreview' : 'performanceContainer' %>" class="halfWidth floatLeft">
+        </div>
+    </div>
+    <div class="row">
+        <div id="<%= preview ? 'actionContainerPreview' : 'actionContainer' %>" class="halfWidth floatLeft"></div>
+        <div id="<%= preview ? 'objectivesContainerPreview' : 'objectivesContainer' %>" class="halfWidth floatLeft"></div>
+    </div>
+</div>

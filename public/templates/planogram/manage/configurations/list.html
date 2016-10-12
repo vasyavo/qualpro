@@ -1,0 +1,11 @@
+<% data.forEach(function(item) { %>
+<tr>
+    <td class="alignCenter">
+        <input data-key="_id" type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox">
+        <label for="<%=item._id%>" class="checkboxLabel"></label>
+    </td>
+    <td>
+        <input data-key="configuration" class="editable" readonly value="<%=item.configuration%>">
+    </td>
+</tr>
+<% }) %>

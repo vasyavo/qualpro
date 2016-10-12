@@ -1,0 +1,164 @@
+.loginForm {
+  margin-top: 250px;
+}
+
+.loginDiv{
+
+  .mainLogo {
+    display: inline-block;
+    margin-bottom: 50px;
+    text-align: center;
+    margin-left: calc(~"50% - 98px");
+  }
+
+  fieldset {
+    width: 400px;
+    min-height: 120px;
+    padding: 45px 32px 30px;
+    margin: 0 auto;
+    border: none;
+    border-radius: 2px;
+    box-shadow: 0 0 6px @login-shadow;
+
+    h2,
+    a {
+      text-align: center;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    h2{
+      margin: 0 0 15px;
+      color: @login-main-color;
+      font-weight: 600;
+      font-family: @baseFontFamily1;
+      .pxToRem(18);
+    }
+
+    .loginDescription {
+      margin: 25px 0;
+      font-family: @baseFontFamily2;
+      font-weight: 400;
+      color: @login-sub-color;
+      .pxToRem(16);
+    }
+  }
+}
+
+.bottom-loginForm {
+  width: 100%;
+  margin-top: 20px;
+  .clearfix();
+
+  span {
+    float: left;
+    color: @login-oncircle-switcher;
+    .pxToEm(16);
+  }
+  /*--Switcher--*/
+  .onoffswitch {
+    position: relative;
+    width: 35px;
+    float:left;
+    margin: 4px 0 0 10px;
+    .lh-user-select(none);
+  }
+  .forgot-button {
+    color: @login-forgot-color;
+    text-transform: capitalize !important;
+  }
+}
+
+.forgotPassword{
+  text-align: center;
+
+  fieldset {
+    width: 400px;
+    min-height: 120px;
+    padding: 45px 38px 30px;
+    margin: 0 auto;
+    border: none;
+    box-shadow: 0 0 6px @login-shadow;
+    text-align: left;
+
+    h3{
+      font-weight: normal;
+      text-align: center;
+    }
+
+    .forgotDescription{
+      display: inline-block;
+      margin-bottom: 15px;
+      color: @login-main-color;
+    }
+  }
+}
+
+
+.selectOptions{
+  margin-bottom: 60px;
+  overflow: hidden;
+
+  label{
+    width: 160px;
+    float: left;
+    clear: both;
+    line-height: 23px;
+    color: @loginLabelGray;
+  }
+}
+
+
+.mailBlock,
+.lockedBlock{
+  position: relative;
+
+  label{
+    float: right;
+
+    &:after {
+      position: absolute;
+      top: 0;
+      right: 13px;
+      line-height: normal;
+      font-family: @baseIconName-1;
+      color: @login-icon-color;
+      .pxToRem(20);
+    }
+  }
+
+  input,
+  input[type='password']{
+
+    &:focus,
+    &:active{
+      outline: 1px solid @loginIconFocus;
+      + label{
+
+        &:after{
+          color: @loginIconFocus;
+        }
+      }
+    }
+  }
+}
+
+.mailBlock{
+
+  label{
+
+    &:after{
+      content: '\e930';
+    }
+  }
+}
+
+.lockedBlock{
+
+  label{
+
+    &:after{
+      content: '\e938';
+    }
+  }
+}

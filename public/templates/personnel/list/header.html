@@ -1,0 +1,82 @@
+<% var showCheckboxes = showCheckboxes || null; %>
+<% var notCheckAll = notCheckAll || false; %>
+<% var level = App.currentUser.accessRole.level; %>
+<div class="absoluteContent clickableTable">
+    <table>
+        <% if ((level <=2 || level >= 8) || showCheckboxes) { %>
+        <col width="42px">
+        <% } %>
+        <col width="10%">
+        <col width="10%">
+        <col width="10%">
+        <col width="15%">
+        <col width="10%">
+        <col width="20%">
+        <col width="10%">
+        <col width="10%">
+        <thead>
+        <tr>
+            <% if ((level <=2 || level >= 8) || showCheckboxes) { %>
+            <th class="checkboxArea alignCenter">
+                <% if (!notCheckAll) { %>
+                    <input type="checkbox" id="checkAll" class="customCheckbox"/>
+                    <label for="checkAll" class="checkboxLabel"></label>
+                <% } %>
+            </th>
+            <% } %>
+            <th class="oe_sortable" data-sort="firstName">
+                <div sort-type="1" class="sortedArrow" data-translation="firstName"><%= translation.firstName %></div>
+            </th>
+            <th class="oe_sortable" data-sort="lastName">
+                <div sort-type="1" class="sortedArrow" data-translation="lastName"><%= translation.lastName %></div>
+            </th>
+            <th class="oe_sortable" data-sort="position">
+                <div sort-type="1" class="sortedArrow" data-translation="position"><%= translation.position %></div>
+            </th>
+            <th class="oe_sortable" data-sort="email">
+                <div sort-type="1" class="sortedArrow" data-translation="email"><%= translation.email %></div>
+            </th>
+            <th class="oe_sortable" data-sort="phone">
+                <div sort-type="1" class="sortedArrow" data-translation="phone"><%= translation.phone %></div>
+            </th>
+            <th class="oe_sortable" data-sort="country.name">
+                <div sort-type="1" class="sortedArrow" data-translation="location"><%= translation.location %></div>
+            </th>
+            <th class="oe_sortable" data-sort="createdBy.date">
+                <div sort-type="1" class="sortedArrow" data-translation="createdBy"><%= translation.createdBy %></div>
+            </th>
+            <th class="oe_sortable" data-sort="status">
+                <div sort-type="1" class="sortedArrow" data-translation="status"><%= translation.status %></div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <% if ((level <= 2 || level >= 8) || showCheckboxes) { %>
+                <td colspan="9" class="colspanFix">
+            <% } else { %>
+                <td colspan="8" class="colspanFix">
+            <% } %>
+                <div class="scrollable">
+                    <table class="list alignBaseline">
+                        <% if ((level <= 2 || level >= 8) || showCheckboxes) { %>
+                        <col width="42px">
+                        <% } %>
+                        <col width="10%">
+                        <col width="10%">
+                        <col width="10%">
+                        <col width="15%">
+                        <col width="10%">
+                        <col width="20%">
+                        <col width="10%">
+                        <col width="10%">
+                        <tbody class="listTable">
+
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

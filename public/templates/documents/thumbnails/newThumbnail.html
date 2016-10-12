@@ -1,0 +1,37 @@
+<div class="documentItem thumbnail" data-id="<%=model._id%>">
+    <div class="documentBody">
+        <input type="checkbox" id="<%=model._id%>" value="<%=model._id%>" class="customCheckbox"/>
+        <label for="<%=model._id%>" class="checkboxLabel"></label>
+<!--
+        <img src="<%= model.attachments[0] ? model.attachments[0].preview : '' %>" alt="document image"/>
+-->
+        <div class="bannerWrap <%= model._id %>">
+            <div class="bannerMin">
+                <div data-id="<%= model._id %>"
+                     class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                    <div class="thumbnail_js thumbnailBody">
+                        <% if (model.attachments[0].preview) { %>
+                        <img src="<%= model.attachments[0].preview %>" class="bannerImage">
+                        <% } else {%>
+                        <div class="bannerImage iconThumbnail <%= model.attachments[0].type %>"></div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <span class="textSmall floatRight"><%= model.status && model.status.capitalizer("firstCaps") || '' %></span>
+        </div>
+        <div class="editContent"></div>
+    </div>
+    <div class="documentFooter">
+        <span class="documentDescription hoverFullText fontGray"><%=model.title || ''%></span>
+        <span class="documentDate"><%=model.createdBy.date%></span>
+    </div>
+</div>
+
+<!--<% if (model.attachments[0] && model.attachments[0].preview) { %>
+<img src="<%= model.attachments[0].preview %>" alt="document image"/>
+<% } else if (model.attachments[0] && model.attachments[0].type) {%>
+<div class="iconThumbnail <%= model.attachments[0].type %>"></div>
+<% } else { %>
+<img src="" alt="No document"/>
+<% } %>-->

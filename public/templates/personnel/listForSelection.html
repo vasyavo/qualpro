@@ -1,0 +1,59 @@
+<div class="form-holder">
+    <div class="title">
+        <span class="titleDescription"><%= translation.setCover %></span>
+    </div>
+    <div id="listForSelection" class="listForSelection">
+        <div class="tabs">
+            <ul>
+                <li><a href="#colleagues"><!-- Re-assign responsibilities to  --><%= translation.colleagues %></a></li>
+                <li><a href="#temporaryEmployee"><!-- Re-assign responsibilities to  --><%= translation.temporaryEmployee %></a></li>
+            </ul>
+            <div id="colleagues" class="colleaguesWithoutTabs">
+                <div class="filterBar"></div>
+                <div id="colleaguesInner" class="colleaguesInner">
+                    <!-- colleagues list -->
+                </div>
+            </div>
+            <div id="temporaryEmployee" class="inner temporaryEmployee">
+                <div class="table">
+                    <div class="row">
+                        <div class="cell">
+                            <label><%= translation.firstName %></label>
+                        </div>
+                        <div class="cell">
+                            <input type="text"
+                                   class="firstName">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label><%= translation.lastName %></label>
+                        </div>
+                        <div class="cell">
+                            <input type="text"
+                                   class="lastName">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label><%= translation.phone %></label>
+                        </div>
+                        <div class="cell">
+                            <input type="text"
+                                   class="phoneNumber">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label><%= translation.email %></label>
+                        </div>
+                        <div class="cell">
+                            <input type="text"
+                                   class="email">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

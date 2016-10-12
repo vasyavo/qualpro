@@ -1,0 +1,26 @@
+<% var length = collection.length;%>
+<% var showCheckboxes = show; %>
+
+<% collection.forEach(function(domain, index){ %>
+<tr class="listRow" data-name="<%=domain.name.currentLanguage%>" data-id="<%=domain._id%>">
+    <td class="checkboxArea alignCenter">
+        <% if ( showCheckboxes && (tabName !== 'archived' || domain.topArchived) ) { %>
+        <input type="checkbox" id="<%=domain._id%>" value="<%=domain._id%>" class="customCheckbox"/>
+        <label for="<%=domain._id%>" class="checkboxLabel"></label>
+        <% } %>
+    </td>
+    <td class="alignCenter">
+        <img src="<%=domain.imageSrc%>"/>
+    </td>
+    <td><%=domain.name.currentLanguage%></td>
+    <td>
+        <%=(domain.createdBy&&domain.createdBy.user&&domain.createdBy.user.firstName)?(domain.createdBy.user.firstName.currentLanguage + ' ' + domain.createdBy.user.lastName.currentLanguage):'Admin'%>
+        <%=(domain.createdBy&&domain.createdBy.date)?(domain.createdBy.date):''%>
+    </td>
+</tr>
+<% }) %>
+<% if (!length) {%>
+<div>
+    <span>No data</span>
+</div>
+<%}%>

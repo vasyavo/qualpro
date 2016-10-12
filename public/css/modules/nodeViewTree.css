@@ -1,0 +1,73 @@
+.node {
+  width: 1100px;
+}
+.nodeConnect,
+.nodeLast {
+  position: relative;
+}
+.nodeConnect:before,
+.nodeLast:before {
+  content: '';
+  position: absolute;
+  left: -129px;
+  top: -10px;
+  height: 168px;
+  width: 129px;
+  background-repeat: no-repeat;
+}
+.nodeConnectYellow:before,
+.nodeLastYellow:before {
+  background-image: url('../images/nodeViewImages/nodeConnectYellow.png');
+}
+.nodeConnectBlue:before,
+.nodeLastBlue:before {
+  background-image: url('../images/nodeViewImages/nodeConnectBlue.png');
+}
+.nodeConnectGreen:before,
+.nodeLastGreen:before {
+  background-image: url('../images/nodeViewImages/nodeConnectGreen.png');
+}
+.nodeLast:before {
+  content: '';
+  position: absolute;
+  left: -129px;
+  top: -20px;
+  height: 96px;
+  width: 129px;
+  background-repeat: no-repeat;
+}
+.nodeLastYellow:before {
+  background-image: url('../images/nodeViewImages/nodeLastYellow.png');
+}
+.nodeLastBlue:before {
+  background-image: url('../images/nodeViewImages/nodeLastBlue.png');
+}
+.nodeLastGreen:before {
+  background-image: url('../images/nodeViewImages/nodeLastGreen.png');
+}
+.nodeLine:before {
+  content: '';
+  position: absolute;
+  left: -279px;
+  height: calc( 100% + 20px );
+  top: -10px;
+  width: 129px;
+  background-repeat: repeat-y;
+}
+.nodeLineYellow:before {
+  background-image: url('../images/nodeViewImages/nodeLineYellow.png');
+}
+.node ul {
+  margin-left: 150px;
+  position: relative;
+}
+.node ul li {
+  font-size: 0;
+  margin: 20px 0;
+}
+.node div {
+  display: inline-block;
+  height: 148px;
+  width: 100%;
+  background-color: olive;
+}

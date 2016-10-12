@@ -1,0 +1,45 @@
+// Fonts variables
+@fontPath: '../fonts/';
+@baseFontName-1: 'proxima_nova_bold-webfont';
+@baseFontName-2: 'proxima_nova_regular-webfont';
+@baseFontName-3: 'proxima_nova_semibold-webfont';
+@baseIconName-1: 'icomoon';
+
+@baseFontSvgId1: "proxima_nova_rgbold";
+@baseFontSvgId2: "proxima_nova_rgregular";
+@baseFontSvgId3: "proxima_nova_ltsemibold";
+
+@baseIconSvgId1: "icomoon";
+
+@fontFamily-1: 'proxima_nova_rgbold';
+@fontFamily-2: 'proxima_nova_rgregular';
+@fontFamily-3: 'proxima_nova_ltsemibold';
+@iconFamily-1: 'icomoon';
+@serif: sans-serif;
+
+
+/*** Global ***/
+@baseFontSize: 16;
+@baseFontFamily1: @fontFamily-1, @serif;
+@baseFontFamily2: @fontFamily-2, @serif;
+@baseFontFamily3: @fontFamily-3, @serif;
+
+.pxToRem(@sv) {
+  @sizeValue: unit(@sv);
+  @remValue: (@sizeValue / @baseFontSize);
+  font-size: unit(@sv,px);
+  font-size: unit(@remValue,rem);
+}
+
+//btn mixin need pxToRem mixin, pxToRem need @baseFontSize variable
+
+.btn(@px, @font-color, @width) {
+  display: inline-block;
+  line-height: 36px;
+  color: @font-color;
+  min-width: @width;
+  text-align: center;
+  cursor: pointer;
+  outline: 0;
+  .pxToRem(@px);
+}

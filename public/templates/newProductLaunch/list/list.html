@@ -1,0 +1,66 @@
+<% collection.forEach(function(model, index){ %>
+<% var previewCount = model.attachments.length <= 2 ? model.attachments.length : 2 %>
+<div class="templateWrap listRow productLaunchList" data-id="<%= model._id %>">
+    <div class="userBlock flexColumn">
+        <div class="top flexRowStart bottomLine">
+            <div class="left flexColumn">
+                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+            </div>
+            <div class="right flexColumn">
+                <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.accessRole && model.createdBy.user.accessRole.name) ? model.createdBy.user.accessRole.name.currentLanguage : '' %></div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.position && model.createdBy.user.position.name) ? model.createdBy.user.position.name.currentLanguage : '' %></div>
+            </div>
+        </div>
+        <div class="middle flexRowStart">
+
+        </div>
+        <div class="bottom flexRowStart">
+            <span class="userClip"><%= model.attachments.length %></span>
+        </div>
+    </div>
+    <div class="locationBlock flexGrow flexColumn">
+        <div class="locationTop flexRow">
+            <div class="flexColumn">
+                <div class="flexRow">
+                    <div class="locationTitle"><%= translation.productCategory + ': ' + model.category.name.currentLanguage %></div>
+                    <span class="textSmall"></span>
+                </div>
+                <div class="fontSmall fontGray textContainer">
+                    <div <%= model.variant.name.currentLanguage ? '' : 'class="newBrand"' %>><%= translation.variant + ': ' + (model.variant.name.currentLanguage || model.variant.name) %></div>
+                    <div <%= model.brand.name.currentLanguage ? '' : 'class="newBrand"' %>><%= translation.brand + ': ' + (model.brand.name.currentLanguage || model.brand.name) %></div>
+                    <div><%= translation.packaging + ': ' + model.packing %></div>
+                </div>
+            </div>
+            <div class="flexRow bannerBlock">
+                <% for(var i=0; i<previewCount; i++){ %>
+                <div class="bannerMin">
+                    <% if (model.attachments[i].preview) { %>
+                    <img src="<%= model.attachments[i].preview %>" alt="<%=  model.attachments[i].originalName %>" class="bannerImage"/>
+                    <% } else {%>
+                    <div class="iconThumbnail <%= model.attachments[i].type %>"></div>
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
+            <span class="fontGray noShrink"><%= translation.fromTo + ':' %></span>
+        </div>
+        <div class="locationBottom flexRowStart">
+            <span class="location flexGrow textEllipsis fontGray hoverFullText">
+                <%= translation.location + ': ' %>
+                <%= model.country && model.country.name && model.country.name.currentLanguage || '' %>
+                <%= model.region && model.region.name && ' > ' + model.region.name.currentLanguage || '' %>
+                <%= model.subRegion && model.subRegion.name && ' > ' + model.subRegion.name.currentLanguage || '' %>
+                <%= model.retailSegment && model.retailSegment.name && ' > ' + model.retailSegment.name.currentLanguage || '' %>
+                <%= model.outlet && model.outlet.name && ' > ' + model.outlet.name.currentLanguage || '' %>
+                <%= model.branch && model.branch.name && ' > ' + model.branch.name.currentLanguage || '' %>
+            </span>
+        </div>
+    </div>
+    <div class="dateBlock flexColumn">
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.shelfLifeStart + ' - ' + model.shelfLifeEnd %></span>
+        </div>
+    </div>
+</div>
+<% }) %>

@@ -1,0 +1,130 @@
+.topMenuHolder {
+  box-shadow: 1px 0 4px @transparentBlack4;
+}
+.loginPanel {
+  height: 107px;
+  padding: 0 70px 0 61px;
+  background: @header-bg;
+
+  .logo {
+    position: relative;
+    width: 150px;
+    float: left;
+
+    a {
+      position: absolute;
+      top: -1px;
+      left: 0;
+      display: block;
+    }
+  }
+
+  .logoImage {
+    width: 150px;
+  }
+}
+.aditionalInfo {
+  position: relative;
+  float: right;
+  width: 150px;
+  height: 100%;
+  .lh-display(flex);
+  .lh-justify-content(space-between);
+  .lh-align-items(center);
+
+  li {
+
+    #headerNumber {
+      position: absolute;
+      top: -12px;
+      right: -20px;
+      width: 22px;
+      border: 1px solid @header-font-color;
+      border-radius: 50%;
+      line-height: 19px;
+      text-align: center;
+      color: @header-font-color;
+    }
+
+    &:first-child {
+      position: relative;
+    }
+
+    &.questionItem {
+      position: relative;
+
+      a {
+        position: absolute;
+        left: -45px;
+        top: 0;
+      }
+    }
+
+
+  }
+
+  .bell:after,
+  .currentLanguage,
+  .question {
+    position: absolute;
+    top: 50%;
+    line-height: normal;
+    .lh-transform(translateY(-50%));
+  }
+
+  .bell,
+  .question {
+    &:after {
+      left: 5px;
+    }
+  }
+
+  .chat{
+    &:after{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      .lh-transform(translate(-50%, -50%));
+    }
+  }
+
+  .currentLanguage{
+    right: 0;
+  }
+}
+
+
+.personelShortDetail {
+  float: left;
+  padding: 23px 0 15px;
+  margin-left: 190px;
+  cursor: pointer;
+
+  .avatarHeader {
+    float: left;
+    margin: 0 20px;
+
+    .avatarImage{
+      height: 60px;
+      width: auto;
+      border-radius: 50%;
+    }
+  }
+
+  .personnelDescription {
+    float: left;
+
+    .personnelName {
+      margin-bottom: 10px;
+      font-family: @baseFontFamily1;
+      color: @header-font-color;
+      .pxToRem(18);
+    }
+
+    .personnelJobposition {
+      font-family: @baseFontFamily2;
+      color: @header-font-color;
+      .pxToEm(14);
+    }
+  }
+}

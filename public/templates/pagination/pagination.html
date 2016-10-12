@@ -1,0 +1,63 @@
+<div class="pagination">
+    <div class="countOnPage">
+        <div class="countItems">
+            <span>
+                <span id="gridStart"></span>
+                -
+                <span id="gridEnd"></span>
+                <span data-translation="of"><%=translation.of%></span>
+                <span id="gridCount"></span>
+                <span data-translation="items"><%=translation.items%></span>
+            </span>
+        </div>
+        <div class="pageListWrap">
+            <div class="pageList">
+                <button id="itemsButton" class="iconsNum">
+                    <span id="itemsNumber"></span>
+                </button>
+            </div>
+            <div class="pageList">
+                <button class="currentPageList triDown"></button>
+                <ul class="allNumberPerPage dropDownContent NotRemoveThisClass pagesPopup">
+                    <li>
+                        <a class="itemsNumber" href="javascript:;">25</a>
+                    </li>
+                    <li>
+                        <a class="itemsNumber" href="javascript:;">50</a>
+                    </li>
+                    <li>
+                        <a class="itemsNumber" href="javascript:;">100</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="nextPrev">
+        <div>
+            <!--<button id="firstShowPage" class="firstShowPage" type="button" &lt;!&ndash;disabled="disabled"&ndash;&gt;</button>-->
+            <button id="previousPage" class="previousPage" type="button"> <!--disabled="disabled"--></button>
+            <div>
+                <span data-translation="page"><%=translation.page%></span>
+            </div>
+        </div>
+        <div>
+            <div class="pageListWrap">
+                <div>
+                    <input id="currentShowPage" class="currentShowPage" type="text">
+                </div>
+                <div class="allPage">
+                    <button class="currentPageList triDown"></button>
+                    <div id="pageListScrollable" class="scrollable pagesPopup">
+                        <ul id="pageList" class="allNumberPerPage dropDownContent NotRemoveThisClass"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <span data-translation="of"><%=translation.of%></span>
+            <span id="lastPage"></span>
+        </div>
+        <button id="nextPage" type="button" class="nextPage" disabled="disabled"></button>
+        <!--<button id="lastShowPage" type="button" class="lastShowPage" disabled="disabled"></button>-->
+    </div>
+</div>

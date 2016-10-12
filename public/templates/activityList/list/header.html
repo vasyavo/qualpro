@@ -1,0 +1,41 @@
+<% var showCheckboxes = showCheckboxes || null; %>
+<% var notCheckAll = notCheckAll || false; %>
+<% var level = App.currentUser.accessRole.level; %>
+<div class="absoluteContent activityTable clickableTable">
+    <table>
+        <colgroup>
+            <col width="25%">
+            <col width="25%">
+            <col width="25%">
+            <col width="25%">
+        </colgroup>
+        <thead>
+        <tr>
+
+            <th data-translation="activity"><%= translation.activity %></th>
+            <th data-translation="location"><%= translation.location %></th>
+            <th data-translation="user"><%= translation.user %></th>
+            <th data-translation="date"><%= translation.date %></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="8" class="colspanFix">
+                <div class="scrollable">
+                    <table class="list alignBaseline">
+                        <colgroup>
+                            <col width="25%">
+                            <col width="25%">
+                            <col width="25%">
+                            <col width="25%">
+                        </colgroup>
+                        <tbody class="listTable">
+
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

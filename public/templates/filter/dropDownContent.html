@@ -1,0 +1,3 @@
+<% dropDownList.forEach(function(dropDownItem) { %>
+    <li id="<%= dropDownItem._id %>" class="dropDownItem <%= dropDownItem.selected ? 'selected' : ''%> hoverFullText"><%= dropDownItem.name.currentLanguage || dropDownItem.name.en || dropDownItem.name.ar || dropDownItem.name %></li>
+<% }); %>

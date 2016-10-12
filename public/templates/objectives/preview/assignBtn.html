@@ -1,0 +1,9 @@
+<div class="assignContainer">
+    <input type="button" id="<%= elementId %>" value="<%= App.currentUser.accessRole.level === 3 ? translation.reAssign : translation.assign %>" class="readonlyVisible createBtn">
+    <ul class="assignUl <%= App.currentUser.accessRole.level === 4 ? 'singleAssign' : '' %>" style="display: none">
+        <% if (App.currentUser.accessRole.level !== 4) {%>
+        <li id="<%= elementId + 'ACM' %>"><%= translation.areaMan %></li>
+        <%}%>
+        <li id="<%= elementId + 'Else' %>"><%= translation.salesMan %></li>
+    </ul>
+</div>

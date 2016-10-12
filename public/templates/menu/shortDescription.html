@@ -1,0 +1,7 @@
+<div class="avatarHeader">
+    <img class="avatarImage" src="<%= imageSrc %>" />
+</div>
+<div id="personnelDescription" class="personnelDescription">
+    <span id="personnelName" class="personnelName"><%= firstName.currentLanguage + ' ' + lastName.currentLanguage %></span><br/>
+    <span id="personnelJobposition" class="personnelJobposition"><%= (position && position.name) ? (position.name.currentLanguage || '') : '' %></span>
+</div>

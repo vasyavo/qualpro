@@ -1,0 +1,28 @@
+<div>
+    <div class="title">
+        <span class="titleDescription"><%= translation.all %></span>
+    </div>
+
+    <div class="inner">
+        <div class="table">
+            <div class="row">
+                <div class="cell">
+                    <label for="countrySelect" class="required"><%= translation.country %></label>
+                </div>
+                <div id="countrySelect" data-content="country" child-content="branch" class="itemSelect cell"></div>
+            </div>
+            <div class="row">
+                <div class="cell">
+                    <label for="retailSegmentSelect" class="required"><%= translation.retailSegment %></label>
+                </div>
+                <div id="retailSegmentSelect" data-content="retailSegment" class="itemSelect cell"></div>
+            </div>
+            <div class="row">
+                <div class="cell">
+                    <label for="outletSelect" class="required"><%= translation.outlet %></label>
+                </div>
+                <div id="outletSelect" data-content="outlet" class="itemSelect cell"></div>
+            </div>
+        </div>
+    </div>
+</div>

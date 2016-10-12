@@ -1,0 +1,21 @@
+<div class="paddingBlock">
+    <div class="ratingTitle">
+        <span><%=rating.title%></span>
+    </div>
+    <div class="ratingInfo">
+        <%rating.options.forEach(function(option, i, arr){%>
+        <div class="ratingItem">
+            <label for="<%= preview ? 'optionPreview'+i : 'option'+i %>" class="customRadioDescription"><%=option.displayName%></label>
+            <input id="<%= preview ? 'optionPreview'+i : 'option'+i %>"
+                   class="ratingOption"
+                    <%= preview ? disabled="disabled" : '' %>
+                    <%= rating.result && rating.result.value == option.value ? 'checked' : '' %>
+                    data-value="<%=option.value%>"
+                    data-displayName="<%=option.displayName%>"
+                    name="option"
+                    type="radio">
+            <label for="<%= preview ? 'optionPreview'+i : 'option'+i %>"></label>
+        </div>
+        <%});%>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+<% model.history.sort(function(a, b) {return a.index - b.index}) %>
+
+<% model.history.forEach(function(task, index, array){ %>
+    <div class="templateWrap listRow blueBorder borderAfter" data-id="<%= model._id %>">
+        <div class="userBlock flexColumn">
+            <div class="top flexRowStart bottomLine">
+                <div class="left flexColumn">
+                    <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                </div>
+                <div class="right flexColumn">
+                       <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></div>
+                        <div class="description fontGray"><%= (model.createdBy && model.createdBy.user.accessRole && model.createdBy.user.accessRole.name) ? model.createdBy.user.accessRole.name.currentLanguage : '' %></div>
+                        <div class="description fontGray"><%= (model.createdBy && model.createdBy.user.position && model.createdBy.user.position.name) ? model.createdBy.user.position.name.currentLanguage : '' %></div>
+                </div>
+            </div>
+            <div class="middle flexRowStart">
+                <img src="<%= task.assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                <div class="description fontGray"><%= task.assignedTo.firstName.currentLanguage + ' ' + task.assignedTo.lastName.currentLanguage %></div>
+            </div>
+            <div class="bottom flexRowStart">
+                <span class="userClip"><%= model.attachments.length %></span>
+                <span class="userMassage"><%= model.comments.length %></span>
+            </div>
+        </div>
+        <div class="locationBlock flexGrow flexColumn">
+            <div class="locationTop">
+                <div class="flexRow">
+                    <div class="locationTitle"><%= model.title.currentLanguage %></div>
+                    <span class="textSmall"><%= model.status.name.currentLanguage %></span>
+                </div>
+                <div class="fontSmall fontGray textEllipsis ckEditorOverflow hoverFullText"><%= model.description.currentLanguage %></div>
+            </div>
+            <div class="locationBottom flexRowStart">
+                <span class="priority fontGray"><%=translation.priority%>: <%= model.priority.name.currentLanguage %></span>
+                <span class="location flexGrow textEllipsis fontGray hoverFullText"><%=translation.location%>: <%= model.location %> </span>
+                <span class="fontGray noShrink"><%=translation.endDate%>:</span>
+            </div>
+        </div>
+        <div class="dateBlock flexColumn">
+            <div class="dateWrap flexRow">
+                <span class="name dates"><%= model.dateStart %></span>
+            </div>
+            <div class="dateWrap flexRow">
+                <span class="name dates"><%= model.dateEnd %></span>
+            </div>
+        </div>
+    </div>
+<% }) %>

@@ -1,0 +1,14 @@
+<tr data-id="<%=model._id%>" class="listRow">
+    <td class="checkboxArea alignCenter">
+        <input type="checkbox" id="<%=model._id%>" value="<%=model._id%>" class="customCheckbox"/>
+        <label for="<%=model._id%>" class="checkboxLabel"></label>
+    </td>
+    <td><%=model.country.name.en || model.country.name.ar%></td>
+    <td><%=model.retailSegment.name.en || model.retailSegment.name.ar%></td>
+    <td><%=model.product.name.en || model.product.name.ar%></td>
+    <td>
+        <%= model.configuration.name %>
+    </td>
+    <td><%=model.editedBy.date%></td>
+    <td><%=model.createdBy.date%></td>
+</tr>

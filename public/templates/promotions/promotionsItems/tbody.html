@@ -1,0 +1,88 @@
+<% for (var i = 0, outletLen = outlet.length; i < outletLen; i++) { %>
+<% for (var j = 0, branchesLen = outlet[i].branches.length; j < branchesLen; j++) { %>
+<% var branches = outlet[i].branches[j] %>
+<tr>
+    <% if (j === 0) { %>
+    <td
+    <%- (branchesLen > 1) ? ('rowspan=' + branchesLen) : '' %>>
+        <span class="hoverFullText"><%- outlet[i].name && outlet[i].name.currentLanguage || '' %></span>
+    </td>
+    <% } %>
+    <td>
+        <span class="hoverFullText"><%- branches.name && branches.name.currentLanguage || '' %></span>
+    </td>
+    <td>
+        <%- branches.dateStart %>
+    </td>
+    <td>
+        <%- branches.dateEnd %>
+    </td>
+    <td>
+        <%- branches.rsp %>
+    </td>
+    <td>
+        <%- branches.status %>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList">
+            <% branches.opening.forEach(function(elem, index) { %>
+            <li><%- elem %></li>
+            <% }) %>
+            <% if( branches.opening.length > 1 ) { %>
+            <li></li>
+            <% } %>
+        </ul>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList markedList">
+            <% branches.sellIn.forEach(function(elem, index) { %>
+            <% if ((index !==1) || (index === 1 && ++index !== branches.sellIn.length)) { %>
+            <li><%- elem %></li>
+            <% } %>
+            <% }) %>
+        </ul>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList markedList">
+            <% branches.closingStock.forEach(function(elem, index) { %>
+            <% if ((index !==1) || (index === 1 && ++index !== branches.closingStock.length)) { %>
+            <li><%- elem %></li>
+            <% } %>
+            <% }) %>
+        </ul>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList markedList markedListHover">
+            <% branches.sellOut.forEach(function(elem, index) { %>
+            <% if ((index !==1) || (index === 1 && ++index !== branches.sellOut.length)) { %>
+            <li><%- elem %></li>
+            <% } %>
+            <% }) %>
+        </ul>
+    </td>
+    <td>
+        <%- branches.displayType && branches.displayType.name &&
+        branches.displayType.name.currentLanguage || '' %>
+    </td>
+    <td>
+        <% if (branches.comment) { %>
+        <div class="commentDescription" data-id="<%= branches.comment._id %>">
+            <div id="commentBody" class="commentEllipsis fontSmall">
+                <div class="fontSmall">Created by: <span class="promoTableUserName"><%= branches.comment.createdBy.user.firstName.currentLanguage + ' ' + outlet[i].branches[j].comment.createdBy.user.lastName.currentLanguage %></span>
+                </div>
+                <p class="fontSmall hoverFullText"><%= branches.comment.body %></p>
+                <!--<icon id="showAllDescription" class="showDescription"></icon>-->
+            </div>
+            <% if( branches.comment.attachments && branches.comment.attachments.length){ %>
+            <div id="showFilesBlock" class="showFilesBlock"></div>
+            <div class="commentBottom">
+                <span class="attachment"></span>
+                <span class="commentCount"><%= branches.comment.attachments.length %></span>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+    </td>
+</tr>
+<% } %>
+<% } %>

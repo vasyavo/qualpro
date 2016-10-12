@@ -1,0 +1,62 @@
+<div class="form-holder personnelInfo largeHeightPreview">
+    <div class="title">
+        <span data-translation="editPlanogram"><%= translation.editPlanogram%></span>
+    </div>
+    <form method="post" action="" id="editPlanogramForm" class="form">
+        <fieldset>
+            <div class="inner">
+
+                <div class="avatar block-left block">
+                    <img id="imgPreView" width='150'
+                         src="<%=model.fileID.preview ? model.fileID.preview : ''%>"
+                         alt="">
+
+                    <div class="upload mandatory">
+                        <p data-translation="changePhoto" claass=""><%= translation.changePhoto %></p>
+                        <input type="file"
+                               value="Edit"
+                               id="inputImg"
+                               name="inputImg"
+                               class="uploadInput">
+                    </div>
+                </div>
+                <div class="planogramInfo table">
+                    <div class="row">
+                        <div class="cell">
+                            <label for="countrySelect" class="required" data-translation="country">
+                                <%= translation.country %>
+                            </label>
+                        </div>
+                        <div id="countrySelect" data-content="country" class="itemSelect cell mandatory"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="retailSegmentSelect" class="required" data-translation="retailSegment">
+                                <%= translation.retailSegment %>
+                            </label>
+                        </div>
+                        <div id="retailSegmentSelect" data-content="retailSegment"
+                             class="itemSelect cell mandatory"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="productSelect" class="required" data-translation="product">
+                                <%= translation.product %>
+                            </label>
+                        </div>
+                        <div id="productSelect" data-content="product" class="itemSelect cell mandatory"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="configurationSelect" class="required" data-translation="configuration">
+                                <%= translation.configuration%>
+                            </label>
+                        </div>
+                        <div id="configurationSelect" data-content="configuration"
+                             class="itemSelect cell mandatory"></div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

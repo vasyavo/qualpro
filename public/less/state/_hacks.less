@@ -1,0 +1,153 @@
+* {
+  &::-moz-focus-inner {
+    border: 0;
+  }
+}
+
+// ie hack
+_:-ms-input-placeholder {
+  &:root {
+    .leftMenuHolder,
+    .rightMenuHolder {
+      height: 100%!important;
+    }
+
+    .absoluteContent {
+      height: calc(~"100% - 43px")!important;
+    }
+
+    .scrollable {
+      position: absolute!important;
+    }
+  }
+}
+
+_:-ms-fullscreen, :root {
+
+  .leftMenuHolder,
+  .rightMenuHolder {
+    height: 100%!important;
+  }
+
+  .absoluteContent {
+    height: calc(~"100% - 43px")!important;
+  }
+
+  .scrollable {
+    position: absolute!important;
+  }
+}
+
+html[data-useragent*='MSIE 10.0'] {
+  .leftMenuHolder,
+  .rightMenuHolder {
+    height: 100%!important;
+  }
+
+  .absoluteContent {
+    height: calc(~"100% - 43px")!important;
+  }
+
+  .scrollable {
+    position: absolute!important;
+  }
+}
+
+// hack for ms edge
+@supports (-ms-accelerator:true) {
+
+  .leftMenuHolder,
+  .rightMenuHolder {
+    height: 100%!important;
+  }
+
+  .absoluteContent {
+    height: calc(~"100% - 43px")!important;
+  }
+
+  .scrollable {
+    position: absolute!important;
+  }
+}
+
+// hands off!!
+// this is fix for FifeFox
+#phone {
+  box-shadow: none!important;
+  &:hover,&:focus,&:active {
+    box-shadow: none!important;
+  }
+}
+
+// firefox fix (datapicker)
+@-moz-document url-prefix() {
+  select,
+  select:-moz-focusring,
+  select::-moz-focus-inner {
+    color: transparent !important;
+    text-shadow: 0 0 0 @main-sub-color !important;
+    background-image: none !important;
+    border:0;
+  }
+}
+// mozilla fixing
+@-moz-document url-prefix() {
+
+  .mainHolder{
+
+    .leftMenuHolder,
+    .rightMenuHolder {
+      height: 100%!important;
+    }
+  }
+
+  .dialogCategoryItem{
+
+    .absoluteContent{
+
+      table{
+        border-bottom: 1px solid @tableDialogBorderColor;
+      }
+    }
+  }
+
+  .topBarHolder {
+
+    .pagination {
+
+      button {
+
+        &:after {
+          line-height: normal;
+        }
+      }
+    }
+  }
+
+  .sub-form-holder {
+
+    .absoluteWrap {
+
+      .absoluteContent {
+        height: calc(~"100% - 42px");
+      }
+    }
+  }
+
+  .select-dialog {
+    .listForSelectionWithoutTabs {
+      .scrollable {
+        height: calc(~"100% - 42px");
+      }
+    }
+  }
+}
+
+@-moz-document url-prefix() {
+  .contentHolder,
+  .categoryTableWrap{
+    .absoluteContent {
+      padding-bottom: 40px;
+    }
+  }
+}

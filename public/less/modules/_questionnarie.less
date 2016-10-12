@@ -1,0 +1,602 @@
+//
+.questionnarie {
+  height: calc(~"100% - 50px");
+
+  &Table {
+
+    &Title {
+      background-color: @filterTitleBg;
+      border: 1px solid @questionnarieListBorderGray;
+      border-bottom: 0;
+      padding: 10px 12px;
+    }
+
+    table {
+      tbody {
+        tr {
+          td {
+            &.absoluteInputWrap {
+              position: relative;
+              padding: 0;
+
+              .absoluteInput {
+                position: absolute;
+                top: 0;
+                left: 0;
+                border: 0;
+                height: 100%;
+                width: 100%;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .borderless {
+      border: 0;
+      outline: 0;
+    }
+
+    .scrollable {
+
+    }
+  }
+
+  &InputWrap {
+    overflow: hidden;
+    margin-bottom: 20px;
+
+    .customInput,
+    .questionnarieDatapickerWrap {
+      display: inline-block;
+      height: 43px;
+      float: left;
+      padding: 10px;
+      border: 1px solid @questionnarieListBorderGray;
+    }
+    .customInput {
+      width: 300px;
+      margin-right: 20px;
+    }
+    .questionnarieDatapickerWrap {
+      position: relative;
+      width: 130px;
+
+      &:after {
+        content: '\e90b';
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        font-family: @baseIconName-1;
+        .pxToRem(19px);
+      }
+
+      .questionnarieDatapicker {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        border: 0;
+        outline: 0;
+      }
+    }
+  }
+
+  &Wrap {
+    height: 100%;
+    padding: 10px 40px;
+
+    .filterBar {
+      margin-bottom: 20px;
+
+      .filterContentHolder {
+        border: 1px solid @main-border-color;
+        .clearfix;
+
+        .filtersFullHolder {
+          padding: 10px 0 10px 20px;
+        }
+      }
+    }
+  }
+
+  &-form {
+    height: calc(~"100% - 75px")!important;
+  }
+
+  &TableWrap {
+    position: relative;
+    height: calc(~"100% - 260px")!important;
+
+    .dropDownInput {
+      input {
+        min-width: auto;
+        background-color: @main-sub-color;
+        border-bottom: 1px solid @questionnarieListBorderGray;
+      }
+    }
+  }
+
+  &ListWrap {
+    min-width: 100px;
+    padding: 20px;
+    background-color: @questionnarieListBgGray;
+    border-bottom: 1px solid @questionnarieListBorderGray;
+
+    .rightPart {
+      padding-left: 20px;
+      float: right;
+      .lh-flex-shrink(0);
+    }
+
+    .leftPart {
+      min-width: 0;
+    }
+
+    .state {
+      &Active,
+      &Completed,
+      &Draft,
+      &Expired {
+        padding: 1px 12px;
+        margin-left: 10px;
+        color: @questionnarieStateColor;
+        border-radius: 2px;
+        .pxToRem(14px);
+      }
+
+      &Active {
+        background-color: #8bc34a;
+      }
+
+      &Completed {
+        background-color: #ccc;
+      }
+
+      &Draft {
+        background-color: #ffd180;
+      }
+
+      &Expired {
+        background-color: #e50f0f;
+      }
+    }
+  }
+
+  &UserInfoBlock {
+    margin-top: 5px;
+
+    .user {
+      margin-right: 5px;
+      color: @questionnarieGreenIconActive;
+    }
+    .score {
+      color: @questionnarieScore;
+
+      .black {
+        color: @main-font-color;
+      }
+    }
+
+    &.userEmpty {
+      .user {
+        opacity: .3;
+      }
+      .score {
+        color: @questionnarieScoreDisabled;
+
+        .black {
+          color: @questionnarieScoreDisabled;
+        }
+      }
+    }
+  }
+
+  &Date {
+    float: right;
+
+    &:before {
+      content: '\e90b';
+      margin: 0 10px;
+      font-family: @baseIconName-1;
+      .pxToRem(12px);
+    }
+  }
+
+  //&View {
+  //  padding: 11px 0;
+  //}
+}
+
+.questions {
+
+  &Preview {
+    padding: 20px;
+    height: calc(~"100% - 50px");
+
+    .tabs {
+      height: 100%;
+    }
+
+    .ui-tabs-nav {
+      border-left: 1px solid @questionnarieListBorderGray;
+    }
+  }
+
+  &Wrap {
+    overflow: hidden;
+    height: calc(~"100% - 47px");
+    border: 1px solid @questionnarieListBorderGray !important;
+  }
+
+  &LeftPart {
+    height: 100%;
+    width: 300px;
+    float: left;
+    border-right: 1px solid @questionnarieListBorderGray;
+  }
+
+  &RightPart {
+    float: right;
+    width: calc(~"100% - 300px");
+  }
+
+  &Diagram {
+    height: 250px;
+    padding-top: 45px;
+  }
+
+  &SearchBlock {
+    padding: 5px 10px;
+    background-color: @questionnarieTitleBgGrey;
+    border: solid @questionnarieListBorderGray;
+    border-width: 1px 0;
+    overflow: hidden;
+
+    .searchTitle {
+      display: inline-block;
+      margin: 7px 0 0 5px;
+    }
+
+    .searchLabel:after {
+      top: 7px;
+    }
+
+    .searchInput {
+      height: 36px;
+      width: 270px;
+      padding: 0 15px 0 38px;
+      float: right;
+      border: 1px solid @questionnarieListBorderGray;
+      font-weight: normal;
+      .pxToRem(16px);
+
+      &Wrap {
+        position: relative;
+        float: right;
+      }
+    }
+  }
+
+  &Title {
+    padding: 15px 20px;
+    background-color: @questionnarieTitleBgGrey;
+    border-bottom: 1px solid @questionnarieListBorderGray;
+  }
+
+  &Container {
+    position: relative;
+    height: calc(~"100% - 53px");
+
+    &Item {
+      padding: 10px 20px;
+      border-bottom: 1px solid @questionnarieListBorderGray;
+    }
+
+    .absoluteContent {
+      width: 100%;
+    }
+  }
+
+  &Active {
+    background-color: @questionnarieItemActive;
+  }
+
+  &List {
+    height: 110px;
+    min-width: 0;
+
+    .questions {
+
+      &User {
+        display: inline-block;
+
+        &Image {
+          margin: 20px 15px 20px 25px;
+          border-radius: 50%;
+          .lh-size(60px);
+        }
+      }
+
+      &Description {
+        min-width: 0;
+        padding: 20px 0;
+
+      }
+
+      &Status {
+
+        &.question {
+          width: 100px;
+          height: 110px;
+          position: relative;
+
+          &:before {
+            content: 'Chose';
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            .lh-transform(translateY(-50%));
+          }
+
+          .questionsCount {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            border: 1px solid @questionnarieListBorderGray;
+            border-radius: 3px;
+            text-align: center;
+            line-height: normal;
+            color: @main-sub-color;
+            background-color: #b9b9b9;
+            .lh-transform(translateY(-50%));
+            .lh-size(18px);
+            .pxToRem(14px);
+          }
+        }
+
+        &.answer {
+          display: inline-block;
+          width: 200px;
+          padding: 5px 0 5px 5px;
+          line-height: 25px;
+          .pxToRem(14px);
+
+          &:before {
+            content: 'Answer : ';
+          }
+          .questionsCount {
+          }
+        }
+
+        &Block {
+          position: relative;
+          min-width: 100px;
+        }
+      }
+    }
+  }
+}
+
+.respondents {
+
+  &Wrap {
+    overflow: hidden;
+    height: calc(~"100% - 47px");
+    border: 1px solid @questionnarieListBorderGray !important;
+  }
+
+  &LeftPart,
+  &RightPart {
+    height: 100%;
+  }
+
+  &LeftPart {
+    width: 400px;
+    float: left;
+    border-right: 1px solid @questionnarieListBorderGray;
+  }
+
+  &RightPart {
+    width: calc(~"100% - 400px");
+    float: right;
+
+    .respondentsRightContainer {
+      height: calc(~"100% - 53px");
+      position: relative;
+    }
+
+    .absoluteContent {
+      width: 100%;
+    }
+  }
+
+  &Container {
+    position: relative;
+    height: calc(~"100% - 120px");
+
+    .absoluteContent {
+      width: 100%;
+    }
+
+    .questionsList {
+      padding-right: 25px;
+
+      &Active {
+        background-color: @respondentsItemActive;
+      }
+    }
+  }
+
+  &SearchBlock {
+    padding: 15px 20px;
+
+    .searchInputWrap {
+      position: relative;
+
+      .searchInput {
+        height: 36px;
+        padding: 0 15px 0 38px;
+        border: 1px solid @questionnarieListBorderGray;
+        font-weight: normal;
+      }
+    }
+  }
+
+  &ItemWrap {
+    padding: 10px;
+    overflow: hidden;
+
+    .respondentsItem {
+      width: 50%;
+      padding: 10px;
+      float: left;
+
+      &:nth-child(2) {
+        .pxToRem(14px);
+      }
+    }
+
+    .itemTitle {
+      margin-bottom: 10px;
+      color: @questionnarieScoreDisabled;
+      .pxToRem(12px);
+    }
+
+    .respondentsList {
+      padding-left: 20px;
+      li {
+        list-style-type: inherit;
+        color: @respondentsListGrey;
+
+        &.active {
+          color: inherit;
+          font-family: @baseFontFamily3;
+        }
+      }
+    }
+
+    .respondentsInfo {
+      font-family: @baseFontFamily3;
+    }
+  }
+}
+
+
+.bordered {
+  border: 1px solid @questionnarieListBorderGray;
+  background-color: @questionnarieStateColor;
+  padding: 2px 8px;
+}
+
+.optionsList {
+  padding-left: 20px;
+  li {
+    position: relative;
+    padding: 0 25px 0 0;
+    list-style-type: inherit;
+
+    input {
+      height: 36px;
+      border: 0;
+      line-height: 36px;
+      .pxToRem(16px);
+
+      &:hover,&:focus,&:active {
+        outline: 0;
+      }
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -20px;
+      width: calc(~"100% + 20px");
+      height: 1px;
+      background-color: @questionnarieListBorderGray;
+    }
+
+    .removeOption {
+
+      &:after {
+        content: '\e934';
+        position: absolute;
+        top: 9px;
+        right: 6px;
+        font-family: @baseIconName-1;
+        .pxToRem(14px);
+      }
+    }
+  }
+}
+
+.addNewOption {
+  .plusIcon {
+    &:after {
+      line-height: 30px;
+      margin-left: 7px;
+    }
+  }
+}
+
+.questionnarieTableTitle {
+  min-height: 44px;
+}
+
+.overlayContainer {
+  position: relative;
+}
+
+.questionnarieWrap {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(~"100% - 73px");
+  background: transparent;
+  display: none;
+  z-index: 30;
+
+  &.active {
+    display: block;
+  }
+}
+
+.questionsRightPart {
+  height: 100%;
+}
+
+.questionsListWrap {
+  &.questionsListWrapHeight {
+    position: relative;
+    height: calc(~"100% - 351px");
+
+    .absoluteContent {
+      width: 100%;
+    }
+  }
+
+  &.questionsListWrapHeightIncrease {
+    height: calc(~"100% - 101px");
+
+    .absoluteContent {
+      position: static;
+    }
+  }
+}
+
+.questionsDiagram {
+  max-height: 250px;
+  padding-top: 0 !important;
+
+  .diagram_container {
+    padding-top: 60px;
+  }
+}

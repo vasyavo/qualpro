@@ -1,0 +1,64 @@
+<% items.forEach(function(group) { %>
+    <% var groupName = group.name.currentLanguage.toUpperCase() || '' %>
+    <tr id="<%='categoryRow'+group._id%>"
+        data-categoryId="<%=group._id%>"
+        data-type="category"
+        class="listRow">
+        <td colspan="5"
+            class="fullWidthRow tableGrayDark">
+            <%= groupName %>
+        </td>
+        <td class="icon <%= listType === 'items' ? 'arrowRight' : 'cross' %>">
+        </td>
+    </tr>
+    <% if (group.variants) { %>
+        <% group.variants.forEach(function(variant) { %>
+            <% var variantName = variant.name.currentLanguage.toUpperCase() || '' %>
+            <tr id="<%='variantRow'+variant._id%>"
+                data-variantId="<%=variant._id%>"
+                data-categoryId = "<%=group._id%>"
+                data-categoryName="<%=groupName%>"
+                data-type="variant"
+                class="listRow">
+                <td colspan="5"
+                    class="fullWidthRow tableGrayLight">
+                    <%= variantName %>
+                </td>
+                <td class="icon <%= listType === 'items' ? 'arrowRight' : 'cross' %>">
+                </td>
+            </tr>
+            <% if (variant.items) { %>
+                <% variant.items.forEach(function(item) { %>
+                    <tr data-id="<%=item._id%>"
+                        data-variantId = "<%=variant._id%>"
+                        data-type="item"
+                        data-variantName="<%=variantName%>"
+                        data-categoryId = "<%=group._id%>"
+                        data-categoryName="<%=groupName%>"
+                        class="listRow">
+                        <td class="hoverFullText">
+                            <%= item.name.currentLanguage || '' %>
+                        </td>
+                        <td class="hoverFullText">
+                            <%= item.barCode %>
+                        </td>
+                        <td class="hoverFullText">
+                            <%= item.packing %>
+                        </td>
+                        <td class="hoverFullText">
+                            <%= item.ppt %>
+                            <span class="currency">
+                                <%= item.currency %>
+                            </span>
+                        </td>
+                        <td class="hoverFullText">
+                            <%= item.origin ? _.map(item.origin, function (el) { return el.name.currentLanguage; }).join(', ') : '' %>
+                        </td>
+                        <td class="icon <%= listType === 'items' ? 'arrowRight' : 'cross' %>">
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } %>
+        <% }); %>
+    <% } %>
+<% }); %>

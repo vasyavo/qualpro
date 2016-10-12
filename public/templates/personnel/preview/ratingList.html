@@ -1,0 +1,30 @@
+<% var rateNow = noRateNow ? '' : translation.rateNow %>
+<% var rateNowClass = noRateNow ? '' : 'rateNow' %>
+<% for (var i = ratings.length - 1; i >= 0; i--) { %>
+    <tr id="<%= ratings[i]._id %>">
+        <td>
+            <%= ratings[i].type === 'monthly' ? ratings[i].monthLong + ' ' + ratings[i].year : ratings[i].timeFirstCaps + ' ' + ratings[i].year %>
+        </td>
+        <td>
+            <% if (ratings[i].type === 'monthly') { %>
+                <% if (ratings[i].rating) { %>
+                    <select class="rating">
+                        <option value="0" <%= ratings[i].rating == 0 ? 'selected' : '' %>>0</option>
+                        <option value="1" <%= ratings[i].rating == 1 ? 'selected' : '' %>>1</option>
+                        <option value="2" <%= ratings[i].rating == 2 ? 'selected' : '' %>>2</option>
+                        <option value="3" <%= ratings[i].rating == 3 ? 'selected' : '' %>>3</option>
+                        <option value="4" <%= ratings[i].rating == 4 ? 'selected' : '' %>>4</option>
+                        <option value="5" <%= ratings[i].rating == 5 ? 'selected' : '' %>>5</option>
+                    </select>
+                <% } else { %>
+                    <%= translation.timeToRateGone %>
+                <% } %>
+            <% } else { %>
+                <div class="rating" data-rate-value="<%= ratings[i].rating %>"></div>
+            <% } %>
+        </td>
+        <td class="<%= ratings[i].rating ? 'viewDetails' : rateNowClass %>" >
+            <a href="javascript:;"><%= ratings[i].rating ? translation.viewDetails : rateNow %></a>
+        </td>
+    </tr>
+    <% }; %>

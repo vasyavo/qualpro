@@ -1,0 +1,51 @@
+<div class="tableRating ">
+    <div class="ratingTitleWrap">
+        <div class="ratingTitle floatLeft">
+            <span><%=rating.title%></span>
+        </div>
+        <div class="ratingTotal floatRight">
+            <span class="totalSpan <%=rating.result?'spanTotalValue':''%>"><%=rating.result?rating.result.toFixed(1):''%></span>
+        </div>
+    </div>
+
+    <%var length=rating.groups.length;%>
+    <%for (var i=0;i<length;i++){%>
+    <%var group=rating.groups[i];%>
+    <div class="ratingStandardsContainer <%='table_'+length%>">
+        <table>
+            <colgroup>
+                <col width="100%">
+                <col width="107px">
+            </colgroup>
+            <thead>
+            <tr>
+                <th title="Rating standards"><%= translation.standards %></th>
+                <th title="Rating values"><%= translation.ratingTitle %></th>
+            </tr>
+            </thead>
+            <tbody>
+            <%group.forEach(function(element){%>
+            <tr>
+                <td class="alignLeft"><%=element.displayName%></td>
+                <td>
+                    <!--<div class="rating"
+                         id="<%=element.id%>"
+                         data-rate-value="<%=element.value||0%>">
+                    </div>-->
+                    <select id="<%=element.id%>" class="rating">
+                        <option value="0" <%= element.value == 0 ? 'selected' : '' %>>0</option>
+                        <option value="1" <%= element.value == 1 ? 'selected' : '' %>>1</option>
+                        <option value="2" <%= element.value == 2 ? 'selected' : '' %>>2</option>
+                        <option value="3" <%= element.value == 3 ? 'selected' : '' %>>3</option>
+                        <option value="4" <%= element.value == 4 ? 'selected' : '' %>>4</option>
+                        <option value="5" <%= element.value == 5 ? 'selected' : '' %>>5</option>
+                    </select>
+                </td>
+            </tr>
+            <%});%>
+            </tbody>
+        </table>
+    </div>
+
+    <%}%>
+</div>

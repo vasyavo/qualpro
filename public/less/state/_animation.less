@@ -1,0 +1,396 @@
+// first preloader animation
+.lh-keyframes(~'rotate, from{transform: rotate(0deg)}  to{transform: rotate(180deg);}');
+
+.animated {
+
+  .logoTop {
+    .lh-transform( translateX( calc(~"50vw - 48px")) translateY(0%) );
+    .lh-transition(all .6s ease .5s);
+  }
+
+  .alaliPreloader {
+    .lh-transform(translateX( calc(~"50vw - 100px")) translateY(37px) );
+    .lh-transition(all 1s ease);
+  }
+}
+
+.ellipseAnimated {
+  .alaliPreloaderGradient {
+
+    .gradient {
+      background: rgba(204,122,19,1);
+      background: -moz-linear-gradient(left, rgba(204,122,19,1) 0%, rgba(204,122,19,1) 37%, rgba(242,214,35,1) 50%, rgba(204,122,19,1) 62%, rgba(204,122,19,1) 100%);
+      background: -webkit-gradient(left top, right top, color-stop(0%, rgba(204,122,19,1)), color-stop(37%, rgba(204,122,19,1)), color-stop(50%, rgba(242,214,35,1)), color-stop(62%, rgba(204,122,19,1)), color-stop(100%, rgba(204,122,19,1)));
+      background: -webkit-linear-gradient(left, rgba(204,122,19,1) 0%, rgba(204,122,19,1) 37%, rgba(242,214,35,1) 50%, rgba(204,122,19,1) 62%, rgba(204,122,19,1) 100%);
+      background: -o-linear-gradient(left, rgba(204,122,19,1) 0%, rgba(204,122,19,1) 37%, rgba(242,214,35,1) 50%, rgba(204,122,19,1) 62%, rgba(204,122,19,1) 100%);
+      background: -ms-linear-gradient(left, rgba(204,122,19,1) 0%, rgba(204,122,19,1) 37%, rgba(242,214,35,1) 50%, rgba(204,122,19,1) 62%, rgba(204,122,19,1) 100%);
+      background: linear-gradient(to right, rgba(204,122,19,1) 0%, rgba(204,122,19,1) 37%, rgba(242,214,35,1) 50%, rgba(204,122,19,1) 62%, rgba(204,122,19,1) 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc7a13', endColorstr='#cc7a13', GradientType=1 );
+      .lh-animation-timing-function(cubic-bezier(0,0.5,1,0.5));
+      .lh-animation(1s rotate forwards infinite);
+    }
+  }
+}
+
+#alaliLogo {
+
+  &.smallLogo {
+    position: relative;
+    z-index: 100;
+    .lh-transform( translateX(calc(~"-50% + 135px")) );
+    .lh-transition( transform .6s ease .6s );
+
+    .alaliPreloader {
+      .lh-transition( all .4s linear );
+      .lh-transform( translateX( calc(~"50vw - 100px")) translateY(10px) );
+
+      img {
+        .lh-transform( scale(0.8) );
+        .lh-transition( all .4s linear );
+      }
+
+      .alaliPreloaderGradient {
+        .lh-transform( scale(0.8) );
+        .lh-transition( all .4s linear );
+      }
+    }
+
+    .logoTop {
+      top: -21px;
+      .lh-transition( all .4s linear );
+      .lh-transform( translateX( calc(~"50vw - 48px")) );
+
+      img {
+        .lh-transform( scale(0.8) );
+        .lh-transition( all .4s linear );
+      }
+    }
+  }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1366px){
+  #alaliLogo {
+
+    &.smallLogo {
+
+      .alaliPreloader {
+        .lh-transform(translateX( calc(~"50vw - 100px")) translateY(0) );
+
+        img,
+        .alaliPreloaderGradient {
+          .lh-transform(scale(0.7));
+        }
+      }
+
+      .logoTop {
+        top: -31px;
+
+        img {
+          .lh-transform(scale(0.7));
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 992px){
+  #alaliLogo {
+
+    &.smallLogo {
+
+      .alaliPreloader {
+        .lh-transform(translateX( calc(~"50vw - 100px")) translateY(-10px) );
+
+        img,
+        .alaliPreloaderGradient {
+          .lh-transform(scale(0.6));
+        }
+      }
+
+      .logoTop {
+        top: -41px;
+
+        img {
+          .lh-transform(scale(0.6));
+        }
+      }
+    }
+  }
+}
+
+// start left menu arrow rotate animation
+
+.leftMenuHolder{
+
+  .down{
+
+    &:after{
+      position: absolute;
+      top: 14px;
+      right: 22px;
+      .pxToRem(12);
+      //.lh-transition( all ease .4s );
+    }
+  }
+
+  .menuDropDown{
+
+    .down{
+
+      &:after{
+        top: 12px;
+        .lh-transform(rotate(-180deg));
+      }
+    }
+  }
+}
+// end left menu arrow rotate animation
+
+.toogleFilters {
+  position: relative;
+
+  &:after {
+    content: '\e912';
+    position: absolute;
+    top: 1px;
+    left: 60px;
+    font-family: @baseIconName-1;
+    color: @grayDark;
+    .lh-transition(all ease .3s);
+  }
+}
+
+.upArrow {
+
+  .toogleFilters {
+
+    &:after {
+      .lh-transform(rotate(180deg));
+    }
+  }
+}
+
+// start filter collapse
+.filterBar{
+
+  .filterContentHolder{
+    max-height: 500px;
+    .lh-transition(max-height 0.3s ease);
+  }
+}
+
+.filterBarCollapse{
+
+  .filterContentHolder {
+    max-height: 0;
+    overflow: hidden;
+  }
+}
+
+//start filters dropdown animation
+.lh-keyframes(~'fadeInUp, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 39px;}');
+
+.filtersFullHolder{
+
+  .activeGroup{
+
+    .dropDownContent{
+      visibility: visible;
+      .lh-animation-duration(.3s);
+      .lh-animation-fill-mode(both);
+      .lh-animation-name(fadeInUp);
+    }
+  }
+}
+//end filters dropdown animation
+
+.dropDownList{
+  display: block!important;
+  visibility: hidden;
+  opacity: 0;
+}
+.lh-keyframes(~'fadeInUpTwo, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}');
+.lh-keyframes(~'fadeInDownTwo, from{opacity: 0;display: none;bottom: -10%;}  to{display: block;opacity: 1;bottom: 30px;}');
+.openDd{
+  .dropDownContent{
+    visibility: visible;
+    .lh-animation-duration(.3s);
+    .lh-animation-fill-mode(both);
+    .lh-animation-name(fadeInUpTwo);
+  }
+}
+.openDdReverse {
+  .dropDownContent{
+    visibility: visible;
+    .lh-animation-duration(.3s);
+    .lh-animation-fill-mode(both);
+    .lh-animation-name(fadeInDownTwo);
+  }
+}
+.dropDownInputWrap {
+  &.openDdReverse {
+    .dropDownList {
+      top: auto!important;
+    }
+  }
+}
+// start blockObjective dropdown animation
+.lh-keyframes(~'objectivesFadeInUp, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}');
+
+.blockObjective {
+  .openDd{
+    .dropDownContent{
+      visibility: visible;
+      .lh-animation-duration(.3s);
+      .lh-animation-fill-mode(both);
+      .lh-animation-name(objectivesFadeInUp);
+    }
+  }
+}
+// end blockObjective dropdown animation
+
+// start drop down in table
+.lh-keyframes(~'dropDownFixed, from{opacity: 0;display: none;top: -50px;}  to{display: block;opacity: 1;top: -2px;}');
+
+.openDd{
+  .forPosition{
+    z-index: 9;
+    .dropDownContent{
+      visibility: visible;
+      .lh-animation-duration(.3s);
+      .lh-animation-fill-mode(both);
+      .lh-animation-name(dropDownFixed);
+    }
+  }
+}
+
+// end drop down in table
+
+.lh-keyframes(~'fadeInUpTwo, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 28px;}');
+
+.countryDropDown{
+  .openDd {
+    .dropDownContent {
+      .lh-animation-duration(.3s);
+      .lh-animation-fill-mode(both);
+      .lh-animation-name(fadeInUpTwo)
+    }
+  }
+}
+
+// start preloader animation
+.lh-keyframes(~'cubemove,25%{transform:translateX(42px)rotate(-90deg)scale(0.5);}50%{transform: translateX(42px) translateY(42px) rotate(-179deg);} 50.1% {transform: translateX(42px) translateY(42px) rotate(-180deg);} 75% {transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);} 100% {transform: rotate(-360deg);}');
+
+.cube1,
+.cube2 {
+  .lh-animation(cubemove 1.8s infinite ease-in-out);
+}
+
+.cube2 {
+  .lh-animation-delay(-0.9s);
+}
+// end preloader animation
+
+// start error animation
+
+
+
+// end error animation
+
+.lh-keyframes(~'errorAnimate, 0%{ opacity: 0; transform: translate3d(100%, 0, 0);}  15%{opacity: 1; transform: none;} 85%{opacity: 1; transform: none;} 100%{display:none; opacity: 0; transform: translate3d(100%, 0, 0);}');
+
+#errorHandler{
+  .animate {
+    .lh-transform(translate3d(100%, 0, 0));
+    opacity: 0;
+    .lh-animation-fill-mode(both);
+    .lh-animation(5s errorAnimate linear);
+  }
+}
+
+// start content animation
+.lh-keyframes(~'contentFadeOutLeft, from{opacity: 1;}  to{opacity: 0;visibility:hidden;transform: translate3d(-100%, 0, 0);}');
+
+.contentFadeOutLeft{
+  .lh-animation-duration(.5s);
+  .lh-animation-fill-mode(both);
+  .lh-animation-timing-function(ease-out);
+  .lh-animation-name(contentFadeOutLeft);
+}
+
+.lh-keyframes(~'contentFadeOutRight, from{opacity: 1;}  to{opacity: 0;visibility:hidden;transform: translate3d(100%, 0, 0);}');
+
+.contentFadeOutRight{
+  .lh-animation-duration(.5s);
+  .lh-animation-fill-mode(both);
+  .lh-animation-timing-function(ease-out);
+  .lh-animation-name(contentFadeOutRight);
+}
+
+.lh-keyframes(~'contentFadeInLeft, from{opacity: 0; transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}');
+
+.contentFadeInLeft{
+  .lh-animation-duration(.5s);
+  .lh-animation-fill-mode(both);
+  .lh-animation-timing-function(ease-out);
+  .lh-animation-name(contentFadeInLeft);
+}
+
+.lh-keyframes(~'contentFadeInRight, from{opacity: 0; transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}');
+
+.contentFadeInRight{
+  .lh-animation-duration(.5s);
+  .lh-animation-fill-mode(both);
+  .lh-animation-timing-function(ease-out);
+  .lh-animation-name(contentFadeInRight);
+}
+// end content animation
+
+//start dialog animation
+.lh-keyframes(~'uiDialogAmination, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 57px;}');
+.lh-keyframes(~'selfShareAmination, from{opacity: 0;display: none;top: 200px;}  to{display: block;opacity: 1;top: 107px;}');
+
+.ui-dialog{
+  .lh-animation-duration(.5s);
+  //.lh-animation-fill-mode(both);
+  .lh-animation-name(uiDialogAmination);
+}
+
+//.self-share-dialog {
+//  .lh-animation-duration(.5s);
+//  //.lh-animation-fill-mode(both);
+//  .lh-animation-name(selfShareAmination);
+//}
+
+// correcting dialog position for resonsive header
+@media screen and (max-width: 992px){
+  .lh-keyframes(~'uiDialogAmination, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 24px;}');
+  //.lh-keyframes(~'selfShareAmination, from{opacity: 0;display: none;top: 200px;}  to{display: block;opacity: 1;top: 74px;}');
+}
+@media screen and (min-width: 992px) and (max-width: 1366px){
+  .lh-keyframes(~'uiDialogAmination, from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 40px;}');
+  //.lh-keyframes(~'selfShareAmination, from{opacity: 0;display: none;top: 200px;}  to{display: block;opacity: 1;top: 90px;}');
+}
+//end dialog animation4
+
+
+//start global animation
+.lh-keyframes(~'headerAnimation, from{transform: translateY(-150px);}  to{transform: none;}');
+
+.topMenuHolder {
+  animation: .7s headerAnimation;
+}
+
+.lh-keyframes(~'leftMenuAnimation, from{transform: translateX(-255px);}  to{transform: none;}');
+
+.leftMenuHolder {
+  animation: .7s leftMenuAnimation;
+}
+
+.lh-keyframes(~'rightMenuAnimation, from{opacity: 0;}  to{opacity: 1;}');
+
+.rightMenuHolder {
+  opacity: 0;
+  animation: 1s rightMenuAnimation .5s forwards;
+}
+//end global animation

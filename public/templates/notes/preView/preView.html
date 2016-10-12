@@ -1,0 +1,28 @@
+<div class="form-holder">
+    <div class="title">
+        <span class="titleDescription" data-translation="preViewTitle"><%=translation.preViewTitle %></span>
+    </div>
+    <% if(activityList){ %>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap">
+        </div>
+    </div>
+    <%}%>
+    <div id="main" class="notesPreviewWrap">
+        <div class="notesPreviewTitle">
+            <span class="fontBold" data-translation="title"><%=translation.title %></span>
+            <span id="title"><%= jsonModel.title || '' %></span>
+        </div>
+        <div class="notesPreviewTitle">
+            <span class="fontBold" data-translation="theme"><%=translation.theme %></span>
+            <span id="theme"><%= jsonModel.theme || '' %></span>
+        </div>
+
+        <div class="notesPreviewBodyWrap">
+            <span class="fontBold" data-translation="description"><%=translation.description %>:</span>
+            <div class="notesPreviewBody scrollable">
+                <span id="description"><%= jsonModel.description || '' %></span>
+            </div>
+        </div>
+    </div>
+</div>

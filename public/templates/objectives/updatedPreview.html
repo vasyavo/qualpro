@@ -1,0 +1,195 @@
+<% var curLang = App.currentUser.currentLanguage; %>
+<% var anotherLang = App.currentUser.currentLanguage === 'en' ? 'ar' : 'en';  %>
+<div class="blockObjective flexColumn objectivePreview">
+    <div class="borderBottom scrollingFormComment">
+        <div class="block-left noTranslate borderRight">
+            <div class="absoluteContent">
+                <div class="scrollable">
+                    <div class="table objectivesTable">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.title %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="title" class="textEllipsis hoverFullText"><%= jsonModel.title.currentLanguage || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.type %></span>
+                            </div>
+                            <div class="cell">
+                                <input class="objectivesInput textEllipsis hoverFullText" type="text"
+                                       value="<%= _.findWhere(this.CONSTANTS.OBJECTIVES_TYPE, {_id: jsonModel.objectiveType}).name[curLang] %>"
+                                       disabled/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.assignBy %></span>
+                            </div>
+                            <div class="cell">
+                                <span class="textEllipsis hoverFullText"><%= jsonModel.createdBy.user.firstName.currentLanguage + ' ' + jsonModel.createdBy.user.lastName.currentLanguage %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.assignTo %></span>
+                            </div>
+                            <div class="cell assignTo" id="assignTo">
+                                <span class="textEllipsis hoverFullText"><%= _.map(jsonModel.assignedTo, function(personnel) { return personnel.firstName.currentLanguage + ' ' + personnel.lastName.currentLanguage } ).join(', ') %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.location %></span>
+                            </div>
+                            <div class="cell locationCell">
+                                <span id="personnelLocation" class="textEllipsis hoverFullText"><%= jsonModel.location %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.status %></span>
+                            </div>
+                            <div class="cell">
+                                <div id="statusDd">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.priority %></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.priority.name.currentLanguage %></span>
+                            </div>
+                        </div>
+                        <% if ( jsonModel.createdBy && jsonModel.createdBy.date ) { %>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.creationDate %></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.createdBy.date %></span>
+                            </div>
+                        </div>
+                        <% } %>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate %></span>
+                            </div>
+                            <div class="cell">
+                                <input class="objectivesInput" type="text" value="<%= jsonModel.dateStart %>" disabled/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate %></span>
+                            </div>
+                            <div class="cell">
+                                <input class="objectivesInput" type="text" value="<%= jsonModel.dateEnd %>" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block-right">
+            <div class="absoluteContent">
+                <div class="scrollable">
+                    <% if(jsonModel.level > 1 && (jsonModel.companyObjective.en || jsonModel.companyObjective.ar )) { %>
+                    <div class="objectivesPaddingBlock borderBottom">
+                        <div class="descriptionBlock floatBlock">
+                            <span><%= translation.companyObjective %></span>
+                        </div>
+                        <span id="companyObjective" class="descriptionValue fontBold fontMedium hoverFullText">
+                                <%= _.unescape(jsonModel.companyObjective[curLang] || jsonModel.companyObjective[anotherLang]) %>
+                        </span>
+                    </div>
+                    <% } %>
+                    <div class="objectivesPaddingBlock borderBottom">
+                        <div class="descriptionBlock floatBlock">
+                            <span><%= translation.description %></span>
+                        </div>
+                        <span id="descriptionEn"
+                              class="descriptionValue fontBold fontMedium heightDescription hoverFullText mCustomScrollbar"><%= _.unescape(jsonModel.description.currentLanguage) || 'No translation'  %></span>
+                    </div>
+
+                    <div class="subObjectives borderBottom floatBlock" id="subObjective">
+
+                    </div>
+
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold"><%= translation.attachments %></span>
+                        </div>
+                        <div class="formBlock borderBottom objectivesPaddingBlock">
+                            <div id="objectiveFormThumbnail" class="formThumbnail"></div>
+                        </div>
+
+                        <div class="filesBlock borderBottom" id="objectiveFiles">
+                            <span class="filesTitle"><%= translation.files %></span>
+                            <div id="objectiveFileThumbnail" class="fileThumbnail"></div>
+                        </div>
+                    </div>
+
+                    <div class="objectivesPaddingBlock innerScroll">
+                        <div class="absoluteContent">
+                            <div class="scrollable">
+                                <div class="commentWrapper" id="commentWrapper"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="blockBottom objectivesPaddingBlock">
+        <div class="objectivesProgressBlock">
+            <span class="progressDescription"><%= translation.progress %></span>
+
+            <select id="rating" class="rating">
+                <option value="0"
+                <%= jsonModel.complete == 0 ? 'selected' : '' %>>0%</option>
+                <option value="10"
+                <%= jsonModel.complete == 10 ? 'selected' : '' %>>10%</option>
+                <option value="20"
+                <%= jsonModel.complete == 20 ? 'selected' : '' %>>20%</option>
+                <option value="30"
+                <%= jsonModel.complete == 30 ? 'selected' : '' %>>30%</option>
+                <option value="40"
+                <%= jsonModel.complete == 40 ? 'selected' : '' %>>40%</option>
+                <option value="50"
+                <%= jsonModel.complete == 50 ? 'selected' : '' %>>50%</option>
+                <option value="60"
+                <%= jsonModel.complete == 60 ? 'selected' : '' %>>60%</option>
+                <option value="70"
+                <%= jsonModel.complete == 70 ? 'selected' : '' %>>70%</option>
+                <option value="80"
+                <%= jsonModel.complete == 80 ? 'selected' : '' %>>80%</option>
+                <option value="90"
+                <%= jsonModel.complete == 90 ? 'selected' : '' %>>90%</option>
+                <option value="100"
+                <%= jsonModel.complete == 100 ? 'selected' : '' %>>100%</option>
+            </select>
+        </div>
+
+        <% if (jsonModel.status._id !== 'closed') { %>
+
+        <div class="objectivesBtnBlock">
+            <span class="greyBtn" id="attachFiles"><%= translation.attach %></span>
+            <span class="greyBtn" id="sendComment"><%= translation.send %></span>
+            <div class="fileBottom">
+                <span class="attachment"></span>
+                <span id="newCommentAttachments"></span>
+                <div id="fileThumbnail"></div>
+            </div>
+        </div>
+        <div class="objectivesTextareaWrap">
+            <textarea class="objectivesTextarea" id="commentInput"></textarea>
+        </div>
+        <form action="" method="post" id="commentForm" style="display: none;"></form>
+        <% } %>
+    </div>
+</div>

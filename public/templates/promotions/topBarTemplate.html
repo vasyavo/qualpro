@@ -1,0 +1,16 @@
+<% var level = App.currentUser.accessRole.level; %>
+<div class="featureTitleWrap" data-translation="all"><%=translation.all%></div>
+
+<div class="filterBar">
+</div>
+
+<div id="viewBar" class="viewBar viewBarPadding">
+    <% if ((level <=2) || (level >= 8)) { %>
+    <span id="createBtn" class="promotionBtn" data-translation="newPromotion"><%= translation.newPromotion %></span>
+    <% } %>
+
+    <div id="paginationHolder" class="paginationHolder">
+
+    </div>
+
+</div>

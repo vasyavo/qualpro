@@ -1,0 +1,47 @@
+<% collection.forEach(function (model) { %>
+    <tr>
+        <td>
+            <div class="flexRow">
+                <span><%= Math.round(model.totalBrandsLengthMax*100)/100 %></span>
+                <span><%= Math.round(model.totalBrandsLengthAvg*100)/100 %></span>
+                <span><%= Math.round(model.totalBrandsLengthMin*100)/100 %></span>
+            </div>
+        </td>
+        <% for (var i = 0; i < maxBrandsLength; i++) { %>
+            <td class="noPadding">
+                <% if (model.brands[i]) { %>
+                    <ul class="shelfShareList">
+                        <li><%= model.brands[i].name.currentLanguage %></li>
+                        <li>
+                            <div class="flexRow">
+                                <span><%= translation.max %></span>
+                                <span><%= translation.mid %></span>
+                                <span><%= translation.min %></span>
+                            </div>
+                        </li>
+                        <li class="showAllBrands" data-brand-id="<%= model.brands[i]._id %>" data-category-id="<%= model._id %>">
+                            <div class="flexRow">
+                                <span><%= Math.round(model.brands[i].max.length*100)/100 %></span>
+                                <span><%= Math.round(model.brands[i].avg.length*100)/100 %></span>
+                                <span><%= Math.round(model.brands[i].min.length*100)/100 %></span>
+                            </div>
+                            <div class="flexRow">
+                                <span><%= Math.round(model.brands[i].max.percent) %>%</span>
+                                <span><%= Math.round(model.brands[i].avg.percent) %>%</span>
+                                <span><%= Math.round(model.brands[i].min.percent) %>%</span>
+                            </div>
+                        </li>
+                    </ul>
+                <% } else { %>
+                    <ul class="shelfShareList">
+                        <li> - </li>
+                        <li>
+                            <div class="flexRow"> - </div>
+                        </li>
+                        <li> - </li>
+                    </ul>
+                <% } %>
+            </td>
+        <% }; %>
+    </tr>
+<% }); %>

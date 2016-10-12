@@ -1,0 +1,142 @@
+.dropDownInput{
+  height: 28px;
+  line-height: 28px;
+
+  input {
+    min-width: 210px;
+    height: 28px;
+    padding-right: 40px;
+    border: 0;
+    background-color: @selectInputBackground;
+    color: @topbarmenu-font-color-menu;
+    .pxToRem(14);
+
+    &:focus {
+      outline: none;
+      border-width: 0;
+      color: @main-font-color;
+    }
+  }
+
+  .triDown{
+
+    &:after{
+      position: absolute;
+      right: 7px;
+      top: 10px;
+      color: @grayDark;
+      line-height: normal;
+      .pxToRem(12);
+    }
+  }
+}
+
+.editting {
+
+  .dropDownInputWrap {
+    height: 25px;
+
+    .dropDownList {
+      position: fixed;
+      top: 26px;
+    }
+
+    .dropDownInput {
+
+      .triDown{
+
+        &:after {
+          top: 7px;
+        }
+      }
+    }
+  }
+}
+
+.countryDropDown{
+  display: inline-block;
+  float: right;
+  margin-right: 15px;
+  margin-top: 11px;
+
+  .dropDownInput {
+
+    input {
+      float: right;
+      background-color: @main-sub-color;
+    }
+
+    .triDown {
+      &:after{
+        top: 9px;
+      }
+    }
+  }
+
+  .dropDownInputWrap {
+    .dropDownList {
+      z-index: 1000;
+      top: 25px;
+
+      .dropDownPagination {
+        line-height: 20px;
+        height: 35px;
+
+        .counter{
+          font-weight: normal;
+          line-height: normal;
+          color: @gray5;
+        }
+      }
+    }
+  }
+}
+
+.dropDownInputWrap{
+  position: relative;
+
+  .dropDownList{
+    position: absolute;
+    top: 39px;
+    height: auto;
+    width: 100%;
+    background-color: @main-sub-color;
+    border-radius: 3px;
+    box-shadow: 0 0 3px @grayMedium;
+    z-index: 6;
+    .pxToRem(14);
+
+    .dropDownItem{
+      padding: 5px 10px 5px 35px;
+      line-height: 20px;
+      cursor: pointer;
+      position: relative;
+      .text-ellipsis;
+    }
+
+    .prev,
+    .next{
+      position: absolute;
+      color: @ListPrev;
+      .pxToRem(14);
+    }
+
+    .prev{
+      left: 15px;
+    }
+
+    .next{
+      right: 15px;
+    }
+
+    .dropDownPagination{
+      position: relative;
+      height: 40px;
+      width: 100%;
+      padding: 10px 15px;
+      line-height: 22px;
+      text-align: center;
+      overflow: hidden;
+    }
+  }
+}

@@ -1,0 +1,27 @@
+<% collection.forEach(function(comment){ %>
+<div class="commentWrap" data-id="<%= comment._id %>">
+    <div class="userBlock">
+        <div class="flexRowStart">
+            <img src="<%=comment.createdBy.user.imageSrc%>" alt="image" class="userImgBig imgCircle"/>
+            <div class="userDescription">
+                <div class="fontSmall"><%= comment.createdBy.user.firstName.currentLanguage + comment.createdBy.user.lastName.currentLanguage %></div>
+                <div class="fontMicro"><%= comment.createdBy.user.accessRole.name.currentLanguage %></div>
+            </div>
+        </div>
+    </div>
+    <div class="commentDescription flexGrow">
+        <div id="commentBody" class="commentEllipsis fontSmall">
+            <p class="fontSmall"><%= comment.body %></p>
+            <icon id="showAllDescription" class="showDescription"></icon>
+        </div>
+        <div id="showFilesBlock" class="showFilesBlock"></div>
+        <div class="commentBottom">
+            <span class="attachment"></span>
+            <span class="commentCount"><%= comment.attachments.length %></span>
+        </div>
+    </div>
+    <div class="timeBlock">
+        <span class="dateTime fontSmall"><%= comment.createdBy.diffDate || comment.createdBy.date %></span>
+    </div>
+</div>
+<% }) %>

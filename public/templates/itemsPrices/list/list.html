@@ -1,0 +1,60 @@
+<% var level = App.currentUser.accessRole.level; %>
+<% items.forEach(function(group, index){ %>
+<tr data-id="<%=group._id%>" class="listRow">
+    <% if ((level <=2) || (level >= 8)) { %>
+    <% if (archived && group.topArchived) { %>
+        <td class="checkboxArea alignCenter">
+            <input type="checkbox" id="<%=group._id%>" value="<%=group._id%>" class="customCheckbox" data-contentType="category"/>
+            <label for="<%=group._id%>" class="checkboxLabel"></label>
+        </td>
+    <% } else if (archived) { %>
+       <td></td>
+    <% } %>
+    <% } %>
+    <td colspan="5" class="tableGrayDark"><%=group.categoryName ? group.categoryName.currentLanguage.toUpperCase() : ''%></td>
+</tr>
+<% if (group.variants) { %>
+<% group.variants.forEach(function(variant, index){ %>
+<tr data-id="<%=variant._id%>" class="listRow">
+    <% if ((level <=2) || (level >= 8)) { %>
+    <% if (archived && variant.topArchived) { %>
+    <td class="checkboxArea alignCenter">
+        <input type="checkbox" id="<%=variant._id%>" value="<%=variant._id%>" class="customCheckbox" data-contentType="variant"/>
+        <label for="<%=variant._id%>" class="checkboxLabel"></label>
+    </td>
+    <% } else if (archived) { %>
+      <td></td>
+    <% } %>
+    <% } %>
+    <td colspan="5" class="tableGrayLight"><%=variant.variantName ? variant.variantName.currentLanguage.toUpperCase() : ''%></td>
+</tr>
+
+<% if (variant.items) { %>
+<% variant.items.forEach(function(item, index){ %>
+<tr data-id="<%=item._id%>" class="listRow">
+    <% if ((level <=2) || (level >= 8)) { %>
+    <% if (archived && item.topArchived) { %>
+        <td class="checkboxArea alignCenter">
+            <input type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox" data-contentType="item"/>
+            <label for="<%=item._id%>" class="checkboxLabel"></label>
+        </td>
+    <% } else if (archived) { %>
+        <td></td>
+    <% } %>
+    <% } %>
+    <td><%=item.name ? item.name.currentLanguage : ''%></td>
+    <td>
+        <%=item.barCode%>
+    </td>
+    <td><%=item.packing%></td>
+    <td>
+        <%= item.origin ? _.map(item.origin, function (el) { return el.name.currentLanguage; }).join(', ') : '' %>
+    </td>
+    <td><%= item.ppt %><span class="currency"><%= item.currency %></span></td>
+</tr>
+<% }) %>
+<% } %>
+
+<% }) %>
+<% } %>
+<% }) %>

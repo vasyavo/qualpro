@@ -1,0 +1,8 @@
+<div class="paddingBlock">
+    <div class="ratingTitle">
+        <span><%=rating.title%></span>
+    </div>
+    <div class="ratingInfo">
+        <textarea <%= preview ? disabled="disabled" : '' %> class="ratingDetails"><%=rating.result ||''%></textarea>
+    </div>
+</div>

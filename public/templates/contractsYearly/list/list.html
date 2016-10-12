@@ -1,0 +1,61 @@
+<% collection.forEach(function(model, index){ %>
+<% var documentsCount = model.documents.length <= 2 ? model.documents.length : 2 %>
+<div class="templateWrap listRow contractList" data-id="<%= model._id %>">
+    <div class="userBlock flexColumn">
+        <div class="top flexRowStart">
+            <div class="left flexColumn">
+                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+            </div>
+            <div class="right flexColumn">
+                <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.accessRole && model.createdBy.user.accessRole.name) ? model.createdBy.user.accessRole.name.currentLanguage : '' %></div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.position && model.createdBy.user.position.name) ? model.createdBy.user.position.name.currentLanguage : '' %></div>
+            </div>
+        </div>
+    </div>
+    <div class="locationBlock flexGrow flexColumn">
+        <div class="locationTop">
+            <div class="flexRow">
+                <div class="flexColumn locationTitleWrap">
+                    <div class="locationTitle"><%= translation.description + ': ' + model.description.currentLanguage || '' %></div>
+                    <div class="fontYellow"><%= translation.type + ': ' + model.type.name.currentLanguage || '' %></div>
+                    <div class="fontSmall fontGray textEllipsis"></div>
+                </div>
+                <div class="bannerWrap">
+                    <% for(var i=0; i < documentsCount; i++){ %>
+                    <div class="bannerMin">
+                        <div data-id="<%= model.documents[i]._id %>"
+                             class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                            <div class="thumbnail_js thumbnailBody">
+                                <% if (model.documents[i].preview) { %>
+                                <img src="<%= model.documents[i].preview %>" class="bannerImage">
+                                <% } else {%>
+                                <div class="bannerImage iconThumbnail <%= model.documents[i].type %>"></div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                    <span class="textSmall floatRight <%= model.statusClass %>"><%= model.status.name.currentLanguage || '' %></span>
+                    <span class="textSmall fontGray noShrink floatRight"
+                          data-translation="startDate"><%=translation.startDate%>:</span>
+                </div>
+            </div>
+        </div>
+        <div class="locationBottom flexRowStart">
+                <span class="location flexGrow textEllipsis fontGray hoverFullText" data-translation="location">
+                     <%=translation.location + ' : ' + model.location %>
+                </span>
+            <span class="fontGray noShrink" data-translation="endDate"><%=translation.endDate%>:</span>
+        </div>
+    </div>
+    <div class="dateBlock flexColumn">
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.dateStart || '' %></span>
+        </div>
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.dateEnd || '' %></span>
+        </div>
+    </div>
+</div>
+<% }) %>

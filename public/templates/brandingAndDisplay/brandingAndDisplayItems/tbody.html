@@ -1,0 +1,29 @@
+<% collection.forEach(function(outlet) { %>
+<tr>
+    <td>
+        <span class="hoverFullText"><%= outlet.name.currentLanguage || '' %></span>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList markedList">
+            <% outlet.branches.forEach(function(elem) { %>
+            <li class="hoverFullText"><%= elem.branch.name.currentLanguage %></li>
+            <% }) %>
+        </ul>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList markedList">
+            <% outlet.branches.forEach(function(elem) { %>
+            <li><%= elem.createdBy.user.firstName.currentLanguage + ' ' + elem.createdBy.user.lastName.currentLanguage%>
+            </li>
+            <% }) %>
+        </ul>
+    </td>
+    <td class="noPadding promotionTableList">
+        <ul class="promotionList markedList markedListHover">
+            <% outlet.branches.forEach(function(elem) { %>
+            <li data-id="<%= elem._id%>" id="viewComments"><%= translation.viewDetails %></li>
+            <% }) %>
+        </ul>
+    </td>
+</tr>
+<%})%>

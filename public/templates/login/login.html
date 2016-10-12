@@ -1,0 +1,34 @@
+<div id="login" class="loginDiv">
+    <!--<a href="http://alalali.com/en/" title="Return to the al alali homepage" class="mainLogo"><img src="..\images\main-logo.png" alt=""/></a>-->
+    <form id="loginForm" class="loginForm">
+        <fieldset>
+            <h2>SIGN IN</h2>
+
+            <span class="loginDescription">Email / Phone number</span><br/>
+
+            <span class="mailBlock">
+                <input type="text" id="email" name="login" value="" autofocus maxlength="64" required/>
+                <label for="email"></label>
+            </span>
+
+            <span class="loginDescription">Password</span><br/>
+
+            <span class="lockedBlock">
+                <input type="password" id="pass" name="upass" value="" maxlength="32"/>
+                <label for="pass"></label>
+            </span>
+
+            <a class="login-button" href="javascript:;">sign in<i></i></a>
+            <div class="bottom-loginForm">
+                <span>Remember Me</span>
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+                    <label class="onoffswitch-label" for="myonoffswitch"></label>
+                </div>
+                <a id="forgotPass" class="forgot-button floatRight" href="javascript;">forgot password?<i></i></a>
+            </div>
+
+            <input type="submit" value="">
+        </fieldset>
+    </form>
+</div>

@@ -1,0 +1,14 @@
+<% var iconId = iconId || 'removeFile'; %>
+<% var iconClass = iconClass || ''; %>
+<% var iconsClass = ['image_icon', 'video_icon', 'word_icon', 'excel_icon', 'pdf_icon' ] %>
+<div class="thumbnail masonryThumbnail" data-id="<%= cid %>" data-type="<%=type%>">
+    <div class="close left <%= iconClass %>" id="<%= iconId %>"></div>
+    <div class="thumbnail_js thumbnailBody clickableArea">
+        <% if (iconsClass.indexOf(preview) !== -1) { %>
+        <div class="<%= preview %>"></div>
+        <% } else { %>
+        <img class="imgResponsive" src="<%= preview %>">
+        <% } %>
+       <div class="fileDescription hoverFullText textEllipsis"><%= name %></div>
+    </div>
+</div>

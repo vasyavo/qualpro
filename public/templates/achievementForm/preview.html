@@ -1,0 +1,113 @@
+<div class="form-holder personnelInfo achivementFormWrap largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.title %></span>
+    </div>
+    <div id="main" class="achivementFormPreview">
+
+        <div class="blockObjective achievementForm">
+
+            <div class="block-left borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row borderBottomWithoutClearfix">
+                            <div class="cell alignTop">
+                                <span><%= translation.employeeName %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="employee"><%=  model.createdBy.user.firstName.currentLanguage + ' ' +  model.createdBy.user.lastName.currentLanguage %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.country %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="country"><%= model.countryString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.region %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="region"><%= model.regionString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.subRegion %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="subRegion"><%= model.subRegionString || this.translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.retailSegment %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="retailSegment"><%= model.retailSegmentString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.outlet %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="outlet"><%= model.outletString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.branch %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="branch"><%= model.branchString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row borderTop">
+                            <div class="cell">
+                                <span><%= translation.date %></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= model.createdBy.date %></span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-right">
+                <div class="absoluteContent">
+                    <div class="scrollable">
+                        <div class="objectivesPaddingBlock">
+                            <div class="descriptionBlock floatBlock">
+                                <span><%= translation.description %></span>
+                            </div>
+                            <span id="description" class="descriptionValue heightDescription fontBold fontMedium hoverFullText"><%= model.description.currentLanguage || 'No translation'  %></span>
+                        </div>
+                        <div class="objectivesPaddingBlock">
+                            <div class="descriptionBlock floatBlock">
+                                <span><%= translation.comment %></span>
+                            </div>
+                            <span id="additionalComment" class="descriptionValue heightDescription  fontBold fontMedium textEllipsis hoverFullText"><%= model.additionalComment.currentLanguage || 'No translation'  %></span>
+                        </div>
+
+                        <div id="attachments" class="attachmentsBlock">
+                            <div class="attachmentsHeader">
+                                <span class="attachmentsDescription fontBold"><%= translation.attachments %></span>
+                            </div>
+                            <div class="filesBlock">
+                                <span class="filesTitle"><%= translation.files %></span>
+                                <div id="objectiveFileThumbnail" class="fileThumbnail"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

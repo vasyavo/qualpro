@@ -1,0 +1,78 @@
+<% var level = App.currentUser.accessRole.level; %>
+<div class="featureTitleWrap" data-translation="personnel">
+  <%= translation.personnel %>
+</div>
+
+<div class="filterBar">
+</div>
+
+<div id="viewBar" class="viewBar personnelViewBar">
+    <div id="templateSwitcher" class="templateSwitcher">
+        <a href="javascript:;"
+           class="changeContentView filterType"
+           data-archived-type="false"
+           data-translation="personnel"
+           id="all"><%= translation.personnel %>
+        </a>
+        <a href="javascript:;"
+           class="changeContentView filterType"
+           data-archived-type="true"
+           data-translation="archive"
+           id="archived"><%= translation.archive %>
+        </a>
+    </div>
+
+    <% if ((level <=2) || (level >= 8)) { %>
+    <span id="createBtn" class="createBtn" data-translation="newPersonnel"><%= translation.newPersonnel %></span>
+    <% } %>
+
+    <% if (viewType === 'thumbnails' && ((level <=2) || (level >= 8))) { %>
+    <div class="checkboxArea">
+        <input type="checkbox" id="checkAll" class="btnCustomCheckbox"/>
+        <label for="checkAll" class="btnCheckboxLabel" data-translation="selectAll"><%= translation.selectAll %></label>
+    </div>
+    <% } %>
+
+    <% if ((level <=2) || (level >= 8)) { %>
+
+    <div id="actionHolder" class="actionHolder actionBtn hidden">
+        <span class="dropDown downArrow triUp" data-translation="action"><%= translation.action %></span>
+        <ul class="dropDownContent">
+            <li id="sendPass" class="hasSubMenu">
+                <span data-translation="sendPassword"><%= translation.sendPassword %></span>
+                <ul class="subMenu">
+                    <li id="sendEmail" data-type="email" data-translation="sendByEmail"><%= translation.sendByEmail %></li>
+                    <li id="sendSMS" data-type="phone" data-translation="sendBySMS"><%= translation.sendBySMS %></li>
+                </ul>
+            </li>
+            <li id="supervisorBtn"  class="hasSubMenu" data-translation="addSupervisor"><%= translation.addSupervisor %></li>
+            <li id="archiveBtn" data-archived-type="false" class="archiveBtn" data-translation="disable"><%= translation.disable %></li>
+            <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn" data-translation="unDisable"><%= translation.unDisable %></li>
+        </ul>
+    </div>
+
+    <% } %>
+
+    <div id="contentViewSwitcher" class="contentViewSwitcher">
+        <ul class="btn-list">
+            <li>
+                <a href="javascript:;"
+                   class="tiles changeContentView <%= (viewType === 'thumbnails') ? '' : 'viewBarBtnActive'%>"
+                   data-view-type="thumbnails"
+                   id="thumbBtn">
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;"
+                   class="listView changeContentView <%= (viewType === 'list') ? '' : 'viewBarBtnActive'%>"
+                   data-view-type="list"
+                   id="listBtn">
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="paginationHolder" class="paginationHolder">
+
+    </div>
+
+</div>

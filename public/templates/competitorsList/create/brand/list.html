@@ -1,0 +1,37 @@
+<% items.forEach(function(item) { %>
+<tr>
+    <td class="alignCenter">
+        <input
+                data-key="_id"
+                type="checkbox"
+                id="<%=item._id%>"
+                value="<%=item._id%>"
+                class="customCheckbox">
+        <label for="<%=item._id%>" class="checkboxLabel"></label>
+    </td>
+    <td>
+        <% if (item.name) { %>
+        <input
+                data-key="name"
+                data-language="current"
+                class="displayable"
+                readonly
+                value="<%=item.name.currentLanguage || ''%>">
+        <input
+                data-key="name"
+                data-language="<%= currentLanguage %>"
+                class="editable <%= currentLanguage === 'en' ? 'enInput' : 'arInput'%>"
+                readonly
+                value="<%=item.name[currentLanguage] || ''%>"
+                dir="<%= currentLanguage === 'en' ? 'ltr' : 'rtl'%>">
+        <input
+                data-key="name"
+                data-language="<%= anotherLanguage %>"
+                class="editable <%= anotherLanguage === 'en' ? 'enInput' : 'arInput'%>"
+                readonly
+                value="<%=item.name[anotherLanguage] || ''%>"
+                dir="<%= anotherLanguage === 'en' ? 'ltr' : 'rtl'%>">
+        <% } %>
+    </td>
+</tr>
+<% }) %>

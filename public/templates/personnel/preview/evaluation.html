@@ -1,0 +1,94 @@
+<% var avgRating; %>
+<div class="sub-form-holder">
+    <div class="currentRating">
+            <div class="averageRating floatBlock">
+            <span><%= translation.averageRating %></span>
+            <% if (contentType === 'monthly') { %>
+                <% avgRating = Math.round(personnel.avgRating && personnel.avgRating[contentType]); %>
+                <select class="rating">
+                    <option value="0" <%= avgRating == 0 ? 'selected' : '' %>>0</option>
+                    <option value="1" <%= avgRating == 1 ? 'selected' : '' %>>1</option>
+                    <option value="2" <%= avgRating == 2 ? 'selected' : '' %>>2</option>
+                    <option value="3" <%= avgRating == 3 ? 'selected' : '' %>>3</option>
+                    <option value="4" <%= avgRating == 4 ? 'selected' : '' %>>4</option>
+                    <option value="5" <%= avgRating == 5 ? 'selected' : '' %>>5</option>
+                </select>
+            <% } else { %>
+                <div class="rating" data-rate-value="<%= (personnel.avgRating && personnel.avgRating[contentType]) ? personnel.avgRating[contentType] : '' %>"></div>
+            <% } %>
+        </div>
+        <% if( App.currentUser.accessRole.level < 4 ){ %>
+        <div class="needRate bottomLine floatBlock">
+            <span class="needRateDescription"><%= daysLeft %> <%= daysLeft === 1 ? translation.day : translation.days %> <%= translation.leftToRateEmployee %></span>
+            <button class="rateEmployee readonlyVisible greenBtn"><%= translation.rateEmployee %></button>
+        </div>
+        <% } %>
+        <div class="rated bottomLine floatBlock">
+            <span><%= translation.current %> <%= contentType === 'monthly' ? translation.month : translation.rating %></span>
+            <% if (contentType === 'monthly') { %>
+                <select class="rating">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            <% } else { %>
+                <div class="rating" data-rate-value="0"></div>
+            <% } %>
+            <a href="javascript:;" class="viewDetails"><%= translation.viewDetails %></a>
+        </div>
+        <div class="notRated bottomLine floatBlock">
+            <span><%= translation.current %> <%= contentType === 'monthly' ? translation.month : translation.rating %></span>
+            <a href="javascript:;" class="rateEmployee"><%= translation.timeToRateGone %></a>
+        </div>
+    </div>
+    <div class="previousRating">
+        <div class="ratingWrap">
+            <span><%= translation.previousRating %></span>
+            <div class="select">
+                <a id="previousRatingDd" class="" href="javascript:;">
+                </a>
+            </div>
+        </div>
+        <div class="absoluteWrap">
+            <div class="absoluteContent">
+                <table>
+                    <colgroup>
+                        <col width="40%">
+                        <col width="30%">
+                        <col width="30%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>
+                            <%= contentType === 'monthly' ? translation.month : translation.time %>
+                        </th>
+                        <th><%= translation.rating %></th>
+                        <th><%= translation.details %></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="9" class="colspanFix">
+                            <div class="scrollable">
+                                <table class="list">
+                                    <colgroup>
+                                        <col width="40%">
+                                        <col width="30%">
+                                        <col width="30%">
+                                    </colgroup>
+                                    <tbody class="listTable">
+                                        <!-- Rating list -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

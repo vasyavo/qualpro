@@ -1,0 +1,59 @@
+<div class="dialogCategoryTitle">
+    <% if (listType === "items") { %>
+    <%= translation.items%>
+    <% } else { %>
+        <%= location %>
+    <% } %>
+</div>
+<div class="categoryTableWrap">
+    <div class="dialogCategoryInputWrap">
+        <input type="text" class="categoryInput" placeholder="<%= translation.search %>" id="searchInput"/>
+        <label for="searchInput"></label>
+    </div>
+    <div class="absoluteContent clickableTable">
+        <table>
+            <colgroup>
+                <col width="20%">
+                <col width="20%">
+                <col width="25%">
+                <col width="20%">
+                <col width="15%">
+                <col width="52px">
+            </colgroup>
+            <thead class="darkGrayHeader">
+            <tr>
+                <th><%= translation.product%></th>
+                <th><%= translation.barcode%></th>
+                <th><%= translation.packing%></th>
+                <th><%= translation.ppt%></th>
+                <th><%= translation.origin%></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="6" class="colspanFix">
+                    <div class="scrollable">
+                        <table>
+                            <colgroup>
+                                <col width="20%">
+                                <col width="20%">
+                                <col width="25%">
+                                <col width="20%">
+                                <col width="15%">
+                                <col width="52px">
+                            </colgroup>
+                            <tbody class="itemsList"
+                                   data-listType="<%=listType%>">
+                            <!-- items list template place -->
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="categoryTableEdit">
+    </div>
+</div>

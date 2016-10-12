@@ -1,0 +1,38 @@
+<tr>
+    <th class="hoverFullText"><%= translation.variants %></th>
+    <th class="hoverFullText"><%= translation.size %></th>
+    <th class="hoverFullText"><%= translation.total %></th>
+    <% for (var i = 0; i < branchesAllLenght; i++) { %>
+    <th class="hoverFullText" data-branch="<%- branchesAll[i]._id %>"><%= branchesAll[i].name.currentLanguage %></th>
+    <% }; %>
+</tr>
+<tr>
+    <th></th>
+    <th><%= translation.gms %></th>
+    <th>
+        <div class="flexRow">
+            <span><%= translation.min %></span>
+            <span><%= translation.avg %></span>
+            <span><%= translation.max %></span>
+        </div>
+        <div class="flexRow">
+            <span>(<%= currency %>)</span>
+            <span>(<%= currency %>)</span>
+            <span>(<%= currency %>)</span>
+        </div>
+    </th>
+    <% for (var i = 0; i < branchesAllLenght; i++) { %>
+    <th>
+        <div class="flexRow">
+            <span><%= translation.min %></span>
+            <span><%= translation.avg %></span>
+            <span><%= translation.max %></span>
+        </div>
+        <div class="flexRow">
+            <span>(<%= currency %>)</span>
+            <span>(<%= currency %>)</span>
+            <span>(<%= currency %>)</span>
+        </div>
+    </th>
+    <% }; %>
+</tr>

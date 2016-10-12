@@ -1,0 +1,427 @@
+.redBtn,
+.greenBtn,
+.greyBtn,
+.btnView {
+  display: inline-block;
+  height: 36px;
+  min-width: 100px;
+  padding: 0 10px;
+  line-height: 36px;
+  text-align: center;
+  border: 0;
+  color: @btnTextWhite;
+  cursor: pointer;
+  .pxToRem(14px);
+}
+
+.btnView {
+  background: @btnViewBg;
+
+  &:hover {
+    background: @btnViewBgHover;
+  }
+}
+
+.hasSubMenu{
+  background-color: @login-change-password-color;
+  padding-left: 7px;
+  border: 1px solid @main-border-color;
+  border-top: 0;
+  color: @main-sub-color;
+  cursor: pointer;
+
+  .subMenu{
+    position: absolute;
+    right: -130px;
+    top: -1px;
+    border: 1px solid @main-border-color;
+    border-bottom: 0;
+
+    li{
+      background-color: @login-change-password-color;
+      border-bottom: 1px solid @main-border-color;
+      color: @main-sub-color;
+      padding-left: 5px;
+      .pxToRem(14);
+    }
+  }
+}
+
+.showActionDropDown {
+
+  .hasSubMenu,
+  .archiveBtn{
+    line-height: 38px;
+  }
+}
+
+.prevButton{
+  float: left;
+}
+
+.goToNextWorkflowButton{
+  float: right;
+}
+
+.ui-dialog-buttonpane {
+  text-align: right !important;
+
+  .ui-dialog-buttonset {
+    display: inline-block;
+
+    .acceptBtn{
+      background-color: @btn-success;
+      border: 0!important;
+    }
+
+    .sendBtn {
+      float: right;
+    }
+
+    .cancelBtn {
+      float: left;
+    }
+  }
+}
+
+
+.login-button {
+  display: block;
+  width: 100%;
+  background-color: @login-button-color;
+  color: white;
+  line-height: 64px;
+  font-family: @baseFontFamily1;
+  border: 0;
+  border-radius: 4px;
+  .pxToEm(18);
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+.submitButton{
+  display: block;
+  height: 64px;
+  width: 100%;
+  background-color: @submitBtnBg;
+
+  line-height: 64px;
+  font-family: @baseFontFamily1;
+  text-align: center;
+  text-transform: uppercase;
+  color: @submitBtnFontColor;
+  border: none;
+  border-radius: 4px;
+  .pxToRem(18px);
+}
+
+.changePasswordBtn{
+  background-color: @login-button-color;
+  margin-top: 24px;
+  .btn(16,@btnTextWhite,150px);
+}
+
+.clearBtn{
+  float: right;
+  margin: 5px 20px 0 0;
+  background-color: @login-button-color;
+  .btn(14,@btnTextWhite,100px);
+}
+
+.viewBarBtnActive {
+  background-color: transparent !important;
+}
+
+.viewBarTabActive {
+  border-bottom: 0!important;
+  background-color: transparent !important;
+}
+
+.assignDd{
+  display: inline-block;
+  float: right;
+  width: 210px;
+  height: 26px;
+  padding-left: 10px;
+  background-color: @btnTextGray1;
+  line-height: 26px;
+
+  &:after{
+    content: '\e901';
+    position: absolute;
+    right: -33px;
+    color: @iconBlack;
+    .pxToRem(25);
+  }
+
+  &:before{
+    content: '\e910';
+    position: absolute;
+    right: 18px;
+    top: 9px;
+    line-height: normal;
+    color: @dropdownTriIcon;
+    .pxToRem(12);
+  }
+}
+
+.searchResetBtn {
+  position: relative;
+  display: inline-block;
+  border: 1px solid transparent;
+  background-color: @pink;
+  border-radius:50%;
+  box-shadow:0 0 2px @red2;
+  outline: none;
+  vertical-align: middle;
+  cursor: pointer;
+  .lh-size(15px);
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    line-height: 16px;
+    color: @main-sub-color;
+    .pxToRem(12);
+    .lh-size(15px);
+  }
+}
+
+
+.checkedGroup{
+
+  .pencil{
+
+    &:after{
+      content: '\e90d';
+      position: absolute;
+      top: -10px;
+      right: 25px;
+      font-family: @baseIconName-1;
+      color: @main-border-color;
+      .pxToRem(16);
+    }
+  }
+}
+
+.topBarHolder{
+
+  .templateSwitcher{
+
+    .changeContentView {
+      float: left;
+      border-bottom: 1px solid @topbarmenu-border-color;
+      background-color: @tabDarkBg;
+      .btn(14, @topbarmenu-font-color-menu, 140px);
+    }
+  }
+}
+
+.linkBtn{
+  float: left;
+  margin: 0 10px;
+  background-color: @greenButtonBg;
+  padding: 0 12px;
+  .btn(14,@main-sub-color,96px);
+}
+
+.dialogCategoryWrapInner,
+.dialogCategoryWrapInnerFullHeight,
+.brandHolder{
+
+  .addBtn,
+  .deleteBtn,
+  .editBtn{
+
+    &:after{
+      display: inline-block;
+      margin: 0 5px;
+      font-family: @baseIconName-1;
+      .pxToRem(16);
+    }
+  }
+
+  .addBtn{
+    &:after{
+      content: '\e933';
+    }
+  }
+
+  .deleteBtn{
+    &:after{
+      content: '\e928';
+    }
+  }
+
+  .editBtn{
+    &:after{
+      content: '\e90d';
+    }
+  }
+}
+
+.flowSaveBtn{
+  &:after{
+    content: '\e90a';
+  }
+}
+
+.flowCancelBtn{
+  &:after{
+    content: '\e934';
+  }
+}
+
+.arrowRight,
+.cross{
+
+  &:after{
+    display: inline-block;
+    margin: 0 5px;
+    font-family: @baseIconName-1;
+    color: @grayDark;
+    .pxToRem(16);
+  }
+}
+
+.arrowRight{
+  &:after{
+    content: '\e932';
+  }
+}
+
+.cross{
+  &:after{
+    content: '\e934';
+  }
+}
+
+.createBtn{
+  float: left;
+  padding: 0 12px;
+  margin: 0 10px;
+  border: 0;
+  background-color: @greenButtonBg;
+  .btn(14,@btnColorWhite,96px);
+}
+
+.promotionBtn {
+  padding: 0 12px;
+  margin: 0 10px 10px 0;
+  border: 0;
+  background-color: @greenButtonBg;
+  .btn(14,@btnColorWhite,96px);
+}
+
+.viewBar,
+.title{
+
+  .checkboxArea{
+    display: inline-block;
+  }
+}
+
+.title{
+  .checkboxArea{
+    float: right;
+    margin-right: 10px;
+  }
+}
+
+.viewBar{
+  .checkboxArea{
+    float: left;
+  }
+}
+
+.btnCheckboxLabel{
+  position: relative;
+  display: inline-block;
+  padding: 0 46px 0 15px;
+  margin: 0 10px;
+  background-color: @yellowBtn;
+  line-height: 36px;
+  color: @btnTextWhite;
+  cursor: pointer;
+  .pxToRem(14);
+
+  &:hover{
+    background-color: @yellowBtnHover;
+  }
+
+  &:after{
+    content:'';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    border: 2px solid @btnTextWhite;
+    border-radius:2px;
+    .lh-box-sizing(border-box);
+    .lh-size(16px);
+  }
+}
+
+.btnCustomCheckbox {
+  display: none;
+
+  &:checked {
+
+    + label {
+
+      &:before {
+        content: '\e93b';
+        position: absolute;
+        top: -1px;
+        right: 12px;
+        font-family: @baseIconName-1;
+        z-index: 1;
+        .pxToRem(18);
+      }
+    }
+  }
+}
+.buttonsWrap{
+  float: right;
+  height: 36px;
+}
+
+
+
+.assignContainer {
+  position: relative;
+  display: inline-block;
+
+  .assignUl {
+    display: none;
+    position: absolute;
+    left: 20px;
+    bottom: -103px;
+    width: 180px;
+    background: #fff;
+    border: 1px solid @main-border-color;
+    box-shadow: 0 0 14px 1px @transparentBlack2;
+    z-index: 10;
+    .pxToRem(14px);
+
+    &.singleAssign {
+      left: 10px;
+      bottom: -61px;
+    }
+
+    li {
+      padding: 10px;
+      .lh-transition(background-color .3s ease);
+
+      &:nth-child(n+2) {
+        border-top: 1px solid @main-border-color;
+      }
+
+      &:hover {
+        background-color: @main-border-color;
+      }
+    }
+  }
+}

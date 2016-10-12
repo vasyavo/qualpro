@@ -1,0 +1,10 @@
+<div class="<%= model.type %> thumbnail" data-id="<%=model._id%>">
+    <div class="thumbnailTop">
+        <input type="checkbox" value="<%=model._id%>" id="<%=model._id%>" class="customCheckbox hidden">
+        <label for="<%=model._id%>" class="checkboxLabel"></label>
+    </div>
+    <div class="thumbnailBottom">
+        <img class="thumbnailImage" src="<%=model.imageSrc%>">
+        <span class="thumbnailUserName"><%=model.name.currentLanguage%></span>
+    </div>
+</div>

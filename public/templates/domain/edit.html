@@ -1,0 +1,212 @@
+<% var language = App.currentUser.currentLanguage; %>
+<% var anotherLanguage = language === 'en' ? 'ar' : 'en'; %>
+<div class="form-holder <%=contentType%>" id="contentHolder">
+    <div class="title">
+        <span data-filter-type="all" class="titleDescription"><%=translation.editTitle%></span>
+    </div>
+    <form method="post" action="" id="createForm" class="form createForm">
+        <fieldset>
+            <%var hasOutlet = contentType == 'branch';%>
+            <%var hasRetSegment = contentType == 'branch';%>
+            <%var hasAvatar = contentType !== 'branch';%>
+            <%var hasAddress = contentType === 'branch';%>
+            <%var hasLinkToMap = contentType === 'branch';%>
+            <%var hasManager = contentType === 'branch';%>
+            <%var hasCurrency = contentType === 'country';%>
+            <div class="inner flexRow">
+                <%if (hasAvatar) { %>
+                <div class="avatar block-left block">
+                    <canvas>
+                        <input type="file" value="Edit" id="File1">
+                    </canvas>
+                    <div class="upload">
+                        <p class="uploadValue"><%=translation.changeImage%></p>
+                        <input type="file" value="Edit" id="inputImg" class="uploadInput">
+                    </div>
+                </div>
+                <%}%>
+                <div class="descriptionContainer table smallDialog">
+                    <div class="row">
+                        <div class="cell">
+                            <label for="name<%=language === 'en' ? 'En' : 'Ar'%>"
+                                   data-filter-type="all">
+                                <%=translation.name%>
+                            </label>
+                        </div>
+                        <div class="cell">
+                            <div>
+                                <input name="name<%=language === 'en' ? 'En' : 'Ar'%>"
+                                       type="text"
+                                       id="name<%=language === 'en' ? 'En' : 'Ar'%>"
+                                       class="currentSelected <%= language === 'en' ? 'enInput' : 'arInput'%>"
+                                       value="<%= model.name[language] || model.name[anotherLanguage] %>"
+                                       required
+                                       maxlength="56"
+                                       dir="<%= language === 'en' ? 'ltr' : 'rtl'%>">
+                                <a class='showHideTranslation <%=language === "en" ? "arabicIcon" : "englishIcon" %>'
+                                   data-id="name<%=language === 'en' ? 'Ar' : 'En'%>"
+                                   href="javascript;"></a>
+                            </div>
+                            <div>
+                                <input name="name<%=language === 'en' ? 'Ar' : 'En'%>"
+                                       type="text"
+                                       id="name<%=language === 'en' ? 'Ar' : 'En'%>"
+                                       class="currentSelected name<%=language === 'en' ? 'Ar' : 'En'%> <%= language === 'en' ? 'arInput' : 'enInput'%>"
+                                       value="<%= model.name[anotherLanguage] %>"
+                                       placeholder="<%= translation.addTranslation[language] %>"
+                                       maxlength="56"
+                                       dir="<%= language === 'en' ? 'rtl' : 'ltr'%>"
+                                       style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <%if (hasRetSegment) {%>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="retSegmentDd"><%=translation.retailSegment%></label>
+                        </div>
+                        <div class="cell">
+                            <div id="retSegmentDd"></div>
+                        </div>
+                    </div>
+                    <%}%>
+
+                    <%if (hasOutlet) {%>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="outletDd"><%=translation.outlet%></label>
+                        </div>
+                        <div class="cell">
+                            <div id="outletDd"></div>
+                        </div>
+                    </div>
+                    <%}%>
+
+                    <%if (hasAddress) {%>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="addressEn"><%=translation.address%></label>
+                        </div>
+                        <div class="cell">
+                            <div>
+                                <input name="address<%=language === 'en' ? 'En' : 'Ar'%>"
+                                       type="text"
+                                       id="address<%=language === 'en' ? 'En' : 'Ar'%>"
+                                       class="currentSelected <%= language === 'en' ? 'enInput' : 'arInput'%>"
+                                       value="<%= model.address ? model.address[language] || model.address[anotherLanguage] : '' %>"
+                                       required
+                                       maxlength="56"
+                                       dir="<%= language === 'en' ? 'ltr' : 'rtl'%>">
+                                <a class='showHideTranslation <%=language === "en" ? "arabicIcon" : "englishIcon" %>'
+                                   data-id="address<%=language === 'en' ? 'Ar' : 'En'%>"
+                                   href="javascript;"></a>
+                            </div>
+                            <div>
+                                <input name="addressAr"
+                                       type="text"
+                                       id="addressAr"
+                                       class="currentSelected <%= language === 'en' ? 'arInput' : 'enInput'%>"
+                                       value="<%= (model.address) ? (model.address.ar || '') : ''%>"
+                                       placeholder="<%= translation.addTranslation[language] %>"
+                                       maxlength="56"
+                                       dir="<%= language === 'en' ? 'rtl' : 'ltr'%>">
+                                       style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+                    <%}%>
+
+                    <%if (hasLinkToMap) {%>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="linkToMap"><%=translation.labelMap%></label>
+                        </div>
+                        <div class="cell">
+                            <div>
+                                <input name="linkToMap"
+                                       type="text"
+                                       id="linkToMap"
+                                       class="currentSelected"
+                                       value="<%= model.linkToMap || ''%>"
+                                       required
+                                       maxlength="56">
+                            </div>
+                        </div>
+                    </div>
+                    <%}%>
+
+                    <%if (hasManager) {%>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="personnelDd"
+                                   data-filter-type="all">
+                                <%=translation.labelManager%>
+                            </label>
+                        </div>
+                        <div class="cell">
+                            <div id="personnelDd"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <label for="mobile"><%=translation.labelMobile%></label>
+                        </div>
+                        <div class="cell">
+                            <input name="mobile"
+                                   type="text"
+                                   id="mobile"
+                                   class="currentSelected"
+                                   value=""
+                                   readonly
+                                   maxlength="56">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <label for="email"><%=translation.labelEmail%></label>
+                        </div>
+                        <div class="cell">
+                            <input name="email"
+                                   type="text"
+                                   id="email"
+                                   class="currentSelected"
+                                   value=""
+                                   readonly
+                                   maxlength="56">
+                        </div>
+                    </div>
+                    <%}%>
+
+                    <%if (hasCurrency) {%>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="currencyDd"><%=translation.labelCurrency%></label>
+                        </div>
+                        <div class="cell">
+                            <div id="currencyDd"></div>
+                        </div>
+                    </div>
+                    <%}%>
+                </div>
+            </div>
+            <%if (hasAvatar) { %>
+            <div class="cropImages form" style="display:none;">
+                <div class="title">
+                    <span class="titleDescription"><%=translation.crop.title%></span>
+
+                    <div class="clearfix"></div>
+                </div>
+                <br/>
+
+                <div class="image_input" style="float: left;margin-right: 20px;"></div>
+                <img class="imgCircle image_output"/>
+
+                <div class="clearfix"></div>
+            </div>
+            <%}%>
+        </fieldset>
+    </form>
+</div>

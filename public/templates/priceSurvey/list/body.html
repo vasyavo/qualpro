@@ -1,0 +1,30 @@
+<% collection.forEach(function (model) { %>
+    <tr class="priceSurveyCategory priceOneRow">
+        <td colspan="<%= 3 + branchesAllLenght %>"></td>
+    </tr>
+    <% model.brands.forEach(function(brand) { %>
+        <% brand.variants.forEach(function(variant) { %>
+            <tr>
+                <td class="hoverFullText" ><%- variant.variant.name.currentLanguage %></td>
+                <td class="hoverFullText" ><%- variant.size %></td>
+                <td>
+                    <div class="flexRow">
+                        <span><%= Math.round(variant.totalMinPrice*100)/100 %><!--(<%= variant.currency %>)--></span>
+                        <span><%= Math.round(variant.totalAvgPrice*100)/100 %><!--(<%= variant.currency %>)--></span>
+                        <span><%= Math.round(variant.totalMaxPrice*100)/100 %><!--(<%= variant.currency %>)--></span>
+                    </div>
+                </td>
+                <% for (var i = 0; i < branchesAllLenght; i++) { %>
+                    <td data-category="<%- model.category._id %>"
+                        data-brand="<%- brand.brand._id %>"
+                        data-variant="<%- variant.variant._id %>"
+                        data-size="<%- variant.size %>"
+                        data-branch="<%- branchesAll[i]._id %>">
+                        <!-- Branches data -->
+                        -
+                    </td>
+                <% }; %>
+            </tr>
+        <% }); %>
+    <% }); %>
+<% }); %>

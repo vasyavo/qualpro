@@ -1,0 +1,63 @@
+<% var showCheckboxes = show; %>
+<% var ifBranch = contentType === 'branch'; %>
+<div class="absoluteContent">
+    <table class="list">
+        <colgroup>
+            <col width="42px">
+        </colgroup>
+        <colgroup class="forChange">
+            <col width="10%">
+        </colgroup>
+        <colgroup>
+            <col width="70%">
+            <col width="20%">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="checkboxArea alignCenter">
+               <% if (showCheckboxes) { %>
+                <input type="checkbox" id="checkAll" class="customCheckbox"/>
+                <label for="checkAll" class="checkboxLabel"></label>
+                <% } %>
+            </th>
+            <th class="forChange alignCenter">
+                <div sort-type="1" class="sortedArrow" data-translation="flag"><%=translation.flag%></div>
+            </th>
+            <th class="oe_sortable" sort-type="1" data-sort="name">
+                <div sort-type="1" class="sortedArrow" data-translation="name"><%=translation.name%></div>
+            </th>
+            <th class="oe_sortable sortDn" sort-type="1" data-sort="createdBy.date">
+                <div sort-type="1" class="sortedArrow" data-translation="createdBy"><%=translation.createdBy%></div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <% if (!ifBranch) { %>
+                <td colspan="4" class="changeColSpan colspanFix">
+            <% } else { %>
+                <td colspan="3" class="changeColSpan colspanFix">
+            <% } %>
+                <div class="scrollable">
+                    <table>
+                        <colgroup>
+                            <col width="42px">
+                        </colgroup>
+                        <colgroup class="forChange">
+                            <col width="10%">
+                        </colgroup>
+                        <colgroup>
+                            <col width="70%">
+                            <col width="20%">
+                        </colgroup>
+                        <tbody class="listTable">
+
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+

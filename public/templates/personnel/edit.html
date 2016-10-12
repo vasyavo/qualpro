@@ -1,0 +1,342 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+<% var vacation = model.vacation; %>
+
+<div class="form-holder personnelInfo editPersonnelForm largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.editProfile %></span>
+    </div>
+    <form method="post" action="" id="editPersonnelForm" class="form">
+        <fieldset>
+            <div class="inner flexRowStart">
+                <div class="avatar block-left block">
+                    <% if (!model.temp) { %>
+                    <canvas src="<%=model.imgSrc%>"><input type="file" value="Edit" id="File1"></canvas>
+                    <div class="upload">
+                        <p class="uploadValue"><%= translation.changePhoto %></p>
+                        <input type="file" value="Edit" id="inputImg" class="uploadInput">
+                    </div>
+                    <% } %>
+                </div>
+
+                <div class="block flexRowStart">
+
+                    <div class="blockPersonel block-left noShrink personnelEditLeft">
+                        <div class="personnelInfo largeHeightPreview table">
+
+                            <div class="row">
+                                <div class="cell">
+                                    <label class="required mandatory" for="firstName<%= anotherLanguage.capitalizer('firstCaps') %>"><%= translation.firstName %></label>
+                                </div>
+                                <div class="cell">
+                                    <div>
+                                        <input type="text"
+                                               data-parent="firstName"
+                                               data-property="en"
+                                               id="firstNameEn"
+                                               class="inputNarrow formField enInput"
+                                               value="<%=model.firstName.en%>"
+                                               maxlength="32"
+                                               placeholder="<%= translation.firstName %>"
+                                               dir="ltr"
+                                        />
+                                        <% if (!model.temp) { %>
+                                        <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                           data-id="firstName<%= anotherLanguage.capitalizer('firstCaps') %>"
+                                           href="javascript:;">
+                                        </a>
+                                        <% } %>
+                                    </div>
+
+                                    <div>
+                                        <input id="firstNameAr"
+                                               class="inputNarrow formField arInput"
+                                               data-parent="firstName"
+                                               data-property="ar"
+                                               value="<%=model.firstName.ar%>"
+                                               placeholder="<%= translation.firstName %>"
+                                               maxlength="56"
+                                               dir="rtl"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="cell"><label class="required mandatory" for="lastName<%= anotherLanguage.capitalizer('firstCaps') %>"><%= translation.lastName %></label>
+                                </div>
+                                <div class="cell">
+                                    <div>
+                                        <input type="text"
+                                               data-parent="lastName"
+                                               data-property="en"
+                                               id="lastNameEn"
+                                               class="inputNarrow formField enInput"
+                                               value="<%=model.lastName.en%>"
+                                               maxlength="32"
+                                               placeholder="<%= translation.lastName %>"
+                                               dir="ltr"
+                                        />
+                                        <% if (!model.temp) { %>
+                                        <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                           data-id="lastName<%= anotherLanguage.capitalizer('firstCaps') %>"
+                                           href="javascript:;">
+                                        </a>
+                                        <% } %>
+                                    </div>
+
+                                    <div>
+                                        <input data-property="ar"
+                                               data-parent="lastName"
+                                               id="lastNameAr"
+                                               class="inputNarrow formField arInput"
+                                               value="<%=model.lastName.ar%>"
+                                               placeholder="<%= translation.lastName %>"
+                                               maxlength="56"
+                                               dir="rtl"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% if (!model.temp) { %>
+                            <div class="row">
+                                <div class="cell"><label for="dateJoined"><%= translation.dateOfJoining %></label></div>
+                                <div class="cell"><input type="text"
+                                                         data-property="dateJoined"
+                                                         id="dateJoined"
+                                                         class="inputWide formField"
+                                                         data-initial-value="<%=model.dateJoined%>"
+                                                         value="<%=model.dateJoined%>"
+                                                         readonly/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span class="required mandatory"><%= translation.accessRole %></span>
+                                </div>
+                                <div class="cell">
+                                    <a id="accessRoleDd"
+                                       class="selectDropdown accessRoleDd triDown"
+                                       href="javascript:;"><%= translation.select %></a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span class="required mandatory"><%= translation.jobPosition %></span>
+                                </div>
+                                <div class="cell">
+                                    <a id="positionDd"
+                                       class="selectDropdown positionDd triDown"
+                                       href="javascript:;">
+                                        Select
+                                    </a>
+                                </div>
+                            </div>
+                            <% } %>
+                            <div class="row">
+                                <div class="cell">
+                                    <label class="required mandatory" for="phone"><%= translation.phoneNumber %></label>
+                                </div>
+                                <div class="cell"><input data-property="phoneNumber"
+                                                         id="phone"
+                                                         class="inputWide formField"
+                                                         type="tel"
+                                                         data-initial-value="<%=model.phoneNumber%>"
+                                                         value="<%=model.phoneNumber%>"
+                                                         required
+                                                         maxlength="48"
+                                                         placeholder="<%= translation.phoneNumber %>"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <label class="required" for="email"><%= translation.email %></label>
+                                </div>
+                                <div class="cell">
+                                    <input data-property="email"
+                                                         id="email"
+                                                         class="inputWide formField"
+                                                         type="email"
+                                                         data-initial-value="<%=model.email%>"
+                                                         value="<%=model.email%>"
+                                                         maxlength="48"
+                                                         placeholder="<%= translation.email %>"/>
+                                </div>
+                            </div>
+                            <% if (!model.temp) { %>
+                            <div class="row">
+                                <div class="cell">
+                                    <label for="onLeaveCheckbox"><%= translation.onLeave %></label>
+                                </div>
+                                <div class="cell">
+                                    <div class="onoffswitchBox">
+                                        <input type="checkbox"
+                                               name="onoffswitch"
+                                               id="onLeaveCheckbox"
+                                               class="onoffswitch-checkbox formField"
+                                               data-parent="vacation"
+                                               data-property="onLeave"
+                                        <%= (vacation && vacation.onLeave) ? "checked" : '' %>>
+                                        <label for="onLeaveCheckbox" class="onoffswitch-label"><%= translation.onLeave %></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row coverField" style=<%= (vacation && vacation.onLeave) ? "" : "display:none" %>>
+                            <div class="cell">
+                                        <span>
+                                            <%= translation.cover %>
+                                        </span>
+                            </div>
+                            <div class="cell coveredName">
+                                <span id="coveredName"
+                                      class="coveredItem formField"
+                                      data-parent="vacation"
+                                      data-property="cover"
+                                      data-value="cover" <%= (vacation && vacation.cover) ? 'class="formField" data-id="' + vacation.cover._id + '"' : 'class="hidden formField"' %>>
+                                    <%= (vacation && vacation.cover) ? model.vacation.cover.firstName.currentLanguage + ' ' +
+                                    model.vacation.cover.lastName.currentLanguage : '' %>
+                                </span>
+                                <a id="coverDiag"
+                                   class="coverDialogExecutor addUsers"
+                                   data-icon="add"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="blockPersonel block-right noShrink personnelEditRight">
+                    <% if (!model.super && !model.temp) { %>
+                    <div class="personnelLocationManager table">
+                        <div class="row hidden countryRow" id="countryRow">
+                            <div class="cell">
+                                    <span class="countryField mandatory required">
+                                        <%= translation.country %>
+                                    </span>
+                            </div>
+                            <div class="cell">
+                                <a id="countryDiag"
+                                   class="domainDialogExecutor countryField formField"
+                                   data-format="array"
+                                   data-property="country"
+                                   data-value="country"
+                                   data-icon="add"
+                                   data-id=""
+                                   href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row hidden regionRow" id="regionRow">
+                            <div class="cell">
+                                    <span class="regionField">
+                                        <%= translation.region %>
+                                    </span>
+                            </div>
+                            <div class="cell">
+                                <a id="regionDiag"
+                                   class="domainDialogExecutor regionField formField"
+                                   data-format="array"
+                                   data-property="region"
+                                   data-value="region"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row hidden subRegionRow" id="subRegionRow">
+                            <div class="cell">
+                                    <span class="subRegionField">
+                                        <%= translation.subRegion %>
+                                    </span>
+                            </div>
+                            <div class="cell">
+                                <a id="subRegionDiag"
+                                   class="domainDialogExecutor subRegionField formField"
+                                   data-format="array"
+                                   data-property="subRegion"
+                                   data-value="subRegion"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <!-- <div class="row">
+                            <div class="cell">
+                                <span class="retailSegmentField">
+                                    <%= translation.retailSegment %>
+                                </span>
+                            </div>
+                            <div class="cell">
+                                <a id="retailSegmentDiag"
+                                   class="domainDialogExecutor retailSegmentField formField"
+                                   data-format="array"
+                                   data-property="retailSegment"
+                                   data-value="retailSegment"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span class="outletField">
+                                    <%= translation.outlet %>
+                                </span>
+                            </div>
+                            <div class="cell">
+                                <a id="outletDiag"
+                                   class="domainDialogExecutor outletField formField"
+                                   data-format="array"
+                                   data-property="outlet"
+                                   data-value="outlet"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div> -->
+                        <div class="row hidden branchRow" id="branchRow">
+                            <div class="cell">
+                                    <span class="branchField">
+                                        <%= translation.branch %>
+                                    </span>
+                            </div>
+                            <div class="cell">
+                                <a id="branchDiag"
+                                   class="domainDialogExecutor branchField formField"
+                                   data-format="array"
+                                   data-property="branch"
+                                   data-value="branch"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span class="managerField hoverFullText"><%= translation.supervisor %></span>
+                            </div>
+                            <div class="selectInput cell">
+                                <!--<a id="managerDd"
+                                   class="selectDropdown managerDd triDown"
+                                   href="javascript:;">
+                                    <%= translation.select %>
+                                </a>-->
+                                <span class="suspervisor hoverFullText"><%= model.manager ? model.manager.firstName.currentLanguage + model.manager.lastName.currentLanguage : 'Not assigned' %></span>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="cropImages form" style="display:none;">
+                <div class="title">
+                    <span class="titleDescription"><%= translation.cropImages %></span>
+
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="image_input" style="float: left;margin-right: 20px;"></div>
+                <img class="imgCircle image_output"/>
+
+                <div class="clearfix"></div>
+            </div>
+        </fieldset>
+    </form>
+</div>

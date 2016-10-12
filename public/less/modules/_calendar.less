@@ -1,0 +1,242 @@
+.ui-datepicker{
+  margin-left: 11px!important;
+  overflow: hidden;
+  padding: 0;
+  opacity: 1 !important;
+  background-color: @dateTableBgColor;
+  box-shadow:0 10px 20px @calenderColor1,0 6px 6px @calenderColor3;
+  .lh-transition(background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out);
+
+  &:hover {
+    background-color: @dateTableBgHover;
+    box-shadow:0 19px 38px @calenderColor4,0 15px 12px @calenderColor2;
+
+    table.ui-datepicker-calendar {
+      background-color: @dateTableBgHover;
+
+      thead{
+        tr{
+          th{
+            background-color: @dateTableBgHover;
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          td {
+            background-color: @dateTableBgHover;
+
+            a{
+              background-color: @dateTableBgHover;
+            }
+          }
+        }
+      }
+    }
+    .ui-datepicker-header {
+      background-color: @dateHover;
+
+      .ui-datepicker-title {
+
+        select {
+          background-color: @dateHover;
+        }
+      }
+    }
+  }
+
+  .ui-datepicker-header{
+    width: 240px;
+    padding: 7px 0;
+    background-color: @dateBackground;
+    border-bottom: 0;
+    .lh-transition(all 0.2s ease-in-out);
+
+    .ui-datepicker-title{
+
+      select{
+        -moz-appearance: none;
+        text-indent: 0.01px;
+        text-overflow: '';
+        position: relative;
+        background-color: @dateBackground;
+        outline: 0;
+        border: 0;
+        border-bottom: 1px solid @dateWhite;
+        color: @dateWhite;
+        .lh-transition(all 0.2s ease-in-out);
+
+        &:active,&:focus{
+          outline: 0;
+        }
+
+        option{
+          background-color: @dateTableBgHover;
+          color: @dateBlack;
+        }
+      }
+
+      .ui-datepicker-month{
+        margin-right: 4px;
+      }
+
+      .ui-datepicker-year{
+        margin-left: 4px;
+      }
+    }
+
+    .ui-datepicker-prev,
+    .ui-datepicker-next{
+      top: 0;
+      height: 100%;
+      border: 0;
+      line-height: normal;
+      font-weight: 600;
+      .pxToRem(12);
+
+      &:before,
+      &:after{
+        position: absolute;
+        top: 14px;
+        display: inline-block;
+        font-family: @iconFamily-1;
+        color: @main-sub-color;
+        font-weight: 600;
+        .pxToRem(12);
+      }
+
+      &:hover{
+        top: 0;
+        border: 0;
+        background-color: @dateHover;
+        transition: all 0.3s ease-in-out;
+      }
+    }
+    .ui-datepicker-prev{
+      left: 0;
+
+      &:before{
+        content: '\e91b';
+        left: 10px;
+      }
+
+      &:hover{
+        left: 0;
+      }
+    }
+
+    .ui-datepicker-next{
+      right: 0;
+
+      &:after{
+        content: '\e91c';
+        right: 10px;
+      }
+
+      &:hover{
+        right: 0;
+      }
+    }
+  }
+
+  .ui-widget-header {
+
+    .ui-icon{
+      background-image: none;
+    }
+  }
+
+  table.ui-datepicker-calendar{
+    width: 210px;
+    margin: 0 14px 13px;
+    transition: all 0.2s ease-in-out;
+
+    thead,
+    tbody{
+      tr{
+        td,
+        th{
+          background-color: @dateTableBgColor;
+          transition: all 0.2s ease-in-out;
+        }
+      }
+    }
+
+    thead{
+      tr{
+        th{
+          color: @grayDark;
+          .pxToRem(12);
+        }
+      }
+    }
+    tbody{
+      tr{
+        td{
+          padding: 4px 4px;
+          a{
+            padding: 4px 2px;
+            background-color: @dateTableBgColor;
+            border-bottom: 0;
+            line-height: normal;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.2s ease-in-out;
+            .pxToRem(12);
+
+            &:hover {
+              background-color: @dateHover;
+              color: @dateTableBgColor;
+            }
+          }
+        }
+
+        td.ui-datepicker-current-day{
+
+          a{
+            background-color: @dateBackground;
+            color: @dateTableBgColor;
+          }
+        }
+      }
+    }
+  }
+}
+
+.ui-datepicker-rtl {
+  .ui-datepicker-prev {
+    right: auto;
+    left: 0;
+
+    &:hover {
+      right: auto;
+      left: 0;
+    }
+  }
+}
+
+.dataPickerDialog {
+  width: 600px;
+  height: 200px;
+
+  .datapickerInput {
+    &:nth-child(2) {
+      float: right;
+    }
+  }
+  .leftPart,
+  .rightPart {
+    width: 50%;
+    padding: 20px;
+    input {
+      width: 260px;
+    }
+  }
+  .leftPart {
+    float: left;
+  }
+  .rightPart {
+    float: right;
+  }
+}

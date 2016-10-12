@@ -1,0 +1,64 @@
+.topBarHolder .viewBar .createBtn,
+.ui-dialog-buttonpane .ui-dialog-buttonset .acceptBtn,
+.linkBtn,
+.greenBtn{
+
+  &:active,
+  &:focus{
+    background-color: @geenBtnActive;
+  }
+
+  &:hover{
+    background-color: @geenBtnHover;
+  }
+}
+
+.greyBtn,
+.upload,
+.hasSubMenu,
+.hasSubMenu .subMenu li,
+.topBarHolder .viewBar .actionHolder ul .editBtn{
+
+  &:active,
+  &:focus{
+    background-color: @greyBtnActive;
+  }
+
+  &:hover{
+    background-color: @greyBtnHover;
+  }
+}
+.clearBtn,
+.redBtn,
+.ui-dialog-buttonpane .ui-dialog-buttonset .cancelBtn,
+.topBarHolder .viewBar .actionHolder ul .archiveBtn{
+
+  &:active,
+  &:focus{
+    background-color: @redBtnActive;
+  }
+
+  &:hover{
+    background-color: @redBtnHover;
+  }
+}
+
+.btnDisabled {
+  background-color: @disabledBtn!important;
+  opacity: 1;
+}
+
+// table hover
+*:not('.magicTableWrap'){
+  tr{
+    tr {
+
+      &:hover {
+        td {
+          transition: all ease .3s;
+          background-color: @tableRowHover!important;
+        }
+      }
+    }
+  }
+}

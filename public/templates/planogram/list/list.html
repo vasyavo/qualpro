@@ -1,0 +1,16 @@
+<% items.forEach(function(item, index){ %>
+    <tr data-id="<%=item._id%>" class="listRow">
+        <td class="checkboxArea alignCenter">
+            <input type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox"/>
+            <label for="<%=item._id%>" class="checkboxLabel"></label>
+        </td>
+        <td><%=item.country.name.en || item.country.name.ar%></td>
+        <td><%=item.retailSegment.name.en || item.retailSegment.name.ar%></td>
+        <td><%=item.product.name.en || item.product.name.ar%></td>
+        <td>
+            <%= item.configuration.name %>
+        </td>
+        <td><%=item.editedBy.date%></td>
+        <td><%=item.createdBy.date%></td>
+    </tr>
+<% }) %>

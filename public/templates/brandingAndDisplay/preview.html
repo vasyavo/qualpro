@@ -1,0 +1,127 @@
+<div class="form-holder personnelInfo promotionView largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.preViewTitle%></span>
+    </div>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap">
+        </div>
+    </div>
+    <div id="main" class="competitorBrandingPreview">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.category%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="category" class="hoverFullText"><%= jsonModel.categoryString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row borderRowBottom">
+                            <div class="cell alignTop">
+                                <span><%= translation.brand %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="brand" class="hoverFullText">Al Alali</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.country%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="country" class="hoverFullText"><%= jsonModel.countryString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.region%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="region" class="hoverFullText"><%= jsonModel.regionString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.subRegion%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="subRegion" class="hoverFullText"><%= jsonModel.subRegionString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.retailSegment%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="retailSegment" class="hoverFullText"><%= jsonModel.retailSegmentString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.outlet%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="outlet" class="hoverFullText"><%= jsonModel.outletString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.branch%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="branch" class="hoverFullText"><%= jsonModel.branchString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row borderRow">
+                            <div class="cell">
+                                <span><%= translation.displayType%></span>
+                            </div>
+                            <div class="cell">
+                                <span class="hoverFullText"><%= jsonModel.displayTypeString || translation.noTranslation %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.dateStart %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.dateEnd %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="objectivesPaddingBlock borderBottom">
+                        <div class="descriptionBlock floatBlock">
+                            <span><%= translation.description%></span>
+                        </div>
+                        <span id="description" class="descriptionValue fontBold fontMedium heightDescription mCustomScrollbar"><%= jsonModel.description.currentLanguage || translation.noTranslation  %></span>
+                    </div>
+
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold"><%= translation.attachments%></span>
+                        </div>
+                        <div class="promotionFilesBlock">
+                            <div id="objectiveFileThumbnail" class="fileThumbnail masonryThumbnailsWrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

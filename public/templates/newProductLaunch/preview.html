@@ -1,0 +1,173 @@
+<div class="form-holder personnelInfo productLaunchWrap largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.all %></span>
+    </div>
+    <div id="main" class="productLaunchPreview">
+
+        <div class="blockObjective">
+
+            <div class="block-left">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.category %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="category"><%=  model.category.name.currentLanguage %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.variant %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="variant" <%= model.variant.name.currentLanguage ? '' : 'class="newBrand"' %>><%=  model.variant.name.currentLanguage || model.variant.name %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.brand %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="brand" <%= model.brand.name.currentLanguage ? '' : 'class="newBrand"' %>><%=  model.brand.name.currentLanguage || model.brand.name %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.country %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="country"><%= model.country.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.region %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="region"><%= model.region.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.subRegion %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="subRegion"><%= model.subRegion.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.retailSegment %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="retailSegment"><%= model.retailSegment.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.outlet %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="outlet"><%= model.outlet.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.branch %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="branch"><%= model.branch.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.employee %></span>
+                            </div>
+                            <div class="cell employeeBox">
+                                <span id="employee"><%=  model.createdBy.user.firstName.currentLanguage + ' ' +  model.createdBy.user.lastName.currentLanguage %></span>
+                                <span id="accessRole" class="secondEmployeeSpan"><%= model.createdBy.user.accessRole.name.currentLanguage || '' %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-right">
+                <div class="absoluteContent">
+                    <div class="scrollable">
+                        <div class="inner borderBottom">
+                        <div class="table">
+                            <div class="row">
+                                <div class="cell">
+                                    <span><%= translation.origin %></span>
+                                </div>
+                                <div class="cell">
+                                    <span id="origin"><%= model.origin.name.currentLanguage %></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span><%= translation.packing %></span>
+                                </div>
+                                <div class="cell">
+                                    <span id="packing"><%= model.packing %></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span><%= translation.price %></span>
+                                </div>
+                                <div class="cell">
+                                    <span id="price"><%= model.price + ' ' + model.country.currency %></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span><%= translation.displayType %></span>
+                                </div>
+                                <div class="cell">
+                                    <span id="displayType"><%= model.displayTypeString || '' %></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span><%= translation.distributor %></span>
+                                </div>
+                                <div class="cell">
+                                    <span id="distributor"><%= model.distributor.currentLanguage || '' %></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span><%= translation.shelfLife %></span>
+                                </div>
+                                <div class="cell">
+                                    <span id="shelfLife"><%= model.shelfLifeStart + ' - ' + model.shelfLifeEnd %></span>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span><%= translation.comment %></span>
+                            </div>
+                            <span id="additionalComment" class="descriptionValue heightDescription fontBold fontMedium mCustomScrollbar"><%= model.additionalComment.currentLanguage || ''  %></span>
+                        </div>
+
+                        <div id="attachments" class="attachmentsBlock borderBottom">
+                            <div class="attachmentsHeader">
+                                <span class="attachmentsDescription fontBold"><%= translation.attachments %></span>
+                            </div>
+                            <div class="filesBlock borderBottom">
+                                <span class="filesTitle">Files</span>
+                                <div id="objectiveFileThumbnail" class="fileThumbnail"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name='csrf-token' content={{ csrfToken }}>
+    <title></title>
+    <script src="../js/libs/jquery/dist/jquery.min.js"></script>
+    <style>
+        * {box-sizing: border-box;}
+        body {margin: 0;font-size: 100%;line-height: 1.42857143;font-family: 'proxima_nova_rgregular', sans-serif;}
+        h2 {text-align: center;color: #546e7a;font-size: 18px;}
+        span {color: #546e7a;}
+        .loginDiv .mainLogo {display: block;margin-bottom: 50px;text-align: center;}
+        .loginDiv fieldset {width: 400px;min-height: 120px;padding: 45px 32px 30px;margin: 0 auto;border: none;border-radius: 2px;box-shadow: 0 0 6px rgba(26, 24, 25, 0.5);}
+        .login-button {display: block;width: 100%;background-color: #f44336;color: white;line-height: 64px;border: 0;border-radius: 4px;font-size: 1.125em;text-transform: uppercase;font-weight: bold;text-align: center;text-decoration: none;margin-top: 205px;}
+    </style>
+</head>
+<body>
+<div>
+    <div class="loginDiv">
+        <a title="Return to the al alali homepage" class="mainLogo"><img src="..\images\main-logo.png" alt="logo"/></a>
+        <form id="changePassForm" action="{{host}}/personnel/passwordChange/{{forgotToken}}" method="post">
+            <fieldset>
+                <h2>We have sent You an e-mail!</h2>
+
+                <span>Please check your e-mail and follow the link to reset your password.</span>
+
+                <a id="submitButton" href="{{host}}/#login/" class="login-button">Ok</a>
+            </fieldset>
+        </form>
+    </div>
+</div>
+</body>
+</html>

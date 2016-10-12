@@ -1,0 +1,99 @@
+.leftMenuHolder {
+  position: relative;
+  height: calc(~"100% - 20px");
+  width: 240px;
+  float: left;
+  margin: 10px 20px 10px 10px;
+  border: 1px solid @leftmenu-border-color;
+
+  .parentLeft {
+    height: 43px;
+    > a {
+      height: 43px;
+    }
+  }
+
+  .down {
+    a {
+      padding: 10px 0 10px 25%;
+    }
+  }
+
+  li {
+    position: relative;
+    background-color: @main-sub-color;
+    overflow: hidden;
+    transition: height ease-in-out .5s;
+
+    a {
+      display: block;
+      padding-left: 30px;
+      color: @leftmenu-font-color-menu;
+      .lh-display(flex);
+      .lh-align-items(center);
+      .pxToEm(14);
+    }
+
+    &[data-count] {
+      &:after {
+        content: attr(data-count);
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        height: 20px;
+        min-width: 20px;
+        padding: 0 4px;
+        border-radius: 5px;
+        background-color: @red;
+        color: @main-sub-color;
+        line-height: 20px;
+        text-align: center;
+        font-size: 14px;
+      }
+    }
+  }
+  .childMenu {
+    color: @leftmenu-subfont-color-menu;
+  }
+
+  .listNumber {
+
+    &:after {
+      content: attr(data-content);
+      position: absolute;
+      top: 11px;
+      right: 15px;
+      width: 20px;
+      background-color: @leftmenu-listnum-bg;
+      line-height: 20px;
+      text-align: center;
+      color: @leftmenu-listnum-text-color;
+      border-radius: 4px;
+    }
+  }
+
+  .selected{
+    background-color: @leftmenu-selected-color;
+
+    > a {
+
+      &:hover {
+        background-color: @leftmenu-selected-color;
+      }
+    }
+  }
+
+  .selectedSub{
+    background-color: @leftmenu-hover-color;
+  }
+
+  .menuDropDown {
+    height: auto;
+  }
+
+  a {
+    &:hover {
+      background-color: @leftmenu-hover-color;
+    }
+  }
+}

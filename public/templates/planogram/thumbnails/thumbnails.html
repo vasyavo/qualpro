@@ -1,0 +1,19 @@
+<% var level = App.currentUser.accessRole.level; %>
+<% collection.forEach(function(item, index){ %>
+<div class="thumbnail planogram" data-id="<%=item._id%>">
+    <div class="thumbnailTop">
+        <% if ((level <=2) || (level >= 8)) { %>
+        <input type="checkbox"
+               value="<%=item._id%>"
+               id="<%=item._id%>"
+               class="customCheckbox hidden">
+        <label for="<%=item._id%>"
+               class="checkboxLabel"></label>
+        <% } %>
+        <img class="thumbnailImageSquare" src="<%=item.fileID.preview%>">
+    </div>
+    <div class="thumbnailBottom">
+        <span class="configuration"><%= item.configuration ? item.configuration.name : '' %></span>
+    </div>
+</div>
+<% }) %>

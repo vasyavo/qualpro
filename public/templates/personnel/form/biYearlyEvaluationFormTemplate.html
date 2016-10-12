@@ -1,0 +1,34 @@
+<div class="evaluationWrapper">
+    <div class="title">
+        <span class="titleDescription"><%= translation.biYearlyFormTitle %></span>
+        <% if  (showEditBtn) { %>
+            <span id="editBtn" class="createBtn floatRight"><%= translation.editTitle %></span>
+        <% } %>
+    </div>
+    <div class="workflowHeader">
+        <ul>
+            <li class="workflowItem active enabled"
+                id="professionalSkills">
+                <a href="javascript:;">
+                    <%= translation.professionalSkills %>
+                </a>
+            </li>
+            <li class="workflowItem"
+                id="personalSkills">
+                <a href="javascript:;">
+                    <%= translation.personalSkills %>
+                </a>
+            </li>
+            <li class="workflowItem"
+                id="summary">
+                <a href="javascript:;">
+                    <%= translation.summary %>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="absoluteContent scrollable">
+        <div class="workflowContent ">
+        </div>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+<% var showCheckboxes = showCheckboxes || null; %>
+<% var level = App.currentUser.accessRole.level; %>
+<% personnelCollection.forEach(function(personnel, index){ %>
+<tr data-id="<%=personnel._id%>" class="listRow">
+    <% if ((level <= 2 || level >= 8) || showCheckboxes) { %>
+    <td class="checkboxArea alignCenter">
+        <input type="checkbox" id="<%=personnel._id%>" value="<%=personnel._id%>" class="customCheckbox"/>
+        <label for="<%=personnel._id%>" class="checkboxLabel"></label>
+    </td>
+    <% } %>
+    <td class="firstName"><%=personnel.firstName.currentLanguage%></td>
+    <td class="lastName"><%=personnel.lastName.currentLanguage%></td>
+    <td>
+        <%= personnel.position ? personnel.position.name.currentLanguage : ''%>
+        <span class="userPost"><%= personnel.accessRole ? personnel.accessRole.name.currentLanguage : ''%></span>
+    </td>
+    <td><%=personnel.email%></td>
+    <td><%=personnel.phoneNumber%></td>
+    <td><%=personnel.country.map(function(country) { if (country) { return country.name.currentLanguage } }).join(',')%>
+    </td>
+    <td class="wordWrapp">
+        <%= (personnel.createdBy && personnel.createdBy.user && personnel.createdBy.user.firstName) ?(personnel.createdBy.user.firstName.currentLanguage || 'System') + ' ' + (personnel.createdBy.user.lastName.currentLanguage || ' ') : '' %>
+        <%= (personnel.createdBy && personnel.createdBy.date) ? personnel.createdBy.date : '' %>
+    </td>
+    <td class="wordWrapp <%=personnel.status ? personnel.status.classCss : ''%>">
+        <%=personnel.status ? personnel.status.message : ''%>
+    </td>
+</tr>
+<% }) %>

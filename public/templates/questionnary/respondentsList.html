@@ -1,0 +1,18 @@
+<% optionIndex = answer.optionIndex && answer.optionIndex.length ? answer.optionIndex : [answer.optionIndex] %>
+<div class="questionsList flexRowStretch noShrink borderBottom">
+    <div class="questionsUser">
+        <img src="<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
+    </div>
+    <div class="questionsDescription flexGrow">
+        <div class="fontBold"><%= answer.personnel.firstName[App.currentUser.currentLanguage] + ' ' +
+            answer.personnel.lastName[App.currentUser.currentLanguage] %>
+        </div>
+        <div class="fontGray fontSmall"><%= answer.position.name[App.currentUser.currentLanguage] %></div>
+        <div class="fontGray textEllipsis hoverFullText"><%= translation.location %>: <%= answer.location %></div>
+    </div>
+    <div class="questionsStatusBlock questionnaireMultiEllipsis noShrink">
+        <div class="questionsStatus <%= question.type._id === 'fullAnswer' ? 'answer' : question.type._id === 'singleChoice' ? 'question' : ''%>">
+            <span class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
+        </div>
+    </div>
+</div>

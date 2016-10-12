@@ -1,0 +1,31 @@
+<% collection.forEach(function(item, index){ %>
+<div class="documentItem thumbnail" data-id="<%=item._id%>">
+    <div class="documentBody">
+        <input type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox"/>
+        <label for="<%=item._id%>" class="checkboxLabel"></label>
+        <div class="bannerWrap <%= item._id %>">
+            <div class="bannerMin">
+                <div data-id="<%= item._id %>"
+                     class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                    <div class="thumbnail_js thumbnailBody">
+                        <% if (item.attachments && item.attachments[0]){
+                            if (item.attachments[0].preview) { %>
+                                <img src="<%= item.attachments[0].preview %>" class="bannerImage">
+                            <% } else {%>
+                                <div class="bannerImage iconThumbnail <%= item.attachments[0].type %>"></div>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <span class="textSmall floatRight"><%= item.status && item.status.capitalizer("firstCaps") || '' %></span>
+        </div>
+
+        <div class="editContent"></div>
+    </div>
+    <div class="documentFooter">
+        <span class="documentDescription hoverFullText fontGray"><%=item.title || ''%></span>
+        <span class="documentDate"><%=item.createdBy.date%></span>
+    </div>
+</div>
+<% }) %>

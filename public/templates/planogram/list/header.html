@@ -1,0 +1,58 @@
+<div class="absoluteContent clickableTable">
+    <table>
+        <col width="42px">
+        <col width="15%">
+        <col width="20%">
+        <col width="15%">
+        <col width="15%">
+        <col width="20%">
+        <col width="10%">
+
+        <thead>
+            <tr>
+                <th class="checkboxArea alignCenter">
+                    <input type="checkbox" id="checkAll" class="customCheckbox"/>
+                    <label for="checkAll" class="checkboxLabel"></label>
+                </th>
+                <th class="oe_sortable" sort-type="1" data-sort="country.name">
+                    <div sort-type="1" class="sortedArrow"><%= translation.country %></div>
+                </th>
+                <th class="oe_sortable" sort-type="1" data-sort="retailSegment.name">
+                    <div sort-type="1" class="sortedArrow"><%= translation.retailSegment %></div>
+                </th>
+                <th class="oe_sortable" sort-type="1" data-sort="product.name">
+                    <div sort-type="1" class="sortedArrow"><%= translation.product %></div>
+                </th>
+                <th class="oe_sortable" sort-type="1" data-sort="configurations.configuration">
+                    <div sort-type="1" class="sortedArrow"><%= translation.configuration %></div>
+                </th>
+                <th class="oe_sortable" sort-type="1" data-sort="editedBy.date"><%= translation.edited %>
+                    <div sort-type="1" class="sortedArrow"><%= translation.by %></div>
+                </th>
+                <th class="oe_sortable" sort-type="1" data-sort="createdBy.date"><%= translation.created %>
+                    <div sort-type="1" class="sortedArrow"><%= translation.by %></div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="7" class="colspanFix">
+                <div class="scrollable">
+                    <table class="list">
+                        <col width="42px">
+                        <col width="15%">
+                        <col width="20%">
+                        <col width="15%">
+                        <col width="15%">
+                        <col width="20%">
+                        <col width="10%">
+                        <tbody class="listTable">
+
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,468 @@
+/*top bar holder*/
+
+.filterBar {
+  margin-bottom: 20px;
+  border: 1px solid @topbarmenu-border-color;
+  .clearfix;
+
+  .filterHeader {
+    padding: 0 20px;
+    background-color: @filterTitleBg;
+    cursor: pointer;
+    height: 50px;
+    overflow: hidden;
+
+    span {
+      float: left;
+      line-height: 50px;
+      color: @topbarmenu-font-color-menu;
+      text-transform: capitalize;
+      .pxToRem(16);
+
+      &:last-child {
+        position: relative;
+        float: right;
+      }
+    }
+  }
+
+  .filterContentHolder{
+    border-top: 1px solid @main-border-color;
+  }
+
+  .filtersFullHolder {
+    float: left;
+    padding: 20px 0 20px 20px;
+    width: 100%;
+
+    .filterFullContainer {
+      position: relative;
+      float: left;
+      margin: 0 20px 10px 0;
+
+      .filterName {
+        position: relative;
+
+        span {
+          position: absolute;
+          top: 20px;
+          right: 0;
+          cursor: pointer;
+        }
+
+        .downArrow {
+          .triangle();
+          border-top: solid 5px @topbarmenu-border-color;
+        }
+
+        .topArrow {
+          .triangle();
+          border-bottom: solid 5px @topbarmenu-border-color;
+        }
+      }
+    }
+  }
+
+  .filterBlocked {
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: @transparentBlack10 ;
+      z-index: 1;
+    }
+  }
+
+  &.singleFilter {
+    position: absolute;
+    right: 0;
+    top: -67px;
+    width: 185px;
+    border: 0;
+    margin: 0;
+    height: auto;
+
+    .filtersFullHolder {
+      padding: 0;
+    }
+
+    .filterContentHolder {
+      border: 0;
+    }
+  }
+}
+
+.topBarHolder {
+  position: relative;
+  .lh-display(flex);
+  .lh-flex-direction(column);
+  .lh-flex-shrink(0);
+
+  .pl {
+    padding: 0 2.75%;
+  }
+
+  .viewBar {
+    position: relative;
+    .lh-flex-shrink(0);
+
+    #header{
+      position: absolute;
+      top: -30px;
+    }
+
+    .templateSwitcher {
+      min-width: 280px;
+      float: left;
+      border: 1px solid @topbarmenu-border-color;
+      border-bottom: 0;
+      padding-bottom: 7px;
+
+      a {
+
+        &:first-child {
+          border-right: 1px solid @topbarmenu-border-color;
+        }
+
+        &:nth-child(n+3) {
+          border-left: 1px solid @topbarmenu-border-color;
+        }
+      }
+    }
+
+    &Padding {
+      padding: 10px 0;
+    }
+
+    .contentViewSwitcher {
+      float: right;
+      margin-left: 10px;
+
+      .btn-list {
+        overflow: hidden;
+
+        li {
+          float: left;
+
+          a {
+            display: block;
+            width: 35px;
+            height: 32px;
+            background-color: @topbarmenu-block-bg;
+            border: 1px solid @topbarmenu-border-color;
+            text-align: center;
+            line-height: 32px;
+            color: @topbarmenu-font-color-menu;
+          }
+
+          &:first-child {
+            a {
+              border-right: none;
+              border-radius:2px 0 0 2px;
+            }
+          }
+
+          &:last-child {
+            a {
+              border-radius:0 2px 2px 0;
+            }
+          }
+        }
+      }
+    }
+
+    &Padding {
+      padding-bottom: 10px;
+
+      .createBtn {
+        margin: 0;
+      }
+    }
+  }
+
+  .promotionView {
+    .lh-display(flex);
+    .lh-justify-content(space-between);
+  }
+}
+
+.actionHolder {
+  position: relative;
+  margin: 0 10px;
+  float: left;
+
+  .holderBtn {
+    margin-left: 20px;
+    .btn(14, @main-sub-color, 120px);
+  }
+
+  .dropDown{
+    display: block;
+    width: 130px;
+    padding-left: 7px;
+    border: 1px solid @main-border-color;
+    line-height: 36px;
+    text-align: left;
+    color: @main-font-color;
+    cursor: pointer;
+    .pxToRem(14);
+  }
+
+  ul{
+    visibility: hidden;
+    position: absolute;
+    display: block;
+    width: 130px;
+    line-height: 30px;
+    opacity: 0;
+    z-index: 10;
+    .lh-transition(all ease .4s);
+    .pxToRem(14);
+
+    .editBtn{
+      background-color: @grayBtn;
+      border: 1px solid @main-border-color;
+      border-top: none;
+      color: @btnColorWhite;
+      padding-left: 7px;
+      cursor: pointer;
+    }
+
+    .archiveBtn{
+      background-color: @submitBtnBg;
+      border: 1px solid @main-border-color;
+      border-top: none;
+      color: @btnColorWhite;
+      padding-left: 7px;
+      cursor: pointer;
+    }
+
+    .subMenu{
+      visibility: hidden;
+      opacity: 0;
+      transition: all ease .3s;
+    }
+  }
+
+  .showActionDropDown{
+    visibility: visible;
+    opacity: 1;
+    transition: all ease .4s;
+
+    .hasSubMenu{
+
+      &:hover{
+
+        .subMenu{
+          visibility: visible;
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+.paginationHolder {
+  float: right;
+}
+.pagination {
+  width: 100%;
+  float: right;
+  margin-top: 2px;
+  .pxToRem(15);
+
+  div {
+    float: left;
+  }
+
+  .countOnPage {
+    float: left;
+    color: @topbarmenu-font-color-menu;
+    margin-left: 5px;
+
+    .countItems{
+      line-height: 33px;
+    }
+  }
+
+  .nextPrev {
+    float: right;
+    color: @topbarmenu-font-color-menu;
+
+    span{
+      line-height: 33px;
+    }
+  }
+
+  .firstShowPage {
+    margin: 0;
+    border: 1px solid @topbarmenu-border-color;
+    border-right: none;
+    background: @main-sub-color url("../images/pagination/first_page.png");
+    .pxToRem(12);
+    .lh-border-radius(2px 0 0 2px);
+  }
+
+  .previousPage,
+  .nextPage{
+    height: 29px;
+    width: 35px;
+    margin: 0 5px;
+    line-height: 29px;
+
+    &:after{
+      font-family: @iconFamily-1;
+      color: @main-font-color;
+    }
+  }
+
+  .previousPage {
+    background-color: @main-sub-color;
+    border: 1px solid @topbarmenu-border-color;
+    .pxToRem(12);
+    .lh-border-radius(2px 0 0 2px);
+
+    &:after{
+      content: '\e91b';
+    }
+  }
+
+  .nextPage {
+    background-color: @main-sub-color;
+    border: 1px solid @topbarmenu-border-color;
+    .pxToRem(12);
+    .lh-border-radius(0 2px 2px 0);
+
+    &:after{
+      content: '\e91c';
+    }
+  }
+
+  .lastShowPage{
+    margin: 0;
+    border: 1px solid @topbarmenu-border-color;
+    border-left: none;
+    background: @main-sub-color url("../images/pagination/last_page.png");
+    .pxToRem(12);
+    .lh-border-radius(0 2px 2px 0);
+  }
+
+  button {
+    color: @transparentBlack3;
+
+    &[disabled] {
+      color: @paginationBtnDisabled;
+      border: 1px solid @paginationBtnDisabled;
+      cursor: default;
+
+      &:after{
+        color: @paginationBtnDisabled;
+      }
+    }
+  }
+}
+
+.pageListWrap{
+  position: relative;
+  margin: 0 10px;
+
+  .iconsNum,
+  .currentPageList,
+  .currentShowPage{
+    display: inline-block;
+    height: 29px;
+    width: 30px;
+    padding-left: 7px;
+    background-color: @main-sub-color;
+    border: 0;
+    border-bottom: 1px solid @topbarmenu-border-color;
+    outline: 0;
+    line-height: 10px;
+    text-align: left;
+    .pxToRem(12);
+  }
+
+  .dropDownContent {
+    display: none;
+    position: absolute;
+    top: 28px;
+    left: 0;
+    width: 100%;
+    background-color: @main-sub-color;
+    border: 1px solid @topbarmenu-border-color;
+    box-shadow:0 2px 4px @boxShadowOne;
+    z-index: 3;
+    .pxToRem(12);
+
+    li {
+      display: block;
+      height: 20px;
+      width: 100%;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+
+      &:hover {
+        background-color: @topbarmenu-border-color;
+        color: @main-sub-color;
+        text-decoration: none;
+      }
+
+      a {
+        display: block;
+        width: 100%;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        color: @main-font-color;
+        .pxToRem(12);
+
+        &:hover {
+          background-color: @topbarmenu-border-color;
+          color: @main-sub-color;
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}
+.ulContent{
+  position: absolute;
+  top: 39px;
+  height: auto;
+  width: 100%;
+  background-color: @main-sub-color;
+  border-radius: 3px;
+  box-shadow:0 0 3px @grayMedium;
+  z-index: 6;
+  .pxToRem(14);
+
+  li{
+    padding: 5px 20px;
+  }
+
+  .prev,
+  .next{
+    color: @ListPrev;
+    .pxToRem(14);
+  }
+
+  .prev{
+    float: left;
+  }
+
+  .next{
+    float: right;
+  }
+
+  .miniStylePagination{
+    text-align: center;
+    line-height: 22px;
+    padding: 10px 15px;
+  }
+}
+

@@ -1,0 +1,17 @@
+<% var level = App.currentUser.accessRole.level; %>
+<div class="thumbnail planogram" data-id="<%=model._id%>">
+    <div class="thumbnailTop">
+        <% if ((level <=2) || (level >= 8)) { %>
+        <input type="checkbox"
+               value="<%=model._id%>"
+               id="<%=model._id%>"
+               class="customCheckbox hidden">
+        <label for="<%=model._id%>"
+               class="checkboxLabel"></label>
+        <% } %>
+        <img class="thumbnailImageSquare" src="<%=model.fileID && model.fileID.preview ? model.fileID.preview :'' %>">
+    </div>
+    <div class="thumbnailBottom">
+        <span class="configuration"><%= model.configuration.name %></span>
+    </div>
+</div>

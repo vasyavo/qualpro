@@ -1,0 +1,10 @@
+_:-ms-input-placeholder:root .leftMenuHolder,
+_:-ms-input-placeholder:root .rightMenuHolder {
+  height: 100%!important;
+}
+_:-ms-input-placeholder .absoluteContent {
+  height: calc(100% - 43px) !important;
+}
+_:-ms-input-placeholder .scrollable {
+  position: absolute!important;
+}

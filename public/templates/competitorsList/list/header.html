@@ -1,0 +1,58 @@
+<% var level = App.currentUser.accessRole.level; %>
+<div class="absoluteContent competitorTable">
+    <table>
+        <% if ((level <=2) || (level >= 8)) { %>
+        <colgroup class="forChange">
+            <col width="42px">
+        </colgroup>
+        <% } %>
+        <col width="40%">
+        <col width="30%">
+        <col width="30%">
+
+        <thead class="darkGrayHeader">
+        <tr>
+            <% if ((level <=2) || (level >= 8)) { %>
+            <th class="forChange checkboxArea alignCenter">
+                <input type="checkbox" id="checkAll" class="customCheckbox"/>
+                <label for="checkAll" class="checkboxLabel"></label>
+            </th>
+            <% } %>
+            <!-- <th class="oe_sortable" sort-type="1" data-sort="brand.name">
+                <div sort-type="1" class="sortedArrow" data-translation="brand"><%= translation.brand %></div>
+            </th> -->
+            <th class="oe_sortable" sort-type="1" data-sort="brand.name">
+                <div sort-type="1" class="sortedArrow" data-translation="product"><%= translation.product %></div>
+            </th>
+            <!-- <th class="oe_sortable" sort-type="1" data-sort="variant.name">
+                <div sort-type="1" class="sortedArrow" data-translation="variant"><%= translation.variant %></div>
+            </th> -->
+            <th class="oe_sortable" sort-type="1" data-sort="packing">
+                <div sort-type="1" class="sortedArrow" data-translation="packing"><%= translation.packing %></div>
+            </th>
+            <th data-sort="origin" data-translation="origin"><%= translation.origin %></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="4" class="colspanFix">
+                <div class="scrollable">
+                    <table class="list">
+                        <% if ((level <=2) || (level >= 8)) { %>
+                        <colgroup class="forChange">
+                            <col width="42px">
+                        </colgroup>
+                        <% } %>
+                        <col width="40%">
+                        <col width="30%">
+                        <col width="30%">
+                        <tbody class="listTable">
+
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

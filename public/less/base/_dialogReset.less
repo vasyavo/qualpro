@@ -1,0 +1,267 @@
+//dialog reset
+
+.ui-dialog {
+  position: absolute;
+  left: 50%!important;
+  top: 57px!important;
+  .lh-transform(translateX(-50%));
+
+  .ui-dialog-buttonpane {
+
+    .ui-dialog-buttonset {
+      float: none;
+    }
+  }
+
+  .filterBar{
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    margin: 0;
+    border: 0;
+  }
+
+  .contentHolder {
+    border: none;
+    overflow: visible;
+  }
+}
+
+.ui-dialog-titlebar {
+  display: none;
+}
+
+.ui-widget-content{
+  border: 0;
+}
+
+.ui-widget-header{
+  border: 0;
+  border-bottom: 1px solid @main-border-color;
+  background: transparent;
+}
+
+.ui-tabs{
+  padding: 0;
+
+  *{
+    outline: 0;
+  }
+
+  .ui-tabs-nav{
+    display: inline-block;
+    min-width: 150px;
+    padding: 0;
+    padding-bottom: 7px;
+    border: 1px solid @main-border-color;
+    border-bottom: 0;
+    border-left: 0;
+
+    li{
+      min-width: 140px;
+      margin: 0;
+      border-right: 1px solid @main-border-color;
+      border-bottom: 1px solid @main-border-color;
+
+      a{
+        border: 0;
+      }
+    }
+
+    li.ui-tabs-active {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+
+      .ui-tabs-anchor{
+        background-color: @main-sub-color;
+      }
+    }
+
+    li:last-child{
+      border-right: 0;
+    }
+
+    .ui-tabs-anchor{
+      width: 100%;
+      text-align: center;
+      padding: 0 20px;
+    }
+  }
+}
+
+.tabs {
+  ul {
+    li {
+      a {
+        background-color: @main-block-hover-bg;
+      }
+
+      .ui-tabs-active {
+        a {
+          background-color: @main-sub-color;
+        }
+      }
+    }
+  }
+}
+.ui-state-default {
+  border: 0;
+  border-radius: 0;
+  font-weight: normal;
+  color: @stateDefault;
+}
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+
+  &:extend(.ui-state-default);
+}
+
+.ui-widget {
+  font-family: @baseFontFamily2;
+  font-size: 14px;
+  font-weight: 400;
+
+  .ui-widget{
+
+    .ui-widget{
+      width: auto;
+      border-right: 1px solid @main-border-color;
+    }
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-family: @baseFontFamily2;
+  }
+}
+
+.dialogHandler {
+
+  .ui-dialog {
+    font-size: 16px ;
+    padding: 0;
+    background: @main-sub-color;
+    overflow: visible;
+    box-shadow:0 0 14px 1px @transparentBlack8;
+
+    .ui-dialog-content {
+      overflow: visible;
+    }
+    .ui-dialog-buttonpane{
+      margin-top: 0;
+      float: left;
+      height: 75px;
+      width: 100%;
+    }
+  }
+}
+.ui-dialog {
+
+  .ui-dialog-buttonpane {
+    margin-top: 0;
+    padding: 0;
+  }
+}
+
+.ui-corner-all,
+.ui-corner-bottom,
+.ui-corner-right,
+.ui-corner-br{
+  border-bottom-right-radius:0;
+  border-bottom-left-radius:0;
+  border-top-right-radius:0;
+  border-top-left-radius:0;
+}
+.ui-dialog-buttonpane {
+  border: 1px solid @gray1;
+  background: @main-sub-color;
+  background-image: none;
+  color: @main-font-color;
+  text-align: left;
+
+  &:before {
+    content: "";
+    display: table;
+    border-collapse: collapse;
+  }
+
+  &:after {
+    clear: both;
+    content: "";
+    display: table;
+    border-collapse: collapse;
+  }
+
+  .ui-dialog-buttonset {
+    text-align: right;
+    padding-right: 10px;
+
+    button {
+      position: relative;
+      display: inline-block;
+      width: 100px;
+      height: 36px;
+      padding: 0;
+      margin: 20px 10px 20px;
+      background-color: @btn-success;
+      background-image: none;
+      border-radius:0;
+      line-height: 48px;
+      font-size: 14px;
+      font-weight: 600;
+      vertical-align: middle;
+      text-align: center;
+      color: @main-sub-color;
+      cursor: pointer;
+      overflow: visible;
+
+      span {
+        display: block;
+        padding: .4em 1em;
+        font-family: @baseFontFamily2;
+        line-height: normal;
+        color: @main-sub-color;
+      }
+
+      &:hover,
+      &:active {
+        background-color: @btn-success;
+        .pxToRem(14px);
+      }
+    }
+  }
+}
+
+.ui-tabs{
+
+  .ui-tabs-panel{
+    width:100%;
+    border-top: 1px solid @borderGray;
+    padding: 0;
+
+    .ui-tabs {
+
+      .ui-tabs-panel {
+        border: 0;
+      }
+
+      .ui-tabs-nav{
+        width: 420px;
+        border-right: 0;
+
+        li{
+          width: 50% ;
+        }
+      }
+    }
+  }
+
+  .sub-form-holder{
+    display: inline-block;
+    width: 100%;
+  }
+}
+

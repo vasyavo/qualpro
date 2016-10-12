@@ -1,0 +1,69 @@
+<div id="viewBar" class="viewBar outletViewBar">
+    <div class="featureTitleWrap" data-translation="all">
+      <%=translation.all%>
+    </div>
+    <div class="filterBar singleFilter">
+
+    </div>
+
+    <div id="templateSwitcher" class="templateSwitcher">
+        <a href="javascript:;"
+           class="changeContentView filterType"
+           data-archived-type="false"
+           id="all"
+           data-translation="all">
+            <%=translation.all%>
+        </a>
+        <a href="javascript:;"
+           class="changeContentView filterType"
+           data-archived-type="true"
+           id="archived"
+           data-translation="archive">
+            <%=translation.archive%>
+        </a>
+    </div>
+
+    <% if (App.currentUser.accessRole.level < 3 || App.currentUser.accessRole.level > 7) { %>
+        <span id="createBtn" class="createBtn" data-translation="newButton"><%=translation.newButton%></span>
+    <% } %>
+
+    <% if (viewType === 'thumbnails') { %>
+
+    <div class="checkboxArea">
+        <input type="checkbox" id="checkAll" class="btnCustomCheckbox"/>
+        <label for="checkAll" class="btnCheckboxLabel" data-translation="selectAll"><%=translation.selectAll%></label>
+    </div>
+    <% } %>
+
+    <div id="actionHolder" class="actionHolder actionBtn hidden">
+        <span class="dropDown downArrow triUp" data-translation="action"><%=translation.action%></span>
+        <ul class="dropDownContent">
+            <li id="editBtn" class="editBtn" data-translation="edit"><%=translation.edit%></li>
+            <li id="archiveBtn" data-archived-type="false" class="archiveBtn" data-translation="disable"><%=translation.disable%></li>
+            <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn" data-translation="unDisable"><%=translation.unDisable%></li>
+        </ul>
+    </div>
+
+    <div id="contentViewSwitcher" class="contentViewSwitcher">
+        <ul class="btn-list">
+            <li>
+                <a href="javascript:;"
+                   class="tiles changeContentView <%= (viewType === 'thumbnails') ? 'viewBarBtnActive' : ''%>"
+                   data-view-type="thumbnails"
+                   id="thumbBtn">
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;"
+                   class="listView changeContentView <%= (viewType === 'list') ? 'viewBarBtnActive' : ''%>"
+                   data-view-type="list"
+                   id="listBtn">
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="paginationHolder" class="paginationHolder">
+
+    </div>
+
+</div>

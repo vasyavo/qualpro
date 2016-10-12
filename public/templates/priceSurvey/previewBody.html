@@ -1,0 +1,8 @@
+<% collection.forEach(function (model) { %>
+<tr>
+    <td><%= model.timeStamp %></td>
+    <td><%= model.branch.name.currentLanguage %></td>
+    <td><%= model.price %></td>
+    <td><%= model.employee.name.currentLanguage !== ' ' ? model.employee.name.currentLanguage : model.employee.name.en %></td>
+</tr>
+<% });%>

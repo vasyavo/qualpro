@@ -1,0 +1,973 @@
+/** TABLES **/
+table:not(.ui-datepicker-calendar) {
+  width: 100%;
+  table-layout: fixed;
+  text-align: left;
+
+  thead,
+  tbody {
+    tr {
+      height: 42px;
+      th,
+      td{
+        border: 1px solid @tableBorder;
+        padding-left: 8px;
+        font-weight: 400;
+      }
+    }
+  }
+
+  thead{
+    tr{
+      th,
+      td{
+        background-color: @tableHeaderBg;
+        .pxToRem(14);
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      td {
+        background-color: @tableBodyBgColor;
+        .pxToRem(12);
+      }
+    }
+  }
+  td,th {
+    .text-ellipsis;
+  }
+}
+
+table:not(.ui-datepicker-calendar):not(.singleColor) {
+  tbody{
+    tr{
+      td{
+        tr{
+          &:nth-child(even) {
+            td{
+              background-color: @tableEvenBg;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+table {
+  &.list {
+    td,
+    th {
+      white-space: normal;
+    }
+
+    img {
+      margin-top: 6px;
+      border-radius: 50%;
+      .lh-size(30px);
+    }
+
+    .withImg {
+      padding: 8px;
+
+      span {
+        display: inline-block;
+        margin-top: 8px;
+      }
+      img {
+        margin: 0;
+      }
+    }
+  }
+}
+
+.contentHolder {
+  table {
+    thead {
+      tr {
+        th {
+          border-top: 0;
+          border-left: 0;
+
+          &:nth-child(n+3){
+            text-align: left;
+            padding: 0 8px;
+          }
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          &:nth-child(n+3){
+            text-align: left;
+            padding: 0 8px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.sub-form-holder{
+
+  table {
+
+    &.list {
+      width: 380px;
+
+      td {
+
+        .scrollable{
+          height: 129px!important;
+          text-align: center;
+        }
+
+        span {
+          display: inline-block;
+        }
+      }
+
+      td[colspan] {
+        padding: 0;
+        border: 0;
+      }
+    }
+  }
+}
+
+.dialogHandler{
+  table {
+    thead {
+      tr {
+        th {
+          background-color: @contentholder-block-bg;
+
+          &:nth-child(n+3){
+            text-align: left;
+            padding: 0 8px;
+          }
+        }
+      }
+      &:first-child {
+        th {
+          input[type="checkbox"] {
+            + label {
+              display: block;
+              margin: 0 auto;
+            }
+          }
+        }
+      }
+    }
+    tbody {
+      overflow-x: auto;
+
+      tr {
+        td {
+
+          &:nth-child(n+3){
+            text-align: left;
+            padding: 0 8px;
+          }
+        }
+      }
+      &:first-child{
+        td{
+          border-top: 0;
+        }
+      }
+    }
+  }
+}
+
+.listWrap{
+  border: 1px solid @tableBorder;
+  margin-bottom: 5px;
+  table{
+    thead,
+    tbody{
+      td,
+      th{
+        &:first-child{
+          border-left: 0;
+        }
+        &:last-child{
+          border-right: 0;
+        }
+      }
+    }
+    thead{
+      tr{
+        th{
+          border-top: 0;
+        }
+      }
+    }
+  }
+}
+
+.colspanFix{
+  height: 100%;
+  padding: 0!important;
+  border: 0!important;
+  vertical-align: top;
+}
+
+.workflowContent{
+  overflow: hidden;
+}
+
+.ratingTitleWrap{
+  width: 100%;
+  padding: 0 20px;
+  line-height: 34px;
+  overflow: hidden;
+}
+
+.ratingTitle,
+.ratingTotal{
+  display: inline-block;
+}
+
+.ratingTableColumn{
+  float: left;
+
+  .tableRating{
+    clear: both;
+  }
+}
+
+.tableRating{
+  overflow: hidden;
+  float: left;
+
+  .ratingStandardsContainer{
+    float: left;
+    padding: 10px 20px;
+  }
+
+  table {
+    tbody {
+      tr {
+        td{
+          &:last-child {
+            .pxToRem(17);
+          }
+        }
+      }
+    }
+  }
+  .table_2{
+    width: 50%;
+  }
+}
+
+.absoluteWrap{
+  position: relative;
+  min-height: 250px;
+  table{
+    thead{
+      tr{
+        th{
+          &:first-child{
+            border-left: 1px solid @main-border-color;
+          }
+          &:last-child{
+            border-right: 1px solid @main-border-color;
+          }
+        }
+      }
+    }
+    tbody{
+      tr{
+        tr{
+          td{
+            &:first-child{
+              border-left: 1px solid @main-border-color;
+            }
+            &:last-child{
+              border-right: 1px solid @main-border-color;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.absoluteContent{
+  height: 100%;
+  position: absolute;
+
+  > table {
+    height: 100%;
+  }
+
+  table{
+
+    tbody{
+      height: 100%;
+    }
+
+    tr{
+      th{
+        &:first-child{
+          border-left: 0;
+        }
+        &:last-child{
+          border-right: 0;
+        }
+      }
+      tr{
+        &:first-child{
+          td{
+            border-top: none;
+          }
+        }
+        td{
+          &:first-child{
+            border-left: 0;
+          }
+          &:last-child{
+            border-right: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.alignBaseline{
+  tbody{
+    tr{
+      vertical-align: baseline;
+      td{
+        padding-top: 15px!important;
+        padding-bottom: 15px!important;
+        label{
+          top: 4px;
+        }
+      }
+      .userPost{
+        display: block;
+        color: @grayDark;
+      }
+    }
+  }
+}
+
+.previewDistribution {
+  .magicTableWrap{
+    position: relative;
+    width: 100%;
+    height: 400px;
+    float: left;
+    clear: both;
+    table{
+      thead{
+        tr{
+          th{
+            text-align: center;
+          }
+        }
+      }
+    }
+
+    .list{
+      tbody{
+        tr{
+          td{
+            vertical-align: top;
+            padding-top: 15px;
+            text-align: left;
+          }
+        }
+      }
+    }
+
+    .absoluteContent{
+      overflow: hidden;
+    }
+
+    .magicTableLeftPeace{
+      position: relative;
+      height: 100%;
+      width: 401px;
+      float: left;
+
+      .absoluteContent {
+
+        table {
+          width: 300px;
+          border-right: 1px solid @main-border-color;
+
+          tbody{
+            tr{
+              td{
+                background-color: @main-block-hover-bg;
+
+                &.textEllipsis {
+                  white-space: nowrap;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .leftHiddenScroll{
+        position: absolute;
+        height: calc(~" 100% - 42px");
+        overflow: hidden;
+      }
+    }
+
+    .magicTableRightPeace{
+      position: relative;
+      height: 100%;
+      width: calc(~"100% - 401px");
+      float: left;
+
+      .absoluteContent{
+        width: 100%;
+
+        .scrollable-yx{
+          position: absolute;
+          height: 100%;
+          max-height: calc(~"100% - 42px");
+          width: 100%;
+          max-width: 100%;
+          overflow: auto;
+
+          .mCSB_container_wrapper{
+            margin: 0;
+
+            > .mCSB_container{
+              padding-right: 0;
+              padding-bottom: 0;
+            }
+          }
+
+          .mCSB_scrollTools_horizontal{
+            width: 100%;
+          }
+        }
+      }
+      table{
+        thead{
+          tr{
+            th{
+              padding: 0 10px;
+              text-align: center;
+              span{
+                display: block;
+                .text-ellipsis;
+                .pxToRem(12px);
+              }
+            }
+          }
+        }
+      }
+
+      .topHiddenScroll {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+.activityTable {
+  table {
+    thead {
+      tr {
+        th {
+          padding: 0 24px;
+          &:nth-child(n+3) {
+            padding: 0 24px;
+          }
+        }
+      }
+    }
+    tbody {
+      tr {
+        td {
+          padding: 0 24px;
+          &:nth-child(n+3) {
+            padding: 0 24px;
+          }
+        }
+        &.listRow {
+          td {
+            .pxToRem(14px);
+          }
+        }
+      }
+    }
+  }
+}
+
+.linkForm{
+  height: 140px;
+  .row {
+    .cell {
+      line-height: 32px;
+    }
+  }
+}
+
+.categoryTableWrap {
+
+  .absoluteContent {
+
+    .competitorCategoryTable {
+
+      tr {
+
+        td {
+
+          &:first-child {
+            border: none;
+          }
+
+          &:last-child {
+            border-left: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+.competitorTextEllipsis {
+  vertical-align: middle;
+
+  span {
+    display: block;
+    .text-ellipsis;
+  }
+
+  &:hover {
+
+    span {
+      white-space: normal;
+      margin: 8px 0;
+    }
+  }
+}
+
+tr.clicked {
+  border: 1px double @green;
+}
+
+//ambivalent scroll tables
+.shelfShare {
+
+  &Dialog {
+    table {
+      width: auto;
+    }
+  }
+
+  &TableWrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    float: left;
+    clear: both;
+
+    table{
+      thead{
+        tr{
+          th{
+            text-align: center;
+          }
+        }
+      }
+    }
+
+    th, td {
+      padding: 8px;
+    }
+
+    th {
+      height: 60px;
+    }
+
+    td {
+      &:not(.colspanFix) {
+        height: 120px;
+        vertical-align: top;
+      }
+    }
+
+    .list{
+      tbody{
+        tr{
+          td{
+            vertical-align: top;
+            padding-top: 15px;
+            text-align: left;
+          }
+        }
+      }
+    }
+
+    .absoluteContent{
+      overflow: hidden;
+    }
+  }
+
+  &List {
+
+    li {
+      min-height: 30px;
+      padding: 8px;
+
+      &:first-child {
+        background-color: @tableEvenBg;
+      }
+      &:nth-child(n+2) {
+        border-top: 1px solid @main-border-color;
+      }
+    }
+  }
+
+  &LeftPeace,
+  &RightPeace{
+    position: relative;
+    height: 100%;
+  }
+
+  &LeftPeace {
+    position: relative;
+    height: 100%;
+    width: 170px;
+    float: left;
+
+    .singleColor {
+      border-right: 1px solid @main-border-color;
+    }
+
+    .absoluteContent {
+
+      table {
+        table-layout: auto;
+        width: 170px;
+        border-right: 1px solid @main-border-color;
+
+        tbody{
+          tr{
+            td{
+              background-color: @main-block-hover-bg;
+            }
+          }
+        }
+      }
+    }
+
+    .leftHiddenScroll{
+      position: absolute;
+      height: calc(~"100% - 42px");
+      overflow: hidden;
+    }
+  }
+
+  &RightPeace {
+    position: relative;
+    height: 100%;
+    width: calc(~"100% - 170px");
+    float: left;
+
+    table {
+      width: auto;
+      max-width: 100%;
+
+      thead {
+        tr{
+          th{
+            padding: 0 10px;
+            text-align: center;
+            span{
+              display: block;
+              .text-ellipsis;
+              .pxToRem(12px);
+            }
+          }
+        }
+      }
+      tbody,
+      thead {
+        td,
+        th {
+          width: 150px;
+          max-width: 150px;
+          min-width: 150px;
+          overflow:hidden;
+        }
+      }
+    }
+
+    .absoluteContent {
+      width: 100%;
+
+      table tr tr td:last-child {
+        border-right: 1px solid @main-border-color;
+      }
+    }
+
+    .topHiddenScroll {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .scrollable-yx{
+      position: absolute;
+      bottom: 0;
+      height: 100%;
+      max-height: calc(~"100% - 121px");
+      width: 100%;
+      max-width: 100%;
+      overflow: auto;
+
+      .mCSB_container_wrapper{
+        margin: 0;
+
+        > .mCSB_container{
+          padding-right: 0;
+          padding-bottom: 0;
+        }
+      }
+
+      .mCSB_scrollTools_horizontal{
+        width: 100%;
+      }
+    }
+  }
+}
+
+.priceSurvey {
+  &TableWrap {
+
+  }
+  &TableBody {
+
+  }
+  &LeftPeace {
+
+  }
+  &RightPeace {
+
+  }
+}
+
+.priceSurvey {
+
+  &Dialog {
+  }
+
+  &TableWrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    float: left;
+    clear: both;
+
+    table{
+      thead{
+        tr{
+          th{
+            text-align: center;
+          }
+        }
+      }
+      &:not(.ui-datepicker-calendar) {
+        tbody {
+          tr {
+            height: 50px;
+          }
+        }
+      }
+    }
+
+    th, td {
+      padding: 8px;
+    }
+
+    td {
+      &:not(.colspanFix) {
+        height: 50px;
+        vertical-align: top;
+      }
+    }
+
+    .sectionHeader {
+      td {
+        background-color: @main-block-hover-bg;
+      }
+    }
+
+    .list{
+      tbody{
+        tr{
+          td{
+            vertical-align: top;
+            padding-top: 15px;
+            text-align: left;
+          }
+        }
+      }
+    }
+
+    .absoluteContent{
+      overflow: hidden;
+    }
+  }
+
+  &List {
+    li {
+      display: inline-block;
+    }
+  }
+
+  &LeftPeace,
+  &RightPeace{
+    position: relative;
+    height: 100%;
+  }
+
+  &LeftPeace {
+    position: relative;
+    height: 100%;
+    width: 150px;
+    float: left;
+
+    .singleColor {
+      border-right: 1px solid @main-border-color;
+    }
+
+    .absoluteContent {
+
+      table {
+        table-layout: auto;
+        width: 150px;
+        border-right: 1px solid @main-border-color;
+
+        tbody{
+          //cursor: ns-resize;
+        }
+      }
+    }
+
+    .leftHiddenScroll{
+      position: absolute;
+      height: calc(~"100% - 42px");
+      overflow: hidden;
+    }
+  }
+
+  &RightPeace {
+    position: relative;
+    height: 100%;
+    width: calc(~"100% - 150px");
+    float: left;
+
+    table {
+      width: auto;
+      max-width: 100%;
+
+      thead {
+        tr{
+          th{
+            padding: 0 10px;
+            text-align: center;
+            span{
+              display: block;
+              .text-ellipsis;
+              .pxToRem(12px);
+            }
+          }
+        }
+      }
+      tbody,
+      thead {
+        td,
+        th {
+          width: 150px;
+          max-width: 150px;
+          min-width: 150px;
+          overflow:hidden;
+        }
+      }
+    }
+
+    .absoluteContent {
+      width: 100%;
+
+      table tr tr td:last-child {
+        border-right: 1px solid @main-border-color;
+      }
+    }
+
+    .topHiddenScroll {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .scrollable-yx{
+      position: absolute;
+      bottom: 0;
+      height: 100%;
+      max-height: calc(~"100% - 43px");
+      width: 100%;
+      max-width: 100%;
+      overflow: auto;
+
+      .mCSB_container_wrapper{
+        margin: 0;
+
+        > .mCSB_container{
+          padding-right: 0;
+          padding-bottom: 0;
+        }
+      }
+
+      .mCSB_scrollTools_horizontal{
+        width: 100%;
+      }
+    }
+  }
+}
+
+.clickableTable {
+  tbody {
+    td {
+      cursor: pointer;
+
+      input {
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.promotionTableWrap {
+  .absoluteContent {
+    .scrollable {
+      width: calc(~"100% - 2px");
+    }
+  }
+}

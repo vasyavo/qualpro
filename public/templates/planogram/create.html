@@ -1,0 +1,63 @@
+<div class="">
+    <div class="title">
+        <span class="titleDescription" data-translation="createPlanogram"><%= translation.createPlanogram%></span>
+    </div>
+    <form method="post" action="" id="createPlanogramForm" class="form">
+        <div class="inner flexRow">
+            <div class="avatar noShrink">
+                <div class="thumbnail_js thumbnailBody">
+                    <img id="img" width='150'
+                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWAQMAAAAGz+OhAAAABlBMVEXNy8v///83JiJ6AAABlUlEQVRIx+3UMWrEQAyFYQ0Dcekj+ApbpgjrK6XcbuZocxQfYUoXZhRJtmGfxhAIKUJYNbt8jX+EZXrNv5vEzKszltmQglpDi6zzMxuuTJ/pbdXGX7fvn9uIwlXzn7VQe4trb8PW29hiZxOHC8sXVpK3kZfZ28B1YobX6C3yOvI++bApsAbalNOINdBmOWzOicNh9bQyc/a2SOCD0KoESiXYOuj/CLZFuw2wFuw20rOxBOovmATqKsA0UFYBpoHJmQbOJYJp4FQDmAaOG4Fp4NDQ2DZICcw2mNFsg3kGs8DizAInNA1cnGmgs6KB3jSwepPAOjqTQG83Cfx09i6BN2cfEkjO7hLobZbAzjI3mtxeSuLOFgn0ViUQrY6rbhBt2HSDzppuEGyNrBtECyyBEWwjPc0A1ihpoDMLTM/GFKsGguX9isEKkQaCyW1pIJjdUYtg+x0FMN5vB63snxmwlR4aCMZsG3RmGzxt2s02uKDZBgt8YNk2mA8LO+1XjGOBnY0XNlxYvLCg5odzb4n6udNrXnPOF+LsukzuroMwAAAAAElFTkSuQmCC"
+                         alt="">
+                </div>
+                <div class="upload mandatory">
+                    <p class="uploadValue" data-translation="addPhoto"><%= translation.addPhoto%></p>
+                    <input accept=".jpeg, .jpg, .png, .tiff, .bmp"
+                           type="file"
+                           name="inputImg"
+                           value="Edit"
+                           id="inputImg"
+                           class="uploadInput">
+                </div>
+            </div>
+            <div class="createPlanogramForm">
+                <div class="table">
+                    <div class="row">
+                        <div class="cell">
+                            <label for="countrySelect" class="required" data-translation="country">
+                                <%= translation.country%>
+                            </label>
+                        </div>
+                        <div id="countrySelect" data-content="country" class="itemSelect cell mandatory"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="retailSegmentSelect" class="required" data-translation="retailSegment">
+                                <%= translation.retailSegment %>
+                            </label>
+                        </div>
+                        <div id="retailSegmentSelect" data-content="retailSegment"
+                             class="itemSelect cell mandatory"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="productSelect" class="required" data-translation="product">
+                                <%= translation.product%>
+                            </label>
+                        </div>
+                        <div id="productSelect" data-content="product" class="itemSelect cell mandatory"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="configurationSelect" class="required" data-translation="configuration">
+                                <%= translation.configuration%>
+                            </label>
+                        </div>
+                        <div id="configurationSelect" data-content="configuration"
+                             class="itemSelect cell mandatory"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

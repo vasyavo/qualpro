@@ -1,0 +1,206 @@
+.promotion {
+
+  &ItemsDialogWrap {
+    height: 100%;
+  }
+
+  &View {
+    height: 100%;
+
+    .competitorBrandingPreview {
+      height: calc(~"100% - 97px");
+
+      //.blockObjective {
+      //  height: 100%;
+      //}
+    }
+  }
+
+  &Form {
+    height: calc(~"100% - 50px");
+
+    .block-left,
+    .block-right {
+      height: 100%;
+    }
+  }
+
+  &TableWrap {
+    height: calc(~"100% - 50px");
+    position: relative;
+
+    table {
+      thead {
+        tr {
+          th {
+            white-space: normal;
+            text-overflow: inherit;
+            text-align: center;
+            &:last-child {
+              //border-right: none;
+            }
+          }
+        }
+      }
+      tbody {
+        tr {
+          &:first-child {
+            td {
+              border-top: none;
+            }
+          }
+        }
+      }
+    }
+
+    .paginationHolder {
+      padding: 5px;
+    }
+
+    .absoluteContent {
+      height: calc(~"100% - 89px");
+    }
+
+    .commentDescription {
+      padding-right: 10px;
+
+      p {
+        white-space: normal;
+      }
+
+      .commentEllipsis {
+        margin-bottom: 10px;
+        height: 50px;
+      }
+
+      .brandItem {
+        max-width: 170px;
+
+        img {
+          width: 100%;
+          height: auto;
+        }
+        span {
+          display: block;
+          white-space: normal;
+        }
+      }
+    }
+
+    .showDescription {
+      background-color: @main-sub-color;
+
+      &:after,&:before {
+        background-color: @main-sub-color;
+      }
+    }
+  }
+
+  &TableList {
+    height: 1px;
+
+    ul {
+      .lh-display(flex);
+      .lh-flex-direction(column);
+      .lh-justify-content(center);
+      height: 100%;
+
+      li {
+        height: 42px;
+        line-height: 42px;
+        text-align: center;
+
+        &:nth-child(n+2) {
+          border-top: 1px solid @main-border-color;
+        }
+      }
+    }
+  }
+}
+
+.competitorBranding {
+
+  .blockObjective {
+    .table {
+      .row {
+        .cell {
+          max-width: 150px;
+        }
+      }
+    }
+  }
+}
+
+.notificationsObjectiveCell {
+  display: block;
+}
+.competitorBranding,
+.competitorBrandingPreview{
+  .block-left {
+    .table {
+      padding: 5px 20px;
+    }
+  }
+  //.block-right {
+  //  border-left: 1px solid @main-border-color;
+  //}
+}
+
+.promotionsItemsDialog {
+  height: 90%!important;
+  width: 80%!important;
+
+  > .ui-dialog-content {
+    height: calc(~"100% - 75px")!important;
+  }
+}
+
+.markedList {
+  &.markedListHover {
+    li {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  li {
+    &:last-child {
+      background-color: @gray;
+    }
+  }
+}
+
+.bannerWithoutBorder {
+  box-shadow: none;
+}
+
+.objectivesPaddingBlock {
+  width: 100%;
+}
+
+.promoTableUserName {
+  font-weight: bold;
+}
+
+.competitorCategoeyColumn {
+  max-width: 60%;
+}
+
+.promotionTableList {
+  ul {
+
+  }
+}
+
+.employeeBox {
+  span {
+    display: block;
+  }
+
+  .secondEmployeeSpan {
+    color: @gray14;
+    font-size: 12px;
+  }
+}

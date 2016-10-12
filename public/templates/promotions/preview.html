@@ -1,0 +1,176 @@
+<div class="form-holder personnelInfo promotionView largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.preViewTitle%></span>
+    </div>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap">
+        </div>
+    </div>
+    <div id="main" class="competitorBrandingPreview">
+
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.category%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="category" class="textEllipsis hoverFullText"><%=  jsonModel.categoryString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.country%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="country" class="textEllipsis hoverFullText"><%= jsonModel.countryString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.region%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="region" class="textEllipsis hoverFullText"><%= jsonModel.regionString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.subRegion%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="subRegion" class="textEllipsis hoverFullText"><%= jsonModel.subRegionString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.retailSegment%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="retailSegment" class="textEllipsis hoverFullText"><%= jsonModel.retailSegmentString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.outlet%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="outlet" class="textEllipsis hoverFullText"><%= jsonModel.outletString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.branch%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="branch" class="textEllipsis hoverFullText"><%= jsonModel.branchString || 'No translation' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.displayType%></span>
+                            </div>
+                            <div class="cell">
+                                <span class="textEllipsis hoverFullText"><%= jsonModel.displayTypeString || 'No translation'  %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.barcode%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="barcode" class="textEllipsis hoverFullText"><%= jsonModel.barcode || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.packing%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="packing" class="textEllipsis hoverFullText"><%= jsonModel.packing || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.ppt%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="ppt" class="textEllipsis hoverFullText"><%= jsonModel.ppt || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.totalQuantity%></span>
+                            </div>
+                            <div class="cell">
+                                <span id="quantity" class="textEllipsis hoverFullText"><%= jsonModel.quantity || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.dateStart %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate%></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= jsonModel.dateEnd %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="objectivesPaddingBlock borderBottom">
+                        <div class="descriptionBlock floatBlock">
+                            <span><%= translation.promotionType%></span>
+                        </div>
+                        <span id="description" class="descriptionValue heightDescription fontBold fontMedium mCustomScrollbar"><%= jsonModel.promotionType.currentLanguage || 'No translation'  %></span>
+                    </div>
+
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold"><%= translation.attachments%></span>
+                        </div>
+                        <div class="promotionFilesBlock">
+                            <div id="objectiveFileThumbnail" class="fileThumbnail masonryThumbnailsWrapper">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="objectivesPaddingBlock innerScroll">
+                        <div class="absoluteContent">
+                            <div class="scrollable">
+                                <div class="commentWrapper" id="commentWrapper"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="blockBottom objectivesPaddingBlock">
+            <div class="objectivesBtnBlock">
+                <span class="greyBtn" id="attachFiles"><%= translation.attachFiles%></span>
+                <span class="greyBtn" id="sendComment"><%= translation.saveBtn%></span>
+                <div class="fileBottom">
+                    <span class="attachment"></span>
+                    <span id="newCommentAttachments"></span>
+                    <div id="fileThumbnail"></div>
+                </div>
+            </div>
+            <div class="objectivesTextareaWrap">
+                <textarea class="objectivesTextarea" id="commentInput"></textarea>
+            </div>
+            <form action="" method="post" id="commentForm" style="display: none;"></form>
+        </div>
+    </div>
+</div>

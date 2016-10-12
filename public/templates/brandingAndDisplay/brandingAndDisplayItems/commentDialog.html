@@ -1,0 +1,37 @@
+<div class="form-holder personnelInfo promotionView displayBrandingDialogContainer">
+    <div class="displayBrandingDialogLeft">
+        <div class="">
+            <span class="titleDescription"><%= translation.attachments%></span>
+        </div>
+
+        <div id="attachments" class="attachmentsBlock">
+            <div class="promotionFilesBlock brandDisplayComments">
+                <div class="scrollable mCustomScrollbar brandingAttachHeight">
+                    <div id="objectiveFileThumbnail" class="fileThumbnail  masonryThumbnailsWrapper clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="displayBrandingDialogRight">
+        <div class="rightTitle">
+            <span class="titleDescription"><%= translation.comments%></span>
+        </div>
+        <div class="blockBottom objectivesPaddingBlock rightObjectivesContainer">
+            <div class="objectivesBtnBlock">
+                <span class="greyBtn" id="attachFiles"><%= translation.attach %></span>
+                <span class="greyBtn" id="sendComment"><%= translation.send %></span>
+            </div>
+            <div class="objectivesTextareaWrap">
+                <textarea class="objectivesTextarea" id="commentInput"></textarea>
+            </div>
+            <form action="" method="post" id="commentForm" style="display: none;"></form>
+            <div class="objectivesPaddingBlock innerScroll">
+                <div class="absoluteContent">
+                    <div class="scrollable mCustomScrollbar">
+                        <div class="commentWrapper" id="commentWrapper"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

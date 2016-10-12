@@ -1,0 +1,45 @@
+<div class="dialog_js form-holder">
+    <div class="title">
+        <span class="titleDescription"><%= translation.userProfile %></span>
+    </div>
+    <div id="previewPersonnel" class="previewPersonnel">
+        <div class="tabs">
+            <% if (!model.temp && isEvaluation) { %>
+            <ul>
+                <li data-width="auto"><a href="#main"><%= translation.main %></a></li>
+                <% if([5,6,7,8,9].indexOf(App.currentUser.accessRole.level) === -1) { %>
+                <li data-width="80%"><a href="#evaluation"><%= translation.employeesEvaluation %></a></li>
+                <% } %>
+            </ul>
+            <% } %>
+            <div id="main" class="inner previewPersonnelInner">
+            </div>
+            <% if (!model.temp && isEvaluation && canViewEvaluation) { %>
+            <div id="evaluation" class="inner evaluationContainer">
+                <div class="personnelPerformance">
+                    <div class="subtitle">
+                        <span class="subtitleDescription"><%= translation.userPerformance %></span>
+                    </div>
+                    <div id="evaluationPersonnel" class="evaluationPersonnel">
+                        <div class="tabs">
+                            <ul>
+                                <li data-width="80%"><a href="#monthly"><%= translation.monthlyEvaluation %></a></li>
+                                <li data-width="80%"><a href="#biYearly"><%= translation.biYearlyEvaluation %></a></li>
+                            </ul>
+                            <div id="monthly" class="inner monthly">
+                            </div>
+                            <div id="biYearly" class="inner biYearly">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="personnelTasks">
+                    <div class="subtitle">
+                        <span class="subtitleDescription"><%= translation.userTasks %></span>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+<div class="dropDownInputWrap">
+    <div class="dropDownInput">
+        <input id="<%= contentType %>Dd" autocomplete="off" data-property="<%= dataProperty || contentType %>" type="text" class="grayDropdownInput dropDown formField" placeholder="<%= displayText %>"
+               value="">
+        <span class="dropDown downArrow triDown"></span>
+    </div>
+    <% if (forPosition) { %>
+    <div class="forPosition">
+        <% } %>
+        <div class="dropDownContent dropDownList">
+            <ul class="dropDownItems">
+                <!-- dropDownContent template -->
+            </ul>
+            <li class="dropDownPagination">
+                <a href="javascript:;" class="prev">&lt;Prev</a>
+                <span class="counter"></span>
+                <a href="javascript:;" class="next">Next&gt;</a>
+            </li>
+        </div>
+        <% if (forPosition) { %>
+    </div>
+    <% } %>
+</div>

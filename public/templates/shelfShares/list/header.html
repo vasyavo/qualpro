@@ -1,0 +1,12 @@
+<th>
+    <span><%= translation.total %></span>
+    <div class="flexRow">
+        <span><%= translation.max %></span>
+        <span><%= translation.mid %></span>
+        <span><%= translation.min %></span>
+    </div>
+</th>
+
+<% for (var i = 0; i < maxBrandsLength; i++) { %>
+    <th><%= translation.brand %> <%= i + 1 %></th>
+<% }; %>

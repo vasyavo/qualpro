@@ -1,0 +1,86 @@
+.rightMenuHolder {
+  margin: 0 10px;
+  margin-top: 10px;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: calc(~"100% - 20px");
+// don't attach lh-prefixes to this block!!
+}
+
+.breadcrumbsContainerWrap{
+  position: absolute;
+  top: -25px;
+  .lh-display(flex);
+  .pxToRem(16);
+
+  .countryLabel,
+  .breadcrumbsContainer{
+    float: left;
+  }
+
+  .countryLabel{
+    margin-right: 5px;
+    color: @main-font-color;
+    .pxToRem(16);
+  }
+
+  .breadcrumb{
+    margin-right: 5px;
+    cursor: pointer;
+
+    &:before {
+      content: '\e91c';
+      display: inline-block;
+      font-family: @iconFamily-1;
+      cursor: default;
+      .pxToRem(13);
+    }
+  }
+
+  // this is awesome fix for arabic breadcrumbs
+  .breadcrumbsContainer{
+    .lh-display(flex);
+    .lh-flex-wrap(wrap);
+
+    .breadcrumb{
+      white-space: nowrap;
+
+      &:nth-child(2){
+        .lh-order(1);
+      }
+      &:nth-child(3){
+        .lh-order(2);
+      }
+      &:nth-child(4){
+        .lh-order(3);
+      }
+      &:nth-child(5){
+        .lh-order(4);
+      }
+      &:nth-child(6){
+        .lh-order(5);
+      }
+      &:nth-child(7){
+        .lh-order(8);
+      }
+      &:nth-child(8){
+        .lh-order(7);
+      }
+      &:nth-child(9){
+        .lh-order(8);
+      }
+      &:nth-child(10){
+        .lh-order(9);
+      }
+    }
+  }
+}

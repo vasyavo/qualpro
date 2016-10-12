@@ -1,0 +1,20 @@
+<% collection.forEach(function(model, index){ %>
+<div class="notesItem listRow" data-id="<%= model._id %>">
+    <div class="notesUser flexRowStart">
+        <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+        <span class="fontBold textEllipsis"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></span>
+    </div>
+    <div class="locationBlock">
+        <div class="locationTitle">
+            <span class="fontBold"><%= model.title || '' %></span>
+            <span class="dates floatRight"><%=model.createdBy.date || ''%></span>
+        </div>
+        <div class="fontSmall"><%=model.theme || ''%></div>
+        <div class="fontSmall fontGray textEllipsis multiEllipsis childEllipsis"><%=model.description || ''%></div>
+    </div>
+    <div class="actionsBlock">
+        <span class="editContent bottomLine"></span>
+        <span class="trash"></span>
+    </div>
+</div>
+<% }) %>

@@ -1,0 +1,100 @@
+<% var accessLevel = App.currentUser.accessRole.level; %>
+<div class="monthlyEvaluationWrapper">
+    <div class="title">
+        <span class="titleDescription"><%= translation.monthlyFormPreviewTitle %></span>
+        <% if (accessLevel > 0 && accessLevel < 3 && accessLevel < personnelAccessLevel) { %>
+        <span id="editBtn" class="createBtn floatRight"> <%= translation.editBtn %></span>
+        <% } %>
+    </div>
+    <div class="topContentWrap">
+        <div class="monthlyBoxWrap">
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.individualObjectives %>
+                </div>
+                <div id="individualObjectivesTable" data-content="objectives" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.companyObjectives %>
+                </div>
+                <div id="companyObjectivesTable" data-content="objectives" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+        </div>
+        <div class="monthlyBoxWrap">
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.inStoreTasks %>
+                </div>
+                <div id="inStoreTasksTable" data-content="inStoreTasks" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.submittingReports %>
+                </div>
+                <div id="submittingReportsTable" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottomContentWrap">
+        <div class="leftBottomContentWrap">
+            <div class="achievementHolder">
+                <div class="titleHolder">
+                    <%= translation.achievement %>
+                </div>
+                <div class="monthlyEvaluationBottomTableWrap">
+                    <table>
+                        <colgroup>
+                            <col width="120px">
+                            <col width="120px">
+                            <col width="80px">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th><%= translation.target %></th>
+                            <th><%= translation.achiev %></th>
+                            <th>%<%= translation.age.toUpperCase() %></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <span id="target"><%= model.target %></span>
+                            </td>
+                            <td>
+                                <span id="achiev"><%= model.achiev %></span>
+                            </td>
+                            <td>
+                                <span id="age"><%= model.age %>%</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="rightBottomContentWrap">
+            <div class="performanceHolder">
+                <div class="titleHolder">
+                    <%= translation.performance %>
+                </div>
+                <select id="rating" class="rating">
+                    <option value="0" <%= model.rating == 0 ? 'selected' : '' %>>0</option>
+                    <option value="1" <%= model.rating == 1 ? 'selected' : '' %>>1</option>
+                    <option value="2" <%= model.rating == 2 ? 'selected' : '' %>>2</option>
+                    <option value="3" <%= model.rating == 3 ? 'selected' : '' %>>3</option>
+                    <option value="4" <%= model.rating == 4 ? 'selected' : '' %>>4</option>
+                    <option value="5" <%= model.rating == 5 ? 'selected' : '' %>>5</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>

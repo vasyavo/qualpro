@@ -1,0 +1,131 @@
+<div class="form-holder personnelInfo promotionView largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%=translation.viewNotification%></span>
+    </div>
+    <div id="main" class="notificationPreviewForm">
+
+        <div class="blockObjective scrollingForm">
+
+            <% var country       = [];%>
+            <% var region        = [];%>
+            <% var subRegion     = [];%>
+            <% var branch        = [];%>
+            <% var retailSegment = [];%>
+            <% var outlet        = [];%>
+            <% var position      = [];%>
+            <% var name          = [];%>
+            <% jsonModel.country.forEach(function(item){ %>
+                <% country.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.region.forEach(function(item){ %>
+                <% region.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.subRegion.forEach(function(item){ %>
+                <% subRegion.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.branch.forEach(function(item){ %>
+                <% branch.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.retailSegment.forEach(function(item){ %>
+                <% retailSegment.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.outlet.forEach(function(item){ %>
+                <% outlet.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.position.forEach(function(item){ %>
+                <% position.push(item.name[jsonModel.currentLanguage]); %>
+            <% }); %>
+            <% jsonModel.recipients.forEach(function(item){ %>
+                <% if (item.position) { %>
+                    <% position.push(item.position.name[jsonModel.currentLanguage]); %>
+                <% } %>
+                <% name.push(item.firstName[jsonModel.currentLanguage]+ ' ' + item.lastName[jsonModel.currentLanguage]); %>
+            <% }); %>
+
+
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.country%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="country" class="hoverFullText"><%= country.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.region%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="region" class="hoverFullText"><%= region.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.subRegion%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="subRegion" class="hoverFullText"><%= subRegion.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.tradeChannel%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="retailSegment" class="hoverFullText"><%= retailSegment.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.outlet%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="outlet" class="hoverFullText textEllipsis"><%= outlet.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.branch%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="branch" class="hoverFullText textEllipsis"><%= branch.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.position%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="position" class="hoverFullText textEllipsis"><%= position.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.employee%></span>
+                            </div>
+                            <div class="cell" textEllipsis>
+                                <span id="employee" class="hoverFullText textEllipsis"><%= name.join(', ') || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%=translation.date%></span>
+                            </div>
+                            <div class="cell textEllipsis">
+                                <span id="date" class="hoverFullText textEllipsis"><%= jsonModel.createdBy.date || '' %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="notificationText"><%= jsonModel.description.currentLanguage %></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+<% var contentType = contentType || 'noCT'%>
+<% var searchId = 'searchInput' + contentType%>
+<% if (showHeader) { %>
+<div class="filterHeader">
+    <span class="toogleFilters upArrow" data-translation="filters"><%= translation.filters %></span>
+    <span class="searchInputWrap">
+        <input type="text" data-translation="search" placeholder="<%=translation.search%>" id="<%=searchId %>"
+               class="searchInput" value="" required/>
+        <!--<button id="searchResetBtn" class="searchResetBtn" type="reset"></button>-->
+        <label for="<%=searchId %>"></label>
+    </span>
+</div>
+<% } %>
+<div class="filterContentHolder">
+    <div class="filtersFullHolder">
+        <% if (showClear) { %>
+        <span class="clearBtn" data-translation="clear"><%=translation.clear%></span>
+        <% } %>
+        <% if (!showHeader) { %>
+        <span class="searchInputWrap translatedSearch">
+            <input type="text" data-translation="search" placeholder="<%=translation.search%>" id="<%=searchId %>" class="searchInput" value="" required/>
+            <label for="<%=searchId %>"></label>
+        </span>
+        <% } %>
+    </div>
+</div>

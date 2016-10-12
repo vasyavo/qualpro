@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name='csrf-token' content={{ csrfToken }}>
+    <meta name='phoneNumber' content={{ phoneNumber }}>
+    <title>enter code</title>
+    <script src="../js/libs/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="../css/icons.css"/>
+    <style>
+        h2,
+        span,
+        .description {
+            color: #546e7a
+        }
+
+        a {
+            text-decoration: none;
+            color: darkorange;
+        }
+
+        .login-button,
+        h2 {
+            text-align: center
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-size: 100%;
+            line-height: 1.42857143;
+            font-family: proxima_nova_rgregular, sans-serif
+        }
+
+        h2 {
+            font-size: 18px
+        }
+
+        lesshat-selector {
+            -lh-property: 0;
+        }
+
+        @-webkit-keyframes errorAnimate {
+            0% {
+                opacity: 0;
+                -webkit-transform: translate3d(100%, 0, 0);
+            }
+            15% {
+                opacity: 1;
+                -webkit-transform: none;
+            }
+            85% {
+                opacity: 1;
+                -webkit-transform: none;
+            }
+            100% {
+                display: none;
+                opacity: 0;
+                -webkit-transform: translate3d(100%, 0, 0);
+            }
+        }
+
+        @-moz-keyframes errorAnimate {
+            0% {
+                opacity: 0;
+                -moz-transform: translate3d(100%, 0, 0);
+            }
+            15% {
+                opacity: 1;
+                -moz-transform: none;
+            }
+            85% {
+                opacity: 1;
+                -moz-transform: none;
+            }
+            100% {
+                display: none;
+                opacity: 0;
+                -moz-transform: translate3d(100%, 0, 0);
+            }
+        }
+
+        @-o-keyframes errorAnimate {
+            0% {
+                opacity: 0;
+                -o-transform: translate3d(100%, 0, 0);
+            }
+            15% {
+                opacity: 1;
+                -o-transform: none;
+            }
+            85% {
+                opacity: 1;
+                -o-transform: none;
+            }
+            100% {
+                display: none;
+                opacity: 0;
+                -o-transform: translate3d(100%, 0, 0);
+            }
+        }
+
+        @keyframes errorAnimate {
+            0% {
+                opacity: 0;
+                -webkit-transform: translate3d(100%, 0, 0);
+                -moz-transform: translate3d(100%, 0, 0);
+                -ms-transform: translate3d(100%, 0, 0);
+                transform: translate3d(100%, 0, 0);
+            }
+            15% {
+                opacity: 1;
+                -webkit-transform: none;
+                -moz-transform: none;
+                -ms-transform: none;
+                transform: none;
+            }
+            85% {
+                opacity: 1;
+                -webkit-transform: none;
+                -moz-transform: none;
+                -ms-transform: none;
+                transform: none;
+            }
+            100% {
+                display: none;
+                opacity: 0;
+                -webkit-transform: translate3d(100%, 0, 0);
+                -moz-transform: translate3d(100%, 0, 0);
+                -ms-transform: translate3d(100%, 0, 0);
+                transform: translate3d(100%, 0, 0);
+            }
+
+        ;
+        }
+
+        #errorHandler .animate {
+            -webkit-transform: translate3d(100%, 0, 0);
+            -moz-transform: translate3d(100%, 0, 0);
+            -ms-transform: translate3d(100%, 0, 0);
+            -o-transform: translate3d(100%, 0, 0);
+            transform: translate3d(100%, 0, 0);
+            opacity: 0;
+            -webkit-animation-fill-mode: both;
+            -moz-animation-fill-mode: both;
+            -o-animation-fill-mode: both;
+            animation-fill-mode: both;
+            -webkit-animation: 5s errorAnimate linear;
+            -moz-animation: 5s errorAnimate linear;
+            -o-animation: 5s errorAnimate linear;
+            animation: 5s errorAnimate linear;
+        }
+
+        #errorHandler {
+            position: fixed;
+            width: 300px;
+            right: 0;
+            height: 0;
+            z-index: 20000;
+        }
+
+        #errorHandler .error,
+        #errorHandler .notification,
+        #errorHandler .alert {
+            position: relative;
+            width: 300px;
+            padding: 20px 20px 20px 60px;
+            background-color: #ffffff;
+            border: 1px solid #cfd8dc;
+            border-top: 0;
+            border-right: 0;
+            overflow: hidden;
+        }
+
+        #errorHandler .error:after,
+        #errorHandler .notification:after,
+        #errorHandler .alert:after {
+            position: absolute;
+            font-family: 'icomoon';
+            display: block;
+            top: 14px;
+            left: 14px;
+            color: #f44336;
+            font-size: 30px;
+            font-size: 1.875rem;
+        }
+
+        #errorHandler .error:after {
+            content: '\e93c';
+            color: #f44336;
+        }
+
+        #errorHandler .notification:after {
+            content: '\e93b';
+            color: #00c853;
+        }
+
+        #errorHandler .alert:after {
+            content: '\e944';
+            color: #ff9800;
+        }
+
+        .loginDiv .mainLogo {
+            display: block;
+            margin-bottom: 50px;
+            text-align: center
+        }
+
+        .login-button {
+            display: block;
+            width: 100%;
+            background-color: #f44336;
+            color: #fff;
+            line-height: 64px;
+            border: 0;
+            border-radius: 4px;
+            font-size: 1.125em;
+            text-transform: uppercase;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .loginDiv fieldset {
+            width: 400px;
+            min-height: 120px;
+            padding: 45px 32px 30px;
+            margin: 0 auto;
+            border: none;
+            border-radius: 2px;
+            box-shadow: 0 0 6px rgba(26, 24, 25, .5)
+        }
+
+        .loginDiv fieldset input[type=text] {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 24px;
+            height: 40px;
+            padding: 0 40px 0 10px;
+            background-color: #f2f0f4;
+            border: none
+        }
+
+        .lockedBlock .icon:after {
+            content: '\e938';
+            position: absolute;
+            top: 18px;
+            right: 13px;
+            line-height: normal;
+            font-family: icomoon;
+            color: #b7bac0;
+            font-size: 20px;
+            font-size: 1.25rem
+        }
+
+        input[type=text]:focus + .icon:after {
+            color: #70a5fb
+        }
+
+        .lockedBlock {
+            position: relative
+        }
+
+        .description {
+            display: block;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+<div id="errorHandler" class="notification"></div>
+<div>
+    <div class="loginDiv">
+        <a title="Return to the al alali homepage" class="mainLogo"><img
+                src="..\images\main-logo.png" alt="logo"/></a>
+        <form id="sendChangePass" action="{{host}}/personnel/checkVerificationCode/" method="post">
+            <fieldset>
+                <h2>Password reset</h2>
+
+                <span>Enter verification code from SMS</span>
+
+                <label for="code" class="description">Verification code</label>
+                <div class="lockedBlock">
+                    <input type="text" id="code" name="code" value="" autofocus
+                           maxlength="6"/>
+                    <label for="code" class="icon"></label>
+                </div>
+
+                <a id="submitButton" href="javascript:;" class="login-button">Submit</a>
+                <span id="sms">Have you not received the SMS?</span>
+                <a id="clickHere" href="javascript:;" data-url="{{host}}/{{sendSMSUrl}}" class="clickHere">Click
+                    here</a>
+            </fieldset>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+
+    var frm = $('#sendChangePass');
+    var button = frm.find('#submitButton');
+    var buttonClickHere = frm.find('#clickHere');
+    var CSRF_TOKEN = $("meta[name='csrf-token']").attr('content');
+    var phoneNumber = $("meta[name='phoneNumber']").attr('content');
+    var code;
+
+    buttonClickHere.click(function (ev) {
+        var url = $(ev.target).attr('data-url');
+        var type = frm.attr('method');
+        var data = {};
+        data['login'] = phoneNumber;
+        data['ifPhone'] = true;
+
+        $.ajax({
+            headers: {
+                'X-CSRF-Token': CSRF_TOKEN
+            },
+            type   : type,
+            url    : url,
+            data   : data,
+            success: function (data) {
+                window.location = data;
+            },
+            error  : function (xhr) {
+                var messageClass = xhr.type || 'error';
+                var index = xhr.index || 1;
+                var text = xhr.message || 'Invalid credentials';
+                var $renderEl = $('<div class="animate ' + messageClass + '">' + text + '</div>');
+
+                $('#errorHandler').append($renderEl);
+
+                setTimeout(function () {
+                    $renderEl.remove();
+                    $('#code').val('');
+                }, (index + 1) * 2500);
+            }
+        });
+        ev.preventDefault();
+    });
+
+    button.click(function (ev) {
+        var data = frm.serialize();
+        var url = frm.attr('action');
+        var type = frm.attr('method');
+        data = data + '&phone=' + phoneNumber;
+
+        $.ajax({
+            headers: {
+                'X-CSRF-Token': CSRF_TOKEN
+            },
+            type   : type,
+            url    : url,
+            data   : data,
+            success: function (data) {
+                window.location = data;
+            },
+            error  : function (xhr) {
+                var messageClass = xhr.type || 'error';
+                var index = xhr.index || 1;
+                var text = xhr.message || 'Invalid credentials';
+                var $renderEl = $('<div class="animate ' + messageClass + '">' + text + '</div>');
+
+                $('#errorHandler').append($renderEl);
+
+                setTimeout(function () {
+                    $renderEl.remove();
+                    $('#code').val('');
+                }, (index + 1) * 2500);
+            }
+        });
+        ev.preventDefault();
+    });
+</script>
+</body>
+</html>

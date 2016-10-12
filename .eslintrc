@@ -1,0 +1,17 @@
+{
+  "extends": "thinkmobiles",
+  "rules": {
+    "no-console": [
+      0,
+      {
+        "allow": [
+          "warn",
+          "error"
+        ]
+      }
+    ]
+  },
+  "globals": {
+    "App": true
+  }
+}

@@ -1,0 +1,13 @@
+<tr id="<%='variantRow'+variant._id%>"
+    data-variantId="<%=variant._id%>"
+    data-categoryId="<%=variant.categoryId%>"
+    data-categoryName="<%=variant.categoryName%>"
+    data-type="variant"
+    class="listRow">
+    <td colspan="5"
+        class="fullWidthRow">
+        <%= variant.name || ''%>
+    </td>
+    <td class="icon <%= listType === 'items' ? 'arrowRight' : 'cross' %>">
+    </td>
+</tr>

@@ -1,0 +1,364 @@
+<div class="node">
+    <ul>
+        <% model.forEach(function(item){ %>
+        <li class="<%= (model[0] && model[0].level && model[0].level !== 1) ? 'nodeLast nodeLastRed' : '' %>">
+            <div id="<%= item._id %>" class="templateWrap">
+
+                <div class="userBlock flexColumn">
+                    <div class="top flexRowStart bottomLine">
+                        <div class="left flexColumn">
+                            <img src="<%= item.createdBy.user.imageSrc %>" class="imgCircle userImgBig createdByImage">
+                        </div>
+                        <div class="right flexColumn">
+                            <div class="userName createdByName"><%= (item.createdBy.user &&
+                                item.createdBy.user.firstName) ? item.createdBy.user.firstName.currentLanguage + ' ' +
+                                item.createdBy.user.lastName.currentLanguage : '' %>
+                            </div>
+                            <div class="description fontGray createdByAccessRole"><%= (item.createdBy.user &&
+                                item.createdBy.user.accessRole && item.createdBy.user.accessRole.name) ?
+                                item.createdBy.user.accessRole.name.currentLanguage : '' %>
+                            </div>
+                            <div class="description fontGray createdByPosition"><%= (item.createdBy.user &&
+                                item.createdBy.user.position && item.createdBy.user.position.name) ?
+                                item.createdBy.user.position.name.currentLanguage : '' %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="middle flexColumn assignedTo">
+                        <% item.assignedTo.forEach( function(assignedTo) { %>
+                        <div class="flexRowStart">
+                            <img src="<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                            <div class="description fontGray">
+                                <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
+                                <%= assignedTo.firstName.currentLanguage + ' ' + assignedTo.lastName.currentLanguage %>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <div class="bottom flexRowStart">
+                        <span class="userClip attachmentsCount"><%= item.attachments.length %></span>
+                        <span class="userMassage commentsCount"><%= item.comments.length %></span>
+                    </div>
+                </div>
+                <div class="locationBlock flexGrow flexColumn">
+                    <div class="locationTop">
+                        <div class="flexRow">
+                            <div class="locationTitle objectiveTitle"><%= item.title.currentLanguage %></div>
+                            <span class="textSmall"></span>
+                            <span class="startDate"><%= translation.startDate %>: </span>
+                        </div>
+                        <div class="fontSmall fontGray textEllipsis multiEllipsis objectiveDescription"><%=
+                            item.description.currentLanguage %>
+                        </div>
+                    </div>
+                    <div class="locationBottom flexRowStart">
+                        <span class="priority fontGray"><%= translation.priority %>: <%= item.priority.name.currentLanguage %></span>
+                        <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location %>: <%= item.location %> </span>
+                        <span class="fontGray noShrink"><%= translation.endDate %>:</span>
+                    </div>
+                </div>
+                <div class="dateBlock flexColumn">
+                    <div class="dateWrap flexRow">
+                        <span class="name dates"><%= item.dateStart %></span>
+                    </div>
+                    <div class="dateWrap flexRow">
+                        <span class="name dates endDate"><%= item.dateEnd %></span>
+                    </div>
+                </div>
+                <div class="progressBlock noShrink flexColumn">
+                    <div>
+                        <span class="name"><%= translation.progress %></span>
+                    </div>
+                    <div class="progress">
+                        <span class="progressRate">
+                            <span class="progressRateInner" style="width: <%= item.complete %>%"></span>
+                        </span>
+                        <span class="percent"><%= item.complete %>%</span>
+                    </div>
+                    <div class="bottom">
+                        <span class="inProgress status"><%= item.status.name.currentLanguage %></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <% if (item.child.length) { %>
+            <ul>
+                <% item.child.forEach(function(item2, index2){ %>
+                <li class="<%= (index2 !== item.child.length - 1) ? 'nodeConnect nodeConnectYellow' : 'nodeLast nodeLastYellow' %>">
+                    <div id="<%= item2._id %>" class="templateWrap">
+
+                        <div class="userBlock flexColumn">
+                            <div class="top flexRowStart bottomLine">
+                                <div class="left flexColumn">
+                                    <img src="<%= item2.createdBy.user.imageSrc %>"
+                                         class="imgCircle userImgBig createdByImage">
+                                </div>
+                                <div class="right flexColumn">
+                                    <div class="userName createdByName"><%= (item2.createdBy.user &&
+                                        item2.createdBy.user.firstName) ? item2.createdBy.user.firstName.currentLanguage
+                                        + ' ' + item2.createdBy.user.lastName.currentLanguage : '' %>
+                                    </div>
+                                    <div class="description fontGray createdByAccessRole"><%= (item2.createdBy.user &&
+                                        item2.createdBy.user.accessRole && item2.createdBy.user.accessRole.name) ?
+                                        item2.createdBy.user.accessRole.name.currentLanguage : '' %>
+                                    </div>
+                                    <div class="description fontGray createdByPosition"><%= (item2.createdBy.user &&
+                                        item2.createdBy.user.position && item2.createdBy.user.position.name) ?
+                                        item2.createdBy.user.position.name.currentLanguage : '' %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="middle flexColumn assignedTo">
+                                <% item2.assignedTo.forEach( function(assignedTo) { %>
+                                <div class="flexRowStart">
+                                    <img src="<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                                    <div class="description fontGray">
+                                        <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
+                                        <%= assignedTo.firstName.currentLanguage + ' ' +
+                                        assignedTo.lastName.currentLanguage %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            </div>
+                            <div class="bottom flexRowStart">
+                                <span class="userClip attachmentsCount"><%= item2.attachments.length %></span>
+                                <span class="userMassage commentsCount"><%= item2.comments.length %></span>
+                            </div>
+                        </div>
+                        <div class="locationBlock flexGrow flexColumn">
+                            <div class="locationTop">
+                                <div class="flexRow">
+                                    <div class="locationTitle objectiveTitle"><%= item2.title.currentLanguage %></div>
+                                    <span class="textSmall"></span>
+                                    <span class="startDate"><%= translation.startDate %>: </span>
+                                </div>
+                                <div class="fontSmall fontGray textEllipsis multiEllipsis objectiveDescription"><%=
+                                    item2.description.currentLanguage %>
+                                </div>
+                            </div>
+                            <div class="locationBottom flexRowStart">
+                                <span class="priority fontGray"><%= translation.priority %>: <%= item2.priority.name.currentLanguage %></span>
+                                <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location %>: <%= item2.location %> </span>
+                                <span class="fontGray noShrink"><%= translation.endDate %>:</span>
+                            </div>
+                        </div>
+                        <div class="dateBlock flexColumn">
+                            <div class="dateWrap flexRow">
+                                <span class="name dates"><%= item2.dateStart %></span>
+                            </div>
+                            <div class="dateWrap flexRow">
+                                <span class="name dates endDate"><%= item2.dateEnd %></span>
+                            </div>
+                        </div>
+                        <div class="progressBlock noShrink flexColumn">
+                            <div>
+                                <span class="name"><%= translation.progress %></span>
+                            </div>
+                            <div class="progress">
+                                <span class="progressRate">
+                                    <span class="progressRateInner" style="width: <%= item2.complete %>%"></span>
+                                </span>
+                                <span class="percent"><%= item2.complete %>%</span>
+                            </div>
+                            <div class="bottom">
+                                <span class="inProgress status"><%= item2.status.name.currentLanguage %></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <% if (item2.child.length) { %>
+                    <ul
+                    <%= (index2 !== item.child.length-1) ? 'class="nodeLine nodeLineYellow"' : '' %>>
+                    <% item2.child.forEach(function(item3, index3){ %>
+                <li class="<%= (index3 !== item2.child.length - 1) ? 'nodeConnect nodeConnectGreen' : 'nodeLast nodeLastGreen' %>">
+                    <div id="<%= item3._id %>" class="templateWrap">
+
+                        <div class="userBlock flexColumn">
+                            <div class="top flexRowStart bottomLine">
+                                <div class="left flexColumn">
+                                    <img src="<%= item3.createdBy.user.imageSrc %>"
+                                         class="imgCircle userImgBig createdByImage">
+                                </div>
+                                <div class="right flexColumn">
+                                    <div class="userName createdByName"><%= (item3.createdBy.user &&
+                                        item3.createdBy.user.firstName) ? item3.createdBy.user.firstName.currentLanguage
+                                        + ' ' + item3.createdBy.user.lastName.currentLanguage : '' %>
+                                    </div>
+                                    <div class="description fontGray createdByAccessRole"><%= (item3.createdBy.user &&
+                                        item3.createdBy.user.accessRole && item3.createdBy.user.accessRole.name) ?
+                                        item3.createdBy.user.accessRole.name.currentLanguage : '' %>
+                                    </div>
+                                    <div class="description fontGray createdByPosition"><%= (item3.createdBy.user &&
+                                        item3.createdBy.user.position && item3.createdBy.user.position.name) ?
+                                        item3.createdBy.user.position.name.currentLanguage : '' %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="middle flexColumn assignedTo">
+                                <% item3.assignedTo.forEach( function(assignedTo) { %>
+                                <div class="flexRowStart">
+                                    <img src="<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                                    <div class="description fontGray">
+                                        <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
+                                        <%= assignedTo.firstName.currentLanguage + ' ' +
+                                        assignedTo.lastName.currentLanguage %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            </div>
+                            <div class="bottom flexRowStart">
+                                <span class="userClip attachmentsCount"><%= item3.attachments.length %></span>
+                                <span class="userMassage commentsCount"><%= item3.comments.length %></span>
+                            </div>
+                        </div>
+                        <div class="locationBlock flexGrow flexColumn">
+                            <div class="locationTop">
+                                <div class="flexRow">
+                                    <div class="locationTitle objectiveTitle"><%= item3.title.currentLanguage %></div>
+                                    <span class="textSmall"></span>
+                                    <span class="startDate"><%= translation.startDate %>: </span>
+                                </div>
+                                <div class="fontSmall fontGray textEllipsis multiEllipsis objectiveDescription"><%=
+                                    item3.description.currentLanguage %>
+                                </div>
+                            </div>
+                            <div class="locationBottom flexRowStart">
+                                <span class="priority fontGray"><%= translation.priority %>: <%= item3.priority.name.currentLanguage %></span>
+                                <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location %>: <%= item3.location %> </span>
+                                <span class="fontGray noShrink"><%= translation.endDate %>:</span>
+                            </div>
+                        </div>
+                        <div class="dateBlock flexColumn">
+                            <div class="dateWrap flexRow">
+                                <span class="name dates"><%= item3.dateStart %></span>
+                            </div>
+                            <div class="dateWrap flexRow">
+                                <span class="name dates endDate"><%= item3.dateEnd %></span>
+                            </div>
+                        </div>
+                        <div class="progressBlock noShrink flexColumn">
+                            <div>
+                                <span class="name"><%= translation.progress %></span>
+                            </div>
+                            <div class="progress">
+                                        <span class="progressRate">
+                                            <span class="progressRateInner"
+                                                  style="width: <%= item3.complete %>%"></span>
+                                        </span>
+                                <span class="percent"><%= item3.complete %>%</span>
+                            </div>
+                            <div class="bottom">
+                                <span class="inProgress status"><%= item3.status.name.currentLanguage %></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <% if (item3.child.length) { %>
+                    <ul
+                    <%= (index3 !== item2.child.length-1) ? 'class="nodeLine nodeLineGreen"' : '' %>>
+                    <% item3.child.forEach(function(item4, index4){ %>
+                <li class="<%= (index4 !== item3.child.length - 1) ? 'nodeConnect nodeConnectBlue' : 'nodeLast nodeLastBlue' %>">
+                    <div id="<%= item4._id %>" class="templateWrap">
+
+                        <div class="userBlock flexColumn">
+                            <div class="top flexRowStart bottomLine">
+                                <div class="left flexColumn">
+                                    <img src="<%= item4.createdBy.user.imageSrc %>"
+                                         class="imgCircle userImgBig createdByImage">
+                                </div>
+                                <div class="right flexColumn">
+                                    <div class="userName createdByName"><%= (item4.createdBy.user &&
+                                        item4.createdBy.user.firstName) ? item4.createdBy.user.firstName.currentLanguage
+                                        + ' ' + item4.createdBy.user.lastName.currentLanguage : '' %>
+                                    </div>
+                                    <div class="description fontGray createdByAccessRole"><%= (item4.createdBy.user &&
+                                        item4.createdBy.user.accessRole && item4.createdBy.user.accessRole.name) ?
+                                        item4.createdBy.user.accessRole.name.currentLanguage : '' %>
+                                    </div>
+                                    <div class="description fontGray createdByPosition"><%= (item4.createdBy.user &&
+                                        item4.createdBy.user.position && item4.createdBy.user.position.name) ?
+                                        item4.createdBy.user.position.name.currentLanguage : '' %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="middle flexColumn assignedTo">
+                                <% item4.assignedTo.forEach( function(assignedTo) { %>
+                                <div class="flexRowStart">
+                                    <img src="<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                                    <div class="description fontGray">
+                                        <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
+                                        <%= assignedTo.firstName.currentLanguage + ' ' +
+                                        assignedTo.lastName.currentLanguage %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            </div>
+                            <div class="bottom flexRowStart">
+                                <span class="userClip attachmentsCount"><%= item4.attachments.length %></span>
+                                <span class="userMassage commentsCount"><%= item4.comments.length %></span>
+                            </div>
+                        </div>
+                        <div class="locationBlock flexGrow flexColumn">
+                            <div class="locationTop">
+                                <div class="flexRow">
+                                    <div class="locationTitle objectiveTitle"><%= item4.title.currentLanguage %></div>
+                                    <span class="textSmall"></span>
+                                    <span class="startDate"><%= translation.startDate %>: </span>
+                                </div>
+                                <div class="fontSmall fontGray textEllipsis multiEllipsis objectiveDescription"><%=
+                                    item4.description.currentLanguage %>
+                                </div>
+                            </div>
+                            <div class="locationBottom flexRowStart">
+                                <span class="priority fontGray"><%= translation.priority %>: <%= item4.priority.name.currentLanguage %></span>
+                                <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location %>: <%= item4.location %> </span>
+                                <span class="fontGray noShrink"><%= translation.endDate %>:</span>
+                            </div>
+                        </div>
+                        <div class="dateBlock flexColumn">
+                            <div class="dateWrap flexRow">
+                                <span class="name dates"><%= item4.dateStart %></span>
+                            </div>
+                            <div class="dateWrap flexRow">
+                                <span class="name dates endDate"><%= item4.dateEnd %></span>
+                            </div>
+                        </div>
+                        <div class="progressBlock noShrink flexColumn">
+                            <div>
+                                <span class="name"><%= translation.progress %></span>
+                            </div>
+                            <div class="progress">
+                                                <span class="progressRate">
+                                                    <span class="progressRateInner"
+                                                          style="width: <%= item4.complete %>%"></span>
+                                                </span>
+                                <span class="percent"><%= item4.complete %>%</span>
+                            </div>
+                            <div class="bottom">
+                                <span class="inProgress status"><%= item4.status.name.currentLanguage %></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <% })%>
+            </ul>
+            <% } %>
+            <% })%>
+    </ul>
+    <% } %>
+    </li>
+    <% }) %>
+    </ul>
+    <%}%>
+
+    </li>
+    <% }) %>
+    </ul>
+</div>

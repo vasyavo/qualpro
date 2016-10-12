@@ -1,0 +1,45 @@
+<div class="form-holder">
+    <div class="title">
+        <div class="searchInputWrap">
+            <input type="text" id="brandSearch">
+            <label for="brandSearch"></label>
+        </div>
+    </div>
+    <div class="shelfShareDialog">
+        <table>
+            <colgroup>
+                <col width="150px">
+                <col width="150px">
+                <col width="150px">
+                <col width="150px">
+            </colgroup>
+            <thead>
+            <tr>
+                <th><%= translation.timeStamp %></th>
+                <th><%= translation.branch %></th>
+                <th><%= translation.value %></th>
+                <th><%= translation.employee %></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="4" class="colspanFix">
+                    <div class="scrollable">
+                        <table class="list">
+                            <colgroup>
+                                <col width="150px">
+                                <col width="150px">
+                                <col width="150px">
+                                <col width="150px">
+                            </colgroup>
+                            <tbody id="mainContent" class="shelfShareTableBody">
+                            <!--BODY-->
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

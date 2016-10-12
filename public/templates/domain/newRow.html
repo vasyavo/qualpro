@@ -1,0 +1,17 @@
+<% var ifBranch = model.contentType === 'branch'; %>
+<tr class="listRow" data-name="<%=model.name.currentLanguage%>" data-id="<%=model._id%>">
+    <td class="checkboxArea alignCenter">
+        <input type="checkbox" id="<%=model._id%>" value="<%=model._id%>" class="customCheckbox"/>
+        <label for="<%=model._id%>" class="checkboxLabel"></label>
+    </td>
+    <% if (!ifBranch) { %>
+    <td class="alignCenter">
+        <img src="<%=model.imageSrc%>"/>
+    </td>
+    <% } %>
+    <td><%=model.name.currentLanguage%></td>
+    <td>
+        <%=(App.currentUser)? App.currentUser.firstName.currentLanguage + ' ' + App.currentUser.lastName.currentLanguage : 'Admin'%>
+        <%=(model.createdBy&&model.createdBy.date)?(model.createdBy.date):''%>
+    </td>
+</tr>

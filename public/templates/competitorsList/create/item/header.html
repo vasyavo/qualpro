@@ -1,0 +1,57 @@
+<div class="dialogCategoryTitle">
+    <span class="categoryTitle"><%= title %></span>
+
+    <%if (editable){%>
+    <div class="categoryButtonWrap">
+        <a href="javascript:;" class="addBtn" title="Add New <%= title %>"></a>
+        <a href="javascript:;" class="deleteBtn" title="Delete <%= title %>"></a>
+        <a href="javascript:;" class="editBtn" title="Edit <%= title %>"></a>
+    </div>
+    <%}%>
+</div>
+<div class="categoryTableWrap">
+    <div class="absoluteContent clickableTable">
+        <table>
+            <colgroup>
+                <col width="52px">
+                <col width="50%">
+                <col width="50%">
+                <col width="210px">
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="alignCenter">
+                    <input type="checkbox" id="check_all_<%=title%>" class="customCheckbox">
+                    <label for="check_all_<%=title%>" class="checkboxLabel"></label>
+                </th>
+                <th><%= translation.name %></th>
+                <th><%= translation.packing %></th>
+                <th><%= translation.origin %></th>
+             </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="7" class="colspanFix">
+                    <div class="scrollable">
+                        <table>
+                            <colgroup>
+                                <col width="52px">
+                                <col width="50%">
+                                <col width="50%">
+                                <col width="210px">
+                            </colgroup>
+                            <tbody class="listBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="floatButtonsContainer">
+        <a href="javascript:;" class="flowSaveBtn"></a>
+        <a href="javascript:;" class="flowCancelBtn"></a>
+    </div>
+</div>

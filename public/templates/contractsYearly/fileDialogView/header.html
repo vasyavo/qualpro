@@ -1,0 +1,15 @@
+<div class="flexGrow thumbnailsInner flexColumn">
+    <div class="objectivesPreviewTitleWrap">
+        <span class="objectivesPreviewTitle"><%= title.capitalizer('firstCaps') %></span>
+        <% if (!parent) { %>
+        <span class="greyBtn right" id="attachButton">Attach</span>
+        <% } %>
+    </div>
+    <div class="absoluteContent">
+        <div class="scrollable">
+            <div id="<%= parent ? 'parentThumbnails' : 'thumbnails'%>" class="thumbnailsContainer masonryThumbnailsWrapper">
+
+            </div>
+        </div>
+    </div>
+</div>

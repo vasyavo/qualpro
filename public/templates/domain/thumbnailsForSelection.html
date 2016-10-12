@@ -1,0 +1,27 @@
+<div class="domainDialog">
+    <div class="title">
+        <span data-filter-type="all" class="titleDescription">Add <%=contentType.capitalizer('firstCaps')%></span>
+        <% if (multiselect) { %>
+        <div class="checkboxArea">
+            <input type="checkbox" id="checkAll" class="btnCustomCheckbox" <%= selected.length === itemsCount || itemsCount === 1 ? 'checked' : '' %>/>
+            <label for="checkAll" class="btnCheckboxLabel">Select all</label>
+        </div>
+        <% } %>
+    </div>
+    <div class="scrollable">
+        <%collection.forEach(function(domain,index){%>
+        <div class="thumbnail" data-id="<%=domain._id%>">
+            <div class="thumbnailTop">
+                <%var id = domain._id;%>
+                <%var checked = selected.indexOf(id) !== -1;%>
+                <input type="checkbox" value="<%=id%>" id="<%=id%>" class="customCheckbox hidden"<%=checked || itemsCount === 1 ?'checked':''%> />
+                <label for="<%=id%>" class="checkboxLabel"></label>
+                <img class="thumbnailImage" src="<%=domain.imageSrc%>">
+            </div>
+            <div class="thumbnailBottom">
+                <span class="thumbnailUserName"><%=domain.name.currentLanguage%></span>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+</div>

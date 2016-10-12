@@ -1,0 +1,73 @@
+<div class="form-holder">
+    <div class="title">
+        <span data-translation="viewPlanogram "><%= translation.viewPlanogram %></span>
+    </div>
+    <div id="previewPlanogram" class="form">
+        <div class="tabs">
+            <div id="main" class="inner">
+                <!-- main template -->
+                <div class="avatar planogramAvatar">
+                    <div class="canvasWrap">
+                        <img id="imgPreView" width='100'
+                             src="<%= model.fileID.preview ? model.fileID.preview : '' %>"
+                             alt="">
+
+                    </div>
+                    <% if(!activityList){%>
+                    <% if([3,4].indexOf(App.currentUser.accessRole.level) === -1 ){ %>
+                    <button id="editPlanogram" type="button" class="readonlyVisible greyBtn" role="button">
+                        <%= translation.editBtn%>
+                    </button>
+                    <% }%>
+                    <% }else{%>
+                    <button id="goToBtn" type="button" class="readonlyVisible redBtn" role="button">
+                        <%= translation.goToBtn %>
+                    </button>
+                    <%}%>
+                </div>
+                <div class="planogram-info table">
+                    <div class="row">
+                        <div class="cell">
+                            <label for="countryDd" data-translation="country">
+                                <%= translation.country %>
+                            </label>
+                        </div>
+                        <div class="cell">
+                            <span id="countryDd" class="textEllipsis hoverFullText descriptionViewContent"><%= model.country ? model.country.name.currentLanguage : '' %></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="retailSegment" data-translation="retailSegment">
+                                <%= translation.retailSegment %>
+                            </label>
+                        </div>
+                        <div class="cell">
+                            <span id="retailSegment" class="textEllipsis hoverFullText descriptionViewContent"><%= model.retailSegment ? model.retailSegment.name.currentLanguage : '' %></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="category" data-translation="product">
+                                <%= translation.product %>
+                            </label>
+                        </div>
+                        <div class="cell">
+                            <span id="category" class="textEllipsis hoverFullText descriptionViewContent"><%= model.product ? model.product.name.currentLanguage:  '' %></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="configuration" data-translation="configuration">
+                                <%= translation.configuration %>
+                            </label>
+                        </div>
+                        <div class="cell">
+                            <span id="configuration" class="textEllipsis hoverFullText descriptionViewContent"><%= model.configuration ? model.configuration.name : '' %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

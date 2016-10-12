@@ -1,0 +1,216 @@
+<% var curUser = App.currentUser._id === model._id
+var archived = model.archived
+var level = App.currentUser.accessRole.level;
+if( level === 8){ level = 1 }
+if( level === 9){ level = 2 }
+var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
+<div class="scrollable">
+    <div class="personnelPreviewWrap">
+        <div class="avatar noShrink">
+            <canvas></canvas>
+            <% if(!activityList) {%>
+            <% if (!hideButtons && (((level < modelLevel && ((level <= 2) || (level >= 8))) || level === 1))) { %>
+            <button id="editProfile" type="button" class="readonlyVisible greyBtn" role="button">
+                <%= translation.editProfile %>
+            </button>
+            <% } %>
+            <% if (curUser) { %>
+            <button id="changePassword" type="button" class="readonlyVisible changePasswordBtn greyBtn" role="button">
+                <%= translation.changePassword %>
+            </button>
+            <% } %>
+            <!--<button id="logout" type="button" class="readonlyVisible redBtn" role="button"
+                    style=<%= !curUser ?
+            "display:none" : "" %>>
+            <%= translation.logout %>
+            </button>-->
+            <% if (!hideButtons && ((level <=2) || (level >= 8))) { %>
+            <button id="unArchiveBtn" type="button" class="readonlyVisible redBtn" role="button"
+                    style=<%= (curUser || !archived) ?
+            "display:none" : "" %>>
+            <%= translation.unDisable %>
+            </button>
+            <button id="archiveBtn" type="button" class="readonlyVisible redBtn" role="button"
+                    style=<%= (curUser || archived) ?
+            "display:none" : "" %>>
+            <%= translation.disable %>
+            </button>
+            <% } %>
+            <% if (hideButtons) {%>
+            <button id="findBtn" type="button" class="readonlyVisible redBtn" role="button">
+                <%= translation.findBtn %>
+            </button>
+            <%}%>
+            <%} else {%>
+            <button id="goToBtn" type="button" class="readonlyVisible redBtn" role="button">
+                <%= translation.goToBtn %>
+            </button>
+            <%}%>
+        </div>
+
+        <div class="blockUser block-left">
+            <div class="half-block ">
+                <div class="personnel-info table">
+                    <div class="row">
+                        <div class="cell">
+                            <label for="firstNameEn"><%= translation.firstName %></label>
+                        </div>
+                        <div class="cell">
+                            <div class="mainLanguageContent">
+                                <span id="firstNameEn" class="hoverFullText"><%= (model && model.firstName && model.firstName.currentLanguage) ? model.firstName.currentLanguage : '' %></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="lastNameEn"><%= translation.lastName %></label>
+                        </div>
+                        <div class="cell">
+                            <div class="mainLanguageContent">
+                                <span id="lastNameEn" class="hoverFullText"><%= (model && model.lastName && model.lastName.currentLanguage) ? model.lastName.currentLanguage : ''%></span>
+                            </div>
+                        </div>
+                    </div>
+                    <% if (!model.temp) { %>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="dateOfJoining"><%= translation.dateOfJoining %></label>
+                        </div>
+                        <div class="cell">
+                            <span id="dateOfJoining" class="hoverFullText"><%= model.dateJoined || '' %></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="accessDd"><%= translation.accessRole %></label>
+                        </div>
+                        <div class="cell">
+                            <span id="accessDd" class="hoverFullText"><%= model.accessRole ? model.accessRole.name.currentLanguage : '' %></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="positionDd"><%= translation.jobPosition %></label>
+                        </div>
+                        <div class="cell">
+                            <span id="positionDd" class="hoverFullText"><%= model.position ? model.position.name.currentLanguage : '' %></span>
+                        </div>
+                    </div>
+                    <% } %>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="phone"><%= translation.phoneNumber %></label>
+                        </div>
+                        <div class="cell">
+                            <span id="phone" class="hoverFullText"><%= model.phoneNumber || '' %></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="email"><%= translation.email %></label>
+                        </div>
+                        <div class="cell">
+                            <span id="email" class="hoverFullText"><%= model.email || '' %></span>
+                        </div>
+                    </div>
+                    <% if (!model.temp) { %>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="onLeave"><%= translation.onLeave %></label>
+                        </div>
+                        <div class="cell">
+                            <span id="onLeave"><%= (model.vacation && model.vacation.onLeave) ? 'Yes' : 'No' %></span>
+                        </div>
+                    </div>
+                    <div class="row" style=<%= (model.vacation && model.vacation.onLeave) ?
+                    "" : "display:none" %>>
+                    <div class="cell">
+                        <label for="cover"><%= translation.cover %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="cover"><%= (model.vacation && model.vacation.cover) ? model.vacation.cover.firstName.currentLanguage + ' ' + model.vacation.cover.lastName.currentLanguage : '' %></span>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <% if (!model.super && !model.temp) { %>
+    <div class="blockUser block-right">
+        <div class="half-block ">
+            <div class="personnel-description table">
+                <% if(model.country) { %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="countryDd"><%= translation.country %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="countryDd" class="hoverFullText"><%= model.country%></span>
+                    </div>
+                </div>
+                <% } %>
+                <% if(model.region) { %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="regionDd"><%= translation.region %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="regionDd" class="hoverFullText"><%= model.region %></span>
+                    </div>
+                </div>
+                <% } %>
+                <% if(model.subRegion) { %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="subRegionDd"><%= translation.subRegion %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="subRegionDd" class="hoverFullText"><%= model.subRegion%></span>
+                    </div>
+                </div>
+                <% } %>
+                <% if(model.retailSegment) { %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="retailSegmentDd"><%= translation.retailSegment %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="retailSegmentDd" class="hoverFullText"><%= model.retailSegment || '' %></span>
+                    </div>
+                </div>
+                <% } %>
+                <% if(model.outlet) { %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="outletDd"><%= translation.outlet %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="outletDd" class="hoverFullText"><%= model.outlet %></span>
+                    </div>
+                </div>
+                <% } %>
+                <% if(model.branch) { %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="branchDd"><%= translation.branch %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="branchDd" class="hoverFullText"><%= model.branch || '' %></span>
+                    </div>
+                </div>
+                <% } %>
+                <div class="row">
+                    <div class="cell">
+                        <label for="managerDd"><%= translation.supervisor %></label>
+                    </div>
+                    <div class="cell">
+                        <span id="managerDd" class="managerDd hoverFullText"><%= model.manager ? model.manager.firstName.currentLanguage + ' ' + model.manager.lastName.currentLanguage : '' %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>
+</div>

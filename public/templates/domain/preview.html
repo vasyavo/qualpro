@@ -1,0 +1,154 @@
+<div class="form-holder <%=contentType%>" id="contentHolder">
+    <div class="title">
+        <span data-filter-type="all" class="titleDescription"><%=translation.previewTitle%></span>
+    </div>
+    <div>
+        <%var hasOutlet = contentType == 'branch';%>
+        <%var hasRetSegment = contentType == 'branch';%>
+        <%var hasAvatar = contentType !== 'branch';%>
+        <%var hasAddress = contentType === 'branch';%>
+        <%var hasLinkToMap = contentType === 'branch';%>
+        <%var hasManager = contentType === 'branch';%>
+        <%var hasCurrency = contentType === 'country';%>
+        <div class="inner">
+            <%if (hasAvatar) { %>
+            <div class="avatar block-left block">
+                <canvas>
+                    <input type="file" value="Edit" id="File1">
+                </canvas>
+            </div>
+            <%}%>
+            <div class="descriptionContainer table">
+                <div class="row">
+                    <div class="cell">
+                        <label for="nameEn"
+                               data-filter-type="all">
+                            <%=translation.labelName%>
+                        </label>
+                    </div>
+                    <div class="cell">
+                        <div>
+                            <span id="nameEn" class="textEllipsis hoverFullText descriptionViewContent"><%= model.name.currentLanguage || ''%></span>
+                        </div>
+                    </div>
+                </div>
+
+                <%if (hasRetSegment) {%>
+                <div class="row">
+                    <div class="cell">
+                        <label for="retSegmentEnDd"><%=translation.retailSegment%></label>
+                    </div>
+                    <div class="cell">
+                        <div>
+                            <span id="retSegmentEnDd" class="textEllipsis hoverFullText">
+                                <%= (model.retailSegment && model.retailSegment.name) ? model.retailSegment.name.currentLanguage : '' %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <%}%>
+
+                <%if (hasOutlet) {%>
+                <div class="row">
+                    <div class="cell">
+                        <label for="outletEnDd"><%=translation.outlet%></label>
+                    </div>
+                    <div class="cell">
+                        <div>
+                            <span id="outletEnDd" class="textEllipsis hoverFullText">
+                                <%= (model.outlet && model.outlet.name) ? model.outlet.name.currentLanguage : ''%>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <%}%>
+
+                <%if (hasAddress) {%>
+                <div class="row">
+                    <div class="cell">
+                        <label for="addressEn"><%=translation.address%></label>
+                    </div>
+                    <div class="cell">
+                        <div>
+                            <span id="addressEn" class="textEllipsis hoverFullText"><%= model.address.currentLanguage || ''%></span>
+                        </div>
+                    </div>
+                </div>
+                <%}%>
+
+                <%if (hasLinkToMap) {%>
+                <div class="row">
+                    <div class="cell">
+                        <label for="linkToMap"><%=translation.labelMap%></label>
+                    </div>
+                    <div class="cell">
+                        <a id="linkToMap" target="_blank" href="<%= model.linkToMap || ''%>"
+                           class="textEllipsis hoverFullText"><%= model.linkToMap || ''%></a>
+                    </div>
+                </div>
+                <%}%>
+
+                <%if (hasManager) {%>
+                <div class="row">
+                    <div class="cell">
+                        <label for="managerDd"
+                               data-filter-type="all">
+                            <%=translation.labelManager%>
+                        </label>
+                    </div>
+                    <div class="cell currencyBlock">
+                        <span id="managerDd" class="textEllipsis hoverFullText"><%=model.manager?model.manager.fullName:''%></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="cell">
+                        <label for="mobile"><%=translation.labelMobile%></label>
+                    </div>
+                    <div class="cell">
+                        <span id="mobile" class="textEllipsis hoverFullText"><%= (model.manager) ? model.manager.phoneNumber : '' %></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="cell">
+                        <label for="email"><%=translation.labelEmail%></label>
+                    </div>
+                    <div class="cell">
+                        <span id="email" class="textEllipsis hoverFullText">
+                            <%= (model.manager) ? model.manager.email : '' %>
+                        </span>
+                    </div>
+                </div>
+                <%}%>
+
+                <%if (hasCurrency) {%>
+                <div class="row">
+                    <div class="cell">
+                        <label for="currencyDd"><%=translation.labelCurrency%></label>
+                    </div>
+                    <div class="cell currencyBlock">
+                        <a id="currencyDd"
+                           class="currentSelected readonly textEllipsis hoverFullText"><%=model.currency%></a>
+                    </div>
+                </div>
+                <%}%>
+            </div>
+        </div>
+        <%if (hasAvatar) { %>
+        <div class="cropImages form" style="display:none;">
+            <div class="title">
+                <h3 class="left"><%=translation.crop.title%></h3>
+
+                <div class="clearfix"></div>
+            </div>
+            <br/>
+
+            <div class="image_input" style="float: left;margin-right: 20px;"></div>
+            <img class="imgCircle"/>
+
+            <div class="clearfix"></div>
+        </div>
+        <%}%>
+    </div>
+</div>

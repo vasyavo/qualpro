@@ -1,0 +1,25 @@
+<% var level = App.currentUser.accessRole.level; %>
+<tr data-id="<%=model._id%>" class="listRow">
+    <% if ((level <=2) || (level >= 8)) { %>
+    <td class="checkboxArea alignCenter">
+        <input type="checkbox" id="<%=model._id%>" value="<%=model._id%>" class="customCheckbox"/>
+        <label for="<%=model._id%>" class="checkboxLabel"></label>
+    </td>
+    <% } %>
+    <td><%=model.firstName.en%></td>
+    <td><%=model.lastName.en%></td>
+    <td>
+        <%=model.position%>
+        <span><%=model.accessRole%></span>
+    </td>
+    <td><%=model.email%></td>
+    <td><%=model.phoneNumber.replace(this.REGEXP.DISPLAY_PHONE_REGEXP, '+$1($2)-$3-$4')%></td>
+    <td><%=model.country.map(function(country) { return country.name.en }).join(', ')%></td>
+    <td class="wordWrapp">
+        <%=(App.currentUser&&App.currentUser.fullName)?(App.currentUser.fullName):''%>
+        <%=(model.createdBy&&model.createdBy.date)?model.createdBy.date:''%>
+    </td>
+    <td class="wordWrapp <%=model.status ? model.status : ''%>">
+        <%=model.status ? this.STATUSES[model.status.toUpperCase()].name : ''%>
+    </td>
+</tr>

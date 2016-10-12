@@ -1,0 +1,16 @@
+<div class="scrollable">
+    <table class="list">
+        <col width="10%">
+        <col width="60%">
+        <col width="30%">
+        <tbody class="listTable">
+        <% tasks.forEach(function(task, index){ %>
+        <tr data-id="<%=task._id%>" class="listRow">
+            <td><%= index + 1 %></td>
+            <td><%= task.title ? task.title.currentLanguage : task.typeText %></td>
+            <td><%= task.statusText || task.dateText %></td>
+        </tr>
+        <% }) %>
+        </tbody>
+    </table>
+</div>

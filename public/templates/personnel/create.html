@@ -1,0 +1,299 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<div class="form-holder personnelInfo largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%= translation.addNewEmployee %></span>
+    </div>
+    <form method="post" action="" id="createPersonnelForm" class="form">
+        <fieldset>
+            <div class="inner">
+                <div class="avatar noShrink">
+                    <canvas>
+                        <input type="file"
+                               value="<%= translation.edit %>"
+                               id="File1">
+                    </canvas>
+                    <div class="upload">
+                        <p class="uploadValue"><%= translation.addPhoto %></p>
+                        <input type="file"
+                               value="<%= translation.edit %>"
+                               id="inputImg"
+                               class="uploadInput">
+                    </div>
+                </div>
+
+                <div>
+
+                    <div class="blockPersonel ">
+                        <div class="personnelInfo largeHeightPreview table">
+
+                            <div class="row">
+                                <div class="cell">
+                                    <label for="firstName<%= anotherLanguage.capitalizer('firstCaps') %>" class="required mandatory"><%= translation.firstName %></label>
+                                </div>
+                                <div class="cell">
+                                    <div>
+                                        <input type="text"
+                                               data-parent="firstName"
+                                               data-property="en"
+                                               id="firstNameEn"
+                                               class="inputNarrow formField enInput"
+                                               value=""
+                                               maxlength="32"
+                                               placeholder="<%= translation.firstName %>"
+                                               dir="ltr"
+                                        />
+                                        <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                           data-id="firstName<%= anotherLanguage.capitalizer('firstCaps') %>"
+                                           href="javascript:;">
+                                        </a>
+                                    </div>
+
+                                    <div>
+                                        <input id="firstNameAr"
+                                               class="inputNarrow formField arInput"
+                                               data-parent="firstName"
+                                               data-property="ar"
+                                               value=""
+                                               placeholder="<%= translation.firstName %>"
+                                               maxlength="56"
+                                               dir="rtl"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="cell">
+                                    <label for="lastName<%= anotherLanguage.capitalizer('firstCaps') %>" class="required mandatory"><%= translation.lastName %></label>
+                                </div>
+                                <div class="cell">
+                                    <div>
+                                        <input type="text"
+                                               data-parent="lastName"
+                                               data-property="en"
+                                               id="lastNameEn"
+                                               class="inputNarrow formField enInput"
+                                               value=""
+                                               maxlength="32"
+                                               placeholder="<%= translation.lastName %>"
+                                               dir="ltr"
+                                        />
+                                        <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                           data-id="lastName<%= anotherLanguage.capitalizer('firstCaps') %>"
+                                           href="javascript:;">
+                                        </a>
+                                    </div>
+
+                                    <div>
+                                        <input data-property="ar"
+                                               data-parent="lastName"
+                                               id="lastNameAr"
+                                               class="inputNarrow formField arInput"
+                                               value=""
+                                               placeholder="<%= translation.lastName %>"
+                                               maxlength="56"
+                                               dir="rtl"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="cell">
+                                    <label for="dateJoined"><%= translation.dateOfJoining %></label>
+                                </div>
+                                <div class="cell dateJoinedWrap">
+                                    <input type="text"
+                                           data-property="dateJoined"
+                                           id="dateJoined"
+                                           class="inputWide formField"
+                                           value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span class="required mandatory"><%= translation.accessRole %></span>
+                                </div>
+                                <div class="cell">
+                                    <a id="accessRoleDd"
+                                       class="accessRoleDd selectDropdown"
+                                       href="javascript:;"><%= translation.select %></a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span class="required mandatory"><%= translation.jobPosition %></span>
+                                </div>
+                                <div class="cell">
+                                    <a id="positionDd"
+                                       class="positionDd selectDropdown"
+                                       href="javascript:;">
+                                        <%= translation.select %>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <label for="phone" class="required mandatory"><%= translation.phoneNumber %></label>
+                                </div>
+                                <div class="cell"><input data-property="phoneNumber"
+                                           id="phone"
+                                           class="inputWide formField"
+                                           type="tel"
+                                           value=""
+                                           required
+                                           maxlength="48"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <label for="email" class="required"><%= translation.email %></label>
+                                </div>
+                                <div class="cell"><input data-property="email"
+                                           id="email"
+                                           class="inputWide formField"
+                                           type="email"
+                                           value=""
+                                           maxlength="48"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="blockPersonel ">
+                        <div class="personnelLocationManager table">
+                            <div class="row hidden countryRow"  id="countryRow">
+                                <div class="cell">
+                                    <span class="countryField required mandatory">
+                                        <%= translation.country %>
+                                    </span>
+                                </div>
+                                <div class="cell">
+                                    <a id="countryDiag"
+                                       class="domainDialogExecutor countryField formField"
+                                       data-format="array"
+                                       data-property="country"
+                                       data-value="country"
+                                       data-icon="add"
+                                       data-id=""
+                                       href="javascript:;"></a>
+                                </div>
+                            </div>
+                            <div class="row hidden regionRow" id="regionRow">
+                                <div class="cell">
+                                    <span class="regionField">
+                                        <%= translation.region %>
+                                    </span>
+                                </div>
+                                <div class="cell">
+                                    <a id="regionDiag"
+                                       class="domainDialogExecutor regionField formField"
+                                       data-format="array"
+                                       data-property="region"
+                                       data-value="region"
+                                       href="javascript:;">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row hidden subRegionRow" id="subRegionRow">
+                                <div class="cell">
+                                    <span class="subRegionField">
+                                        <%= translation.subRegion %>
+                                    </span>
+                                </div>
+                                <div class="cell">
+                                    <a id="subRegionDiag"
+                                       class="domainDialogExecutor subRegionField formField"
+                                       data-format="array"
+                                       data-property="subRegion"
+                                       data-value="subRegion"
+                                       href="javascript:;">
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- <div class="row">
+                                <div class="cell">
+                                    <span class="retailSegmentField">
+                                        <%= translation.retailSegment %>
+                                    </span>
+                                </div>
+                                <div class="cell">
+                                    <a id="retailSegmentDiag"
+                                       class="domainDialogExecutor retailSegmentField formField"
+                                       data-format="array"
+                                       data-property="retailSegment"
+                                       data-value="retailSegment"
+                                       href="javascript:;">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <span class="outletField">
+                                        <%= translation.outlet %>
+                                    </span>
+                                </div>
+                                <div class="cell">
+                                    <a id="outletDiag"
+                                       class="domainDialogExecutor outletField formField"
+                                       data-format="array"
+                                       data-property="outlet"
+                                       data-value="outlet"
+                                       href="javascript:;">
+                                    </a>
+                                </div>
+                            </div> -->
+                            <div class="row hidden branchRow" id="branchRow">
+                                <div class="cell">
+                                    <span class="branchField">
+                                        <%= translation.branch %>
+                                    </span>
+                                </div>
+                                <div class="cell">
+                                    <a id="branchDiag"
+                                       class="domainDialogExecutor branchField formField"
+                                       data-format="array"
+                                       data-property="branch"
+                                       data-value="branch"
+                                       href="javascript:;">
+                                    </a>
+                                </div>
+                            </div>
+                            <!--<div class="row">
+                                <div class="cell">
+                                    <span class="managerField"><%= translation.supervisor %></span>
+                                </div>
+                                <div class="selectInput cell supervisor">
+                                    <a id="managerDd"
+                                       class="currentSelected inpuWidet formField personnelDd managerDd triDown"
+                                       data-property="manager"
+                                       data-value="manager"
+                                       href="javascript:;">
+                                        <%= translation.select %>
+                                    </a>
+                                </div>
+                            </div>-->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="cropImages form" style="display:none;">
+                <div class="title">
+                    <span class="titleDescription"><%= translation.cropImages %></span>
+
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="image_input" style="float: left;margin-right: 20px;"></div>
+                <img class="imgCircle image_output"/>
+
+                <div class="clearfix"></div>
+            </div>
+        </fieldset>
+    </form>
+</div>

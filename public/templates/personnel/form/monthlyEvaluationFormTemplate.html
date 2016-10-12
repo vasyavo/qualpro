@@ -1,0 +1,96 @@
+<div class="monthlyEvaluationWrapper">
+    <div class="title">
+        <span class="titleDescription"><%= translation.monthlyFormTitle %></span>
+    </div>
+    <div class="topContentWrap">
+        <div class="monthlyBoxWrap">
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.individualObjectives %>
+                </div>
+                <div id="individualObjectivesTable" data-content="objectives" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.companyObjectives %>
+                </div>
+                <div id="companyObjectivesTable" data-content="objectives" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+        </div>
+        <div class="monthlyBoxWrap">
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.inStoreTasks %>
+                </div>
+                <div id="inStoreTasksTable" data-content="inStoreTasks" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+            <div class="monthlyBox">
+                <div class="titleHolder">
+                    <%= translation.submittingReports %>
+                </div>
+                <div id="submittingReportsTable" class="monthlyItem">
+                    <!-- table be here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottomContentWrap">
+        <div class="leftBottomContentWrap">
+            <div class="achievementHolder">
+                <div class="titleHolder">
+                    <%= translation.achievement %>
+                </div>
+                <div class="monthlyEvaluationBottomTableWrap">
+                    <table>
+                        <colgroup>
+                            <col width="120px">
+                            <col width="120px">
+                            <col width="80px">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th><%= translation.target %></th>
+                            <th><%= translation.achiev %></th>
+                            <th>%<%= translation.age.toUpperCase() %></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <input id="target" type="text" name="">
+                            </td>
+                            <td>
+                                <input id="achiev" type="text" name="">
+                            </td>
+                            <td>
+                                <span id="age"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="rightBottomContentWrap">
+            <div class="performanceHolder">
+                <div class="titleHolder">
+                    <%= translation.performance %>
+                </div>
+                <select id="rating" class="rating">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,443 @@
+.blockUser{
+  padding: 10px 60px 10px 10px;
+}
+
+.half-block{
+  min-width: 300px;
+}
+
+.dialogCategotyWrap,
+.dialogCompetitorWrap {
+  min-height: 550px!important;
+
+  .nestedContentHolder{
+    height: 100%;
+    .lh-display(flex);
+    .lh-flex-direction(column);
+  }
+
+  .dialogCategoryWrapInner {
+    height: calc(~"50% - 30px");
+    padding-left: 60px;
+    .lh-display(flex);
+
+    .dialogCategoryItem {
+      position: relative;
+      margin: 10px 60px 0 0;
+      .lh-flex-grow(1);
+    }
+  }
+
+  .dialogCategoryWrapInnerFullHeight {
+    height: calc(~"100% - 60px");
+    padding-left: 60px;
+    .lh-display(flex);
+
+    .dialogCategoryItem {
+      //height: 100%;
+      margin: 10px 60px 10px 0;
+    }
+  }
+}
+
+.dialogCompetitorWrap{
+
+  .flexRow {
+    height: calc(~"100% - 60px");
+    width: 100%;
+  }
+
+  .flexGrowOne{
+    margin-left: 60px;
+  }
+
+  .flexGrowOne,
+  .flexGrowTwo{
+    height: 100%;
+  }
+
+  .flexGrowTwo{
+
+    .dialogCategoryWrapInner{
+      height: 50%;
+    }
+  }
+}
+
+.categoryTableWrap,
+.brandTableWrap {
+
+  .absoluteContent {
+    position: absolute;
+    border: 1px solid @main-border-color;
+    height: calc(~"100% - 46px");
+    width: 100%;
+    overflow: hidden;
+
+    tr {
+
+      &:first-child {
+        text-align: center;
+      }
+
+      td,
+      th {
+        padding: 10px 10px;
+
+        label {
+          display: inline-block;
+        }
+      }
+
+      th {
+        border-top: none;
+      }
+
+      td {
+
+        input {
+
+          &:not([type=checkbox]) {
+            width: 100%;
+            height: 25px;
+            padding-left: 5px;
+            float: left;
+            clear: both;
+            border: 1px solid @leftmenu-border-color;
+          }
+
+          &:nth-child(n+2) {
+            display: none;
+          }
+
+          &[disabled]{
+            background-color: transparent;
+            border: none;
+          }
+        }
+        //
+        //&:nth-child(n+2){
+        //  padding: 10px 20px 10px 10px;
+        //}
+      }
+    }
+
+    .editting{
+
+      td {
+
+        input {
+
+          &:not([type=checkbox]) {
+
+            &:first-child {
+              &:not(.editable){
+                &:not(.dropDown) {
+                  display: none;
+                }
+              }
+            }
+
+            &:nth-child(n+2) {
+              display: block;
+            }
+
+            &:nth-child(3) {
+              margin-top: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.brandTableWrap {
+  .editting{
+
+    td {
+
+      input {
+
+        &:not([type=checkbox]) {
+
+          &:nth-child(2) {
+            margin-top: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.dialogCategoryTitle{
+  position: relative;
+  padding: 5px 0;
+  overflow: hidden;
+  height: 30px;
+
+  .categoryTitle{
+    float: left;
+    line-height: 36px;
+  }
+
+  .greyBtn{
+    float: right;
+  }
+}
+
+.categoryButtonWrap,
+.brandButtonWrap{
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  .addBtn,
+  .deleteBtn,
+  .editBtn{
+    display: none;
+    position: absolute;
+  }
+
+  .addBtn{
+    right: 0;
+  }
+
+  .deleteBtn{
+    right: 29px;
+  }
+
+  .editBtn{
+    right: 57px;
+  }
+}
+
+.floatButtonsContainer{
+  display: none;
+  position: absolute;
+  right: -55px;
+}
+//items & outlet
+.dialogOutletItem{
+  padding: 10px 60px 10px 0;
+  .lh-size(100%);
+
+  .categoryTableWrap {
+    position: relative;
+    height: 100%;
+    min-height: 400px;
+
+    .absoluteContent {
+      border: 1px solid @main-border-color;
+      height: calc(~"100%" - 23px);
+    }
+
+    table {
+
+      tr {
+
+        &:first-child {
+          text-align: center;
+        }
+
+        td,
+        th {
+          padding: 10px 10px;
+
+          label {
+            display: inline-block;
+          }
+        }
+      }
+      tbody {
+
+        tr {
+
+          td {
+
+            input {
+
+              &:not([type=checkbox]) {
+                height: 25px;
+                width: 100%;
+                float: left;
+                clear: both;
+
+                &:nth-child(n+2){
+                  display: none;
+                }
+              }
+
+              &[disabled]{
+                border: none;
+                background-color: @inputDisabled;
+              }
+            }
+
+            &:nth-child(n+2){
+              padding: 10px 20px 10px 10px;
+            }
+
+            .icon{
+              padding: 0;
+              text-align: center;
+            }
+          }
+        }
+
+        tr.editting{
+
+          td {
+
+            input {
+
+              &:not([type=checkbox]) {
+
+                &:first-child {
+                  display: none;
+                }
+
+                &:nth-child(2){
+                  display: block;
+                  margin-bottom: 10px;
+                }
+
+                &:nth-child(3){
+                  display: block;
+                }
+              }
+            }
+          }
+          .dropDownInput {
+            input {
+              min-width: auto;
+              padding-right: 25px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.shelfShareLeftPeace {
+  .priceSurveyContainer {
+    height: calc(~"100% - 121px") !important;
+  }
+
+  .shelfSharesContainer {
+    height: calc(~"100% - 61px") !important;
+
+    td {
+      height: 137px !important;
+    }
+  }
+
+  .priceSurveyBrand {
+    background: #ffffff !important;
+  }
+}
+
+.shelfShareLeftPeace,
+.shelfShareRightPeace {
+  .absoluteContent .singleColor
+  > tbody {
+    > tr {
+      > td {
+        background: none;
+      }
+    }
+  }
+}
+
+table:not(.ui-datepicker-calendar) thead tr td {
+  background: none;
+}
+
+.shelfShareLeftPeace  {
+  .absoluteContent  {
+    table {
+      border-right: none;
+    }
+
+    .shelfShareTableBody {
+      border-right: 1px solid @tableBorder;
+    }
+  }
+}
+
+.contentHolder {
+  .smallCells {
+    table {
+      tbody {
+        tr {
+          td {
+            &:nth-child(n+3) {
+              padding: 15px 8px 8px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.smallCells {
+  td:not(.colspanFix) {
+    height: 50px;
+  }
+
+  .absoluteContent {
+    th:last-child {
+      border-right: 1px solid @main-border-color !important;
+    }
+  }
+
+}
+
+.shelfShareRightPeace {
+  .shelfSharesContainer {
+    max-height: calc(~"100% - 61px") !important;
+
+    tr:first-child td {
+      border-top: 1px solid transparent;
+    }
+
+    .shelfShareList {
+      min-height: 135px;
+    }
+  }
+}
+
+.priceOneRow {
+  height: 41px !important;
+
+  td {
+    background: @main-block-hover-bg !important;
+    
+  }
+}
+
+.showAllBrands {
+  cursor: pointer;
+
+  .flexRow {
+    margin-bottom: 9px;
+
+    span {
+      position: relative;
+      display: inline-block;
+      padding: 0 4px;
+
+
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        border-bottom: 1px solid @main-border-color;
+      }
+    }
+  }
+}

@@ -1,0 +1,570 @@
+input {
+  &[type="file"],
+  &[type=text],
+  &[type=password],
+  &[type=email] {
+    width: 100%;
+    padding-left: 10px;
+  }
+
+  &[type=button] {
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+
+  &:read-only {
+
+    &:not([type="checkbox"]) {
+
+      &:not(#dateJoined) {
+
+        &:not(.hasDatepicker) {
+
+          &:not([type="button"]) {
+            border: 0 !important;
+            background-color: transparent !important;
+          }
+        }
+      }
+    }
+  }
+
+  &:required {
+    box-shadow:none;
+  }
+
+  &:invalid {
+    box-shadow: none;
+  }
+}
+
+.uploadInput{
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.nameAr{
+  padding-left: 10px;
+}
+
+.customCheckbox{
+
+  &:not(.onoffswitch-checkbox) {
+    display: none;
+
+    + label {
+      position: relative;
+      z-index: 1;
+      display: block;
+      border: 2px solid @transparentBlack6;
+      border-radius:2px;
+      cursor: pointer;
+      .lh-size(15px);
+    }
+
+    &:disabled{
+
+      + label{
+        border-color: @disabledCheckboxBorder;
+      }
+    }
+  }
+}
+
+.customCheckbox{
+
+  &:not(.onoffswitch-checkbox) {
+
+    &:checked {
+
+      + label {
+
+        &:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          z-index: 5;
+          background-image: url("../images/check2.png");
+          background-size: cover;
+          .lh-size(13px);
+        }
+      }
+    }
+  }
+}
+
+.dialogCategoryInputWrap {
+
+  .categoryInput {
+    height: 50px;
+    padding-left: 45px;
+    border: 1px solid @main-border-color;
+    border-bottom: none;
+  }
+}
+
+.ratingInfo{
+
+  .ratingItem {
+    width: 160px;
+    float: left;
+    padding: 10px 0;
+    overflow: hidden;
+  }
+
+  input[type='radio'].ratingOption {
+    display: none;
+
+    + label {
+      float: left;
+      position: relative;
+      display: inline-block;
+      margin-right: 15px;
+      background-color: transparent;
+      border: 2px solid @main-font-color;
+      border-radius: 50%;
+      .lh-size(20px);
+
+      &:after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        background-color: transparent;
+        border-radius: 50%;
+        .lh-size(10px);
+        .lh-transition(all .2s ease-in-out);
+        .lh-transform(scale(2,2));
+      }
+    }
+    &:checked {
+
+      + label {
+
+        &:after {
+          top: 3px;
+          left: 3px;
+          height: 10px;
+          width: 10px;
+          background-color: @main-font-color;
+          .lh-transform(none);
+        }
+      }
+    }
+  }
+}
+
+.selectOptions{
+  padding-left: 23px;
+
+  label {
+    position: relative;
+    cursor: pointer;
+
+    &:after {
+      content: none;
+      position: absolute;
+      top: 8px;
+      left: -19px;
+      background-color: @radioGreen;
+      border-radius:50%;
+      .lh-size(7px);
+    }
+  }
+
+
+  .inputWrap{
+    position: relative;
+    float: left;
+    margin-right: 23px;
+
+    .ratingOption{
+      display: none;
+    }
+
+    &:before{
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: -23px;
+      background-color: @radioWhite;
+      border: 2px solid @radioGreen;
+      border-radius: 50%;
+      .lh-size(15px);
+    }
+  }
+
+  input {
+    display: none;
+
+    &:checked {
+
+      & + label {
+        &:after {
+          content: '';
+        }
+      }
+    }
+  }
+}
+
+.forgotInput{
+  height: 46px;
+  width: 100%;
+  background-color: @forgotInputBg;
+  border: none;
+  margin-bottom: 25px;
+  transition: background-color .3s ease;
+
+  &:hover{
+    background-color: lighten(@forgotInputBg, 2%);
+  }
+
+  &:focus,
+  &:active{
+    background-color: @forgotInputBgWhite;
+  }
+}
+
+.searchInputWrap {
+  position: relative;
+  float: right;
+  color: @main-font-color;
+  text-transform: capitalize;
+  .pxToRem(16px);
+
+  input[type="text"] {
+    color: @main-font-color;
+    height: 36px;
+    width: 270px;
+    padding: 0 15px 0 38px;
+    border: 1px solid @topbarmenu-border-color;
+    font-weight: normal;
+    .pxToRem(16);
+  }
+}
+
+.filterName{
+
+  input {
+    height: 40px;
+    width: 185px;
+    padding-right: 45px;
+    border-width: 0;
+    border-bottom: 1px solid @topbarmenu-border-color;
+    line-height: 40px;
+    color: @topbarmenu-font-color-menu;
+    .pxToRem(14);
+
+    &:focus {
+      outline: none;
+      border-width: 0;
+      border-bottom: 1px solid @gray9;
+    }
+  }
+}
+
+.loginDiv,
+.mainLogo {
+
+  input.error {
+    border: 2px solid @errorInput;
+    border-radius:2px;
+    outline: 0;
+  }
+
+  input[type="submit"] {
+    display: none;
+  }
+
+  .loginForm.notRegister {
+
+    input {
+      border: 2px solid @login-button-color;
+      border-radius:2px;
+      outline: 0;
+    }
+  }
+
+  fieldset{
+
+    input[type=text]#email,
+    input[type=password]#pass,
+    input[type=password]#passwordInput,
+    input[type=password]#repeatPassword{
+      margin-top: 10px;
+      margin-bottom: 24px;
+      height: 40px;
+      padding: 0 40px 0 10px;
+      background-color: @login-input-color-bg;
+      border: none;
+    }
+  }
+}
+
+.block{
+
+  input{
+    float: left;
+    background-color: @login-input-color-bg;
+    border: 1px solid @login-input-color-bg;
+  }
+}
+
+.upload {
+
+  input[type="file"] {
+    position: absolute;
+    height: 35px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.ui-widget-content{
+
+  .changePassword{
+
+    input{
+      width: 259px;
+      height: 28px;
+      background-color: @login-input-color-bg;
+      border: 1px solid @login-input-color-bg;
+      margin-bottom: 13px;
+    }
+  }
+}
+
+.inputWide{
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin-right: 10px;
+  padding-left: 10px;
+}
+
+.blockObjective{
+
+  .objectivesInput{
+    width: 250px;
+  }
+
+  .dropDownInput {
+
+    input{
+      height: 28px;
+    }
+  }
+
+  .assignDd{
+    width: 100%;
+  }
+}
+
+.cell{
+  .inputNarrow{
+    width: 210px;
+    padding-left: 10px;
+  }
+}
+
+.inputNarrow,
+.inputWide,
+.objectivesInput{
+  height: 28px;
+  background-color: @login-input-color-bg;
+  border: 1px solid @login-input-color-bg;
+  color: @main-font-color;
+  .pxToRem(13);
+}
+
+.searchInputWrap {
+  &.translatedSearch {
+    position: absolute;
+    top: 5px;
+    left: -250px;
+
+    .searchInput {
+      height: 36px;
+      width: 230px;
+      padding: 0 15px 0 38px;
+      border: 1px solid @main-border-color;
+    }
+    label {
+      &:after {
+        top: 7px;
+      }
+    }
+  }
+}
+
+.questionnarie {
+  .searchInputWrap {
+    &.translatedSearch {
+      top: 7px;
+      left: auto;
+      right: 10px;
+    }
+  }
+}
+
+.notesViewBar {
+  padding: 10px 0;
+
+  .filterBar {
+    &.singleFilter {
+      position: static;
+      width: auto;
+      margin: 0 10px 0 20px;
+      float: right;
+    }
+  }
+  .searchInputWrap {
+    &.translatedSearch {
+      position: relative;
+      left: auto;
+      top: auto;
+    }
+  }
+  .createBtn {
+    margin-left: 0;
+  }
+
+  .paginationHolder {
+    width: auto;
+    border: none;
+    float: right;
+  }
+}
+
+.grayDropdown{
+
+  input[type=text]{
+    width: 210px;
+    height: 28px;
+    background-color: @selectInputBackground;
+  }
+}
+//this is my fix to yellow backgroun in login input
+input:-webkit-autofill {
+  box-shadow: inset 0 0 0 50px @forgotInputBg!important;
+  -webkit-text-fill-color: @grayDark !important;
+  color: @grayDark !important;
+}
+
+input:not([readonly]) {
+
+  &:focus,
+  &active {
+
+    &:-webkit-autofill {
+      box-shadow:inset 0 0 0 50px @main-sub-color!important;
+      -webkit-text-fill-color: @grayDark !important;
+      color: @grayDark !important;
+    }
+  }
+}
+
+::-webkit-input-placeholder {color:@main-placeholder-color;}
+::-moz-placeholder          {color:@main-placeholder-color;}/* Firefox 19+ */
+:-moz-placeholder           {color:@main-placeholder-color;}/* Firefox 18- */
+:-ms-input-placeholder      {color:@main-placeholder-color;}
+
+.filtersFullHolder {
+  ::-webkit-input-placeholder {color: #000;}
+  ::-moz-placeholder          {color: #000;}/* Firefox 19+ */
+  :-moz-placeholder           {color: #000;}/* Firefox 18- */
+  :-ms-input-placeholder      {color: #000;}
+}
+
+.singleFilter {
+  ::-webkit-input-placeholder {color: #000!important;}
+  ::-moz-placeholder          {color: #000!important;}/* Firefox 19+ */
+  :-moz-placeholder           {color: #000!important;}/* Firefox 18- */
+  :-ms-input-placeholder      {color: #000!important;}
+}
+
+input:not([readonly]):not(.grayDropdownInput):not(#email):not(#pass):not(#password):not([type='button']){
+
+  &:focus{
+    background-color: @main-sub-color!important;
+  }
+}
+:focus::-webkit-input-placeholder {color:transparent!important;}
+:focus::-moz-placeholder          {color:transparent!important;}/* Firefox 19+ */
+:focus:-moz-placeholder           {color:transparent!important;}/* Firefox 18- */
+:focus:-ms-input-placeholder      {color:transparent!important;}
+
+// language trigger
+.currentLanguageWrap{
+  position: absolute;
+  right: 35px;
+  top: 50%;
+  height: 36px;
+  .lh-transform(translateY(-50%));
+  .currentLanguageInput{
+    display: none;
+
+    + label{
+
+      &:before{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 36px;
+        width: 36px;
+        background-image: url("../images/uk-flag.png");
+        background-size: cover;
+        border-radius: 50%;
+        cursor: pointer;
+        .lh-transition(all ease-in-out .2s);
+      }
+    }
+
+    &:checked{
+
+      + label{
+
+        &:before{
+          background-image: url("../images/ar-flag.png");
+        }
+      }
+    }
+  }
+}
+
+// for readonly input
+input {
+  &:not([type="checkbox"]) {
+    &:not(.readonlyVisible) {
+      &:not(.hasDatepicker) {
+        //&:-moz-read-only {
+        //  background-color: transparent;
+        //  border: 0;
+        //}
+        &:read-only {
+          background-color: transparent;
+          border: 0;
+        }
+      }
+    }
+  }
+}
+
+.dateJoinedWrap {
+  input {
+    background-color: #f2f0f4!important;
+  }
+}

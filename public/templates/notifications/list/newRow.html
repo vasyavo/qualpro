@@ -1,0 +1,43 @@
+<% var percent; %>
+
+<% var currentLanguage = App.currentUser.currentLanguage %>
+<% var country = [];%>
+
+<% model.country.forEach(function(item){ %>
+    <% country.push(item.name[currentLanguage]); %>
+<% }); %>
+<div class="templateWrap listRow <%= model.objectiveType === 'Individual' ? 'leftBorderG' : 'leftBorderY' %>" data-id="<%= model._id %>">
+    <div class="userBlock flexColumn">
+        <div class="top flexRowStart bottomLine">
+            <div class="left flexColumn">
+                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+            </div>
+            <div class="right flexColumn">
+                <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName[currentLanguage] + ' ' + model.createdBy.user.lastName[currentLanguage] : '' %></div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.accessRole && model.createdBy.user.accessRole.name) ? model.createdBy.user.accessRole.name[currentLanguage] : '' %></div>
+                <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.position && model.createdBy.user.position.name) ? model.createdBy.user.position.name[currentLanguage] : '' %></div>
+            </div>
+        </div>
+        <div class="notificationsOverflowWrap">
+            <% model.recipients.forEach( function(recipient) { %>
+            <img src="<%= recipient.imageSrc %>" class="imgCircle userImgSmall">
+            <% }); %>
+        </div>
+    </div>
+    <div class="locationBlock flexGrow flexColumn">
+        <div class="locationTop">
+            <div class="flexRow">
+                <span class="textSmall"></span>
+            </div>
+            <div class="fontSmall fontGray textEllipsis multiEllipsis"><%= model.description[currentLanguage] %></div>
+        </div>
+        <div class="locationBottom flexRowStart">
+            <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location %>: <%= country.join(', ') || 'No translation' %> </span>
+        </div>
+    </div>
+    <div class="dateBlock flexColumn">
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.createdBy.date %></span>
+        </div>
+    </div>
+</div>

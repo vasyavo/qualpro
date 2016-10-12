@@ -1,0 +1,22 @@
+<% var length = collection.length;%>
+<% var showCheckboxes = show; %>
+
+<% collection.forEach(function(domain, index){ %>
+<div class="retailSegment thumbnail" data-id="<%=domain._id%>">
+    <div class="thumbnailTop">
+        <% if ( (tabName !== 'archived' && showCheckboxes ) || ( domain.topArchived && showCheckboxes ) ) { %>
+        <input type="checkbox" value="<%=domain._id%>" id="<%=domain._id%>" class="customCheckbox hidden">
+        <label for="<%=domain._id%>" class="checkboxLabel"></label>
+        <% } %>
+        <img class="thumbnailImage" src="<%=domain.imageSrc%>">
+    </div>
+    <div class="thumbnailBottom">
+        <span class="thumbnailUserName"><%=domain.name.currentLanguage%></span>
+    </div>
+</div>
+<% }) %>
+<% if (!length) {%>
+<div>
+    <span>No data</span>
+</div>
+<% } %>
