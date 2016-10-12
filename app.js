@@ -16,7 +16,7 @@ module.exports = function (db, event) {
     var logWriter = require('./helpers/logWriter');
 
     var MemoryStore = require('connect-mongo')(Session);
-    var configs = require('./config/' + process.env.NODE_ENV);
+    var configs = require('./config');
 
     var sessionConfig = configs.sessionConfig(db);
 

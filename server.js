@@ -26,10 +26,7 @@ var Scheduler;
  };
  */
 
-// env.NODE_ENV = 'development';
-env.NODE_ENV = 'production';
-
-configs = require('./config/' + env.NODE_ENV);
+configs = require('./config');
 
 // importer.testRead();
 

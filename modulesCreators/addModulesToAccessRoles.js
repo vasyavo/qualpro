@@ -6,7 +6,7 @@ var connectOptions;
 var configs;
 var db;
 
-configs = require('../config/development'/* + env.NODE_ENV*/);
+configs = require('../config');
 
 // connectOptions = configs.mongoConfig;
 require('../models/index.js');
