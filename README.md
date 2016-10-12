@@ -16,7 +16,6 @@ CI listens all branches and runs a test pipeline on each commit. After that it d
 An application pipeline on Heroku built with promotion system which upgrade dyno from development to staging and production environments.
 
 #### To be discussed:
- - conventional commit engine
  - writing correct test results
  - generate code coverage report
  - code style guides
@@ -27,6 +26,11 @@ To run project, put in terminal:
 ```
 $ npm install
 $ cross-env NODE_ENV=YOUR_ENVIRONMENT npm start
+```
+
+In order to make conventional commit, use:
+```
+$ npm run commit
 ```
 
 #### Settings
