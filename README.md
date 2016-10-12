@@ -42,30 +42,30 @@ Ask credentials in your administrator.
 
 ## Environment variables
 
- General settings of instance:
+##### General settings of instance:
  - HOST
  - PORT
  - NODE_APP_INSTANCE
- 
- Database configurations:
+
+##### Database configurations:
  - DB_USER
  - DB_PASS
  - DB_HOST
  - DB_PORT
  - DB_NAME
- 
- Redis host :
+
+##### Redis host :
  - REDIS_HOST
- 
- Socket connection settings:
+
+##### Socket connection settings:
  - SOCKET_DB_HOST
  - SOCKET_DB_PORT
  - SOCKET_DB
 
- Twillio credentials are:
+##### Twillio credentials are:
  - SMS_ACCOUNT_SID
  - SMS_AUTH_TOKEN
  - SMS_NUMBER
- 
- Heroku:
+
+##### Heroku:
  - MONGOHQ_URL MongoDB url which passed by Compose.io addon in Heroku
