@@ -1,4 +1,6 @@
 const path = require('path');
+const fs = require('fs');
+const nconf = require('nconf');
 const config = {};
 
 // for example NODE_ENV is development
@@ -11,8 +13,14 @@ require('dotenv').config({
     path: path.join(__dirname, `.env${config.env ? `.${config.env}` : ''}`).normalize(),
 });
 
+config.port = parseInt(process.env.PORT) || 443;
+config.nodeAppInstance = parseInt(process.env.NODE_APP_INSTANCE, 10) || 0;
+config.nodePort = config.port + config.nodeAppInstance;
+
 // Heroku Compose.io addon variable
 const mongohqUrl = process.env.MONGOHQ_URL;
+
+/* Database configurations */
 const dbConfig = {
     user : process.env.DB_USER,
     password : process.env.DB_PASS,
@@ -24,6 +32,7 @@ const dbConfig = {
 config.dbConfig = dbConfig;
 config.mongodbUri = mongohqUrl ? mongohqUrl :
     `mongodb://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}`;
+/* Database configurations */
 
 /* following code is copied from vcs and modified */
 const mongoConfig = {
@@ -48,6 +57,42 @@ const sessionConfig = (db) => {
 config.mongoConfig = mongoConfig;
 config.sessionConfig = sessionConfig;
 /* end of copy */
+
+/* AWS S3 configurations begin */
+
+// setup default state for run environment
+config.aws = {
+    s3: {
+        bucket: process.env.AWS_S3_BUCKET,
+        region: process.env.AWS_S3_REGION,
+    },
+};
+
+// path to file with credentials
+config.awsCredentialsPath = path.join(__dirname, 'aws.json').normalize();
+
+// load credentials from file if it exist for development purposes
+if (fs.existsSync(config.awsCredentialsPath)) {
+    nconf.argv().env().file({
+        file: config.awsCredentialsPath,
+    });
+
+    const accessKeyId = nconf.get('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = nconf.get('AWS_SECRET_ACCESS_KEY');
+
+    // rewrite default state with additional props
+    config.aws.s3 = {
+        accessKeyId,
+        secretAccessKey,
+        bucketName : nconf.get('AWS_S3_BUCKET'),
+        region : nconf.get('AWS_S3_REGION'),
+        imageUrlDurationSec : 60 * 60 * 24 * 365 * 10
+    };
+
+    process.env.AWS_ACCESS_KEY_ID = accessKeyId;
+    process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
+}
+/* end of AWS S3 configurations */
 
 // import this file at begin of server.js
 module.exports = config;

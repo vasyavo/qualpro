@@ -17,7 +17,7 @@ var Files = function (db) {
     var self = this;
 
     if (process.env.UPLOADER_TYPE && process.env.UPLOADER_TYPE === 'AmazonS3') {
-        amazonS3conf = require('../config/aws');
+        amazonS3conf = require('../config').aws.s3;
         fileUploaderConfig = {
             type     : process.env.UPLOADER_TYPE,
             awsConfig: amazonS3conf

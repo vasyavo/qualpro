@@ -35,3 +35,6 @@ build/Release
 node_modules
 /log.txt
 /attachments
+
+# AWS S3 credentials
+/config/aws.json
