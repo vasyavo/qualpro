@@ -1,10 +1,8 @@
 {
-  "name": "qualProBackend",
+  "name": "qualpro-spa",
   "version": "1.0.1",
   "homepage": "",
-  "authors": [
-    "Roman <roma.buchuk@gmail.com>"
-  ],
+  "authors": [],
   "moduleType": [
     "node"
   ],
