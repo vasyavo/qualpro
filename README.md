@@ -15,6 +15,12 @@ Current project configured with continuous integration. *[Codeship](https://code
 CI listens all branches and runs a test pipeline on each commit. After that it deploys code to [Heroku](https://www.heroku.com/).
 An application pipeline on Heroku built with promotion system which upgrade dyno from development to staging and production environments.
 
+#### Links:
+ - Heroku app available [here](https://qualpro.herokuapp.com/)
+ - [Join](https://foxtrappteam.slack.com) Slack team.
+ - [Project items](https://drive.google.com/open?id=0Bx8qXOKRvi2adXJiT2ZwRUdVdXM)
+
+
 #### To be discussed:
  - writing correct test results
  - generate code coverage report
