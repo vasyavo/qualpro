@@ -1,6 +1,6 @@
 ﻿module.exports = function (app) {
     var _ = require('underscore');
-    var redisClient = require('../helpers/redisClient')();
+    var redisClient = require('../helpers/redisClient');
     // var redisClient =  RedisClient();
 
 

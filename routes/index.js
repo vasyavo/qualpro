@@ -11,7 +11,7 @@ module.exports = function (app, db, event) {
     var multipartMiddleware = multipart();
     var mongoose = require('mongoose');
 
-    var redis = require('../helpers/redisClient')();
+    var redis = require('../helpers/redisClient');
 
     var csurf = require('csurf');
     var csrfProtection = csurf({ignoreMethods: ['GET', 'POST'], cookie: true});

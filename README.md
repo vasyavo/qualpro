@@ -74,4 +74,5 @@ Ask credentials in your administrator.
  - SMS_NUMBER
 
 ##### Heroku:
+ - REDIS_URL Redis url which passed by Heroku Redis addon
  - MONGOHQ_URL MongoDB url which passed by Compose.io addon in Heroku
