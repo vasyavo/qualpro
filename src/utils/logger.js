@@ -7,7 +7,7 @@ const logger = new (winston.Logger)({
     transports: config.isTest ? [] : [
         new (winston.transports.Console)({
             colorize: true,
-            json: false,
+            json: true,
             handleExceptions: true,
             humanReadableUnhandledException: true,
         }),

@@ -9,6 +9,8 @@ const logger = require('./src/utils/logger');
 const Scheduler = require('./helpers/scheduler')(mongo, event);
 
 mongo.once('open', () => {
+    logger.info('Current configurations:', config);
+
     const scheduler = new Scheduler();
 
     require('./models/index.js');
