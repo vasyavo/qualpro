@@ -18,7 +18,7 @@ config.nodeAppInstance = parseInt(process.env.NODE_APP_INSTANCE, 10) || 0;
 config.nodePort = config.port + config.nodeAppInstance;
 
 // Heroku Compose.io addon variable
-const mongohqUrl = process.env.MONGOHQ_URL;
+const mongohqUrl = process.env.MONGOHQ_URL || process.env.MONGODB_URI;
 
 /* Database configurations */
 const dbConfig = {
