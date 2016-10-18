@@ -34,6 +34,7 @@ config.mongodbUri = mongohqUrl ? mongohqUrl :
     `mongodb://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}`;
 /* Database configurations */
 
+config.sendgirdApiKey = process.env.SENDGRID_APIKEY;
 config.redisUrl = process.env.REDIS_URL;
 
 /* following code is copied from vcs and modified */

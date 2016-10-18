@@ -68,10 +68,13 @@ Ask credentials in your administrator.
  - `SOCKET_DB_PORT`
  - `SOCKET_DB`
 
-##### Twillio credentials are:
+##### Twilio credentials are:
  - `SMS_ACCOUNT_SID`
  - `SMS_AUTH_TOKEN`
  - `SMS_NUMBER`
+ 
+##### SendGrid:
+ - `SENDGRID_APIKEY`
  
 ##### AWS S3
  - `AWS_S3_BUCKET`
