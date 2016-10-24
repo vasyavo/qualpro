@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('underscore');
+var _ = require('lodash');
 var CONSTANTS = require('../constants/allowedBodyData');
 var CONTENT_TYPE = require('../public/js/constants/contentType');
 
@@ -48,11 +48,11 @@ var BodyValidator = (function () {
     };
 
     validationFunctions[CONTENT_TYPE.OBJECTIVES] = function (value, key, allowedObject) {
-        if (allowedObject.indexOf(key) === -1) {
+        if (!_.includes(allowedObject, key)) {
             return false;
         }
 
-        if (key === 'title' || key === 'description' || key === 'companyObjective') {
+        if (_.includes(['title', 'description', 'companyObjective'], key)) {
             return validationFunctionsHelper.englishOrArabic(value, key);
         }
 

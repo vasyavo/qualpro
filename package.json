@@ -72,11 +72,11 @@
     "test": "mocha tests/",
     "start": "node server.js",
     "dev": "cross-env NODE_ENV=development node server.js",
+    "debug": "cross-env NODE_ENV=development node-debug --save-live-edit server.js",
     "postinstall": "bower install",
     "commit": "git-cz"
   },
-  "pre-push": [
-  ],
+  "pre-push": [],
   "engines": {
     "node": "6.5.0",
     "npm": "3.10.3"
