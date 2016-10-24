@@ -3010,7 +3010,8 @@ var Personnel = function (db, redis, event) {
                 email = body.email;
                 isEmailValid = email === '' || false;
             }
-            if (body.email) {
+
+            if (body.phoneNumber) {
                 phone = body.phoneNumber;
                 isPhoneValid = phone === '' || false;
             }

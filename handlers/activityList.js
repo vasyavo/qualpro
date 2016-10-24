@@ -36,7 +36,8 @@ var Personnel = function (db, redis, event) {
         accessRoleLevel: 1,
         assignedTo     : 1,
         creationDate   : 1,
-        personnels     : 1
+        personnels     : 1,
+        checkPersonnel : 1
     };
 
 // 11 - virtual role level
@@ -71,7 +72,40 @@ var Personnel = function (db, redis, event) {
         var planogramQuery;
         var countryQuery;
         var questionaryQuery;
-        var contractsQuery;
+        var usersArray = [currentUser._id];
+        var checkPersonnelCondition = {
+            $cond: {
+                if  : { $eq:['$itemType', CONTENT_TYPES.CONTRACTSSECONDARY]},
+                then: 1,
+                else: {
+                    $cond: {
+                        if  : { $eq:['$itemType', CONTENT_TYPES.CONTRACTSYEARLY]},
+                        then: 1,
+                        else: 0
+                    }
+                }
+            }
+        };
+        var contractsQuery = {
+            $or: [
+                {
+                    $and: [
+                        {
+                            checkPersonnel: 1
+                        },
+                        {
+                            personnels: {
+                                $in: usersArray
+                            }
+                        }
+                    ]
+                },
+                {
+                    checkPersonnel: 0
+                }
+
+            ]
+        };
         var itemsPricesQuery;
         var competitorItemQuery;
         var competitorPromoQuery;
@@ -79,7 +113,6 @@ var Personnel = function (db, redis, event) {
         var selfSharesQuery;
         var newProductLaunchQuery;
         var notificationQuery;
-        var usersArray = [currentUser._id];
 
         var afterIteMTypeQuery = options.afterIteMTypeQuery || {};
 
@@ -116,8 +149,13 @@ var Personnel = function (db, redis, event) {
 
         pipeLine.push({
             $project: aggregateHelper.getProjection({
-                module: {$arrayElemAt: ['$module', 0]}
+                module        : {$arrayElemAt: ['$module', 0]},
+                checkPersonnel: checkPersonnelCondition
             })
+        });
+
+        pipeLine.push({
+            $match: contractsQuery
         });
 
         if (positionFilter) {
@@ -199,15 +237,6 @@ var Personnel = function (db, redis, event) {
                     }
                 }, {
                     itemType: {$eq: CONTENT_TYPES.PLANOGRAM}
-                }];
-
-            contractsQuery = [
-                {
-                    country: {
-                        $in: currentUser.country
-                    }
-                }, {
-                    itemType: {$in: [CONTENT_TYPES.CONTRACTSSECONDARY, CONTENT_TYPES.CONTRACTSYEARLY]}
                 }];
 
             itemsPricesQuery = [
@@ -294,9 +323,10 @@ var Personnel = function (db, redis, event) {
                 }];
 
             personnelQuery.push({
-                country: {
+                country : {
                     $in: currentUser.country
-                }
+                },
+                itemType: {$eq: CONTENT_TYPES.PERSONNEL}
             });
 
             if (!isMobile) {
@@ -306,10 +336,6 @@ var Personnel = function (db, redis, event) {
                     }
                 });
             }
-
-            personnelQuery.push({
-                itemType: {$eq: 'personnel'}
-            });
 
             if (currentUser.accessRoleLevel === 5) {
                 regionsMathArray = {branch: {$in: currentUser.branch || afterIteMTypeQuery.branch}};
@@ -339,7 +365,8 @@ var Personnel = function (db, redis, event) {
                     $or: [
                         {
                             $and: [
-                                regionsMathArray, {
+                                regionsMathArray,
+                                {
                                     accessRoleLevel: {
                                         $in: levelsByLevel[currentUser.accessRoleLevel]
                                     }
@@ -367,9 +394,6 @@ var Personnel = function (db, redis, event) {
                         },
                         {
                             $and: countryQuery
-                        },
-                        {
-                            $and: contractsQuery
                         },
                         {
                             $and: questionaryQuery
@@ -403,7 +427,8 @@ var Personnel = function (db, redis, event) {
                         },
                         {
                             assignedTo: {$in: usersArray}
-                        }
+                        },
+                        contractsQuery
                     ]
                 }
             });

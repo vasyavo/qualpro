@@ -385,8 +385,9 @@ define([
             });
             var self = this;
             var $curEl;
-            var questionnarieTableTitleEn;
-            var questionnarieTableTitleAr;
+            var questionnarieTableTitle;
+            var idToSearch = '#' + this.currentLanguage;
+            var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
             var $endDate;
             var dateStart = new Date();
             var dateEnd;
@@ -453,15 +454,10 @@ define([
             idToFind = 'questionnaryTitle' + anotherLanguage;
             $curEl.find('#' + idToFind).hide();
 
-            questionnarieTableTitleEn = $curEl.find('#en');
-            questionnarieTableTitleAr = $curEl.find('#ar');
+            questionnarieTableTitle = $curEl.find(idToSearch);
 
-            $curEl.find('#questionnaryTitleEn').on('input', function (e) {
-                questionnarieTableTitleEn.text(e.target.value);
-            });
-
-            $curEl.find('#questionnaryTitleAr').on('input', function (e) {
-                questionnarieTableTitleAr.text(e.target.value);
+            $curEl.find('#questionnaryTitle' + idToBind).on('input', function (e) {
+                questionnarieTableTitle.text(e.target.value);
             });
 
             this.delegateEvents(this.events);

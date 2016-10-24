@@ -10844,3 +10844,8 @@ ul.fancytree-container li {
 .questionsDiagram {
     max-height: 270px;
 }
+
+.showAllBrands .flexRow {
+    -webkit-justify-content: center;
+    justify-content: center;
+}

@@ -454,27 +454,70 @@ var Objectives = function (db, redis, event) {
                     };
 
                     aggregation.exec(function (err, response) {
+                        var idsPersonnel = [];
+                        var idsFile = [];
+                        var options = {
+                            data: {}
+                        };
                         if (err) {
-                            return cb(err, null);
+                            return cb(err);
+                        }
+                        response = response ? response[0] : {data: [], total: 0};
+
+                        if(!response.data.length){
+                            return cb(null, response);
                         }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                        response.data = _.map(response.data, function (model) {
+                            if (model.title) {
+                                model.title = {
+                                    en: model.title.en ? _.unescape(model.title.en) : '',
+                                    ar: model.title.ar ? _.unescape(model.title.ar) : ''
+                                };
+                            }
+                            if (model.description) {
+                                model.description = {
+                                    en: model.description.en ? _.unescape(model.description.en) : '',
+                                    ar: model.description.ar ? _.unescape(model.description.ar) : ''
+                                };
+                            }
+                            if (model.companyObjective) {
+                                model.companyObjective = {
+                                    en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                                    ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
+                                };
+                            }
 
-                        response.data = _.map(response.data, function (objective) {
-                            objective.description = {
-                                ar: _.unescape(objective.description.ar),
-                                en: _.unescape(objective.description.en)
-                            };
+                            idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
+                            idsPersonnel.push(model.createdBy.user._id);
+                            idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
 
-                            objective.companyObjective = {
-                                ar: _.unescape(objective.companyObjective.ar),
-                                en: _.unescape(objective.companyObjective.en)
-                            };
-
-                            return objective;
+                            return model;
                         });
 
-                        cb(null, response);
+                        idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
+                        options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
+                        options.data[CONTENT_TYPES.FILES] = idsFile;
+
+                        getImagesHelper.getImages(options, function (err, result) {
+                            var fieldNames = {};
+                            var setOptions;
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            setOptions = {
+                                response  : response,
+                                imgsObject: result
+                            };
+                            fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
+                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
+                            setOptions.fields = fieldNames;
+
+                            getImagesHelper.setIntoResult(setOptions, function (response) {
+                                cb(null, response);
+                            })
+                        });
                     });
                 }
             }

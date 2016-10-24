@@ -413,7 +413,8 @@ define([
                     this.visibilityForm = new VisibilityForm({
                         id         : id,
                         branchName : branchesForVisibility.join(', '),
-                        description: modelJSON.description
+                        description: modelJSON.description,
+                        translation: self.translation
                     });
                 }
             }
@@ -883,20 +884,18 @@ define([
                     });
                 } else {
                     onfigForActivityList.forEach(function (config) {
-                        if (!individualObjective && config.elementId === 'viewSubObjective') {
-                            require([config.template], function (template) {
-                                var container = self.$el.find(config.selector);
+                        require([config.template], function (template) {
+                            var container = self.$el.find(config.selector);
 
-                                template = _.template(template);
+                            template = _.template(template);
 
-                                if (!container.find('#' + config.elementId).length) {
-                                    container[config.insertType](template({
-                                        elementId  : config.elementId,
-                                        translation: self.translation
-                                    }));
-                                }
-                            });
-                        }
+                            if (!container.find('#' + config.elementId).length) {
+                                container[config.insertType](template({
+                                    elementId  : config.elementId,
+                                    translation: self.translation
+                                }));
+                            }
+                        });
                     });
                 }
             }

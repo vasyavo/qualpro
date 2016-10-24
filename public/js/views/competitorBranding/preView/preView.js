@@ -60,12 +60,21 @@ define([
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
             var fileModel = this.previewFiles.get(fileModelId);
-
-            this.fileDialogView = new FileDialogPreviewView({
+            var options = {
                 fileModel  : fileModel,
                 bucket     : 'competitors',
                 translation: this.translation
-            });
+            };
+            if(!fileModel){
+                fileModel = this.fileCollection.get(fileModelId);
+                options = {
+                    fileModel  : fileModel,
+                    bucket     : 'comments',
+                    translation: this.translation
+                };
+            }
+
+            this.fileDialogView = new FileDialogPreviewView(options);
             this.fileDialogView.on('download', function (options) {
                 var url = options.url;
                 var originalName = options.originalName;
@@ -187,14 +196,14 @@ define([
             if (!showFiles) {
                 if (!$loadFiles && attachments.length) {
                     dataService.getData('/comment/' + commentId, {}, function (err, filesCollection) {
-                        var fileCollection;
+                        self.fileCollection;
                         if (err) {
                             return App.render(err);
                         }
 
                         $target.addClass('loadFile');
-                        fileCollection = new FileCollection(filesCollection);
-                        self.showFilesInComment($showFilesBlock, fileCollection.toJSON());
+                        self.fileCollection = new FileCollection(filesCollection);
+                        self.showFilesInComment($showFilesBlock, self.fileCollection.toJSON());
                     });
                 } else {
                     $showFilesBlock.show();
