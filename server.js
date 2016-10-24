@@ -7,6 +7,7 @@ const config = require('./config');
 const mongo = require('./src/utils/mongo');
 const logger = require('./src/utils/logger');
 const Scheduler = require('./helpers/scheduler')(mongo, event);
+const wsServer = require('./helpers/socket');
 
 mongo.once('open', () => {
     logger.info('Current configurations:', config);
@@ -17,7 +18,7 @@ mongo.once('open', () => {
 
     const app = require('./app')(mongo, event);
     const httpServer = http.createServer(app);
-    const io = require('./helpers/socket')(httpServer, app);
+    const io = wsServer(httpServer, app);
 
     app.set('io', io);
     httpServer.listen(config.nodePort, () => {
