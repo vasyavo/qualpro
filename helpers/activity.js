@@ -203,6 +203,80 @@ var ActivityHelper = function (db, redis, app) {
 
     };
 
+    function getPersonnelsByLocation(options, cb) {
+        if (!options || !Object.keys(options).length) {
+            return cb(null, null);
+        }
+        var pipeLine = [];
+        var defProjectionPersonnel = {
+            _id       : 1,
+            accessRole: 1
+        };
+        var aggregateHelper = new AggregationHelper(defProjectionPersonnel);
+        var PersonnelModel = models[CONTENT_TYPES.PERSONNEL];
+        var aggregation;
+
+        if (options.country) {
+            pipeLine.push({
+                $match: {
+                    $or: [
+                        {
+                            country: {
+                                $in: options.country
+                            }
+                        },
+                        {
+                            country: {
+                                $size: 0
+                            }
+                        }
+                    ]
+                }
+            });
+        }
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from         : 'accessRoles',
+            key          : 'accessRole',
+            isArray      : false,
+            addProjection: ['level']
+        }));
+
+        if (options.level) {
+            pipeLine.push({
+                $match: {
+                    'accessRole.level': {
+                        $lt: options.level
+                    }
+                }
+            });
+        }
+
+        pipeLine.push({
+            $group: {
+                _id       : null,
+                personnels: {$addToSet: '$_id'}
+            }
+        });
+
+        aggregation = PersonnelModel.aggregate(pipeLine);
+
+        aggregation.options = {
+            allowDiskUse: true
+        };
+
+        aggregation.exec(function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+
+            result = result && result[0] ? result[0].personnels : null;
+
+            cb(null, result);
+        })
+
+
+    }
+
     function getLocationValue(aggregationResult, locationFields) {
         var result = {};
         var locations = aggregationResult.location;
@@ -528,7 +602,9 @@ var ActivityHelper = function (db, redis, app) {
         aggregation.exec(function (err, result) {
             var error;
             var locationObject;
-
+            var searchOptions = {};
+            var level;
+            var country;
             if (err) {
                 return waterFallCB(err);
             }
@@ -549,61 +625,82 @@ var ActivityHelper = function (db, redis, app) {
                 return waterFallCB(error);
             }
 
-            if (options.itemType === CONTENT_TYPES.NOTIFICATIONS) {
-                options.personnels = result.recipients;
+            level = result.level === 1 ? 3 : result.level;
+            if (result.country) {
+                country = Array.isArray(result.country) ? result.country : [result.country];
             }
 
-            if (options.itemType === CONTENT_TYPES.QUESTIONNARIES) {
-                options.personnels = result.personnels;
+            if ([CONTENT_TYPES.CONTRACTSSECONDARY, CONTENT_TYPES.CONTRACTSYEARLY].indexOf(options.itemType) !== -1) {
+                searchOptions.country = country;
+                searchOptions.level = level;
             }
 
-            if (!options.itemDetails) {
-                options.itemDetails = (contentTypesForDetails.indexOf(options.itemType) !== -1) ? options.itemType : '';
-            }
+            getPersonnelsByLocation(searchOptions, function (err, personnelsResult) {
+                if (err) {
+                    return waterFallCB(err);
+                }
 
-            options.accessRoleLevel = result.level || 0;
+                if (personnelsResult) {
+                    options.personnels = _.without(personnelsResult.fromObjectID(), options.createdBy.user);
+                    options.personnels = options.personnels.objectID();
+                    /*options.personnels = personnelsResult;*/
+                }
 
-            if (options.itemType === CONTENT_TYPES.CONTRACTSYEARLY || options.itemType === CONTENT_TYPES.CONTRACTSSECONDARY) {
-                options.accessRoleLevel = 11;
-            }
+                if (options.itemType === CONTENT_TYPES.NOTIFICATIONS) {
+                    options.personnels = result.recipients;
+                }
 
-            locationObject = getLocationValue(result, domainsFields);
+                if (options.itemType === CONTENT_TYPES.QUESTIONNARIES) {
+                    options.personnels = result.personnels;
+                }
 
-            options = _.extend(options, locationObject);
+                if (!options.itemDetails) {
+                    options.itemDetails = (contentTypesForDetails.indexOf(options.itemType) !== -1) ? options.itemType : '';
+                }
 
-            options.assignedTo = result.assignedTo;
+                options.accessRoleLevel = result.level || 0;
 
-            switch (options.itemType) {
-                case CONTENT_TYPES.DOCUMENTS:
-                    itemName = {
-                        en: result.title
-                    };
-                    break;
-                case CONTENT_TYPES.QUESTIONNARIES:
-                case CONTENT_TYPES.OBJECTIVES:
-                case CONTENT_TYPES.INSTORETASKS:
-                    itemName = result.title;
-                    break;
-                case CONTENT_TYPES.PERSONNEL:
-                    itemName = {
-                        en: result.firstName.en + ' ' + result.lastName.en,
-                        ar: result.firstName.ar + ' ' + result.lastName.ar
-                    };
-                    break;
-                case CONTENT_TYPES.PLANOGRAM:
-                    itemName = {
-                        en: result.configuration ? result.configuration.name : '',
-                        ar: result.configuration ? result.configuration.name : ''
-                    };
-                    break;
-                default:
-                    itemName = result.name;
-            }
+                if (options.itemType === CONTENT_TYPES.CONTRACTSYEARLY || options.itemType === CONTENT_TYPES.CONTRACTSSECONDARY) {
+                    options.accessRoleLevel = 11;
+                }
 
-            options.itemName = itemName;
+                locationObject = getLocationValue(result, domainsFields);
 
-            waterFallCB(null);
+                options = _.extend(options, locationObject);
 
+                options.assignedTo = result.assignedTo;
+
+                switch (options.itemType) {
+                    case CONTENT_TYPES.DOCUMENTS:
+                        itemName = {
+                            en: result.title
+                        };
+                        break;
+                    case CONTENT_TYPES.QUESTIONNARIES:
+                    case CONTENT_TYPES.OBJECTIVES:
+                    case CONTENT_TYPES.INSTORETASKS:
+                        itemName = result.title;
+                        break;
+                    case CONTENT_TYPES.PERSONNEL:
+                        itemName = {
+                            en: result.firstName.en + ' ' + result.lastName.en,
+                            ar: result.firstName.ar + ' ' + result.lastName.ar
+                        };
+                        break;
+                    case CONTENT_TYPES.PLANOGRAM:
+                        itemName = {
+                            en: result.configuration ? result.configuration.name : '',
+                            ar: result.configuration ? result.configuration.name : ''
+                        };
+                        break;
+                    default:
+                        itemName = result.name;
+                }
+
+                options.itemName = itemName;
+
+                waterFallCB(null);
+            });
         });
     }
 
@@ -1017,8 +1114,8 @@ var ActivityHelper = function (db, redis, app) {
                 userIdsSocket: async.apply(getUsersByLocationAndLevel, options)
             };
 
-            if ([CONTENT_TYPES.ITEM, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.PLANOGRAM, CONTENT_TYPES.CONTRACTSSECONDARY,
-                    CONTENT_TYPES.CONTRACTSYEARLY, CONTENT_TYPES.COMPETITORITEM,
+            if ([CONTENT_TYPES.ITEM, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.PLANOGRAM,
+                    CONTENT_TYPES.COMPETITORITEM,
                     CONTENT_TYPES.PRICESURVEY, CONTENT_TYPES.SHELFSHARES,
                     CONTENT_TYPES.NEWPRODUCTLAUNCH].indexOf(options.itemType) !== -1) {
 
@@ -1040,6 +1137,16 @@ var ActivityHelper = function (db, redis, app) {
                         results.userIdsPush.push(ObjectId(options.person));
                     }
                     results.userIdsPush = _.uniqWith(results.userIdsPush, _.isEqual);
+                }
+
+                if ([CONTENT_TYPES.CONTRACTSYEARLY, CONTENT_TYPES.CONTRACTSSECONDARY].indexOf(options.itemType) !== -1) {
+                    if (!results.userIdsPush) {
+                        results.userIdsPush = _.union([ObjectId(options.createdBy.user)], results.userIdsSocket);
+                    } else {
+                        results.userIdsPush.push(ObjectId(options.createdBy.user));
+                    }
+
+                    results.userIdsPush = _.uniqBy(results.userIdsPush, 'id');
                 }
 
                 wCb(null, results, respondObject);
@@ -1078,13 +1185,14 @@ var ActivityHelper = function (db, redis, app) {
                                 });
                             });
                             socketArray = _.concat(socketArray, localSocketArray);
-                            eachCb(null);
-                        });
 
-                        pushes.sendPushes(userId, 'newActivity', copyObject, function (err, respond) {
-                            if (err) {
-                                logWriter.log('activity', err);
-                            }
+                            pushes.sendPushes(userId, 'newActivity', copyObject, function (err, respond) {
+                                if (err) {
+                                    logWriter.log('activity', err);
+                                }
+                            });
+
+                            eachCb(null);
                         });
                     });
                 } else {
@@ -1092,9 +1200,9 @@ var ActivityHelper = function (db, redis, app) {
                         if (err) {
                             logWriter.log('activity', err);
                         }
-                    });
 
-                    eachCb(null);
+                        eachCb(null);
+                    });
                 }
             }, function (err) {
                 if (err) {

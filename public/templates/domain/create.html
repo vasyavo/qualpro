@@ -51,7 +51,7 @@
                                 <input name="name<%=language === 'en' ? 'Ar' : 'En'%>"
                                        type="text"
                                        id="name<%=language === 'en' ? 'Ar' : 'En'%>"
-                                       class="inputNarrow name<%=language === 'en' ? 'Ar' : 'En'%> <%= currentLanguage === 'en' ? 'arInput' : 'enInput'%>"
+                                       class="inputNarrow name<%=language === 'en' ? 'Ar' : 'En'%> <%= language === 'en' ? 'arInput' : 'enInput'%>"
                                        value=""
                                        placeholder="<%= translation.addTranslation[language] %>"
                                        maxlength="56"

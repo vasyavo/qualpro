@@ -391,6 +391,12 @@ var InStoreReports = function (db, redis, event) {
                             return cb(error);
                         }
 
+                        if (lodash.isEqual(inStoreTaskModel.toJSON().status, 'fail')) {
+                            error = new Error('You could not update task with status: "fail"');
+                            error.status = 400;
+                            return cb(error);
+                        }
+
                         assignedTo = inStoreTaskModel.get('assignedTo');
 
                         if (updateObject.assignedTo && updateObject.assignedTo.length) {

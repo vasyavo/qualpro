@@ -289,7 +289,7 @@ var Files = function (db) {
                             return waterfallCb(null);
                         }
 
-                        inputFileName = fileOptions.tempPath + '[0]';
+                        inputFileName = fileOptions.tempPath  + '[0]';
                         outputFile = '/tmp/' + fileOptions.name + '.png';
 
                         im.convert([inputFileName, '-resize', '150x150', outputFile],

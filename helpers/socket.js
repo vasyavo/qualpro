@@ -1,6 +1,9 @@
 "use strict";
-var redis = require('redis');
-var io;
+
+const config = require('./../config');
+const redis = require('redis');
+const socketIo = require('socket.io');
+const redisAdapter = require('socket.io-redis');
 
 function onError(err) {
     if (err) {
@@ -10,27 +13,13 @@ function onError(err) {
 
 module.exports = function (server, app) {
 
-    var unreadCache = require('./unreadCache')(app);
-    var adapter = require('socket.io-redis');
-    var pub = redis.createClient(
-        parseInt(process.env.SOCKET_DB_PORT, 10),
-        process.env.SOCKET_DB_HOST,
-        {
-            return_buffers: true
-        }
-    );
-    var sub = redis.createClient(
-        parseInt(process.env.SOCKET_DB_PORT),
-        process.env.SOCKET_DB_HOST,
-        {
-            return_buffers: true
-        }
-    );
+    const unreadCache = require('./unreadCache')(app);
 
-    io = require('socket.io')(
-        server
-    );
+    const redisOptions = { return_buffers: true };
+    const pub = redis.createClient(config.redisUrl, redisOptions);
+    const sub = redis.createClient(config.redisUrl, redisOptions);
 
+    const io = socketIo(server);
 
     io.set('transports', [
         'websocket',
@@ -41,9 +30,7 @@ module.exports = function (server, app) {
     pub.select(parseInt(process.env.SOCKET_DB));
     sub.select(parseInt(process.env.SOCKET_DB));
 
-    io.adapter(adapter({
-        host     : process.env.SOCKET_DB_HOST,
-        port     : parseInt(process.env.SOCKET_DB_PORT),
+    io.adapter(redisAdapter(config.redisUrl, {
         pubClient: pub,
         subClient: sub
     }));
