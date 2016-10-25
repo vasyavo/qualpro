@@ -376,11 +376,7 @@ var BodyValidator = (function () {
     };
 
     validationFunctions[CONTENT_TYPE.DOCUMENTS] = function (value, key, allowedObject) {
-        if (allowedObject.indexOf(key) === -1) {
-            return false;
-        }
-
-        return true;
+        return _.includes(allowedObject, key);
     };
 
     validationFunctions[CONTENT_TYPE.NOTES] = function (value, key, allowedObject) {
@@ -409,7 +405,7 @@ var BodyValidator = (function () {
             return callback(error);
         }
 
-        saveObj = _.pick(body, function (value, key) {
+        saveObj = _.pickBy(body, function (value, key) {
             return validationFunctions[contentType](value, key, allowedObject);
         });
 

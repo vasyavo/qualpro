@@ -69,21 +69,6 @@ module.exports = function (db, event) {
 
     app.use(session);
 
-    app.use(function (req, res, next) {
-        res.on('finish', function () {
-            if (req.files)
-                Object.keys(req.files).forEach(function (file) {
-                    console.log(req.files[file].path);
-                    fs.unlink(req.files[file].path, function (err) {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
-                });
-        });
-        next();
-    });
-
     Array.prototype.fromObjectID = function () {
         var _arrayOfID = [];
 
