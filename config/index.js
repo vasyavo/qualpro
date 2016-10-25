@@ -21,17 +21,7 @@ config.nodePort = config.port + config.nodeAppInstance;
 const mongohqUrl = process.env.MONGOHQ_URL || process.env.MONGODB_URI;
 
 /* Database configurations */
-const dbConfig = {
-    user : process.env.DB_USER,
-    password : process.env.DB_PASS,
-    host : process.env.DB_HOST,
-    port : process.env.DB_PORT,
-    name : process.env.DB_NAME
-};
-
-config.dbConfig = dbConfig;
-config.mongodbUri = mongohqUrl ? mongohqUrl :
-    `mongodb://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}`;
+config.mongodbUri = process.env.MONGODB_URI;
 /* Database configurations */
 
 config.sendgirdApiKey = process.env.SENDGRID_APIKEY;
@@ -96,6 +86,8 @@ if (fs.existsSync(config.awsCredentialsPath)) {
     process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
 }
 /* end of AWS S3 configurations */
+
+config.uploaderType = 'AmazonS3';
 
 // import this file at begin of server.js
 module.exports = config;

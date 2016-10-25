@@ -52,6 +52,7 @@ Ask credentials in your administrator.
  - `HOST`
  - `PORT`
  - `NODE_APP_INSTANCE`
+ - `UPLOADER_TYPE` For now available only AmazonS3.
 
 ##### Database configurations:
  - `DB_USER`
