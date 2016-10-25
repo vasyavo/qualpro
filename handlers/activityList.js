@@ -1,6 +1,7 @@
-var Personnel = function (db, redis, event) {
+var Personnel = function(db, redis, event) {
     var mongoose = require('mongoose');
     var CONSTANTS = require('../constants/mainConstants');
+    var ACL_CONSTANTS = require('../constants/aclNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var access = require('../helpers/access')(db);
     var FilterMapper = require('../helpers/filterMapper');
@@ -19,38 +20,59 @@ var Personnel = function (db, redis, event) {
     var MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity.js');
     var actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
     var $defProjection = {
-        _id            : 1,
-        module         : 1,
-        actionType     : 1,
-        itemType       : 1,
-        itemDetails    : 1,
-        createdBy      : 1,
-        country        : 1,
-        region         : 1,
-        subRegion      : 1,
-        branch         : 1,
-        retailSegment  : 1,
-        outlet         : 1,
-        itemId         : 1,
-        itemName       : 1,
-        accessRoleLevel: 1,
-        assignedTo     : 1,
-        creationDate   : 1,
-        personnels     : 1,
+        _id : 1,
+        module : 1,
+        actionType : 1,
+        itemType : 1,
+        itemDetails : 1,
+        createdBy : 1,
+        country : 1,
+        region : 1,
+        subRegion : 1,
+        branch : 1,
+        retailSegment : 1,
+        outlet : 1,
+        itemId : 1,
+        itemName : 1,
+        accessRoleLevel : 1,
+        assignedTo : 1,
+        creationDate : 1,
+        personnels : 1,
         checkPersonnel : 1
     };
 
 // 11 - virtual role level
     var levelsByLevel = {
-        1: [1, 2, 3, 4, 5, 6, 7, 8, 11],
-        2: [3, 4, 5, 6, 7, 11],
-        3: [4, 5, 6, 7, 11],
-        4: [5, 6, 7, 11],
-        5: [11],
-        6: [11],
-        7: [11],
-        8: [1, 2, 3, 4, 5, 6, 7, 8, 11],
-        9: [1, 2, 3, 4, 5, 6, 7, 8, 11]
+        1 : _.values(ACL_CONSTANTS),
+        2 : _(ACL_CONSTANTS).pick([
+            'AREA_MANAGER',
+            'AREA_IN_CHARGE',
+            'SALES_MAN',
+            'MERCHANDISER',
+            'MERCHANDISER',
+            'CASH_VAN',
+            'VIRTUAL'
+        ]).values().value(),
+        3 : _(ACL_CONSTANTS).pick([
+            'AREA_IN_CHARGE',
+            'SALES_MAN',
+            'MERCHANDISER',
+            'MERCHANDISER',
+            'CASH_VAN',
+            'VIRTUAL'
+        ]).values().value(),
+        4 : _(ACL_CONSTANTS).pick([
+            'SALES_MAN',
+            'MERCHANDISER',
+            'MERCHANDISER',
+            'CASH_VAN',
+            'VIRTUAL'
+        ]).values().value(),
+        5 : [ACL_CONSTANTS.VIRTUAL],
+        6 : [ACL_CONSTANTS.VIRTUAL],
+        7 : [ACL_CONSTANTS.VIRTUAL],
+        8 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
+        9 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value()
     };
 
     function getAllPipelineActivity(options) {
@@ -74,34 +96,34 @@ var Personnel = function (db, redis, event) {
         var questionaryQuery;
         var usersArray = [currentUser._id];
         var checkPersonnelCondition = {
-            $cond: {
-                if  : { $eq:['$itemType', CONTENT_TYPES.CONTRACTSSECONDARY]},
-                then: 1,
-                else: {
-                    $cond: {
-                        if  : { $eq:['$itemType', CONTENT_TYPES.CONTRACTSYEARLY]},
-                        then: 1,
-                        else: 0
+            $cond : {
+                if : {$eq : ['$itemType', CONTENT_TYPES.CONTRACTSSECONDARY]},
+                then : 1,
+                else : {
+                    $cond : {
+                        if : {$eq : ['$itemType', CONTENT_TYPES.CONTRACTSYEARLY]},
+                        then : 1,
+                        else : 0
                     }
                 }
             }
         };
         var contractsQuery = {
-            $or: [
+            $or : [
                 {
-                    $and: [
+                    $and : [
                         {
-                            checkPersonnel: 1
+                            checkPersonnel : 1
                         },
                         {
-                            personnels: {
-                                $in: usersArray
+                            personnels : {
+                                $in : usersArray
                             }
                         }
                     ]
                 },
                 {
-                    checkPersonnel: 0
+                    checkPersonnel : 0
                 }
 
             ]
@@ -121,61 +143,61 @@ var Personnel = function (db, redis, event) {
         }
 
         pipeLine.push({
-            $match: queryObject
+            $match : queryObject
         });
 
         pipeLine.push({
-            $match: {
-                creationDate: {$gte: (new Date()).addDays(-3)}
+            $match : {
+                creationDate : {$gte : (new Date()).addDays(-3)}
             }
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         pipeLine.push({
-            $lookup: {
-                from        : 'modules',
-                localField  : 'module',
-                foreignField: '_id',
-                as          : 'module'
+            $lookup : {
+                from : 'modules',
+                localField : 'module',
+                foreignField : '_id',
+                as : 'module'
             }
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                module        : {$arrayElemAt: ['$module', 0]},
-                checkPersonnel: checkPersonnelCondition
+            $project : aggregateHelper.getProjection({
+                module : {$arrayElemAt : ['$module', 0]},
+                checkPersonnel : checkPersonnelCondition
             })
         });
 
         pipeLine.push({
-            $match: contractsQuery
+            $match : contractsQuery
         });
 
         if (positionFilter) {
             pipeLine.push({
-                $match: positionFilter
+                $match : positionFilter
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
+            from : 'accessRoles',
+            key : 'createdBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
                         position : 1,
-                        firstName: 1,
+                        firstName : 1,
                         lastName : 1
                     }
                 }
@@ -183,34 +205,34 @@ var Personnel = function (db, redis, event) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName : 1
                     }
                 }
             }
         }));
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                createdBy: {
-                    user    : 1,
-                    date    : 1,
-                    diffDate: {
-                        $let: {
-                            vars: {
-                                dateNow   : new Date(),
-                                createDate: '$createdBy.date'
+            $project : aggregateHelper.getProjection({
+                createdBy : {
+                    user : 1,
+                    date : 1,
+                    diffDate : {
+                        $let : {
+                            vars : {
+                                dateNow : new Date(),
+                                createDate : '$createdBy.date'
                             },
-                            in  : {$subtract: ['$$dateNow', '$$createDate']}
+                            in : {$subtract : ['$$dateNow', '$$createDate']}
                         }
                     }
                 }
@@ -218,161 +240,164 @@ var Personnel = function (db, redis, event) {
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                module      : {
-                    name: 1,
+            $project : aggregateHelper.getProjection({
+                module : {
+                    name : 1,
                     _id : 1
                 },
-                creationDate: '$createdBy.date'
+                creationDate : '$createdBy.date'
 
             })
         });
 
-        if ((currentUser.accessRoleLevel !== 1) && (currentUser.accessRoleLevel !== 8)) {
+        if (!_.includes(_(ACL_CONSTANTS).pick([
+                'MASTER_ADMIN',
+                'MASTER_UPLOADER'
+            ]).values().value(), currentUser.accessRoleLevel)) {
 
             planogramQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$eq: CONTENT_TYPES.PLANOGRAM}
+                    itemType : {$eq : CONTENT_TYPES.PLANOGRAM}
                 }];
 
             itemsPricesQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: [CONTENT_TYPES.ITEM]}
+                    itemType : {$in : [CONTENT_TYPES.ITEM]}
                 }];
 
             competitorItemQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: [CONTENT_TYPES.COMPETITORITEM]}
+                    itemType : {$in : [CONTENT_TYPES.COMPETITORITEM]}
                 }];
 
             competitorPromoQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: [CONTENT_TYPES.COMPETITORPROMOTION]}
+                    itemType : {$in : [CONTENT_TYPES.COMPETITORPROMOTION]}
                 }];
 
             newProductLaunchQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: [CONTENT_TYPES.NEWPRODUCTLAUNCH]}
+                    itemType : {$in : [CONTENT_TYPES.NEWPRODUCTLAUNCH]}
                 }];
 
             priceSurveyQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: [CONTENT_TYPES.PRICESURVEY]}
+                    itemType : {$in : [CONTENT_TYPES.PRICESURVEY]}
                 }];
 
             selfSharesQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: [CONTENT_TYPES.SHELFSHARES]}
+                    itemType : {$in : [CONTENT_TYPES.SHELFSHARES]}
                 }];
 
             questionaryQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$eq: CONTENT_TYPES.QUESTIONNARIES}
+                    itemType : {$eq : CONTENT_TYPES.QUESTIONNARIES}
                 }];
 
             countryQuery = [
                 {
-                    country: {
-                        $in: currentUser.country
+                    country : {
+                        $in : currentUser.country
                     }
                 }, {
-                    itemType: {$in: ['domain', 'retailSegment', 'outlet']}
+                    itemType : {$in : ['domain', 'retailSegment', 'outlet']}
                 }, {
-                    itemDetails: {$in: ['country', 'region', 'subRegion', '']}
+                    itemDetails : {$in : ['country', 'region', 'subRegion', '']}
                 }];
 
             notificationQuery = [
                 {
-                    personnels: {
-                        $in: [currentUser._id]
+                    personnels : {
+                        $in : [currentUser._id]
                     }
                 }, {
-                    itemType: {$eq: CONTENT_TYPES.NOTIFICATIONS}
+                    itemType : {$eq : CONTENT_TYPES.NOTIFICATIONS}
                 }];
 
             personnelQuery.push({
                 country : {
-                    $in: currentUser.country
+                    $in : currentUser.country
                 },
-                itemType: {$eq: CONTENT_TYPES.PERSONNEL}
+                itemType : {$eq : CONTENT_TYPES.PERSONNEL}
             });
 
             if (!isMobile) {
                 personnelQuery.push({
-                    accessRoleLevel: {
-                        $in: _.union(levelsByLevel[currentUser.accessRoleLevel], [currentUser.accessRoleLevel])
+                    accessRoleLevel : {
+                        $in : _.union(levelsByLevel[currentUser.accessRoleLevel], [currentUser.accessRoleLevel])
                     }
                 });
             }
 
             if (currentUser.accessRoleLevel === 5) {
-                regionsMathArray = {branch: {$in: currentUser.branch || afterIteMTypeQuery.branch}};
+                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
             }
             if (currentUser.accessRoleLevel === 6) {
-                regionsMathArray = {branch: {$in: currentUser.branch || afterIteMTypeQuery.branch}};
+                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
             }
             if (currentUser.accessRoleLevel === 7) {
-                regionsMathArray = {branch: {$in: currentUser.branch || afterIteMTypeQuery.branch}};
+                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
             }
 
             if (currentUser.accessRoleLevel === 4) {
-                regionsMathArray = {subRegion: {$in: currentUser.subRegion || afterIteMTypeQuery.subRegion}};
+                regionsMathArray = {subRegion : {$in : currentUser.subRegion || afterIteMTypeQuery.subRegion}};
             }
             if (currentUser.accessRoleLevel === 3) {
-                regionsMathArray = {region: {$in: currentUser.region || afterIteMTypeQuery.region}};
+                regionsMathArray = {region : {$in : currentUser.region || afterIteMTypeQuery.region}};
             }
             if (currentUser.accessRoleLevel === 2) {
-                regionsMathArray = {country: {$in: currentUser.country || afterIteMTypeQuery.country}};
+                regionsMathArray = {country : {$in : currentUser.country || afterIteMTypeQuery.country}};
             }
             if (currentUser.accessRoleLevel === 8) {
-                regionsMathArray = {country: {$in: currentUser.country || afterIteMTypeQuery.country}};
+                regionsMathArray = {country : {$in : currentUser.country || afterIteMTypeQuery.country}};
             }
 
             pipeLine.push({
-                $match: {
-                    $or: [
+                $match : {
+                    $or : [
                         {
-                            $and: [
+                            $and : [
                                 regionsMathArray,
                                 {
-                                    accessRoleLevel: {
-                                        $in: levelsByLevel[currentUser.accessRoleLevel]
+                                    accessRoleLevel : {
+                                        $in : levelsByLevel[currentUser.accessRoleLevel]
                                     }
                                 }, {
-                                    itemType: {
-                                        $in: [
+                                    itemType : {
+                                        $in : [
                                             CONTENT_TYPES.OBJECTIVES,
                                             CONTENT_TYPES.INSTORETASKS
                                         ]
@@ -381,10 +406,10 @@ var Personnel = function (db, redis, event) {
                             ]
                         },
                         {
-                            $and: [
+                            $and : [
                                 regionsMathArray, {
-                                    itemType: {
-                                        $in: [
+                                    itemType : {
+                                        $in : [
                                             CONTENT_TYPES.BRANDINGANDDISPLAY,
                                             CONTENT_TYPES.PROMOTIONS
                                         ]
@@ -393,40 +418,40 @@ var Personnel = function (db, redis, event) {
                             ]
                         },
                         {
-                            $and: countryQuery
+                            $and : countryQuery
                         },
                         {
-                            $and: questionaryQuery
+                            $and : questionaryQuery
                         },
                         {
-                            $and: notificationQuery
+                            $and : notificationQuery
                         },
                         {
-                            $and: itemsPricesQuery
+                            $and : itemsPricesQuery
                         },
                         {
-                            $and: competitorItemQuery
+                            $and : competitorItemQuery
                         },
                         {
-                            $and: competitorPromoQuery
+                            $and : competitorPromoQuery
                         },
                         {
-                            $and: newProductLaunchQuery
+                            $and : newProductLaunchQuery
                         },
                         {
-                            $and: priceSurveyQuery
+                            $and : priceSurveyQuery
                         },
                         {
-                            $and: selfSharesQuery
+                            $and : selfSharesQuery
                         },
                         {
-                            $and: personnelQuery
+                            $and : personnelQuery
                         },
                         {
-                            $and: planogramQuery
+                            $and : planogramQuery
                         },
                         {
-                            assignedTo: {$in: usersArray}
+                            assignedTo : {$in : usersArray}
                         },
                         contractsQuery
                     ]
@@ -435,60 +460,60 @@ var Personnel = function (db, redis, event) {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
+            from : 'personnels',
             key : 'assignedTo'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
+            from : 'domains',
             key : 'country'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
+            from : 'domains',
             key : 'region'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
+            from : 'domains',
             key : 'subRegion'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from             : 'branches',
-            key              : 'branch',
-            addMainProjection: ['retailSegment', 'outlet']
+            from : 'branches',
+            key : 'branch',
+            addMainProjection : ['retailSegment', 'outlet']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'retailSegments',
+            from : 'retailSegments',
             key : 'retailSegment'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
+            from : 'outlets',
             key : 'outlet'
         }));
 
         pipeLine.push({
-            $group: {
-                _id            : '$_id',
-                createdBy      : {$first: '$createdBy'},
-                region         : {$first: '$region'},
-                subRegion      : {$first: '$subRegion'},
-                retailSegment  : {$first: '$retailSegment'},
-                outlet         : {$first: '$outlet'},
-                branch         : {$first: '$branch'},
-                country        : {$first: '$country'},
-                module         : {$first: '$module'},
-                creationDate   : {$first: '$creationDate'},
-                accessRoleLevel: {$first: '$accessRoleLevel'},
-                actionType     : {$first: '$actionType'},
-                assignedTo     : {$first: '$assignedTo'},
-                itemDetails    : {$first: '$itemDetails'},
-                itemId         : {$first: '$itemId'},
-                itemName       : {$first: '$itemName'},
-                itemType       : {$first: '$itemType'}
+            $group : {
+                _id : '$_id',
+                createdBy : {$first : '$createdBy'},
+                region : {$first : '$region'},
+                subRegion : {$first : '$subRegion'},
+                retailSegment : {$first : '$retailSegment'},
+                outlet : {$first : '$outlet'},
+                branch : {$first : '$branch'},
+                country : {$first : '$country'},
+                module : {$first : '$module'},
+                creationDate : {$first : '$creationDate'},
+                accessRoleLevel : {$first : '$accessRoleLevel'},
+                actionType : {$first : '$actionType'},
+                assignedTo : {$first : '$assignedTo'},
+                itemDetails : {$first : '$itemDetails'},
+                itemId : {$first : '$itemId'},
+                itemName : {$first : '$itemName'},
+                itemType : {$first : '$itemType'}
             }
         });
 
@@ -517,12 +542,12 @@ var Personnel = function (db, redis, event) {
          pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit,
-            sort             : sort
+            isMobile : isMobile,
+            searchFieldsArray : searchFieldsArray,
+            filterSearch : filterSearch,
+            skip : skip,
+            limit : limit,
+            sort : sort
         }));
 
         return pipeLine;
@@ -530,14 +555,14 @@ var Personnel = function (db, redis, event) {
 
     function getCoveredUsers(userObject, waterFallCb) {
         PersonnelModel
-            .find({'vacation.cover': userObject._id}, {_id: 1})
+            .find({'vacation.cover' : userObject._id}, {_id : 1})
             .lean()
-            .exec(function (err, result) {
+            .exec(function(err, result) {
                 if (err) {
                     return waterFallCb(err);
                 }
 
-                userObject.cover = _.map(result, function (el) {
+                userObject.cover = _.map(result, function(el) {
                     return el._id;
                 });
 
@@ -549,37 +574,37 @@ var Personnel = function (db, redis, event) {
 
         var aggregation = PersonnelModel.aggregate([
             {
-                $match: {_id: ObjectId(userId)}
+                $match : {_id : ObjectId(userId)}
             },
             {
-                $project: {
-                    country     : 1,
-                    region      : 1,
-                    subRegion   : 1,
-                    branch      : 1,
-                    accessRole  : 1,
-                    beforeAccess: 1
+                $project : {
+                    country : 1,
+                    region : 1,
+                    subRegion : 1,
+                    branch : 1,
+                    accessRole : 1,
+                    beforeAccess : 1
                 }
             }, {
-                $lookup: {
-                    from        : 'accessRoles',
-                    localField  : 'accessRole',
-                    foreignField: '_id',
-                    as          : 'accessRole'
+                $lookup : {
+                    from : 'accessRoles',
+                    localField : 'accessRole',
+                    foreignField : '_id',
+                    as : 'accessRole'
                 }
             }, {
-                $project: {
-                    country        : 1,
-                    region         : 1,
-                    subRegion      : 1,
-                    branch         : 1,
-                    beforeAccess   : 1,
-                    accessRoleLevel: {'$arrayElemAt': ['$accessRole.level', 0]}
+                $project : {
+                    country : 1,
+                    region : 1,
+                    subRegion : 1,
+                    branch : 1,
+                    beforeAccess : 1,
+                    accessRoleLevel : {'$arrayElemAt' : ['$accessRole.level', 0]}
                 }
             }
         ]);
 
-        aggregation.exec(function (err, result) {
+        aggregation.exec(function(err, result) {
             var error;
             if (err) {
                 return waterFallCb(err);
@@ -605,7 +630,7 @@ var Personnel = function (db, redis, event) {
 
         waterFallTasks.push(getCoveredUsers);
 
-        async.waterfall(waterFallTasks, function (err, result) {
+        async.waterfall(waterFallTasks, function(err, result) {
             if (err) {
                 return cb(err);
             }
@@ -614,13 +639,16 @@ var Personnel = function (db, redis, event) {
         });
     }
 
-    this.getBadge = function (req, res, next) {
+    this.getBadge = function(req, res, next) {
         function queryRun(activity) {
             var userId = req.session.uId;
 
-            var actionKey = actionKeyTemplate({userId: userId, moduleId: 'alalali'});
+            var actionKey = actionKeyTemplate({
+                userId : userId,
+                moduleId : 'alalali'
+            });
 
-            redis.cacheStore.readFromStorage(actionKey, function (err, number) {
+            redis.cacheStore.readFromStorage(actionKey, function(err, number) {
                 if (err) {
                     return next(err);
                 }
@@ -628,11 +656,11 @@ var Personnel = function (db, redis, event) {
                 if (!number) {
                     number = 0;
                 }
-                res.status(200).send({badge: number});
+                res.status(200).send({badge : number});
             });
         }
 
-        access.getReadAccess(req, 1, function (err, allowed, personnel) {
+        access.getReadAccess(req, 1, function(err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -647,17 +675,20 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.deleteBadge = function (req, res, next) {
+    this.deleteBadge = function(req, res, next) {
         function queryRun(activity) {
             var userId = req.session.uId;
-            var actionKey = actionKeyTemplate({userId: userId, moduleId: 'alalali'});
+            var actionKey = actionKeyTemplate({
+                userId : userId,
+                moduleId : 'alalali'
+            });
 
             redis.cacheStore.removeFromStorage(actionKey);
 
-            res.status(200).send({message: 'OK Delete'});
+            res.status(200).send({message : 'OK Delete'});
         }
 
-        access.getReadAccess(req, 1, function (err, allowed, personnel) {
+        access.getReadAccess(req, 1, function(err, allowed, personnel) {
             var error;
             if (err) {
                 return next(err);
@@ -673,7 +704,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.getAllForSync = function (req, res, next) {
+    this.getAllForSync = function(req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
             var isMobile = req.isMobile;
@@ -684,21 +715,21 @@ var Personnel = function (db, redis, event) {
             var aggregation;
             var pipeLine;
             var sort = {
-                'createdBy.date': -1
+                'createdBy.date' : -1
             };
 
             var queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.ACTIVITYLIST,
-                filter     : filter,
-                personnel  : personnel
+                contentType : CONTENT_TYPES.ACTIVITYLIST,
+                filter : filter,
+                personnel : personnel
             });
 
             var afterIteMTypeQuery = {
-                region       : queryObject.region,
-                subRegion    : queryObject.subRegion,
-                retailSegment: queryObject.retailSegment,
-                outlet       : queryObject.outlet,
-                branch       : queryObject.branch
+                region : queryObject.region,
+                subRegion : queryObject.subRegion,
+                retailSegment : queryObject.retailSegment,
+                outlet : queryObject.outlet,
+                branch : queryObject.branch
             };
 
             delete queryObject.region;
@@ -713,49 +744,55 @@ var Personnel = function (db, redis, event) {
 
             // aggregateHelper.setSyncQuery(queryObject, lastLogOut);
             queryObject = {
-                'createdBy.date': {$gte: lastLogOut}
+                'createdBy.date' : {$gte : lastLogOut}
             };
 
             for (key in sort) {
                 sort[key] = parseInt(sort[key]);
             }
 
-            getUserInfo(req.session.uId, function (err, currentUser) {
+            getUserInfo(req.session.uId, function(err, currentUser) {
 
                 pipeLine = getAllPipelineActivity({
-                    queryObject       : queryObject,
-                    aggregateHelper   : aggregateHelper,
-                    sort              : sort,
-                    isMobile          : isMobile,
-                    currentUser       : currentUser,
-                    afterIteMTypeQuery: afterIteMTypeQuery,
-                    forSync           : true
+                    queryObject : queryObject,
+                    aggregateHelper : aggregateHelper,
+                    sort : sort,
+                    isMobile : isMobile,
+                    currentUser : currentUser,
+                    afterIteMTypeQuery : afterIteMTypeQuery,
+                    forSync : true
                 });
 
                 aggregation = activityListModel.aggregate(pipeLine);
 
-                aggregation.exec(function (err, response) {
+                aggregation.exec(function(err, response) {
                     var idsPersonnel = [];
                     var options = {
-                        data: {}
+                        data : {}
                     };
                     if (err) {
                         return next(err);
                     }
-                    response = response.length ? response[0] : {data: [], total: 0};
+                    response = response.length ? response[0] : {
+                        data : [],
+                        total : 0
+                    };
 
                     if (!response.data.length) {
-                        return next({status: 200, body: response});
+                        return next({
+                            status : 200,
+                            body : response
+                        });
                     }
 
-                    _.map(response.data, function (model) {
+                    _.map(response.data, function(model) {
                         idsPersonnel.push(model.createdBy.user._id);
                     });
 
                     idsPersonnel = _.uniqBy(idsPersonnel, 'id');
                     options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
 
-                    getImagesHelper.getImages(options, function (err, result) {
+                    getImagesHelper.getImages(options, function(err, result) {
                         var fieldNames = {};
                         var setOptions;
                         if (err) {
@@ -763,18 +800,21 @@ var Personnel = function (db, redis, event) {
                         }
 
                         setOptions = {
-                            response  : response,
-                            imgsObject: result
+                            response : response,
+                            imgsObject : result
                         };
                         fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                         setOptions.fields = fieldNames;
 
-                        getImagesHelper.setIntoResult(setOptions, function (response) {
-                            _.map(response.data, function (element) {
+                        getImagesHelper.setIntoResult(setOptions, function(response) {
+                            _.map(response.data, function(element) {
                                 element.module = MODULE_NAMES[element.module._id];
                             });
 
-                            next({status: 200, body: response});
+                            next({
+                                status : 200,
+                                body : response
+                            });
                         })
                     });
                 });
@@ -782,7 +822,7 @@ var Personnel = function (db, redis, event) {
         }
 
         // 6 - id of personnel modul. Should be changed like CONSTANT.PERSONNEL_ID
-        access.getReadAccess(req, 6, function (err, allowed, personnel) {
+        access.getReadAccess(req, 6, function(err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -797,7 +837,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.getAll = function (req, res, next) {
+    this.getAll = function(req, res, next) {
         function queryRun(activity) {
             var isMobile = req.isMobile;
             var query = req.query;
@@ -817,7 +857,7 @@ var Personnel = function (db, redis, event) {
             var aggregation;
             var pipeLine;
             var sort = {
-                'createdBy.date': -1
+                'createdBy.date' : -1
             };
 
             var aggregateHelper;
@@ -840,15 +880,15 @@ var Personnel = function (db, redis, event) {
             delete filter.globalSearch;
 
             queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.ACTIVITYLIST,
-                filter     : filter,
-                personnel  : activity
+                contentType : CONTENT_TYPES.ACTIVITYLIST,
+                filter : filter,
+                personnel : activity
             });
 
             delete  queryObject.archived;
 
             if (queryObject.position && queryObject.position.$in) {
-                positionFilter = {'createdBy.user.position': queryObject.position};
+                positionFilter = {'createdBy.user.position' : queryObject.position};
 
                 delete queryObject.position;
             }
@@ -857,47 +897,53 @@ var Personnel = function (db, redis, event) {
                 sort[key] = parseInt(sort[key]);
             }
 
-            getUserInfo(req.session.uId, function (err, currentUser) {
+            getUserInfo(req.session.uId, function(err, currentUser) {
 
                 aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
                 pipeLine = getAllPipelineActivity({
-                    queryObject      : queryObject,
-                    aggregateHelper  : aggregateHelper,
-                    searchFieldsArray: searchFieldsArray,
-                    filterSearch     : filterSearch,
-                    limit            : limit,
-                    skip             : skip,
-                    sort             : sort,
-                    currentUser      : currentUser,
-                    positionFilter   : positionFilter,
-                    isMobile         : isMobile
+                    queryObject : queryObject,
+                    aggregateHelper : aggregateHelper,
+                    searchFieldsArray : searchFieldsArray,
+                    filterSearch : filterSearch,
+                    limit : limit,
+                    skip : skip,
+                    sort : sort,
+                    currentUser : currentUser,
+                    positionFilter : positionFilter,
+                    isMobile : isMobile
                 });
 
                 aggregation = activityListModel.aggregate(pipeLine);
 
-                aggregation.exec(function (err, response) {
+                aggregation.exec(function(err, response) {
                     var idsPersonnel = [];
                     var options = {
-                        data: {}
+                        data : {}
                     };
                     if (err) {
                         return next(err);
                     }
-                    response = response.length ? response[0] : {data: [], total: 0};
+                    response = response.length ? response[0] : {
+                        data : [],
+                        total : 0
+                    };
 
                     if (!response.data.length) {
-                        return next({status: 200, body: response});
+                        return next({
+                            status : 200,
+                            body : response
+                        });
                     }
 
-                    _.map(response.data, function (model) {
+                    _.map(response.data, function(model) {
                         idsPersonnel.push(model.createdBy.user._id);
                     });
 
                     idsPersonnel = _.uniqBy(idsPersonnel, 'id');
                     options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
 
-                    getImagesHelper.getImages(options, function (err, result) {
+                    getImagesHelper.getImages(options, function(err, result) {
                         var fieldNames = {};
                         var setOptions;
                         if (err) {
@@ -905,18 +951,21 @@ var Personnel = function (db, redis, event) {
                         }
 
                         setOptions = {
-                            response  : response,
-                            imgsObject: result
+                            response : response,
+                            imgsObject : result
                         };
                         fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                         setOptions.fields = fieldNames;
 
-                        getImagesHelper.setIntoResult(setOptions, function (response) {
-                            _.map(response.data, function (element) {
+                        getImagesHelper.setIntoResult(setOptions, function(response) {
+                            _.map(response.data, function(element) {
                                 element.module = MODULE_NAMES[element.module._id];
                             });
 
-                            next({status: 200, body: response});
+                            next({
+                                status : 200,
+                                body : response
+                            });
                         })
                     });
                 });
@@ -925,7 +974,7 @@ var Personnel = function (db, redis, event) {
         }
 
         // 6 - id of personnel modul. Should be changed like CONSTANT.PERSONNEL_ID
-        access.getReadAccess(req, 1, function (err, allowed, personnel) {
+        access.getReadAccess(req, 1, function(err, allowed, personnel) {
             var error;
             if (err) {
                 return next(err);
