@@ -405,7 +405,7 @@ var BodyValidator = (function () {
             return callback(error);
         }
 
-        saveObj = _.pickBy(body, function (value, key) {
+        saveObj = _.forOwn(body, function (value, key) {
             return validationFunctions[contentType](value, key, allowedObject);
         });
 
