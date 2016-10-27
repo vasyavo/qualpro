@@ -3,6 +3,7 @@ var Files = function (db) {
     var fs = require('fs');
     var _ = require('lodash');
     var path = require('path');
+    var config = require('../config');
     var ffmpeg = require('fluent-ffmpeg');
     var im = require('imagemagick');
     var mongoose = require('mongoose');
@@ -17,11 +18,10 @@ var Files = function (db) {
     var fileUploader;
     var self = this;
 
-    if (process.env.UPLOADER_TYPE && process.env.UPLOADER_TYPE === 'AmazonS3') {
-        amazonS3conf = require('../config').aws.s3;
+    if (config.uploaderType && config.uploaderType === 'AmazonS3') {
         fileUploaderConfig = {
-            type     : process.env.UPLOADER_TYPE,
-            awsConfig: amazonS3conf
+            type     : config.uploaderType,
+            awsConfig: config.aws.s3
         };
     }
 

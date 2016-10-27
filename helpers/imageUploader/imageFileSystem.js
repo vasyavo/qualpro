@@ -85,7 +85,7 @@ var imagesUploader = function (dirConfig) {
         catch (err) {
             console.log('ERROR:', err);
             if (callback && typeof callback === 'function') {
-                callback(err)
+                callback(err);
             }
         }
     }
@@ -93,11 +93,7 @@ var imagesUploader = function (dirConfig) {
     function getImagePath(imageName, folderName) {
         var folder = folderName || defaultImageDir;
 
-        if (process.env.NODE_ENV === 'production') {
-            return process.env.HOST + "\/" + defaultUploadsDir + "\/" + folder + "\/" + imageName;
-        }
-
-        return process.env.HOST + "\/" + defaultUploadsDir + "\/" + folder + "\/" + imageName;
+        return defaultUploadsDir + "\/" + folder + "\/" + imageName;
     }
 
     function uploadImage(imageData, imageName, folderName, callback) {
@@ -138,13 +134,13 @@ var imagesUploader = function (dirConfig) {
                                 writer(path, data, callback);
                             } else {
                                 if (callback && typeof callback === 'function') {
-                                    callback(err)
+                                    callback(err);
                                 }
                             }
                         });
                     } else {
                         if (callback && typeof callback === 'function') {
-                            callback(err)
+                            callback(err);
                         }
                     }
                 });
@@ -160,7 +156,7 @@ var imagesUploader = function (dirConfig) {
                                 writer(path, data, callback);
                             } else {
                                 if (callback && typeof callback === 'function') {
-                                    callback(err)
+                                    callback(err);
                                 }
                             }
                         });
