@@ -2,6 +2,7 @@
 module.exports = function (PersonnelModel, accessRoleLevel, contentType, cb) {
     var _;
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var AggregationHelper;
     var currentDomain;
     var aggregateHelper;
@@ -11,14 +12,14 @@ module.exports = function (PersonnelModel, accessRoleLevel, contentType, cb) {
     var aggregation;
 
     switch (accessRoleLevel) {
-        case '2':
-        case '9':
+        case ACL_CONSTANTS.COUNTRY_ADMIN:
+        case ACL_CONSTANTS.COUNTRY_UPLOADER:
             currentDomain = CONTENT_TYPES.COUNTRY;
             break;
-        case '3':
+        case ACL_CONSTANTS.AREA_MANAGER:
             currentDomain = CONTENT_TYPES.REGION;
             break;
-        case '4':
+        case ACL_CONSTANTS.AREA_IN_CHARGE:
             currentDomain = CONTENT_TYPES.SUBREGION;
             break;
     }
