@@ -2,6 +2,7 @@ var NewProductLaunch = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -144,7 +145,7 @@ var NewProductLaunch = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 36,
+                            module    : ACL_MODULES.NEW_PRODUCT_LAUNCH,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : model.get('createdBy'),
                             itemId    : model._id,
@@ -171,7 +172,7 @@ var NewProductLaunch = function (db, redis, event) {
 
         }
 
-        access.getWriteAccess(req, 36, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function (err, allowed) {
             var body;
 
             if (err) {
@@ -382,7 +383,7 @@ var NewProductLaunch = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 36, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -673,7 +674,7 @@ var NewProductLaunch = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 36, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function (err, allowed) {
             if (err) {
                 return next(err);
             }

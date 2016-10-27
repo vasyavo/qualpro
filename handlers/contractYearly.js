@@ -5,9 +5,10 @@ var Contract = function (db, redis, event) {
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
@@ -53,7 +54,6 @@ var Contract = function (db, redis, event) {
         var skip = options.skip;
         var limit = options.limit;
         var isMobile = options.isMobile;
-        var forSync = options.forSync;
         var pipeLine = [];
 
         if (queryObject) {
@@ -225,43 +225,6 @@ var Contract = function (db, redis, event) {
             }));
         }
 
-        /*if (!forSync) {
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
-        }
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                lastDate: {
-                    $ifNull: [
-                        '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }
-            })
-        });
-
-        pipeLine.push({
-            $sort: {
-                lastDate: -1
-            }
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
             searchFieldsArray: searchFieldsArray,
@@ -408,7 +371,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 42, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -433,7 +396,6 @@ var Contract = function (db, redis, event) {
             var userId = session.uId;
             var model;
             var saveContractsYearly = body.saveContractsYearly;
-            var error;
 
             var keys = Object.keys(body);
             keys.forEach(function (key) {
@@ -495,7 +457,7 @@ var Contract = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 20,
+                            module    : ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : body.createdBy,
                             itemId    : model._id,
@@ -527,7 +489,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 20, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY, function (err, allowed) {
             var body;
 
             if (err) {
@@ -668,7 +630,7 @@ var Contract = function (db, redis, event) {
             );
         }
 
-        access.getEditAccess(req, 20, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY, function (err, allowed) {
             var updateObject;
 
             if (err) {
@@ -706,7 +668,7 @@ var Contract = function (db, redis, event) {
             res.status(200).send();
         }
 
-        access.getEditAccess(req, 20, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -740,7 +702,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 20, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -828,7 +790,12 @@ var Contract = function (db, redis, event) {
                 delete queryObject.position;
             }
 
-            if ([4, 5, 6, 7].indexOf(req.session.level) !== -1) {
+            if (_.includes(_(ACL_CONSTANTS).pick([
+                    'AREA_IN_CHARGE',
+                    'SALES_MAN',
+                    'MERCHANDISER',
+                    'CASH_VAN'
+                ]).values().value(), req.session.level)) {
                 queryObject.type = queryObject.type || {};
                 queryObject.type.$nin = ['yearly'];
             }
@@ -926,7 +893,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 20, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }

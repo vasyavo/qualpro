@@ -3,6 +3,8 @@ var Objectives = function (db, redis, event) {
     var _ = require('underscore');
     var lodash = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var VALIDATION = require('../public/js/constants/validation.js');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
@@ -71,7 +73,7 @@ var Objectives = function (db, redis, event) {
     };
 
     function createSubObjective(options, callback) {
-        var options = options || {};
+        options = options || {};
         var parentId = options.parentId;
         var files = options.files;
         var assignedToIds = options.assignedToIds;
@@ -208,7 +210,7 @@ var Objectives = function (db, redis, event) {
                         4: parent['4'] || null
                     };
 
-                    if (parentObjectiveModel.level && parentObjectiveModel.level <= 4) {
+                    if (parentObjectiveModel.level && parentObjectiveModel.level <= ACL_CONSTANTS.AREA_IN_CHARGE) {
                         subObjective.parent[parentObjectiveModel.get('level')] = parentObjectiveModel.get('_id');
                     }
                 }
@@ -231,7 +233,7 @@ var Objectives = function (db, redis, event) {
                     }
                     newObjectiveId = objective._id;
                     event.emit('activityChange', {
-                        module    : 7,
+                        module    : ACL_MODULES.OBJECTIVE,
                         actionType: ACTIVITY_TYPES.CREATED,
                         createdBy : createdBy,
                         itemId    : newObjectiveId,
@@ -243,7 +245,7 @@ var Objectives = function (db, redis, event) {
                             return cb(err);
                         }
                         event.emit('activityChange', {
-                            module    : 7,
+                            module    : ACL_MODULES.OBJECTIVE,
                             actionType: ACTIVITY_TYPES.UPDATED,
                             createdBy : createdBy,
                             itemId    : parentObjectiveModel._id,
@@ -685,7 +687,7 @@ var Objectives = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 7,
+                            module    : ACL_MODULES.OBJECTIVE,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : createdBy,
                             itemId    : model._id,
@@ -785,7 +787,7 @@ var Objectives = function (db, redis, event) {
 
         }
 
-        access.getWriteAccess(req, 7, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body;
 
             if (err) {
@@ -938,7 +940,7 @@ var Objectives = function (db, redis, event) {
 
                     if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
                         && objectiveModel.objectiveType !== 'individual'
-                        && objectiveModel.level === 1) {
+                        && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
                         Model
                             .update({
                                 'parent.1': objectiveModel._id
@@ -956,7 +958,7 @@ var Objectives = function (db, redis, event) {
                     }
 
                     event.emit('activityChange', {
-                        module    : 7,
+                        module    : ACL_MODULES.OBJECTIVE,
                         actionType: ACTIVITY_TYPES.UPDATED,
                         createdBy : updateObject.editedBy,
                         itemId    : objectiveId,
@@ -1250,7 +1252,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 7, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body;
             var updateObject;
 
@@ -1351,7 +1353,7 @@ var Objectives = function (db, redis, event) {
                 });
         }
 
-        access.getWriteAccess(req, 7, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
                 if (err) {
                     return next(err);
                 }
@@ -1418,7 +1420,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 7, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body;
 
             if (err) {
@@ -1496,7 +1498,7 @@ var Objectives = function (db, redis, event) {
                 });
             }
 
-            if (isMobile && currentUserLevel && currentUserLevel !== 1) {
+            if (isMobile && currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
                 pipeLine.push({
                     $match: {
                         $or: [
@@ -1919,7 +1921,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -2202,7 +2204,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -2237,7 +2239,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -2568,7 +2570,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -2979,7 +2981,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -3204,7 +3206,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }

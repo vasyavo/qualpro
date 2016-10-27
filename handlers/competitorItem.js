@@ -6,6 +6,7 @@ var CompetitorItem = function (db, redis, event) {
     var _ = require('../node_modules/underscore');
 
     var CONSTANTS = require('../constants/mainConstants');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var access = require('../helpers/access')(db);
     var bodyValidator = require('../helpers/bodyValidator');
@@ -233,24 +234,6 @@ var CompetitorItem = function (db, redis, event) {
                 $match: aggregationHelper.getSearchMatch(searchFieldsArray, filterSearch)
             });
         }
-/*
-        pipeLine = _.union(pipeLine, aggregationHelper.setTotal());
-
-        pipeLine.push({
-            $sort: sort
-        });
-
-        if (!query.brand && !query.competitorVariant && limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregationHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregationHelper.endOfPipeLine({
             isMobile         : isMobile,
@@ -288,7 +271,7 @@ var CompetitorItem = function (db, redis, event) {
                     return next(error);
                 }
                 event.emit('activityChange', {
-                    module    : 12,
+                    module    : ACL_MODULES.COMPETITOR_LIST,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : createdBy,
                     itemId    : model._id,
@@ -305,7 +288,7 @@ var CompetitorItem = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 12, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -398,7 +381,7 @@ var CompetitorItem = function (db, redis, event) {
 
         }
 
-        access.getReadAccess(req, 12, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -555,7 +538,7 @@ var CompetitorItem = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 12, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -753,7 +736,7 @@ var CompetitorItem = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 12, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -784,7 +767,7 @@ var CompetitorItem = function (db, redis, event) {
                     return next(err);
                 }
                 event.emit('activityChange', {
-                    module    : 12,
+                    module    : ACL_MODULES.COMPETITOR_LIST,
                     actionType: ACTIVITY_TYPES.UPDATED,
                     createdBy : body.editedBy,
                     itemId    : id,
@@ -800,7 +783,7 @@ var CompetitorItem = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 12, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -853,7 +836,7 @@ var CompetitorItem = function (db, redis, event) {
 
                 async.eachSeries(idsToArchive, function (item, callback) {
                     event.emit('activityChange', {
-                        module    : 12,
+                        module    : ACL_MODULES.COMPETITOR_LIST,
                         actionType: type,
                         createdBy : editedBy,
                         itemId    : item,
@@ -872,7 +855,7 @@ var CompetitorItem = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 12, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             if (err) {
                 return next(err);
             }

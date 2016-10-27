@@ -6,6 +6,7 @@ var Documents = function (db, redis, event) {
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler(db);
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var modelAndSchemaName = CONTENT_TYPES.DOCUMENTS;
@@ -257,14 +258,6 @@ var Documents = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        // event.emit('activityChange', {
-                        //     module    : 42,
-                        //     actionType: ACTIVITY_TYPES.CREATED,
-                        //     createdBy : body.createdBy,
-                        //     itemId    : model._id,
-                        //     itemType  : CONTENT_TYPES.DOCUMENTS
-                        // });
-
                         cb(null, model);
                     });
                 },
@@ -284,7 +277,7 @@ var Documents = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 42, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             var body;
 
             if (err) {
@@ -514,7 +507,7 @@ var Documents = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 42, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -675,7 +668,7 @@ var Documents = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 42, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -707,7 +700,7 @@ var Documents = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 42, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -810,7 +803,7 @@ var Documents = function (db, redis, event) {
                 });
         }
 
-        access.getArchiveAccess(req, 42, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }

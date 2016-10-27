@@ -4,6 +4,7 @@ var Promotions = function (db, redis, event) {
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler(db);
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var VALIDATION = require('../public/js/constants/validation.js');
     var CONSTANTS = require('../constants/mainConstants');
@@ -322,7 +323,7 @@ var Promotions = function (db, redis, event) {
                     }
 
                     event.emit('activityChange', {
-                        module    : 33,
+                        module    : ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
                         actionType: ACTIVITY_TYPES.CREATED,
                         createdBy : body.createdBy,
                         itemId    : model._id,
@@ -350,7 +351,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 33, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, function (err, allowed) {
             var body;
 
             if (err) {
@@ -500,7 +501,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 15, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.REPORTING, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -664,7 +665,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 15, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.REPORTING, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -823,7 +824,7 @@ var Promotions = function (db, redis, event) {
                                 return cb(err);
                             }
                             event.emit('activityChange', {
-                                module    : 33,
+                                module    : ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
                                 actionType: ACTIVITY_TYPES.UPDATED,
                                 createdBy : updateObject.editedBy,
                                 itemId    : promotionId,
@@ -847,7 +848,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 15, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.REPORTING, function (err, allowed) {
             var updateObject;
 
             if (err) {
@@ -901,7 +902,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 15, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }

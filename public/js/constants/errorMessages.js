@@ -57,7 +57,7 @@
             ar: 'تم إلغاءالارشفة بنجاح '
         },
         passwordLength: {
-            en: 'Password must be longer than 3 characters',
+            en: 'Password must be longer than 6 characters',
             ar: 'يجب ان تحتوى كلمة المرور على اكثر من ثلاثة احرف'
         },
         canNotFetchCurrentUser: {

@@ -5,7 +5,7 @@ var Contract = function (db, redis, event) {
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
@@ -243,43 +243,6 @@ var Contract = function (db, redis, event) {
             }));
         }
 
-        /*pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                lastDate: {
-                    $ifNull: [
-                        '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }
-            })
-        });
-
-        pipeLine.push({
-            $sort: {
-                lastDate: -1
-            }
-        });
-
-        if (!forSync) {
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
             searchFieldsArray: searchFieldsArray,
@@ -422,7 +385,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 42, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -527,7 +490,7 @@ var Contract = function (db, redis, event) {
                         return cback(err);
                     }
                     event.emit('activityChange', {
-                        module    : 22,
+                        module    : ACL_MODULES.CONTRACT_SECONDARY,
                         actionType: ACTIVITY_TYPES.CREATED,
                         createdBy : body.createdBy,
                         itemId    : model._id,
@@ -561,7 +524,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 22, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.CONTRACT_SECONDARY, function (err, allowed) {
             var body;
 
             if (err) {
@@ -691,7 +654,7 @@ var Contract = function (db, redis, event) {
                                 return cb(err);
                             }
                             event.emit('activityChange', {
-                                module    : 22,
+                                module    : ACL_MODULES.CONTRACT_SECONDARY,
                                 actionType: ACTIVITY_TYPES.UPDATED,
                                 createdBy : updateObject.editedBy,
                                 itemId    : contractSecondaryId,
@@ -720,7 +683,7 @@ var Contract = function (db, redis, event) {
             );
         }
 
-        access.getEditAccess(req, 22, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.CONTRACT_SECONDARY, function (err, allowed) {
             var updateObject;
 
             if (err) {
@@ -760,7 +723,7 @@ var Contract = function (db, redis, event) {
             res.status(200).send();
         }
 
-        access.getEditAccess(req, 22, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.CONTRACT_SECONDARY, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -788,7 +751,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 22, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.CONTRACT_SECONDARY, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -967,7 +930,7 @@ var Contract = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 22, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.CONTRACT_SECONDARY, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }

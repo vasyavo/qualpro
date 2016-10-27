@@ -9,6 +9,7 @@ var ActivityHelper = function (db, redis, app) {
     var pushes = new Pushes(db);
     var ObjectId = mongoose.Types.ObjectId;
     var AggregationHelper = require('../helpers/aggregationCreater');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var MAIN_CONSTANTS = require('../constants/mainConstants.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
@@ -20,17 +21,62 @@ var ActivityHelper = function (db, redis, app) {
     var access = require('../helpers/access')(db);
 
     var levelsByLevel = {
-        1: [1, 8, 11],
-        2: [1, 8, 11],
-        3: [2, 9, 1, 8, 11],
-        4: [2, 9, 1, 8, 3, 11],
-        5: [2, 9, 1, 8, 3, 4, 11],
-        6: [2, 9, 1, 8, 3, 4, 5, 11],
-        7: [2, 9, 1, 8, 3, 4, 5, 11],
-        8: [1, 8, 11],
-        9: [1, 8, 11],
+        1: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL
+        ],
+        2: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL
+        ],
+        3: _(ACL_CONSTANTS).pick([
+            'MASTER_ADMIN',
+            'COUNTRY_ADMIN',
+            'COUNTRY_UPLOADER',
+            'MASTER_UPLOADER',
+            'VIRTUAL'
+        ]).values().value(), // [2, 9, 1, 8, 11],
+        4: _(ACL_CONSTANTS).pick([
+            'MASTER_ADMIN',
+            'COUNTRY_ADMIN',
+            'AREA_MANAGER',
+            'MASTER_UPLOADER',
+            'COUNTRY_UPLOADER',
+            'VIRTUAL'
+        ]).values().value(),// [2, 9, 1, 8, 3, 11],
+        5: _(ACL_CONSTANTS).omit([
+            'SUPER_ADMIN',
+            'SALES_MAN',
+            'MERCHANDISER',
+            'CASH_VAN'
+        ]).values().value(), // [2, 9, 1, 8, 3, 4, 11],
+        6: _(ACL_CONSTANTS).omit([
+            'SUPER_ADMIN',
+            'MERCHANDISER',
+            'CASH_VAN'
+        ]).values().value(), // [2, 9, 1, 8, 3, 4, 5, 11],
+        7: _(ACL_CONSTANTS).omit([
+            'SUPER_ADMIN',
+            'MERCHANDISER',
+            'CASH_VAN'
+        ]).values().value(), // [2, 9, 1, 8, 3, 4, 5, 11],
+        8: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL
+        ],
+        9: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL
+        ],
 
-        11: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        11: _(ACL_CONSTANTS).omit([
+            'SUPER_ADMIN',
+            'VIRTUAL'
+        ]).values().value() // [1, 2, 3, 4, 5, 6, 7, 8, 9]
     };
 
     var $defProjections = {};
@@ -625,7 +671,7 @@ var ActivityHelper = function (db, redis, app) {
                 return waterFallCB(error);
             }
 
-            level = result.level === 1 ? 3 : result.level;
+            level = result.level === ACL_CONSTANTS.MASTER_ADMIN ? ACL_CONSTANTS.AREA_MANAGER : result.level;
             if (result.country) {
                 country = Array.isArray(result.country) ? result.country : [result.country];
             }

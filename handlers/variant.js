@@ -1,5 +1,6 @@
 var Variant = function (db, redis, event) {
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var modelAndSchemaName = CONTENT_TYPES.VARIANT;
     var schema = mongoose.Schemas[modelAndSchemaName];
@@ -60,7 +61,7 @@ var Variant = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 10, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -143,7 +144,7 @@ var Variant = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -184,7 +185,7 @@ var Variant = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -213,7 +214,7 @@ var Variant = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -254,7 +255,7 @@ var Variant = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 10, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -331,7 +332,7 @@ var Variant = function (db, redis, event) {
                 res.status(200).send();
             });
         }
-        access.getArchiveAccess(req, 10, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }

@@ -4,6 +4,7 @@ var RetailSegmentHandler = function (db, redis, event) {
     var lodash = require('lodash');
     var mongoose = require('mongoose');
     var access = require('../helpers/access')(db);
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
@@ -109,7 +110,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                     return next(error);
                 }
                 event.emit('activityChange', {
-                    module    : 5,
+                    module    : ACL_MODULES.TRADE_CHANNEL,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : createdBy,
                     itemId    : model._id,
@@ -127,7 +128,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 5, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -218,7 +219,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                 }
                 async.eachSeries(idsToArchive, function (item, callback) {
                     event.emit('activityChange', {
-                        module    : 5,
+                        module    : ACL_MODULES.TRADE_CHANNEL,
                         actionType: type,
                         createdBy : editedBy,
                         itemId    : item,
@@ -251,7 +252,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 5, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -286,7 +287,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 5, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -323,7 +324,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 5, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -663,7 +664,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 5, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -839,7 +840,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 5, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -875,7 +876,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                         return next(err);
                     }
                     event.emit('activityChange', {
-                        module    : 5,
+                        module    : ACL_MODULES.TRADE_CHANNEL,
                         actionType: ACTIVITY_TYPES.UPDATED,
                         createdBy : body.editedBy,
                         itemId    : id,
@@ -893,7 +894,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                 });
         }
 
-        access.getEditAccess(req, 5, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -961,7 +962,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 5, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -1012,7 +1013,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 5, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             var query = req.query;
 
             if (err) {
@@ -1072,7 +1073,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 5, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1134,7 +1135,7 @@ var RetailSegmentHandler = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 5, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }

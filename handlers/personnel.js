@@ -1,5 +1,7 @@
 var Personnel = function (db, redis, event) {
     var mongoose = require('mongoose');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var RESPONSES_CONSTANTS = require('../constants/responses');
     var CONSTANTS = require('../constants/mainConstants');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -525,7 +527,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 6, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             var customErr;
 
             if (err) {
@@ -597,13 +599,13 @@ var Personnel = function (db, redis, event) {
                 },
 
                 function (level, cb) {
-                    if (level === 1) {
+                    if (level === ACL_CONSTANTS.MASTER_ADMIN) {
                         return cb(null, []);
                     }
 
                     //show all tree for level > 4
-                    if (level > 5) {
-                        level = 5;
+                    if (level > ACL_CONSTANTS.SALES_MAN) {
+                        level = ACL_CONSTANTS.SALES_MAN;
                     }
 
                     queryObject.ids = queryObject.ids.objectID();
@@ -931,7 +933,7 @@ var Personnel = function (db, redis, event) {
 
                     //==============================
 
-                    if (level < 5) {
+                    if (level < ACL_CONSTANTS.SALES_MAN) {
                         for (var i = level - 1; i > 0; i--) {
                             element = pipeArray[i - 1];
 
@@ -973,7 +975,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 6, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -998,7 +1000,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 6, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1210,7 +1212,7 @@ var Personnel = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 6,
+                            module    : ACL_MODULES.PERSONNEL,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : body.createdBy,
                             itemId    : personnel._id,
@@ -1240,7 +1242,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 6, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             var body = req.body;
             if (err) {
                 return next(err);
@@ -1275,8 +1277,15 @@ var Personnel = function (db, redis, event) {
         var error;
 
         var currentLanguage;
-        var notAllowedLevelsCMS = [5, 6, 7];
-        var notAllowedLevelsMobile = [8, 9];
+        var notAllowedLevelsCMS = [
+            ACL_CONSTANTS.SALES_MAN,
+            ACL_CONSTANTS.MERCHANDISER,
+            ACL_CONSTANTS.CASH_VAN
+        ];
+        var notAllowedLevelsMobile = [
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER
+        ];
 
         var locationsByLevel = {
             2: 'country',
@@ -1548,7 +1557,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 6, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1603,7 +1612,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 6, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1648,7 +1657,7 @@ var Personnel = function (db, redis, event) {
 
         if (isMobile) {
             if (!queryObject['accessRole.level']) {
-                queryObject['accessRole.level'] = {$lt: 8};
+                queryObject['accessRole.level'] = {$lt: ACL_CONSTANTS.MASTER_UPLOADER};
             }
         }
 
@@ -1677,7 +1686,12 @@ var Personnel = function (db, redis, event) {
         if (!isMobile) {
             if (queryObject.lasMonthEvaluate) {
                 queryObject['accessRole.level'] = {
-                    $nin: [8, 9, 1, 2]
+                    $nin: [
+                        ACL_CONSTANTS.MASTER_UPLOADER,
+                        ACL_CONSTANTS.COUNTRY_UPLOADER,
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN
+                    ]
                 };
             }
 
@@ -1706,7 +1720,7 @@ var Personnel = function (db, redis, event) {
                             },
                             {
                                 country           : {$eq: []},
-                                'accessRole.level': 1
+                                'accessRole.level': ACL_CONSTANTS.MASTER_ADMIN
                             },
                             {
                                 temp: true //TODO, limit by country for mobile
@@ -1742,28 +1756,43 @@ var Personnel = function (db, redis, event) {
 
         if (supervisorFilter) {
             switch (supervisorFilter) {
-                case 1:
+                case ACL_CONSTANTS.MASTER_ADMIN:
                     accessLevels = [-1];
                     break;
-                case 2:
-                    accessLevels = [1];
+                case ACL_CONSTANTS.COUNTRY_ADMIN:
+                    accessLevels = [ACL_CONSTANTS.MASTER_ADMIN];
                     break;
-                case 3:
-                    accessLevels = [1, 2];
+                case ACL_CONSTANTS.AREA_MANAGER:
+                    accessLevels = [
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN
+                    ];
                     break;
-                case 4:
-                    accessLevels = [1, 2, 3];
+                case ACL_CONSTANTS.AREA_IN_CHARGE:
+                    accessLevels = [
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
+                        ACL_CONSTANTS.AREA_MANAGER
+                    ];
                     break;
-                case 5:
-                case 6:
-                case 7:
-                    accessLevels = [1, 2, 3, 4];
+                case ACL_CONSTANTS.SALES_MAN:
+                case ACL_CONSTANTS.MERCHANDISER:
+                case ACL_CONSTANTS.CASH_VAN:
+                    accessLevels = [
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
+                        ACL_CONSTANTS.AREA_MANAGER,
+                        ACL_CONSTANTS.AREA_IN_CHARGE
+                    ];
                     break;
-                case 8:
-                    accessLevels = [1];
+                case ACL_CONSTANTS.MASTER_UPLOADER:
+                    accessLevels = [ACL_CONSTANTS.MASTER_ADMIN];
                     break;
-                case 9:
-                    accessLevels = [1, 2];
+                case ACL_CONSTANTS.COUNTRY_UPLOADER:
+                    accessLevels = [
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN
+                    ];
                     break;
             }
 
@@ -2187,21 +2216,21 @@ var Personnel = function (db, redis, event) {
                         if (req.isMobile) {
                             async.eachLimit(response, 100, function (element, callback) {
                                 switch (personnelLevel) {
-                                    case 2:
+                                    case ACL_CONSTANTS.COUNTRY_ADMIN:
                                         personnelLocation = personnel.country;
                                         keyName = 'country';
                                         break;
-                                    case 3:
+                                    case ACL_CONSTANTS.AREA_MANAGER:
                                         personnelLocation = personnel.region;
                                         keyName = 'region';
                                         break;
-                                    case 4:
+                                    case ACL_CONSTANTS.AREA_IN_CHARGE:
                                         personnelLocation = personnel.subRegion;
                                         keyName = 'subRegion';
                                         break;
-                                    case 5:
-                                    case 6:
-                                    case 7:
+                                    case ACL_CONSTANTS.SALES_MAN:
+                                    case ACL_CONSTANTS.MERCHANDISER:
+                                    case ACL_CONSTANTS.CASH_VAN:
                                         personnelLocation = personnel.branch;
                                         keyName = 'branch';
                                         break;
@@ -2224,7 +2253,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 6, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -2415,21 +2444,21 @@ var Personnel = function (db, redis, event) {
                         if (req.isMobile) {
                             async.eachLimit(response, 100, function (element, callback) {
                                 switch (personnelLevel) {
-                                    case 2:
+                                    case ACL_CONSTANTS.COUNTRY_ADMIN:
                                         personnelLocation = personnel.country;
                                         keyName = 'country';
                                         break;
-                                    case 3:
+                                    case ACL_CONSTANTS.AREA_MANAGER:
                                         personnelLocation = personnel.region;
                                         keyName = 'region';
                                         break;
-                                    case 4:
+                                    case ACL_CONSTANTS.AREA_IN_CHARGE:
                                         personnelLocation = personnel.subRegion;
                                         keyName = 'subRegion';
                                         break;
-                                    case 5:
-                                    case 6:
-                                    case 7:
+                                    case ACL_CONSTANTS.SALES_MAN:
+                                    case ACL_CONSTANTS.MERCHANDISER:
+                                    case ACL_CONSTANTS.CASH_VAN:
                                         personnelLocation = personnel.branch;
                                         keyName = 'branch';
                                         break;
@@ -2451,8 +2480,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        // 6 - id of personnel modul. Should be changed like CONSTANT.PERSONNEL_ID
-        access.getReadAccess(req, 6, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -2913,7 +2941,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 6, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -3250,7 +3278,7 @@ var Personnel = function (db, redis, event) {
 
                 if (!body.currentLanguage && !body.newPass) {
                     event.emit('activityChange', {
-                        module    : 6,
+                        module    : ACL_MODULES.PERSONNEL,
                         actionType: ACTIVITY_TYPES.UPDATED,
                         createdBy : body.editedBy,
                         itemId    : id,
@@ -3290,7 +3318,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 6, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
             var body = req.body;
 
             if (err) {

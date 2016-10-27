@@ -3,6 +3,7 @@
 var ItemHistory = function (db, event) {
     var async = require('async');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONSTANTS = require('../constants/mainConstants');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var modelAndSchemaName = CONTENT_TYPES.ITEMHISTORY;
@@ -215,7 +216,7 @@ var ItemHistory = function (db, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -244,7 +245,7 @@ var ItemHistory = function (db, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }

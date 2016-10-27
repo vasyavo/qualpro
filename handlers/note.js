@@ -4,6 +4,7 @@ var Note = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var modelAndSchemaName = CONTENT_TYPES.NOTES;
@@ -219,7 +220,7 @@ var Note = function (db, redis, event) {
                             return cb(err);
                         }
                         event.emit('activityChange', {
-                            module    : 25,
+                            module    : ACL_MODULES.NOTE,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : body.createdBy,
                             itemId    : model._id,
@@ -245,7 +246,7 @@ var Note = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 25, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
             var body;
 
             if (err) {
@@ -320,7 +321,7 @@ var Note = function (db, redis, event) {
                             }
 
                             event.emit('activityChange', {
-                                module    : 25,
+                                module    : ACL_MODULES.NOTE,
                                 actionType: ACTIVITY_TYPES.UPDATED,
                                 createdBy : updateObject.editedBy,
                                 itemId    : noteId,
@@ -345,7 +346,7 @@ var Note = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 25, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
             var updateObject;
 
             if (err) {
@@ -498,7 +499,7 @@ var Note = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 25, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -536,7 +537,7 @@ var Note = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 25, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -579,7 +580,7 @@ var Note = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 25, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
             if (err) {
                 return next(err);
             }

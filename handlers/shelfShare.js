@@ -2,6 +2,7 @@ var ShelfShareHandler;
 ShelfShareHandler = function (db, redis, event) {
     var _ = require('underscore');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var access = require('../helpers/access')(db);
@@ -742,7 +743,7 @@ ShelfShareHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 39, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.SHELF_SHARES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -783,7 +784,7 @@ ShelfShareHandler = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 39,
+                    module    : ACL_MODULES.SHELF_SHARES,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : body.createdBy,
                     itemId    : result._id,
@@ -794,7 +795,7 @@ ShelfShareHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 39, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.SHELF_SHARES, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -831,7 +832,7 @@ ShelfShareHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 39, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.SHELF_SHARES, function (err, allowed) {
             if (err) {
                 return next(err);
             }

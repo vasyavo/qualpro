@@ -1,5 +1,6 @@
 var Variant = function (db, redis, event) {
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var modelAndSchemaName = CONTENT_TYPES.COMPETITORVARIANT;
     var schema = mongoose.Schemas[modelAndSchemaName];
@@ -49,7 +50,7 @@ var Variant = function (db, redis, event) {
                     return next(error);
                 }
                 event.emit('activityChange', {
-                    module    : 12,
+                    module    : ACL_MODULES.COMPETITOR_LIST,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : createdBy,
                     itemId    : model._id,
@@ -58,7 +59,7 @@ var Variant = function (db, redis, event) {
                 res.status(201).send(model);
             });
         }
-        access.getWriteAccess(req, 12, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -135,13 +136,11 @@ var Variant = function (db, redis, event) {
                     total: 0
                 };
 
-                // res.status(200).send(result);
-
                 next({status: 200, body: result});
             });
         }
 
-        access.getReadAccess(req, 12, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -182,7 +181,7 @@ var Variant = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 12, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -211,7 +210,7 @@ var Variant = function (db, redis, event) {
                     res.status(200).send(result);
                 });
         }
-        access.getReadAccess(req, 12, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -243,7 +242,7 @@ var Variant = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 12,
+                    module    : ACL_MODULES.COMPETITOR_LIST,
                     actionType: ACTIVITY_TYPES.UPDATED,
                     createdBy : body.editedBy,
                     itemId    : id,
@@ -254,7 +253,7 @@ var Variant = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 12, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -315,7 +314,7 @@ var Variant = function (db, redis, event) {
 
                 async.eachSeries(idsToArchive, function (item, callback) {
                     event.emit('activityChange', {
-                        module    : 12,
+                        module    : ACL_MODULES.COMPETITOR_LIST,
                         actionType: type,
                         createdBy : editedBy,
                         itemId    : item,
@@ -334,7 +333,7 @@ var Variant = function (db, redis, event) {
                 res.status(200).send();
             });
         }
-        access.getArchiveAccess(req, 12, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             if (err) {
                 return next(err);
             }

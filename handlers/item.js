@@ -3,6 +3,7 @@
 var Item = function (db, event) {
     var async = require('async');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONSTANTS = require('../constants/mainConstants');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -236,7 +237,7 @@ var Item = function (db, event) {
                     return next(error);
                 }
                 event.emit('activityChange', {
-                    module    : 10,
+                    module    : ACL_MODULES.ITEMS_AND_PRICES,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : createdBy,
                     itemId    : model._id,
@@ -252,7 +253,7 @@ var Item = function (db, event) {
             });
         }
 
-        access.getWriteAccess(req, 10, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -342,7 +343,7 @@ var Item = function (db, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -460,7 +461,7 @@ var Item = function (db, event) {
             }
         }
 
-        access.getReadAccess(req, 10, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -946,7 +947,7 @@ var Item = function (db, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -993,7 +994,7 @@ var Item = function (db, event) {
             });
         }
 
-        access.getEditAccess(req, 10, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -1058,7 +1059,7 @@ var Item = function (db, event) {
             });
         }
 
-        access.getEditAccess(req, 10, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1103,7 +1104,7 @@ var Item = function (db, event) {
                 }
                 async.eachSeries(idsToArchive, function (item, callback) {
                     event.emit('activityChange', {
-                        module    : 10,
+                        module    : ACL_MODULES.ITEMS_AND_PRICES,
                         actionType: type,
                         createdBy : editedBy,
                         itemId    : item,
@@ -1121,7 +1122,7 @@ var Item = function (db, event) {
             });
         }
 
-        access.getArchiveAccess(req, 10, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }

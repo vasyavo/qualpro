@@ -3,6 +3,8 @@ var InStoreReports = function (db, redis, event) {
     var _ = require('underscore');
     var lodash = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
@@ -127,7 +129,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 18, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -239,7 +241,7 @@ var InStoreReports = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 18,
+                            module    : ACL_MODULES.IN_STORE_REPORTING,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : createdBy,
                             itemId    : model._id,
@@ -295,7 +297,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 18, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             var body;
 
             if (err) {
@@ -435,7 +437,7 @@ var InStoreReports = function (db, redis, event) {
                                     return cb(err);
                                 }
                                 event.emit('activityChange', {
-                                    module    : 18,
+                                    module    : ACL_MODULES.IN_STORE_REPORTING,
                                     actionType: ACTIVITY_TYPES.UPDATED,
                                     createdBy : updateObject.editedBy,
                                     itemId    : inStoreTaskId,
@@ -460,7 +462,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 18, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             var body = {};
             var updateObject;
 
@@ -539,7 +541,7 @@ var InStoreReports = function (db, redis, event) {
                 });
         }
 
-        access.getWriteAccess(req, 18, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -738,7 +740,8 @@ var InStoreReports = function (db, redis, event) {
                         $match: {
                             'accessRole.level': {
                                 $nin: [
-                                    8, 9
+                                    ACL_CONSTANTS.MASTER_UPLOADER,
+                                    ACL_CONSTANTS.COUNTRY_UPLOADER
                                 ]
                             }
                         }
@@ -755,7 +758,7 @@ var InStoreReports = function (db, redis, event) {
                             {'country': {$in: personnelCountryes}},
                             {
                                 'country'         : {$eq: []},
-                                'accessRole.level': 1
+                                'accessRole.level': ACL_CONSTANTS.MASTER_ADMIN
                             }
                         ]
                     }
@@ -851,7 +854,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 18, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -1297,7 +1300,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 18, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1649,7 +1652,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 18, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -2167,7 +2170,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 18, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -2196,7 +2199,7 @@ var InStoreReports = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 18, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }

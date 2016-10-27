@@ -4,7 +4,7 @@ var PriceSurvey = function (db, redis, event) {
     var mongoose = require('mongoose');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var modelAndSchemaName = CONTENT_TYPES.PRICESURVEY;
@@ -75,7 +75,7 @@ var PriceSurvey = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 41,
+                    module    : ACL_MODULES.PRICE_SURVEY,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : priceSurvey.createdBy,
                     itemId    : model._id,
@@ -99,7 +99,7 @@ var PriceSurvey = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 41, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.PRICE_SURVEY, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -593,7 +593,7 @@ var PriceSurvey = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 41, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PRICE_SURVEY, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -839,7 +839,7 @@ var PriceSurvey = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 39, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.SHELF_SHARES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -868,7 +868,7 @@ var PriceSurvey = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 41, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PRICE_SURVEY, function (err, allowed) {
             if (err) {
                 return next(err);
             }

@@ -3,6 +3,7 @@ var planogramsHandler = function (db, redis, event) {
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler(db);
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var _ = require('lodash');
@@ -87,7 +88,7 @@ var planogramsHandler = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 11,
+                    module    : ACL_MODULES.PLANOGRAM,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : result.createdBy,
                     itemId    : result._id,
@@ -98,7 +99,7 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 11, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
             var body = req.body;
             if (err) {
                 return next(err);
@@ -322,7 +323,7 @@ var planogramsHandler = function (db, redis, event) {
                 }
                 async.eachSeries(idsToArchive, function (item, callback) {
                     event.emit('activityChange', {
-                        module    : 11,
+                        module    : ACL_MODULES.PLANOGRAM,
                         actionType: type,
                         createdBy : editedBy,
                         itemId    : item,
@@ -341,7 +342,7 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 11, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -368,7 +369,7 @@ var planogramsHandler = function (db, redis, event) {
             })
         }
 
-        access.getReadAccess(req, 11, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -680,7 +681,7 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 11, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -825,7 +826,7 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 11, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -878,7 +879,7 @@ var planogramsHandler = function (db, redis, event) {
                             }
 
                             event.emit('activityChange', {
-                                module    : 11,
+                                module    : ACL_MODULES.PLANOGRAM,
                                 actionType: ACTIVITY_TYPES.UPDATED,
                                 createdBy : body.editedBy,
                                 itemId    : id,
@@ -903,7 +904,7 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 12, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
             var body = req.body;
 
             if (err) {

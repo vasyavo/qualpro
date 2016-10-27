@@ -4,7 +4,7 @@ var CompetitorBranding = function (db, redis, event) {
     var mongoose = require('mongoose');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
@@ -116,7 +116,7 @@ var CompetitorBranding = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 34,
+                            module    : ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
                             actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : competitorBrand.createdBy,
                             itemId    : model._id,
@@ -143,7 +143,7 @@ var CompetitorBranding = function (db, redis, event) {
 
         }
 
-        access.getWriteAccess(req, 32, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function (err, allowed) {
             var body;
 
             if (err) {
@@ -319,7 +319,7 @@ var CompetitorBranding = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 32, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -510,45 +510,6 @@ var CompetitorBranding = function (db, redis, event) {
             }));
         }
 
-        /*pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                lastDate: {
-                    $ifNull: [
-                        '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }
-            })
-        });
-
-        if (!forSync) {
-            pipeLine.push({
-                $sort: {
-                    lastDate: -1
-                }
-            });
-
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
-
-            pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-        }
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        if (!forSync) {
-            pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
-        }*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
             searchFieldsArray: searchFieldsArray,
@@ -574,7 +535,7 @@ var CompetitorBranding = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 32, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function (err, allowed) {
             if (err) {
                 return next(err);
             }

@@ -2,6 +2,7 @@ var Promotions = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -454,7 +455,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 35, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -540,7 +541,7 @@ var Promotions = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 35,
+                    module    : ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
                     actionType: ACTIVITY_TYPES.UPDATED,
                     createdBy : result.get('createdBy'),
                     itemId    : result.promotion,
@@ -551,7 +552,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 35, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, function (err, allowed) {
             var body;
 
             if (err) {
