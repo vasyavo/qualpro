@@ -22,6 +22,9 @@ module.exports = (function () {
         barCode: {type: String, default: ''},
         packing: {type: String, default: ''},
         ppt    : {type: Number, min: 0, default: 0}, //TODO: review field PPT (product item model)
+        pptPerCase : {type: Number, min: 0, default: 0},
+        rspMin : {type: Number, min: 0, default: 0},
+        rspMax : {type: Number, min: 0, default: 0},
         origin : [{type: ObjectId, ref: CONTENT_TYPES.ORIGIN}],
 
         category: {type: ObjectId, ref: CONTENT_TYPES.CATEGORY},
@@ -56,6 +59,9 @@ module.exports = (function () {
 
     schema.pre('save', function (next) {
         this.ppt = Math.round(this.ppt * 100);
+        this.pptPerCase = Math.round(this.pptPerCase * 100);
+        this.rspMin = Math.round(this.rspMin * 100);
+        this.rspMax = Math.round(this.rspMax * 100);
         next();
     });
 
@@ -63,15 +69,28 @@ module.exports = (function () {
         var item;
         var price;
         var createdBy;
+        var pricePerCase;
+        var rspMin;
+        var rspMax;
         var ItemHistoryModel;
 
         if (this._update.$set && this._update.$set.ppt) {
             item = this._conditions._id;
             price = this._update.$set.ppt;
+            pricePerCase = this._update.$set.pptPerCase;
+            rspMin = this._update.$set.rspMin;
+            rspMax = this._update.$set.rspMax;
             createdBy = this._update.$set.editedBy;
             ItemHistoryModel = this.model.db.model(CONTENT_TYPES.ITEMHISTORY, mongoose.Schemas[CONTENT_TYPES.ITEMHISTORY]);
 
-            this.update({}, {$set: {ppt: Math.round(price * 100)}});
+            this.update({}, {
+                $set: {
+                    ppt: Math.round(price * 100),
+                    pptPerCase: Math.round(pricePerCase * 100),
+                    rspMin: Math.round(rspMin * 100),
+                    rspMax: Math.round(rspMax * 100)
+                }
+            });
 
             ItemHistoryModel.create({
                 item     : item,
@@ -91,8 +110,14 @@ module.exports = (function () {
 
     schema.post('findOne', function (model) {
         var price = model.get('ppt');
+        var pricePerCase = model.get('pptPerCase');
+        var rspMin = model.get('rspMin');
+        var rspMax = model.get('rspMax');
 
         model.set('ppt', price / 100);
+        model.set('pptPerCase', pricePerCase / 100);
+        model.set('rspMin', rspMin / 100);
+        model.set('rspMax', rspMax / 100);
     });
 
     mongoose.model(CONTENT_TYPES.ITEM, schema);

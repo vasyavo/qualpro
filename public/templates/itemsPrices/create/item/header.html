@@ -12,14 +12,14 @@
 <div class="categoryTableWrap">
     <div class="absoluteContent clickableTable">
         <table>
-            <colgroup>
+            <!--<colgroup>
                 <col width="52px">
                 <col width="35%">
                 <col width="25%">
                 <col width="20%">
                 <col width="200px">
                 <col width="20%">
-            </colgroup>
+            </colgroup>-->
             <thead>
             <tr>
                 <th>
@@ -31,6 +31,9 @@
                 <th><%= translation.packing %></th>
                 <th><%= translation.origin %></th>
                 <th><%= translation.ppt %></th>
+                <th><%- translation.rspMin %></th>
+                <th><%- translation.rspMax %></th>
+                <th><%- translation.pptPerCase %></th>
             </tr>
             </thead>
             <tbody>
@@ -38,14 +41,14 @@
                 <td colspan="6" class="colspanFix">
                     <div class="scrollable">
                         <table>
-                            <colgroup>
+                            <!--<colgroup>
                                 <col width="52px">
                                 <col width="35%">
                                 <col width="25%">
                                 <col width="20%">
                                 <col width="200px">
                                 <col width="20%">
-                            </colgroup>
+                            </colgroup>-->
                             <tbody class="listBody">
 
                             </tbody>

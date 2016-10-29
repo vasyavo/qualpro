@@ -808,44 +808,44 @@ allowedParams[CONTENT_TYPES.VARIANT] = {
 
 allowedParams[CONTENT_TYPES.ITEM] = {
     0: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     1: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     2: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     3: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     4: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     5: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     6: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     7: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     8: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     },
     9: {
-        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name'],
-        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'size', 'packing', 'barCode', 'name']
+        create: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name'],
+        update: ['variant', 'category', 'country', 'topArchived', 'archived', 'origin', 'ppt', 'pptPerCase', 'rspMin', 'rspMax', 'size', 'packing', 'barCode', 'name']
     }
 };
 

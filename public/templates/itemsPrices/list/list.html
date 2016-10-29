@@ -51,6 +51,9 @@
         <%= item.origin ? _.map(item.origin, function (el) { return el.name.currentLanguage; }).join(', ') : '' %>
     </td>
     <td><%= item.ppt %><span class="currency"><%= item.currency %></span></td>
+    <td><%- item.rspMin %><span class="currency"><%- item.currency %></span></td>
+    <td><%- item.rspMax %><span class="currency"><%- item.currency %></span></td>
+    <td><%- item.pptPerCase %><span class="currency"><%- item.currency %></span></td>
 </tr>
 <% }) %>
 <% } %>

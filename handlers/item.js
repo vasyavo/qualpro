@@ -29,6 +29,9 @@ var Item = function (db, event) {
         barCode      : 1,
         packing      : 1,
         ppt          : 1,
+        pptPerCase   : 1,
+        rspMin       : 1,
+        rspMax       : 1,
         origin       : 1,
         currency     : 1,
         category     : 1,
@@ -380,6 +383,9 @@ var Item = function (db, event) {
                 'packing',
                 'size',
                 'ppt',
+                'pptPerCase',
+                'rspMin',
+                'rspMax',
                 'origin.name.ar',
                 'origin.name.en',
                 'variant.name.en',
@@ -538,6 +544,15 @@ var Item = function (db, event) {
                     $project: aggregationHelper.getProjection({
                         ppt: {
                             $divide: ['$ppt', 100]
+                        },
+                        pptPerCase: {
+                            $divide: ['$pptPerCase', 100]
+                        },
+                        rspMin: {
+                            $divide: ['$rspMin', 100]
+                        },
+                        rspMax: {
+                            $divide: ['$rspMax', 100]
                         }
                     })
                 });
@@ -661,6 +676,15 @@ var Item = function (db, event) {
                     $project: aggregationHelper.getProjection({
                         ppt: {
                             $divide: ['$ppt', 100]
+                        },
+                        pptPerCase: {
+                            $divide: ['$pptPerCase', 100]
+                        },
+                        rspMin: {
+                            $divide: ['$rspMin', 100]
+                        },
+                        rspMax: {
+                            $divide: ['$rspMax', 100]
                         }
                     })
                 });
@@ -833,7 +857,6 @@ var Item = function (db, event) {
                 },
                 createdBy    : {
                     $arrayElemAt: ['$createdBy', 0]
-
                 },
                 editedBy     : {
                     $arrayElemAt: ['$editedBy', 0]
@@ -899,6 +922,9 @@ var Item = function (db, event) {
                         currency   : '$currency',
                         packing    : '$packing',
                         ppt        : '$ppt',
+                        pptPerCase : '$pptPerCase',
+                        rspMin     : '$rspMin',
+                        rspMax     : '$rspMax',
                         origin     : '$origin',
                         category   : '$category',
                         variant    : '$variant',

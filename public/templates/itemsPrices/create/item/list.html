@@ -45,7 +45,7 @@
                 data-key="packing"
                 class="editable"
                 readonly
-                value="<%=item.packing || ''%>">
+                value="<%= item.packing || '' %>">
     </td>
     <td>
         <div data-key="origin" readonly class="originDropDown">
@@ -57,8 +57,20 @@
                 data-key="ppt"
                 class="editable"
                 readonly
-                value="<%=item.ppt || ''%>">
+                value="<%= item.ppt || '' %>">
         <span class="currency"><%= item.currency %></span>
+    </td>
+    <td>
+        <input data-key="rspMin" class="editable" readonly value="<%- item.rspMin || '' %>">
+        <span class="currency"><%- item.currency %></span>
+    </td>
+    <td>
+        <input data-key="rspMax" class="editable" readonly value="<%- item.rspMax || '' %>">
+        <span class="currency"><%- item.currency %></span>
+    </td>
+    <td>
+        <input data-key="pptPerCase" class="editable" readonly value="<%- item.pptPerCase || '' %>">
+        <span class="currency"><%- item.currency %></span>
     </td>
 </tr>
 <% }) %>

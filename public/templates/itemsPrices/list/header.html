@@ -6,13 +6,13 @@
             <col width="42px">
         </colgroup>
         <% } %>
-        <colgroup>
+        <!--<colgroup>
             <col width="35%">
             <col width="20%">
             <col width="20%">
             <col width="15%">
             <col width="10%">
-        </colgroup>
+        </colgroup>-->
 
         <thead class="darkGrayHeader">
         <tr>
@@ -35,6 +35,15 @@
             <th class="oe_sortable" sort-type="1" data-sort="ppt">
                 <div sort-type="1" class="sortedArrow" data-translation="ppt"><%= translation.ppt %></div>
             </th>
+            <th class="oe_sortable" sort-type="1" data-sort="rspMin">
+                <div sort-type="1" class="sortedArrow" data-translation="rspMin"><%- translation.rspMin %></div>
+            </th>
+            <th class="oe_sortable" sort-type="1" data-sort="rspMax">
+                <div sort-type="1" class="sortedArrow" data-translation="rspMax"><%- translation.rspMax %></div>
+            </th>
+            <th class="oe_sortable" sort-type="1" data-sort="pptPerCase">
+                <div sort-type="1" class="sortedArrow" data-translation="pptPerCase"><%- translation.pptPerCase %></div>
+            </th>
         </tr>
         </thead>
         <tbody>
@@ -47,16 +56,14 @@
                             <col width="42px">
                         </colgroup>
                         <% } %>
-                        <colgroup>
+                        <!--<colgroup>
                             <col width="35%">
                             <col width="20%">
                             <col width="20%">
                             <col width="15%">
                             <col width="10%">
-                        </colgroup>
-                        <tbody class="listTable">
-
-                        </tbody>
+                        </colgroup>-->
+                        <tbody class="listTable"></tbody>
                     </table>
                 </div>
             </td>

@@ -11,6 +11,9 @@ define([
             'barcode',
             'packing',
             'ppt',
+            'pptPerCase',
+            'rspMin',
+            'rspMax',
             'origin'
         ],
 
@@ -35,6 +38,15 @@ define([
             }
             if (this.translatedFields.ppt) {
                 validation.checkPriceField(errors, true, attrs.ppt, this.translatedFields.ppt);
+            }
+            if (this.translatedFields.pptPerCase) {
+                validation.checkPriceField(errors, true, attrs.pptPerCase, this.translatedFields.pptPerCase);
+            }
+            if (this.translatedFields.rspMin) {
+                validation.checkPriceField(errors, true, attrs.rspMin, this.translatedFields.rspMin);
+            }
+            if (this.translatedFields.rspMax) {
+                validation.checkPriceField(errors, true, attrs.rspMax, this.translatedFields.rspMax);
             }
             if (this.translatedFields.origin) {
                 validation.checkForValuePresence(errors, true, attrs.origin, this.translatedFields.origin);
