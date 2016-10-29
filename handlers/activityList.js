@@ -1,7 +1,8 @@
 var Personnel = function(db, redis, event) {
     var mongoose = require('mongoose');
     var CONSTANTS = require('../constants/mainConstants');
-    var ACL_CONSTANTS = require('../constants/aclNames');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var access = require('../helpers/access')(db);
     var FilterMapper = require('../helpers/filterMapper');
@@ -48,7 +49,6 @@ var Personnel = function(db, redis, event) {
             'AREA_MANAGER',
             'AREA_IN_CHARGE',
             'SALES_MAN',
-            'MERCHANDISER',
             'MERCHANDISER',
             'CASH_VAN',
             'VIRTUAL'
@@ -517,30 +517,6 @@ var Personnel = function(db, redis, event) {
             }
         });
 
-        /*pipeLine.push({
-         $sort: sort
-         });
-
-         if (!isMobile) {
-         pipeLine.push({
-         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile : isMobile,
             searchFieldsArray : searchFieldsArray,
@@ -660,7 +636,7 @@ var Personnel = function(db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 1, function(err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, function(err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -688,7 +664,7 @@ var Personnel = function(db, redis, event) {
             res.status(200).send({message : 'OK Delete'});
         }
 
-        access.getReadAccess(req, 1, function(err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, function(err, allowed, personnel) {
             var error;
             if (err) {
                 return next(err);
@@ -821,8 +797,7 @@ var Personnel = function(db, redis, event) {
             });
         }
 
-        // 6 - id of personnel modul. Should be changed like CONSTANT.PERSONNEL_ID
-        access.getReadAccess(req, 6, function(err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -973,8 +948,7 @@ var Personnel = function(db, redis, event) {
 
         }
 
-        // 6 - id of personnel modul. Should be changed like CONSTANT.PERSONNEL_ID
-        access.getReadAccess(req, 1, function(err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, function(err, allowed, personnel) {
             var error;
             if (err) {
                 return next(err);

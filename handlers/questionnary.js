@@ -3,6 +3,8 @@ var QuestionnaryHandler = function (db, redis, event) {
     var _ = require('underscore');
     var lodash = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var access = require('../helpers/access')(db);
     var CONSTANTS = require('../constants/mainConstants');
@@ -264,7 +266,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 31, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -601,7 +603,7 @@ var QuestionnaryHandler = function (db, redis, event) {
 
         }
 
-        access.getReadAccess(req, 31, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -723,7 +725,12 @@ var QuestionnaryHandler = function (db, redis, event) {
                     pipeLine.push({
                         $match: {
                             'accessRole.level': {
-                                $nin: [1, 2, 8, 9]
+                                $nin: [
+                                    ACL_CONSTANTS.MASTER_ADMIN,
+                                    ACL_CONSTANTS.COUNTRY_ADMIN,
+                                    ACL_CONSTANTS.MASTER_UPLOADER,
+                                    ACL_CONSTANTS.COUNTRY_UPLOADER
+                                    ]
                             }
                         }
                     });
@@ -832,7 +839,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 31, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed) {
             var body;
 
             if (err) {
@@ -998,7 +1005,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                         }
 
                         event.emit('activityChange', {
-                            module    : 31,
+                            module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
                             actionType: ACTIVITY_TYPES.UPDATED,
                             createdBy : body.editedBy,
                             itemId    : id,
@@ -1020,7 +1027,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 31, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed) {
             var body;
 
             if (err) {
@@ -1175,7 +1182,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 31, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -1342,7 +1349,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 31,
+                    module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
                     actionType: ACTIVITY_TYPES.UPDATED,
                     createdBy : updater.editedBy,
                     itemId    : body.questionnaryId,
@@ -1353,7 +1360,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 31, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed) {
             var updateObject;
 
             if (err) {
@@ -1400,7 +1407,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 31, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed) {
             if (err) {
                 return next(err);
             }

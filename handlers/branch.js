@@ -5,6 +5,7 @@ var BranchHandler = function (db, redis, event) {
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var VALIDATION = require('../public/js/constants/validation.js');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var modelAndSchemaName = CONTENT_TYPES.BRANCH;
@@ -253,7 +254,7 @@ var BranchHandler = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 105,
+                    module    : ACL_MODULES.BRANCH,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : createdBy,
                     itemId    : result._id,
@@ -294,7 +295,7 @@ var BranchHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 4, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -357,7 +358,7 @@ var BranchHandler = function (db, redis, event) {
 
                         idsToArchive.forEach(function (id) {
                             event.emit('activityChange', {
-                                module    : 105,
+                                module    : ACL_MODULES.BRANCH,
                                 actionType: type,
                                 createdBy : req.body.editedBy,
                                 itemId    : id,
@@ -371,7 +372,7 @@ var BranchHandler = function (db, redis, event) {
                 } else {
                     idsToArchive.forEach(function (id) {
                         event.emit('activityChange', {
-                            module    : 105,
+                            module    : ACL_MODULES.BRANCH,
                             actionType: type,
                             createdBy : req.body.editedBy,
                             itemId    : id,
@@ -386,7 +387,7 @@ var BranchHandler = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 4, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -426,7 +427,7 @@ var BranchHandler = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 4, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -762,7 +763,7 @@ var BranchHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -917,7 +918,7 @@ var BranchHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -968,7 +969,7 @@ var BranchHandler = function (db, redis, event) {
                         return next(err);
                     }
                     event.emit('activityChange', {
-                        module    : 105,
+                        module    : ACL_MODULES.BRANCH,
                         actionType: ACTIVITY_TYPES.UPDATED,
                         createdBy : body.editedBy,
                         itemId    : id,
@@ -997,7 +998,7 @@ var BranchHandler = function (db, redis, event) {
                 });
         }
 
-        access.getEditAccess(req, 4, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1008,7 +1009,7 @@ var BranchHandler = function (db, redis, event) {
                 return next(err);
             }
 
-            access.getWriteAccess(req, 4, function (err, allowed) {
+            access.getWriteAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
                 var body = req.body;
 
                 if (err) {

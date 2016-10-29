@@ -2,6 +2,7 @@ var VisibilityForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('underscore');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var VALIDATION = require('../public/js/constants/validation.js');
     var CONSTANTS = require('../constants/mainConstants');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -94,7 +95,7 @@ var VisibilityForm = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 7,
+                    module    : ACL_MODULES.OBJECTIVE,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : result.get('createdBy'),
                     itemId    : result._id,
@@ -116,7 +117,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 7, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -438,7 +439,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -543,7 +544,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -636,7 +637,9 @@ var VisibilityForm = function (db, redis, event) {
                         if (err) {
                             return cb(err);
                         }
-                        var module = model.objective.context === CONTENT_TYPES.OBJECTIVES ? 7 : 18;
+                        var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
+                            ? ACL_MODULES.OBJECTIVE :
+                            ACL_MODULES.IN_STORE_REPORTING;
 
                         event.emit('activityChange', {
                             module     : module,
@@ -715,7 +718,7 @@ var VisibilityForm = function (db, redis, event) {
             );
         }
 
-        access.getEditAccess(req, 7, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body = req.body;
 
             try {
@@ -777,7 +780,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -805,7 +808,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }

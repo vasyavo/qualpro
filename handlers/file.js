@@ -1,6 +1,7 @@
 var Files = function (db) {
     var async = require('async');
     var fs = require('fs');
+    var _ = require('lodash');
     var path = require('path');
     var config = require('../config');
     var ffmpeg = require('fluent-ffmpeg');
@@ -157,7 +158,7 @@ var Files = function (db) {
                     },
 
                     function (waterfallCb) {
-                        if (OTHER_CONSTANTS.VIDEO_CONTENT_TYPES.indexOf(fileOptions.type) === -1) {
+                        if (!_.includes(OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, fileOptions.type)) {
                             return waterfallCb(null);
                         }
 
@@ -285,7 +286,7 @@ var Files = function (db) {
                         var inputFileName;
                         var outputFile;
 
-                        if (OTHER_CONSTANTS.OTHER_FORMATS.indexOf(fileOptions.type) === -1) {
+                        if (!_.includes(OTHER_CONSTANTS.OTHER_FORMATS, fileOptions.type)) {
                             return waterfallCb(null);
                         }
 

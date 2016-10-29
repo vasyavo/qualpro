@@ -1,7 +1,9 @@
 var BiYearlyHandler = function (db) {
     var async = require('async');
-    var _ = require('underscore');
+    var _ = require('lodash');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
+    var ACL_ROLES = require('../constants/aclRolesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType');
     var access = require('../helpers/access')(db);
     var modelAndSchemaName = CONTENT_TYPES.BIYEARLY;
@@ -10,7 +12,6 @@ var BiYearlyHandler = function (db) {
     var personnelSchema = mongoose.Schemas[CONTENT_TYPES.PERSONNEL];
     var PersonnelModel = db.model(CONTENT_TYPES.PERSONNEL, personnelSchema);
     var bodyValidator = require('../helpers/bodyValidator');
-    var ObjectId = mongoose.Types.ObjectId;
 
     function parseDetailsToModel(details, saveObject) {
         var bodyObj;
@@ -228,7 +229,10 @@ var BiYearlyHandler = function (db) {
                 var oldRatingDataKey = null;
 
                 // for Master Admin and Country Admin //TODO need more testing, get first unrated period
-                if (level === 1 || level === 2) {
+                if (_.includes(_(ACL_ROLES).pick([
+                        'MASTER_ADMIN',
+                        'COUNTRY_ADMIN'
+                    ]).values().value(), level)) {
                     if (ratingModel) {
                         oldRatingDataKey = ratingModel.get('dataKey');
                     }
@@ -342,7 +346,7 @@ var BiYearlyHandler = function (db) {
             });
         }
 
-        access.getWriteAccess(req, 23, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -399,7 +403,7 @@ var BiYearlyHandler = function (db) {
             });
         }
 
-        access.getReadAccess(req, 23, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -431,7 +435,7 @@ var BiYearlyHandler = function (db) {
             });
         }
 
-        access.getReadAccess(req, 23, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -496,7 +500,7 @@ var BiYearlyHandler = function (db) {
             });
         }
 
-        access.getEditAccess(req, 23, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             var body = req.body;
 
             if (err) {

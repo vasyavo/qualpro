@@ -101,6 +101,7 @@ define(['Backbone',
             var err = this.error = '';
             var self = this;
             var thisEl = this.$el;
+            var minimumPassLength = 6;
             var loginForm = thisEl.find('#loginForm');
             var login = _.escape(loginForm.find('#email').val());
             var pass = thisEl.find('#pass').val();
@@ -125,7 +126,7 @@ define(['Backbone',
 
             loginForm.removeClass('notRegister');
 
-            if (data.pass.length < 3) {
+            if (data.pass.length < minimumPassLength) {
                 err += ERROR_MESSAGES.passwordLength.en + '</br>' + ERROR_MESSAGES.passwordLength.ar;
             }
             if (err) {

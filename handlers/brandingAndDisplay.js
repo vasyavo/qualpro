@@ -2,6 +2,7 @@ var BrandingAndDisplay = function (db, redis, event) {
     var _ = require('lodash');
     var async = require('async');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var VALIDATION = require('../public/js/constants/validation.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -417,7 +418,7 @@ var BrandingAndDisplay = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 38, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -547,7 +548,7 @@ var BrandingAndDisplay = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 38, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -625,7 +626,7 @@ var BrandingAndDisplay = function (db, redis, event) {
                     }
 
                     event.emit('activityChange', {
-                        module    : 38,
+                        module    : ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
                         actionType: ACTIVITY_TYPES.CREATED,
                         createdBy : body.createdBy,
                         itemId    : model._id,
@@ -652,7 +653,7 @@ var BrandingAndDisplay = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 38, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed) {
 
             var body;
 
@@ -809,7 +810,7 @@ var BrandingAndDisplay = function (db, redis, event) {
                                     return cb(err);
                                 }
                                 event.emit('activityChange', {
-                                    module    : 38,
+                                    module    : ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
                                     actionType: ACTIVITY_TYPES.UPDATED,
                                     createdBy : updateObject.editedBy,
                                     itemId    : brandingAndDisplayId,
@@ -835,7 +836,7 @@ var BrandingAndDisplay = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 38, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed) {
             var updateObject;
 
             if (err) {
@@ -889,7 +890,7 @@ var BrandingAndDisplay = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 38, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed) {
             if (err) {
                 return next(err);
             }

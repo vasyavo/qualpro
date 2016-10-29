@@ -2,6 +2,7 @@ var OutletHandler = function (db, redis, event) {
     var async = require('async');
     var mongoose = require('mongoose');
     var _ = require('lodash');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
@@ -106,7 +107,7 @@ var OutletHandler = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 4,
+                    module    : ACL_MODULES.CUSTOMER,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : createdBy,
                     itemId    : model._id,
@@ -124,7 +125,7 @@ var OutletHandler = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 4, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -202,7 +203,7 @@ var OutletHandler = function (db, redis, event) {
 
                 async.eachSeries(idsToArchive, function (item, callback) {
                     event.emit('activityChange', {
-                        module    : 4,
+                        module    : ACL_MODULES.CUSTOMER,
                         actionType: type,
                         createdBy : editedBy,
                         itemId    : item,
@@ -236,7 +237,7 @@ var OutletHandler = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, 4, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -271,7 +272,7 @@ var OutletHandler = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 4, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -309,7 +310,7 @@ var OutletHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 4, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -817,7 +818,7 @@ var OutletHandler = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 4, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -872,7 +873,7 @@ var OutletHandler = function (db, redis, event) {
                 });
         }
 
-        access.getEditAccess(req, 4, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.CUSTOMER, function (err, allowed) {
             var body = req.body;
 
             if (err) {

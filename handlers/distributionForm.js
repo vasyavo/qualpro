@@ -3,6 +3,7 @@ var DistributionForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
     var CONSTANTS = require('../constants/mainConstants');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
@@ -47,7 +48,7 @@ var DistributionForm = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 7,
+                    module    : ACL_MODULES.OBJECTIVE,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : model.get('createdBy'),
                     itemId    : model._id,
@@ -58,7 +59,7 @@ var DistributionForm = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 7, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -500,7 +501,7 @@ var DistributionForm = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -677,7 +678,7 @@ var DistributionForm = function (db, redis, event) {
             }
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -706,7 +707,7 @@ var DistributionForm = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 7, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -808,7 +809,7 @@ var DistributionForm = function (db, redis, event) {
                     }
 
                     event.emit('activityChange', {
-                        module    : 7,
+                        module    : ACL_MODULES.OBJECTIVE,
                         actionType: ACTIVITY_TYPES.UPDATED,
                         createdBy : result.get('editedBy'),
                         itemId    : result._id,
@@ -820,7 +821,7 @@ var DistributionForm = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, 7, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
             var body = req.body;
 
             if (err) {

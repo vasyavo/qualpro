@@ -2,6 +2,7 @@ var Notifications = function (db, redis, event) {
     var _ = require('lodash');
     var async = require('async');
     var mongoose = require('mongoose');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -480,7 +481,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 26, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -589,7 +590,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 26, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -642,7 +643,7 @@ var Notifications = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : 26,
+                    module    : ACL_MODULES.NOTIFICATION,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : model.createdBy,
                     itemId    : model._id,
@@ -732,7 +733,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, 26, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed) {
 
             var body;
 
@@ -772,7 +773,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 26, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed) {
             if (err) {
                 return next(err);
             }

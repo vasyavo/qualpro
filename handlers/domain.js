@@ -5,6 +5,7 @@ var Domain = function (db, redis, event) {
     var mongoose = require('mongoose');
     var _ = require('underscore');
     var lodash = require('lodash');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var modelAndSchemaName = CONTENT_TYPES.DOMAIN;
@@ -44,15 +45,15 @@ var Domain = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
-        var mid = req.mid || 3;
+        var mid = req.mid || ACL_MODULES.COUNTRY;
 
         function queryRun(body) {
             var model;
-            var moduleNumber = 3;
+            var moduleNumber = ACL_MODULES.COUNTRY;
             if (body.type === 'region') {
-                moduleNumber = 103;
+                moduleNumber = ACL_MODULES.REGION;
             } else if (body.type === 'subRegion') {
-                moduleNumber = 104;
+                moduleNumber = ACL_MODULES.SUB_REGION;
             }
             var createdBy = {
                 user: req.session.uId,
@@ -140,7 +141,7 @@ var Domain = function (db, redis, event) {
     };
 
     this.archive = function (req, res, next) {
-        var mid = req.mid || 3;
+        var mid = req.mid || ACL_MODULES.COUNTRY;
 
         function queryRun() {
             var idsToArchive = req.body.ids.objectID();
@@ -163,11 +164,11 @@ var Domain = function (db, redis, event) {
                     user: req.session.uId,
                     date: new Date()
                 };
-                var moduleNumber = 3;
+                var moduleNumber = ACL_MODULES.COUNTRY;
                 if (options.contentType === 'region') {
-                    moduleNumber = 103;
+                    moduleNumber = ACL_MODULES.REGION;
                 } else if (options.contentType === 'subRegion') {
-                    moduleNumber = 104;
+                    moduleNumber = ACL_MODULES.SUB_REGION;
                 }
                 if (err) {
                     return next(err);
@@ -227,7 +228,7 @@ var Domain = function (db, redis, event) {
                 });
         }
 
-        access.getReadAccess(req, 3, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -264,7 +265,7 @@ var Domain = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 3, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -493,25 +494,6 @@ var Domain = function (db, redis, event) {
             isArray: false
         }));
 
-        /*pipeLine.push({
-         $sort: sort
-         });
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
             searchFieldsArray: searchFieldsArray,
@@ -620,7 +602,7 @@ var Domain = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 3, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -786,7 +768,7 @@ var Domain = function (db, redis, event) {
             returnResult();
         }
 
-        access.getReadAccess(req, 3, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -802,16 +784,16 @@ var Domain = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
-        var mid = req.mid || 3;
+        var mid = req.mid || ACL_MODULES.COUNTRY;
 
         function queryRun(body) {
             var id = req.params.id;
             var query;
-            var moduleNumber = 3;
+            var moduleNumber = ACL_MODULES.COUNTRY;
             if (body.type === 'region') {
-                moduleNumber = 103;
+                moduleNumber = ACL_MODULES.REGION;
             } else if (body.type === 'subRegion') {
-                moduleNumber = 104;
+                moduleNumber = ACL_MODULES.SUB_REGION;
             }
 
             if (body.name) {

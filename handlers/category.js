@@ -1,6 +1,7 @@
 var Category = function (db, event) {
     var mongoose = require('mongoose');
     var async = require('async');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var modelAndSchemaName = CONTENT_TYPES.CATEGORY;
     var schema = mongoose.Schemas[modelAndSchemaName];
@@ -84,7 +85,7 @@ var Category = function (db, event) {
             });
         }
 
-        access.getWriteAccess(req, 10, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -167,7 +168,7 @@ var Category = function (db, event) {
             });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -205,7 +206,7 @@ var Category = function (db, event) {
                 });
         }
 
-        access.getReadAccess(req, 10, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -255,7 +256,7 @@ var Category = function (db, event) {
 
         }
 
-        access.getWriteAccess(req, 10, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
             var body = req.body;
 
             if (err) {

@@ -3,6 +3,7 @@ var Comment = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
     var moment = require('moment');
+    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
@@ -102,31 +103,31 @@ var Comment = function (db, redis, event) {
             switch (context) {
                 case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
                     ContextModel = CompetitorBrandingItemModel;
-                    mid = 40;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_ITEMS;
                     break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
                     ContextModel = CompetitorBrandingModel;
-                    mid = 34;
+                    mid = ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT;
                     break;
                 case CONTENT_TYPES.COMPETITORPROMOTION:
                     ContextModel = CompetitorPromotionModel;
-                    mid = 32;
+                    mid = ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY;
                     break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:
                     ContextModel = PromotionsItemsModel;
-                    mid = 35;
+                    mid = ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS;
                     break;
                 case CONTENT_TYPES.PROMOTIONS:
                     ContextModel = PromotionsModel;
-                    mid = 33;
+                    mid = ACL_MODULES.AL_ALALI_PROMO_EVALUATION;
                     break;
                 case CONTENT_TYPES.OBJECTIVES:
                     ContextModel = ObjectiveModel;
-                    mid = 7;
+                    mid = ACL_MODULES.OBJECTIVE;
                     break;
                 case CONTENT_TYPES.INSTORETASKS:
                     ContextModel = ObjectiveModel;
-                    mid = 18;
+                    mid = ACL_MODULES.IN_STORE_REPORTING;
                     break;
             }
 
@@ -296,7 +297,7 @@ var Comment = function (db, redis, event) {
             }
         }
 
-        access.getWriteAccess(req, 1010, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.COMMENT, function (err, allowed) {
             var body;
             if (err) {
                 return next(err);
@@ -497,7 +498,7 @@ var Comment = function (db, redis, event) {
             async.waterfall([
                 function (waterfallCb) {
                     var key;
-                    if (!context || [CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS].indexOf(context) === -1 && !isMobile) {
+                    if (!context || !_.includes([CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS], context) && !isMobile) {
                         return waterfallCb(null);
                     }
                     key = req.session.id + '.' + context;
@@ -608,7 +609,7 @@ var Comment = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 1010, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -639,7 +640,7 @@ var Comment = function (db, redis, event) {
             async.waterfall([
                 function (waterfallCb) {
                     var key;
-                    if (!context || [CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS].indexOf(context) === -1 && !isMobile) {
+                    if (!context || !_.includes([CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS], context) && !isMobile) {
                         return waterfallCb(null);
                     }
                     key = req.session.id + '.' + context;
@@ -751,7 +752,7 @@ var Comment = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 1010, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -964,7 +965,7 @@ var Comment = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 1010, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1033,7 +1034,7 @@ var Comment = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, 1010, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMMENT, function (err, allowed) {
             if (err) {
                 return next(err);
             }
