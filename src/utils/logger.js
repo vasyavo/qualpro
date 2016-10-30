@@ -1,5 +1,5 @@
 const winston = require('winston');
-const config = require('./../../config');
+const config = require('./../config');
 
 require('winston-mongodb');
 
@@ -7,7 +7,7 @@ const logger = new (winston.Logger)({
     transports: config.isTest ? [] : [
         new (winston.transports.Console)({
             colorize: true,
-            json: true,
+            json: false,
             handleExceptions: true,
             humanReadableUnhandledException: true,
         }),

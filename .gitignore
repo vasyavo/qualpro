@@ -1,7 +1,7 @@
-/public/files
-/routes/locales
-/documentation
-/public/js/libs
+/src/public/files
+/src/routes/locales
+/src/documentation
+/src/public/js/libs
 # Logs
 logs
 *.log
@@ -16,6 +16,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+.nyc_output
 
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 /.idea
@@ -37,4 +38,4 @@ node_modules
 /attachments
 
 # AWS S3 credentials
-/config/aws.json
+/src/config/aws.json

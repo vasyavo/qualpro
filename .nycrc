@@ -1,0 +1,28 @@
+{
+    "extension": [
+      ".js"
+    ],
+    "lines": 50,
+    "statements": 50,
+    "functions": 50,
+    "branches": 50,
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "src/**/*.spec.js",
+      "src/public"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary",
+      "cobertura"
+    ],
+    "require": [],
+    "cache": true,
+    "all": true,
+    "check-coverage": false,
+    "report-dir": "coverage",
+    "sourceMap": true,
+    "instrument": true
+}
