@@ -4,6 +4,7 @@
  */
 
 module.exports = function (app, db, event) {
+    // var express = require('express');
     var path = require('path');
     var logWriter = require('../helpers/logWriter');
     var fs = require('fs');
@@ -121,6 +122,11 @@ module.exports = function (app, db, event) {
         //ToDo remove (res.cookie) this one after test sms
         //res.cookie('lang', 'ae');
         res.render('index.html', {csrfToken: req.csrfToken()});
+    });
+
+    // endpoint for handling api documents
+    app.get('/docs', function (req, res, next) {
+        res.render(process.cwd() + '/API_documentation/qualPro_API.html');
     });
 
     app.get('/authenticated', function (req, res, next) {

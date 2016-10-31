@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "aglio": "^2.2.1",
     "async": "0.9.0",
     "aws-sdk": "2.2.42",
     "bcryptjs": "2.2.2",
@@ -81,7 +82,8 @@
     "debug": "cross-env NODE_ENV=development node-debug --save-live-edit src/server.js",
     "postinstall": "bower install",
     "commit": "git-cz",
-    "coverage": "nyc npm run test"
+    "coverage": "nyc npm run test",
+    "docs": "./API_documentation/update_docs.sh"
   },
   "pre-push": [],
   "engines": {

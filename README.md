@@ -39,6 +39,16 @@ In order to make conventional commit, use:
 $ npm run commit
 ```
 
+For generating api docs use:
+```
+$ npm run docs
+```
+Ensure 'update_docs.sh' have right access level
+```
+ls -al - check right
+chmod 755 ./API_documentation/update_docs.sh - full access
+```
+
 #### Settings
 
 All project settings are stored in `config` folder, the main config file is `index.js`.
