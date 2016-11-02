@@ -1,0 +1,46 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<tr class="js_question">
+    <td class="checkboxArea alignCenter">
+        <input type="checkbox" id="id<%= someIdForCheckBox %>" value="someValue" class="customCheckbox"/>
+        <label for="id<%= someIdForCheckBox %>" class="checkboxLabel"></label>
+    </td>
+    <td class="absoluteInputWrap">
+        <!--    <input type="text" class="absoluteInput js_questionInput" placeholder="<%= translation.enterQuestion %>" value="<%= question.title || '' %>"/>
+        -->
+        <div class="cell">
+            <div>
+                <input type="text"
+                       data-parent="title"
+                       data-property="en"
+                       id="questionTitleEn"
+                       class="customInput enInput"
+                       value="<%= question.title && question.title.en || '' %>"
+                       placeholder="<%= translation.enterQuestion.en %>"
+                       dir="ltr"
+                />
+            </div>
+            <div>
+                <input type="text"
+                       id="questionTitleAr"
+                       class="customInput arInput"
+                       data-parent="title"
+                       data-property="ar"
+                       value="<%= question.title && question.title.ar || '' %>"
+                       placeholder="<%= translation.enterQuestion.ar %>"
+                       maxlength="56"
+                       dir="rtl"
+                >
+            </div>
+        </div>
+    </td>
+    <td>
+        <div class="js_questionType">
+
+        </div>
+    </td>
+    <td class="noPadding">
+        <div class="js_options"></div>
+    </td>
+</tr>

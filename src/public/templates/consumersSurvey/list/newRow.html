@@ -1,0 +1,30 @@
+<%
+var currentLanguage = App.currentUser.currentLanguage;
+var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+%>
+
+<div class="questionnarieListWrap flexRow listRow" data-id="<%= model._id %>">
+    <div class="leftPart flexGrow">
+        <div class="questionnarieRow ">
+            <span class="fontSuperBig"><%= model.title.currentLanguage || model.title[anotherLanguage]%></span>
+            <span class="state<%= model.status.name.en %> <%= model.statusClass %>"><%= model.status.name.currentLanguage %></span>
+        </div>
+        <div class="questionnarieRow textEllipsis">
+            <span class="fontMedium fontGray hoverFullText">
+                <%= translation.location %>: <%= model.location[currentLanguage] || model.location[anotherLanguage] %>
+            </span>
+        </div>
+        <div class="questionnarieUserInfoBlock">
+            <span class="user"></span>
+            <span class="score">
+                <span class="black"><%= model.countAnswered %></span>
+                <%= translation.of %>
+                <span><%= model.countAll %></span>
+            </span>
+        </div>
+    </div>
+    <div class="rightPart">
+        <span class="fontGray"><%= translation.endDate %>:</span>
+        <span class="questionnarieDate"><%= model.dueDate %></span>
+    </div>
+</div>

@@ -42,6 +42,10 @@ define([
             all: {}
         };
 
+        this[CONTENT_TYPES.CONSUMERS_SURVEY] = {
+            all: {}
+        };
+
         this[CONTENT_TYPES.COUNTRY] = {
             all     : {
                 archived: {
