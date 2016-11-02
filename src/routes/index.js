@@ -68,6 +68,7 @@ module.exports = function (app, db, event) {
     var activityList = require('./activityList')(db, redis, event);
     var originRouter = require('./origin')(db, redis, event);
     var priceSurvey = require('./priceSurvey')(db, redis, event);
+    var contactUs = require('./contactUs')(db, redis, event);
 
     var contractsYearlyRouter = require('./contractsYearly')(db, redis, event);
     var contractsSecondaryRouter = require('./contractsSecondary')(db, redis, event);
@@ -271,6 +272,7 @@ module.exports = function (app, db, event) {
     app.use('/competitorPromotion', competitorPromotion);
     app.use('/achievementForm', achievementForm);
     app.use('/newProductLaunch', newProductLaunch);
+    app.use('/contactUs', contactUs);
 
     app.use('/contractsYearly', contractsYearlyRouter);
     app.use('/contractsSecondary', contractsSecondaryRouter);
@@ -364,13 +366,19 @@ module.exports = function (app, db, event) {
                 err.message = 'Record with such data is already exists';
             }
 
-            res.status(status).send(err.message);
+            res.status(status).send({
+                error : err.message,
+                details : err.details
+            });
         } else {
             if (status !== 401) {
                 logWriter.log('', err.message + '\n' + err.stack);
             }
 
-            res.status(status).send({error: err.message + '\n' + err.stack});
+            res.status(status).send({
+                error: err.message + '\n' + err.stack,
+                details : err.details
+            });
         }
     }
 

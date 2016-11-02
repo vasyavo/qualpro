@@ -67,6 +67,7 @@
         BIYEARLY               : 'biYearly',
         ITEMHISTORY            : 'itemHistory',
         DOCUMENTS              : 'documents',
+        CONTACT_US              : 'contactUs',
         DISPLAYTYPE            : 'displayType',
 
         PRICESURVEY               : 'priceSurvey',
