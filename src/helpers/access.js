@@ -1,7 +1,7 @@
-var access = function (db) {
+var access = function(db) {
     var async = require('async');
 
-    var getAccess = function (req, mid, accessType, callback) {
+    var getAccess = function(req, mid, accessType, callback) {
         var PersonnelModel = require('./../types/personnel/model');
         var RoleModel = require('./../types/accessRole/model');
         var uId = req.session.uId;
@@ -29,20 +29,20 @@ var access = function (db) {
             }
 
             RoleModel.aggregate([{
-                $project: {
-                    roleAccess: 1
+                $project : {
+                    roleAccess : 1
                 }
             }, {
-                $match: {
-                    _id: personnel.accessRole
+                $match : {
+                    _id : personnel.accessRole
                 }
             }, {
-                $unwind: '$roleAccess'
+                $unwind : '$roleAccess'
             }, {
-                $match: {
-                    'roleAccess.module': mid
+                $match : {
+                    'roleAccess.module' : mid
                 }
-            }], function (err, result) {
+            }], function(err, result) {
                 if (err) {
                     return waterfallCb(err);
                 }
@@ -55,7 +55,7 @@ var access = function (db) {
 
         tasks = [findPersonnel, checkRole];
 
-        async.waterfall(tasks, function (err, result, personnel) {
+        async.waterfall(tasks, function(err, result, personnel) {
             var access;
 
             if (err) {
@@ -70,6 +70,13 @@ var access = function (db) {
                     return callback(null, true, personnel);
                 }
 
+                if (!access[accessType]) {
+                    err = new Error();
+                    err.status = 403;
+
+                    return callback(err);
+                }
+
                 return callback(null, access[accessType], personnel);
             }
 
@@ -77,32 +84,32 @@ var access = function (db) {
         });
     };
 
-    var getReadAccess = function (req, mid, callback) {
+    var getReadAccess = function(req, mid, callback) {
         return getAccess(req, mid, 'read', callback);
     };
-    var getEditAccess = function (req, mid, callback) {
+    var getEditAccess = function(req, mid, callback) {
         return getAccess(req, mid, 'edit', callback);
     };
-    var getWriteAccess = function (req, mid, callback) {
+    var getWriteAccess = function(req, mid, callback) {
         return getAccess(req, mid, 'write', callback);
     };
-    var getArchiveAccess = function (req, mid, callback) {
+    var getArchiveAccess = function(req, mid, callback) {
         return getAccess(req, mid, 'archive', callback);
     };
-    var getEvaluateAccess = function (req, mid, callback) {
+    var getEvaluateAccess = function(req, mid, callback) {
         return getAccess(req, mid, 'evaluate', callback);
     };
-    var getUploadAccess = function (req, mid, callback) {
+    var getUploadAccess = function(req, mid, callback) {
         return getAccess(req, mid, 'upload', callback);
     };
 
     return {
-        getReadAccess    : getReadAccess,
-        getEditAccess    : getEditAccess,
-        getWriteAccess   : getWriteAccess,
+        getReadAccess : getReadAccess,
+        getEditAccess : getEditAccess,
+        getWriteAccess : getWriteAccess,
         getArchiveAccess : getArchiveAccess,
-        getEvaluateAccess: getEvaluateAccess,
-        getUploadAccess  : getUploadAccess
+        getEvaluateAccess : getEvaluateAccess,
+        getUploadAccess : getUploadAccess
     };
 };
 
