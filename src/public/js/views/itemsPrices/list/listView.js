@@ -78,7 +78,7 @@ define([
             }).render());
 
             $currentEl.find('.forChange').toggle(archived);
-            $currentEl.find('.changeColSpan').attr('colspan', !archived ? 6 : 7);
+            $currentEl.find('.changeColSpan').attr('colspan', !archived ? 8 : 9);
 
             return this;
         },
@@ -111,7 +111,7 @@ define([
             holder.find('#checkAll').prop('checked', false);
 
             holder.find('.forChange').toggle(archived);
-            holder.find('.changeColSpan').attr('colspan', !archived ? 6 : 7);
+            holder.find('.changeColSpan').attr('colspan', !archived ? 8 : 9);
         },
 
         archiveItems: function (e) {
