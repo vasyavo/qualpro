@@ -18,6 +18,7 @@
                        class="customInput enInput"
                        value="<%= question.title && question.title.en || '' %>"
                        placeholder="<%= translation.enterQuestion.en %>"
+                       maxlength="500"
                        dir="ltr"
                 />
             </div>
@@ -29,7 +30,7 @@
                        data-property="ar"
                        value="<%= question.title && question.title.ar || '' %>"
                        placeholder="<%= translation.enterQuestion.ar %>"
-                       maxlength="56"
+                       maxlength="500"
                        dir="rtl"
                 >
             </div>
