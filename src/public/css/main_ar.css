@@ -3017,7 +3017,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .allDialogsClass .mediaDialogInner .pdfContainer {
     height: 600px;
 }
-.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]) {
+.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]):read-only {
     width: calc(100% - 40px) !important;
 }
 @media screen and (max-height: 792px) {
