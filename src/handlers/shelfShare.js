@@ -479,8 +479,14 @@ ShelfShareHandler = function (db, redis, event) {
             if (queryObject.retailSegment) {
                 pipeLine.push({
                     $match: {
-                        'branch.retailSegment' : queryObject.retailSegment,
-                        'outlet.retailSegments': queryObject.retailSegment
+                        $or : [
+                            {
+                                'branch.retailSegment' : queryObject.retailSegment,
+                            },
+                            {
+                                'outlet.retailSegments': queryObject.retailSegment
+                            }
+                        ]
                     }
                 });
             }

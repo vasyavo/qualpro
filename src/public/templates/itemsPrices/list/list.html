@@ -11,7 +11,7 @@
        <td></td>
     <% } %>
     <% } %>
-    <td colspan="5" class="tableGrayDark"><%=group.categoryName ? group.categoryName.currentLanguage.toUpperCase() : ''%></td>
+    <td colspan="8" class="tableGrayDark"><%=group.categoryName ? group.categoryName.currentLanguage.toUpperCase() : ''%></td>
 </tr>
 <% if (group.variants) { %>
 <% group.variants.forEach(function(variant, index){ %>
@@ -26,7 +26,7 @@
       <td></td>
     <% } %>
     <% } %>
-    <td colspan="5" class="tableGrayLight"><%=variant.variantName ? variant.variantName.currentLanguage.toUpperCase() : ''%></td>
+    <td colspan="8" class="tableGrayLight"><%=variant.variantName ? variant.variantName.currentLanguage.toUpperCase() : ''%></td>
 </tr>
 
 <% if (variant.items) { %>
