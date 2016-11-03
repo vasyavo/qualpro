@@ -58,11 +58,16 @@ config.sessionConfig = sessionConfig;
 /* AWS S3 configurations begin */
 
 // setup default state for run environment
+const awsS3Config = {
+    bucketName: process.env.AWS_S3_BUCKET,
+    region: process.env.AWS_S3_REGION,
+    accessKeyId : process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey : process.env.AWS_SECRET_ACCESS_KEY,
+    imageUrlDurationSec : 60 * 60 * 24 * 365 * 10
+};
+
 config.aws = {
-    s3: {
-        bucket: process.env.AWS_S3_BUCKET,
-        region: process.env.AWS_S3_REGION,
-    },
+    s3 : awsS3Config
 };
 
 // path to file with credentials
@@ -78,17 +83,17 @@ if (fs.existsSync(config.awsCredentialsPath)) {
     const secretAccessKey = nconf.get('AWS_SECRET_ACCESS_KEY');
 
     // rewrite default state with additional props
-    config.aws.s3 = {
+    config.aws.s3 = Object.assign({}, awsS3Config, {
         accessKeyId,
         secretAccessKey,
         bucketName : nconf.get('AWS_S3_BUCKET'),
-        region : nconf.get('AWS_S3_REGION'),
-        imageUrlDurationSec : 60 * 60 * 24 * 365 * 10
-    };
+        region : nconf.get('AWS_S3_REGION')
+    });
 
     process.env.AWS_ACCESS_KEY_ID = accessKeyId;
     process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
 }
+
 /* end of AWS S3 configurations */
 
 config.uploaderType = 'AmazonS3';
