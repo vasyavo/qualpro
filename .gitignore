@@ -3,6 +3,7 @@
 /src/routes/locales
 /src/documentation
 /src/public/js/libs
+dump.rdb
 # Logs
 logs
 *.log

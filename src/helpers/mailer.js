@@ -1,16 +1,21 @@
-/**
- * Created by soundstorm on 14.04.15.
- */
+const fs = require('fs');
+const path = require('path');
+const _ = require('underscore');
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
+const smtpTransportObject = require('../config/mailer').noReplay;
+
+const readTmpl = (name) => {
+    const pathToTmpl = `${__dirname}/../public/templates/mailer/${name}.html`;
+    const file = fs.readFileSync(pathToTmpl, 'utf8');
+
+    return _.template(file);
+};
+
+const forgotPasswordTemplate = readTmpl('forgotPassword');
+const confirmAccountTemplate = readTmpl('createUser');
+
 module.exports = function () {
-    var _ = require('../public/js/libs/underscore/underscore-min.js');
-    var nodemailer = require("nodemailer");
-    var sgTransport = require('nodemailer-sendgrid-transport');
-    var smtpTransportObject = require('../config/mailer').noReplay;
-
-    var fs = require('fs');
-    var forgotPasswordTemplate = _.template(fs.readFileSync('public/templates/mailer/forgotPassword.html', encoding = "utf8"));
-    var confirmAccountTemplate = _.template(fs.readFileSync('public/templates/mailer/createUser.html', encoding = "utf8"));
-
     this.forgotPassword = function (options) {
         var language = options.currentLanguage;
         var anotherLanguage = (language === 'en') ? 'ar' : 'en';
