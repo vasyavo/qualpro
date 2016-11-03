@@ -1,3 +1,4 @@
+const async = require('async');
 const logger = require('../utils/logger');
 const AccessRoleModel = require('../types/accessRole/model');
 
@@ -6001,16 +6002,16 @@ AccessRoleModel.update({}, {$set: {roleAccess: []}}, {multi: true}, function (er
         return logger.error(err);
     }
 
-    accessRolesData.forEach(function (value, index) {
+    async.eachOf(accessRolesData, function (value, index, cb) {
         AccessRoleModel.findOneAndUpdate({level: index}, {$push: {roleAccess: {$each: value}}}, {
             new   : true,
             upsert: true
-        }, function (err) {
-            if (err) {
-                return logger.error(err);
-            }
+        }, cb);
+    }, function (err) {
+        if (err) {
+            logger.error(err);
+        }
 
-            logger.info('Access role to modules updated!');
-        });
+        logger.info('Access roles for modules updated!');
     });
 });
