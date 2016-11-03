@@ -68,6 +68,7 @@ module.exports = function (app, db, event) {
     var activityList = require('./activityList')(db, redis, event);
     var originRouter = require('./origin')(db, redis, event);
     var priceSurvey = require('./priceSurvey')(db, redis, event);
+    var contactUs = require('./contactUs')(db, redis, event);
 
     var contractsYearlyRouter = require('./contractsYearly')(db, redis, event);
     var contractsSecondaryRouter = require('./contractsSecondary')(db, redis, event);
@@ -138,11 +139,6 @@ module.exports = function (app, db, event) {
     });
     app.get('/modules', checkAuth, modulesHandler.getAll);
     app.post('/login', csrfProtection, personnelHandler.login);
-    app.post('/mobile/login', function (req, res, next) {
-        req.isMobile = true;
-
-        next();
-    }, csrfProtection, personnelHandler.login);
 
     app.post('/upload', multipartMiddleware, function (req, res, next) {
         var localFs = new LocalFs();
@@ -214,21 +210,7 @@ module.exports = function (app, db, event) {
         res.clearCookie();
     });
 
-    app.get('/mobile/logout', csrfProtection, function (req, res, next) {
-        if (req.session) {
-            req.session.destroy(function (err) {
-                if (err) {
-                    return next(err);
-                }
 
-                res.status(200).send();
-            });
-        } else {
-            res.status(200).send();
-        }
-
-        res.clearCookie();
-    });
     app.use('/activityList', activityList);
     app.use('/brandingAndDisplay', brandingAndDisplayRouter);
     app.use('/brandingAndDisplayItems', brandingAndDisplayItems);
@@ -271,6 +253,7 @@ module.exports = function (app, db, event) {
     app.use('/competitorPromotion', competitorPromotion);
     app.use('/achievementForm', achievementForm);
     app.use('/newProductLaunch', newProductLaunch);
+    app.use('/contactUs', contactUs);
 
     app.use('/contractsYearly', contractsYearlyRouter);
     app.use('/contractsSecondary', contractsSecondaryRouter);
@@ -364,13 +347,19 @@ module.exports = function (app, db, event) {
                 err.message = 'Record with such data is already exists';
             }
 
-            res.status(status).send(err.message);
+            res.status(status).send({
+                error : err.message,
+                details : err.details
+            });
         } else {
             if (status !== 401) {
                 logWriter.log('', err.message + '\n' + err.stack);
             }
 
-            res.status(status).send({error: err.message + '\n' + err.stack});
+            res.status(status).send({
+                error: err.message + '\n' + err.stack,
+                details : err.details
+            });
         }
     }
 

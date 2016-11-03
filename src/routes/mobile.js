@@ -44,7 +44,10 @@ module.exports = function (db, app, redis, event) {
     var questionnaryRouter = require('./mobile/questionnary')(db, redis, event);
     var positionRouter = require('./position')(db, redis, event);
     var originRouter = require('./origin')(db, redis, event);
+    var contactUsRouter = require('./contactUs')(db, redis, event);
 
+    var csurf = require('csurf');
+    var csrfProtection = csurf({ignoreMethods: ['GET', 'POST'], cookie: true});
 
     router.use(function (req, res, next) {
         req.isMobile = true;
@@ -92,6 +95,7 @@ module.exports = function (db, app, redis, event) {
     router.use('/questionnary', questionnaryRouter);
     router.use('/position', positionRouter);
     router.use('/origin', originRouter);
+    router.use('/contactUs', contactUsRouter);
 
     /**
      * __Type__ 'POST'
@@ -114,8 +118,28 @@ module.exports = function (db, app, redis, event) {
      * @method /mobile/login
      * @instance
      */
-    router.post('/login', personnelHandler.login);
+    // router.post('/login', personnelHandler.login);
 
+    app.get('/logout', csrfProtection, function (req, res, next) {
+        if (req.session) {
+            req.session.destroy(function (err) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send();
+            });
+        } else {
+            res.status(200).send();
+        }
+
+        res.clearCookie();
+    });
+    app.post('/login', function (req, res, next) {
+        req.isMobile = true;
+
+        next();
+    }, csrfProtection, personnelHandler.login);
 
     /**
      * __Type__ 'POST'

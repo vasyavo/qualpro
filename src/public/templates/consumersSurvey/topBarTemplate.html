@@ -1,0 +1,14 @@
+<div class="featureTitleWrap" data-translation="all">
+    <%= translation.all %>
+</div>
+
+<div class="filterBar">
+</div>
+
+<div id="viewBar" class="viewBar questionnarieView viewBarPadding">
+    <% if([3,4].indexOf(App.currentUser.accessRole.level) === -1) { %>
+    <span id="createBtn" class="greenBtn" data-translation="newBtn"><%= translation.newBtn %></span>
+    <%}%>
+    <div id="paginationHolder" class="paginationHolder">
+    </div>
+</div>

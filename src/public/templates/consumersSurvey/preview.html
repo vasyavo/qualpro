@@ -1,0 +1,105 @@
+<div class="form-holder questionnarie-form">
+    <div class="title">
+        <span class="titleDescription"><%= translation.questionaryPreview %></span>
+    </div>
+    <% if(activityList){%>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap">
+        </div>
+    </div>
+    <%}%>
+    <div class="questionsPreview">
+        <div class="tabs">
+            <ul>
+                <li><a href="#questions"><%= translation.questions %></a></li>
+                <li><a href="#respondents"><%= translation.respondents %></a></li>
+            </ul>
+            <% if(!activityList){%>
+            <button id="duplicate" class="greyBtn floatRight"><%= translation.duplicateBtn %></button>
+            <% if(model && model.status && model.status._id !== 'expired'){ %>
+            <button id="edit" class="greenBtn floatRight"><%= translation.editBtn %></button>
+            <%}%>
+            <%}%>
+            <div id="respondents" class="respondentsWrap">
+                <div class="respondentsLeftPart">
+                    <div class="questionsTitle clearfix"><%= translation.respondent %>
+                        <span class="questionsCount floatRight">
+                            <span class="bordered" id="selectedRespondentsIndex"></span>
+                            <span><%= translation.of %></span>
+                            <span id="allRespondentsCount"><%= model.countAll %></span>
+                        </span>
+                    </div>
+                    <div class="respondentsSearchBlock borderBottom">
+                        <span class="searchInputWrap">
+                            <input type="text" data-translation="search" placeholder="<%= translation.search %>" id="respondentSearchInput" class="searchInput"
+                                   required="">
+                            <label for="searchInput" class="searchLabel"></label>
+                        </span>
+                    </div>
+                    <div class="respondentsContainer">
+                        <div class="absoluteContent">
+                            <div class="scrollable">
+                                <div id="respondentsFullList">
+                                    <!--respondentsFullList-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="respondentsRightPart">
+                    <div class="questionsTitle clearfix"><%= translation.answer %></div>
+                    <div class="respondentsRightContainer">
+                        <div class="absoluteContent">
+                            <div class="scrollable" id="questionFullList">
+                                <!--questionFullList-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="questions" class="questionsWrap">
+                <div class="questionsLeftPart">
+                    <div class="questionsTitle clearfix"><%= translation.question %>
+                        <span class="questionsCount floatRight">
+                            <span class="bordered" id="selectedQuestionIndex"></span>
+                            <span><%= translation.of %></span>
+                            <span><%= model.questions.length %></span>
+                        </span>
+                    </div>
+                    <div class="questionsContainer">
+                        <div class="absoluteContent">
+                            <div class="scrollable" id="questionList">
+                                <!--questionList-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="questionsRightPart">
+                    <div class="questionsTitle clearfix" id="questionBigTitle"></div>
+                    <div class="questionsDiagram" id="divToHide">
+                        <div class="diagram_container" id="questionsDiagram">
+                            <!--diagram-->
+                        </div>
+                    </div>
+
+                    <div class="questionsSearchBlock">
+                        <span class="searchTitle"><%= translation.respondents %></span>
+                        <span class="searchInputWrap">
+                            <input type="text" data-translation="search" placeholder="<%= translation.search %>" id="searchInput" class="searchInput" required="">
+                            <label for="searchInput" class="searchLabel"></label>
+                        </span>
+                    </div>
+                    <div class="questionsListWrap">
+                        <div class="absoluteContent">
+                            <div class="scrollable">
+                                <div id="respondentsList">
+                                    <!--respondents-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

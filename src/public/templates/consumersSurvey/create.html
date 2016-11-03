@@ -1,0 +1,101 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<div class="form-holder questionnarie-form">
+    <div class="title">
+        <span class="titleDescription"><%= title %> <%= translation.titleQuestionary %></span>
+    </div>
+    <div id="quetrionnarie" class="questionnarie">
+        <div class="questionnarieWrap">
+            <div class="questionnarieInputWrap questionnarieTab">
+                <% if(model && model.status && model.status._id === 'active' && edit) {%>
+                <span class="customInput" id="questionnaryTitle"> <%= model.title.en || '' %> </span>
+                <span class="customInput" id="questionnaryTitle"> <%= model.title.ar || '' %> </span>
+                <% } else { %>
+                <!--<input type="text" class="customInput" id="questionnaryTitle" placeholder="<%= translation.title %>"
+                       value="<%= model.title || '' %>"/>-->
+                <div class="row clearfix">
+                    <div class="cell clearfix">
+                        <div class="inputBox">
+                            <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                               data-id="questionnaryTitle<%= anotherLanguage.capitalizer('firstCaps') %>"
+                               href="javascript:;">
+                            </a>
+                            <input type="text"
+                                   data-parent="title"
+                                   data-property="en"
+                                   id="questionnaryTitleEn"
+                                   class="customInput enInput"
+                                   value="<%= model && model.title && model.title.en || '' %>"
+                                   maxlength="32"
+                                   placeholder="<%= translation.enterTitle.en %>"
+                                   dir="ltr"
+                            />
+                        </div>
+
+                        <div class="inputBox">
+                            <input type="text"
+                                   id="questionnaryTitleAr"
+                                   class="customInput arInput"
+                                   data-parent="title"
+                                   data-property="ar"
+                                   value="<%= model && model.title && model.title.ar || '' %>"
+                                   placeholder="<%= translation.enterTitle.ar %>"
+                                   maxlength="56"
+                                   dir="rtl"
+                            >
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+                <div class="questionnarieDatapickerWrap">
+                    <input type="text" data-property="dueDate" id="dueDate" placeholder="<%= translation.dueDate %>"
+                           class="questionnarieDatapicker" value="<%= model.dueDate || '' %>" readonly="">
+                </div>
+            </div>
+
+            <div class="overlay
+            <%= model && model.status && model.status._id === 'active' && edit ? 'active' : ''%>
+            "></div>
+            <div class="filterBar">
+            </div>
+            <div class="questionnarieTableWrap">
+                <div class="questionnarieTable absoluteContent">
+                    <div class="questionnarieTableTitle">
+                        <span id="en"></span>
+                        <span id="ar"></span>
+                        <div id="buttonContainer" class="floatRight">
+                            <a href="javascript:;" class="plusIcon" id="addQuestion"
+                               title="<%= translation.addNewBtn %>"></a>
+                            <a href="javascript:;" class="trash" id="deleteQuestion"
+                               title="<%= translation.deleteBtn %>"></a>
+                        </div>
+                    </div>
+                    <div class="scrollable" style="max-height: 100%">
+                        <table>
+                            <colgroup>
+                                <col width="42px">
+                                <col width="35%">
+                                <col width="20%">
+                                <col width="45%">
+                            </colgroup>
+                            <tbody id="questionTable">
+                            <tr>
+                                <td class="checkboxArea alignCenter"></td>
+                                <td><span><%= translation.title %></span></td>
+                                <td><span><%= translation.type %></span></td>
+                                <td><span><%= translation.options %></span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="floatButtonsContainer">
+        <a href="javascript:;" class="flowSaveBtn"></a>
+        <a href="javascript:;" class="flowCancelBtn"></a>
+    </div>
+</div>

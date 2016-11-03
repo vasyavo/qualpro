@@ -2,3 +2,67 @@ FORMAT: 1A
 HOST: https://qualpro.herokuapp.com
 
 # qualPro API
+
+## General Errors
+
+Http Code | Error Type           |  Error                             | Details
+---------:| -------------------- |  --------------------------------- | ----------------
+403       | AuthError            |  Not Authorized                    |
+404       | Not Found            |  Page Not Found                    |
+400       | Bad request          |  Not enough incoming parameters    |
+400       | Bad request          |  ValidationError                   | Reasons of error
+500       | Internal error       |  Internal server error             |
+
+# Data Structures
+
+## GenericError
++ error:`Some error description.` (string)
+
+## CreateContactUs
++ module (enum, required)
+    + Members
+        + No modules
+        + Activity list
+        + Locations
+        + Personnel
+        + Items and Prices
+        + Objectives
+        + In-srote reporting
+        + Reporting
+        + Al Alali Marketing
+        + Planograms
+        + Competitors list
+        + Contracts
+        + Documents
+        + Notes
++ type (enum, required)
+    + Members
+        + bug
+        + comment
+        + idea
++ description: `some description` (string, required)
++ file: `1Virtyv.jpg` (optional) - file in multipart/form-data
+
+## CreateContactUsRes
++ _id: `5818b01a13187de020871b63` (string)
++ createdBy: `5818b01a13187de020871b63` (string)
++ attachments: `5818b01a13187de020871b63` (string)
++ module: `No modules` (string)
++ type: `bug` (string)
++ description: `test bug` (string)
++ status: `new` (string)
++ createdAt: `2016-11-01T13:09:14.000Z` (string)
+
+# Group ContactUs
+
+## Send contactUs form [/mobile/contactUs]
+
+### Create [POST]
+Create contact us form.
+
++ Request (multipart/form-data)
+    + Attributes (CreateContactUs)
++ Response 200 (application/json)
+    + Attributes (CreateContactUsRes)
++ Response 400 (application/json)
+    + Attributes (GenericError)
