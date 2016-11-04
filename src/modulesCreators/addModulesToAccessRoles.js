@@ -626,7 +626,23 @@ const superAdmin = [
         write  : true,
         read   : true
     }
-}, commentsAccess
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    },
+    commentsAccess
 ];
 
 const masterAdmin = [
@@ -1285,21 +1301,36 @@ const masterAdmin = [
         write  : true,
         read   : true
     }
-}, {
-    module: 43,
-    cms   : {
-        archive: false,
-        edit   : true,
-        write  : true,
-        read   : true
-    },
-    mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : true
-    }
-}, commentsAccess
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    }, commentsAccess
 ];
 
 const countryAdmin = [
@@ -1912,8 +1943,23 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}, {
+},
+    {
         module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : true,
@@ -2483,23 +2529,37 @@ const areaFiledManager = [
     }
 },
 commentsAccess,
+{
+    module: 31,
+    cms   : {
+        archive: false,
+        edit   : false,
+        write  : false,
+        read   : true
+    },
+    mobile: {
+        archive: false,
+        edit   : true,
+        write  : false,
+        read   : true
+    }
+},
     {
-        module: 31,
-        cms: {
+        module: 43,
+        cms   : {
             archive: false,
-            edit: false,
-            write: false,
-            read: true
+            edit   : false,
+            write  : false,
+            read   : false
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: false,
-            read: true
+            edit   : false,
+            write  : true,
+            read   : false
         }
-    },
-    {
-        module: 43,
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : false,
@@ -2512,7 +2572,7 @@ commentsAccess,
             write  : false,
             read   : true
         }
-    },
+    }
 ];
 
 const areaInChargeManager = [
@@ -3083,8 +3143,23 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}, {
+},
+    {
         module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : false,
@@ -3667,8 +3742,23 @@ const salesman = [
         write  : false,
         read   : true
     }
-}, {
+},
+    {
         module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : false,
@@ -4251,8 +4341,23 @@ const merchandiser = [
         write  : false,
         read   : true
     }
-}, {
+},
+    {
         module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : false,
@@ -4835,8 +4940,23 @@ const cashVan = [
         write  : false,
         read   : true
     }
-}, {
+},
+    {
         module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : false,
@@ -5466,8 +5586,23 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}, {
+},
+    {
         module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+        module: 44,
         cms   : {
             archive: false,
             edit   : true,
@@ -6094,21 +6229,7 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}, {
-        module: 43,
-        cms   : {
-            archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
-        },
-        mobile: {
-            archive: false,
-            edit   : false,
-            write  : false,
-            read   : true
-        }
-    }
+}
 ];
 
 const accessRolesData = {
@@ -6131,7 +6252,7 @@ AccessRoleModel.update({}, {$set: {roleAccess: []}}, {multi: true}, function (er
 
     async.eachOf(accessRolesData, function (value, index, cb) {
         AccessRoleModel.findOneAndUpdate({level: index}, {$push: {roleAccess: {$each: value}}}, {
-            new: true,
+            new   : true,
             upsert: true
         }, cb);
     }, function (err) {
