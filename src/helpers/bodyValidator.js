@@ -290,21 +290,29 @@ var BodyValidator = (function() {
     };
 
     function validateBody(body, level, contentType, method, callback) {
-        var saveObj;
-        var allowedObject = CONSTANTS[contentType] && CONSTANTS[contentType][level] && CONSTANTS[contentType][level][method] || null;
+        const allowedObject = CONSTANTS[contentType] &&
+            CONSTANTS[contentType][level] &&
+            CONSTANTS[contentType][level][method] || null;
 
         if (!allowedObject) {
-            error = new Error('Validation error');
+            const error = new Error('Validation error');
+
             error.status = 400;
             return callback(error);
         }
 
-        saveObj = _.pickBy(body, function(value, key) {
-            return validationFunctions[contentType](value, key, allowedObject);
-        });
+        const allowedProps = {};
 
+        for (let prop in body) {
+            const propValue = body[prop];
+            const isPropAllowed = validationFunctions[contentType](propValue, prop, allowedObject);
 
-        callback(null, saveObj);
+            if (isPropAllowed) {
+                allowedProps[prop] = propValue;
+            }
+        }
+
+        callback(null, allowedProps);
     }
 
     return {

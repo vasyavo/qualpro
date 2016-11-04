@@ -1,0 +1,33 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<li class="option">
+    <!--<input class="js_optionInput" type="text" value="<%= option || '' %>">-->
+    <div class="cell options">
+        <div>
+            <input type="text"
+                   data-parent="title"
+                   data-property="en"
+                   id="optionEn"
+                   class="customInput enInput"
+                   value="<%= option && option.en || '' %>"
+                   maxlength="32"
+                   placeholder="<%= translation.enterOption.en %>"
+                   dir="ltr"
+            />
+        </div>
+        <div>
+            <input type="text"
+                   id="optionAr"
+                   class="customInput arInput"
+                   data-parent="title"
+                   data-property="ar"
+                   value="<%= option && option.ar || '' %>"
+                   placeholder="<%= translation.enterOption.ar %>"
+                   maxlength="56"
+                   dir="rtl"
+            >
+        </div>
+    </div>
+    <span style="cursor: pointer" class="removeOption"></span>
+</li>

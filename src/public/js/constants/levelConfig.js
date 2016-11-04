@@ -323,6 +323,21 @@ define([
         }
     };
 
+    var consumersSurveyConfig = {
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
+
     var brandingAndDisplayConfig = {
         1           : {
             preview: [
@@ -592,6 +607,7 @@ define([
     config[CONTENT_TYPES.QUESTIONNARIES] = questionaryConfig;
     config[CONTENT_TYPES.BRANDINGANDDISPLAY] = brandingAndDisplayConfig;
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
+    config[CONTENT_TYPES.CONSUMERS_SURVEY] = consumersSurveyConfig;
 
     return config;
 });

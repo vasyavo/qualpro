@@ -29,4 +29,6 @@ const scheduler = new Scheduler();
 
 scheduler.initEveryHourScheduler();
 
+require('./modulesCreators');
+
 module.exports = server;

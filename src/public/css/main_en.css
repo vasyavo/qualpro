@@ -1684,7 +1684,7 @@ input:invalid {
 }
 .customCheckbox:not(.onoffswitch-checkbox) + label {
   position: relative;
-  z-index: 1;
+  /*z-index: 1; */
   display: block;
   border: 2px solid rgba(0, 0, 0, 0.9);
   border-radius: 2px;
@@ -3017,7 +3017,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .allDialogsClass .mediaDialogInner .pdfContainer {
   height: 600px;
 }
-.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]) {
+.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]):read-only {
   width: calc(100% - 40px) !important;
 }
 @media screen and (max-height: 792px) {
@@ -3937,7 +3937,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .forPosition .dropDownContent {
   position: absolute !important;
   height: auto;
-  width: 100%;
+  width: 200px;
   background-color: #ffffff;
   border-radius: 3px;
   box-shadow: 0 0 3px #ada7a7;
