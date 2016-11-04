@@ -4,7 +4,7 @@ var async = require('async');
 var _ = require('lodash');
 var Joi = require('joi');
 
-var schemasByRole = require('../constants/schemasByRole')
+var schemasByRole = require('../constants/schemasByRole');
 
 function getSchemaByAccessRole(level, contentType, method, callback) {
     var path = [contentType, level, method].join('.');
@@ -15,10 +15,10 @@ function getSchemaByAccessRole(level, contentType, method, callback) {
         err = new Error();
         err.status = 400;
 
-        return callback(err)
+        return callback(err);
     }
 
-    callback(null, schema)
+    callback(null, schema);
 }
 
 function validate(body, schema, callback) {
@@ -35,9 +35,9 @@ function joiValidate(body, level, contentType, method, callback) {
         async.apply(validate, body)
     ], function(err, result) {
         if (err) {
-            return callback(err)
+            return callback(err);
         }
-        callback(null, result)
+        callback(null, result);
     })
 }
 

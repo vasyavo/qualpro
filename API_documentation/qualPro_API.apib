@@ -19,39 +19,71 @@ Http Code | Error Type           |  Error                             | Details
 + error:`Some error description.` (string)
 
 ## CreateContactUs
-+ module (enum, required)
-    + Members
-        + No modules
-        + Activity list
-        + Locations
-        + Personnel
-        + Items and Prices
-        + Objectives
-        + In-srote reporting
-        + Reporting
-        + Al Alali Marketing
-        + Planograms
-        + Competitors list
-        + Contracts
-        + Documents
-        + Notes
 + type (enum, required)
     + Members
-        + bug
-        + comment
-        + idea
+        + Application Related Issue
+        + Future Application Ideas
+        + Others
 + description: `some description` (string, required)
 + file: `1Virtyv.jpg` (optional) - file in multipart/form-data
+
+## UpdateContactUs
++ comment: `some comment` (string)
++ status (enum)
+    + Members
+        + resolved
 
 ## CreateContactUsRes
 + _id: `5818b01a13187de020871b63` (string)
 + createdBy: `5818b01a13187de020871b63` (string)
 + attachments: `5818b01a13187de020871b63` (string)
-+ module: `No modules` (string)
-+ type: `bug` (string)
++ type: `Others` (string)
 + description: `test bug` (string)
 + status: `new` (string)
 + createdAt: `2016-11-01T13:09:14.000Z` (string)
+
+## Country
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: USA (string)
+
+## ContactUsById
++ _id: `5818b01a13187de020871b63` (string)
++ type: `Others` (string)
++ description: `test bug` (string)
++ status: `new` (string)
++ createdAt: `2016-11-01T13:09:14.000Z` (string)
++ creator
+    + _id: `5818b01a13187de020871b63` (string)
+    + ID: 153 (number)
+    + country (array[Country])
+    + lastName
+        + en (string)
+        + ar (string)
+    + firstName
+        + en (string)
+        + ar (string)
++ file
+    + originalName (string)
+    + name (string)
+    + url (string)
+
+## ContactUsShort
++ _id: `5818b01a13187de020871b63` (string)
++ type: `Others` (string)
++ description: `test bug` (string)
++ status: `new` (string)
++ createdAt: `2016-11-01T13:09:14.000Z` (string)
++ creator
+    + _id: `5818b01a13187de020871b63` (string)
+    + ID: 153 (number)
+    + lastName
+        + en (string)
+        + ar (string)
+    + firstName
+        + en (string)
+        + ar (string)
 
 # Group ContactUs
 
@@ -62,6 +94,50 @@ Create contact us form.
 
 + Request (multipart/form-data)
     + Attributes (CreateContactUs)
++ Response 200 (application/json)
+    + Attributes (CreateContactUsRes)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get all contactUs form [/contactUs{?}]
+
+### Get all [GET]
+Get contact us form by id.
+
++ Parameters
+
++ Request (application/json)
++ Response 200 (application/json)
+    + Attributes
+        + total: 1 (number)
+        + data (array[ContactUsShort])
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get By Id contactUs form [/contactUs/{id}]
+
+### Get By Id [GET]
+Get contact us form by id.
+
++ Parameters
+    + id - form _id
+
++ Request (application/json)
++ Response 200 (application/json)
+    + Attributes (ContactUsById)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Update By Id contactUs form [/contactUs/{id}]
+
+### Update By Id [PUT]
+Get contact us form by id.
+
++ Parameters
+    + id - form _id
+
++ Request (application/json)
+    + Attributes (UpdateContactUs)
 + Response 200 (application/json)
     + Attributes (CreateContactUsRes)
 + Response 400 (application/json)
