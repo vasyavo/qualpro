@@ -4,7 +4,7 @@ var access = function(db) {
     var getAccess = function(req, mid, accessType, callback) {
         var PersonnelModel = require('./../types/personnel/model');
         var RoleModel = require('./../types/accessRole/model');
-        var uId = '57daa39d2ae5ba3a6e251f90'// req.session.uId;
+        var uId = req.session.uId;
         var isMobile = !!req.isMobile;
         var type = isMobile ? 'mobile' : 'cms';
 
