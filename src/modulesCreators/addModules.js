@@ -464,6 +464,15 @@ const modules = [
         sequence: 42,
         parrent : null,
         visible : true
+    },
+
+    {
+        _id     : 43,
+        name    : {en: 'ContactUs'},
+        href    : CONSTANTS.CONTACT_US,
+        sequence: 43,
+        parrent : null,
+        visible : true
     }
 ];
 

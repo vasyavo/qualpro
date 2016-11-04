@@ -11,9 +11,11 @@ module.exports = function (db, redis, event) {
     var handler = new ContactUsHandler(db, redis, event);
     var checkAuth = access.checkAuth;
 
-    router.use(checkAuth);
+    // router.use(checkAuth);
 
-    router.post('/', multipartMiddleware, handler.create);
+    router.get('/', handler.getAll);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
+    router.put('/:id([0-9a-fA-F]{24})', handler.updateById);
 
     return router;
 };

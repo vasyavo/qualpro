@@ -626,7 +626,23 @@ const superAdmin = [
         write  : true,
         read   : true
     }
-}, commentsAccess
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    },
+    commentsAccess
 ];
 
 const masterAdmin = [
@@ -1285,7 +1301,22 @@ const masterAdmin = [
         write  : true,
         read   : true
     }
-}, commentsAccess
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    },commentsAccess
 ];
 
 const countryAdmin = [
@@ -1898,7 +1929,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const areaFiledManager = [
@@ -2469,7 +2515,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const areaInChargeManager = [
@@ -3040,7 +3101,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const salesman = [
@@ -3610,7 +3686,22 @@ const salesman = [
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const merchandiser = [
@@ -4180,7 +4271,22 @@ const merchandiser = [
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const cashVan = [
@@ -4750,7 +4856,22 @@ const cashVan = [
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const masterUpload = [
@@ -5367,7 +5488,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const countryUpload = [
@@ -5981,7 +6117,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: 43,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
 ];
 
 const accessRolesData = {
