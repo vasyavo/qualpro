@@ -464,6 +464,15 @@ const modules = [
         sequence: 42,
         parrent : null,
         visible : true
+    },
+
+    {
+        _id     : 43,
+        name    : {en: 'Consumers Survey', ar: ''}, // todo insert Arabic translation
+        href    : CONSTANTS.CONSUMERS_SURVEY,
+        sequence: 43,
+        parrent : 16,
+        visible : true
     }
 ];
 
