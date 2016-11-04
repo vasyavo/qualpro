@@ -13,7 +13,11 @@ require('dotenv').config({
     path: path.join(__dirname, `.env${config.env ? `.${config.env}` : ''}`).normalize(),
 });
 
-config.port = parseInt(process.env.PORT) || 443;
+const host = process.env.HOST;
+
+config.port = parseInt(process.env.PORT) || 3000;
+config.host = host || 'localhost';
+config.localhost = host ? host : `${host}:${config.port}`;
 config.nodeAppInstance = parseInt(process.env.NODE_APP_INSTANCE, 10) || 0;
 config.nodePort = config.port + config.nodeAppInstance;
 

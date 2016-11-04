@@ -1,115 +1,114 @@
 const fs = require('fs');
 const path = require('path');
+const config = require('./../config');
+const logger = require('./../utils/logger');
 const _ = require('underscore');
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport');
 const smtpTransportObject = require('../config/mailer').noReplay;
 
+const transport = nodemailer.createTransport(sgTransport(smtpTransportObject));
+
 const readTmpl = (name) => {
-    const pathToTmpl = `${__dirname}/../public/templates/mailer/${name}.html`;
+    const pathToTmpl = `${__dirname}/../${name}.html`;
     const file = fs.readFileSync(pathToTmpl, 'utf8');
 
     return _.template(file);
 };
 
-const forgotPasswordTemplate = readTmpl('forgotPassword');
-const confirmAccountTemplate = readTmpl('createUser');
+const forgotPasswordTemplate = readTmpl('public/templates/mailer/forgotPassword');
+const confirmAccountTemplate = readTmpl('public/templates/mailer/createUser');
+const changePasswordTemplate = readTmpl('views/changePassword');
 
-module.exports = function () {
-    this.forgotPassword = function (options) {
-        var language = options.currentLanguage;
-        var anotherLanguage = (language === 'en') ? 'ar' : 'en';
-        var langFirstName = options.firstName[language];
-        var langLastName = options.lastName[language];
+module.exports = function() {
+    this.forgotPassword = function(options) {
+        const language = options.currentLanguage;
+        const anotherLanguage = (language === 'en') ? 'ar' : 'en';
+        const langFirstName = options.firstName[language];
+        const langLastName = options.lastName[language];
 
-        var firstName = (langFirstName && langLastName) ? langFirstName : options.firstName[anotherLanguage];
-        var lastName = (langFirstName && langLastName) ? langLastName : options.lastName[anotherLanguage];
+        const firstName = (langFirstName && langLastName) ? langFirstName : options.firstName[anotherLanguage];
+        const lastName = (langFirstName && langLastName) ? langLastName : options.lastName[anotherLanguage];
 
-        var templateOptions = {
-            name : firstName + ' ' + lastName,
+        const templateOptions = {
+            name: `${firstName} ${lastName}`,
             email: options.email,
-            url  : process.env.HOST + '/passwordChange/' + options.forgotToken
+            url: `${config.host}/passwordChange/${options.forgotToken}`
         };
-        var mailOptions = {
-            from                : 'Al Alali <no-replay@alAlali.com>',
-            to                  : templateOptions.email,
-            subject             : 'Change password',
+        const mailOptions = {
+            from: 'Al Alali <no-replay@alAlali.com>',
+            to: templateOptions.email,
+            subject: 'Change password',
             generateTextFromHTML: true,
-            html                : forgotPasswordTemplate(templateOptions)
+            html: forgotPasswordTemplate(templateOptions)
         };
 
         deliver(mailOptions);
     };
 
-    this.changePassword = function (options) {
-        var enFirstName = options.firstName.en || options.firstName.ar;
-        var arFirstName = options.firstName.ar || options.firstName.en;
+    this.changePassword = function(options) {
+        const enFirstName = options.firstName.en || options.firstName.ar;
+        const arFirstName = options.firstName.ar || options.firstName.en;
 
-        var enLastName = options.lastName.en || options.lastName.ar;
-        var arLastName = options.lastName.ar || options.lastName.en;
+        const enLastName = options.lastName.en || options.lastName.ar;
+        const arLastName = options.lastName.ar || options.lastName.en;
 
-        var templateOptions = {
-            name : {
-                en: enFirstName + ' ' + enLastName,
-                ar: arFirstName + ' ' + arLastName
+        const templateOptions = {
+            name: {
+                en: `${enFirstName} ${enLastName}`,
+                ar: `${arFirstName} ${arLastName}`
             },
-            email   : options.email,
+            email: options.email,
             password: options.password,
-            url     : 'http://localhost:8823'
+            url: config.localhost // todo check url
         };
-        var mailOptions = {
-            from                : 'Test',
-            to                  : options.email,
-            subject             : 'Change password',
+        const mailOptions = {
+            from: 'Test',
+            to: options.email,
+            subject: 'Change password',
             generateTextFromHTML: true,
-            html                : _.template(fs.readFileSync('public/templates/mailer/changePassword.html', encoding = "utf8"), templateOptions)
+            html: changePasswordTemplate(templateOptions)
         };
 
         deliver(mailOptions);
     };
 
-    this.confirmNewUserRegistration = function (options) {
-        var enFirstName = options.firstName.en || options.firstName.ar;
-        var arFirstName = options.firstName.ar || options.firstName.en;
+    this.confirmNewUserRegistration = function(options) {
+        const enFirstName = options.firstName.en || options.firstName.ar;
+        const arFirstName = options.firstName.ar || options.firstName.en;
 
-        var enLastName = options.lastName.en || options.lastName.ar;
-        var arLastName = options.lastName.ar || options.lastName.en;
+        const enLastName = options.lastName.en || options.lastName.ar;
+        const arLastName = options.lastName.ar || options.lastName.en;
 
-        var templateOptions = {
-            name : {
-                en: enFirstName + ' ' + enLastName,
-                ar: arFirstName + ' ' + arLastName
+        const templateOptions = {
+            name: {
+                en: `${enFirstName} ${enLastName}`,
+                ar: `${arFirstName} ${arLastName}`
             },
-            email   : options.email,
+            email: options.email,
             password: options.password,
-            url     : process.env.HOST + '/personnel/confirm/' + options.token
+            url: `${config.host}/personnel/confirm/${options.token}`
         };
-        var mailOptions = {
-            from                : 'Al Alali <no-replay@alAlali.com>',
-            to                  : options.email,
-            subject             : 'User verification',
+        const mailOptions = {
+            from: 'Al Alali <no-replay@alAlali.com>',
+            to: options.email,
+            subject: 'User verification',
             generateTextFromHTML: true,
-            html                : confirmAccountTemplate(templateOptions)
+            html: confirmAccountTemplate(templateOptions)
         };
 
         deliver(mailOptions);
     };
 
     function deliver(mailOptions, cb) {
-        var transport = nodemailer.createTransport(sgTransport(smtpTransportObject));
-
-        transport.sendMail(mailOptions, function (err, response) {
+        transport.sendMail(mailOptions, function(err, response) {
             if (err) {
-                console.log(err);
-                if (cb && (typeof cb === 'function')) {
-                    cb(err, null);
-                }
-            } else {
-                console.log("Message sent: " + response.messageId);
-                if (cb && (typeof cb === 'function')) {
-                    cb(null, response);
-                }
+                logger.error(err);
+                return cb(err, null);
             }
+
+            logger.info(`Message sent: ${response.messageId}`);
+            return cb(null, response);
         });
     }
 };

@@ -71,7 +71,7 @@ describe('mobile authentication', () => {
     /*
     * Master admin authenticated and performing request
     * */
-    it.skip('su should register first user', function * () {
+    it('su should register first user', function * () {
         const resp = yield agent
             .post('/personnel')
             .send(user)
