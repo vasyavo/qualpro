@@ -642,6 +642,21 @@ const superAdmin = [
             read   : false
         }
     },
+    {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    },
     commentsAccess
 ];
 
