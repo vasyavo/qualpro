@@ -6,4 +6,6 @@
 
 pwd=$(pwd)
 cd $pwd/API_documentation
-exec aglio -i qualPro_API.apib -o qualPro_API.html
+
+# fixme Line 129: the resource '/contactUs/{id}' is already defined (warning code 2)
+# exec aglio -i qualPro_API.apib -o qualPro_API.html
