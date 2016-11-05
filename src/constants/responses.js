@@ -35,19 +35,17 @@ module.exports = {
     },
 
     SMS: {
-        FORGOT_PASS: 'Reset Code: <resetCode>'
-        + ' If you did not request a'
-        + ' password reset, please'
-        + ' contact your administrator.',
+        FORGOT_PASS: `Reset Code: {{resetCode}} 
+            If you did not request a 
+            password reset, please 
+            contact your administrator`,
 
         NEW_PASSWORD: {
-            en: 'In order to register and access al alali sales & marketing application, '
-            + 'please use the following password: "<password>"'
-            + ' and either your registered phone number or email address. '
-            + 'To proceed, please click on the following link: <url>',
-            ar: 'link: "<url>" password: "<password>"' + 'من أجل تفعيل الحساب والدخول على تطبيق' +
-            ' العلالي للمبيعات والتسويق، برجاء استخدام رقم هاتف الجوال او عنوان البريد الإلكتروني ' +
-            'المسجل. للمتابعة، يرجى الضغط على الرابط التالي'
+            en: `In order to register and access al alali sales & marketing application, 
+                please use the following password: {{password}}
+                and either your registered phone number or email address.
+                To proceed, please click on the following link: {{url}}`,
+            ar: `link: {{url}} password: {{password}} من أجل تفعيل الحساب والدخول على تطبيق العلالي للمبيعات والتسويق، برجاء استخدام رقم هاتف الجوال او عنوان البريد الإلكتروني المسجل. للمتابعة، يرجى الضغط على الرابط التالي`
         }
     }
 };
