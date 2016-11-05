@@ -1015,6 +1015,7 @@ var Personnel = function (db, redis, event) {
 
     this.createSuper = function (req, res, next) {
         const body = req.body;
+        const password = body.pass;
 
         let email = body.email;
         let isEmailValid = false;
@@ -1047,7 +1048,7 @@ var Personnel = function (db, redis, event) {
             editedBy: createdBy,
             token: generator.generate(),
             status: PERSONNEL_STATUSES.INACTIVE._id,
-            pass: bcrypt.hashSync(body.pass, salt)
+            pass: bcrypt.hashSync(password, salt)
         };
 
         PersonnelModel.findOne({ super: true }, (err, result) => {
@@ -1083,7 +1084,7 @@ var Personnel = function (db, redis, event) {
                     const options = {
                         firstName: personnel.firstName,
                         lastName: personnel.lastName,
-                        password: personnel.pass,
+                        password: password,
                         email: personnel.email
                     };
                     const personnelId = personnel._id;
