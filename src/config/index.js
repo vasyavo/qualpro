@@ -17,7 +17,7 @@ const host = process.env.HOST;
 
 config.port = parseInt(process.env.PORT) || 3000;
 config.host = host || 'localhost';
-config.localhost = host ? host : `${config.host}:${config.port}`;
+config.localhost = host ? host : `https://${config.host}:${config.port}`;
 config.nodeAppInstance = parseInt(process.env.NODE_APP_INSTANCE, 10) || 0;
 config.nodePort = config.port + config.nodeAppInstance;
 

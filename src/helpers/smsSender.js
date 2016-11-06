@@ -40,13 +40,13 @@ const forgotPassword = (options, res, cb) => {
 const sendNewPassword = (options, res, cb) => {
     const currentLanguage = options.language ? options.language : 'en';
 
-    const url = `${config.host}/personnel/confirm/${options.token}`;
-    const resetCode = options.resetCode;
+    const url = `${config.localhost}/personnel/confirm/${options.token}`;
+    const password = options.password;
 
     const template = SMS_CONST.NEW_PASSWORD[currentLanguage];
     const body = handlebars.compile(template)({
         url,
-        resetCode
+        password
     });
     const message = {
         to: options.phoneNumber,
