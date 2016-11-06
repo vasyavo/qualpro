@@ -1,117 +1,64 @@
-module.exports = function () {
-    var TWILIO_ACCOUNT_SID = process.env.SMS_ACCOUNT_SID;
-    var TWILIO_AUTH_TOKEN = process.env.SMS_AUTH_TOKEN;
-    var TWILIO_NUMBER = process.env.SMS_NUMBER;
+const twilio = require('twilio');
+const handlebars = require('handlebars');
+const config = require('./../config');
+const logger = require('./../utils/logger');
+const accountSid = config.twilio.accountSid;
+const authToken = config.twilio.authToken;
+const phoneNumber = config.twilio.number;
 
-    var SMS_CONST = require('../constants/responses').SMS;
+const SMS_CONST = require('../constants/responses').SMS;
+const client = new twilio.RestClient(accountSid, authToken);
 
-    var twilio = require('twilio');
-    var client = new twilio.RestClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-
-    this.forgotPassword = function (options, res, callback) {
-        var smsMessage;
-        var twilioMessage;
-        var msg = SMS_CONST.FORGOT_PASS;
-
-        if (!validateInviteSMSOptions(options)) {
-            var err = new Error('Not enough options to send forgot password sms.');
-
-            if (callback && typeof callback === 'function') {
-                return callback(err);
-            }
-
-            return err;
+const sendSMS = (message, cb) => {
+    client.messages.create(message, (err, message) => {
+        if (err) {
+            logger.error(`Message wasn't sent. ${err.message} : ${err.moreInfo}`);
+        } else {
+            logger.info(`SMS sent. SID: ${message.sid}. Message sent on: ${message.dateCreated}`);
         }
 
-        smsMessage = prepareForgotPassMessage(msg, res, options);
-        twilioMessage = {
-            to  : options.phoneNumber,
-            from: TWILIO_NUMBER,
-            body: smsMessage
-        };
+        cb(err, message);
+    });
+};
 
-        sendSMS(twilioMessage, function (err, msg) {
-            if (callback && typeof callback === 'function') {
-                return callback(err, msg);
-            }
-            return (err) ? err : true;
-        });
+const forgotPassword = (options, res, cb) => {
+    const resetCode = options.resetCode;
+    const template = SMS_CONST.FORGOT_PASS;
+
+    const body = handlebars.compile(template)({
+        resetCode
+    });
+    const message = {
+        to: options.phoneNumber,
+        from: phoneNumber,
+        body: body
     };
 
-    this.sendNewPassword = function (options, res, callback) {
-        var smsMessage;
-        var twilioMessage;
-        var currentLanguage = options.language ? options.language : 'en';
-        var msg = SMS_CONST.NEW_PASSWORD[currentLanguage];
+    sendSMS(message, cb);
+};
 
-        if (!validateInviteSMSOptions(options)) {
-            var err = new Error('Not enough options to send new password sms.');
+const sendNewPassword = (options, res, cb) => {
+    const currentLanguage = options.language ? options.language : 'en';
 
-            if (callback && typeof callback === 'function') {
-                return callback(err);
-            }
+    const url = `${config.localhost}/personnel/confirm/${options.token}`;
+    const password = options.password;
 
-            return err;
-        }
-
-        smsMessage = prepareNewPassMessage(msg, res, options);
-        twilioMessage = {
-            to  : options.phoneNumber,
-            from: TWILIO_NUMBER,
-            body: smsMessage
-        };
-
-        sendSMS(twilioMessage, function (err, msg) {
-            if (callback && typeof callback === 'function') {
-                return callback(err, msg);
-            }
-
-            return (err) ? err : true;
-        });
+    const template = SMS_CONST.NEW_PASSWORD[currentLanguage];
+    const body = handlebars.compile(template)({
+        url,
+        password
+    });
+    const message = {
+        to: options.phoneNumber,
+        from: phoneNumber,
+        body: body
     };
 
-    function validateInviteSMSOptions(options) {
-        return (!!options || !!options.phoneNumber || !!options.resetCode);
-    }
+    sendSMS(message, cb);
+};
 
-    function prepareForgotPassMessage(messageTemplate, res, options) {
-        // messageTemplate = res.__(messageTemplate);
-
-        return messageTemplate.replace('<resetCode>', options.resetCode);
-    }
-
-    function prepareNewPassMessage(messageTemplate, res, options) {
-        var url = process.env.HOST + '/personnel/confirm/' + options.token;
-
-        // messageTemplate = res.__(messageTemplate);
-
-        messageTemplate = messageTemplate.replace('<password>', options.password);
-        messageTemplate = messageTemplate.replace('<url>', url);
-
-        return messageTemplate;
-    }
-
-    function sendSMS(twilioMessage, callback) {
-        client.messages.create(twilioMessage, function (error, message) {
-            if (!error) {
-                if (process.env.NODE_ENV === 'development') {
-                    var success = 'SMS sent! The SID for this SMS message is: '
-                        + message.sid
-                        + '\nMessage sent on: '
-                        + message.dateCreated;
-
-                    console.log(success);
-                }
-            } else {
-                if (process.env.NODE_ENV === 'development') {
-                    var failed = 'SMS sent failed! Error occurred: '
-                        + error.message + ' : ' + error.moreInfo;
-
-                    console.error(failed);
-                }
-            }
-
-            callback(error, message);
-        });
-    }
+module.exports = {
+    sendSMS,
+    forgotPassword,
+    sendNewPassword
 };

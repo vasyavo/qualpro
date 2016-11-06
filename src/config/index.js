@@ -13,7 +13,11 @@ require('dotenv').config({
     path: path.join(__dirname, `.env${config.env ? `.${config.env}` : ''}`).normalize(),
 });
 
-config.port = parseInt(process.env.PORT) || 443;
+const host = process.env.HOST;
+
+config.port = parseInt(process.env.PORT) || 3000;
+config.host = host || 'localhost';
+config.localhost = host ? host : `https://${config.host}:${config.port}`;
 config.nodeAppInstance = parseInt(process.env.NODE_APP_INSTANCE, 10) || 0;
 config.nodePort = config.port + config.nodeAppInstance;
 
@@ -26,6 +30,16 @@ config.mongodbUri = process.env.MONGODB_URI;
 
 config.sendgirdApiKey = process.env.SENDGRID_APIKEY;
 config.redisUrl = process.env.REDIS_URL;
+
+/* Twilio configurations */
+const twilio = {
+    accountSid: process.env.SMS_ACCOUNT_SID,
+    authToken: process.env.SMS_AUTH_TOKEN,
+    number: process.env.SMS_NUMBER
+};
+
+config.twilio = twilio;
+/* Twilio configurations */
 
 /* following code is copied from vcs and modified */
 const mongoConfig = {

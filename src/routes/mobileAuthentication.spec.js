@@ -4,6 +4,7 @@ const request = require('supertest-as-promised');
 const server = require('./../server');
 const faker = require('faker');
 const agent = request.agent(server);
+const mailer = require('./../helpers/mailer');
 
 /*
 * Master admin can create master admin and country admin.
@@ -44,6 +45,9 @@ describe('mobile authentication', () => {
     });
 
     it('should register super user', function * () {
+        this.timeout(4000);
+        const confirmNewUserRegistrationMailerSpy = this.sandbox.spy(mailer, 'confirmNewUserRegistration');
+
         const resp = yield request(server)
             .post('/personnel/createSuper')
             .send(su)
@@ -51,7 +55,8 @@ describe('mobile authentication', () => {
 
         const body = resp.body;
 
-        expect(body).to.be.a('String')
+        expect(body).to.be.a('String');
+        expect(confirmNewUserRegistrationMailerSpy).to.be.calledOnce;
     });
 
     /*
@@ -71,7 +76,7 @@ describe('mobile authentication', () => {
     /*
     * Master admin authenticated and performing request
     * */
-    it.skip('su should register first user', function * () {
+    it('su should register first user', function * () {
         const resp = yield agent
             .post('/personnel')
             .send(user)
@@ -79,7 +84,7 @@ describe('mobile authentication', () => {
 
         const body = resp.body;
 
-        expect(body).to.be.an('Object')
+        expect(body).to.be.an('Object');
     });
 
     /*

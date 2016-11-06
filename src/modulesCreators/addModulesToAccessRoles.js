@@ -642,6 +642,21 @@ const superAdmin = [
             read   : false
         }
     },
+    {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    },
     commentsAccess
 ];
 
@@ -1316,7 +1331,21 @@ const masterAdmin = [
             write  : true,
             read   : false
         }
-    },commentsAccess
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    }, commentsAccess
 ];
 
 const countryAdmin = [
@@ -1944,6 +1973,20 @@ commentsAccess,
             write  : true,
             read   : false
         }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
     }
 ];
 
@@ -2529,6 +2572,20 @@ commentsAccess,
             edit   : false,
             write  : true,
             read   : false
+        }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
         }
     }
 ];
@@ -3116,6 +3173,20 @@ commentsAccess,
             write  : true,
             read   : false
         }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        }
     }
 ];
 
@@ -3700,6 +3771,20 @@ const salesman = [
             edit   : false,
             write  : true,
             read   : false
+        }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
         }
     }
 ];
@@ -4286,6 +4371,20 @@ const merchandiser = [
             write  : true,
             read   : false
         }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        }
     }
 ];
 
@@ -4870,6 +4969,20 @@ const cashVan = [
             edit   : false,
             write  : true,
             read   : false
+        }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
         }
     }
 ];
@@ -5503,6 +5616,20 @@ commentsAccess,
             write  : true,
             read   : false
         }
+    }, {
+        module: 44,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
     }
 ];
 
@@ -6117,22 +6244,7 @@ commentsAccess,
         write  : false,
         read   : true
     }
-},
-    {
-        module: 43,
-        cms   : {
-            archive: false,
-            edit   : true,
-            write  : false,
-            read   : true
-        },
-        mobile: {
-            archive: false,
-            edit   : false,
-            write  : true,
-            read   : false
-        }
-    }
+}
 ];
 
 const accessRolesData = {

@@ -13,8 +13,8 @@ var Personnel = function (db, redis, event) {
     var crypto = require('crypto');
     var access = require('../helpers/access')(db);
     var generator = require('../helpers/randomPass.js');
-    var Mailer = require('../helpers/mailer');
-    var SMS = require('../helpers/smsSender');
+    var mailer = require('../helpers/mailer');
+    var smsSender = require('../helpers/smsSender');
     var FilterMapper = require('../helpers/filterMapper');
     var async = require('async');
     var GetImagesHelper = require('../helpers/getImages');
@@ -1014,27 +1014,19 @@ var Personnel = function (db, redis, event) {
     };
 
     this.createSuper = function (req, res, next) {
-        var body = req.body;
-        var email = body.email;
-        var isEmailValid = false;
-        var mailer = new Mailer();
-        var personnelModel;
-        var error;
-        var accessRoleModel;
+        const body = req.body;
+        const password = body.pass;
 
-        var salt = bcrypt.genSaltSync(10);
-
-        var createdBy = {
-            user: req.session.uId,
-            date: new Date()
-        };
+        let email = body.email;
+        let isEmailValid = false;
 
         if (email) {
             isEmailValid = REGEXP.EMAIL_REGEXP.test(email);
         }
 
         if (!isEmailValid) {
-            error = new Error();
+            const error = new Error('Email is invalid');
+
             error.status = 400;
             return next(error);
         }
@@ -1042,82 +1034,91 @@ var Personnel = function (db, redis, event) {
         email = validator.escape(email);
         email = xssFilters.inHTMLData(email);
 
-        body.email = email.toLowerCase();
-        body.super = true;
-        body.createdBy = createdBy;
-        body.editedBy = createdBy;
-        body.token = generator.generate();
-        body.status = PERSONNEL_STATUSES.INACTIVE._id;
+        const createdBy = {
+            user: req.session.uId,
+            date: new Date()
+        };
+        const salt = bcrypt.genSaltSync(10);
+        const su = {
+            firstName: { en: 'Super' },
+            lastName: { en: 'Admin' },
+            email: email.toLowerCase(),
+            super: true,
+            createdBy,
+            editedBy: createdBy,
+            token: generator.generate(),
+            status: PERSONNEL_STATUSES.INACTIVE._id,
+            pass: bcrypt.hashSync(password, salt)
+        };
 
-        body.pass = bcrypt.hashSync(body.pass, salt);
-
-        body.firstName = {en: 'Super'};
-        body.lastName = {en: 'Admin'};
-
-        PersonnelModel.findOne({super: true}, function (err, result) {
+        PersonnelModel.findOne({ super: true }, (err, result) => {
             if (err) {
-                return console.log(err);
+                return res.status(400).send('Query is invalid');
             }
 
-            if (!result) {
-                async.waterfall([
-                    function (cb) {
-                        accessRoleModel = new AccessRoleModel({
-                            name : {
-                                en: 'Super Admin',
-                                ar: 'Super Admin'
-                            },
-                            level: 0
-                        });
-
-                        accessRoleModel.save(function (err, accessRole) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            return cb(null, accessRole);
-                        });
-                    },
-                    function (accessRole, cb) {
-                        body.accessRole = accessRole._id;
-
-                        personnelModel = new PersonnelModel(body);
-                        personnelModel.save(function (err, personnel) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            mailer.confirmNewUserRegistration(personnel);
-                            return cb(null, personnel);
-                        });
-                    }
-                ], function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    res.status(201).send(result._id);
-                });
-
-            } else if (result.email === body.email) {
-                res.status(400).send('email not unique');
-            } else {
-                res.status(400).send('admin is already created');
+            if (result) {
+                return res.status(400).send('Admin already exists');
             }
+
+            async.waterfall([
+
+                (cb) => {
+                    AccessRoleModel.create({
+                        name : {
+                            en: 'Super Admin',
+                            ar: 'Super Admin'
+                        },
+                        level: 0
+                    }, cb);
+                },
+
+                (accessRole, cb) => {
+                    su.accessRole = accessRole._id;
+
+                    PersonnelModel.create(su, cb);
+                },
+
+                // SU only one, email should be sent in waterfall
+                (personnelModel, cb) => {
+                    const personnel = personnelModel.toJSON();
+                    const options = {
+                        firstName: personnel.firstName,
+                        lastName: personnel.lastName,
+                        password: password,
+                        email: personnel.email
+                    };
+                    const personnelId = personnel._id;
+
+                    mailer.confirmNewUserRegistration(options, (err) => {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        cb(null, personnelId);
+                    });
+                }
+
+            ], (err, personnelId) => {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(201).send(personnelId);
+            });
         });
     };
 
     this.create = function (req, res, next) {
-        function queryRun(body) {
+        const body = req.body;
+        const accessLevel = req.session.level;
+
+        function queryRun(body, callback) {
             var phone = body.phoneNumber;
             var isPhoneValid = phone === '' || false;
             var createdBy = {
                 user: req.session.uId,
                 date: new Date()
             };
-            var personnelModel;
-            var error;
-            var options;
             var email;
             var isEmailValid;
 
@@ -1144,7 +1145,8 @@ var Personnel = function (db, redis, event) {
             }
 
             if ((/*!email &&*/ !phone) /*|| !isEmailValid */ || !isPhoneValid) {
-                error = new Error();
+                const error = new Error();
+
                 error.status = 400;
                 return next(error);
             }
@@ -1178,86 +1180,69 @@ var Personnel = function (db, redis, event) {
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
-            personnelModel = new PersonnelModel(body);
-
             async.waterfall([
-                function (waterfallCb) {
-                    var query = {
+
+                (cb) => {
+                    const query = {
                         $or: []
                     };
 
                     if (body.email) {
-                        query.$or.push({email: body.email});
+                        query.$or.push({ email: body.email });
                     }
 
                     if (body.phoneNumber) {
-                        query.$or.push({phoneNumber: body.phoneNumber});
+                        query.$or.push({ phoneNumber: body.phoneNumber });
                     }
 
-                    PersonnelModel.findOne(query, function (err, personnel) {
-                        if (err || personnel) {
-                            return waterfallCb(err || new Error('Employee with such credentials already exists'));
-                        }
-
-                        waterfallCb(null);
-                    });
+                    PersonnelModel.findOne(query, cb);
                 },
-                function (waterfallCb) {
-                    personnelModel.save(function (err, personnel) {
-                        if (err) {
-                            return waterfallCb(err);
-                        }
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.PERSONNEL,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : body.createdBy,
-                            itemId    : personnel._id,
-                            itemType  : CONTENT_TYPES.PERSONNEL
-                        });
+                (personnel, cb) => {
+                    if (personnel) {
+                        return res.status(400).send('User with such credentials already exist')
+                    }
 
-                        options = {id: personnel._id};
-
-                        waterfallCb(null, options);
-                    });
+                    PersonnelModel.create(body, cb);
                 },
-                function (options, waterfallCb) {
-                    personnelFindByIdAndPopulate(options, function (err, personnel) {
-                        if (err) {
-                            return waterfallCb(err);
-                        }
 
-                        waterfallCb(null, personnel);
+                (personnel, cb) => {
+                    const personnelId = personnel._id;
+
+                    event.emit('activityChange', {
+                        module: ACL_MODULES.PERSONNEL,
+                        actionType: ACTIVITY_TYPES.CREATED,
+                        createdBy: body.createdBy,
+                        itemId: personnelId,
+                        itemType: CONTENT_TYPES.PERSONNEL
                     });
-                }
-            ], function (err, personnel) {
-                if (err) {
-                    return next(err);
+
+                    cb(null, { id: personnelId });
+                },
+
+                (options, cb) => {
+                    personnelFindByIdAndPopulate(options, cb);
                 }
 
-                res.status(201).send(personnel);
-            });
+            ], callback);
         }
 
-        access.getWriteAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
-            var body = req.body;
+        async.waterfall([
+
+            async.apply(access.getWriteAccess, req, ACL_MODULES.PERSONNEL),
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(body, accessLevel, CONTENT_TYPES.PERSONNEL, 'create', cb)
+            },
+
+            queryRun
+
+        ], (err, personnel) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PERSONNEL, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(201).send(personnel);
         });
     };
 
@@ -2961,8 +2946,6 @@ var Personnel = function (db, redis, event) {
 
             var pass = generator.generate(8);
             var token = generator.generate();
-            var mailer = new Mailer();
-            var smsSender = new SMS();
             var salt = bcrypt.genSaltSync(10);
             var hash;
             var messageOptions;
@@ -3266,7 +3249,7 @@ var Personnel = function (db, redis, event) {
             waterFallTasks.push(updateUsers);
             waterFallTasks.push(getUserForUi);
 
-            async.waterfall(waterFallTasks, function (err, result) {
+            async.waterfall(waterFallTasks, (err, result) => {
                 var personnelObject = result;
 
                 if (err) {
@@ -3295,14 +3278,16 @@ var Personnel = function (db, redis, event) {
                     };
 
                     if (body.type === 'email') {
-                        mailer.confirmNewUserRegistration(messageOptions);
-
-                        res.status(200).send(result);
-                    } else {
-                        smsSender.sendNewPassword(messageOptions, res, function (err, message) {
+                        mailer.confirmNewUserRegistration(messageOptions, (err) => {
                             if (err) {
-                                console.dir(err);
+                                return next(err);
+                            }
 
+                            res.status(200).send(result);
+                        });
+                    } else {
+                        smsSender.sendNewPassword(messageOptions, res, (err) => {
+                            if (err) {
                                 return next(err);
                             }
 
@@ -3319,12 +3304,6 @@ var Personnel = function (db, redis, event) {
             var body = req.body;
 
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
@@ -3344,8 +3323,6 @@ var Personnel = function (db, redis, event) {
         var option = body.ifPhone;
         var forgotToken;
         var error;
-        var mailer = new Mailer();
-        var smsSender = new SMS();
         var isValid;
 
         if (option === 'true') {

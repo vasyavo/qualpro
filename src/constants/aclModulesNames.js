@@ -43,5 +43,6 @@ module.exports = {
     BRANCH : 105,
     CUSTOM_REPORTS : 1000,
     PRICE_REPORT : 1001,
-    COMMENT : 1010
+    COMMENT : 1010,
+    CONSUMERS_SURVEY : 44
 };
