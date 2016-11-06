@@ -15,11 +15,12 @@ describe('feature: contactUs form', () => {
     const password = faker.lorem.words(1);
     const login = faker.internet.email().toLowerCase();
     const salt = bcrypt.genSaltSync(10);
-    const su = {
+    const user = {
         login : login,
         email : login,
         pass : bcrypt.hashSync(password, salt),
-        super : true
+        super : true,
+        confirmed : true
     };
     const contactUsForm = {
         type : faker.random.arrayElement([
@@ -32,7 +33,13 @@ describe('feature: contactUs form', () => {
 
     before(function *() {
         yield Promise.all([
-            PersonnelModel.collection.insert(su)
+            PersonnelModel.collection.insert(user)
+        ])
+    });
+
+    after(function *() {
+        yield Promise.all([
+            PersonnelModel.collection.remove({})
         ])
     });
 
