@@ -5,7 +5,6 @@ const request = require('supertest-as-promised');
 const server = require('./../server');
 const faker = require('faker');
 const agent = request.agent(server);
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const PersonnelModel = require('../types/personnel/model');
