@@ -41,3 +41,6 @@ node_modules
 
 # AWS S3 credentials
 /src/config/aws.json
+
+# API docs html
+/API_documentation/qualPro_API.html

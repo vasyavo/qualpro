@@ -1,5 +1,7 @@
 var Joi = require('joi');
 var moment = require('moment');
+var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
 
 var CONSTANTS = require('../constants/mainConstants');
 var TYPES = [
@@ -14,6 +16,21 @@ var STATUSES = [
 
 Joi.objectId = require('joi-objectid')(Joi);
 
+const customJoi = Joi.extend({
+    base : Joi.objectId(),
+    name : 'objectId',
+    language : {
+        toObjectId : 'can\'t convert to objectId, wrong format'
+    },
+    rules : [
+        {
+            name : 'toObjectId',
+            validate(params, value, state, options) {
+                return new ObjectId(value);
+            }
+        }
+    ]
+});
 function currentDate() {
     return moment().utc().format('YYYY-MM-DD HH:mm:ss');
 }
@@ -37,9 +54,11 @@ var update = Joi.object().keys({
 var getAll = Joi.object().keys({
     page : Joi.number().integer().min(1).default(1),
     count : Joi.number().integer().default(CONSTANTS.LIST_COUNT),
-    type : Joi.string().valid(TYPES),
-    status : Joi.string().valid(STATUSES),
     sortBy : Joi.string().default('createdAt'),
+    type : Joi.array().items(Joi.string().valid(TYPES)),
+    status : Joi.array().items(Joi.string().valid(STATUSES)),
+    createdBy : Joi.array().items(customJoi.objectId().toObjectId()),
+    'creator.position' : Joi.array().items(customJoi.objectId().toObjectId()),
     startDate : Joi.date().default(startOfYear, 'start of a year date'),
     endDate : Joi.date().default(currentDate, 'current date')
 });

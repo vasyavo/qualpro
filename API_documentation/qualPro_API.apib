@@ -99,12 +99,33 @@ Create contact us form.
 + Response 400 (application/json)
     + Attributes (GenericError)
 
-## Get all contactUs form [/contactUs{?}]
+## Get all contactUs form [/contactUs{?page,count,sortBy,type,status,createdBy,creator.position,startDate,endDate}]
 
 ### Get all [GET]
 Get contact us form by id.
 
 + Parameters
+    + page: 3 (number)
+        + Default: 1
+    + count: 50 (number)
+        + Default: 25
+    + sortBy: `-createdAt` (string) - parameter for sorting, default order ASC add prefix `-` for DESC
+    + type: Others (enum)
+        + Members
+            + `Application Related Issue`
+            + `Future Application Ideas`
+            + `Others`
+    + status: new (enum)
+        + Members
+            + new
+            + resolved
+    + createdBy: `57daa3e9a102f7786ef14708` (string)
+    + `creator.position`: `57daa3e9a102f7786ef14708` (string)
+    + startDate: `2016-11-06 13:41:46` (string)
+        + Default: `start of the year`
+    + endDate: `2016-11-06 13:41:46` (string)
+        + Default: `current date`
+
 
 + Request (application/json)
 + Response 200 (application/json)

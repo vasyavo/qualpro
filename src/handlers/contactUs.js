@@ -94,44 +94,67 @@ var ContactUs = function(db, redis, event) {
         function generateSearchCondition(query) {
             var searchVariants = [
                 'type',
-                'status'
+                'status',
+                'createdBy'
             ];
-            var $match = {
-                /*createdAt : {
-                 $gte : query.startDate,
-                 $lte : query.endDate
-                 }*/
+            var foreignVariants = [
+                'creator.position'
+            ];
+            var match = {
+                createdAt : {
+                    $gte : new Date(query.startDate),
+                    $lte : new Date(query.endDate)
+                }
             };
-            var condition = [];
+            var fMatch = {};
+            var formCondition = [];
+            var foreignCondition = [];
 
             _.forOwn(query, function(value, key) {
                 if (_.includes(searchVariants, key)) {
-                    $match[key] = value;
+                    match[key] = {};
+                    match[key].$in = value;
+                }
+            });
+            _.forOwn(query, function(value, key) {
+                if (_.includes(foreignVariants, key)) {
+                    fMatch[key] = {};
+                    fMatch[key].$in = value;
                 }
             });
 
-            if (Object.keys($match).length) {
-                condition.push({
-                    $match : $match
-                })
-            }
-            return condition;
+            formCondition.push({
+                $match : match
+            });
+            foreignCondition.push({
+                $match : fMatch
+            });
+
+            return {
+                formCondition : formCondition,
+                foreignCondition : foreignCondition
+            };
         }
 
         function queryRun(query) {
             var skip = (query.page - 1) * query.count;
             var condition = generateSearchCondition(query);
             var mongoQuery = ContactUsModel.aggregate()
-                .append(condition)
+                .append(condition.formCondition)
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
                     foreignField : '_id',
                     as : 'creator'
                 })
-                .unwind('creator')
                 .project({
-                    module : 1,
+                    type : 1,
+                    createdAt : 1,
+                    description : 1,
+                    status : 1,
+                    creator : {$arrayElemAt : ['$creator', 0]}
+                })
+                .project({
                     type : 1,
                     createdAt : 1,
                     description : 1,
@@ -139,7 +162,25 @@ var ContactUs = function(db, redis, event) {
                     'creator._id' : 1,
                     'creator.ID' : 1,
                     'creator.lastName' : 1,
-                    'creator.firstName' : 1
+                    'creator.firstName' : 1,
+                    'creator.position' : 1
+                })
+                .append(condition.foreignCondition)
+                .lookup({
+                    from : CONTENT_TYPES.POSITION + 's',
+                    localField : 'creator.position',
+                    foreignField : '_id',
+                    as : 'position'
+                })
+                .unwind('position')
+                .project({
+                    type : 1,
+                    createdAt : 1,
+                    description : 1,
+                    status : 1,
+                    creator : {$ifNull : ["$creator", []]},
+                    'position.name' : 1,
+                    'position._id' : 1
                 })
                 .limit(query.count)
                 .skip(skip)
@@ -148,7 +189,21 @@ var ContactUs = function(db, redis, event) {
 
             function getCount(cb) {
                 ContactUsModel.aggregate()
-                    .append(condition)
+                    .append(condition.formCondition)
+                    .lookup({
+                        from : CONTENT_TYPES.PERSONNEL + 's',
+                        localField : 'createdBy',
+                        foreignField : '_id',
+                        as : 'creator'
+                    })
+                    .project({
+                        type : 1,
+                        createdAt : 1,
+                        description : 1,
+                        status : 1,
+                        creator : {$arrayElemAt : ['$creator', 0]}
+                    })
+                    .append(condition.foreignCondition)
                     .append([
                         {
                             $group : {
@@ -186,26 +241,26 @@ var ContactUs = function(db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
-            var error;
+        // access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
+        var error;
+        //
+        //     if (err) {
+        //         return next(err);
+        //     }
 
+        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
-                return next(err);
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
             }
 
-            joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
-                if (err) {
-                    error = new Error();
-                    error.status = 400;
-                    error.message = err.name;
-                    error.details = err.details;
-
-                    return next(error);
-                }
-
-                queryRun(query);
-            });
+            queryRun(query);
         });
+        // });
     };
 
     this.getById = function(req, res, next) {
