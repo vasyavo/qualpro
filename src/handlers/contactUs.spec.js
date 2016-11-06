@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs');
 const PersonnelModel = require('../types/personnel/model');
 
 
-describe('feature: contactUs form', () => {
+describe.skip('feature: contactUs form', () => {
     const password = faker.lorem.words(1);
     const login = faker.internet.email().toLowerCase();
     const salt = bcrypt.genSaltSync(10);
