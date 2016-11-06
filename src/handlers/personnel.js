@@ -1,3 +1,5 @@
+'use strict';
+
 var Personnel = function (db, redis, event) {
     var mongoose = require('mongoose');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
