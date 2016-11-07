@@ -53,24 +53,24 @@
         </div>
     </td>
     <td>
+        <span class="currency"><%= item.currency %></span>
         <input
                 data-key="ppt"
                 class="editable"
                 readonly
                 value="<%= item.ppt || '' %>">
-        <span class="currency"><%= item.currency %></span>
     </td>
     <td>
+        <span class="currency"><%- item.currency %></span>
         <input data-key="rspMin" class="editable" readonly value="<%- item.rspMin || '' %>">
-        <span class="currency"><%- item.currency %></span>
     </td>
     <td>
+        <span class="currency"><%- item.currency %></span>
         <input data-key="rspMax" class="editable" readonly value="<%- item.rspMax || '' %>">
-        <span class="currency"><%- item.currency %></span>
     </td>
     <td>
-        <input data-key="pptPerCase" class="editable" readonly value="<%- item.pptPerCase || '' %>">
         <span class="currency"><%- item.currency %></span>
+        <input data-key="pptPerCase" class="editable" readonly value="<%- item.pptPerCase || '' %>">
     </td>
 </tr>
 <% }) %>
