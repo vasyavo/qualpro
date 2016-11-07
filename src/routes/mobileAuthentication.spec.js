@@ -183,7 +183,7 @@ describe('mobile authentication', () => {
         user.pass = PasswordManager.generatePassword();
         const generatePasswordStub = this.sandbox.stub(PasswordManager, 'generatePassword').returns(user.pass);
 
-        user.token = shortId.generate();;
+        user.token = shortId.generate();
         const generateTokenStub = this.sandbox.stub(oldPassGenerator, 'generate').returns(user.token);
 
         const resp = yield agent

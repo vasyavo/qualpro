@@ -6271,47 +6271,48 @@ for (let level in accessRolesData) {
 }
 
 const generate = (callback) => {
-    AccessRoleModel.update({}, {
-        $set: {
-            roleAccess: []
+    async.waterfall([
+
+        (cb) => {
+            AccessRoleModel.update({}, {
+                $set: {
+                    roleAccess: []
+                }
+            }, {
+                multi: true
+            }, cb);
+        },
+
+        (result, cb) => {
+            async.eachOf(accessRolesData, (roleAccess, level, eachCb) => {
+                AccessRoleModel.findOneAndUpdate({
+                    level
+                }, {
+                    $set: {
+                        level,
+                        roleAccess
+                    }
+                }, {
+                    new: true,
+                    upsert: true
+                }, (err, model) => {
+                    if (model) {
+                        accessRoles[level].id = model._id.toString();
+                    }
+
+                    eachCb(err, model);
+                });
+            }, cb);
         }
-    }, {
-        multi: true
-    }, (err) => {
+
+    ], (err) => {
         if (err) {
+            logger.error('Fail to setup access roles!', err);
             return callback(err);
         }
 
-        async.eachOf(accessRolesData, (value, index, eachCb) => {
-            AccessRoleModel.findOneAndUpdate({
-                level: index
-            }, {
-                $push: {
-                    roleAccess: {
-                        $each: value
-                    }
-                }
-            }, {
-                new: true,
-                upsert: true
-            }, (err, model) => {
-                if (err) {
-                    return eachCb(err);
-                }
-                const needId = model._id.toString();
-
-                accessRoles[index].id = needId;
-                eachCb(null, model);
-            });
-        }, (err) => {
-            if (err) {
-                logger.error('Error happened during access roles creating.', err);
-                return callback(err);
-            }
-
-            logger.info('Access roles for modules.');
-            callback();
-        });
+        logger.info('Setup is done for access roles.');
+        callback();
     });
 };
 

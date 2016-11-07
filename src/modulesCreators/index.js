@@ -1,11 +1,14 @@
 const async = require('async');
 
 module.exports = (callback) => {
-    async.parallel([
+    async.waterfall([
+
+        require('./addModules').generate,
 
         require('./addModulesToAccessRoles').generate,
 
-        require('./addModules').generate
+        // todo access role name is empty and level is undefined
+        // require('./addLevelToAccessRoles').generate
 
     ], callback);
 };
