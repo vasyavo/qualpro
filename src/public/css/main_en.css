@@ -815,7 +815,7 @@ a {
 }
 .contactUsIcon {
   position: absolute;
-  left: -105px;
+  left: -100px;
 }
 .filterName .triDown:after {
   position: absolute;
@@ -4196,7 +4196,7 @@ span.currency + input:not([type="checkbox"]) {
 }
 .aditionalInfo li.questionItem a {
   position: absolute;
-  left: -90px;
+  left: -81px;
   top: 0;
 }
 .aditionalInfo li.contactUs a {

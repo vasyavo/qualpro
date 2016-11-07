@@ -816,7 +816,7 @@ a {
 }
 .contactUsIcon {
     position: absolute;
-    left: -105px;
+    left: 50px;
 }
 .filterName .triDown:after {
     position: absolute;
@@ -2072,7 +2072,7 @@ input:not([readonly]):not(.grayDropdownInput):not(#email):not(#pass):not(#passwo
 }
 .currentLanguageWrap {
     position: absolute;
-    left: 35px;
+    left: 30px;
     top: 50%;
     height: 36px;
     -webkit-transform: translateY(-50%);
@@ -4152,7 +4152,7 @@ span.currency + input:not([type="checkbox"]) {
 .aditionalInfo {
     position: relative;
     float: left;
-    width: 150px;
+    width: 180px;
     height: 100%;
     display: -webkit-box;
     display: -moz-box;
@@ -4197,8 +4197,12 @@ span.currency + input:not([type="checkbox"]) {
 }
 .aditionalInfo li.questionItem a {
     position: absolute;
-    left: -90px;
+    left: 8px;
     top: 0;
+}
+.aditionalInfo li .bell {
+    position: absolute;
+    left: 130px;
 }
 .aditionalInfo li.contactUs a {
     position: absolute;
@@ -10692,6 +10696,10 @@ span.currency {
 
 .aditionalInfo .chat:after {
     right: 30%;
+}
+.aditionalInfo .chat {
+    position: absolute;
+    left: 90px
 }
 
 .ui-dialog {
