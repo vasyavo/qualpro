@@ -6260,21 +6260,62 @@ const accessRolesData = {
     9: countryUpload
 };
 
-AccessRoleModel.update({}, {$set: {roleAccess: []}}, {multi: true}, function (err) {
-    if (err) {
-        return logger.error(err);
-    }
+const accessRoles = [];
 
-    async.eachOf(accessRolesData, function (value, index, cb) {
-        AccessRoleModel.findOneAndUpdate({level: index}, {$push: {roleAccess: {$each: value}}}, {
-            new   : true,
-            upsert: true
-        }, cb);
-    }, function (err) {
+for (let level in accessRolesData) {
+    const roleAccess = accessRolesData[level];
+
+    accessRoles.push({
+        roleAccess
+    })
+}
+
+const generate = (callback) => {
+    AccessRoleModel.update({}, {
+        $set: {
+            roleAccess: []
+        }
+    }, {
+        multi: true
+    }, (err) => {
         if (err) {
-            logger.error(err);
+            return callback(err);
         }
 
-        logger.info('Access roles for modules updated!');
+        async.eachOf(accessRolesData, (value, index, eachCb) => {
+            AccessRoleModel.findOneAndUpdate({
+                level: index
+            }, {
+                $push: {
+                    roleAccess: {
+                        $each: value
+                    }
+                }
+            }, {
+                new: true,
+                upsert: true
+            }, (err, model) => {
+                if (err) {
+                    return eachCb(err);
+                }
+                const needId = model._id.toString();
+
+                accessRoles[index].id = needId;
+                eachCb(null, model);
+            });
+        }, (err) => {
+            if (err) {
+                logger.error('Error happened during access roles creating.', err);
+                return callback(err);
+            }
+
+            logger.info('Access roles for modules.');
+            callback();
+        });
     });
-});
+};
+
+module.exports = {
+    generate,
+    accessRoles
+};

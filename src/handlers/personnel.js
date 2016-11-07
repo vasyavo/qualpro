@@ -1,3 +1,5 @@
+const PasswordManager = require('./../helpers/passwordManager');
+
 var Personnel = function (db, redis, event) {
     var mongoose = require('mongoose');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
@@ -2939,24 +2941,14 @@ var Personnel = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
-        function queryRun(body) {
-            var id = req.params.id;
-            var currentUserId = req.session.uId;
-            var currentLanguage = req.cookies.currentLanguage;
+        const personnelId = req.params.id;
+        const body = req.body;
+        const accessLevel = req.session.level;
+        const currentUserId = req.session.uId;
+        const currentLanguage = req.cookies.currentLanguage;
 
-            var pass = generator.generate(8);
-            var token = generator.generate();
-            var salt = bcrypt.genSaltSync(10);
-            var hash;
-            var messageOptions;
-            var error;
-            var coveredUserId;
-            var waterFallTasks = [];
-
-            var email;
-            var isEmailValid;
-            var phone;
-            var isPhoneValid;
+        function queryRun(body, callback) {
+            let coveredUserId;
 
             convertDomainsToObjectIdArray(body);
 
@@ -2974,11 +2966,11 @@ var Personnel = function (db, redis, event) {
             }
 
             if (body.oldPass || body.newPass) {
-                if (currentUserId !== id) {
-                    error = new Error('You can\'t change not own password');
-                    error.status = 400;
+                if (currentUserId !== personnelId) {
+                    const error = new Error(`You can't change not own password`);
 
-                    return next(error);
+                    error.status = 400;
+                    return callback(error);
                 }
             }
 
@@ -2987,7 +2979,11 @@ var Personnel = function (db, redis, event) {
             }
 
             if (body.sendPass && !(body.oldPass || body.newPass)) {
-                hash = bcrypt.hashSync(pass, salt);
+                const password = PasswordManager.generatePassword();
+                const salt = bcrypt.genSaltSync(10);
+                const hash = bcrypt.hashSync(password, salt);
+                const token = generator.generate();
+
                 body.pass = hash;
                 body.token = token;
             }
@@ -3014,15 +3010,22 @@ var Personnel = function (db, redis, event) {
                 }
             }
 
+            let email;
+            let isEmailValid;
+
             if (body.email) {
                 email = body.email;
                 isEmailValid = email === '' || false;
             }
 
+            let phone;
+            let isPhoneValid;
+
             if (body.phoneNumber) {
                 phone = body.phoneNumber;
                 isPhoneValid = phone === '' || false;
             }
+
             if (email && !isEmailValid) {
                 email = validator.escape(email);
                 email = xssFilters.inHTMLData(email);
@@ -3039,10 +3042,10 @@ var Personnel = function (db, redis, event) {
             }
 
             if ((email && !isEmailValid) || (phone && !isPhoneValid)) {
-                error = new Error('Email/phone validation fail');
-                error.status = 400;
+                const error = new Error('Email/phone validation fail');
 
-                return next(error);
+                error.status = 400;
+                return callback(error);
             }
 
             body.editedBy = {
@@ -3050,41 +3053,7 @@ var Personnel = function (db, redis, event) {
                 date: new Date()
             };
 
-            function findById(personnelId, waterFallCb) {
-                PersonnelModel
-                    .findById(personnelId)
-                    .lean()
-                    .exec(function (err, model) {
-                        var error;
-                        var oldAccessRole;
-
-                        if (err) {
-                            return waterFallCb(err);
-                        }
-
-                        if (!model) {
-                            error = new Error('Personnel not found');
-                            error.status = 400;
-
-                            return waterFallCb(error);
-                        }
-
-                        if (!model.temp) {
-                            oldAccessRole = model.accessRole.toString();
-                        }
-
-                        if ((body.accessRole && oldAccessRole !== body.accessRole) || body.archived) {
-                            someEvents.personnelArchived({
-                                ids    : id,
-                                Session: SessionModel
-                            });
-                        }
-
-                        return waterFallCb(null, model);
-                    });
-            }
-
-            function updateCover(model, callBack) {
+            function updateCover(model, cb) {
                 var id = model._id;
                 var data = {
                     position : model.position || null,
@@ -3094,42 +3063,31 @@ var Personnel = function (db, redis, event) {
                     branch   : model.branch || null
                 };
 
-                PersonnelModel.findByIdAndUpdate(id, data, function (err, result) {
-                    if (err) {
-                        return callBack(err);
-                    }
-
-                    callBack(null, result);
-                });
+                PersonnelModel.findByIdAndUpdate(id, data, cb);
             }
 
-            function updateUsers(model, waterFallCb) {
+            function updateUsers(model, cb) {
                 var currentUserIdNew = model._id;
                 var coverUserId;
                 var coverBeforeUserId;
-                var error;
 
                 var parallelTasks = {
-                    currentUser: function (parallelCb) {
+                    currentUser: (parallelCb) => {
                         if (body.newPass && body.oldPass) {
                             if (bcrypt.compareSync(body.oldPass, model.pass)) {
-                                hash = bcrypt.hashSync(body.newPass, salt);
+                                const salt = bcrypt.genSalt(10);
+                                const hash = bcrypt.hashSync(body.newPass, salt);
+
                                 body.pass = hash;
                             } else {
-                                error = new Error();
-                                error.status = 432;
+                                const error = new Error('Current password is invalid');
 
+                                error.status = 432;
                                 return parallelCb(error);
                             }
                         }
 
-                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, {new: true}, function (err, updatedModel) {
-                            if (err) {
-                                return parallelCb(err);
-                            }
-
-                            parallelCb(null, updatedModel.toObject());
-                        });
+                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, parallelCb);
                     }
                 };
 
@@ -3137,16 +3095,16 @@ var Personnel = function (db, redis, event) {
                 coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
 
                 if (coverBeforeUserId && body.vacation) {
-                    parallelTasks.coverBeforeUser = function (parallelCb) {
+                    parallelTasks.coverBeforeUser = (parallelCb) => {
                         PersonnelModel
                             .findById(coverBeforeUserId)
                             .lean()
-                            .exec(function (err, resultModel) {
+                            .exec((err, personnel) => {
                                 if (err) {
-                                    consoleLogENV(err);
+                                    return parallelCb(err);
                                 }
 
-                                if (!resultModel.temp) {
+                                if (!personnel.temp) {
                                     event.emit('notOnLeave', {
                                         coveredUserId: coverBeforeUserId.toString()
                                     });
@@ -3156,15 +3114,15 @@ var Personnel = function (db, redis, event) {
 
                                 updateCover({
                                     _id: coverBeforeUserId
-                                }, function (err, model) {
+                                }, (err, model) => {
                                     if (err) {
-                                        consoleLogENV(err);
+                                        return parallelCb(err);
                                     }
 
                                     coveredUserId = model._id;
 
                                     event.emit('notOnLeave', {
-                                        coveredUserId: coveredUserId
+                                        coveredUserId
                                     });
 
                                     parallelCb(null, model);
@@ -3174,16 +3132,16 @@ var Personnel = function (db, redis, event) {
                 }
 
                 if (coverUserId) {
-                    parallelTasks.coverUser = function (parallelCb) {
+                    parallelTasks.coverUser = (parallelCb) => {
                         PersonnelModel
                             .findById(coverUserId)
                             .lean()
-                            .exec(function (err, resultModel) {
+                            .exec((err, personnel) => {
                                 if (err) {
-                                    consoleLogENV(err);
+                                    return parallelCb(err);
                                 }
 
-                                if (!resultModel.temp) {
+                                if (!personnel.temp) {
                                     event.emit('notOnLeave', {
                                         coveredUserId: coverUserId.toString()
                                     });
@@ -3198,122 +3156,148 @@ var Personnel = function (db, redis, event) {
                                     subRegion: model.subRegion,
                                     branch   : model.branch,
                                     position : model.position
-                                }, function (err, model) {
+                                }, (err, personnel) => {
                                     if (err) {
-                                        consoleLogENV(err);
+                                        return parallelCb(err);
                                     }
 
-                                    coveredUserId = model._id;
+                                    coveredUserId = personnel._id;
 
                                     event.emit('notOnLeave', {
                                         coveredUserId: coveredUserId
                                     });
 
-                                    parallelCb(null, model);
+                                    parallelCb(null, personnel);
                                 });
                             });
 
                     };
                 }
 
-                async.parallel(parallelTasks, function (err, results) {
+                async.parallel(parallelTasks, (err, results) => {
                     if (err) {
-                        return waterFallCb(err);
+                        return cb(err);
                     }
 
-                    waterFallCb(null, results.currentUser);
+                    cb(null, results.currentUser);
                 });
             }
 
-            function getUserForUi(model, waterFallCb) {
+            function getUserForUi(model, cb) {
                 var options = {
                     id: model._id
                 };
 
-                personnelFindByIdAndPopulate(options, function (err, personnel) {
+                personnelFindByIdAndPopulate(options, (err, personnel) => {
                     if (err) {
-                        return waterFallCb(err);
+                        return cb(err);
                     }
 
                     if (body.vacation) {
                         event.emit('notOnLeave', {
-                            userOnLeave: id
+                            userOnLeave: personnelId
                         });
                     }
 
-                    waterFallCb(null, personnel);
+                    cb(null, personnel);
                 });
             }
 
-            waterFallTasks.push(async.apply(findById, id));
-            waterFallTasks.push(updateUsers);
-            waterFallTasks.push(getUserForUi);
 
-            async.waterfall(waterFallTasks, (err, result) => {
-                var personnelObject = result;
+            async.waterfall([
 
-                if (err) {
-                    return next(err);
-                }
+                // find personnel by id
+                (cb) => {
+                    PersonnelModel
+                        .findById(personnelId)
+                        .lean()
+                        .exec(cb)
+                },
 
-                if (!body.currentLanguage && !body.newPass) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.PERSONNEL,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : body.editedBy,
-                        itemId    : id,
-                        itemType  : CONTENT_TYPES.PERSONNEL
-                    });
-                }
+                (personnel, cb) => {
+                    if (!personnel) {
+                        const error = new Error('Personnel not found');
 
-                if (body.sendPass) {
-                    messageOptions = {
-                        firstName  : personnelObject.firstName,
-                        lastName   : personnelObject.lastName,
-                        email      : personnelObject.email,
-                        phoneNumber: '+' + personnelObject.phoneNumber,
-                        password   : pass,
-                        token      : personnelObject.token,
-                        language   : currentLanguage
-                    };
+                        error.status = 400;
+                        return cb(error);
+                    }
 
-                    if (body.type === 'email') {
-                        mailer.confirmNewUserRegistration(messageOptions, (err) => {
-                            if (err) {
-                                return next(err);
-                            }
+                    let oldAccessRole;
 
-                            res.status(200).send(result);
-                        });
-                    } else {
-                        smsSender.sendNewPassword(messageOptions, res, (err) => {
-                            if (err) {
-                                return next(err);
-                            }
+                    if (!personnel.temp) {
+                        oldAccessRole = personnel.accessRole.toString();
+                    }
 
-                            res.status(200).send(result);
+                    if ((body.accessRole && oldAccessRole !== body.accessRole) || body.archived) {
+                        someEvents.personnelArchived({
+                            ids    : personnelId,
+                            Session: SessionModel
                         });
                     }
-                } else {
-                    res.status(200).send(result);
-                }
-            });
+
+                    cb(null, personnel);
+                },
+
+                updateUsers,
+
+                getUserForUi
+
+            ], callback);
         }
 
-        access.getEditAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
-            var body = req.body;
+        async.waterfall([
 
+            async.apply(access.getEditAccess, req, ACL_MODULES.PERSONNEL),
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(body, accessLevel, CONTENT_TYPES.PERSONNEL, 'update', cb)
+            },
+
+            queryRun
+
+        ], (err, personnel) => {
             if (err) {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PERSONNEL, 'update', function (err, saveData) {
+            const end = (err) => {
                 if (err) {
                     return next(err);
                 }
 
-                queryRun(saveData);
-            });
+                res.status(200).send(personnel);
+            };
+
+            if (!body.currentLanguage && !body.newPass) {
+                event.emit('activityChange', {
+                    module    : ACL_MODULES.PERSONNEL,
+                    actionType: ACTIVITY_TYPES.UPDATED,
+                    createdBy : body.editedBy,
+                    itemId    : personnelId,
+                    itemType  : CONTENT_TYPES.PERSONNEL
+                });
+            }
+
+            // todo move to function declaration
+            if (!body.sendPass) {
+                return callback(null);
+            }
+
+            const messageOptions = {
+                firstName  : personnel.firstName,
+                lastName   : personnel.lastName,
+                email      : personnel.email,
+                phoneNumber: `+${personnel.phoneNumber}`,
+                password   : body.pass,
+                token      : personnel.token,
+                language   : currentLanguage
+            };
+
+            if (body.type === 'email') {
+                return mailer.confirmNewUserRegistration(messageOptions, end);
+            }
+
+            return smsSender.sendNewPassword(messageOptions, end);
         });
     };
 
