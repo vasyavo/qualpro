@@ -10,8 +10,8 @@ const TYPES = [
     'Others'
 ];
 const STATUSES = [
-    'new',
-    'resolved'
+    'draft',
+    'active'
 ];
 
 Joi.objectId = require('joi-objectid')(Joi);
@@ -40,31 +40,14 @@ function startOfYear() {
 
 const create = Joi.object().keys({
     createdBy : Joi.objectId().required(),
-    status : Joi.string().default('new'),
+    status : Joi.string().valid(STATUSES).default('draft'),
     type : Joi.string().valid(TYPES).required(),
-    description : Joi.string().required(),
-    createdAt : Joi.date().default(currentDate, 'current date')
-});
-
-const update = Joi.object().keys({
-    status : Joi.string().valid('resolved'),
-    comment : Joi.string()
-});
-
-const getAll = Joi.object().keys({
-    page : Joi.number().integer().min(1).default(1),
-    count : Joi.number().integer().default(CONSTANTS.LIST_COUNT),
-    sortBy : Joi.string().default('createdAt'),
-    type : Joi.array().items(Joi.string().valid(TYPES)),
-    status : Joi.array().items(Joi.string().valid(STATUSES)),
-    createdBy : Joi.array().items(customJoi.objectId().toObjectId()),
-    'creator.position' : Joi.array().items(customJoi.objectId().toObjectId()),
-    startDate : Joi.date().default(startOfYear, 'start of a year date'),
-    endDate : Joi.date().default(currentDate, 'current date')
+    title : Joi.string().required(),
+    createdAt : Joi.date().default(currentDate, 'current date'),
+    updatedAt : Joi.date().default(currentDate, 'current date'),
+    dueDate : Joi.date().min(Joi.ref('createdAt'))
 });
 
 module.exports = {
-    create : create,
-    getAll : getAll,
-    update : update
+    create : create
 };

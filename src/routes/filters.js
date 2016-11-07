@@ -4,18 +4,18 @@ var filterHandler = require('../handlers/filters');
 var access = require('../helpers/access');
 const PersonnelModel = require('./../types/personnel/model');
 
-module.exports = function (db, app, redis) {
+module.exports = function(db, app, redis) {
     var handler = new filterHandler(db, redis);
     var csrfProtection = app.get('csrfProtection');
     var checkAuth = access.checkAuth;
 
-    router.use(function (req, res, next) {
+    router.use(function(req, res, next) {
         PersonnelModel.findById(req.session.uId, {
-            country  : 1,
-            region   : 1,
-            subRegion: 1,
-            branch   : 1
-        }).lean().exec(function (err, personnel) {
+            country : 1,
+            region : 1,
+            subRegion : 1,
+            branch : 1
+        }).lean().exec(function(err, personnel) {
             if (err) {
                 return next(err);
             }
@@ -60,6 +60,7 @@ module.exports = function (db, app, redis) {
     router.get('/documents', handler.documentsFilters);
     router.get('/notes', handler.notesFilters);
     router.get('/items/toOutlet', handler.itemsToOutletCountry);
+    router.get('/contactUs', checkAuth, handler.contactUsFilters);
 
     return router;
 };
