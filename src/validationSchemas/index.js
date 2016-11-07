@@ -1,5 +1,7 @@
 const contactUs = require('./contactUs');
+const consumerSurvey = require('./consumerSurvey');
 
 module.exports = {
-    contactUs : contactUs
+    contactUs : contactUs,
+    consumerSurvey : consumerSurvey
 };
