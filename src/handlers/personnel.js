@@ -1,3 +1,5 @@
+'use strict';
+
 var Personnel = function (db, redis, event) {
     var mongoose = require('mongoose');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
@@ -3249,7 +3251,7 @@ var Personnel = function (db, redis, event) {
             waterFallTasks.push(updateUsers);
             waterFallTasks.push(getUserForUi);
 
-            async.waterfall(waterFallTasks, function (err, result) {
+            async.waterfall(waterFallTasks, (err, result) => {
                 var personnelObject = result;
 
                 if (err) {
@@ -3278,14 +3280,16 @@ var Personnel = function (db, redis, event) {
                     };
 
                     if (body.type === 'email') {
-                        mailer.confirmNewUserRegistration(messageOptions);
-
-                        res.status(200).send(result);
-                    } else {
-                        smsSender.sendNewPassword(messageOptions, res, function (err, message) {
+                        mailer.confirmNewUserRegistration(messageOptions, (err) => {
                             if (err) {
-                                console.dir(err);
+                                return next(err);
+                            }
 
+                            res.status(200).send(result);
+                        });
+                    } else {
+                        smsSender.sendNewPassword(messageOptions, res, (err) => {
+                            if (err) {
                                 return next(err);
                             }
 
@@ -3302,12 +3306,6 @@ var Personnel = function (db, redis, event) {
             var body = req.body;
 
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
