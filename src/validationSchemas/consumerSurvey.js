@@ -45,7 +45,7 @@ const create = Joi.object().keys({
     title : Joi.string().required(),
     createdAt : Joi.date().default(currentDate, 'current date'),
     updatedAt : Joi.date().default(currentDate, 'current date'),
-    dueDate : Joi.date().min(currentDate)
+    dueDate : Joi.date().min(Joi.ref('createdAt'))
 });
 
 module.exports = {
