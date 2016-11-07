@@ -1,3 +1,5 @@
+'use strict';
+
 const PasswordManager = require('./../helpers/passwordManager');
 
 var Personnel = function (db, redis, event) {

@@ -804,6 +804,19 @@ a {
 .logOut:after {
   content: '\e946';
 }
+.contactUs:after {
+  display: block;
+  content: "";
+  width: 30px;
+  height: 33px;
+  background: url(../images/header/phone.png) no-repeat;
+  float: left;
+  margin: 0 6px 0 0;
+}
+.contactUsIcon {
+  position: absolute;
+  left: -100px;
+}
 .filterName .triDown:after {
   position: absolute;
   right: 7px;
@@ -3017,7 +3030,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .allDialogsClass .mediaDialogInner .pdfContainer {
   height: 600px;
 }
-.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]):read-only {
+span.currency + input:not([type="checkbox"]) {
   width: calc(100% - 40px) !important;
 }
 @media screen and (max-height: 792px) {
@@ -4183,12 +4196,17 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 }
 .aditionalInfo li.questionItem a {
   position: absolute;
-  left: -45px;
+  left: -81px;
+  top: 0;
+}
+.aditionalInfo li.contactUs a {
+  position: absolute;
+  left: -115px;
   top: 0;
 }
 .aditionalInfo .bell:after,
 .aditionalInfo .currentLanguage,
-.aditionalInfo .question {
+.aditionalInfo .question, .contactUs {
   position: absolute;
   top: 50%;
   line-height: normal;
@@ -7671,7 +7689,7 @@ tr.clicked {
   clear: both;
   border: 1px solid #cfd8dc;
 }
-.categoryTableWrap .absoluteContent tr td input:nth-child(n+2),
+.categoryTableWrap .absoluteContent tr td:nth-child(2) input:nth-child(n+2),
 .brandTableWrap .absoluteContent tr td input:nth-child(n+2) {
   display: none;
 }

@@ -582,7 +582,8 @@ a {
 .plusIcon:before,
 .sortArrows:before,
 .question:before,
-.logOut:after {
+.logOut:after,
+.contact-us:after {
     font-family: 'icomoon';
 }
 .bubbleMassage:after {
@@ -803,6 +804,19 @@ a {
 }
 .logOut:after {
     content: '\e946';
+}
+.contactUs:after {
+    display: block;
+    content: "";
+    width: 30px;
+    height: 33px;
+    background: url(../images/header/phone.png) no-repeat;
+    float: left;
+    margin: 0 6px 0 0;
+}
+.contactUsIcon {
+    position: absolute;
+    left: 50px;
 }
 .filterName .triDown:after {
     position: absolute;
@@ -2058,7 +2072,7 @@ input:not([readonly]):not(.grayDropdownInput):not(#email):not(#pass):not(#passwo
 }
 .currentLanguageWrap {
     position: absolute;
-    left: 35px;
+    left: 30px;
     top: 50%;
     height: 36px;
     -webkit-transform: translateY(-50%);
@@ -3017,7 +3031,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .allDialogsClass .mediaDialogInner .pdfContainer {
     height: 600px;
 }
-.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]):read-only {
+span.currency + input:not([type="checkbox"]) {
     width: calc(100% - 40px) !important;
 }
 @media screen and (max-height: 792px) {
@@ -4138,7 +4152,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .aditionalInfo {
     position: relative;
     float: left;
-    width: 150px;
+    width: 180px;
     height: 100%;
     display: -webkit-box;
     display: -moz-box;
@@ -4183,12 +4197,21 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 }
 .aditionalInfo li.questionItem a {
     position: absolute;
-    right: -45px;
+    left: 8px;
+    top: 0;
+}
+.aditionalInfo li .bell {
+    position: absolute;
+    left: 130px;
+}
+.aditionalInfo li.contactUs a {
+    position: absolute;
+    left: -115px;
     top: 0;
 }
 .aditionalInfo .bell:after,
 .aditionalInfo .currentLanguage,
-.aditionalInfo .question {
+.aditionalInfo .question, .contactUs {
     position: absolute;
     top: 50%;
     line-height: normal;
@@ -10673,6 +10696,10 @@ span.currency {
 
 .aditionalInfo .chat:after {
     right: 30%;
+}
+.aditionalInfo .chat {
+    position: absolute;
+    left: 90px
 }
 
 .ui-dialog {
