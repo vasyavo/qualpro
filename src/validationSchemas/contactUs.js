@@ -1,15 +1,15 @@
-var Joi = require('joi');
-var moment = require('moment');
-var mongoose = require('mongoose');
-var ObjectId = mongoose.Types.ObjectId;
+const Joi = require('joi');
+const moment = require('moment');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
-var CONSTANTS = require('../constants/mainConstants');
-var TYPES = [
+const CONSTANTS = require('../constants/mainConstants');
+const TYPES = [
     'Application Related Issue',
     'Future Application Ideas',
     'Others'
 ];
-var STATUSES = [
+const STATUSES = [
     'new',
     'resolved'
 ];
@@ -38,7 +38,7 @@ function startOfYear() {
     return moment().utc().startOf('year').format('YYYY-MM-DD HH:mm:ss');
 }
 
-var create = Joi.object().keys({
+const create = Joi.object().keys({
     createdBy : Joi.objectId().required(),
     status : Joi.string().default('new'),
     type : Joi.string().valid(TYPES).required(),
@@ -46,12 +46,12 @@ var create = Joi.object().keys({
     createdAt : Joi.date().default(currentDate, 'current date')
 });
 
-var update = Joi.object().keys({
+const update = Joi.object().keys({
     status : Joi.string().valid('resolved'),
     comment : Joi.string()
 });
 
-var getAll = Joi.object().keys({
+const getAll = Joi.object().keys({
     page : Joi.number().integer().min(1).default(1),
     count : Joi.number().integer().default(CONSTANTS.LIST_COUNT),
     sortBy : Joi.string().default('createdAt'),
