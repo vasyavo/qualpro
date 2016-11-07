@@ -6270,6 +6270,19 @@ for (let level in accessRolesData) {
     })
 }
 
+const levels = [
+    'Super User',
+    'Master Admin',
+    'Country Admin',
+    'Area Manager',
+    'Area in charge',
+    'Sales Man',
+    'Merchandiser',
+    'Cash van',
+    'Master uploader',
+    'Country uploader'
+];
+
 const generate = (callback) => {
     async.waterfall([
 
@@ -6285,10 +6298,13 @@ const generate = (callback) => {
 
         (result, cb) => {
             async.eachOf(accessRolesData, (roleAccess, level, eachCb) => {
+                const name = levels[level];
+
                 AccessRoleModel.findOneAndUpdate({
                     level
                 }, {
                     $set: {
+                        name,
                         level,
                         roleAccess
                     }

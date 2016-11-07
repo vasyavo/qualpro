@@ -5,10 +5,7 @@ module.exports = (callback) => {
 
         require('./addModules').generate,
 
-        require('./addModulesToAccessRoles').generate,
-
-        // todo access role name is empty and level is undefined
-        // require('./addLevelToAccessRoles').generate
+        require('./addModulesToAccessRoles').generate
 
     ], callback);
 };
