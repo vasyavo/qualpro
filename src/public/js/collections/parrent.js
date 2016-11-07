@@ -1,9 +1,10 @@
 define([
     'Backbone',
     'js-cookie',
-    'constants/otherConstants'
+    'constants/otherConstants',
+    'constants/contentType'
 ],
-function (Backbone, Cookies, CONSTANTS) {
+function (Backbone, Cookies, CONSTANTS, CONTENT_TYPES) {
     /**
      * Drop-in replacement for Backbone.Collection. Encapsulate main pagination logic
      * @see {@link http://backbonejs.org/#Collection|Backbone.Collection }
@@ -103,6 +104,10 @@ function (Backbone, Cookies, CONSTANTS) {
 
             _opts.supervisorFilter = options.supervisorFilter;
 
+            if (options.contentType === CONTENT_TYPES.CONTACT_US && _opts.data.filter.personnel) {
+                _opts.data.createBy = _opts.data.filter.personnel.values[0];
+            }
+
             return _opts;
         },
 
@@ -124,7 +129,7 @@ function (Backbone, Cookies, CONSTANTS) {
             }
 
             _opts = this.dataComposer(page, options);
-
+debugger;
             return this.fetch(_opts);
         },
 
