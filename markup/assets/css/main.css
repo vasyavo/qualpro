@@ -3030,7 +3030,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .allDialogsClass .mediaDialogInner .pdfContainer {
   height: 600px;
 }
-.itemPriceTable .dialogCategoryItem input:not([type="checkbox"]):read-only {
+span.currency + input:not([type="checkbox"]) {
   width: calc(100% - 40px) !important;
 }
 @media screen and (max-height: 792px) {
@@ -4198,12 +4198,17 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 }
 .aditionalInfo li.questionItem a {
   position: absolute;
-  left: -80px;
+  left: -81px;
+  top: 0;
+}
+.aditionalInfo li.contactUs a {
+  position: absolute;
+  left: -115px;
   top: 0;
 }
 .aditionalInfo .bell:after,
 .aditionalInfo .currentLanguage,
-.aditionalInfo .question {
+.aditionalInfo .question, .contactUs {
   position: absolute;
   top: 50%;
   line-height: normal;
@@ -9633,7 +9638,7 @@ table.fancytree-ext-table {
   background-color: #e8e8e8 !important;
 }
 lesshat-selector {
-  -lh-property: 0; } 
+  -lh-property: 0; }
 @-webkit-keyframes rotate{ from{-webkit-transform: rotate(0deg)}  to{-webkit-transform: rotate(180deg);}}
 @-moz-keyframes rotate{ from{-moz-transform: rotate(0deg)}  to{-moz-transform: rotate(180deg);}}
 @-o-keyframes rotate{ from{-o-transform: rotate(0deg)}  to{-o-transform: rotate(180deg);}}
@@ -10061,7 +10066,7 @@ lesshat-selector {
   animation-name: contentFadeOutLeft;
 }
 lesshat-selector {
-  -lh-property: 0; } 
+  -lh-property: 0; }
 @-webkit-keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-webkit-transform: translate3d(100%, 0, 0);}}
 @-moz-keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-moz-transform: translate3d(100%, 0, 0);}}
 @-o-keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-o-transform: translate3d(100%, 0, 0);}}
