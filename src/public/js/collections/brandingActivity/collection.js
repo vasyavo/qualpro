@@ -3,13 +3,13 @@ define([
         'jQuery',
         'Underscore',
         'collections/parrent',
-        'models/brandingAndDisplay',
+        'models/brandingActivity',
         'constants/contentType'
     ],
     function (Backbone, $, _, Parent, Model, CONTENT_TYPES) {
         var Collection = Parent.extend({
             model      : Model,
-            url        : CONTENT_TYPES.BRANDINGANDDISPLAY,
+            url        : CONTENT_TYPES.BRANDING_ACTIVITY,
             viewType   : null,
             contentType: null,
 

@@ -29,7 +29,7 @@ define([
         },
 
         urlRoot: function () {
-            return CONTENT_TYPES.BRANDINGANDDISPLAYITEMS;
+            return CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS;
         }
     });
 

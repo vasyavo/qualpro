@@ -33,8 +33,8 @@ module.exports = function(db, app, redis) {
     router.get('/personnel', checkAuth, handler.personnelFilters);
     router.get('/planogram', checkAuth, handler.planogramFilters);
     router.get('/activityList', handler.activityListFilters);
-    router.get('/brandingAndDisplay', handler.brandingAndDisplayFilters);
-    router.get('/brandingAndDisplayCreate', handler.promotionLocationFilters);
+    router.get('/brandingActivity', handler.brandingActivityFilters);
+    router.get('/brandingActivityCreate', handler.promotionLocationFilters);
     // router.get('/brandingAndDisplayCreate', handler.brandingAndDisplayCreateFilters);
     router.get('/itemsPrices', checkAuth, handler.itemsAndPricesFilters);
     router.get('/competitorsList', checkAuth, handler.competitorsListFilters);

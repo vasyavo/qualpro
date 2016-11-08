@@ -6,7 +6,9 @@
     var CONTNETTYPES = {
         ACTIVITYLIST : 'activityList',
         BRANCH : 'branch',
-        BRANDINGANDDISPLAY : 'brandingAndDisplay',
+        //BRANDINGANDDISPLAY : 'brandingActivity',
+        BRANDING_ACTIVITY : 'brandingActivity',
+        BRANDING_ACTIVITY_ITEMS : 'brandingActivityItems',
         BRANDINGANDDISPLAYITEMS : 'brandingAndDisplayItems',
         CATEGORY : 'category',
         PRODUCT : 'product',

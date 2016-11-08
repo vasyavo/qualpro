@@ -3,7 +3,7 @@ define([
     'jQuery',
     'Underscore',
     'constants/contentType',
-    'text!templates/brandingAndDisplay/create.html',
+    'text!templates/brandingActivity/create.html',
     'text!templates/file/preView.html',
     'views/baseDialog',
     'views/objectives/fileDialogView',
@@ -16,7 +16,7 @@ define([
     'models/outlet',
     'models/branch',
     'models/parrent',
-    'models/brandingAndDisplay',
+    'models/brandingActivity',
     'populate',
     'collections/file/collection',
     'collections/category/collection',
@@ -33,7 +33,7 @@ define([
              implementShowHideArabicInputIn, CONSTANTS, moment, dataService, DisplayTypeCollection, ERROR_MESSAGES) {
 
     var CreateView = BaseView.extend({
-        contentType          : CONTENT_TYPES.BRANDINGANDDISPLAY,
+        contentType          : CONTENT_TYPES.BRANDING_ACTIVITY,
         template             : _.template(CreateTemplate),
         fileTemplate         : _.template(FileTemplate),
         imageSrc             : '',
@@ -227,7 +227,7 @@ define([
                 return model.get('name').currentLanguage;
             };
 
-            dataService.getData('/filters/brandingAndDisplayCreate', {filter: self.locationFilter}, function (err, result) {
+            dataService.getData('/filters/brandingActivityCreate', {filter: self.locationFilter}, function (err, result) {
                 if (err) {
                     return console.dir(err);
                 }
@@ -417,7 +417,7 @@ define([
         resetLocations: function (options) {
             var self = this;
 
-            dataService.getData('/filters/brandingAndDisplayCreate', {filter: self.locationFilter},
+            dataService.getData('/filters/brandingActivityCreate', {filter: self.locationFilter},
                 function (err, result) {
                     if (err) {
                         return App.render(err);

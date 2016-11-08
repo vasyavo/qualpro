@@ -680,7 +680,7 @@ var Filters = function(db, redis) {
         });
     };
 
-    this.brandingAndDisplayFilters = function(req, res, next) {
+    this.brandingActivityFilters = function(req, res, next) {
         var CONSTANTS = require('../public/js/constants/otherConstants');
         var STATUSES = CONSTANTS.PROMOTION_UI_STATUSES;
         var query = req.query;

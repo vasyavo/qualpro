@@ -605,7 +605,7 @@ define([
     config[CONTENT_TYPES.CONTRACTSSECONDARY] = contractsSecondaryConfig;
     config[CONTENT_TYPES.CONTRACTSYEARLY] = contractsYearlyConfig;
     config[CONTENT_TYPES.QUESTIONNARIES] = questionaryConfig;
-    config[CONTENT_TYPES.BRANDINGANDDISPLAY] = brandingAndDisplayConfig;
+    config[CONTENT_TYPES.BRANDING_ACTIVITY] = brandingAndDisplayConfig;
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
     config[CONTENT_TYPES.CONSUMERS_SURVEY] = consumersSurveyConfig;
 

@@ -4,7 +4,7 @@ define([
     'Underscore',
     'views/baseDialog',
     'text!templates/file/preView.html',
-    'text!templates/brandingAndDisplay/brandingAndDisplayItems/commentDialog.html',
+    'text!templates/brandingActivity/brandingActivityItems/commentDialog.html',
     'text!templates/objectives/comments/comment.html',
     'text!templates/objectives/comments/newRow.html',
     'collections/comment/collection',
@@ -22,7 +22,7 @@ define([
              FileCollection, CONTENT_TYPES, ERROR_MESSAGES, FileDialogView, FileDialogPreviewView) {
 
     var CommentView = BaseDialog.extend({
-        contentType        : CONTENT_TYPES.BRANDINGANDDISPLAYITEMS,
+        contentType        : CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS,
         filePreviewTemplate: _.template(FilePreviewTemplate),
         commentViewTemplate: _.template(CommentViewTemplate),
         commentTemplate    : _.template(CommentTemplate),

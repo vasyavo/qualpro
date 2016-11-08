@@ -1111,7 +1111,7 @@ var BrandingAndDisplay = function (db, redis, event) {
                     }
 
                     if (removeFile) {
-                        // fileHandler.deleteFile(fileName, 'brandingAndDisplay', function (err) {
+                        // fileHandler.deleteFile(fileName, 'brandingActivity', function (err) {
                         //     if (err) {
                         //         return cb(err);
                         //     }

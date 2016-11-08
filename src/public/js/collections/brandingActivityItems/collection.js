@@ -1,11 +1,11 @@
 define([
     'collections/parrent',
-    'models/brandingAndDisplayItems',
+    'models/brandingActivityItems',
     'constants/contentType'
 ], function (Parrent, Model, CONTENT_TYPES) {
     var Collection = Parrent.extend({
         model      : Model,
-        url        : CONTENT_TYPES.BRANDINGANDDISPLAYITEMS,
+        url        : CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS,
         viewType   : null,
         contentType: null,
 

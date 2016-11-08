@@ -4,14 +4,14 @@ define([
     'Underscore',
     'async',
     'views/baseDialog',
-    'text!templates/brandingAndDisplay/brandingAndDisplayItems/header.html',
-    'text!templates/brandingAndDisplay/brandingAndDisplayItems/tbody.html',
+    'text!templates/brandingActivity/brandingActivityItems/header.html',
+    'text!templates/brandingActivity/brandingActivityItems/tbody.html',
     'text!templates/pagination/pagination.html',
     'text!templates/file/preView.html',
-    'text!templates/brandingAndDisplay/brandingAndDisplayItems/commentDialog.html',
+    'text!templates/brandingActivity/brandingActivityItems/commentDialog.html',
     'text!templates/objectives/comments/comment.html',
     'text!templates/objectives/comments/newRow.html',
-    'collections/brandingAndDisplayItems/collection',
+    'collections/brandingActivityItems/collection',
     'collections/comment/collection',
     'models/comment',
     'models/file',
@@ -22,7 +22,7 @@ define([
     'constants/errorMessages',
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
-    'views/brandingAndDisplay/comments/comment'
+    'views/brandingActivity/comments/comment'
 
 ], function (Backbone, $, _, async, BaseDialog, template, tbodyTemplate, paginationTemplate, FilePreviewTemplate,
              CommentViewTemplate, CommentTemplate, NewCommentTemplate,
@@ -30,7 +30,7 @@ define([
              CONTENT_TYPES, ERROR_MESSAGES, FileDialogView, FileDialogPreviewView, CommentFiewDialog) {
 
     var BrandingAndDisplayItemsView = BaseDialog.extend({
-        contentType       : CONTENT_TYPES.BRANDINGANDDISPLAYITEMS,
+        contentType       : CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS,
         template          : _.template(template),
         tbodyTemplate     : _.template(tbodyTemplate),
         paginationTemplate: _.template(paginationTemplate),

@@ -1,3 +1,5 @@
+'use strict';
+
 const async = require('async');
 const logger = require('../utils/logger');
 const AccessRoleModel = require('../types/accessRole/model');

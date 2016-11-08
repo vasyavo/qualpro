@@ -1,16 +1,12 @@
-/**
- * @module Mobile - Alalali Branding
- */
-
 var express = require('express');
 var router = express.Router();
-var BrandingAndDisplayHandler = require('../../handlers/brandingAndDisplay');
-var access = require('../../helpers/access');
+var BrandingActivityHandler = require('../handlers/brandingActivity');
+var access = require('../helpers/access');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
 module.exports = function (db, redis, event) {
-    var handler = new BrandingAndDisplayHandler(db, redis, event);
+    var handler = new BrandingActivityHandler(db, redis, event);
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);
@@ -18,7 +14,7 @@ module.exports = function (db, redis, event) {
     /**
      * __Type__ 'POST'
      *
-     * Base ___url___ for build __requests__ is `http:/<host>:<port>/brandingAndDisplay`
+     * Base ___url___ for build __requests__ is `http:/<host>:<port>/brandingActivity`
      *
      * Creates new outlet.
      *
@@ -156,7 +152,7 @@ module.exports = function (db, redis, event) {
      *    "status": "active"
      *  }
      *
-     * @method /brandingAndDisplay
+     * @method /brandingActivity
      * @instance
      */
 
@@ -166,7 +162,7 @@ module.exports = function (db, redis, event) {
     /**
      * __Type__ 'PUT'
      *
-     * Base ___url___ for build __requests__ is `http:/<host>:<port>/brandingAndDisplay/:id`
+     * Base ___url___ for build __requests__ is `http:/<host>:<port>/brandingActivity/:id`
      *
      * Updated branding activity with specific id. Put into body all model properties
      *
@@ -308,19 +304,19 @@ module.exports = function (db, redis, event) {
      *  }
      *
      *
-     * @method /brandingAndDisplay/:id
+     * @method /brandingActivity/:id
      * @instance
      */
 
 
-    router.patch('/:id', handler.update);
+    router.patch('/:id', multipartMiddleware, handler.update);
 
     /**
      * __Type__ `GET`
      *
-     * Base ___url___ for build __requests__ is `http:/<host>:<port>/brandingAndDisplay`
+     * Base ___url___ for build __requests__ is `http:/<host>:<port>/brandingActivity`
      *
-     * Returns the all existing `brandingAndDisplay`
+     * Returns the all existing `brandingActivity`
      *
      * __Next parameters is allowed in query to limit count of elements in response:__
      *
@@ -455,14 +451,14 @@ module.exports = function (db, redis, event) {
      *   "total": 15
      * }
      *
-     * @method /brandingAndDisplay
+     * @method /brandingActivity
      * @instance
      */
 
     router.get('/', handler.getAll);
 
-    router.get('/sync', handler.getAllForSync);
-
+    router.get('/:id', handler.getById);
+    router.delete('/file', handler.removeFileFromBrandingActivity);
 
     return router;
 };
