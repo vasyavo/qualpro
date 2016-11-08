@@ -815,7 +815,7 @@ a {
 }
 .contactUsIcon {
   position: absolute;
-  left: -100px;
+  left: -105px;
 }
 .filterName .triDown:after {
   position: absolute;
@@ -10359,6 +10359,10 @@ lesshat-selector {
 .ui-dialog-buttonpane .ui-dialog-buttonset .cancelBtn,
 .cancelBtn {
   background-color: #f44336;
+  border: 0!important;
+}
+button.grayBtn {
+  background-color: #9e9e9e !important;
   border: 0!important;
 }
 .ui-widget-overlay {
