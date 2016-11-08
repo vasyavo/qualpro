@@ -1,12 +1,17 @@
 'use strict';
 
 const http = require('http');
+const async = require('async');
 const eventEmitter = require('./utils/eventEmitter');
 const config = require('./config');
 const mongo = require('./utils/mongo');
 const logger = require('./utils/logger');
 
 require('mongoose').Schemas = {};
+
+process.on('unhandledRejection', (reason, p) => {
+    logger.error(p, reason);
+});
 
 const Scheduler = require('./helpers/scheduler')(mongo, eventEmitter);
 
@@ -17,12 +22,22 @@ const io = require('./helpers/socket')(server);
 
 app.set('io', io);
 
-server.listen(config.nodePort, () => {
-    logger.info(`Server started at port ${config.nodePort} in ${config.env} environment:`, config);
-});
-
 mongo.on('connected', () => {
     require('./types');
+
+    async.waterfall([
+
+        (cb) => {
+            require('./modulesCreators')(cb);
+        },
+
+        (creators, cb) => {
+            server.listen(config.nodePort, cb);
+        }
+
+    ], (err) => {
+        logger.info(`Server started at port ${config.nodePort} in ${config.env} environment:`, config);
+    })
 });
 
 const scheduler = new Scheduler();

@@ -37,7 +37,7 @@ const forgotPassword = (options, res, cb) => {
     sendSMS(message, cb);
 };
 
-const sendNewPassword = (options, res, cb) => {
+const sendNewPassword = (options, cb) => {
     const currentLanguage = options.language ? options.language : 'en';
 
     const url = `${config.localhost}/personnel/confirm/${options.token}`;

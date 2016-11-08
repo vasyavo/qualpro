@@ -6260,21 +6260,82 @@ const accessRolesData = {
     9: countryUpload
 };
 
-AccessRoleModel.update({}, {$set: {roleAccess: []}}, {multi: true}, function (err) {
-    if (err) {
-        return logger.error(err);
-    }
+const accessRoles = [];
 
-    async.eachOf(accessRolesData, function (value, index, cb) {
-        AccessRoleModel.findOneAndUpdate({level: index}, {$push: {roleAccess: {$each: value}}}, {
-            new   : true,
-            upsert: true
-        }, cb);
-    }, function (err) {
-        if (err) {
-            logger.error(err);
+for (let level in accessRolesData) {
+    const roleAccess = accessRolesData[level];
+
+    accessRoles.push({
+        roleAccess
+    })
+}
+
+const levels = [
+    'Super User',
+    'Master Admin',
+    'Country Admin',
+    'Area Manager',
+    'Area in charge',
+    'Sales Man',
+    'Merchandiser',
+    'Cash van',
+    'Master uploader',
+    'Country uploader'
+];
+
+const generate = (callback) => {
+    async.waterfall([
+
+        (cb) => {
+            AccessRoleModel.update({}, {
+                $set: {
+                    roleAccess: []
+                }
+            }, {
+                multi: true
+            }, cb);
+        },
+
+        (result, cb) => {
+            async.eachOf(accessRolesData, (roleAccess, level, eachCb) => {
+                const name = levels[level];
+
+                AccessRoleModel.findOneAndUpdate({
+                    level
+                }, {
+                    $set: {
+                        name: {
+                            en: name,
+                            ar: name
+                        },
+                        level,
+                        roleAccess
+                    }
+                }, {
+                    new: true,
+                    upsert: true
+                }, (err, model) => {
+                    if (model) {
+                        accessRoles[level].id = model._id.toString();
+                    }
+
+                    eachCb(err, model);
+                });
+            }, cb);
         }
 
-        logger.info('Access roles for modules updated!');
+    ], (err) => {
+        if (err) {
+            logger.error('Fail to setup access roles!', err);
+            return callback(err);
+        }
+
+        logger.info('Setup is done for access roles.');
+        callback();
     });
-});
+};
+
+module.exports = {
+    generate,
+    accessRoles
+};

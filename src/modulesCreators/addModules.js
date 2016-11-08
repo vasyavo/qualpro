@@ -486,11 +486,20 @@ const modules = [
 ];
 
 const q = async.queue((module, cb) => {
-    ModuleModel.findOneAndUpdate(module, module, { upsert: true }, cb);
+    ModuleModel.findOneAndUpdate({
+        _id: module._id
+    }, module, { upsert: true }, cb);
 }, 1000);
 
-q.push(modules);
+const generate = (callback) => {
+    q.drain = () => {
+        logger.info('Modules are added successfully');
+        callback();
+    };
 
-q.drain = () => {
-    logger.info('Modules are added successfully');
+    q.push(modules);
+};
+
+module.exports = {
+    generate
 };
