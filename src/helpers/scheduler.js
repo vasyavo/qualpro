@@ -297,7 +297,7 @@ module.exports = function (db, event) {
     }
 
     function brandingAndDisplayExpired() {
-        const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+        const BrandingAndDisplayModel = require('././model');
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {

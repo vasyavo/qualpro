@@ -4,6 +4,7 @@ const async = require('async');
 const logger = require('../utils/logger');
 const AccessRoleModel = require('../types/accessRole/model');
 
+var ACL_MODULES = require('../constants/aclModulesNames');
 const commentsAccess = {
     module: 1010,
     cms: {
@@ -657,6 +658,21 @@ const superAdmin = [
             edit   : false,
             write  : true,
             read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
         }
     },
     commentsAccess
@@ -1347,7 +1363,22 @@ const masterAdmin = [
             write  : false,
             read   : true
         }
-    }, commentsAccess
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },commentsAccess
 ];
 
 const countryAdmin = [
@@ -1989,6 +2020,21 @@ commentsAccess,
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -2587,6 +2633,21 @@ commentsAccess,
             archive: false,
             edit   : true,
             write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     }
@@ -3189,6 +3250,21 @@ commentsAccess,
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -3786,6 +3862,21 @@ const salesman = [
             archive: false,
             edit   : true,
             write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     }
@@ -4387,6 +4478,21 @@ const merchandiser = [
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -4984,6 +5090,21 @@ const cashVan = [
             archive: false,
             edit   : true,
             write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     }
@@ -5632,6 +5753,21 @@ commentsAccess,
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -6246,7 +6382,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    }
 ];
 
 const accessRolesData = {

@@ -27,7 +27,7 @@ var BodyValidator = (function() {
         return !!key;
     };
 
-    validationFunctions[CONTENT_TYPE.BRANDINGANDDISPLAY] = function(value, key, allowedObject) {
+    validationFunctions[CONTENT_TYPE.BRANDING_ACTIVITY] = function(value, key, allowedObject) {
         if (_.isEqual(key, 'description')) {
             return validationFunctionsHelper.englishOrArabic(value, key);
         }
@@ -35,7 +35,7 @@ var BodyValidator = (function() {
         return _.includes(allowedObject, key);
     };
 
-    validationFunctions[CONTENT_TYPE.BRANDINGANDDISPLAYITEMS] = function(value, key, allowedObject) {
+    validationFunctions[CONTENT_TYPE.BRANDING_ACTIVITY_ITEMS] = function(value, key, allowedObject) {
         return _.includes(allowedObject, key);
     };
 

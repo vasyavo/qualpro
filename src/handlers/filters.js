@@ -9,7 +9,7 @@ var Filters = function(db, redis) {
     var self = this;
 
     const PersonnelModel = require('./../types/personnel/model');
-    const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+    const BrandingAndDisplayModel = require('././model');
     const ObjectiveModel = require('./../types/objective/model');
     const ItemModel = require('./../types/item/model');
     const ActivityListModel = require('./../types/activityList/model');
