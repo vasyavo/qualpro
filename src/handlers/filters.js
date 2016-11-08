@@ -6332,13 +6332,38 @@ var Filters = function(db, redis) {
         let positionFilter;
         let aggregateHelper;
         const TYPES = [
-            'Application Related Issue',
-            'Future Application Ideas',
-            'Others'
+            {
+                name : {
+                    en : 'Application Related Issue',
+                    ar : ''
+                }
+            },
+            {
+                name : {
+                    en : 'Future Application Ideas',
+                    ar : ''
+                }
+            },
+            {
+                name : {
+                    en : 'Others',
+                    ar : ''
+                }
+            }
         ];
         const STATUSES = [
-            'new',
-            'resolved'
+            {
+                name : {
+                    en : 'new',
+                    ar : ''
+                }
+            },
+            {
+                name : {
+                    en : 'resolved',
+                    ar : ''
+                }
+            }
         ];
 
         if (filter.personnel) {
