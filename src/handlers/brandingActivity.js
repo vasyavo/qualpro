@@ -12,7 +12,7 @@ var BrandingActivity = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler(db);
-    var BrandingAndDisplayModel = require('././model');
+    var BrandingActivityModel = require('../types/brandingActivity/model');
     var FileModel = require('./../types/file/model');
     var access = require('../helpers/access')(db);
     var bodyValidator = require('../helpers/bodyValidator');
@@ -353,7 +353,7 @@ var BrandingActivity = function (db, redis, event) {
                 isMobile         : isMobile
             });
 
-            aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+            aggregation = BrandingActivityModel.aggregate(pipeLine);
 
             aggregation.options = {
                 allowDiskUse: true
@@ -483,7 +483,7 @@ var BrandingActivity = function (db, redis, event) {
                 forSync        : true
             });
 
-            aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+            aggregation = BrandingActivityModel.aggregate(pipeLine);
 
             aggregation.options = {
                 allowDiskUse: true
@@ -615,7 +615,7 @@ var BrandingActivity = function (db, redis, event) {
 
                 body.status = saveBrandingAndDisplay ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
 
-                model = new BrandingAndDisplayModel(body);
+                model = new BrandingActivityModel(body);
                 model.save(function (err, model) {
                     if (err) {
                         return cb(err);
@@ -753,7 +753,7 @@ var BrandingActivity = function (db, redis, event) {
                         delete updateObject.attachments;
                     }
 
-                    BrandingAndDisplayModel.findOne({_id: brandingAndDisplayId}, function (err, brandingAndDisplayModel) {
+                    BrandingActivityModel.findOne({_id: brandingAndDisplayId}, function (err, brandingAndDisplayModel) {
                         var error;
                         var deletedAttachments = [];
                         var brandingAndDisplay = brandingAndDisplayModel;
@@ -778,7 +778,7 @@ var BrandingActivity = function (db, redis, event) {
                                     }
                                     updateObject.status = saveBrandingAndDisplay ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
 
-                                    BrandingAndDisplayModel.findByIdAndUpdate(brandingAndDisplayModel, fullUpdate, {new: true}, function (err, result) {
+                                    BrandingActivityModel.findByIdAndUpdate(brandingAndDisplayModel, fullUpdate, {new: true}, function (err, result) {
                                         if (err) {
                                             return callback(err);
                                         }
@@ -1006,7 +1006,7 @@ var BrandingActivity = function (db, redis, event) {
             key : 'outlet'
         }));
 
-        aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+        aggregation = BrandingActivityModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true
@@ -1105,7 +1105,7 @@ var BrandingActivity = function (db, redis, event) {
             },
 
             function (removeFile, cb) {
-                BrandingAndDisplayModel.findByIdAndUpdate(objectiveId, {$pull: {attachments: ObjectId(fileId)}}, function (err) {
+                BrandingActivityModel.findByIdAndUpdate(objectiveId, {$pull: {attachments: ObjectId(fileId)}}, function (err) {
                     if (err) {
                         return cb(err);
                     }

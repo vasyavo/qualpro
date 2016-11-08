@@ -11,7 +11,7 @@ function BrandingAndDisplay(db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler(db);
-    var BrandingAndDisplayModel = require('././model');
+    var BrandingAndDisplayModel = require('../types/brandingAndDisplay/model');
     var FileModel = require('./../types/file/model');
     var access = require('../helpers/access')(db);
     var joiValidate = require('../helpers/joiValidate');
@@ -648,6 +648,7 @@ function BrandingAndDisplay(db, redis, event) {
         }
 
         var body;
+        var error;
 
         try {
             if (req.body.data) {

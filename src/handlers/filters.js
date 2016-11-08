@@ -9,7 +9,7 @@ var Filters = function(db, redis) {
     var self = this;
 
     const PersonnelModel = require('./../types/personnel/model');
-    const BrandingAndDisplayModel = require('././model');
+    const BrandingActivityModel = require('../types/brandingActivity/model');
     const ObjectiveModel = require('./../types/objective/model');
     const ItemModel = require('./../types/item/model');
     const ActivityListModel = require('./../types/activityList/model');
@@ -911,7 +911,7 @@ var Filters = function(db, redis) {
             }
         });
 
-        aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+        aggregation = BrandingActivityModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse : true
