@@ -2,11 +2,11 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
-    'text!templates/brandingAndDisplay/preview.html',
+    'text!templates/brandingActivity/preview.html',
     'text!templates/file/preView.html',
     'collections/file/collection',
     'models/file',
-    'models/brandingAndDisplay',
+    'models/brandingActivity',
     'views/baseDialog',
     'populate',
     'constants/otherConstants',
@@ -15,7 +15,7 @@ define([
     'dataService',
     'constants/contentType',
     'views/objectives/fileDialogView',
-    'views/brandingAndDisplay/brandingAndDisplayItemsView',
+    'views/brandingActivity/brandingActivityItemsView',
     'views/fileDialog/fileDialog'
 ], function (Backbone, _, $, PreviewTemplate, FileTemplate,
              FileCollection, FileModel, BrandingAndDisplayModel, BaseView, populate, CONSTANTS,
@@ -23,7 +23,7 @@ define([
              brandingAndDisplayItemsView, FileDialogPreviewView) {
 
     var PreviewView = BaseView.extend({
-        contentType : CONTENT_TYPES.BRANDINGANDDISPLAY,
+        contentType : CONTENT_TYPES.BRANDING_ACTIVITY,
         template    : _.template(PreviewTemplate),
         fileTemplate: _.template(FileTemplate),
         CONSTANTS   : CONSTANTS,

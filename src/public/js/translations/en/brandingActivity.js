@@ -2,11 +2,11 @@ define([
     'Underscore',
     'translations/en/pagination',
     'translations/en/filters',
-    'translations/en/brandingAndDisplayItems'
+    'translations/en/brandingActivityItems'
 ], function (_, paginationTranslation, filtersTranslation, brandingAndDisplayItems) {
     var brandingAndDisplayTranslation = {
         // top bar
-        all                : ' Al Alali Branding & Display report',
+        all                : ' Al Alali Branding Activity report',
         newBranding        : 'New Branding Activity',
         // list
         startDate          : 'Start date',
@@ -15,12 +15,12 @@ define([
         item               : 'Item:',
         promotionType      : 'Promotion Type: ',
         // create
-        createTitle        : 'Create Branding & Display Activity',
+        createTitle        : 'Create Branding Activity',
         publishBtn         : 'Publish',
         cancelBtn          : 'Cancel',
         attachments        : 'Attachments',
         attachFiles        : 'Attach Files',
-        attachTitle        : 'Branding and Display Items comment files',
+        attachTitle        : 'Branding Activity Items comment files',
         attach             : 'Attach',
         description        : 'Description',
         selectTitle        : 'Select Title',
@@ -33,11 +33,11 @@ define([
         selectBranch       : 'Select branch',
         // edit
         saveBtn            : 'Save',
-        duplicateBranding  : 'Duplicate branding & display activity',
-        editBranding       : 'Edit branding & display activity',
+        duplicateBranding  : 'Duplicate branding activity activity',
+        editBranding       : 'Edit branding activity activity',
         // preview
         okBtn              : 'Ok',
-        preViewTitle       : 'View Branding & Display Activity',
+        preViewTitle       : 'View Branding Activity',
         table              : 'Table',
         edit               : 'Edit',
         duplicate          : 'Duplicate',
@@ -58,7 +58,7 @@ define([
             ar: 'Add english translation'
         },
 
-        dialogTitle     : 'Branding and Display activity files',
+        dialogTitle     : 'Branding Activity files',
         attachButtonName: 'Attach',
         viewDetails     : 'View details',
         commentText     : 'Comment Text',

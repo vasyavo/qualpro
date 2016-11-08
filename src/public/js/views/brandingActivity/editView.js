@@ -3,12 +3,12 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
-    'text!templates/brandingAndDisplay/edit.html',
+    'text!templates/brandingActivity/edit.html',
     'text!templates/file/preView.html',
     'views/baseDialog',
     'views/objectives/fileDialogView',
     'views/personnel/listForSelection',
-    'models/brandingAndDisplay',
+    'models/brandingActivity',
     'populate',
     'collections/file/collection',
     'models/file',
@@ -37,7 +37,7 @@ define([
              DisplayTypeCollection, ERROR_MESSAGES) {
 
     var CreateView = BaseView.extend({
-        contentType          : CONTENT_TYPES.BRANDINGANDDISPLAY,
+        contentType          : CONTENT_TYPES.BRANDING_ACTIVITY,
         template             : _.template(EditTemplate),
         fileTemplate         : _.template(FileTemplate),
         imageSrc             : '',
@@ -430,7 +430,7 @@ define([
             this.locationFilter.outlet = {type: 'ObjectId', values: outletIds};
             this.locationFilter.branch = {type: 'ObjectId', values: branchIds};
 
-            dataService.getData('/filters/brandingAndDisplayCreate', {
+            dataService.getData('/filters/brandingActivityCreate', {
                 edit  : true,
                 filter: this.locationFilter
             }, function (err, result) {
@@ -638,7 +638,7 @@ define([
                 }
             }
 
-            dataService.getData('/filters/brandingAndDisplayCreate', {filter: self.locationFilter}, function (err, result) {
+            dataService.getData('/filters/brandingActivityCreate', {filter: self.locationFilter}, function (err, result) {
                 if (err) {
                     return App.render(err);
                 }

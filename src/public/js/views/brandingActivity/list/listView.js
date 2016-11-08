@@ -3,16 +3,16 @@ define([
     'jQuery',
     'Underscore',
     'views/paginator',
-    'views/brandingAndDisplay/createView',
-    'views/brandingAndDisplay/editView',
-    'views/brandingAndDisplay/preView/preView',
-    'text!templates/brandingAndDisplay/list/list.html',
-    'text!templates/brandingAndDisplay/list/newRow.html',
+    'views/brandingActivity/createView',
+    'views/brandingActivity/editView',
+    'views/brandingActivity/preView/preView',
+    'text!templates/brandingActivity/list/list.html',
+    'text!templates/brandingActivity/list/newRow.html',
     'constants/contentType'
 ], function (Backbone, $, _, paginator, createView, editView, PreView, template, newRow, CONTENT_TYPES) {
     'use strict';
     var View = paginator.extend({
-        contentType: CONTENT_TYPES.BRANDINGANDDISPLAY,
+        contentType: CONTENT_TYPES.BRANDING_ACTIVITY,
         viewType   : 'list',
         template   : _.template(template),
         templateNew: _.template(newRow),

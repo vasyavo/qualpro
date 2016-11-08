@@ -2455,8 +2455,11 @@ var Personnel = function (db, redis, event) {
                                 }
                                 callback();
                             }, function (err) {
-                                // return res.status(200).send(response);
-                                return next({status: 200, body: response});
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                return res.status(200).send(response);
                             });
                         } else {
                             res.status(200).send(response);
@@ -2468,12 +2471,6 @@ var Personnel = function (db, redis, event) {
 
         access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
@@ -3282,7 +3279,7 @@ var Personnel = function (db, redis, event) {
 
             // todo move to function declaration
             if (!body.sendPass) {
-                return callback(null);
+                return end();
             }
 
             const messageOptions = {

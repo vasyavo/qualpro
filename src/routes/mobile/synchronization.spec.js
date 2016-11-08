@@ -144,7 +144,7 @@ describe('mobile synchronization', () => {
 
     it('should get branding and display', function *() {
         const resp = yield Authenticator.master
-            .get('/mobile/brandingAndDisplay')
+            .get('/mobile/brandingActivity')
             .expect(200);
 
         const body = resp.body;
@@ -154,7 +154,7 @@ describe('mobile synchronization', () => {
 
     it('should sync branding and display', function *() {
         const resp = yield Authenticator.master
-            .get('/mobile/brandingAndDisplay/sync')
+            .get('/mobile/brandingActivity/sync')
             .expect(200);
 
         const body = resp.body;

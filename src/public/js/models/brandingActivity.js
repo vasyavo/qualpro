@@ -93,7 +93,7 @@ define([
         },
 
         urlRoot: function () {
-            return CONTENT_TYPES.BRANDINGANDDISPLAY;
+            return CONTENT_TYPES.BRANDING_ACTIVITY;
         },
 
         modelParse: function (model) {

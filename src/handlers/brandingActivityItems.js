@@ -6,8 +6,8 @@ var Promotions = function (db, redis, event) {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
-    const BrandingAndDisplayItemModel = require('./../types/brandingAndDisplayItem/model');
-    const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+    const BrandingActivityItemModel = require('../types/brandingActivityItem/model');
+    const BrandingActivityModel = require('../types/brandingActivity/model');
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ObjectId = mongoose.Types.ObjectId;
@@ -286,7 +286,7 @@ var Promotions = function (db, redis, event) {
                 }
             });
 
-            aggregation = BrandingAndDisplayItemModel.aggregate(pipeLine);
+            aggregation = BrandingActivityItemModel.aggregate(pipeLine);
 
             aggregation.options = {
                 allowDiskUse: true
@@ -303,7 +303,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_ITEMS, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -330,7 +330,7 @@ var Promotions = function (db, redis, event) {
 
             async.waterfall([
                 function (callback) {
-                    BrandingAndDisplayModel.findByIdAndUpdate(body.brandingAndDisplay, {
+                    BrandingActivityModel.findByIdAndUpdate(body.brandingAndDisplay, {
                         $addToSet: {personnel: ObjectId(body.createdBy.user)}
                     }, function (err) {
                         if (err) {
@@ -341,7 +341,7 @@ var Promotions = function (db, redis, event) {
                     });
                 },
                 function (callback) {
-                    BrandingAndDisplayItemModel.create(body, callback);
+                    BrandingActivityItemModel.create(body, callback);
                 },
                 function (model, callback) {
                     var saveObj = {
@@ -351,7 +351,7 @@ var Promotions = function (db, redis, event) {
                         files      : req.files
                     };
 
-                    commentCreator(saveObj, BrandingAndDisplayItemModel, function (err, comment) {
+                    commentCreator(saveObj, BrandingActivityItemModel, function (err, comment) {
                         if (err) {
                             return callback(err);
                         }
@@ -360,7 +360,7 @@ var Promotions = function (db, redis, event) {
                     });
                 },
                 function (model, comment, callback) {
-                    BrandingAndDisplayItemModel.findByIdAndUpdate(model._id, {$addToSet: {comments: comment._id}}, {new: true}, callback);
+                    BrandingActivityItemModel.findByIdAndUpdate(model._id, {$addToSet: {comments: comment._id}}, {new: true}, callback);
                 }
             ], function (err, result) {
                 if (err) {
@@ -368,7 +368,7 @@ var Promotions = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_ITEMS,
+                    module    : ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
                     actionType: ACTIVITY_TYPES.UPDATED,
                     createdBy : result.get('createdBy'),
                     itemId    : result.brandingAndDisplay,
@@ -379,7 +379,7 @@ var Promotions = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_ITEMS, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS, function (err, allowed) {
             var body;
 
             if (err) {

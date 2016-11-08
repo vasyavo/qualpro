@@ -309,7 +309,7 @@
                     en: 'Al Alali Branding & Display report',
                     ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'
                 },
-                href: CONSTANTS.BRANDINGANDDISPLAY
+                href: CONSTANTS.BRANDING_ACTIVITY
             },
 
             39: {
@@ -327,7 +327,7 @@
                     en: 'Al Alali Branding & Display items',
                     ar: 'العلامات التجارية وتقارير العرض للسلع'
                 },
-                href: CONSTANTS.BRANDINGANDDISPLAYITEMS
+                href: CONSTANTS.BRANDING_ACTIVITY_ITEMS
             },
 
             41: {

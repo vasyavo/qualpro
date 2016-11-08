@@ -393,8 +393,8 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'Al Alali Branding & Display report', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
-        href    : CONSTANTS.BRANDINGANDDISPLAY,
+        name    : {en: 'Al Alali Branding Activity', ar: ''},
+        href    : CONSTANTS.BRANDING_ACTIVITY,
         sequence: 38,
         parrent : 16,
         visible : true
@@ -403,10 +403,10 @@ const modules = [
     {
         _id     : 40,
         name: {
-            en: 'Al Alali Branding & Display items',
-            ar: 'العلامات التجارية وتقارير العرض للسلع'
+            en: 'Al Alali Branding Activity items',
+            ar: '' /*'العلامات التجارية وتقارير العرض للسلع'*/
         },
-        href    : CONSTANTS.BRANDINGANDDISPLAYITEMS,
+        href    : CONSTANTS.BRANDING_ACTIVITY_ITEMS,
         sequence: 40,
         parrent : 16,
         visible : false
@@ -479,6 +479,15 @@ const modules = [
         _id     : 44,
         name    : {en: 'Consumers Survey', ar: ''}, // todo insert Arabic translation
         href    : CONSTANTS.CONSUMERS_SURVEY,
+        sequence: 44,
+        parrent : 16,
+        visible : true
+    },
+
+    {
+        _id     : 44,
+        name    : {en: 'Al Alali Branding & Display report', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
+        href    : CONSTANTS.BRANDING_AND_DISPLAY,
         sequence: 44,
         parrent : 16,
         visible : true

@@ -3,12 +3,12 @@ define([
     'jQuery',
     'Underscore',
     'constants/contentType',
-    'text!templates/brandingAndDisplay/topBarTemplate.html',
+    'text!templates/brandingActivity/topBarTemplate.html',
     'text!templates/pagination/pagination.html',
     'views/baseTopBar'
 ], function (Backbone, $, _, CONTENT_TYPES, topBarTemplate, pagination, baseTopBar) {
     var TopBarView = baseTopBar.extend({
-        contentType       : CONTENT_TYPES.BRANDINGANDDISPLAY,
+        contentType       : CONTENT_TYPES.BRANDING_ACTIVITY,
         template          : _.template(topBarTemplate),
         paginationTemplate: _.template(pagination),
 
