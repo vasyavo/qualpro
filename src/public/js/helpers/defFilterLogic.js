@@ -30,7 +30,7 @@ define([
             all: {}
         };
 
-        this[CONTENT_TYPES.BRANDINGANDDISPLAY] = {
+        this[CONTENT_TYPES.BRANDING_ACTIVITY] = {
             all: {}
         };
 

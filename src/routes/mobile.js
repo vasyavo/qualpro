@@ -9,8 +9,9 @@ var PersonnelHandler = require('../handlers/personnel');
 module.exports = function (db, app, redis, event) {
     var personnelHandler = new PersonnelHandler(db, app, event, redis);
     var activityListRouter = require('./mobile/activityList')(db, redis, event);
+    var brandingActivityRouter = require('./mobile/brandingActivity')(db, redis, event);
     var brandingAndDisplayRouter = require('./mobile/brandingAndDisplay')(db, redis, event);
-    var brandingAndDisplayItemsRouter = require('./mobile/brandingAndDisplayItems')(db, redis, event);
+    var brandingActivityItemsRouter = require('./mobile/brandingActivityItems')(db, redis, event);
     var domainRouter = require('./mobile/domain')(db, redis, event);
     var notificationsRouter = require('./mobile/notifications')(db);
     var retailSegmentRouter = require('./mobile/retailSegment')(db, redis, event);
@@ -57,8 +58,9 @@ module.exports = function (db, app, redis, event) {
 
     router.use('/personnel', require('./mobile/personnel')(db, app, event, redis));
     router.use('/activityList', activityListRouter);
-    router.use('/brandingAndDisplay', brandingAndDisplayRouter);
-    router.use('/brandingAndDisplayItems', brandingAndDisplayItemsRouter);
+    router.use('/brandingActivity', brandingAndDisplayRouter);
+    router.use('/brandingActivity', brandingActivityRouter);
+    router.use('/brandingActivityItems', brandingActivityItemsRouter);
     router.use('/domain', domainRouter);
     router.use('/accessRole', accessRoleRouter);
     router.use('/notifications', notificationsRouter);

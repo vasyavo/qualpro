@@ -1518,7 +1518,7 @@
             CONSTANTS.STATUS
         ];
 
-        filters[CONSTANTS.BRANDINGANDDISPLAY] = brandingAndDisplayFilter;
+        filters[CONSTANTS.BRANDING_ACTIVITY] = brandingAndDisplayFilter;
         filters[CONSTANTS.PERSONNEL] = personnelFilter;
         filters[CONSTANTS.SHELFSHARES] = shelfSharesFilter;
         filters[CONSTANTS.PRICESURVEY] = priceSurveyFilter;

@@ -82,7 +82,7 @@
     "supertest-session": "1.0.0"
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha --require co-mocha 'src/**/*.spec.js'",
+    "test": "cross-env NODE_ENV=test mocha --require co-mocha src/server.spec.js",
     "start": "node src/server.js",
     "dev": "cross-env NODE_ENV=development node src/server.js",
     "debug": "cross-env NODE_ENV=development node-debug --save-live-edit src/server.js",

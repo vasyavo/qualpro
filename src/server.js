@@ -9,6 +9,10 @@ const logger = require('./utils/logger');
 
 require('mongoose').Schemas = {};
 
+process.on('unhandledRejection', (reason, p) => {
+    logger.error(p, reason);
+});
+
 const Scheduler = require('./helpers/scheduler')(mongo, eventEmitter);
 
 const app = require('./app');
@@ -31,7 +35,7 @@ mongo.on('connected', () => {
             server.listen(config.nodePort, cb);
         }
 
-    ], () => {
+    ], (err) => {
         logger.info(`Server started at port ${config.nodePort} in ${config.env} environment:`, config);
     })
 });

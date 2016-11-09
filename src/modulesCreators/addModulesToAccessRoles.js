@@ -1,7 +1,10 @@
+'use strict';
+
 const async = require('async');
 const logger = require('../utils/logger');
 const AccessRoleModel = require('../types/accessRole/model');
 
+var ACL_MODULES = require('../constants/aclModulesNames');
 const commentsAccess = {
     module: 1010,
     cms: {
@@ -655,6 +658,21 @@ const superAdmin = [
             edit   : false,
             write  : true,
             read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
         }
     },
     commentsAccess
@@ -1345,7 +1363,22 @@ const masterAdmin = [
             write  : false,
             read   : true
         }
-    }, commentsAccess
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },commentsAccess
 ];
 
 const countryAdmin = [
@@ -1987,6 +2020,21 @@ commentsAccess,
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -2585,6 +2633,21 @@ commentsAccess,
             archive: false,
             edit   : true,
             write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     }
@@ -3187,6 +3250,21 @@ commentsAccess,
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -3784,6 +3862,21 @@ const salesman = [
             archive: false,
             edit   : true,
             write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     }
@@ -4385,6 +4478,21 @@ const merchandiser = [
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -4982,6 +5090,21 @@ const cashVan = [
             archive: false,
             edit   : true,
             write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     }
@@ -5630,6 +5753,21 @@ commentsAccess,
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
     }
 ];
 
@@ -6244,7 +6382,22 @@ commentsAccess,
         write  : false,
         read   : true
     }
-}
+},
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    }
 ];
 
 const accessRolesData = {
@@ -6270,48 +6423,68 @@ for (let level in accessRolesData) {
     })
 }
 
+const levels = [
+    'Super User',
+    'Master Admin',
+    'Country Admin',
+    'Area Manager',
+    'Area in charge',
+    'Sales Man',
+    'Merchandiser',
+    'Cash van',
+    'Master uploader',
+    'Country uploader'
+];
+
 const generate = (callback) => {
-    AccessRoleModel.update({}, {
-        $set: {
-            roleAccess: []
+    async.waterfall([
+
+        (cb) => {
+            AccessRoleModel.update({}, {
+                $set: {
+                    roleAccess: []
+                }
+            }, {
+                multi: true
+            }, cb);
+        },
+
+        (result, cb) => {
+            async.eachOf(accessRolesData, (roleAccess, level, eachCb) => {
+                const name = levels[level];
+
+                AccessRoleModel.findOneAndUpdate({
+                    level
+                }, {
+                    $set: {
+                        name: {
+                            en: name,
+                            ar: name
+                        },
+                        level,
+                        roleAccess
+                    }
+                }, {
+                    new: true,
+                    upsert: true
+                }, (err, model) => {
+                    if (model) {
+                        accessRoles[level].id = model._id.toString();
+                    }
+
+                    eachCb(err, model);
+                });
+            }, cb);
         }
-    }, {
-        multi: true
-    }, (err) => {
+
+    ], (err) => {
         if (err) {
+            logger.error('Fail to setup access roles!', err);
             return callback(err);
         }
 
-        async.eachOf(accessRolesData, (value, index, eachCb) => {
-            AccessRoleModel.findOneAndUpdate({
-                level: index
-            }, {
-                $push: {
-                    roleAccess: {
-                        $each: value
-                    }
-                }
-            }, {
-                new: true,
-                upsert: true
-            }, (err, model) => {
-                if (err) {
-                    return eachCb(err);
-                }
-                const needId = model._id.toString();
-
-                accessRoles[index].id = needId;
-                eachCb(null, model);
-            });
-        }, (err) => {
-            if (err) {
-                logger.error('Error happened during access roles creating.', err);
-                return callback(err);
-            }
-
-            logger.info('Access roles for modules.');
-            callback();
-        });
+        logger.info('Setup is done for access roles.');
+        callback();
     });
 };
 

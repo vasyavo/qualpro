@@ -393,8 +393,8 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'Al Alali Branding & Display report', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
-        href    : CONSTANTS.BRANDINGANDDISPLAY,
+        name    : {en: 'Al Alali Branding Activity', ar: ''},
+        href    : CONSTANTS.BRANDING_ACTIVITY,
         sequence: 38,
         parrent : 16,
         visible : true
@@ -403,10 +403,10 @@ const modules = [
     {
         _id     : 40,
         name: {
-            en: 'Al Alali Branding & Display items',
-            ar: 'العلامات التجارية وتقارير العرض للسلع'
+            en: 'Al Alali Branding Activity items',
+            ar: '' /*'العلامات التجارية وتقارير العرض للسلع'*/
         },
-        href    : CONSTANTS.BRANDINGANDDISPLAYITEMS,
+        href    : CONSTANTS.BRANDING_ACTIVITY_ITEMS,
         sequence: 40,
         parrent : 16,
         visible : false
@@ -482,20 +482,31 @@ const modules = [
         sequence: 44,
         parrent : 16,
         visible : true
+    },
+
+    {
+        _id     : 44,
+        name    : {en: 'Al Alali Branding & Display report', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
+        href    : CONSTANTS.BRANDING_AND_DISPLAY,
+        sequence: 44,
+        parrent : 16,
+        visible : true
     }
 ];
 
 const q = async.queue((module, cb) => {
-    ModuleModel.findOneAndUpdate(module, module, { upsert: true }, cb);
+    ModuleModel.findOneAndUpdate({
+        _id: module._id
+    }, module, { upsert: true }, cb);
 }, 1000);
 
 const generate = (callback) => {
-    q.push(modules);
-
     q.drain = () => {
         logger.info('Modules are added successfully');
         callback();
     };
+
+    q.push(modules);
 };
 
 module.exports = {

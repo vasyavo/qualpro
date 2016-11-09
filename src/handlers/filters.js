@@ -9,7 +9,7 @@ var Filters = function(db, redis) {
     var self = this;
 
     const PersonnelModel = require('./../types/personnel/model');
-    const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+    const BrandingActivityModel = require('../types/brandingActivity/model');
     const ObjectiveModel = require('./../types/objective/model');
     const ItemModel = require('./../types/item/model');
     const ActivityListModel = require('./../types/activityList/model');
@@ -680,7 +680,7 @@ var Filters = function(db, redis) {
         });
     };
 
-    this.brandingAndDisplayFilters = function(req, res, next) {
+    this.brandingActivityFilters = function(req, res, next) {
         var CONSTANTS = require('../public/js/constants/otherConstants');
         var STATUSES = CONSTANTS.PROMOTION_UI_STATUSES;
         var query = req.query;
@@ -911,7 +911,7 @@ var Filters = function(db, redis) {
             }
         });
 
-        aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+        aggregation = BrandingActivityModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse : true
@@ -6332,13 +6332,38 @@ var Filters = function(db, redis) {
         let positionFilter;
         let aggregateHelper;
         const TYPES = [
-            'Application Related Issue',
-            'Future Application Ideas',
-            'Others'
+            {
+                name : {
+                    en : 'Application Related Issue',
+                    ar : ''
+                }
+            },
+            {
+                name : {
+                    en : 'Future Application Ideas',
+                    ar : ''
+                }
+            },
+            {
+                name : {
+                    en : 'Others',
+                    ar : ''
+                }
+            }
         ];
         const STATUSES = [
-            'new',
-            'resolved'
+            {
+                name : {
+                    en : 'new',
+                    ar : ''
+                }
+            },
+            {
+                name : {
+                    en : 'resolved',
+                    ar : ''
+                }
+            }
         ];
 
         if (filter.personnel) {

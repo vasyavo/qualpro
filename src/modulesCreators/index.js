@@ -1,11 +1,11 @@
 const async = require('async');
 
 module.exports = (callback) => {
-    async.parallel([
+    async.waterfall([
 
-        require('./addModulesToAccessRoles').generate,
+        require('./addModules').generate,
 
-        require('./addModules').generate
+        require('./addModulesToAccessRoles').generate
 
     ], callback);
 };

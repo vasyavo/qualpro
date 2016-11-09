@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const schema = require('./schema');
-const contentType = require('./../../public/js/constants/contentType.js').BRANDINGANDDISPLAY;
+const contentType = require('./../../public/js/constants/contentType.js').BRANDING_AND_DISPLAY;
 
 const model = mongoose.model(contentType, schema);
 

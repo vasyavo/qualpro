@@ -7,6 +7,7 @@ const request = require('supertest-as-promised');
 const server = require('./../server');
 const faker = require('faker');
 const agent = request.agent(server);
+const Authenticator = require('./../authenticator');
 const shortId = require('shortid');
 const mailer = require('./../helpers/mailer');
 const PasswordManager = require('./../helpers/passwordManager');
@@ -129,7 +130,7 @@ describe('mobile authentication', () => {
      * Agent using here for persisting master admin session
      * */
     it('su should pass authentication successfully', function *() {
-        const resp = yield agent
+        const resp = yield Authenticator.su
             .post('/mobile/login')
             .send(su)
             .expect(200);
@@ -145,7 +146,7 @@ describe('mobile authentication', () => {
     it('su should register master admin', function *() {
         user.accessRole = AccessRolesCreator.accessRoles[1].id;
 
-        const resp = yield agent
+        const resp = yield Authenticator.su
             .post('/personnel')
             .send(user)
             .expect(201);
@@ -183,10 +184,10 @@ describe('mobile authentication', () => {
         user.pass = PasswordManager.generatePassword();
         const generatePasswordStub = this.sandbox.stub(PasswordManager, 'generatePassword').returns(user.pass);
 
-        user.token = shortId.generate();;
+        user.token = shortId.generate();
         const generateTokenStub = this.sandbox.stub(oldPassGenerator, 'generate').returns(user.token);
 
-        const resp = yield agent
+        const resp = yield Authenticator.su
             .put(`/personnel/${user.id}`)
             .send({
                 sendPass: true,
@@ -210,7 +211,7 @@ describe('mobile authentication', () => {
     });
 
     it('master should pass authentication with password', function *() {
-        const resp = yield request(server)
+        const resp = yield Authenticator.master
             .post('/mobile/login')
             .send({
                 login: user.email,
