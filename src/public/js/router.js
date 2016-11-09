@@ -531,7 +531,7 @@ define([
                 var contentView;
 
                 collection.unbind('reset');
-debugger;
+
                 topbarView = new TopBarView(topBarOptions);
                 contentView = new ContentView(viewOptions);
 

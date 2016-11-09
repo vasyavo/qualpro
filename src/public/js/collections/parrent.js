@@ -1,9 +1,10 @@
 define([
     'Backbone',
     'js-cookie',
-    'constants/otherConstants'
+    'constants/otherConstants',
+    'constants/contentType'
 ],
-function (Backbone, Cookies, CONSTANTS) {
+function (Backbone, Cookies, CONSTANTS, CONTENT_TYPES) {
     /**
      * Drop-in replacement for Backbone.Collection. Encapsulate main pagination logic
      * @see {@link http://backbonejs.org/#Collection|Backbone.Collection }

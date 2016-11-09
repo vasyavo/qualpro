@@ -22,8 +22,7 @@ const schema = new Schema({
         type : ObjectId,
         ref : CONTENT_TYPES.FILES,
         default : null
-    }
-    ,
+    },
     createdBy : {
         type : ObjectId,
         ref : CONTENT_TYPES.PERSONNEL,

@@ -70,6 +70,7 @@
     "grunt-jsdoc": "0.6.8",
     "istanbul": "0.4.5",
     "jsdoc": "3.3.2",
+    "json-server": "0.8.23",
     "mocha": "3.1.2",
     "mocha-junit-reporter": "1.12.1",
     "nyc": "8.3.2",

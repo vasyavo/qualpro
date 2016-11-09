@@ -815,7 +815,7 @@ a {
 }
 .contactUsIcon {
   position: absolute;
-  left: -100px;
+  left: -105px;
 }
 .filterName .triDown:after {
   position: absolute;
@@ -4081,6 +4081,9 @@ span.currency + input:not([type="checkbox"]) {
   border: none;
   box-shadow: none;
 }
+.colorGreen {
+  color: #00c853;
+}
 .contentHolder {
   position: relative;
   width: 100%;
@@ -4363,6 +4366,11 @@ span.currency + input:not([type="checkbox"]) {
 .yearly-evaluation-form .evaluationWrapper .absoluteContent table tr th:last-child {
   border-right: 1px solid #cfd8dc;
 }
+.ui-widget-content {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #333;
+}
 .competitorBranding {
   height: 100%;
 }
@@ -4383,6 +4391,35 @@ span.currency + input:not([type="checkbox"]) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.contactUsFormPreview {
+  height: calc(100% - 90px);
+  padding: 30px;
+}
+.contactUsForm .block-right {
+  height: 100%;
+}
+.contactUsForm .descriptionValue {
+  width: 100%;
+  height: auto;
+  border: 1px solid #cfd8dc;
+  padding: 5px 20px;
+  overflow: hidden;
+  margin-left: 0;
+}
+.contactUsForm .comments {
+  padding: 5px;
+  background: #fbf8f8;
+  display: block;
+  min-height: 0px;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #f2f0f4;
+  border: 1px solid #d5d5d5;
+  color: #000000;
+  resize: none;
+  font-size: 14px;
+  font-size: 0.875rem;
 }
 .achivementFormWrap {
   height: 100%;
@@ -4764,6 +4801,50 @@ span.currency + input:not([type="checkbox"]) {
 .brandDisplayComments .displayComments {
   margin-top: 10px;
   margin-bottom: 20px;
+}
+.dialog-small {
+  height: auto;
+  width: 700px;
+  top: 34px;
+  left: 683px;
+  display: block;
+}
+.dialog-small .descriptionBlock {
+  margin: 5px 0 10px;
+  font-weight: bold;
+}
+.dialog-small .ui-dialog-content {
+  padding: 10px 20px!important;
+}
+.dialog-small .ui-dialog-buttonpane {
+  border: none;
+}
+.dialog-small .templateWrap {
+  min-height: auto;
+  min-width: auto;
+  margin-top: 15px;
+  border-top: 1px solid #cfd8dc !important;
+}
+.dialog-small .userBlock {
+  margin: 10px 10px 20px 10px;
+}
+.dialog-small .userBlock .right {
+  padding-left: 10px;
+}
+.dialog-small .userBlock .userName {
+  font-weight: bold;
+}
+.dialog-small .commentBlock {
+  padding: 10px 20px 10px;
+  width: 100%;
+}
+.dialog-small .commentBlock span {
+  font-style: italic;
+  font-weight: bold;
+}
+.dialog-small .commentDate {
+  position: relative;
+  top: 85%;
 }
 .no-close .ui-dialog-titlebar-close {
   display: none;
@@ -10278,6 +10359,10 @@ lesshat-selector {
 .ui-dialog-buttonpane .ui-dialog-buttonset .cancelBtn,
 .cancelBtn {
   background-color: #f44336;
+  border: 0!important;
+}
+button.grayBtn {
+  background-color: #9e9e9e !important;
   border: 0!important;
 }
 .ui-widget-overlay {

@@ -468,7 +468,7 @@ const modules = [
 
     {
         _id     : 43,
-        name    : {en: 'ContactUs'},
+        name    : {en: 'Contact Us', ar: 'Contact Us'}, // todo set Arabic translation
         href    : CONSTANTS.CONTACT_US,
         sequence: 43,
         parrent : null,
@@ -477,7 +477,7 @@ const modules = [
 
     {
         _id     : 44,
-        name    : {en: 'Consumers Survey', ar: ''}, // todo insert Arabic translation
+        name    : {en: 'Consumers Survey', ar: 'Consumers Survey'}, // todo set Arabic translation
         href    : CONSTANTS.CONSUMERS_SURVEY,
         sequence: 44,
         parrent : 16,

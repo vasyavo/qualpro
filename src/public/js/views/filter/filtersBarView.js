@@ -314,7 +314,6 @@ define([
                 });
 
                 return clonedArray;
-
             }
 
             filterNames.forEach(function (filterName) {

@@ -46,6 +46,10 @@ define([
             all: {}
         };
 
+        this[CONTENT_TYPES.CONTACT_US] = {
+            all: {}
+        };
+
         this[CONTENT_TYPES.COUNTRY] = {
             all     : {
                 archived: {
