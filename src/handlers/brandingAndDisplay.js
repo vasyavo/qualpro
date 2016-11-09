@@ -563,17 +563,6 @@ function BrandingAndDisplay(db, redis, event) {
             var files = req.files;
             var userId = session.uId;
             var saveBrandingAndDisplay = body.save;
-            var functions;
-
-            var keys = ['branch', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'category'];
-            keys.forEach(function (key) {
-                if (typeof body[key] === 'string') {
-                    body[key] = body[key].split(',');
-                    body[key] = body[key].objectID();
-                } else {
-                    body[key] = body[key].objectID();
-                }
-            });
 
             function uploadFiles(files, body, userId, cb) {
                 if (!files) {
@@ -611,8 +600,6 @@ function BrandingAndDisplay(db, redis, event) {
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
 
-                body.status = saveBrandingAndDisplay ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
-
                 model = new BrandingAndDisplayModel(body);
                 model.save(function (err, model) {
                     if (err) {
@@ -637,8 +624,11 @@ function BrandingAndDisplay(db, redis, event) {
                 self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
             }
 
-            functions = [].concat(async.apply(uploadFiles, files, body, userId), createBrandingAndDisplay, getBrandingAndDisplayAggr);
-            async.waterfall(functions, function (err, result) {
+            async.waterfall([
+                async.apply(uploadFiles, files, body, userId),
+                createBrandingAndDisplay,
+                getBrandingAndDisplayAggr
+            ], function (err, result) {
                 if (err) {
                     return next(err);
                 }

@@ -98,7 +98,8 @@ var ContactUs = function(db, redis, event) {
                 'createdBy'
             ];
             var foreignVariants = [
-                'creator.position'
+                'position',
+                'country'
             ];
             var match = {
                 createdAt : {
@@ -113,13 +114,13 @@ var ContactUs = function(db, redis, event) {
             _.forOwn(query, function(value, key) {
                 if (_.includes(searchVariants, key)) {
                     match[key] = {};
-                    match[key].$in = value;
+                    match[key].$in = value.values;
                 }
             });
             _.forOwn(query, function(value, key) {
                 if (_.includes(foreignVariants, key)) {
-                    fMatch[key] = {};
-                    fMatch[key].$in = value;
+                    fMatch[`creator.${key}`] = {};
+                    fMatch[`creator.${key}`].$in = value.values;
                 }
             });
 
@@ -138,7 +139,7 @@ var ContactUs = function(db, redis, event) {
 
         function queryRun(query) {
             var skip = (query.page - 1) * query.count;
-            var condition = generateSearchCondition(query);
+            var condition = generateSearchCondition(query.filter);
             var mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
                 .lookup({
@@ -161,6 +162,7 @@ var ContactUs = function(db, redis, event) {
                     status : 1,
                     'creator._id' : 1,
                     'creator.ID' : 1,
+                    'creator.country' : 1,
                     'creator.lastName' : 1,
                     'creator.firstName' : 1,
                     'creator.position' : 1
@@ -241,14 +243,14 @@ var ContactUs = function(db, redis, event) {
             });
         }
 
-        // access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
+        access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
         var error;
-        //
-        //     if (err) {
-        //         return next(err);
-        //     }
 
-        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+            if (err) {
+                return next(err);
+            }
+
+        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
                 error = new Error();
                 error.status = 400;
@@ -260,7 +262,7 @@ var ContactUs = function(db, redis, event) {
 
             queryRun(query);
         });
-        // });
+        });
     };
 
     this.getById = function(req, res, next) {
