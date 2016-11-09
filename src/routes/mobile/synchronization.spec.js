@@ -98,7 +98,7 @@ describe('mobile synchronization', () => {
         assertSynchResponse(body);
     });
 
-    xit('should get personnel', function *() {
+    it('should get personnel', function *() {
         const resp = yield Authenticator.master
             .get('/mobile/personnel')
             .expect(200);
@@ -108,7 +108,7 @@ describe('mobile synchronization', () => {
         assertGetResponse(body);
     });
 
-    xit('should sync personnel', function *() {
+    it('should sync personnel', function *() {
         const resp = yield Authenticator.master
             .get('/mobile/personnel/sync')
             .expect(200);
