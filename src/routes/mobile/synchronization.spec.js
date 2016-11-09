@@ -1,6 +1,8 @@
+const shell = require('shelljs');
+const config = require('./../../config');
+const spawnDefaults = require('./../../modulesCreators');
 const expect = require('chai').expect;
 const async = require('async');
-const setup = require('./../../testSetup.spec');
 const request = require('supertest-as-promised');
 const server = require('./../../server');
 const faker = require('faker');
@@ -21,6 +23,40 @@ const assertSynchResponse = (body) => {
 };
 
 describe('mobile synchronization', () => {
+
+    before(function(done) {
+        const timeToPullDatabase = 60 * 10 * 1000;
+
+        this.timeout(timeToPullDatabase);
+
+        const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
+
+        shell.chmod('+x', pathToScript);
+
+        async.waterfall([
+
+            (cb) => {
+                shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
+                    if (code !== 0) {
+                        return cb('Something wrong with database pulling')
+                    }
+
+                    cb();
+                });
+            },
+
+            (cb) => {
+                spawnDefaults(cb);
+            }
+
+        ], (err) => {
+            if (err) {
+                return done(err);
+            }
+
+            done();
+        });
+    });
 
     it('should get activity list', function *() {
         const resp = yield Authenticator.master
