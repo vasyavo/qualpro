@@ -104,10 +104,6 @@ function (Backbone, Cookies, CONSTANTS, CONTENT_TYPES) {
 
             _opts.supervisorFilter = options.supervisorFilter;
 
-            if (options.contentType === CONTENT_TYPES.CONTACT_US && _opts.data.filter.personnel) {
-                _opts.data.createBy = _opts.data.filter.personnel.values[0];
-            }
-
             return _opts;
         },
 
@@ -129,7 +125,7 @@ function (Backbone, Cookies, CONSTANTS, CONTENT_TYPES) {
             }
 
             _opts = this.dataComposer(page, options);
-debugger;
+
             return this.fetch(_opts);
         },
 

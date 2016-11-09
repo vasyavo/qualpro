@@ -7,9 +7,7 @@ define([
         'views/filter/filtersBarView',
         'views/paginator',
         'constants/contentType'
-    ],
-
-    function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
+    ], function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
         'use strict';
 
         var View = paginator.extend({

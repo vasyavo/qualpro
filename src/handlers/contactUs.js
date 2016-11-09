@@ -104,7 +104,7 @@ var ContactUs = function(db, redis, event) {
                 createdAt : {
                     $gte : new Date(query.startDate),
                     $lte : new Date(query.endDate)
-                }
+                },
             };
             var fMatch = {};
             var formCondition = [];
@@ -126,6 +126,7 @@ var ContactUs = function(db, redis, event) {
             formCondition.push({
                 $match : match
             });
+
             foreignCondition.push({
                 $match : fMatch
             });
