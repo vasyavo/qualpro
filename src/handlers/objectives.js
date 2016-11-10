@@ -2023,7 +2023,7 @@ var Objectives = function (db, redis, event) {
             queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
             async.waterfall([
-                // Appends to query object _ids of users that are subordinates to current user.
+                // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
                 (cb) => {
                     if (myCC) {
                         PersonnelModel.find({manager: req.session.uId})
@@ -2036,7 +2036,7 @@ var Objectives = function (db, redis, event) {
                 },
                 function (arrayOfUserId, cb) {
                     if (myCC) {
-                        queryObject.$and[0]['createdBy.user'].$in = [arrayOfUserId[0]._id];
+                        queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
                     }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },

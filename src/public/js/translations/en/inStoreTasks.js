@@ -28,6 +28,7 @@ define([
         createdByMe       : 'Created by me',
         myCoverTasks      : 'My Cover Tasks',
         closed            : 'Closed',
+        myCCTasks         : 'My CC tasks',
         newTask           : 'New Task',
         priority          : 'Priority',
         location          : 'Location',
