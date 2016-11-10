@@ -58,7 +58,7 @@ module.exports = function (db, app, redis, event) {
 
     router.use('/personnel', require('./mobile/personnel')(db, app, event, redis));
     router.use('/activityList', activityListRouter);
-    router.use('/brandingActivity', brandingAndDisplayRouter);
+    router.use('/brandingAndDisplay', brandingAndDisplayRouter);
     router.use('/brandingActivity', brandingActivityRouter);
     router.use('/brandingActivityItems', brandingActivityItemsRouter);
     router.use('/domain', domainRouter);
