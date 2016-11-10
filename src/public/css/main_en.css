@@ -1712,7 +1712,7 @@ input:invalid {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
+  left: -1px;
   z-index: 5;
   background-image: url("../images/check2.png");
   background-size: cover;
@@ -2108,6 +2108,52 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 }
 .dateJoinedWrap input {
   background-color: #f2f0f4!important;
+}
+.borderedInput {
+  height: 36px;
+  width: 230px;
+  padding: 0 15px 0 38px;
+  border: 1px solid #cfd8dc;
+  width: 300px!important;
+}
+.calendarInputWrap {
+  position: relative;
+  padding: 7px 10px;
+  margin-right: 10px;
+  border: 1px solid #cfd8dc !important;
+}
+.calendarInputWrap input {
+  width: 90px;
+}
+.calendarInputWrap label:after {
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  content: '\e90b';
+  font-family: 'icomoon';
+  line-height: 28px;
+  font-size: 19px;
+  font-size: 1.1875rem;
+}
+.calendarInputWrap .calendarInput {
+  display: inline-block;
+  padding-left: 0px;
+}
+.circleRadioButton input[type="radio"] {
+  display: none;
+}
+.circleRadioButton input[type="radio"] + label {
+  display: inline-block;
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  border: 1px solid #cfd8dc;
+  text-align: center;
+  line-height: 34px;
+}
+.circleRadioButton input[type="radio"]:checked + label {
+  background-color: #f44336;
+  color: white;
 }
 .redBtn,
 .greenBtn,
@@ -3858,7 +3904,6 @@ span.currency + input:not([type="checkbox"]) {
   -o-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
-
 .spinner .cube1,
 .spinner .cube2 {
   position: absolute;
@@ -4421,6 +4466,16 @@ span.currency + input:not([type="checkbox"]) {
   font-size: 14px;
   font-size: 0.875rem;
 }
+.contactUsForm .table {
+  border-collapse: collapse;
+}
+.contactUsForm .block-left {
+  padding-right: 20px;
+}
+.alaliBrandingFormPreview {
+  height: calc(100% - 170px);
+  padding: 0;
+}
 .achivementFormWrap {
   height: 100%;
 }
@@ -4845,6 +4900,63 @@ span.currency + input:not([type="checkbox"]) {
 .dialog-small .commentDate {
   position: relative;
   top: 85%;
+}
+.consumerSurveyForm {
+  line-height: 44px;
+}
+.consumerSurveyForm .categoryButtonWrap {
+  top: 8px;
+  right: 5px;
+}
+.consumerSurveyForm .arabicIcon {
+  position: relative!important;
+  top: 9px;
+}
+.consumerSurveyForm .filterContentHolder {
+  margin: 5px 20px 20px;
+  overflow: hidden;
+  border: 1px solid #cfd8dc;
+}
+.consumerSurveyForm .blockObjective {
+  margin: 0 20px;
+}
+.consumerSurveyForm .blockObjective .dialogCategoryTitle {
+  border: 1px solid #cfd8dc;
+  background: #e6e6e6;
+  height: 40px;
+}
+.consumerSurveyForm .blockObjective thead th {
+  background: white;
+}
+.consumerSurveyForm .blockObjective .arabicIcon {
+  margin-left: 70px;
+}
+.consumerSurveyPreviewForm .userLogo {
+  width: 70px;
+  height: 70px;
+  margin-left: 15px;
+}
+.consumerSurveyPreviewForm .consumersList .templateWrap {
+  background: white;
+  min-height: auto;
+  display: block;
+  min-width: auto;
+}
+.consumerSurveyPreviewForm .topWrap .userBlock {
+  float: left;
+  margin-bottom: 0px;
+}
+.consumerSurveyPreviewForm .topWrap .userBlock .right {
+  margin-top: 15px;
+}
+.consumerSurveyPreviewForm .topWrap .consumer_answer {
+  float: right;
+  top: 30px;
+  position: relative;
+  right: 180px;
+}
+.consumerSurveyPreviewForm .bottomWrap .location {
+  padding: 0 10px 10px 20px;
 }
 .no-close .ui-dialog-titlebar-close {
   display: none;
@@ -5374,7 +5486,7 @@ span.currency + input:not([type="checkbox"]) {
 }
 .filterBar .filtersFullHolder {
   float: left;
-  padding: 20px 0 20px 20px;
+  padding: 20px 0 10px 20px;
   width: 100%;
 }
 .filterBar .filtersFullHolder .filterFullContainer {
@@ -5387,7 +5499,7 @@ span.currency + input:not([type="checkbox"]) {
 }
 .filterBar .filtersFullHolder .filterFullContainer .filterName span {
   position: absolute;
-  top: 20px;
+  top: 10px;
   right: 0;
   cursor: pointer;
 }
@@ -8109,11 +8221,21 @@ table:not(.ui-datepicker-calendar) thead tr td {
 .templateWrap .dateBlock {
   margin: 10px 20px 20px 10px;
 }
+.templateWrap .userBlockNoBorder,
+.templateWrap .dateBlockNoBorder {
+  margin: 0;
+}
 .templateWrap .locationBlock {
   margin: 10px 5px 20px 10px;
 }
 .templateWrap .locationBlock .locationTitleWrap {
   padding-right: 10px;
+}
+.templateWrap .consumerSurveyBlock {
+  margin: 0 5px 0x 10px;
+}
+.consumerSurveyWrap {
+  min-height: 100px;
 }
 .stretchWrap .templateWrap {
   min-width: 635px;
