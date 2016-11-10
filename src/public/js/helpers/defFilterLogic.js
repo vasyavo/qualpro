@@ -395,7 +395,7 @@ define([
                     values: [{
                         'assignedTo': {
                             type  : 'ObjectId',
-                            values: []
+                            values: [currentUserId]
                         },
                         'status': {
                             type   : 'string',
@@ -641,7 +641,7 @@ define([
                     values: [{
                         'assignedTo': {
                             type  : 'ObjectId',
-                            values: []
+                            values: [currentUserId]
                         },
                         'status'        : {
                             type   : 'string',

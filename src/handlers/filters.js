@@ -194,6 +194,13 @@ var Filters = function(db, redis) {
         var query = req.query;
 
         var queryFilter = query.filter || {};
+        var myCC = queryFilter.myCC;
+
+        if (myCC) {
+            delete queryFilter.myCC;
+            queryFilter.$and.values[0]['createdBy.user'] = queryFilter.$and.values[0]['assignedTo'];
+            delete queryFilter.$and.values[0]['assignedTo'];
+        }
 
         var filterMapper = new FilterMapper();
 
@@ -202,7 +209,7 @@ var Filters = function(db, redis) {
 
         var filter = filterMapper.mapFilter({
             contentType : CONTENT_TYPES.OBJECTIVES,
-            filter : query.filter,
+            filter : queryFilter,
             personnel : req.personnelModel
         });
 
@@ -460,12 +467,23 @@ var Filters = function(db, redis) {
             priority : 1,
             assignedTo : 1
         };
-        var filterMapper = new FilterMapper();
+
+
+
         var query = req.query;
         var queryFilter = query.filter || {};
+        let myCC = queryFilter.myCC;
         var currentSelected = query.current;
+
+        if (myCC) {
+            delete queryFilter.myCC;
+            queryFilter.$and.values[0]['createdBy.user'] = queryFilter.$and.values[0]['assignedTo'];
+            delete queryFilter.$and.values[0]['assignedTo'];
+        }
+
         var filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
 
+        var filterMapper = new FilterMapper();
         var filter = filterMapper.mapFilter({
             filter : queryFilter,
             personnel : req.personnelModel
