@@ -387,6 +387,25 @@ define([
                         }
                     }]
                 }
+            },
+
+            myCC : {
+                $and: {
+                    type  : 'collection',
+                    values: [{
+                        'createdBy.user': {
+                            type  : 'ObjectId',
+                            values: [currentUserId]
+                        },
+                        'status'        : {
+                            type   : 'string',
+                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                            names  : ['Closed'],
+                            options: {$nin: true}
+                        }
+                    }]
+                },
+                myCC: true
             }
         };
 

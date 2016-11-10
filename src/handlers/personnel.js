@@ -2945,6 +2945,7 @@ var Personnel = function (db, redis, event) {
         const accessLevel = req.session.level;
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
+        let generatedPassword;
 
         function queryRun(body, callback) {
             let coveredUserId;
@@ -2978,9 +2979,10 @@ var Personnel = function (db, redis, event) {
             }
 
             if (body.sendPass && !(body.oldPass || body.newPass)) {
-                const password = PasswordManager.generatePassword();
+                generatedPassword = PasswordManager.generatePassword();
+
                 const salt = bcrypt.genSaltSync(10);
-                const hash = bcrypt.hashSync(password, salt);
+                const hash = bcrypt.hashSync(generatedPassword, salt);
                 const token = generator.generate();
 
                 body.pass = hash;
@@ -3287,7 +3289,7 @@ var Personnel = function (db, redis, event) {
                 lastName   : personnel.lastName,
                 email      : personnel.email,
                 phoneNumber: `+${personnel.phoneNumber}`,
-                password   : body.pass,
+                password   : generatedPassword,
                 token      : personnel.token,
                 language   : currentLanguage
             };

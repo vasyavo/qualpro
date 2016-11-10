@@ -19,6 +19,7 @@
     "express": "4.3.0",
     "express-session": "1.10.2",
     "fluent-ffmpeg": "2.0.1",
+    "generate-password": "1.2.0",
     "handlebars": "4.0.5",
     "i18n": "0.5.0",
     "imagemagick": "0.1.3",
