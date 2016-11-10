@@ -3,9 +3,6 @@ function BrandingAndDisplay(db, redis, event) {
     var async = require('async');
     var mongoose = require('mongoose');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var VALIDATION = require('../public/js/constants/validation.js');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
     var getImagesHelper = new GetImageHelper(db);
     var FilterMapper = require('../helpers/filterMapper');
@@ -17,8 +14,6 @@ function BrandingAndDisplay(db, redis, event) {
     var joiValidate = require('../helpers/joiValidate');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-    var self = this;
 
     var $defProjection = {
         _id          : 1,
@@ -559,10 +554,8 @@ function BrandingAndDisplay(db, redis, event) {
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var session = req.session;
             var files = req.files;
-            var userId = session.uId;
-            var saveBrandingAndDisplay = body.save;
+            var userId = req.session.uId;
 
             function uploadFiles(files, body, userId, cb) {
                 if (!files) {
@@ -580,54 +573,21 @@ function BrandingAndDisplay(db, redis, event) {
 
             function createBrandingAndDisplay(filesIds, body, userId, cb) {
                 var model;
-                var description = body.description;
-                var createdBy = {
-                    user: userId,
-                    date: new Date()
-                };
 
-                if (description) {
-                    if (description.en) {
-                        description.en = _.escape(description.en);
-                    }
-
-                    if (description.ar) {
-                        description.ar = _.escape(description.ar);
-                    }
-                    body.description = description;
-                }
                 body.attachments = filesIds;
-                body.createdBy = createdBy;
-                body.editedBy = createdBy;
-
                 model = new BrandingAndDisplayModel(body);
                 model.save(function (err, model) {
                     if (err) {
                         return cb(err);
                     }
 
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId    : model._id,
-                        itemType  : CONTENT_TYPES.BRANDINGANDDISPLAY
-                    });
-
                     cb(null, model);
                 });
             }
 
-            function getBrandingAndDisplayAggr(model, cb) {
-                var id = model.get('_id');
-
-                self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
-            }
-
             async.waterfall([
                 async.apply(uploadFiles, files, body, userId),
-                createBrandingAndDisplay,
-                getBrandingAndDisplayAggr
+                createBrandingAndDisplay
             ], function (err, result) {
                 if (err) {
                     return next(err);
@@ -650,6 +610,7 @@ function BrandingAndDisplay(db, redis, event) {
             return next(err);
         }
 
+        body.createdBy = req.session.uId;
         joiValidate(body, req.session.level, CONTENT_TYPES.BRANDING_AND_DISPLAY, 'create', function (err, saveData) {
             if (err) {
                 error = new Error();

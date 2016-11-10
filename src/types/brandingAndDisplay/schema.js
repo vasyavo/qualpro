@@ -3,18 +3,18 @@ const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    category: [{
+    categories: [{
         type: ObjectId,
         ref: CONTENT_TYPES.CATEGORY
     }],
-    outlet: [{
+    outlet: {
         type: ObjectId,
         ref: CONTENT_TYPES.OUTLET
-    }],
-    branch: [{
+    },
+    branch: {
         type: ObjectId,
         ref: CONTENT_TYPES.BRANCH
-    }],
+    },
     displayType: {
         type: Number,
         ref: CONTENT_TYPES.DISPLAYTYPE,
@@ -28,19 +28,18 @@ const schema = new Schema({
     },
     attachments: { type: Array, default: [] },
     description: {
-        en: { type: String, default: '' },
-        ar: { type: String, default: '' }
+        type: String, default: ''
     },
     createdBy: {
         type: ObjectId,
         ref: CONTENT_TYPES.PERSONNEL,
         default: null
     },
-    editedBy: {
+    /*editedBy: {
         type: ObjectId,
         ref: CONTENT_TYPES.PERSONNEL,
         default: null
-    },
+    },*/
     createdAt : {
         type: Date,
         default: new Date()
