@@ -403,6 +403,7 @@ module.exports = function (app, db, event) {
         res.send('form tampered with');
     }
 
+    // last sync date which represent timestamp end of request and mobile app save it in own context
     function sendData(data, req, res, next) {
         var status = data.status;
         var body = data.body;
