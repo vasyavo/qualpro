@@ -9,17 +9,17 @@ function currentDate() {
 
 const create = Joi.object().keys({
     createdBy : Joi.objectId().required(),
-    branch : Joi.array().items(Joi.objectId()).required(),
-    displayType : Joi.objectId().required(),
-    outlet : Joi.array().items(Joi.objectId()).required(),
-    category : Joi.array(Joi.objectId()).items(Joi.objectId()),
+    branch : Joi.objectId().required(),
+    displayType : Joi.number().integer().required(),
+    outlet : Joi.objectId().required(),
+    categories : Joi.array().items(Joi.objectId()),
     description : Joi.string().required(),
-    dateStart : Joi.date().max(Joi.ref('dateEnd')).required(),
-    dateEnd : Joi.date().min(Joi.ref('dateStart')).required(),
+    dateStart : Joi.date().max(Joi.ref('dateEnd')).default(currentDate, 'current date'),
+    dateEnd : Joi.date().min(Joi.ref('dateStart')).default(currentDate, 'current date'),
     createdAt : Joi.date().default(currentDate, 'current date'),
     updatedAt : Joi.date().default(currentDate, 'current date')
 });
 
 module.exports = {
-    create : create
+    create
 };

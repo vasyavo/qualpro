@@ -18,6 +18,7 @@
         var achievementFormFilter = {};
         var newProductLaunchFilter = {};
         var competitorBrandingFilter = {};
+        var contactUsFilter = {};
         var competitorPromotionFilter = {};
         var promotionFilter = {};
         var personnelTasksFilter = {};
@@ -921,6 +922,49 @@
             'time'
         ];
 
+        // =============================== contactUs filters ===================================================
+        contactUsFilter[CONSTANTS.COUNTRY] = getFilterConstant({
+            displayName: {en: 'Country', ar: 'الدولة'},
+            mandatory  : true,
+            filterType : 'singleSelect'
+        });
+
+        contactUsFilter[CONSTANTS.POSITION] = getFilterConstant({
+            displayName: {en: 'Position', ar: 'المركز الوظيفي'},
+            filterType : 'multiSelect'
+        });
+
+        contactUsFilter[CONSTANTS.PERSONNEL] = getFilterConstant({
+            displayName: {en: 'Employee', ar: 'الموظف'},
+            filterType : 'multiSelect'
+        });
+
+        contactUsFilter.type = getFilterConstant({
+            displayName: {en: 'Type', ar: 'النوع'},
+            filterType : 'multiSelect'
+        });
+
+        contactUsFilter[CONSTANTS.STATUS] = getFilterConstant({
+            displayName: {en: 'Status', ar: 'الحالة'},
+            filterType : 'multiSelect'
+        });
+
+        contactUsFilter.time = getFilterConstant({
+            displayName: {en: 'Time', ar: 'الوقت'},
+            type       : 'date',
+            filterType : 'time'
+        });
+
+        contactUsFilter.array = [
+            CONSTANTS.COUNTRY,
+            CONSTANTS.POSITION,
+            CONSTANTS.PERSONNEL,
+            'type',
+            CONSTANTS.STATUS,
+            'time'
+        ];
+
+        // ================================== achievementForm filters ========================================
         achievementFormFilter[CONSTANTS.COUNTRY] = getFilterConstant({
             displayName: {en: 'Country', ar: 'الدولة'},
             mandatory  : true,
@@ -1493,6 +1537,7 @@
         filters[CONSTANTS.PLANOGRAM] = planogramFilter;
         filters[CONSTANTS.COMPETITORSLIST] = competitorsFilter;
         filters[CONSTANTS.PERSONNELTASKS] = personnelTasksFilter;
+        filters[CONSTANTS.CONTACT_US] = contactUsFilter;
 
         filters[CONSTANTS.CONTRACTSYEARLY] = contractsYearlyFilter;
         filters[CONSTANTS.CONTRACTSSECONDARY] = contractsSecondaryFilter;

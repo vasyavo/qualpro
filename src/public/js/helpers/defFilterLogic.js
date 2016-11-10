@@ -46,6 +46,10 @@ define([
             all: {}
         };
 
+        this[CONTENT_TYPES.CONTACT_US] = {
+            all: {}
+        };
+
         this[CONTENT_TYPES.COUNTRY] = {
             all     : {
                 archived: {
@@ -383,6 +387,25 @@ define([
                         }
                     }]
                 }
+            },
+
+            myCC : {
+                $and: {
+                    type  : 'collection',
+                    values: [{
+                        'assignedTo': {
+                            type  : 'ObjectId',
+                            values: [currentUserId]
+                        },
+                        'status': {
+                            type   : 'string',
+                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                            names  : ['Closed'],
+                            options: {$nin: true}
+                        }
+                    }]
+                },
+                myCC: true
             }
         };
 
@@ -552,8 +575,7 @@ define([
                                         names  : ['Draft'],
                                         options: {$nin: true}
                                     }
-                                },
-                                {
+                                }, {
                                     'createdBy.user': {
                                         type  : 'ObjectId',
                                         values: coveredIdsArr
@@ -569,10 +591,15 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        'status': {
-                            type  : 'string',
-                            values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names : ['Closed']
+                        'createdBy.user': {
+                            type  : 'ObjectId',
+                            values: [currentUserId]
+                        },
+                        'status'        : {
+                            type   : 'string',
+                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                            names  : ['Closed'],
+                            options: {$nin: true}
                         }
                     }]
                 }
@@ -606,6 +633,25 @@ define([
                         }
                     }]
                 }
+            },
+
+            myCC: {
+                $and: {
+                    type: 'collection',
+                    values: [{
+                        'assignedTo': {
+                            type  : 'ObjectId',
+                            values: [currentUserId]
+                        },
+                        'status'        : {
+                            type   : 'string',
+                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                            names  : ['Closed'],
+                            options: {$nin: true}
+                        }
+                    }]
+                },
+                myCC: true
             }
         };
 

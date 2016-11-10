@@ -23,6 +23,10 @@ before(function(done) {
     });
 });
 
+after((done) => {
+    mongo.db.dropDatabase(done);
+});
+
 afterEach(function() {
     this.sandbox.restore();
 });

@@ -55,12 +55,28 @@ const getAll = Joi.object().keys({
     page : Joi.number().integer().min(1).default(1),
     count : Joi.number().integer().default(CONSTANTS.LIST_COUNT),
     sortBy : Joi.string().default('createdAt'),
-    type : Joi.array().items(Joi.string().valid(TYPES)),
-    status : Joi.array().items(Joi.string().valid(STATUSES)),
-    createdBy : Joi.array().items(customJoi.objectId().toObjectId()),
-    'creator.position' : Joi.array().items(customJoi.objectId().toObjectId()),
-    startDate : Joi.date().default(startOfYear, 'start of a year date'),
-    endDate : Joi.date().default(currentDate, 'current date')
+    filter : Joi.object().keys({
+        type : Joi.object().keys({
+            values : Joi.array().items(Joi.string().valid(TYPES))
+        }),
+        status : Joi.object().keys({
+            values : Joi.array().items(Joi.string().valid(STATUSES))
+        }),
+        createdBy : Joi.object().keys({
+            values : Joi.array().items(customJoi.objectId().toObjectId())
+        }),
+        country : Joi.object().keys({
+            values : Joi.array().items(customJoi.objectId().toObjectId()).max(1)
+        }),
+        position : Joi.object().keys({
+            values : Joi.array().items(customJoi.objectId().toObjectId())
+        }),
+        startDate : Joi.date().default(startOfYear, 'start of a year date'),
+        endDate : Joi.date().default(currentDate, 'current date')
+    }).rename('personnel', 'createdBy').default({
+        startDate : startOfYear(),
+        endDate : currentDate()
+    })
 });
 
 module.exports = {

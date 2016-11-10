@@ -1327,6 +1327,7 @@ var InStoreReports = function (db, redis, event) {
             var ids;
             var uId = req.session.uId;
             var currentUserLevel = req.session.level;
+            let myCC = filter.myCC;
 
             var searchFieldsArray = [
                 'title.en',
@@ -1361,7 +1362,9 @@ var InStoreReports = function (db, redis, event) {
                 'assignedTo.position.name.ar',
                 'assignedTo.position.name.en'
             ];
+
             delete filter.globalSearch;
+            delete filter.myCC;
 
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.INSTORETASKS,
@@ -1401,9 +1404,25 @@ var InStoreReports = function (db, redis, event) {
             queryObject.context = CONTENT_TYPES.INSTORETASKS;
 
             async.waterfall([
-                function (cb) {
+                // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
+                (cb) => {
+                    if (myCC) {
+                        PersonnelModel.find({manager: req.session.uId})
+                            .select('_id')
+                            .lean()
+                            .exec(cb);
+                    } else {
+                        cb(null, true);
+                    }
+                },
+
+                function (arrayOfUserId, cb) {
+                    if (myCC) {
+                        queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
+                    }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },
+
                 function (coveredIds, cb) {
                     var pipeLine = [];
                     var aggregation;

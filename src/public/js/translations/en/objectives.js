@@ -17,6 +17,7 @@ define([
         createdByMe      : 'Created by me',
         myCoverObjectives: 'My cover Objectives',
         closed           : 'Closed',
+        myCCObjectives   : 'My CC objectives',
         newObjective     : 'New Objective',
         // list
         priority         : 'Priority',

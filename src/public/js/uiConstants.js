@@ -39,7 +39,7 @@
         TASK                  : 'task',
         VISIBILITYFORM        : 'visibilityForm',
         CONFIGURATIONS        : 'configurations',
-
+        CONTACT_US            : 'contactUs',
 
         PRICESURVEY                  : 'priceSurvey',
         SHELFSHARESANALYSIS          : 'shelfSharesAnalysis',

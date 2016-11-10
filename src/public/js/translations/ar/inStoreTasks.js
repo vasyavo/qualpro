@@ -28,6 +28,7 @@ define([
         createdByMe    : 'تم إنشاؤه من قبلي',
         myCoverTasks   : 'المهام المغطاة بالإنابة',
         closed         : 'المغلقة',
+        myCCTasks      : '', //todo set Arabic translation!
         newTask        : 'مهمة جديدة',
         priority       : 'الأولوية',
         location       : 'الموقع',
