@@ -7,3 +7,7 @@ npm i aglio
 chmod 755 ./API_documentation/update_docs.sh
 chmod +x ./API_documentation/update_docs.sh
 npm run docs
+
+# Get additional scripts
+chmod +x ./get-scripts.sh
+./get-scripts.sh

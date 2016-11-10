@@ -13,6 +13,8 @@ require('dotenv').config({
     path: path.join(__dirname, `.env${config.env ? `.${config.env}` : ''}`).normalize(),
 });
 
+config.workingDirectory = path.join(__dirname, '../../');
+
 const host = process.env.HOST;
 
 config.port = parseInt(process.env.PORT) || 3000;
