@@ -173,26 +173,6 @@ describe('mobile synchronization', () => {
         assertGetResponse(body);
     });
 
-    it('should get branding and display', function *() {
-        const resp = yield Authenticator.master
-            .get('/mobile/brandingActivity')
-            .expect(200);
-
-        const body = resp.body;
-
-        assertGetResponse(body);
-    });
-
-    it('should sync branding and display', function *() {
-        const resp = yield Authenticator.master
-            .get('/mobile/brandingActivity/sync')
-            .expect(200);
-
-        const body = resp.body;
-
-        assertGetResponse(body);
-    });
-
     it('should get current user', function *() {
         const resp = yield Authenticator.master
             .get('/mobile/personnel/currentUser')
@@ -304,9 +284,9 @@ describe('mobile synchronization', () => {
         assertGetResponse(body);
     });
 
-    it('should get branding and display', function *() {
+    it('should get branding and activity (in past branding and display)', function *() {
         const resp = yield Authenticator.master
-            .get('/mobile/brandingAndDisplay')
+            .get('/mobile/brandingActivity')
             .expect(200);
 
         const body = resp.body;
@@ -314,14 +294,14 @@ describe('mobile synchronization', () => {
         assertGetResponse(body);
     });
 
-    it('should sync branding and displa', function *() {
+    it('should sync branding and activity (in past branding and display)', function *() {
         const resp = yield Authenticator.master
-            .get('/mobile/brandingAndDisplay/sync')
+            .get('/mobile/brandingActivity/sync')
             .expect(200);
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     // todo price survey will be implemented later
