@@ -10,30 +10,43 @@ define([
             defaults      : {},
             attachmentsKey: 'attachments',
 
-            multilanguageFields: [
+            fieldsToTranslate: [
+                'title',
+                'type',
                 'description',
-                'location',
-                'createdBy.user.firstName',
-                'createdBy.user.lastName',
-                'createdBy.user.accessRole.name',
-                'createdBy.user.position.name',
-                'category.name',
-                'brand.name',
-                'country.name',
-                'region.name',
-                'subRegion.name',
-                'retailSegment.name',
-                'outlet.name',
-                'branch.name',
-                'displayType.name'
+                'endDate',
+                'startDate',
+                'attachments'
             ],
 
-            validate: function (attrs) {
+            multilanguageFields: [
+                'description'
+            ],
+
+            validate: function (attrs, cb) {
                 var errors = [];
 
-                if (errors.length > 0) {
-                    return errors;
+                if (!attrs.type) {
+                    errors.push('Field type can not be empty');
                 }
+                if (this.translatedFields.description) {
+                    validation.checkDescriptionField(errors, true, attrs.description, this.translatedFields.description);
+                }
+                if (this.translatedFields.startDate) {
+                    validation.checkForValuePresence(errors, true, attrs.dateStart, this.translatedFields.startDate);
+                }
+                if (this.translatedFields.endDate) {
+                    validation.checkForValuePresence(errors, true, attrs.dateEnd, this.translatedFields.endDate);
+                }
+                if (this.translatedFields.attachments) {
+                    validation.checkForValuePresence(errors, false, attrs.attachments, this.translatedFields.attachments);
+                }
+
+                if (errors.length > 0) {
+                    return cb(errors);
+                }
+
+                return cb(null);
             },
 
             urlRoot: function () {

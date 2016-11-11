@@ -47,6 +47,8 @@ define([], function () {
         SECONDARYDISPLAYS            : 'secondaryDisplays',
         RAMADANDISPLAYS              : 'ramadanDisplays',
         OTHERDISPLAYS                : 'otherDisplays',
-        CUSTOMREPORTS                : 'customReports'
+        CUSTOMREPORTS                : 'customReports',
+        CONTACT_US                   : 'contactUs',
+        CONSUMESR_SURVEY             : 'consumersSurvey'
     }
 });
