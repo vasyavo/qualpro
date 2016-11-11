@@ -304,6 +304,26 @@ describe('mobile synchronization', () => {
         assertGetResponse(body);
     });
 
+    it('should get branding and display', function *() {
+        const resp = yield Authenticator.master
+            .get('/mobile/brandingAndDisplay')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+
+    it('should sync branding and displa', function *() {
+        const resp = yield Authenticator.master
+            .get('/mobile/brandingAndDisplay/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertSynchResponse(body);
+    });
+
     // todo price survey will be implemented later
 
 });
