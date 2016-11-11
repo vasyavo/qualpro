@@ -1984,9 +1984,11 @@ var Objectives = function (db, redis, event) {
             ];
 
             var cover = filter.cover;
+            var myCC = filter.myCC;
 
             delete filter.cover;
             delete filter.globalSearch;
+            delete filter.myCC;
 
             queryObject = filterMapper
                 .mapFilter({
@@ -2021,7 +2023,21 @@ var Objectives = function (db, redis, event) {
             queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
             async.waterfall([
-                function (cb) {
+                // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
+                (cb) => {
+                    if (myCC) {
+                        PersonnelModel.find({manager: req.session.uId})
+                            .select('_id')
+                            .lean()
+                            .exec(cb);
+                    } else {
+                        cb(null, true);
+                    }
+                },
+                function (arrayOfUserId, cb) {
+                    if (myCC) {
+                        queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
+                    }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },
                 function (coveredIds, cb) {

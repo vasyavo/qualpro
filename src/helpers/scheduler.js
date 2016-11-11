@@ -297,7 +297,7 @@ module.exports = function (db, event) {
     }
 
     function brandingAndDisplayExpired() {
-        const BrandingActivityModel = require('../types/brandingActivity/model');
+        const BrandingAndDisplayModel = require('../types/brandingAndDisplay/model');
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
@@ -311,7 +311,7 @@ module.exports = function (db, event) {
         };
 
         function updateBrandingAndDisplay(id, cb) {
-            BrandingActivityModel.findByIdAndUpdate(id, {
+            BrandingAndDisplayModel.findByIdAndUpdate(id, {
                 $set: {
                     status: PROMOTION_STATUSES.EXPIRED
                 }
@@ -328,7 +328,7 @@ module.exports = function (db, event) {
             });
         }
 
-        BrandingActivityModel.aggregate(getPipeLine(query), schedulerCallBack('brandingAndDisplay', 'Expired', updateEachGenerator(updateBrandingAndDisplay)));
+        BrandingAndDisplayModel.aggregate(getPipeLine(query), schedulerCallBack('brandingAndDisplay', 'Expired', updateEachGenerator(updateBrandingAndDisplay)));
     }
 
     function competitorBrandingAndDisplayExpired() {

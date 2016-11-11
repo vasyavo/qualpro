@@ -232,7 +232,6 @@ define([
                         }
 
                         self.createViews(contentViewOpts, topBarOpts, collectionOpts, self.mainView.topMenu);
-
                     });
                 }
             });

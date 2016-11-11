@@ -2,8 +2,7 @@
   <%= translation.objectives %>
 </div>
 
-<div class="filterBar">
-</div>
+<div class="filterBar"></div>
 
 <div id="viewBar" class="viewBar objectivesViewBar">
     <div id="templateSwitcher" class="templateSwitcher">
@@ -18,7 +17,6 @@
            data-filter-type="assignedToMe"
            data-translation="assignedToMe"
            id="assignedToMe"><%= translation.assignedToMe %>
-
         </a>
         <a href="javascript:;"
            class="changeContentView filterType"
@@ -37,6 +35,12 @@
            data-filter-type="closed"
            data-translation="closed"
            id="closed"><%= translation.closed %>
+        </a>
+        <a href="javascript:;"
+           class="changeContentView filterType"
+           data-filter-type="myCC"
+           data-translation="myCC"
+           id="myCC"><%= translation.myCCObjectives %>
         </a>
     </div>
 

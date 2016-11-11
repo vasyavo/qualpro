@@ -2095,199 +2095,229 @@ var Personnel = function (db, redis, event) {
         return pipeLine;
     }
 
-    this.getAllForSync = function (req, res, next) {
-        function queryRun(personnel) {
-            var query = req.query;
-            var isMobile = req.isMobile;
-            var filter = query.filter || {};
-            var lastLogOut = new Date(query.lastLogOut);
-            var filterMapper = new FilterMapper();
-            var queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.PERSONNEL,
-                filter     : filter,
-                personnel  : personnel
-            });
-            var aggregateHelper = new AggregationHelper($defProjection, queryObject);
-            var supervisorFilter = query.supervisorFilter;
-            var pipeLine;
-            var aggregation;
-            var ids;
-            var key;
-            var splitKey;
-            var domainsArray = ['country', 'region', 'subRegion'];
-            var sort = query.sort || {
-                    lastDate: -1
+    function finalStepToRetrieve(options, callback) {
+        const pipeline = options.pipeline;
+        const personnelLevel = options.personnelLevel;
+        const isMobile = options.isMobile;
+        const personnel = options.personnel;
+
+        async.waterfall([
+
+            (cb) => {
+                PersonnelModel.aggregate(pipeline).exec(cb);
+            },
+
+            (response, cb) => {
+                const options = {
+                    data: {}
+                };
+                const ids = _.map(response.data, '_id');
+
+                response = response && response[0] ?
+                    response[0] : { data: [], total: 0 };
+
+                options.data[CONTENT_TYPES.PERSONNEL] = ids;
+
+                cb(null, {
+                    response,
+                    options
+                });
+            },
+
+            (data, cb) => {
+                getImagesHelper.getImages(data.options, (err, result) => {
+                    cb(err, {
+                        response: data.response,
+                        result
+                    })
+                });
+            },
+
+            (data, cb) => {
+                const optionsForImplement = {
+                    response: data.response,
+                    imgsObject: data.result,
+                    fields: {
+                        personnel: []
+                    }
                 };
 
-            for (key in sort) {
-                splitKey = key.split('.');
+                getImagesHelper.setIntoResult(optionsForImplement, (response) => {
+                    cb(null, response);
+                });
+            },
+
+            (response, cb) => {
+                response.data = response.data.map((element) => {
+                    if (element.firstName) {
+                        element.firstName = {
+                            ar: _.unescape(element.firstName.ar),
+                            en: _.unescape(element.firstName.en)
+                        };
+                    }
+
+                    if (element.lastName) {
+                        element.lastName = {
+                            ar: _.unescape(element.lastName.ar),
+                            en: _.unescape(element.lastName.en)
+                        };
+                    }
+
+                    return element;
+                });
+
+                cb(null, response);
+            },
+
+            (response, cb) => {
+                if (!isMobile) {
+                    return cb(null, response);
+                }
+
+                async.eachLimit(response.data, 100, (eachPersonnel, eachCb) => {
+                    let personnelLocation;
+                    let propName;
+
+                    switch (personnelLevel) {
+                        case ACL_CONSTANTS.COUNTRY_ADMIN:
+                            personnelLocation = personnel.country;
+                            propName = 'country';
+                            break;
+                        case ACL_CONSTANTS.AREA_MANAGER:
+                            personnelLocation = personnel.region;
+                            propName = 'region';
+                            break;
+                        case ACL_CONSTANTS.AREA_IN_CHARGE:
+                            personnelLocation = personnel.subRegion;
+                            propName = 'subRegion';
+                            break;
+                        case ACL_CONSTANTS.SALES_MAN:
+                        case ACL_CONSTANTS.MERCHANDISER:
+                        case ACL_CONSTANTS.CASH_VAN:
+                            personnelLocation = personnel.branch;
+                            propName = 'branch';
+                            break;
+                    }
+
+                    const intersection = !_.intersection(personnelLocation, eachPersonnel[propName]);
+
+                    if (eachPersonnel.level < personnelLevel || intersection) {
+                        delete eachPersonnel.avgRating;
+                    }
+
+                    eachCb(null);
+                }, (err) => {
+                    cb(err, response);
+                });
+            }
+
+        ], callback);
+    }
+
+    this.getAllForSync = function (req, res, next) {
+        function queryRun(personnel, callback) {
+            const query = req.query;
+            const isMobile = req.isMobile;
+            const filter = query.filter || {};
+            const lastLogOut = new Date(query.lastLogOut);
+            const supervisorFilter = query.supervisorFilter;
+            const personnelLevel = personnel.accessRole.level;
+            const sort = query.sort || {
+                lastDate: -1
+            };
+            const domainsArray = ['country', 'region', 'subRegion'];
+
+            for (let key in sort) {
+                sort[key] = parseInt(sort[key], 10);
+                let splitKey = key.split('.');
+
                 if (splitKey[0] === 'firstName' || splitKey[0] === 'lastName') {
                     sort[splitKey[0] + 'Upper.' + splitKey[1]] = sort[key];
                     delete sort[key];
                 }
             }
 
+            const filterMapper = new FilterMapper();
+            const queryObject = filterMapper.mapFilter({
+                contentType: CONTENT_TYPES.PERSONNEL,
+                filter,
+                personnel
+            });
+
             if (query._ids) {
-                ids = query._ids.split(',');
-                ids = _.map(ids, function (id) {
-                    return ObjectId(id);
-                });
+                const ids = query._ids.split(',')
+                    .map((id) => {
+                        return ObjectId(id);
+                    });
+
                 queryObject._id = {
                     $in: ids
                 };
             }
+
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
-            pipeLine = getAllPipeline({
-                aggregateHelper : aggregateHelper,
-                domainsArray    : domainsArray,
-                queryObject     : queryObject,
-                forSync         : true,
-                isMobile        : isMobile,
-                sort            : sort,
-                level           : req.session.level,
-                supervisorFilter: supervisorFilter
+            const pipeline = getAllPipeline({
+                aggregateHelper,
+                domainsArray,
+                queryObject,
+                forSync: true,
+                isMobile,
+                sort,
+                level: req.session.level,
+                supervisorFilter
             });
 
-            aggregation = PersonnelModel.aggregate(pipeLine);
-
-            aggregation.options = {
-                allowDiskUse: true
-            };
-
-            aggregation.exec(function (err, response) {
-                if (err) {
-                    return next(err);
-                }
-                var personnelLevel = personnel.accessRole.level;
-                var personnelLocation;
-                var keyName;
-                var options = {
-                    data: {}
-                };
-                var ids;
-
-                response = response && response[0] ? response[0] : {data: [], total: 0};
-
-                ids = _.map(response.data, '_id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = ids;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var optionsForImplement = {
-                        response  : response,
-                        imgsObject: result,
-                        fields    : {
-                            personnel: []
-                        }
-                    };
-                    getImagesHelper.setIntoResult(optionsForImplement, function (response) {
-                        response.data = _.map(response.data, function (element) {
-                            if (element.firstName) {
-                                element.firstName = {
-                                    ar: _.unescape(element.firstName.ar),
-                                    en: _.unescape(element.firstName.en)
-                                };
-                            }
-                            if (element.lastName) {
-                                element.lastName = {
-                                    ar: _.unescape(element.lastName.ar),
-                                    en: _.unescape(element.lastName.en)
-                                };
-                            }
-
-                            return element;
-                        });
-
-                        if (req.isMobile) {
-                            async.eachLimit(response, 100, function (element, callback) {
-                                switch (personnelLevel) {
-                                    case ACL_CONSTANTS.COUNTRY_ADMIN:
-                                        personnelLocation = personnel.country;
-                                        keyName = 'country';
-                                        break;
-                                    case ACL_CONSTANTS.AREA_MANAGER:
-                                        personnelLocation = personnel.region;
-                                        keyName = 'region';
-                                        break;
-                                    case ACL_CONSTANTS.AREA_IN_CHARGE:
-                                        personnelLocation = personnel.subRegion;
-                                        keyName = 'subRegion';
-                                        break;
-                                    case ACL_CONSTANTS.SALES_MAN:
-                                    case ACL_CONSTANTS.MERCHANDISER:
-                                    case ACL_CONSTANTS.CASH_VAN:
-                                        personnelLocation = personnel.branch;
-                                        keyName = 'branch';
-                                        break;
-                                }
-                                ;
-
-                                if (element.level < personnelLevel || !_.intersection(personnelLocation, element[keyName].length)) {
-                                    delete element.avgRating;
-                                }
-                                callback();
-                            }, function (err) {
-                                // return res.status(200).send(response);
-                                return next({status: 200, body: response});
-                            });
-                        } else {
-                            res.status(200).send(response);
-                        }
-                    });
-                });
-            });
+            finalStepToRetrieve({
+                pipeline,
+                personnelLevel,
+                isMobile,
+                personnel
+            }, callback);
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
+        async.waterfall([
+
+            async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
+            }
+
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun(personnel);
+            return next({
+                status: 200,
+                body
+            });
         });
     };
 
     this.getAll = function (req, res, next) {
-        function queryRun(personnel) {
-            var query = req.query;
-            var isMobile = req.isMobile;
-            var page = query.page || 1;
-            var limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
-            var supervisorFilter = query.supervisorFilter;
-
-            var language = req.cookies.currentLanguage;
-            var translateFields = ['firstName', 'lastName'];
-            var translated;
-
-            var filterMapper = new FilterMapper();
-            var filter = query.filter || {};
-            var filterSearch = filter.globalSearch || '';
-            var onLeaveId = filter.onLeaveId;
-
-            var queryObject;
-            var queryObjectTemp;
-            var queryObjectAfterLookup = {};
-            var key;
-            var splitKey;
-
-            var sort = query.sort || {
-                    lastDate: -1
-                };
-
-            var aggregateHelper;
-
-            var pipeLine;
-            var aggregation;
-            var domainsArray = ['country', 'region', 'subRegion'];
-            var searchFieldsArray = [
+        function queryRun(personnel, callback) {
+            const query = req.query;
+            const isMobile = req.isMobile;
+            const filter = query.filter || {};
+            const page = query.page || 1;
+            const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
+            const skip = (page - 1) * limit;
+            const supervisorFilter = query.supervisorFilter;
+            const personnelLevel = personnel.accessRole.level;
+            const language = req.cookies.currentLanguage;
+            const translateFields = ['firstName', 'lastName'];
+            const filterSearch = filter.globalSearch || '';
+            const onLeaveId = filter.onLeaveId;
+            const queryObjectAfterLookup = {};
+            const sort = query.sort || {
+                lastDate: -1
+            };
+            const domainsArray = ['country', 'region', 'subRegion'];
+            const searchFieldsArray = [
                 'firstName.en',
                 'firstName.ar',
                 'lastName.en',
@@ -2308,25 +2338,27 @@ var Personnel = function (db, redis, event) {
                 'phoneNumber'
             ];
 
-            for (key in sort) {
+            for (let key in sort) {
                 sort[key] = parseInt(sort[key], 10);
-                splitKey = key.split('.');
+                let splitKey = key.split('.');
+
                 if (splitKey[0] === 'firstName' || splitKey[0] === 'lastName') {
                     sort[splitKey[0] + 'Upper.' + splitKey[1]] = sort[key];
                     delete sort[key];
                 }
             }
 
-            translated = filter.translated ? filter.translated.values : [];
+            const translated = filter.translated ? filter.translated.values : [];
 
             delete filter.globalSearch;
             delete filter.onLeaveId;
             delete filter.translated;
 
-            queryObject = filterMapper.mapFilter({
+            const filterMapper = new FilterMapper();
+            const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.PERSONNEL,
-                filter     : filter,
-                personnel  : personnel
+                filter,
+                personnel
             });
 
             if (isMobile) {
@@ -2340,8 +2372,6 @@ var Personnel = function (db, redis, event) {
                     queryObject.country.$in.push(null);
                 }
             }
-
-            aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             if (queryObject.retailSegment) {
                 queryObjectAfterLookup.retailSegment = queryObject.retailSegment;
@@ -2357,126 +2387,50 @@ var Personnel = function (db, redis, event) {
                 queryObject.archived = false;
             }
 
-            pipeLine = getAllPipeline({
-                queryObject           : queryObject,
-                onLeaveId             : onLeaveId,
-                aggregateHelper       : aggregateHelper,
-                translated            : translated,
-                translateFields       : translateFields,
-                language              : language,
-                domainsArray          : domainsArray,
-                queryObjectAfterLookup: queryObjectAfterLookup,
-                searchFieldsArray     : searchFieldsArray,
-                filterSearch          : filterSearch,
-                limit                 : limit,
-                skip                  : skip,
-                sort                  : sort,
-                level                 : req.session.level,
-                uId                   : req.session.uId,
-                isMobile              : isMobile,
-                supervisorFilter      : supervisorFilter
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const pipeline = getAllPipeline({
+                queryObject,
+                onLeaveId,
+                aggregateHelper,
+                translated,
+                translateFields,
+                language,
+                domainsArray,
+                queryObjectAfterLookup,
+                searchFieldsArray,
+                filterSearch,
+                limit,
+                skip,
+                sort,
+                level: req.session.level,
+                uId: req.session.uId,
+                isMobile,
+                supervisorFilter
             });
 
-            aggregation = PersonnelModel.aggregate(pipeLine);
-
-            aggregation.options = {
-                allowDiskUse: true
-            };
-
-            aggregation.exec(function (err, response) {
-                if (err) {
-                    return next(err);
-                }
-                var personnelLevel = personnel.accessRole.level;
-                var personnelLocation;
-                var keyName;
-                var options = {
-                    data: {}
-                };
-                var ids;
-
-                response = response && response[0] ? response[0] : {data: [], total: 0};
-
-                ids = _.map(response.data, '_id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = ids;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var optionsForImplement = {
-                        response  : response,
-                        imgsObject: result,
-                        fields    : {
-                            personnel: []
-                        }
-                    };
-                    getImagesHelper.setIntoResult(optionsForImplement, function (response) {
-                        response.data = _.map(response.data, function (element) {
-                            if (element.firstName) {
-                                element.firstName = {
-                                    ar: _.unescape(element.firstName.ar),
-                                    en: _.unescape(element.firstName.en)
-                                };
-                            }
-                            if (element.lastName) {
-                                element.lastName = {
-                                    ar: _.unescape(element.lastName.ar),
-                                    en: _.unescape(element.lastName.en)
-                                };
-                            }
-
-                            return element;
-                        });
-
-                        if (req.isMobile) {
-                            async.eachLimit(response, 100, function (element, callback) {
-                                switch (personnelLevel) {
-                                    case ACL_CONSTANTS.COUNTRY_ADMIN:
-                                        personnelLocation = personnel.country;
-                                        keyName = 'country';
-                                        break;
-                                    case ACL_CONSTANTS.AREA_MANAGER:
-                                        personnelLocation = personnel.region;
-                                        keyName = 'region';
-                                        break;
-                                    case ACL_CONSTANTS.AREA_IN_CHARGE:
-                                        personnelLocation = personnel.subRegion;
-                                        keyName = 'subRegion';
-                                        break;
-                                    case ACL_CONSTANTS.SALES_MAN:
-                                    case ACL_CONSTANTS.MERCHANDISER:
-                                    case ACL_CONSTANTS.CASH_VAN:
-                                        personnelLocation = personnel.branch;
-                                        keyName = 'branch';
-                                        break;
-                                }
-
-                                if (element.level < personnelLevel || !_.intersection(personnelLocation, element[keyName].length)) {
-                                    delete element.avgRating;
-                                }
-                                callback();
-                            }, function (err) {
-                                if (err) {
-                                    return next(err);
-                                }
-
-                                return res.status(200).send(response);
-                            });
-                        } else {
-                            res.status(200).send(response);
-                        }
-                    });
-                });
-            });
+            finalStepToRetrieve({
+                pipeline,
+                personnelLevel,
+                isMobile,
+                personnel
+            }, callback);
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
+        async.waterfall([
+
+            async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
+            }
+
+        ], (err, response) => {
             if (err) {
                 return next(err);
             }
 
-            queryRun(personnel);
+            return res.status(200).send(response);
         });
-
     };
 
     this.getPersonnelTasks = function (req, res, next) {
@@ -2945,6 +2899,7 @@ var Personnel = function (db, redis, event) {
         const accessLevel = req.session.level;
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
+        let generatedPassword;
 
         function queryRun(body, callback) {
             let coveredUserId;
@@ -2978,9 +2933,10 @@ var Personnel = function (db, redis, event) {
             }
 
             if (body.sendPass && !(body.oldPass || body.newPass)) {
-                const password = PasswordManager.generatePassword();
+                generatedPassword = PasswordManager.generatePassword();
+
                 const salt = bcrypt.genSaltSync(10);
-                const hash = bcrypt.hashSync(password, salt);
+                const hash = bcrypt.hashSync(generatedPassword, salt);
                 const token = generator.generate();
 
                 body.pass = hash;
@@ -3287,7 +3243,7 @@ var Personnel = function (db, redis, event) {
                 lastName   : personnel.lastName,
                 email      : personnel.email,
                 phoneNumber: `+${personnel.phoneNumber}`,
-                password   : body.pass,
+                password   : generatedPassword,
                 token      : personnel.token,
                 language   : currentLanguage
             };

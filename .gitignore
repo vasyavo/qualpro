@@ -44,3 +44,7 @@ node_modules
 
 # API docs html
 /API_documentation/qualPro_API.html
+
+# System test
+restore-staging-db.sh
+staging_database

@@ -1,31 +1,43 @@
-var access = function(db) {
-    var async = require('async');
+const async = require('async');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
+const PersonnelModel = require('./../types/personnel/model');
+const RoleModel = require('./../types/accessRole/model');
 
-    var getAccess = function(req, mid, accessType, callback) {
-        var PersonnelModel = require('./../types/personnel/model');
-        var RoleModel = require('./../types/accessRole/model');
-        var uId = req.session.uId;
-        var isMobile = !!req.isMobile;
-        var type = isMobile ? 'mobile' : 'cms';
+const access = () => {
+    const getAccess = (req, mid, accessType, callback) => {
+        const uid = req.session.uId;
+        const isMobile = !!req.isMobile;
+        const type = isMobile ? 'mobile' : 'cms';
+        const tasks = [];
 
-        var tasks;
+        function findPersonnel(cb) {
+            const pipeline = [
+                { $match: { _id: ObjectId(uid) }},
+                { $lookup: {
+                    from: 'accessRoles',
+                    localField: 'accessRole',
+                    foreignField: '_id',
+                    as: 'accessRole'
+                }},
+                { $unwind: '$accessRole' }
+            ];
 
-        function findPersonnel(waterfallCb) {
-            PersonnelModel.findById(uId, waterfallCb);
+            PersonnelModel.aggregate(pipeline, cb);
         }
 
-        function checkRole(personnel, waterfallCb) {
-            var err;
+        function checkRole(arrayOfPersonnel, cb) {
+            const personnel = arrayOfPersonnel.pop();
 
             if (!personnel) {
-                err = new Error('Such personnel probably don\'t exists');
-                err.status = 400;
+                const err = new Error('Such personnel probably don\'t exists');
 
-                return waterfallCb(err);
+                err.status = 400;
+                return cb(err);
             }
 
             if (personnel.super === true) {
-                return waterfallCb(null, [], personnel.toJSON());
+                return cb(null, [], personnel);
             }
 
             RoleModel.aggregate([{
@@ -34,7 +46,7 @@ var access = function(db) {
                 }
             }, {
                 $match : {
-                    _id : personnel.accessRole
+                    _id : personnel.accessRole._id
                 }
             }, {
                 $unwind : '$roleAccess'
@@ -42,25 +54,23 @@ var access = function(db) {
                 $match : {
                     'roleAccess.module' : mid
                 }
-            }], function(err, result) {
+            }], (err, result) => {
                 if (err) {
-                    return waterfallCb(err);
+                    return cb(err);
                 }
 
-                waterfallCb(null, result, personnel.toJSON());
+                cb(null, result, personnel);
             });
-
-            //waterfallCb();
         }
 
-        tasks = [findPersonnel, checkRole];
+        tasks.push(findPersonnel, checkRole);
 
-        async.waterfall(tasks, function(err, result, personnel) {
-            var access;
-
+        async.waterfall(tasks, (err, result, personnel) => {
             if (err) {
                 return callback(err);
             }
+
+            let access;
 
             if (result) {
                 access = (result[0] && result[0].roleAccess) || {};
@@ -71,9 +81,9 @@ var access = function(db) {
                 }
 
                 if (!access[accessType]) {
-                    err = new Error();
-                    err.status = 403;
+                    const err = new Error();
 
+                    err.status = 403;
                     return callback(err);
                 }
 
@@ -84,46 +94,44 @@ var access = function(db) {
         });
     };
 
-    var getReadAccess = function(req, mid, callback) {
+    const getReadAccess = (req, mid, callback) => {
         return getAccess(req, mid, 'read', callback);
     };
-    var getEditAccess = function(req, mid, callback) {
+    const getEditAccess = (req, mid, callback) => {
         return getAccess(req, mid, 'edit', callback);
     };
-    var getWriteAccess = function(req, mid, callback) {
+    const getWriteAccess = (req, mid, callback) => {
         return getAccess(req, mid, 'write', callback);
     };
-    var getArchiveAccess = function(req, mid, callback) {
+    const getArchiveAccess = (req, mid, callback) => {
         return getAccess(req, mid, 'archive', callback);
     };
-    var getEvaluateAccess = function(req, mid, callback) {
+    const getEvaluateAccess = (req, mid, callback) => {
         return getAccess(req, mid, 'evaluate', callback);
     };
-    var getUploadAccess = function(req, mid, callback) {
+    const getUploadAccess = (req, mid, callback) => {
         return getAccess(req, mid, 'upload', callback);
     };
 
     return {
-        getReadAccess : getReadAccess,
-        getEditAccess : getEditAccess,
-        getWriteAccess : getWriteAccess,
-        getArchiveAccess : getArchiveAccess,
-        getEvaluateAccess : getEvaluateAccess,
-        getUploadAccess : getUploadAccess
+        getReadAccess,
+        getEditAccess,
+        getWriteAccess,
+        getArchiveAccess,
+        getEvaluateAccess,
+        getUploadAccess
     };
 };
 
-access.checkAuth = function checkAuth(req, res, next) {
-    var err;
-
+access.checkAuth = (req, res, next) => {
     if (req.session && req.session.loggedIn) {
-        next();
-    } else {
-        err = new Error('Not Authorized');
-        err.status = 401;
-
-        next(err);
+        return next();
     }
+
+    const err = new Error('Not Authorized');
+
+    err.status = 401;
+    next(err);
 };
 
 module.exports = access;
