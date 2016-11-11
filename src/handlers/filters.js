@@ -468,8 +468,6 @@ var Filters = function(db, redis) {
             assignedTo : 1
         };
 
-
-
         var query = req.query;
         var queryFilter = query.filter || {};
         let myCC = queryFilter.myCC;
