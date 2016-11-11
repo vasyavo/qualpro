@@ -31,6 +31,7 @@ module.exports = function (app, db, event) {
     var modulesHandler = new ModuleslHandler(db);
     var docsHandler = new DocsHandler(db);
 
+    var brandingAndDisplayRouter = require('./brandingAndDisplay')(db, redis, event);
     var brandingActivityRouter = require('./brandingActivity')(db, redis, event);
     var brandingActivityItems = require('./brandingActivity')(db, redis, event);
     var personnelRouter = require('./personnel')(db, app, event, redis);
@@ -232,6 +233,7 @@ module.exports = function (app, db, event) {
         res.clearCookie();
     });
     app.use('/activityList', activityList);
+    app.use('/brandingAndDisplay', brandingAndDisplayRouter);
     app.use('/brandingActivity', brandingActivityRouter);
     app.use('/brandingActivityItems', brandingActivityItems);
     app.use('/personnel', personnelRouter);
