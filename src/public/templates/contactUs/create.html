@@ -1,0 +1,212 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<div class="form-holder personnelInfo largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.createTitle %></span>
+    </div>
+    <div class="promotionForm">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.category%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="categoryDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.country%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="countryDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.region%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="regionDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.subRegion%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="subRegionDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.retailSegment%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="retailSegmentDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.outlet%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="outletDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.branch%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="branchDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.displayType%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="displayTypeDd" class="" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.barcode%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="barcode"
+                                       class="objectivesInput"
+                                       value=""
+                                       required
+                                       maxlength="32"
+                                       placeholder="<%= translation.inputBarcode%>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.packing%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="packing"
+                                       class="objectivesInput"
+                                       value=""
+                                       required
+                                       maxlength="32"
+                                       placeholder="<%= translation.inputPacking%>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.ppt%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="ppt"
+                                       class="objectivesInput"
+                                       value=""
+                                       required
+                                       maxlength="32"
+                                       placeholder="<%= translation.inputPpt%>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.totalQuantity%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="quantity"
+                                       class="objectivesInput"
+                                       value=""
+                                       required
+                                       maxlength="32"
+                                       placeholder="<%= translation.inputTotalQuantity%>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateStart"
+                                           value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateEnd"
+                                           value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%= translation.promotionType %></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="descriptionEnContainer">
+                                <textarea type="text"
+                                          data-parent="description"
+                                          data-property="en"
+                                          class="objectivesTextarea"
+                                          value=""
+                                          maxlength="120"
+                                          placeholder="<%= translation.description %>">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer"
+                             id="descriptionArContainer">
+                            <textarea class="objectivesTextarea"
+                                      data-parent="description"
+                                      data-property="ar"
+                                      value=""
+                                      placeholder="<%= translation.description %>"
+                                      maxlength="120">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold mandatory"><%= translation.attachments %></span>
+                            <span id="attachFile" class="greyBtn right"><%= translation.attachFiles %></span>
+                        </div>
+                        <div class="formBlock borderBottom">
+                            <div id="formThumbnail"></div>
+                        </div>
+                        <div class="promotionFilesBlock borderBottom ">
+                            <form action="" method="post" id="mainForm"></form>
+                            <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock masonryThumbnailsWrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

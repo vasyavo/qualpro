@@ -13,7 +13,7 @@ define([
         location   : 'Location',
 
         // preview
-        titlePreview : 'View Branding & Display Activity',
+        titlePreview : 'Contact Us',
         country      : 'Country',
         region       : 'Region',
         subRegion    : 'Sub-Region',
@@ -30,11 +30,15 @@ define([
         commentText  : 'Comment Text',
 
         // topBar
-        all        : 'Competitor branding & display report',
+        all        : 'Contact Us',
         okBtn      : 'Ok',
-        dialogTitle: 'Comment attachments'
+        dialogTitle: 'Comment attachments',
 
-
+        //createView
+        saveBtn: 'Save',
+        publishBtn: 'Send',
+        createTitle: 'Add New Contact Us Form',
+        attachFiles: 'Attach File'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });
