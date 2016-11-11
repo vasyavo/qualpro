@@ -820,7 +820,6 @@ a {
 .filterName .triDown:after {
   position: absolute;
   right: 7px;
-  top: -7px;
   height: 41px;
   width: 10px;
   color: #cfd8dc;
@@ -832,6 +831,9 @@ a {
   -ms-transform-origin: 6px 7px;
   -o-transform-origin: 6px 7px;
   transform-origin: 6px 7px;
+}
+.consumerSurveyForm .triDown:after {
+  top: -7px;
 }
 .searchInputWrap label:after,
 .dialogCategoryInputWrap label:after {
@@ -3194,6 +3196,10 @@ span.currency + input:not([type="checkbox"]) {
   text-align: center;
   overflow: hidden;
 }
+a.disabled {
+  pointer-events: none;
+  cursor: default;
+}
 .loginForm {
   margin-top: 250px;
 }
@@ -4218,6 +4224,13 @@ span.currency + input:not([type="checkbox"]) {
   align-items: center;
   margin-right: 10px;
 }
+.aditionalInfo li.logOutIcon {
+  margin-right: -45px;
+}
+.aditionalInfo li.logOutIcon a {
+  color: #ffffff;
+  font-size: 20px;
+}
 .aditionalInfo li #headerNumber {
   position: absolute;
   top: -12px;
@@ -4229,13 +4242,6 @@ span.currency + input:not([type="checkbox"]) {
   text-align: center;
   color: #ffffff;
 }
-.aditionalInfo li.logOutIcon {
-  margin-right: -45px;
-}
-.aditionalInfo li.logOutIcon a {
-  color: #ffffff;
-  font-size: 20px;
-}
 .aditionalInfo li:first-child {
   position: relative;
 }
@@ -4244,12 +4250,7 @@ span.currency + input:not([type="checkbox"]) {
 }
 .aditionalInfo li.questionItem a {
   position: absolute;
-  left: -81px;
-  top: 0;
-}
-.aditionalInfo li.contactUs a {
-  position: absolute;
-  left: -115px;
+  left: -80px;
   top: 0;
 }
 .aditionalInfo .bell:after,
