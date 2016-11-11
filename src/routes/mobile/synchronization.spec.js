@@ -173,26 +173,6 @@ describe('mobile synchronization', () => {
         assertGetResponse(body);
     });
 
-    it('should get branding and display', function *() {
-        const resp = yield Authenticator.master
-            .get('/mobile/brandingActivity')
-            .expect(200);
-
-        const body = resp.body;
-
-        assertGetResponse(body);
-    });
-
-    it('should sync branding and display', function *() {
-        const resp = yield Authenticator.master
-            .get('/mobile/brandingActivity/sync')
-            .expect(200);
-
-        const body = resp.body;
-
-        assertGetResponse(body);
-    });
-
     it('should get current user', function *() {
         const resp = yield Authenticator.master
             .get('/mobile/personnel/currentUser')
@@ -297,6 +277,26 @@ describe('mobile synchronization', () => {
     it('should sync branch', function *() {
         const resp = yield Authenticator.master
             .get('/mobile/branch/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+
+    it('should get branding and activity (in past branding and display)', function *() {
+        const resp = yield Authenticator.master
+            .get('/mobile/brandingActivity')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+
+    it('should sync branding and activity (in past branding and display)', function *() {
+        const resp = yield Authenticator.master
+            .get('/mobile/brandingActivity/sync')
             .expect(200);
 
         const body = resp.body;
