@@ -4129,7 +4129,7 @@ span.currency + input:not([type="checkbox"]) {
   border: none;
   box-shadow: none;
 }
-.allValuesContainer .ulContent .prev .disabled {
+.allValuesContainer .prev .disabled {
   pointer-events: none;
   cursor: default;
 }
