@@ -290,274 +290,6 @@ function BrandingAndDisplay(db, redis, event) {
         return pipeLine;
     }
 
-    /* this.getAll = function (req, res, next) {
-     function queryRun(personnel) {
-     var CONSTANTS = require('../constants/mainConstants');
-     var query = req.query;
-     var isMobile = req.isMobile;
-     var filter = query.filter || {};
-     var page = query.page || 1;
-     var limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
-     var skip = (page - 1) * limit;
-     var filterMapper = new FilterMapper();
-     var filterSearch = filter.globalSearch || '';
-     var queryObject = filterMapper.mapFilter({
-     contentType: CONTENT_TYPES.BRANDINGANDDISPLAY,
-     filter     : filter,
-     personnel  : personnel
-     });
-     var pipeLine;
-     var aggregation;
-     var aggregateHelper;
-     var searchFieldsArray = [
-     'description.en',
-     'description.ar',
-     'country.name.en',
-     'country.name.ar',
-     'region.name.en',
-     'region.name.ar',
-     'subRegion.name.en',
-     'subRegion.name.ar',
-     'retailSegment.name.en',
-     'retailSegment.name.ar',
-     'outlet.name.en',
-     'outlet.name.ar',
-     'branch.name.en',
-     'branch.name.ar',
-     'createdBy.user.position.name.en',
-     'createdBy.user.position.name.ar',
-     'createdBy.user.accessRole.name.en',
-     'createdBy.user.accessRole.name.ar',
-     'createdBy.user.firstName.en',
-     'createdBy.user.firstName.ar',
-     'createdBy.user.lastName.en',
-     'createdBy.user.lastName.ar',
-     'displayType.name.en',
-     'displayType.name.ar',
-     'category.name.en',
-     'category.name.ar'
-     ];
-
-     delete filter.globalSearch;
-
-     aggregateHelper = new AggregationHelper($defProjection, queryObject);
-
-     pipeLine = getAllPipeLine({
-     aggregateHelper  : aggregateHelper,
-     searchFieldsArray: searchFieldsArray,
-     queryObject      : queryObject,
-     filterSearch     : filterSearch,
-     skip             : skip,
-     limit            : limit,
-     isMobile         : isMobile
-     });
-
-     aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
-
-     aggregation.options = {
-     allowDiskUse: true
-     };
-
-     aggregation.exec(function (err, response) {
-     var options = {
-     data: {}
-     };
-     var personnelIds = [];
-     var fileIds = [];
-
-     if (err) {
-     return next(err);
-     }
-
-     response = response && response[0] ? response[0] : {data: [], total: 0};
-
-     response.data = _.map(response.data, function (element) {
-     element.description = {
-     ar: _.unescape(element.description.ar),
-     en: _.unescape(element.description.en)
-     };
-     personnelIds.push(element.createdBy.user._id);
-     fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-     return element;
-     });
-
-     if (!response.data.length) {
-     return next({status: 200, body: response});
-     }
-
-     personnelIds = _.uniqBy(personnelIds, 'id');
-
-     options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-     options.data[CONTENT_TYPES.FILES] = fileIds;
-
-     getImagesHelper.getImages(options, function (err, result) {
-     var fieldNames = {};
-     var setOptions;
-     if (err) {
-     return next(err);
-     }
-
-     setOptions = {
-     response  : response,
-     imgsObject: result
-     };
-     fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-     setOptions.fields = fieldNames;
-
-     getImagesHelper.setIntoResult(setOptions, function (response) {
-     next({status: 200, body: response});
-     })
-     });
-     });
-     }
-
-     access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed, personnel) {
-     if (err) {
-     return next(err);
-     }
-     if (!allowed) {
-     err = new Error();
-     err.status = 403;
-
-     return next(err);
-     }
-
-     queryRun(personnel);
-     });
-     };
-
-     this.getAllForSync = function (req, res, next) {
-     function queryRun(personnel) {
-     var isMobile = req.isMobile;
-     var query = req.query;
-     var filter = query.filter || {};
-     var aggregateHelper;
-     var filterMapper = new FilterMapper();
-     var lastLogOut = new Date(query.lastLogOut);
-     var queryObject;
-     var pipeLine;
-     var positionFilter;
-     var aggregation;
-     var ids;
-
-     filterMapper.setFilterLocation(filter, personnel, 'branch', null);
-     queryObject = filterMapper.mapFilter({
-     contentType: CONTENT_TYPES.BRANDINGANDDISPLAY,
-     filter     : filter,
-     personnel  : personnel
-     });
-
-     aggregateHelper = new AggregationHelper($defProjection, queryObject);
-
-     if (query._ids) {
-     ids = query._ids.split(',');
-     ids = _.map(ids, function (id) {
-     return ObjectId(id);
-     });
-     queryObject._id = {
-     $in: ids
-     };
-     }
-     if (queryObject.position && queryObject.position.$in) {
-     positionFilter = {
-     $or: [
-     {
-     'createdBy.user.position': queryObject.position
-     }
-     ]
-     };
-
-     delete queryObject.position;
-     }
-
-     aggregateHelper.setSyncQuery(queryObject, lastLogOut);
-
-     pipeLine = getAllPipeLine({
-     aggregateHelper: aggregateHelper,
-     queryObject    : queryObject,
-     positionFilter : positionFilter,
-     isMobile       : isMobile,
-     forSync        : true
-     });
-
-     aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
-
-     aggregation.options = {
-     allowDiskUse: true
-     };
-
-     aggregation.exec(function (err, response) {
-     var options = {
-     data: {}
-     };
-     var personnelIds = [];
-     var fileIds = [];
-
-     if (err) {
-     return next(err);
-     }
-
-     response = response && response[0] ? response[0] : {data: [], total: 0};
-
-     response.data = _.map(response.data, function (element) {
-     element.description = {
-     ar: _.unescape(element.description.ar),
-     en: _.unescape(element.description.en)
-     };
-     personnelIds.push(element.createdBy.user._id);
-     fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-     return element;
-     });
-
-     if (!response.data.length) {
-     return next({status: 200, body: response});
-     }
-
-     personnelIds = _.uniqBy(personnelIds, 'id');
-
-     options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-     options.data[CONTENT_TYPES.FILES] = fileIds;
-
-     getImagesHelper.getImages(options, function (err, result) {
-     var fieldNames = {};
-     var setOptions;
-     if (err) {
-     return next(err);
-     }
-
-     setOptions = {
-     response  : response,
-     imgsObject: result
-     };
-     fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-     setOptions.fields = fieldNames;
-
-     getImagesHelper.setIntoResult(setOptions, function (response) {
-     next({status: 200, body: response});
-     })
-     });
-     });
-     }
-
-     access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err, allowed, personnel) {
-     if (err) {
-     return next(err);
-     }
-     if (!allowed) {
-     err = new Error();
-     err.status = 403;
-
-     return next(err);
-     }
-
-     queryRun(personnel);
-     });
-     };*/
-
     this.create = function(req, res, next) {
         function queryRun(body) {
             const files = req.files;
@@ -738,11 +470,10 @@ function BrandingAndDisplay(db, redis, event) {
             }
 
             function getAndMapCountries(brandingAndDisplayModel, cb) {
-                const createdBy = brandingAndDisplayModel[0].createdBy;
-
-                if (!createdBy) {
+                if (!_.get(brandingAndDisplayModel, 'brandingAndDisplayModel[0].createdBy')) {
                     return cb(null, brandingAndDisplayModel[0]);
                 }
+                const createdBy = brandingAndDisplayModel[0].createdBy;
                 const origins = _.concat(
                     createdBy.country,
                     createdBy.region,
@@ -764,8 +495,8 @@ function BrandingAndDisplay(db, redis, event) {
                         }
                         createdBy.country = _.filter(countries, function(country) {
                             if (_.includes(_.map(createdBy.country, o => o.toString()),
-                                country._id.toString()
-                            )) {
+                                    country._id.toString()
+                                )) {
                                 return country
                             }
                         });
@@ -791,15 +522,18 @@ function BrandingAndDisplay(db, redis, event) {
             }
 
             function getLinkFromAws(brandingAndDisplayModel, cb) {
+                if (!_.get(brandingAndDisplayModel, 'brandingAndDisplayModel.attachments')) {
+                    return cb(null, brandingAndDisplayModel || {});
+                }
                 async.each(brandingAndDisplayModel.attachments,
                     function(file, callback) {
                         file.url = fileHandler.computeUrl(file.name);
                         callback();
-                }, function(err) {
-                    if (err) {
-                        cb(err);
-                    }
-                    cb(null, brandingAndDisplayModel)
+                    }, function(err) {
+                        if (err) {
+                            cb(err);
+                        }
+                        cb(null, brandingAndDisplayModel);
                     });
             }
 
@@ -819,8 +553,177 @@ function BrandingAndDisplay(db, redis, event) {
         var id = req.params.id;
 
         queryRun(id);
-    }
+    };
 
-};
+    this.getAll = function(req, res, next) {
+        var error;
+
+        function generateSearchCondition(query) {
+            var searchVariants = [
+                'outlet',
+                'branch',
+                'categories',
+                'createdBy'
+            ];
+            var foreignVariants = [
+                'position',
+                'country',
+                'subRegion',
+                'region'
+            ];
+            var match = {
+                createdAt : {
+                    $gte : new Date(query.startDate),
+                    $lte : new Date(query.endDate)
+                },
+            };
+            var fMatch = {};
+            var formCondition = [];
+            var foreignCondition = [];
+
+            _.forOwn(query, function(value, key) {
+                if (_.includes(searchVariants, key)) {
+                    match[key] = {};
+                    match[key].$in = value.values;
+                }
+            });
+            _.forOwn(query, function(value, key) {
+                if (_.includes(foreignVariants, key)) {
+                    fMatch[`createdBy.${key}`] = {};
+                    fMatch[`createdBy.${key}`].$in = value.values;
+                }
+            });
+
+            formCondition.push({
+                $match : match
+            });
+
+            foreignCondition.push({
+                $match : fMatch
+            });
+
+            return {
+                formCondition : formCondition,
+                foreignCondition : foreignCondition
+            };
+        }
+        function queryRun(query) {
+            const limit = query.count;
+            const skip = (query.page - 1) * limit;
+            const condition = generateSearchCondition(query.filter);
+            const mongoQuery = BrandingAndDisplayModel.aggregate()
+                .append(condition.formCondition)
+                .unwind('categories')
+                .lookup({
+                    from : 'categories',
+                    localField : 'categories',
+                    foreignField : '_id',
+                    as : 'categories'
+                })
+                .unwind('$categories')
+                .group({
+                    '_id' : '$_id',
+                    categories : {$push : '$categories'},
+                    branch : {$first : '$branch'},
+                    displayType : {$first : '$displayType'},
+                    outlet : {$first : '$outlet'},
+                    attachments : {$first : '$attachments'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'},
+                })
+                .lookup({
+                    from : CONTENT_TYPES.PERSONNEL + 's',
+                    localField : 'createdBy',
+                    foreignField : '_id',
+                    as : 'createdBy'
+                })
+                .unwind('createdBy')
+                .lookup({
+                    from : CONTENT_TYPES.DISPLAYTYPE + 's',
+                    localField : 'displayType',
+                    foreignField : '_id',
+                    as : 'displayType'
+                })
+                .lookup({
+                    from : CONTENT_TYPES.OUTLET + 's',
+                    localField : 'outlet',
+                    foreignField : '_id',
+                    as : 'outlet'
+                })
+                .lookup({
+                    from : CONTENT_TYPES.BRANCH + 'es',
+                    localField : 'branch',
+                    foreignField : '_id',
+                    as : 'branch'
+                })
+                .unwind('outlet')
+                .unwind('branch')
+                .project({
+                    createdAt : 1,
+                    description : 1,
+                    dateEnd : 1,
+                    dateStart : 1,
+                    displayType : 1,
+                    'categories._id' : 1,
+                    'categories.name' : 1,
+                    'branch._id' : 1,
+                    'branch.name' : 1,
+                    'outlet._id' : 1,
+                    'outlet.name' : 1,
+                    'createdBy._id' : 1,
+                    'createdBy.ID' : 1,
+                    'createdBy.lastName' : 1,
+                    'createdBy.firstName' : 1
+                })
+                .limit(limit)
+                .skip(skip)
+                .sort(query.sortBy)
+                .allowDiskUse(true);
+
+            function getCount(cb) {
+                cb()
+            }
+
+            function getData(cb) {
+                mongoQuery.exec(cb)
+            }
+
+            async.parallel([
+                getCount,
+                getData
+            ], function(err, result) {
+                if (err) {
+                    return next(err);
+                }
+                let count = 0;
+
+               /* if (result[0][0] && result[0][0].count) {
+                    count = result[0][0].count
+                }*/
+
+                res.send(200, {
+                    total : count,
+                    data : result[1]
+                });
+            });
+        }
+
+        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.BRANDING_AND_DISPLAY, 'read', function(err, query) {
+            if (err) {
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
+            }
+
+            queryRun(query);
+        });
+    }
+}
 
 module.exports = BrandingAndDisplay;

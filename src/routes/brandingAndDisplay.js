@@ -22,5 +22,11 @@ module.exports = function (db, redis, event) {
      })
      },*/ handler.getById);
 
+    router.get('/', /*function(req, res, next) {
+     access.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function (err) {
+     err ? next(err) : next();
+     })
+     },*/ handler.getAll);
+
     return router;
 };

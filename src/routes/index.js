@@ -33,7 +33,7 @@ module.exports = function (app, db, event) {
 
     var brandingAndDisplayRouter = require('./brandingAndDisplay')(db, redis, event);
     var brandingActivityRouter = require('./brandingActivity')(db, redis, event);
-    var brandingActivityItems = require('./brandingActivity')(db, redis, event);
+    var brandingActivityItems = require('./brandingActivityItems')(db, redis, event);
     var personnelRouter = require('./personnel')(db, app, event, redis);
     var mobileRouter = require('./mobile')(db, app, redis, event);
     var notificationsRouter = require('./notifications')(db, redis, event);
