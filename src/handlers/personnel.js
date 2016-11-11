@@ -2174,7 +2174,7 @@ var Personnel = function (db, redis, event) {
                     return cb(null, response);
                 }
 
-                async.eachLimit(response, 100, (eachPersonnel, eachCb) => {
+                async.eachLimit(response.data, 100, (eachPersonnel, eachCb) => {
                     let personnelLocation;
                     let propName;
 
