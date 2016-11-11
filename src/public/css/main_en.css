@@ -3196,6 +3196,10 @@ span.currency + input:not([type="checkbox"]) {
   text-align: center;
   overflow: hidden;
 }
+a.disabled {
+  pointer-events: none;
+  cursor: default;
+}
 .loginForm {
   margin-top: 250px;
 }
@@ -4127,10 +4131,6 @@ span.currency + input:not([type="checkbox"]) {
   position: static;
   border: none;
   box-shadow: none;
-}
-.allValuesContainer .prev .disabled {
-  pointer-events: none;
-  cursor: default;
 }
 .colorGreen {
   color: #00c853;
