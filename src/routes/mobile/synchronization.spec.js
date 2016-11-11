@@ -10,11 +10,6 @@ const shortId = require('shortid');
 const Authenticator = require('./../../authenticator');
 
 const assertGetResponse = (body) => {
-    expect(body).to.be.an('Object');
-    expect(body.data).to.be.an('Array');
-};
-
-const assertSynchResponse = (body) => {
     expect(body).to.be.an('Object')
         .and.include.all.keys(['data', 'total', 'lastSyncDate']);
     expect(body.data).to.be.an('Array');
@@ -75,7 +70,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get location', function *() {
@@ -95,7 +90,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get personnel', function *() {
@@ -115,7 +110,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get objectives', function *() {
@@ -135,7 +130,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get in store tasks', function *() {
@@ -155,7 +150,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get promotions', function *() {
@@ -175,7 +170,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get branding and display', function *() {
@@ -195,7 +190,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get current user', function *() {
@@ -226,7 +221,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get contract secondary', function *() {
@@ -246,7 +241,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get retail segment', function *() {
@@ -266,7 +261,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get outlet', function *() {
@@ -286,7 +281,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     it('should get branch', function *() {
@@ -306,7 +301,7 @@ describe('mobile synchronization', () => {
 
         const body = resp.body;
 
-        assertSynchResponse(body);
+        assertGetResponse(body);
     });
 
     // todo price survey will be implemented later
