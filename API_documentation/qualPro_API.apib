@@ -48,6 +48,36 @@ Http Code | Error Type           |  Error                             | Details
     + ar (string)
     + en: USA (string)
 
+## Category
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: TUNA (string)
+
+## Branch
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: `ABA MONOPRIX QATAR` (string)
+
+## DisplayType
++ _id: 16 (number)
++ name
+    + ar (string)
+    + en: `Promoter Stand` (string)
+
+## Outlet
++ _id: 16 (number)
++ name
+    + ar (string)
+    + en: CARREFOUR (string)
+
+## File
++ _id: `5818b01a13187de020871b63` (string)
++ name: `57dbf068843d1c6e3a162bd9.jpg`(string)
++ originalName: `pupok.jpg` (string)
++ url: `https://s3.amazonaws.com/` (string)
+
 ## ContactUsById
 + _id: `5818b01a13187de020871b63` (string)
 + type: `Others` (string)
@@ -84,6 +114,51 @@ Http Code | Error Type           |  Error                             | Details
     + firstName
         + en (string)
         + ar (string)
+
+## BrandingAndDisplayCreate
++ branch: `5818b01a13187de020871b63` (string, required)
++ outlet: `5818b01a13187de020871b63` (string, required)
++ categories: `5818b01a13187de020871b63` (array)
++ description: something (string, required)
++ displayType: 10 (number)
+    + Default: 16
++ dateStart: `2016-11-01T13:09:14.000Z` (string)
++ dateEnd: `2016-11-01T13:09:14.000Z` (string)
+
+## BrandingAndDisplayCreateRes
++ _id: `5818b01a13187de020871b63` (string)
++ createdBy: `5818b01a13187de020871b63` (string)
++ outlet: `5818b01a13187de020871b63` (string)
++ branch: `5818b01a13187de020871b63` (string)
++ attachments: `5818b01a13187de020871b63` (array)
++ description: hhfhf (string)
++ dateStart: `2016-11-01T13:09:14.000Z` (string)
++ dateEnd: `2016-11-01T13:09:14.000Z` (string)
++ createdAt: `2016-11-01T13:09:14.000Z` (string)
+
+## BrandingAndDisplayById
++ _id: `5818b01a13187de020871b63` (string)
++ attachments (array[File])
++ categories (array[Category])
++ branch (Branch)
++ outlet (Outlet)
++ displayType (DisplayType)
++ description: hhfhf (string)
++ dateStart: `2016-11-01T13:09:14.000Z` (string)
++ dateEnd: `2016-11-01T13:09:14.000Z` (string)
++ createdAt: `2016-11-01T13:09:14.000Z` (string)
++ createdBy
+    + _id: `5818b01a13187de020871b63` (string)
+    + ID: 153 (number)
+    + lastName
+        + en (string)
+        + ar (string)
+    + firstName
+        + en (string)
+        + ar (string)
+    + country (array[Country])
+    + region (array[Country])
+    + subRegion (array[Country])
 
 # Group ContactUs
 
@@ -166,5 +241,31 @@ Get contact us form by id.
     + Attributes (UpdateContactUs)
 + Response 200 (application/json)
     + Attributes (CreateContactUsRes)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+# Group BrandingAndDisplayReport
+
+## Send contactUs form [/mobile/brandingAndDisplay]
+
+### Create [POST]
+Create brandingAndDisplay report
+
++ Request (multipart/form-data)
+    + Attributes (BrandingAndDisplayCreate)
++ Response 200 (application/json)
+    + Attributes (BrandingAndDisplayCreateRes)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+### Get By Id [GET]
+Get brandingAndDisplay report by id.
+
++ Parameters
+    + id
+
++ Request (application/json)
++ Response 200 (application/json)
+    + Attributes (BrandingAndDisplayById)
 + Response 400 (application/json)
     + Attributes (GenericError)
