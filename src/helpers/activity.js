@@ -88,8 +88,8 @@ var ActivityHelper = function (db, redis, app) {
         schemaModelName = key;
         models[key] = db.model(schemaModelName, schemas[schemaModelName]);
     }
-    models[CONTENT_TYPES.OBJECTIVES] =  models[CONTENT_TYPES.INSTORETASKS] = require('./../types/objective/model');
-
+    models[CONTENT_TYPES.OBJECTIVES] =  models[CONTENT_TYPES.INSTORETASKS] = require('../types/objective/model');
+    models[CONTENT_TYPES.QUESTIONNARIES] = require('../types/questionnaries/model');
 
     $defProjections[CONTENT_TYPES.OBJECTIVES]
         = $defProjections[CONTENT_TYPES.INSTORETASKS]
