@@ -27,7 +27,7 @@ define([
                 var errors = [];
 
                 if (!attrs.type) {
-                    errors.push('Field type can not be empty');
+                    errors.push('Type field  can not be empty');
                 }
                 if (this.translatedFields.description) {
                     validation.checkDescriptionField(errors, true, attrs.description, this.translatedFields.description);

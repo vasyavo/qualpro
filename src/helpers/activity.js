@@ -2,6 +2,7 @@ var ActivityHelper = function (db, redis, app) {
     'use strict';
 
     var async = require('async');
+    var logger = require('../utils/logger');
     var mongoose = require('mongoose');
     var _ = require('lodash');
     var Pushes = require('../helpers/pushes');
@@ -641,6 +642,7 @@ var ActivityHelper = function (db, redis, app) {
             }));
         }
 
+        logger.info('Model that triggers when creating new activity:', options.itemType);
         aggregation = models[options.itemType].aggregate(pipeLine);
 
         aggregation.exec(function (err, result) {
