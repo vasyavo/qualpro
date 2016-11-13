@@ -2,6 +2,7 @@
  * @see {@link https://nodejs.org/api/events.html}
  * @class EventEmiter
  */
+'use strict';
 
 module.exports = function (app, db, event) {
     // var express = require('express');

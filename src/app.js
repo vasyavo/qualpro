@@ -1,3 +1,5 @@
+'use strict';
+
 const event = require('./utils/eventEmitter');
 const db = require('./utils/mongo');
 

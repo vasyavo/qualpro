@@ -664,15 +664,15 @@ const superAdmin = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
+            edit   : false,
+            write  : false,
             read   : true
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     },
     commentsAccess
@@ -1368,15 +1368,15 @@ const masterAdmin = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
+            edit   : false,
+            write  : false,
             read   : true
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     },commentsAccess
 ];
@@ -2025,15 +2025,15 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
+            edit   : false,
+            write  : false,
             read   : true
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -2640,15 +2640,15 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
+            edit   : false,
+            write  : false,
+            read   : false
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -3255,15 +3255,15 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
+            edit   : false,
+            write  : false,
+            read   : false
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -3869,15 +3869,15 @@ const salesman = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
+            edit   : false,
+            write  : false,
+            read   : false
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -4483,15 +4483,15 @@ const merchandiser = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
+            edit   : false,
+            write  : false,
+            read   : false
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -5097,15 +5097,15 @@ const cashVan = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
+            edit   : false,
+            write  : false,
+            read   : false
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -5758,15 +5758,15 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
+            edit   : false,
+            write  : false,
             read   : true
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
@@ -6387,15 +6387,15 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : true,
-            write  : true,
+            edit   : false,
+            write  : false,
             read   : true
         },
         mobile: {
             archive: false,
-            edit   : true,
+            edit   : false,
             write  : true,
-            read   : true
+            read   : false
         }
     }
 ];
