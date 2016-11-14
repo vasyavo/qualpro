@@ -426,7 +426,6 @@ var InStoreReports = function (db, redis, event) {
                             };
                         }
 
-
                         inStoreTaskModel
                             .update(fullUpdate, function (err) {
                                 if (err) {

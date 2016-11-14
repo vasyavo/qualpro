@@ -73,6 +73,8 @@
         CONTACT_US : 'contactUs',
         CONSUMER_SURVEY : 'consumerSurvey',
         DISPLAYTYPE : 'displayType',
+        MODULE : 'module',
+        SESSION : 'session',
 
         PRICESURVEY : 'priceSurvey',
         SHELFSHARESANALYSIS : 'shelfSharesAnalysis',

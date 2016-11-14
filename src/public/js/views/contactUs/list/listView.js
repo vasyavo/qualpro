@@ -6,14 +6,16 @@ define([
         'views/contactUs/preView/preView',
         'views/filter/filtersBarView',
         'views/paginator',
+        'views/contactUs/createView',
         'constants/contentType'
-    ], function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
+    ], function (Backbone, $, _, template, PreView, filterView, paginator, createView, CONTENT_TYPES) {
         'use strict';
 
         var View = paginator.extend({
             contentType: CONTENT_TYPES.CONTACT_US,
             viewType   : 'list',
             template   : _.template(template),
+            CreateView : createView,
 
             events: {
                 'click .listRow': 'incClicks'

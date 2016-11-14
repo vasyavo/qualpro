@@ -1,0 +1,113 @@
+<% var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en'; %>
+<% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
+
+<div class="form-holder personnelInfo largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.createTitle %></span>
+    </div>
+    <div class="promotionForm">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.title %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="title"
+                                       class="objectivesInput"
+                                       required
+                                       maxlength="100"
+                                       placeholder="<%= translation.title %>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.type %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="typeDd" href="javascript:;">Select</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.startDate%></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateStart"
+                                           value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateEnd"
+                                           value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%= translation.description %></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="descriptionEnContainer">
+                                <textarea type="text"
+                                          data-parent="description"
+                                          data-property="en"
+                                          class="objectivesTextarea"
+                                          value=""
+                                          maxlength="120"
+                                          placeholder="<%= translation.description %>">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer"
+                             id="descriptionArContainer">
+                            <textarea class="objectivesTextarea"
+                                      data-parent="description"
+                                      data-property="ar"
+                                      value=""
+                                      placeholder="<%= translation.description %>"
+                                      maxlength="120">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold mandatory"><%= translation.attachments %></span>
+                            <span id="attachFile" class="greyBtn right"><%= translation.attachFiles %></span>
+                        </div>
+                        <div class="formBlock borderBottom">
+                            <div id="formThumbnail"></div>
+                        </div>
+                        <div class="promotionFilesBlock borderBottom ">
+                            <form action="" method="post" id="mainForm"></form>
+                            <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock masonryThumbnailsWrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

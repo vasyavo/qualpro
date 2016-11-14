@@ -5,36 +5,30 @@ define([
 ], function (_, paginationTranslation, filtersTranslation) {
     var translation = {
         // list view
-        brand      : 'Brand',
-        category   : 'Category',
-        displayType: 'Display Type',
         startDate  : 'Start date',
         endDate    : 'Due date',
-        location   : 'Location',
+        title: 'Title',
+        type: 'Type',
 
         // preview
-        titlePreview : 'View Branding & Display Activity',
-        country      : 'Country',
-        region       : 'Region',
-        subRegion    : 'Sub-Region',
-        retailSegment: 'Trade Channel',
-        outlet       : 'Customer',
-        branch       : 'Branch',
+        titlePreview : 'Contact Us',
         description  : 'Description',
         attachments  : 'Attachments',
         files        : 'Files',
         attachBtn    : 'Attach',
         sendBtn      : 'Send',
         noTranslation: 'no Translation',
-        skipped      : 'Skipped',
-        commentText  : 'Comment Text',
 
         // topBar
-        all        : 'Competitor branding & display report',
+        all        : 'Contact Us',
         okBtn      : 'Ok',
-        dialogTitle: 'Comment attachments'
+        dialogTitle: 'Comment attachments',
 
-
+        //createView
+        saveBtn: 'Save',
+        publishBtn: 'Send',
+        createTitle: 'Add New Contact Us Form',
+        attachFiles: 'Attach File'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });

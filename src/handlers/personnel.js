@@ -2424,12 +2424,15 @@ var Personnel = function (db, redis, event) {
                 queryRun(personnel, cb);
             }
 
-        ], (err, response) => {
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
 
-            return res.status(200).send(response);
+            return next({
+                status: 200,
+                body
+            });
         });
     };
 

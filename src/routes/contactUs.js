@@ -13,7 +13,10 @@ module.exports = function (db, redis, event) {
 
     router.get('/', handler.getAll);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
+
     router.put('/:id([0-9a-fA-F]{24})', handler.updateById);
+
+    router.post('/', handler.create);
 
     return router;
 };
