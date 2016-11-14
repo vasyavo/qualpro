@@ -61,6 +61,7 @@ module.exports = function(db, app, redis) {
     router.get('/notes', handler.notesFilters);
     router.get('/items/toOutlet', handler.itemsToOutletCountry);
     router.get('/contactUs', checkAuth, handler.contactUsFilters);
+    router.get('/brandingAndDisplay', checkAuth, handler.brandingAndDisplayFilters);
 
     return router;
 };

@@ -2,6 +2,7 @@
  * @see {@link https://nodejs.org/api/events.html}
  * @class EventEmiter
  */
+'use strict';
 
 module.exports = function (app, db, event) {
     // var express = require('express');
@@ -31,8 +32,9 @@ module.exports = function (app, db, event) {
     var modulesHandler = new ModuleslHandler(db);
     var docsHandler = new DocsHandler(db);
 
+    var brandingAndDisplayRouter = require('./brandingAndDisplay')(db, redis, event);
     var brandingActivityRouter = require('./brandingActivity')(db, redis, event);
-    var brandingActivityItems = require('./brandingActivity')(db, redis, event);
+    var brandingActivityItems = require('./brandingActivityItems')(db, redis, event);
     var personnelRouter = require('./personnel')(db, app, event, redis);
     var mobileRouter = require('./mobile')(db, app, redis, event);
     var notificationsRouter = require('./notifications')(db, redis, event);
@@ -232,6 +234,7 @@ module.exports = function (app, db, event) {
         res.clearCookie();
     });
     app.use('/activityList', activityList);
+    app.use('/brandingAndDisplay', brandingAndDisplayRouter);
     app.use('/brandingActivity', brandingActivityRouter);
     app.use('/brandingActivityItems', brandingActivityItems);
     app.use('/personnel', personnelRouter);

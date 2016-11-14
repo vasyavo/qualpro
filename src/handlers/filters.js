@@ -30,6 +30,7 @@ var Filters = function(db, redis) {
     const BranchModel = require('./../types/branch/model');
     const OutletModel = require('./../types/outlet/model');
     const NewProductLaunchModel = require('./../types/newProductLaunch/model');
+    const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
 
     var _ = require('underscore');
     var AggregationHelper = require('../helpers/aggregationCreater');
@@ -6503,6 +6504,245 @@ var Filters = function(db, redis) {
                 }
 
                 res.send(200, response);
+            });
+        });
+    };
+
+    this.brandingAndDisplayFilters = function(req, res, next) {
+        var CONSTANTS = require('../public/js/constants/otherConstants');
+        var query = req.query;
+        var filter = query.filter || {};
+        var currentSelected = query.current;
+        var filterExists = Object.keys(filter).length && !(Object.keys(filter).length === 1 && filter.archived);
+        var filterMapper = new FilterMapper();
+
+        var aggregation;
+        var pipeLine = [];
+
+        var aggregateHelper;
+
+        var $defProjection = {
+            _id : 1,
+            description : 1,
+            displayType : 1,
+            dateStart : 1,
+            dateEnd : 1,
+            attachments : 1,
+            category : 1,
+            branch : 1,
+            country : 1,
+            region : 1,
+            subRegion : 1,
+            retailSegment : 1,
+            outlet : 1,
+            createdBy : 1,
+            editedBy : 1,
+            personnel : 1,
+            status : 1,
+            parent : 1,
+            position : 1,
+            publisher : 1
+        };
+
+        var positionFilter;
+
+        filter = filterMapper.mapFilter({
+            filter : filter,
+            personnel : req.personnelModel
+        });
+
+        if (filter.position) {
+            positionFilter = {position : filter.position};
+
+            delete filter.position;
+        }
+
+        aggregateHelper = new AggregationHelper($defProjection, filter);
+
+        pipeLine.push({
+            $match : {
+                status : {
+                    $ne : 'expired'
+                }
+            }
+        });
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'categories',
+            key : 'category'
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'branches',
+            key : 'branch',
+            addMainProjection : ['retailSegment', 'outlet', 'subRegion']
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'domains',
+            key : 'subRegion',
+            addMainProjection : ['parent']
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'domains',
+            key : 'parent',
+            as : 'region',
+            addMainProjection : ['parent']
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'domains',
+            key : 'parent',
+            as : 'country'
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'retailSegments',
+            key : 'retailSegment'
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'outlets',
+            key : 'outlet'
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'personnels',
+            key : 'personnel',
+            addMainProjection : ['position'],
+            nameFields : ['firstName', 'lastName']
+        }));
+
+        pipeLine.push({
+            $lookup : {
+                from : 'personnels',
+                localField : 'createdBy.user',
+                foreignField : '_id',
+                as : 'createdBy.user'
+            }
+        });
+
+        pipeLine.push({
+            $project : aggregateHelper.getProjection({
+                createdBy : {
+                    date : 1,
+                    user : {$arrayElemAt : ['$createdBy.user', 0]}
+                }
+            })
+        });
+
+        pipeLine.push({
+            $project : aggregateHelper.getProjection({
+                position : {
+                    $setUnion : ['$position', ['$createdBy.user.position']]
+                },
+                publisher : {
+                    _id : '$createdBy.user._id',
+                    name : {
+                        en : {$concat : ['$createdBy.user.firstName.en', ' ', '$createdBy.user.lastName.en']},
+                        ar : {$concat : ['$createdBy.user.firstName.ar', ' ', '$createdBy.user.lastName.ar']}
+                    }
+                }
+            })
+        });
+
+        if (positionFilter) {
+            pipeLine.push({
+                $match : positionFilter
+            });
+        }
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'positions',
+            key : 'position'
+        }));
+
+        pipeLine.push({
+            $unwind : {
+                path : '$personnel',
+                preserveNullAndEmptyArrays : true
+            }
+        });
+
+        pipeLine.push({
+            $unwind : {
+                path : '$position',
+                preserveNullAndEmptyArrays : true
+            }
+        });
+
+        pipeLine.push({
+            $unwind : {
+                path : '$category',
+                preserveNullAndEmptyArrays : true
+            }
+        });
+
+        pipeLine.push({
+            $group : {
+                _id : null,
+                country : {$addToSet : '$country'},
+                category : {$addToSet : '$category'},
+                personnel : {$addToSet : '$personnel'},
+                region : {$addToSet : '$region'},
+                subRegion : {$addToSet : '$subRegion'},
+                retailSegment : {$addToSet : '$retailSegment'},
+                outlet : {$addToSet : '$outlet'},
+                branch : {$addToSet : '$branch'},
+                publisher : {$addToSet : '$publisher'},
+                position : {$addToSet : '$position'},
+                status : {$addToSet : '$status'}
+            }
+        });
+
+        aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+
+        aggregation.options = {
+            allowDiskUse : true
+        };
+
+        aggregation.exec(function(err, result) {
+            if (err) {
+                return next(err);
+            }
+
+            result = result[0] || {};
+
+            result = {
+                category : result.category || [],
+                country : result.country && _.uniq(_.flatten(result.country)) || [],
+                region : result.region && _.uniq(_.flatten(result.region)) || [],
+                subRegion : result.subRegion && _.uniq(_.flatten(result.subRegion)) || [],
+                outlet : result.outlet && _.uniq(_.flatten(result.outlet)) || [],
+                branch : result.branch && _.uniq(_.flatten(result.branch)) || [],
+                position : result.position || [],
+                personnel : result.personnel || []
+            };
+
+            Object.keys(result).forEach(function(key) {
+                if (result[key]) {
+                    var i = result[key].length - 1;
+                    for (i; i >= 0; i--) {
+                        if (!result[key][i] || !result[key][i].name) {
+                            result[key].splice(i, 1);
+                        }
+                    }
+                }
+            });
+
+            redisFilters({
+                currentSelected : currentSelected,
+                filterExists : filterExists,
+                filtersObject : result,
+                personnelId : req.personnelModel._id,
+                contentType : CONTENT_TYPES.BRANDING_AND_DISPLAY
+            }, function(err, response) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send(response);
             });
         });
     };
