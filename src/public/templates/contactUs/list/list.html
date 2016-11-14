@@ -7,10 +7,7 @@
                 <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="right flexColumn">
-                <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ?
-                    model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage
-                    : '' %>
-                </div>
+                <div class="userName"><%= (model.createdBy.user.name) ? model.createdBy.user.name : '' %></div>
                 <div class="description fontGray"><%= (model.createdBy.user && model.createdBy.user.accessRole &&
                     model.createdBy.user.accessRole.name) ? model.createdBy.user.accessRole.name.currentLanguage : '' %>
                 </div>
@@ -19,13 +16,7 @@
                 </div>
             </div>
         </div>
-        <div class="middle flexRowStart">
-
-        </div>
-        <div class="bottom flexRowStart">
-            <span class="userClip"><%= model.attachments.length %></span>
-            <span class="userMassage"><%= model.comments.length %></span>
-        </div>
+        <div class="middle flexRowStart"></div>
     </div>
     <div class="locationBlock flexGrow flexColumn">
         <div class="locationTop flexRow">

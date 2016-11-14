@@ -119,8 +119,8 @@ var ContactUs = function(db, redis, event) {
             });
             _.forOwn(query, function(value, key) {
                 if (_.includes(foreignVariants, key)) {
-                    fMatch[`creator.${key}`] = {};
-                    fMatch[`creator.${key}`].$in = value.values;
+                    fMatch[`createdBy.user.${key}`] = {};
+                    fMatch[`createdBy.user.${key}`].$in = value.values;
                 }
             });
 
@@ -147,31 +147,31 @@ var ContactUs = function(db, redis, event) {
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
                     foreignField : '_id',
-                    as : 'creator'
+                    as : 'createdBy.user'
                 })
                 .project({
                     type : 1,
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    creator : {$arrayElemAt : ['$creator', 0]}
+                    'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                 })
                 .project({
                     type : 1,
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    'creator._id' : 1,
-                    'creator.ID' : 1,
-                    'creator.country' : 1,
-                    'creator.lastName' : 1,
-                    'creator.firstName' : 1,
-                    'creator.position' : 1
+                    'createdBy.user._id' : 1,
+                    'createdBy.user.ID' : 1,
+                    'createdBy.user.country' : 1,
+                    'createdBy.user.lastName' : 1,
+                    'createdBy.user.firstName' : 1,
+                    'createdBy.user.position' : 1
                 })
                 .append(condition.foreignCondition)
                 .lookup({
                     from : CONTENT_TYPES.POSITION + 's',
-                    localField : 'creator.position',
+                    localField : 'createdBy.user.position',
                     foreignField : '_id',
                     as : 'position'
                 })
@@ -181,7 +181,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    creator : {$ifNull : ["$creator", []]},
+                    'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
                 })

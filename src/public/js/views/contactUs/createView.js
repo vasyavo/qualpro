@@ -125,7 +125,7 @@ debugger;
             $.ajax({
                 url        : context.model.urlRoot(),
                 type       : 'POST',
-                data       : context.body,
+                data       : data,
                 contentType: false,
                 processData: false,
                 success    : function (xhr) {
