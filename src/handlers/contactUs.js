@@ -239,7 +239,6 @@ var ContactUs = function(db, redis, event) {
 
                 res.send(200, {
                     total : count,
-                    real : result[1].length,
                     data : result[1]
                 });
             });
