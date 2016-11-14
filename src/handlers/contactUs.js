@@ -195,14 +195,14 @@ var ContactUs = function(db, redis, event) {
                         from : CONTENT_TYPES.PERSONNEL + 's',
                         localField : 'createdBy',
                         foreignField : '_id',
-                        as : 'creator'
+                        as : 'createdBy.user'
                     })
                     .project({
                         type : 1,
                         createdAt : 1,
                         description : 1,
                         status : 1,
-                        creator : {$arrayElemAt : ['$creator', 0]}
+                        'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                     })
                     .append(condition.foreignCondition)
                     .append([

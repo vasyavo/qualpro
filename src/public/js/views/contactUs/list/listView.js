@@ -6,16 +6,14 @@ define([
         'views/contactUs/preView/preView',
         'views/filter/filtersBarView',
         'views/paginator',
-        'views/contactUs/createView',
         'constants/contentType'
-    ], function (Backbone, $, _, template, PreView, filterView, paginator, createView, CONTENT_TYPES) {
+    ], function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
         'use strict';
 
         var View = paginator.extend({
             contentType: CONTENT_TYPES.CONTACT_US,
             viewType   : 'list',
             template   : _.template(template),
-            CreateView : createView,
 
             events: {
                 'click .listRow': 'incClicks'
@@ -77,6 +75,7 @@ define([
 debugger;
                 _.each(jsonCollection, (model) => {
                     model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
+                    model.description.currentLanguage = model.description[App.currentUser.currentLanguage];
                 });
                 $currentEl.html('');
                 $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
