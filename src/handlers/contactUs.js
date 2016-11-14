@@ -239,30 +239,31 @@ var ContactUs = function(db, redis, event) {
 
                 res.send(200, {
                     total : count,
+                    real : result[1].length,
                     data : result[1]
                 });
             });
         }
 
         access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
-        var error;
+            var error;
 
             if (err) {
                 return next(err);
             }
 
-        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
-            if (err) {
-                error = new Error();
-                error.status = 400;
-                error.message = err.name;
-                error.details = err.details;
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+                if (err) {
+                    error = new Error();
+                    error.status = 400;
+                    error.message = err.name;
+                    error.details = err.details;
 
-                return next(error);
-            }
+                    return next(error);
+                }
 
-            queryRun(query);
-        });
+                queryRun(query);
+            });
         });
     };
 
