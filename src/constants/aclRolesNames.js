@@ -9,5 +9,6 @@ module.exports = {
     CASH_VAN : 7,
     MASTER_UPLOADER : 8,
     COUNTRY_UPLOADER : 9,
+    TRADE_MARKETER : 10,
     VIRTUAL : 11
 };

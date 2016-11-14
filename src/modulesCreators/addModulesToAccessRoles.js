@@ -304,7 +304,7 @@ const superAdmin = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
         edit  : true,
@@ -318,7 +318,7 @@ const superAdmin = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : true,
         write: true,
@@ -330,7 +330,7 @@ const superAdmin = [
         read : true
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: true,
@@ -342,7 +342,7 @@ const superAdmin = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -356,7 +356,7 @@ const superAdmin = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -368,7 +368,7 @@ const superAdmin = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: true,
         edit   : true,
@@ -382,7 +382,7 @@ const superAdmin = [
         read   : true
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: true,
         edit   : true,
@@ -396,7 +396,7 @@ const superAdmin = [
         read   : true
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: true,
         edit   : true,
@@ -424,7 +424,7 @@ const superAdmin = [
         read   : true
     }
 }, {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -438,7 +438,7 @@ const superAdmin = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -453,7 +453,7 @@ const superAdmin = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -468,7 +468,7 @@ const superAdmin = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -483,7 +483,7 @@ const superAdmin = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -498,7 +498,7 @@ const superAdmin = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -513,7 +513,7 @@ const superAdmin = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: true,
         edit   : true,
@@ -528,7 +528,7 @@ const superAdmin = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -543,7 +543,7 @@ const superAdmin = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -558,7 +558,7 @@ const superAdmin = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         archive: true,
         edit   : true,
@@ -616,7 +616,7 @@ const superAdmin = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -977,7 +977,7 @@ const masterAdmin = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
         edit  : true,
@@ -991,7 +991,7 @@ const masterAdmin = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : true,
         write: true,
@@ -1003,7 +1003,7 @@ const masterAdmin = [
         read : true
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: true,
@@ -1015,7 +1015,7 @@ const masterAdmin = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -1029,7 +1029,7 @@ const masterAdmin = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -1041,7 +1041,7 @@ const masterAdmin = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: true,
         edit   : true,
@@ -1055,7 +1055,7 @@ const masterAdmin = [
         read   : true
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: true,
         edit   : true,
@@ -1069,7 +1069,7 @@ const masterAdmin = [
         read   : true
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: true,
         edit   : true,
@@ -1097,7 +1097,7 @@ const masterAdmin = [
         read   : true
     }
 }, {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -1111,7 +1111,7 @@ const masterAdmin = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -1126,7 +1126,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -1141,7 +1141,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -1156,7 +1156,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -1171,7 +1171,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -1186,7 +1186,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         upload: true,
         edit  : true,
@@ -1201,7 +1201,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -1246,7 +1246,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -1261,7 +1261,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -1321,7 +1321,7 @@ const masterAdmin = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -1692,7 +1692,7 @@ const countryAdmin = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
         edit  : true,
@@ -1706,7 +1706,7 @@ const countryAdmin = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : true,
         write: true,
@@ -1718,7 +1718,7 @@ const countryAdmin = [
         read : true
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: true,
@@ -1730,7 +1730,7 @@ const countryAdmin = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -1744,7 +1744,7 @@ const countryAdmin = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -1756,7 +1756,7 @@ const countryAdmin = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: true,
         edit   : true,
@@ -1770,7 +1770,7 @@ const countryAdmin = [
         read   : true
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: true,
         edit   : true,
@@ -1784,7 +1784,7 @@ const countryAdmin = [
         read   : true
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: true,
         edit   : true,
@@ -1813,7 +1813,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -1827,7 +1827,7 @@ const countryAdmin = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -1842,7 +1842,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -1857,7 +1857,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -1872,7 +1872,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -1887,7 +1887,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -1902,7 +1902,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: true,
         edit   : true,
@@ -1917,7 +1917,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -1932,7 +1932,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -1947,7 +1947,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -1962,7 +1962,7 @@ const countryAdmin = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -2307,7 +2307,7 @@ const areaFiledManager = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
         edit  : true,
@@ -2321,7 +2321,7 @@ const areaFiledManager = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: true,
@@ -2333,7 +2333,7 @@ const areaFiledManager = [
         read : true
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: true,
@@ -2345,7 +2345,7 @@ const areaFiledManager = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -2359,7 +2359,7 @@ const areaFiledManager = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -2371,7 +2371,7 @@ const areaFiledManager = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: false,
         edit   : false,
@@ -2385,7 +2385,7 @@ const areaFiledManager = [
         read   : false
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: false,
         edit   : false,
@@ -2399,7 +2399,7 @@ const areaFiledManager = [
         read   : false
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: false,
         edit   : false,
@@ -2428,7 +2428,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -2442,7 +2442,7 @@ const areaFiledManager = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -2457,7 +2457,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -2472,7 +2472,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -2487,7 +2487,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -2502,7 +2502,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -2517,7 +2517,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -2532,7 +2532,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -2547,7 +2547,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -2562,7 +2562,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -2577,7 +2577,7 @@ const areaFiledManager = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -2922,7 +2922,7 @@ const areaInChargeManager = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: false,
         edit  : false,
@@ -2936,7 +2936,7 @@ const areaInChargeManager = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: false,
@@ -2948,7 +2948,7 @@ const areaInChargeManager = [
         read : true
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: false,
@@ -2960,7 +2960,7 @@ const areaInChargeManager = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -2974,7 +2974,7 @@ const areaInChargeManager = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -2986,7 +2986,7 @@ const areaInChargeManager = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: false,
         edit   : false,
@@ -3000,7 +3000,7 @@ const areaInChargeManager = [
         read   : false
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: false,
         edit   : false,
@@ -3014,7 +3014,7 @@ const areaInChargeManager = [
         read   : false
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: false,
         edit   : false,
@@ -3043,7 +3043,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -3057,7 +3057,7 @@ const areaInChargeManager = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -3072,7 +3072,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -3087,7 +3087,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -3102,7 +3102,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -3117,7 +3117,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -3132,7 +3132,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -3147,7 +3147,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -3162,7 +3162,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -3177,7 +3177,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -3192,7 +3192,7 @@ const areaInChargeManager = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -3537,7 +3537,7 @@ const salesman = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: false,
         edit  : false,
@@ -3551,7 +3551,7 @@ const salesman = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: false,
@@ -3563,7 +3563,7 @@ const salesman = [
         read : false
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: false,
@@ -3575,7 +3575,7 @@ const salesman = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -3589,7 +3589,7 @@ const salesman = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : false,
         write: false,
@@ -3601,7 +3601,7 @@ const salesman = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: false,
         edit   : false,
@@ -3615,7 +3615,7 @@ const salesman = [
         read   : false
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: false,
         edit   : false,
@@ -3629,7 +3629,7 @@ const salesman = [
         read   : false
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: false,
         edit   : false,
@@ -3658,7 +3658,7 @@ const salesman = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -3672,7 +3672,7 @@ const salesman = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -3687,7 +3687,7 @@ const salesman = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -3702,7 +3702,7 @@ const salesman = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -3717,7 +3717,7 @@ const salesman = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -3732,7 +3732,7 @@ const salesman = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -3747,7 +3747,7 @@ const salesman = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -3762,7 +3762,7 @@ const salesman = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -3777,7 +3777,7 @@ const salesman = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -3792,7 +3792,7 @@ const salesman = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -3807,7 +3807,7 @@ const salesman = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -4151,7 +4151,7 @@ const merchandiser = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: false,
         edit  : false,
@@ -4165,7 +4165,7 @@ const merchandiser = [
         read  : false
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: false,
@@ -4177,7 +4177,7 @@ const merchandiser = [
         read : false
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: false,
@@ -4189,7 +4189,7 @@ const merchandiser = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -4203,7 +4203,7 @@ const merchandiser = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : false,
         write: false,
@@ -4215,7 +4215,7 @@ const merchandiser = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: false,
         edit   : false,
@@ -4229,7 +4229,7 @@ const merchandiser = [
         read   : false
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: false,
         edit   : false,
@@ -4243,7 +4243,7 @@ const merchandiser = [
         read   : false
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: false,
         edit   : false,
@@ -4272,7 +4272,7 @@ const merchandiser = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -4286,7 +4286,7 @@ const merchandiser = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -4301,7 +4301,7 @@ const merchandiser = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -4316,7 +4316,7 @@ const merchandiser = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -4331,7 +4331,7 @@ const merchandiser = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -4346,7 +4346,7 @@ const merchandiser = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -4361,7 +4361,7 @@ const merchandiser = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -4376,7 +4376,7 @@ const merchandiser = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -4391,7 +4391,7 @@ const merchandiser = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -4406,7 +4406,7 @@ const merchandiser = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -4421,7 +4421,7 @@ const merchandiser = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -4765,7 +4765,7 @@ const cashVan = [
         read  : false
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: false,
         edit  : false,
@@ -4779,7 +4779,7 @@ const cashVan = [
         read  : false
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: false,
@@ -4791,7 +4791,7 @@ const cashVan = [
         read : false
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: false,
@@ -4803,7 +4803,7 @@ const cashVan = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -4817,7 +4817,7 @@ const cashVan = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : false,
         write: false,
@@ -4829,7 +4829,7 @@ const cashVan = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: false,
         edit   : false,
@@ -4843,7 +4843,7 @@ const cashVan = [
         read   : false
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: false,
         edit   : false,
@@ -4857,7 +4857,7 @@ const cashVan = [
         read   : false
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: false,
         edit   : false,
@@ -4886,7 +4886,7 @@ const cashVan = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -4900,7 +4900,7 @@ const cashVan = [
         read   : true
     }
 }, {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -4915,7 +4915,7 @@ const cashVan = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : false,
@@ -4930,7 +4930,7 @@ const cashVan = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -4945,7 +4945,7 @@ const cashVan = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -4960,7 +4960,7 @@ const cashVan = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -4975,7 +4975,7 @@ const cashVan = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -4990,7 +4990,7 @@ const cashVan = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -5005,7 +5005,7 @@ const cashVan = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -5020,7 +5020,7 @@ const cashVan = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -5035,7 +5035,7 @@ const cashVan = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -5379,7 +5379,7 @@ const masterUpload = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
         edit  : true,
@@ -5393,7 +5393,7 @@ const masterUpload = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: false,
@@ -5405,7 +5405,7 @@ const masterUpload = [
         read : false
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: true,
@@ -5417,7 +5417,7 @@ const masterUpload = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -5431,7 +5431,7 @@ const masterUpload = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -5443,7 +5443,7 @@ const masterUpload = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: true,
         edit   : true,
@@ -5457,7 +5457,7 @@ const masterUpload = [
         read   : true
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: true,
         edit   : true,
@@ -5471,7 +5471,7 @@ const masterUpload = [
         read   : true
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: true,
         edit   : true,
@@ -5500,7 +5500,7 @@ const masterUpload = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : true,
@@ -5515,7 +5515,7 @@ const masterUpload = [
     }
 },
 {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -5530,7 +5530,7 @@ const masterUpload = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : true,
@@ -5545,7 +5545,7 @@ const masterUpload = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -5560,7 +5560,7 @@ const masterUpload = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -5575,7 +5575,7 @@ const masterUpload = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -5590,7 +5590,7 @@ const masterUpload = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -5605,7 +5605,7 @@ const masterUpload = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -5620,7 +5620,7 @@ const masterUpload = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -5635,7 +5635,7 @@ const masterUpload = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -5650,7 +5650,7 @@ const masterUpload = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -6082,7 +6082,7 @@ const countryUpload = [
         read  : true
     }
 }, {
-    module: 22,
+    module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
         edit  : true,
@@ -6096,7 +6096,7 @@ const countryUpload = [
         read  : true
     }
 }, {
-    module: 23,
+    module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
         write: false,
@@ -6108,7 +6108,7 @@ const countryUpload = [
         read : false
     }
 }, {
-    module: 24,
+    module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
         write: true,
@@ -6120,7 +6120,7 @@ const countryUpload = [
         read : false
     }
 }, {
-    module: 25,
+    module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
         edit   : true,
@@ -6134,7 +6134,7 @@ const countryUpload = [
         read   : true
     }
 }, {
-    module: 26,
+    module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
         write: true,
@@ -6146,7 +6146,7 @@ const countryUpload = [
         read : true
     }
 }, {
-    module: 27,
+    module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: true,
         edit   : true,
@@ -6160,7 +6160,7 @@ const countryUpload = [
         read   : true
     }
 }, {
-    module: 28,
+    module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: true,
         edit   : true,
@@ -6174,7 +6174,7 @@ const countryUpload = [
         read   : true
     }
 }, {
-    module: 29,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: true,
         edit   : true,
@@ -6203,7 +6203,7 @@ const countryUpload = [
     }
 },
 {
-    module: 32,
+    module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
     cms   : {
         archive: false,
         edit   : true,
@@ -6218,7 +6218,7 @@ const countryUpload = [
     }
 },
 {
-    module: 33,
+    module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
         edit   : true,
@@ -6233,7 +6233,7 @@ const countryUpload = [
     }
 },
 {
-    module: 34,
+    module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
     cms   : {
         archive: false,
         edit   : true,
@@ -6248,7 +6248,7 @@ const countryUpload = [
     }
 },
 {
-    module: 35,
+    module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
         archive: false,
         edit   : false,
@@ -6263,7 +6263,7 @@ const countryUpload = [
     }
 },
 {
-    module: 36,
+    module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
     cms   : {
         archive: false,
         edit   : false,
@@ -6278,7 +6278,7 @@ const countryUpload = [
     }
 },
 {
-    module: 37,
+    module: ACL_MODULES.ACHIEVEMENT_FORM,
     cms   : {
         archive: false,
         edit   : false,
@@ -6293,7 +6293,7 @@ const countryUpload = [
     }
 },
 {
-    module: 38,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
     cms   : {
         archive: false,
         edit   : false,
@@ -6308,7 +6308,7 @@ const countryUpload = [
     }
 },
 {
-    module: 39,
+    module: ACL_MODULES.SHELF_SHARES,
     cms   : {
         archive: false,
         edit   : false,
@@ -6323,7 +6323,7 @@ const countryUpload = [
     }
 },
 {
-    module: 41,
+    module: ACL_MODULES.PRICE_SURVEY,
     cms   : {
         archive: false,
         edit   : false,
@@ -6338,7 +6338,7 @@ const countryUpload = [
     }
 },
 {
-    module: 40,
+    module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
     cms   : {
         upload: true,
         edit  : true,
@@ -6353,7 +6353,7 @@ const countryUpload = [
     }
 },
 {
-    module: 42,
+    module: ACL_MODULES.DOCUMENT,
     cms   : {
         archive: true,
         edit   : true,
@@ -6400,6 +6400,665 @@ commentsAccess,
     }
 ];
 
+const tradeMarketer = [
+    {
+        module: 1,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 2,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 3,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 103,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 104,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 105,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 4,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 5,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 6,
+        cms   : {
+            archive : false,
+            edit    : false,
+            write   : false,
+            read    : true,
+            evaluate: false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 7,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: 10,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 11,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 12,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 13,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: 14,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: 15,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_MARKETING,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.OBJECTIVES_AND_TASKS_FORM,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.IN_STORE_REPORTING,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.CONTRACT,
+        cms   : {
+            upload: false,
+            edit  : false,
+            write : false,
+            read  : false
+        },
+        mobile: {
+            upload: false,
+            edit  : false,
+            write : false,
+            read  : true
+        }
+    },
+    {
+        module: ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY,
+        cms   : {
+            upload: false,
+            edit  : false,
+            write : false,
+            read  : false
+        },
+        mobile: {
+            upload: false,
+            edit  : false,
+            write : false,
+            read  : true
+        }
+    },
+    {
+        module: ACL_MODULES.VISIBILITY,
+        cms   : {
+            upload: true,
+            edit  : true,
+            write : true,
+            read  : true
+        },
+        mobile: {
+            upload: true,
+            edit  : true,
+            write : true,
+            read  : true
+        }
+    },
+    {
+        module: ACL_MODULES.CONTRACT_SECONDARY,
+        cms   : {
+            upload: false,
+            edit  : false,
+            write : false,
+            read  : true
+        },
+        mobile: {
+            upload: false,
+            edit  : false,
+            write : false,
+            read  : true
+        }
+    },
+    {
+        module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
+        cms   : {
+            edit : false,
+            write: false,
+            read : false
+        },
+        mobile: {
+            edit : false,
+            write: false,
+            read : false
+        }
+    },
+    {
+        module: ACL_MODULES.CUSTOM_REPORT,
+        cms   : {
+            edit : false,
+            write: false,
+            read : false
+        },
+        mobile: {
+            edit : false,
+            write: false,
+            read : false
+        }
+    },
+    {
+        module: ACL_MODULES.NOTE,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.NOTIFICATION,
+        cms   : {
+            edit : true,
+            write: true,
+            read : true
+        },
+        mobile: {
+            edit : false,
+            write: false,
+            read : true
+        }
+    },
+    {
+        module: ACL_MODULES.SETTINGS,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.LOGIN_CREDENTIALS,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: 30,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
+        }
+    },
+    {
+        module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.ACHIEVEMENT_FORM,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.SHELF_SHARES,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.PRICE_SURVEY,
+        cms   : {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
+        cms   : {
+            upload: true,
+            edit  : true,
+            write : true,
+            read  : true
+        },
+        mobile: {
+            upload: true,
+            edit  : true,
+            write : true,
+            read  : true
+        }
+    },
+    {
+        module: ACL_MODULES.DOCUMENT,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    commentsAccess,
+    {
+        module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }
+];
+
 const accessRolesData = {
     0: superAdmin,
     1: masterAdmin,
@@ -6410,7 +7069,8 @@ const accessRolesData = {
     6: merchandiser,
     7: cashVan,
     8: masterUpload,
-    9: countryUpload
+    9: countryUpload,
+    10: tradeMarketer
 };
 
 const accessRoles = [];
@@ -6433,7 +7093,8 @@ const levels = [
     'Merchandiser',
     'Cash van',
     'Master uploader',
-    'Country uploader'
+    'Country uploader',
+    'Trade marketer'
 ];
 
 const generate = (callback) => {
