@@ -4,12 +4,10 @@ const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
     description : {
-        type : String
+        en: { type: String, default: '' },
+        ar: { type: String, default: ''}
     },
     type : {
-        type : String
-    },
-    module : {
         type : String
     },
     status : {
