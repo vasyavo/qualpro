@@ -42,7 +42,10 @@ const create = Joi.object().keys({
     createdBy : Joi.objectId().required(),
     status : Joi.string().default('new'),
     type : Joi.string().valid(TYPES).required(),
-    description : Joi.string().required(),
+    description : Joi.object().keys({
+        en : Joi.string(),
+        ar : Joi.string()
+    }).or('en', 'ar'),
     createdAt : Joi.date().default(currentDate, 'current date')
 });
 
