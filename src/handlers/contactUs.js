@@ -18,9 +18,9 @@ var ContactUs = function(db, redis, event) {
         function queryRun(body) {
             var files = req.files;
             var model;
-            var fileId;
+            var fileIds;
 
-            function uploadFile(callback) {
+            function uploadFiles(callback) {
                 if (!files) {
                     return callback();
                 }
@@ -30,21 +30,19 @@ var ContactUs = function(db, redis, event) {
                         return callback(err);
                     }
 
-                    fileId = filesIds[0];
-
+                    fileIds = filesIds || [];
                     callback();
                 });
             }
-
             function saveContactUs(callback) {
-                body.attachments = fileId;
+                body.attachments = fileIds;
 
                 model = new ContactUsModel(body);
                 model.save(callback);
             }
 
             async.series([
-                uploadFile,
+                uploadFiles,
                 saveContactUs
             ], function(err, result) {
                 if (err) {
@@ -281,15 +279,24 @@ var ContactUs = function(db, redis, event) {
                     as : 'creator'
                 })
                 .unwind('creator')
+                .unwind('attachments')
                 .lookup({
                     from : CONTENT_TYPES.FILES,
                     localField : 'attachments',
                     foreignField : '_id',
-                    as : 'file'
+                    as : 'attachments'
                 })
-                .unwind('file')
+                .unwind('$attachments')
+                .group({
+                    '_id' : '$_id',
+                    attachments : {$push : '$attachments'},
+                    type : {$first : '$type'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    status : {$first : '$status'},
+                    creator : {$first : '$creator'}
+                })
                 .project({
-                    module : 1,
                     type : 1,
                     createdAt : 1,
                     description : 1,
@@ -338,9 +345,19 @@ var ContactUs = function(db, redis, event) {
             }
 
             function getLinkFromAws(contactUs, cb) {
-                contactUs.file.url = fileHandler.computeUrl(contactUs.file.name);
-                cb(null, contactUs)
-
+                if (!_.get(contactUs, 'contactUs.attachments')) {
+                    return cb(null, contactUs || {});
+                }
+                async.each(contactUs.attachments,
+                    function(file, callback) {
+                        file.url = fileHandler.computeUrl(file.name);
+                        callback();
+                    }, function(err) {
+                        if (err) {
+                            cb(err);
+                        }
+                        cb(null, contactUs);
+                    });
             }
 
             async.waterfall([
