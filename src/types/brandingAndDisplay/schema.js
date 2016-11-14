@@ -35,11 +35,6 @@ const schema = new Schema({
         ref: CONTENT_TYPES.PERSONNEL,
         default: null
     },
-    /*editedBy: {
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL,
-        default: null
-    },*/
     createdAt : {
         type: Date,
         default: new Date()

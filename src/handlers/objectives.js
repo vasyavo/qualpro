@@ -2044,6 +2044,10 @@ var Objectives = function (db, redis, event) {
                     var pipeLine;
                     var aggregation;
 
+                    if (isMobile) {
+
+                    }
+
                     pipeLine = getAllPipeline({
                         aggregateHelper  : aggregateHelper,
                         queryObject      : queryObject,
