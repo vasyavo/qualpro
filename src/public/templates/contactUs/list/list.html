@@ -21,18 +21,8 @@
     <div class="locationBlock flexGrow flexColumn">
         <div class="locationTop flexRow">
             <div class="flexColumn competitorCategoeyColumn">
-                <div class="flexRow">
-                    <div class="locationTitle"><%= translation.brand %> : <%= model.brandString %>
-                    </div>
-                </div>
-                <div class="flexRow">
-                    <div class="locationTitle"><%= translation.category %> : <span class="textEllipsis hoverFullText"><%=  model.categoryString || translation.skipped %></span>
-                    </div>
-                </div>
                 <div class="fontSmall fontGray textEllipsis hoverFullText ">
                     <%= translation.description%> : <%= model.description.currentLanguage %>
-                </div>
-                <div class="fontSmall fontGray textEllipsis"><%= translation.displayType %> : <%= model.displayTypeString || '' %>
                 </div>
             </div>
             <div class="flexRow bannerBlock">
@@ -46,21 +36,6 @@
                 </div>
                 <% } %>
             </div>
-            <span class="fontGray noShrink"><%= translation.startDate %>:</span>
-        </div>
-        <div class="locationBottom flexRowStart">
-            <span class="location flexGrow textEllipsis fontGray hoverFullText">
-                <%= translation.location %> : <%= model.location %>
-            </span>
-            <span class="fontGray noShrink"><%= translation.endDate %> :</span>
-        </div>
-    </div>
-    <div class="dateBlock flexColumn">
-        <div class="dateWrap flexRow">
-            <span class="name dates"><%= model.dateStart %></span>
-        </div>
-        <div class="dateWrap flexRow">
-            <span class="name dates"><%= model.dateEnd %></span>
         </div>
     </div>
 </div>

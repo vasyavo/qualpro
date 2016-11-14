@@ -5,26 +5,6 @@
         CANVAS_SIZE     : 135,
         DEFAULT_PER_PAGE: 25,
 
-        CONTACT_US_TYPES : [{
-            _id: 1,
-            name: {
-                en: 'Application Related Issue',
-                ar: '' //todo
-            }
-        }, {
-            _id: 2,
-            name: {
-                en: 'Future Application Ideas',
-                ar: '' //todo
-            }
-        }, {
-            _id: 3,
-            name: {
-                en: 'Others',
-                ar: '' //todo
-            }
-        }],
-
         DISPLAY_TYPE_DD: [
             {_id: 'gondola', name: 'Gondola', sortKey: 0},
             {_id: 'floorStand', name: 'Floor stand', sortKey: 1},

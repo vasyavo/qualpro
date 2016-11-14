@@ -6350,18 +6350,21 @@ var Filters = function(db, redis) {
         let aggregateHelper;
         const TYPES = [
             {
+                _id : 'Application Related Issue',
                 name : {
                     en : 'Application Related Issue',
                     ar : ''
                 }
             },
             {
+                _id : 'Future Application Ideas',
                 name : {
                     en : 'Future Application Ideas',
                     ar : ''
                 }
             },
             {
+                _id : 'Others',
                 name : {
                     en : 'Others',
                     ar : ''
@@ -6370,12 +6373,14 @@ var Filters = function(db, redis) {
         ];
         const STATUSES = [
             {
+                _id : 'new',
                 name : {
                     en : 'new',
                     ar : ''
                 }
             },
             {
+                _id : 'resolved',
                 name : {
                     en : 'resolved',
                     ar : ''
