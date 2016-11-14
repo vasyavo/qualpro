@@ -26,6 +26,7 @@ models[CONTENT_TYPES.DISTRIBUTIONFORM] = require('./distributionForm/model');
 models[CONTENT_TYPES.DOCUMENTS] = require('./document/model');
 models[CONTENT_TYPES.DOMAIN] = require('./domain/model');
 models[CONTENT_TYPES.FILES] = require('./file/model');
+models[CONTENT_TYPES.INSTORETASKS] = require('./objective');
 models[CONTENT_TYPES.ITEM] = require('./item/model');
 models[CONTENT_TYPES.ITEMHISTORY] = require('./itemHistory/model');
 models[CONTENT_TYPES.MODULE] = require('./module/model');
