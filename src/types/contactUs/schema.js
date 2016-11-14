@@ -16,11 +16,7 @@ const schema = new Schema({
     comment : {
         type : String
     },
-    attachments : {
-        type : ObjectId,
-        ref : CONTENT_TYPES.FILES,
-        default : null
-    },
+    attachments : { type: Array, default: [] },
     createdBy : {
         type : ObjectId,
         ref : CONTENT_TYPES.PERSONNEL,
