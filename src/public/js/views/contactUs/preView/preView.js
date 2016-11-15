@@ -44,7 +44,8 @@ define([
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
-            'click #resolve'                  : 'setStatusResolved'
+            'click #resolve'                  : 'setStatusResolved',
+            'click #comments'                 : 'showCommentsDialog'
         },
 
         initialize: function (options) {
@@ -52,10 +53,50 @@ define([
             this.model = options.model;
             this.files = new FileCollection();
             this.previewFiles = new FileCollection(this.model.get('attachments'), true);
-            _.bindAll(this, 'fileSelected', 'renderComment');
+            _.bindAll(this, 'fileSelected');
 
             this.makeRender();
             this.render();
+        },
+
+        showCommentsDialog : function () {
+            const self = this;
+            let formString = this.$el.html(this.commentTemplate());
+            self.$el = formString.dialog({
+                dialogClass  : 'create-dialog competitorBranding-dialog',
+                width        : '1000',
+                showCancelBtn: false,
+                buttons      : {
+                    save: {
+                        text : self.translation.okBtn,
+                        class: 'btn saveBtn',
+                        click: function () {
+                            if (self.model.changedAttributes()) {
+                                self.trigger('modelChanged', self.model.get('comments').length || '');
+                            }
+
+                            self.undelegateEvents();
+                            self.$el.dialog('close').dialog('destroy').remove();
+                        }
+                    }
+                },
+
+                close: function () {
+                    var model = self.model;
+                    var id;
+                    var previousAttributes;
+
+                    if (model.changedAttributes()) {
+                        id = model.get('_id');
+                        previousAttributes = model.previousAttributes();
+                        model.clear();
+                        model.set(previousAttributes);
+                        model.set({_id: id});
+                    }
+
+                    $('body').css({overflow: 'inherit'});
+                }
+            });
         },
 
         setStatusResolved : function (event) {
@@ -69,6 +110,8 @@ define([
                             ERROR_MESSAGES.statusNotChanged[App.currentUser.currentLanguage]
                         ]);
                     }
+
+                    self.trigger('modelChanged', response);
 
                     self.$el.dialog('close').dialog('destroy').remove();
                 });
@@ -312,25 +355,6 @@ define([
 
         },
 
-        renderComment: function () {
-            var $commentWrapper = this.$el.find('#commentWrapper');
-            var $commentScrollableContainer = $commentWrapper.closest('.innerScroll');
-            var jsonCollection = this.commentCollection.toJSON();
-
-            if (jsonCollection.length) {
-                $commentScrollableContainer.show();
-            }
-
-            $commentWrapper.html('');
-            $commentWrapper.append(this.commentTemplate({
-                collection   : jsonCollection,
-                translation  : this.translation,
-                notShowAttach: false
-            }));
-
-            return this;
-        },
-
         setSelectedFiles: function (files) {
             var self = this;
             var $fileContainer = self.$el.find('#objectiveFileThumbnail');
@@ -350,74 +374,65 @@ define([
         },
 
         render: function () {
-            var jsonModel = this.model.toJSON();
-            var formString;
-            var self = this;
+            const self = this;
+            dataService.getData(`contactUs/${self.model.get('_id')}`, {}, function (err, modelData) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.readError[App.currentUser.currentLanguage]
+                    ]);
+                }
 
-            jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
+                var jsonModel = modelData;
+                var formString;
 
-            formString = this.$el.html(this.template({
-                jsonModel  : jsonModel,
-                translation: this.translation
-            }));
+                jsonModel.creator.name = `${jsonModel.creator.firstName[App.currentUser.currentLanguage]} ${jsonModel.creator.lastName[App.currentUser.currentLanguage]}`;
+                jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
 
-            this.$el = formString.dialog({
-                dialogClass  : 'create-dialog competitorBranding-dialog',
-                width        : '1000',
-                showCancelBtn: false,
-                buttons      : {
-                    save: {
-                        text : self.translation.okBtn,
-                        class: 'btn saveBtn',
-                        click: function () {
-                            if (self.model.changedAttributes()) {
-                                self.trigger('modelChanged', self.model.get('comments').length || '');
+                formString = self.$el.html(self.template({
+                    jsonModel  : jsonModel,
+                    translation: self.translation
+                }));
+
+                self.$el = formString.dialog({
+                    dialogClass  : 'create-dialog competitorBranding-dialog',
+                    width        : '1000',
+                    showCancelBtn: false,
+                    buttons      : {
+                        save: {
+                            text : self.translation.okBtn,
+                            class: 'btn saveBtn',
+                            click: function () {
+                                if (self.model.changedAttributes()) {
+                                    self.trigger('modelChanged', self.model.get('comments').length || '');
+                                }
+
+                                self.undelegateEvents();
+                                self.$el.dialog('close').dialog('destroy').remove();
                             }
-
-                            self.undelegateEvents();
-                            self.$el.dialog('close').dialog('destroy').remove();
                         }
+                    },
+
+                    close: function () {
+                        var model = self.model;
+                        var id;
+                        var previousAttributes;
+
+                        if (model.changedAttributes()) {
+                            id = model.get('_id');
+                            previousAttributes = model.previousAttributes();
+                            model.clear();
+                            model.set(previousAttributes);
+                            model.set({_id: id});
+                        }
+
+                        $('body').css({overflow: 'inherit'});
                     }
-                },
+                });
 
-                close: function () {
-                    var model = self.model;
-                    var id;
-                    var previousAttributes;
+                self.delegateEvents(this.events);
 
-                    if (model.changedAttributes()) {
-                        id = model.get('_id');
-                        previousAttributes = model.previousAttributes();
-                        model.clear();
-                        model.set(previousAttributes);
-                        model.set({_id: id});
-                    }
-
-                    $('body').css({overflow: 'inherit'});
-                }
+                return self;
             });
-
-            this.$el.find('#commentForm').on('submit', {
-                body   : this.commentBody,
-                context: this
-            }, this.commentFormSubmit);
-            this.$el.find('#fileThumbnail').hide();
-
-            this.setSelectedFiles(jsonModel.attachments);
-
-            this.commentCollection = new CommentCollection({
-                data: {
-                    objectiveId: this.model.get('_id'),
-                    context    : CONTENT_TYPES.CONTACT_US,
-                    reset      : true
-                }
-            });
-
-            this.commentCollection.on('reset', this.renderComment, this);
-
-            this.delegateEvents(this.events);
-
-            return this;
         }
     });
 

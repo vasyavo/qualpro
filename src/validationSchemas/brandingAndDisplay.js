@@ -35,7 +35,10 @@ const create = Joi.object().keys({
     displayType : Joi.number().integer().required(),
     outlet : Joi.objectId().required(),
     categories : Joi.array().items(Joi.objectId()),
-    description : Joi.string().required(),
+    description : Joi.object().keys({
+        en : Joi.string(),
+        ar : Joi.string()
+    }).required(),
     dateStart : Joi.date().max(Joi.ref('dateEnd')).default(currentDate, 'current date'),
     dateEnd : Joi.date().min(Joi.ref('dateStart')).default(currentDate, 'current date'),
     createdAt : Joi.date().default(currentDate, 'current date'),

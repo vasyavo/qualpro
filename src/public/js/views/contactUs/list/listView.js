@@ -46,8 +46,10 @@ define([
                     model      : model,
                     translation: this.translation
                 });
-                this.preView.on('modelChanged', function (count) {
-                    self.changeCommentCount(count, $targetRow);
+                this.preView.on('modelChanged', function (newModel) {
+                    let modelToUpdate = self.collection.get(newModel._id);
+                    modelToUpdate.set({status: self.translation.resolved});
+                    self.showMoreContent(self.collection);
                 });
             },
 

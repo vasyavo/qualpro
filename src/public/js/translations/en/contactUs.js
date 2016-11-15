@@ -7,6 +7,7 @@ define([
         // list view
         title: 'Title',
         type: 'Type',
+        resolved : 'resolved',
 
         // preview
         employeeName : 'Employee Name',
