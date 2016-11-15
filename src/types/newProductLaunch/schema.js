@@ -8,6 +8,10 @@ const schema = new Schema({
         ar: { type: String, default: '' }
     },
     category: { type: ObjectId, ref: CONTENT_TYPES.CATEGORY, default: null },
+    category_name: {
+        en: { type: String, default: '',},
+        ar: { type: String, default: ''}
+    },
     brand: {
         _id: { type: ObjectId, ref: CONTENT_TYPES.BRAND },
         name: { type: String, default: '' }
