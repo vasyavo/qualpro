@@ -10,6 +10,7 @@ var ContactUs = function(db, redis, event) {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ContactUsModel = require('./../types/contactUs/model');
     var CountryModel = require('./../types/origin/model');
+    var FileModel = require('./../types/file/model');
     var access = require('../helpers/access')(db);
     var joiValidate = require('../helpers/joiValidate');
 
@@ -283,36 +284,17 @@ var ContactUs = function(db, redis, event) {
                     as : 'creator'
                 })
                 .unwind('creator')
-                .unwind('attachments')
-                .lookup({
-                    from : CONTENT_TYPES.FILES,
-                    localField : 'attachments',
-                    foreignField : '_id',
-                    as : 'attachments'
-                })
-                .unwind('$attachments')
-                .group({
-                    '_id' : '$_id',
-                    attachments : {$push : '$attachments'},
-                    type : {$first : '$type'},
-                    description : {$first : '$description'},
-                    createdAt : {$first : '$createdAt'},
-                    status : {$first : '$status'},
-                    creator : {$first : '$creator'}
-                })
                 .project({
                     type : 1,
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    //attachments : 1,
+                    attachments : 1,
                     'creator._id' : 1,
                     'creator.ID' : 1,
                     'creator.lastName' : 1,
                     'creator.firstName' : 1,
-                    'creator.country' : 1,
-                    'attachments.originalName' : 1,
-                    'attachments.name' : 1
+                    'creator.country' : 1
                 })
                 .allowDiskUse(true);
 
@@ -348,6 +330,36 @@ var ContactUs = function(db, redis, event) {
                     })
             }
 
+            function getAndMapAttachments(contactUs, cb) {
+                if (!_.get(contactUs, 'attachments')) {
+                    return cb(null, contactUs);
+                }
+                FileModel
+                    .find({
+                        _id : {
+                            $in : contactUs.attachments
+                        }
+                    }, {
+                        name : 1,
+                        originalName : 1
+                    })
+                    .lean()
+                    .exec(function(err, attachments) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        contactUs.attachments = _.filter(attachments, function(attachment) {
+                            if (_.includes(_.map(contactUs.attachments, o => o.toString()),
+                                    attachment._id.toString()
+                                )) {
+                                return attachment
+                            }
+                        });
+                        cb(null, contactUs);
+                    })
+            }
+
             function getLinkFromAws(contactUs, cb) {
                 if (!_.get(contactUs, 'attachments')) {
                     return cb(null, contactUs || {});
@@ -367,6 +379,7 @@ var ContactUs = function(db, redis, event) {
             async.waterfall([
                 getContactUsForm,
                 getAndMapCountries,
+                getAndMapAttachments,
                 getLinkFromAws
             ], function(err, result) {
                 if (err) {
