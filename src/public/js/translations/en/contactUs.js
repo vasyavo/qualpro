@@ -24,7 +24,8 @@ define([
 
         // topBar
         all        : 'Contact Us',
-        okBtn      : 'Ok'
+        okBtn      : 'Ok',
+        sendBtn    : 'Send'
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);

@@ -5,8 +5,7 @@ define([
     'moment',
     'text!templates/contactUs/preview.html',
     'text!templates/file/preView.html',
-    'text!templates/objectives/comments/comment.html',
-    'text!templates/objectives/comments/newRow.html',
+    'views/contactUs/comments',
     'collections/file/collection',
     'models/contactUs',
     'models/file',
@@ -22,7 +21,7 @@ define([
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
     'constants/errorMessages'
-], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentsView,
              FileCollection, Model, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
              CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
@@ -31,8 +30,6 @@ define([
         contentType: CONTENT_TYPES.CONTACT_US,
 
         template             : _.template(PreviewTemplate),
-        commentTemplate      : _.template(CommentTemplate),
-        newCommentTemplate   : _.template(NewCommentTemplate),
         fileTemplate         : _.template(FileTemplate),
         CONSTANTS            : CONSTANTS,
         ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
@@ -60,42 +57,9 @@ define([
         },
 
         showCommentsDialog : function () {
-            const self = this;
-            let formString = this.$el.html(this.commentTemplate());
-            self.$el = formString.dialog({
-                dialogClass  : 'create-dialog competitorBranding-dialog',
-                width        : '1000',
-                showCancelBtn: false,
-                buttons      : {
-                    save: {
-                        text : self.translation.okBtn,
-                        class: 'btn saveBtn',
-                        click: function () {
-                            if (self.model.changedAttributes()) {
-                                self.trigger('modelChanged', self.model.get('comments').length || '');
-                            }
-
-                            self.undelegateEvents();
-                            self.$el.dialog('close').dialog('destroy').remove();
-                        }
-                    }
-                },
-
-                close: function () {
-                    var model = self.model;
-                    var id;
-                    var previousAttributes;
-
-                    if (model.changedAttributes()) {
-                        id = model.get('_id');
-                        previousAttributes = model.previousAttributes();
-                        model.clear();
-                        model.set(previousAttributes);
-                        model.set({_id: id});
-                    }
-
-                    $('body').css({overflow: 'inherit'});
-                }
+            new CommentsView({
+                modelAttrs : this.model.toJSON(),
+                translation : this.translation
             });
         },
 
@@ -295,66 +259,6 @@ define([
             $descriptionBlock.toggleClass('showAllDescription');
         },
 
-        sendComment: function () {
-            var commentModel = new CommentModel();
-            var self = this;
-            this.commentBody = {
-                commentText: this.$el.find('#commentInput').val(),
-                objectiveId: this.model.get('_id'),
-                context    : CONTENT_TYPES.COMPETITORBRANDING
-            };
-
-            commentModel.setFieldsNames(this.translation);
-
-            commentModel.validate(this.commentBody, function (err) {
-                if (err && err.length) {
-                    App.renderErrors(err);
-                } else {
-                    self.checkForEmptyInput(self.files, self.$el);
-                    self.$el.find('#commentForm').submit();
-                }
-            });
-        },
-
-        commentFormSubmit: function (e) {
-            var context = e.data.context;
-            var data = new FormData(this);
-
-            e.preventDefault();
-            data.append('data', JSON.stringify(context.commentBody));
-
-            $.ajax({
-                url        : context.commentCollection.url,
-                type       : 'POST',
-                data       : data,
-                contentType: false,
-                processData: false,
-                success    : function (comment) {
-                    var commentModel = new CommentModel(comment, {parse: true});
-                    var jsonComment = commentModel.toJSON();
-
-                    context.commentCollection.add(commentModel);
-                    context.model.set({comments: _.pluck(context.commentCollection, '_id')});
-                    context.$el.find('#commentWrapper').prepend(context.newCommentTemplate(
-                        {
-                            comment      : jsonComment,
-                            translation  : this.translation,
-                            notShowAttach: false
-                        }
-                    ));
-                    context.$el.find('#commentInput').val('');
-                    context.files.reset([]);
-                    context.$el.find('#commentForm').html('');
-                    context.chengeCountOfAttachedFilesToComment('');
-
-                    if (context.commentCollection.length === 1) {
-                        context.$el.find('.objectivesPaddingBlock').show();
-                    }
-                }
-            });
-
-        },
-
         setSelectedFiles: function (files) {
             var self = this;
             var $fileContainer = self.$el.find('#objectiveFileThumbnail');
@@ -402,10 +306,6 @@ define([
                             text : self.translation.okBtn,
                             class: 'btn saveBtn',
                             click: function () {
-                                if (self.model.changedAttributes()) {
-                                    self.trigger('modelChanged', self.model.get('comments').length || '');
-                                }
-
                                 self.undelegateEvents();
                                 self.$el.dialog('close').dialog('destroy').remove();
                             }
