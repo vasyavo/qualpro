@@ -2,6 +2,12 @@
     <div class="title">
         <span class="titleDescription"><%= translation.titlePreview %></span>
     </div>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div class="butonsWrap">
+            <input type="button" id="resolve" class="createBtn readonlyVisible <%= jsonModel.status == 'resolved' ? 'hidden' : '' %>" value="<%- translation.resolveBtn %>">
+            <button class="createBtn readonlyVisible greyBtn"><%- translation.comments %></button>
+        </div>
+    </div>
     <div id="main" class="contactUsFormPreview">
 
         <div class="blockObjective contactUsForm">
@@ -14,19 +20,19 @@
                         </div>
                         <div class="row">
                             <div class="cell"><span><%- translation.country %></span></div>
-                            <div class="cell"><span>UNITED ARAB EMIRATES</span></div>
+                            <div class="cell"><span><%- jsonModel.country.name.currentLanguage %></span></div>
                         </div>
                         <div class="row borderTop">
                             <div class="cell"><span><%- translation.type %></span></div>
-                            <div class="cell"><span>Comment</span></div>
+                            <div class="cell"><span><%- jsonModel.type %></span></div>
                         </div>
                         <div class="row">
                             <div class="cell"><span><%- translation.dateCreated %></span></div>
-                            <div class="cell"><span>05.10.2016</span></div>
+                            <div class="cell"><span><%- jsonModel.createdAt %></span></div>
                         </div>
                         <div class="row">
                             <div class="cell"><span><%- translation.status %></span></div>
-                            <div class="cell"><span>Resolved</span></div>
+                            <div class="cell"><span><%- jsonModel.status %></span></div>
                         </div>
                     </div>
                 </div>
@@ -38,7 +44,7 @@
                             <div class="descriptionBlock floatBlock">
                                 <span><%- translation.description %></span>
                             </div>
-                            <span class="descriptionValue heightDescription fontBold fontMedium hoverFullText"><%- jsonModel.description.currentLanguage %></span>
+                            <span class="descriptionValue heightDescription fontBold fontMedium hoverFullText"><%- jsonModel.description %></span>
                         </div>
                         <div class="attachmentsBlock">
                             <div class="attachmentsHeader">

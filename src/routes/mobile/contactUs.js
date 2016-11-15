@@ -2,8 +2,8 @@
 
 var express = require('express');
 var router = express.Router();
-var ContactUsHandler = require('../handlers/contactUs');
-var access = require('../helpers/access');
+var ContactUsHandler = require('../../handlers/contactUs');
+var access = require('../../helpers/access');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 

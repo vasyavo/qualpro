@@ -2,12 +2,13 @@ define([
         'Backbone',
         'jQuery',
         'Underscore',
+        'moment',
         'text!templates/contactUs/list/list.html',
         'views/contactUs/preView/preView',
         'views/filter/filtersBarView',
         'views/paginator',
         'constants/contentType'
-    ], function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
+    ], function (Backbone, $, _, moment, template, PreView, filterView, paginator, CONTENT_TYPES) {
         'use strict';
 
         var View = paginator.extend({
@@ -54,10 +55,20 @@ define([
                 $targetRow.find('.userMassage').text(count);
             },
 
+            prepareDataToDisplay : function (data) {
+                _.each(data, (model) => {
+                    model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
+                    model.country.name.currentLanguage = model.country.name[App.currentUser.currentLanguage];
+                    model.createdAt = moment(model.createdAt).format('DD.MM.YYYY');
+                });
+            },
+
             showMoreContent: function (newModels) {
                 var $currentEl = this.$el;
                 var $holder = $currentEl.find('.reportingWrap');
                 var jsonCollection = newModels.toJSON();
+
+                this.prepareDataToDisplay(jsonCollection);
 
                 this.pageAnimation(this.collection.direction, $holder);
 
@@ -72,11 +83,9 @@ define([
                 var $currentEl = this.$el;
                 var jsonCollection = this.collection.toJSON();
                 var $holder;
-debugger;
-                _.each(jsonCollection, (model) => {
-                    model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
-                    model.description.currentLanguage = model.description[App.currentUser.currentLanguage];
-                });
+
+                this.prepareDataToDisplay(jsonCollection);
+
                 $currentEl.html('');
                 $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
 

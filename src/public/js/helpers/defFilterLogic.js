@@ -397,6 +397,13 @@ define([
                             type  : 'ObjectId',
                             values: [currentUserId]
                         },
+                        'createdBy.user': {
+                            type: 'ObjectId',
+                            values: [currentUserId],
+                            options: {
+                                $nin: true
+                            }
+                        },
                         'status': {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
@@ -642,6 +649,13 @@ define([
                         'assignedTo': {
                             type  : 'ObjectId',
                             values: [currentUserId]
+                        },
+                        'createdBy.user': {
+                            type: 'ObjectId',
+                            values: [currentUserId],
+                            options: {
+                                $nin: true
+                            }
                         },
                         'status'        : {
                             type   : 'string',

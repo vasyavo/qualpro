@@ -2,11 +2,13 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/contactUs/preview.html',
     'text!templates/file/preView.html',
     'text!templates/objectives/comments/comment.html',
     'text!templates/objectives/comments/newRow.html',
     'collections/file/collection',
+    'models/contactUs',
     'models/file',
     'models/comment',
     'views/baseDialog',
@@ -20,8 +22,8 @@ define([
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
     'constants/errorMessages'
-], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
-             FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+             FileCollection, Model, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
              CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
 
@@ -41,7 +43,8 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #resolve'                  : 'setStatusResolved'
         },
 
         initialize: function (options) {
@@ -53,6 +56,23 @@ define([
 
             this.makeRender();
             this.render();
+        },
+
+        setStatusResolved : function (event) {
+            var self = this;
+            if (this.model.get('status') === 'new') {
+                dataService.putData(`${CONTENT_TYPES.CONTACT_US}/${self.model.get('_id')}`, {
+                    status : 'resolved'
+                }, (err, response) => {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.statusNotChanged[App.currentUser.currentLanguage]
+                        ]);
+                    }
+
+                    self.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: function (e) {
@@ -334,6 +354,8 @@ define([
             var formString;
             var self = this;
 
+            jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
+
             formString = this.$el.html(this.template({
                 jsonModel  : jsonModel,
                 translation: this.translation
@@ -386,7 +408,7 @@ define([
             this.commentCollection = new CommentCollection({
                 data: {
                     objectiveId: this.model.get('_id'),
-                    context    : CONTENT_TYPES.COMPETITORBRANDING,
+                    context    : CONTENT_TYPES.CONTACT_US,
                     reset      : true
                 }
             });

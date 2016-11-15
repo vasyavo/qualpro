@@ -243,6 +243,10 @@
         elementsWasDeleted: {
             en: 'elements was deleted',
             ar: 'تم حذف العناصر'
+        },
+        statusNotChanged : {
+            en: 'Status not changed',
+            ar: '' //todo
         }
     };
 

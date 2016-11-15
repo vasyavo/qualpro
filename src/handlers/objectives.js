@@ -1948,6 +1948,7 @@ var Objectives = function (db, redis, event) {
             var positionFilter = {};
             var uId = req.session.uId;
             var currentUserLevel = req.session.level;
+            let arrayOfSubordinateUsersId;
 
             var searchFieldsArray = [
                 'title.en',
@@ -2003,6 +2004,17 @@ var Objectives = function (db, redis, event) {
                 delete queryObject.branch;
             }
 
+            //If request from mobile app, need to turn myCC, then you can get objectives that assigned to your subordinate users
+           /* if (isMobile) {
+                myCC = true;
+                queryObject['$and'] = [];
+                queryObject['$and'][0] = {
+                    assignedTo: {
+                        $in: ''
+                    }
+                }
+            }*/
+
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             if (queryObject.position && queryObject.position.$in) {
@@ -2037,16 +2049,13 @@ var Objectives = function (db, redis, event) {
                 function (arrayOfUserId, cb) {
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
+                        //arrayOfSubordinateUsersId = arrayOfUserId;
                     }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },
                 function (coveredIds, cb) {
                     var pipeLine;
                     var aggregation;
-
-                    if (isMobile) {
-
-                    }
 
                     pipeLine = getAllPipeline({
                         aggregateHelper  : aggregateHelper,
@@ -2214,7 +2223,7 @@ var Objectives = function (db, redis, event) {
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                        next({status: 200, subordinates: arrayOfSubordinateUsersId, body: response});
                     })
                 });
             });

@@ -21,8 +21,9 @@
     <div class="locationBlock flexGrow flexColumn">
         <div class="locationTop flexRow">
             <div class="flexColumn competitorCategoeyColumn">
+                <div class="locationTitle"><%- model.type %></div>
                 <div class="fontSmall fontGray textEllipsis hoverFullText ">
-                    <%= translation.description%> : <%= model.description.currentLanguage %>
+                    <%- translation.description %> : <%- model.description %>
                 </div>
             </div>
             <div class="flexRow bannerBlock">
@@ -36,6 +37,19 @@
                 </div>
                 <% } %>
             </div>
+        </div>
+    </div>
+    <div class="dateBlock flexColumn">
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%- model.createdAt %></span>
+        </div>
+    </div>
+    <div class="progressBlock noShrink flexColumn">
+        <div>
+            <span class="name"><%- translation.status %></span>
+        </div>
+        <div class="bottom">
+            <span class="inProgress"><%- model.status %></span>
         </div>
     </div>
 </div>

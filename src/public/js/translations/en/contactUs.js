@@ -18,6 +18,8 @@ define([
         attachments  : 'Attachments',
         files        : 'Files',
         noTranslation: 'no Translation',
+        resolveBtn : 'Resolve',
+        comments : 'Comments',
 
         // topBar
         all        : 'Contact Us',

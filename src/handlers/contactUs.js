@@ -34,6 +34,7 @@ var ContactUs = function(db, redis, event) {
                     callback();
                 });
             }
+
             function saveContactUs(callback) {
                 body.attachments = fileIds;
 
@@ -182,6 +183,23 @@ var ContactUs = function(db, redis, event) {
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
+                })
+                .unwind('createdBy.user.country')
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'createdBy.user.country',
+                    foreignField : '_id',
+                    as : 'country'
+                })
+                .unwind('country')
+                .project({
+                    type : 1,
+                    createdAt : 1,
+                    description : 1,
+                    status : 1,
+                    'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
+                    'country.name' : 1,
+                    'country._id' : 1
                 })
                 .limit(query.count)
                 .skip(skip)
