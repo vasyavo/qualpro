@@ -3640,7 +3640,7 @@ const salesman = [
         archive: false,
         edit   : false,
         write  : false,
-        read   : false
+        read   : true
     }
 }, {
     module: 30,

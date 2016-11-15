@@ -795,7 +795,9 @@ var planogramsHandler = function (db, redis, event) {
 
                 _.map(response.data, function (element) {
                     personnelIds.push(element.createdBy.user._id);
-                    fileIds.push(element.fileID._id);
+                    if (element.fileID && element.fileID._id) {
+                        fileIds.push(element.fileID._id);
+                    }
                 });
 
                 personnelIds = _.uniqBy(personnelIds, 'id');
