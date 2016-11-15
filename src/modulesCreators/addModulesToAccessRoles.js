@@ -4254,7 +4254,7 @@ const merchandiser = [
         archive: false,
         edit   : false,
         write  : false,
-        read   : false
+        read   : true
     }
 }, {
     module: 30,
@@ -4868,7 +4868,7 @@ const cashVan = [
         archive: false,
         edit   : false,
         write  : false,
-        read   : false
+        read   : true
     }
 }, {
     module: 30,
