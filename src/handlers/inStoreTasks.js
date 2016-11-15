@@ -1,3 +1,5 @@
+'use strict';
+
 var InStoreReports = function (db, redis, event) {
     var async = require('async');
     var _ = require('underscore');

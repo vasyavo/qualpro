@@ -246,7 +246,7 @@ function BrandingAndDisplay(db, redis, event) {
             }
 
             function getLinkFromAws(brandingAndDisplayModel, cb) {
-                if (!_.get(brandingAndDisplayModel, 'brandingAndDisplayModel.attachments')) {
+                if (!_.get(brandingAndDisplayModel, 'attachments')) {
                     return cb(null, brandingAndDisplayModel || {});
                 }
                 async.each(brandingAndDisplayModel.attachments,

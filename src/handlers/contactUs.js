@@ -260,25 +260,19 @@ var ContactUs = function(db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
-            var error;
+        var error;
 
+        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
-                return next(err);
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
             }
 
-            joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
-                if (err) {
-                    error = new Error();
-                    error.status = 400;
-                    error.message = err.name;
-                    error.details = err.details;
-
-                    return next(error);
-                }
-
-                queryRun(query);
-            });
+            queryRun(query);
         });
     };
 
@@ -319,14 +313,14 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    attachments : 1,
+                    //attachments : 1,
                     'creator._id' : 1,
                     'creator.ID' : 1,
                     'creator.lastName' : 1,
                     'creator.firstName' : 1,
                     'creator.country' : 1,
-                    'file.originalName' : 1,
-                    'file.name' : 1
+                    'attachments.originalName' : 1,
+                    'attachments.name' : 1
                 })
                 .allowDiskUse(true);
 
@@ -363,7 +357,7 @@ var ContactUs = function(db, redis, event) {
             }
 
             function getLinkFromAws(contactUs, cb) {
-                if (!_.get(contactUs, 'contactUs.attachments')) {
+                if (!_.get(contactUs, 'attachments')) {
                     return cb(null, contactUs || {});
                 }
                 async.each(contactUs.attachments,
@@ -391,14 +385,7 @@ var ContactUs = function(db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.CONTACT_US, function(err) {
-            var id = req.params.id;
-            if (err) {
-                return next(err);
-            }
-
-            queryRun(id);
-        });
+        queryRun(req.params.id);
     };
 
     this.updateById = function(req, res, next) {
@@ -415,26 +402,20 @@ var ContactUs = function(db, redis, event) {
                 });
         }
 
-        access.getEditAccess(req, ACL_MODULES.CONTACT_US, function(err) {
-            var id = req.params.id;
-            var body = req.body;
-            var error;
+        var id = req.params.id;
+        var body = req.body;
+        var error;
 
+        joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'update', function(err, body) {
             if (err) {
-                return next(err);
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
             }
-
-            joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'update', function(err, body) {
-                if (err) {
-                    error = new Error();
-                    error.status = 400;
-                    error.message = err.name;
-                    error.details = err.details;
-
-                    return next(error);
-                }
-                queryRun(id, body);
-            });
+            queryRun(id, body);
         });
     }
 };
