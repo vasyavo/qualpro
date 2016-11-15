@@ -7,7 +7,6 @@ var ContactUs = function(db, redis, event) {
     var fileHandler = new FileHandler(db);
     var mongoose = require('mongoose');
     var ObjectId = mongoose.Types.ObjectId;
-    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ContactUsModel = require('./../types/contactUs/model');
     var CountryModel = require('./../types/origin/model');
@@ -53,14 +52,8 @@ var ContactUs = function(db, redis, event) {
                 res.status(201).send(result);
             });
         }
-
-        access.getWriteAccess(req, ACL_MODULES.CONTACT_US, function(err) {
             var body;
             var error;
-
-            if (err) {
-                return next(err);
-            }
 
             try {
                 if (req.body.data) {
@@ -86,7 +79,6 @@ var ContactUs = function(db, redis, event) {
 
                 queryRun(saveData);
             });
-        });
     };
 
     this.getAll = function(req, res, next) {
@@ -329,7 +321,7 @@ var ContactUs = function(db, redis, event) {
             }
 
             function getAndMapCountries(contactUs, cb) {
-                if (!contactUs[0].creator) {
+                if (!_.get(contactUs, '[0].creator')) {
                     return cb(null, contactUs[0]);
                 }
                 CountryModel

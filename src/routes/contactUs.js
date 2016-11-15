@@ -1,11 +1,11 @@
 'use strict';
 
-var express = require('express');
-var router = express.Router();
-var ContactUsHandler = require('../handlers/contactUs');
-var access = require('../helpers/access');
-var multipart = require('connect-multiparty');
-var multipartMiddleware = multipart();
+const express = require('express');
+const router = express.Router();
+const ContactUsHandler = require('../handlers/contactUs');
+const access = require('../helpers/access');
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart();
 
 const ACL_MODULES = require('./../constants/aclModulesNames');
 
@@ -13,6 +13,7 @@ module.exports = function (db, redis, event) {
     const handler = new ContactUsHandler(db, redis, event);
     const access = require('./../helpers/access')(db);
     const checkAuth = require('./../helpers/access').checkAuth;
+
     router.use(checkAuth);
 
     router.get('/', function(req, res, next) {
@@ -32,7 +33,11 @@ module.exports = function (db, redis, event) {
         })
     }, handler.updateById);
 
-    router.post('/', multipartMiddleware, handler.create);
+    router.post('/', function(req, res, next) {
+        access.getWriteAccess(req, ACL_MODULES.CONTACT_US, function(err) {
+            err ? next(err) : next();
+        })
+    }, multipartMiddleware, handler.create);
 
     return router;
 };
