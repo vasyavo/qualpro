@@ -1978,6 +1978,7 @@ var Objectives = function (db, redis, event) {
                 'createdBy.user.lastName.ar',
                 'createdBy.user.position.name.en',
                 'createdBy.user.position.name.ar',
+                'assignedTo._id',
                 'assignedTo.firstName.en',
                 'assignedTo.lastName.en',
                 'assignedTo.firstName.ar',
@@ -2006,17 +2007,6 @@ var Objectives = function (db, redis, event) {
                 delete queryObject.branch;
             }
 
-            //If request from mobile app, need to turn myCC, then you can get objectives that assigned to your subordinate users
-           /* if (isMobile) {
-                myCC = true;
-                queryObject['$and'] = [];
-                queryObject['$and'][0] = {
-                    assignedTo: {
-                        $in: ''
-                    }
-                }
-            }*/
-
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             if (queryObject.position && queryObject.position.$in) {
@@ -2039,7 +2029,7 @@ var Objectives = function (db, redis, event) {
             async.waterfall([
                 // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
                 (cb) => {
-                    if (myCC) {
+                    if (myCC || isMobile) {
                         PersonnelModel.find({manager: req.session.uId})
                             .select('_id')
                             .lean()
@@ -2049,6 +2039,10 @@ var Objectives = function (db, redis, event) {
                     }
                 },
                 function (arrayOfUserId, cb) {
+                    if (isMobile) {
+                        //array of subordinate users id, to send on android app
+                        arrayOfSubordinateUsersId = arrayOfUserId;
+                    }
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
                         //arrayOfSubordinateUsersId = arrayOfUserId;
@@ -2225,7 +2219,8 @@ var Objectives = function (db, redis, event) {
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, subordinates: arrayOfSubordinateUsersId, body: response});
+                        response.subordinates = arrayOfSubordinateUsersId;
+                        next({status: 200, body: response});
                     })
                 });
             });

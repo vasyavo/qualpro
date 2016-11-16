@@ -78,6 +78,7 @@ define([
         initialize: function (options) {
             var self = this;
 
+            this.tabName = options.tabName;
             this.translation = options.translation;
             this.activityList = options.activityList;
             this.model = options.model.toJSON() ? options.model : new Model(options.model, {parse: true});
@@ -633,7 +634,8 @@ define([
 
             if (!this.dontShowDialog) {
                 formString = this.template({
-                    translation: this.translation
+                    translation: this.translation,
+                    hiddenActions : self.tabName === 'myCC' ? 'hidden' : ''
                 });
             } else {
                 formString = this.$el;
