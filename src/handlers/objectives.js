@@ -1448,6 +1448,7 @@ var Objectives = function (db, redis, event) {
     };
 
     function getAllPipeline(options) {
+        const subordinates = options.subordinates;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var parentIds = options.parentIds;
@@ -1497,19 +1498,41 @@ var Objectives = function (db, redis, event) {
             }
 
             if (isMobile && currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
-                pipeLine.push({
-                    $match: {
-                        $or: [
-                            {
-                                assignedTo: {$in: coveredIds},
-                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
-                            },
-                            {
-                                'createdBy.user': {$in: coveredIds}
-                            }
-                        ]
-                    }
-                });
+                const allowedAccessRoles = [
+                    ACL_CONSTANTS.COUNTRY_ADMIN,
+                    ACL_CONSTANTS.AREA_MANAGER,
+                    ACL_CONSTANTS.AREA_IN_CHARGE
+                ];
+
+                if (allowedAccessRoles.indexOf(currentUserLevel) > -1) {
+                    pipeLine.push({
+                        $match: {
+                            $or: [
+                                {
+                                    assignedTo: {$in: subordinates},
+                                    status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                                },
+                                {
+                                    'createdBy.user': {$in: coveredIds}
+                                }
+                            ]
+                        }
+                    });
+                } else {
+                    pipeLine.push({
+                        $match: {
+                            $or: [
+                                {
+                                    assignedTo: {$in: coveredIds},
+                                    status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                                },
+                                {
+                                    'createdBy.user': {$in: coveredIds}
+                                }
+                            ]
+                        }
+                    });
+                }
             }
         }
 
@@ -1950,7 +1973,7 @@ var Objectives = function (db, redis, event) {
             var positionFilter = {};
             var uId = req.session.uId;
             var currentUserLevel = req.session.level;
-            let arrayOfSubordinateUsersId;
+            let arrayOfSubordinateUsersId = [];
 
             var searchFieldsArray = [
                 'title.en',
@@ -2041,7 +2064,9 @@ var Objectives = function (db, redis, event) {
                 function (arrayOfUserId, cb) {
                     if (isMobile) {
                         //array of subordinate users id, to send on android app
-                        arrayOfSubordinateUsersId = arrayOfUserId;
+                        arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
+                            return model._id
+                        });
                     }
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
@@ -2052,6 +2077,7 @@ var Objectives = function (db, redis, event) {
                 function (coveredIds, cb) {
                     var pipeLine;
                     var aggregation;
+                    const subordinates = coveredIds.concat(arrayOfSubordinateUsersId);
 
                     pipeLine = getAllPipeline({
                         aggregateHelper  : aggregateHelper,
@@ -2063,6 +2089,7 @@ var Objectives = function (db, redis, event) {
                         skip             : skip,
                         limit            : limit,
                         coveredIds       : coveredIds,
+                        subordinates,
                         currentUserLevel : currentUserLevel
                     });
 
