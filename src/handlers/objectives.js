@@ -1505,6 +1505,7 @@ var Objectives = function (db, redis, event) {
                 ];
 
                 if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
+                    //get objectives that assigned to subordinate users
                     pipeLine.push({
                         $match: {
                             $or: [
@@ -2093,7 +2094,6 @@ var Objectives = function (db, redis, event) {
                         coveredPlusSubordinates,
                         subordinates : arrayOfSubordinateUsersId,
                         currentUserLevel : currentUserLevel,
-                        currentUserId : ObjectId(req.session.uId)
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);
