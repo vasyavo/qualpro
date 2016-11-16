@@ -259,7 +259,7 @@ var ContactUs = function(db, redis, event) {
 
         var error;
 
-        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
                 error = new Error();
                 error.status = 400;
@@ -294,6 +294,7 @@ var ContactUs = function(db, redis, event) {
                     description : 1,
                     status : 1,
                     attachments : 1,
+                    comments : 1,
                     'creator._id' : 1,
                     'creator.ID' : 1,
                     'creator.lastName' : 1,
@@ -399,12 +400,6 @@ var ContactUs = function(db, redis, event) {
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {
-            if (body.comment) {
-                body.$push = {
-                    comments : comment
-                }
-                delete body.comment
-            }
             ContactUsModel.findByIdAndUpdate(id, body, {
                 new : true
             })
@@ -430,6 +425,7 @@ var ContactUs = function(db, redis, event) {
 
                 return next(error);
             }
+
             queryRun(id, body);
         });
     }

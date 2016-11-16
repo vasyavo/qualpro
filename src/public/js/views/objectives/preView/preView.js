@@ -796,7 +796,8 @@ define([
             if (!this.dontShowDialog) {
                 formString = this.template({
                     translation : this.translation,
-                    activiryList: this.activityList
+                    activiryList: this.activityList,
+                    hiddenActions : self.tabName === 'myCC' ? 'hidden' : ''
                 });
             } else {
                 formString = this.$el;
