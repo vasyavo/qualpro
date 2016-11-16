@@ -38,9 +38,9 @@ const create = Joi.object().keys({
     description : Joi.object().keys({
         en : Joi.string(),
         ar : Joi.string()
-    }).required(),
-    dateStart : Joi.date().max(Joi.ref('dateEnd')).default(currentDate, 'current date'),
-    dateEnd : Joi.date().min(Joi.ref('dateStart')).default(currentDate, 'current date'),
+    }).or('en', 'or'),
+    dateStart : Joi.string().allow(''),
+    dateEnd : Joi.string().allow(''),
     createdAt : Joi.date().default(currentDate, 'current date'),
     updatedAt : Joi.date().default(currentDate, 'current date')
 });
