@@ -32,10 +32,10 @@ const customJoi = Joi.extend({
     ]
 });
 function currentDate() {
-    return moment().utc().format('YYYY-MM-DD HH:mm:ss');
+    return moment().utc().toISOString(); //.format('YYYY-MM-DD HH:mm:ss');
 }
 function startOfYear() {
-    return moment().utc().startOf('year').format('YYYY-MM-DD HH:mm:ss');
+    return moment().utc().startOf('year').toISOString(); //.format('YYYY-MM-DD HH:mm:ss');
 }
 
 const create = Joi.object().keys({
