@@ -247,6 +247,10 @@
         statusNotChanged : {
             en: 'Status not changed',
             ar: '' //todo
+        },
+        commentNotAdded : {
+            en: 'Comment not added',
+            ar: '' //todo
         }
     };
 
