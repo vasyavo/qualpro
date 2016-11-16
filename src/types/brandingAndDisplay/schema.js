@@ -29,7 +29,8 @@ const schema = new Schema({
     },
     attachments: { type: Array, default: [] },
     description: {
-        type: String, default: ''
+        en: { type: String, default: '' },
+        ar: { type: String, default: '' }
     },
     createdBy: {
         type: ObjectId,
