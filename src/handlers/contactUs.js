@@ -21,7 +21,7 @@ var ContactUs = function(db, redis, event) {
             var fileIds;
 
             function uploadFiles(callback) {
-                if (!files) {
+                if (!files && !files.length) {
                     return callback();
                 }
 

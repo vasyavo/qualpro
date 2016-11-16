@@ -1,0 +1,28 @@
+<div class="ui-dialog-content ui-widget-content">
+    <div class="descriptionBlock"><span>Comments</span></div>
+    <div class="contactUsForm">
+        <textarea class="comments" id="comment" cols="30" rows="1" placeholder="Write some comment..."></textarea>
+    </div>
+    <div class="ui-dialog-content ui-widget-content templateWrap">
+        <% _.each(comments, function(comment) { %>
+        <div class="userBlock flexColumn flexRowStart">
+            <div class="left flexColumn">
+                <img src="assets/images/user_logo.png" alt="" class="imgCircle userImgBig mCS_img_loaded left">
+            </div>
+            <div class="right flexColumn">
+                <span class="userName">Terrance Garsia</span>
+                <p class="description">Master Admin</p>
+            </div>
+        </div>
+        <div class="commentBlock flrow flexColumn borderLeft">
+            <span>Good job! Waiting for the other comments.</span>
+        </div>
+        <div class="dateblock flexColumn">
+            <span class="commentDate">28.08.2015</span>
+        </div>
+        <% }); %>
+    </div>
+</div>
+<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+    <div class="ui-dialog-buttonset"></div>
+</div>

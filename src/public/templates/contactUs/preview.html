@@ -1,11 +1,11 @@
 <div class="form-holder personnelInfo achivementFormWrap largeHeightPreview">
     <div class="title">
-        <span class="titleDescription"><%= translation.titlePreview %></span>
+        <span class="titleDescription"><%- translation.all %></span>
     </div>
     <div class="objectivesTopBtnBlockSmall borderBottom">
         <div class="butonsWrap">
             <input type="button" id="resolve" class="createBtn readonlyVisible <%= jsonModel.status == 'resolved' ? 'hidden' : '' %>" value="<%- translation.resolveBtn %>">
-            <button class="createBtn readonlyVisible greyBtn"><%- translation.comments %></button>
+            <button id="comments" class="createBtn readonlyVisible greyBtn"><%- translation.comments %></button>
         </div>
     </div>
     <div id="main" class="contactUsFormPreview">
@@ -16,11 +16,7 @@
                     <div class="table">
                         <div class="row borderBottomWithoutClearfix">
                             <div class="cell alignTop"><span><%- translation.employeeName %></span></div>
-                            <div class="cell"><span><%- jsonModel.createdBy.user.name %></span></div>
-                        </div>
-                        <div class="row">
-                            <div class="cell"><span><%- translation.country %></span></div>
-                            <div class="cell"><span><%- jsonModel.country.name.currentLanguage %></span></div>
+                            <div class="cell"><span><%- jsonModel.creator.name %></span></div>
                         </div>
                         <div class="row borderTop">
                             <div class="cell"><span><%- translation.type %></span></div>
@@ -59,7 +55,7 @@
                                         <div class="thumbnail_js thumbnailBody">
                                             <img src="<%- attachment.url %>" class="mCS_img_loaded">
                                             <div class="objectivesFileName fontMicro">
-                                                <%- attachment.name %>
+                                                <%- attachment.originalName %>
                                             </div>
                                         </div>
                                     </div>
@@ -75,3 +71,4 @@
 
     </div>
 </div>
+<div id="comments"></div>

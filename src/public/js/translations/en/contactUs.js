@@ -7,6 +7,7 @@ define([
         // list view
         title: 'Title',
         type: 'Type',
+        resolved : 'resolved',
 
         // preview
         employeeName : 'Employee Name',
@@ -23,7 +24,8 @@ define([
 
         // topBar
         all        : 'Contact Us',
-        okBtn      : 'Ok'
+        okBtn      : 'Ok',
+        sendBtn    : 'Send'
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
