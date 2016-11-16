@@ -146,6 +146,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                 })
                 .project({
@@ -153,6 +154,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user._id' : 1,
                     'createdBy.user.ID' : 1,
                     'createdBy.user.country' : 1,
@@ -173,6 +175,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
@@ -190,6 +193,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'country.name' : 1,
                     'country._id' : 1
@@ -255,7 +259,7 @@ var ContactUs = function(db, redis, event) {
 
         var error;
 
-        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
                 error = new Error();
                 error.status = 400;
@@ -395,6 +399,12 @@ var ContactUs = function(db, redis, event) {
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {
+            if (body.comment) {
+                body.$push = {
+                    comments : comment
+                }
+                delete body.comment
+            }
             ContactUsModel.findByIdAndUpdate(id, body, {
                 new : true
             })
