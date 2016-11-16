@@ -290,6 +290,7 @@ var ContactUs = function(db, redis, event) {
                     description : 1,
                     status : 1,
                     attachments : 1,
+                    comments : 1,
                     'creator._id' : 1,
                     'creator.ID' : 1,
                     'creator.lastName' : 1,
@@ -395,6 +396,12 @@ var ContactUs = function(db, redis, event) {
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {
+            if (body.comment) {
+                body.$push = {
+                    comments : body.comment
+                };
+                delete body.comment
+            }
             ContactUsModel.findByIdAndUpdate(id, body, {
                 new : true
             })

@@ -1504,13 +1504,13 @@ var Objectives = function (db, redis, event) {
                     ACL_CONSTANTS.AREA_IN_CHARGE
                 ];
 
-                if (allowedAccessRoles.indexOf(currentUserLevel) > -1) {
+                if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
                     pipeLine.push({
                         $match: {
                             $or: [
                                 {
                                     assignedTo: {$in: subordinates},
-                                    status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                                    status: {$nin: [OBJECTIVE_STATUSES.DRAFT]}
                                 },
                                 {
                                     'createdBy.user': {$in: coveredIds}
@@ -1524,7 +1524,7 @@ var Objectives = function (db, redis, event) {
                             $or: [
                                 {
                                     assignedTo: {$in: coveredIds},
-                                    status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                                    status: {$nin: [OBJECTIVE_STATUSES.DRAFT]}
                                 },
                                 {
                                     'createdBy.user': {$in: coveredIds}
@@ -1976,6 +1976,7 @@ var Objectives = function (db, redis, event) {
             let arrayOfSubordinateUsersId = [];
 
             var searchFieldsArray = [
+                'myCC',
                 'title.en',
                 'title.ar',
                 'description.en',
@@ -2077,7 +2078,7 @@ var Objectives = function (db, redis, event) {
                 function (coveredIds, cb) {
                     var pipeLine;
                     var aggregation;
-                    const subordinates = coveredIds.concat(arrayOfSubordinateUsersId);
+                    const coveredPlusSubordinates = coveredIds.concat(arrayOfSubordinateUsersId);
 
                     pipeLine = getAllPipeline({
                         aggregateHelper  : aggregateHelper,
@@ -2089,8 +2090,10 @@ var Objectives = function (db, redis, event) {
                         skip             : skip,
                         limit            : limit,
                         coveredIds       : coveredIds,
-                        subordinates,
-                        currentUserLevel : currentUserLevel
+                        coveredPlusSubordinates,
+                        subordinates : arrayOfSubordinateUsersId,
+                        currentUserLevel : currentUserLevel,
+                        currentUserId : ObjectId(req.session.uId)
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);
@@ -2246,7 +2249,19 @@ var Objectives = function (db, redis, event) {
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
-                        response.subordinates = arrayOfSubordinateUsersId;
+                        const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
+                            return ObjectId.toString();
+                        });
+                        const dataMyCC = response.data.map((objective) => {
+                            const assignedToId = objective.assignedTo[0]._id.toString();
+                            const createdById = objective.createdBy.user._id.toString();
+                            const currentUserId = req.session.uId;
+                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
+                                objective.myCC = true;
+                            }
+                            return objective;
+                        });
+                        response.data = dataMyCC;
                         next({status: 200, body: response});
                     })
                 });

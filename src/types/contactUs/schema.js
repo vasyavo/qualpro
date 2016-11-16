@@ -13,8 +13,9 @@ const schema = new Schema({
     status : {
         type : String
     },
-    comment : {
-        type : String
+    comments : {
+        type : Array,
+        default : []
     },
     attachments : { type: Array, default: [] },
     createdBy : {

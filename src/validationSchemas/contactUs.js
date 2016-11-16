@@ -31,6 +31,7 @@ const customJoi = Joi.extend({
         }
     ]
 });
+
 function currentDate() {
     return moment().utc().format('YYYY-MM-DD HH:mm:ss');
 }
