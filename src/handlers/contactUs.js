@@ -146,6 +146,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                 })
                 .project({
@@ -153,6 +154,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user._id' : 1,
                     'createdBy.user.ID' : 1,
                     'createdBy.user.country' : 1,
@@ -173,6 +175,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
@@ -190,6 +193,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'country.name' : 1,
                     'country._id' : 1
@@ -396,12 +400,6 @@ var ContactUs = function(db, redis, event) {
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {
-            if (body.comment) {
-                body.$push = {
-                    comments : body.comment
-                };
-                delete body.comment
-            }
             ContactUsModel.findByIdAndUpdate(id, body, {
                 new : true
             })
@@ -427,6 +425,7 @@ var ContactUs = function(db, redis, event) {
 
                 return next(error);
             }
+
             queryRun(id, body);
         });
     }
