@@ -382,8 +382,8 @@ function BrandingAndDisplay(db, redis, event) {
                     'createdBy.lastName' : 1,
                     'createdBy.firstName' : 1
                 })
-                .limit(limit)
                 .skip(skip)
+                .limit(limit)
                 .sort(query.sortBy)
                 .allowDiskUse(true);
 
