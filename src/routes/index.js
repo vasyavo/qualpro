@@ -234,7 +234,7 @@ module.exports = function (app, db, event) {
         res.clearCookie();
     });
     app.use('/activityList', activityList);
-    app.use('/brandingAndDisplay', brandingAndDisplayRouter);
+    app.use('/brandingAndDisplayNew', brandingAndDisplayRouter);
     app.use('/brandingActivity', brandingActivityRouter);
     app.use('/brandingActivityItems', brandingActivityItems);
     app.use('/personnel', personnelRouter);
