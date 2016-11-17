@@ -309,6 +309,20 @@ describe('mobile synchronization', () => {
     });
 
     describe('Country Admin', () => {
+        it('country admin should pass authentication with password', function *() {
+            const resp = yield Authenticator.countryAdmin
+                .post('/mobile/login')
+                .send({
+                    login: 'ca_uae@yopmail.com', //todo change to variables
+                    pass: '123456'
+                })
+                .expect(200);
+
+            const body = resp.body;
+
+            expect(body).to.be.an('Object')
+        });
+
         it('should get activity list', function *() {
             const resp = yield Authenticator.countryAdmin
                 .get('/mobile/activityList')
@@ -564,8 +578,22 @@ describe('mobile synchronization', () => {
     });
 
     describe('Area Manager', () => {
+        it('area manager should pass authentication with password', function *() {
+            const resp = yield Authenticator.areaManager
+                .post('/mobile/login')
+                .send({
+                    login: 'am_uae@yopmail.com', //todo change to variables
+                    pass: '123456'
+                })
+                .expect(200);
+
+            const body = resp.body;
+
+            expect(body).to.be.an('Object')
+        });
+
         it('should get activity list', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/activityList')
                 .expect(200);
 
@@ -575,7 +603,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync activity list', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/activityList/sync')
                 .expect(200);
 
@@ -585,7 +613,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get location', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/domain')
                 .expect(200);
 
@@ -595,7 +623,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync location', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/domain/sync')
                 .expect(200);
 
@@ -605,7 +633,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get personnel', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/personnel')
                 .expect(200);
 
@@ -615,7 +643,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync personnel', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/personnel/sync')
                 .expect(200);
 
@@ -625,7 +653,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get objectives', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/objectives')
                 .expect(200);
 
@@ -635,7 +663,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync objectives', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/objectives/sync')
                 .expect(200);
 
@@ -645,7 +673,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get in store tasks', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/instoretasks')
                 .expect(200);
 
@@ -655,7 +683,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync in store tasks', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/instoretasks/sync')
                 .expect(200);
 
@@ -665,7 +693,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get promotions', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/promotions')
                 .expect(200);
 
@@ -675,7 +703,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync promotions', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/promotions/sync')
                 .expect(200);
 
@@ -685,7 +713,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get current user', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/personnel/currentUser')
                 .expect(200);
 
@@ -696,7 +724,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get contract yearly', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/contractsYearly')
                 .expect(200);
 
@@ -706,7 +734,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync contract yearly', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/contractsYearly/sync')
                 .expect(200);
 
@@ -716,7 +744,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get contract secondary', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/contractsSecondary')
                 .expect(200);
 
@@ -726,7 +754,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync contract secondary', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/contractsSecondary/sync')
                 .expect(200);
 
@@ -736,7 +764,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get retail segment', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/retailSegment')
                 .expect(200);
 
@@ -746,7 +774,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync retail segment', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/retailSegment/sync')
                 .expect(200);
 
@@ -756,7 +784,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get outlet', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/outlet')
                 .expect(200);
 
@@ -766,7 +794,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync outlet', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/outlet/sync')
                 .expect(200);
 
@@ -776,7 +804,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get branch', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/branch')
                 .expect(200);
 
@@ -786,7 +814,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync branch', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/branch/sync')
                 .expect(200);
 
@@ -796,7 +824,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should get branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/brandingActivity')
                 .expect(200);
 
@@ -806,7 +834,7 @@ describe('mobile synchronization', () => {
         });
 
         it('should sync branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.areaManger
+            const resp = yield Authenticator.areaManager
                 .get('/mobile/brandingActivity/sync')
                 .expect(200);
 

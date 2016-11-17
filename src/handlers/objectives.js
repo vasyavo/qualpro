@@ -2253,9 +2253,15 @@ var Objectives = function (db, redis, event) {
                             return ObjectId.toString();
                         });
                         const dataMyCC = response.data.map((objective) => {
-                            const assignedToId = objective.assignedTo[0]._id.toString();
-                            const createdById = objective.createdBy.user._id.toString();
+                            let assignedToId;
+                            let createdById;
                             const currentUserId = req.session.uId;
+                            if (_.isObject(objective.assignedTo[0])) {
+                                assignedToId = objective.assignedTo[0]._id.toString();
+                            }
+                            if (_.isObject(objective.createdBy.user)) {
+                                createdById = objective.createdBy.user._id.toString();
+                            }
                             if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
                                 objective.myCC = true;
                             }
