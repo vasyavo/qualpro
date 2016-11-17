@@ -131,9 +131,10 @@ var ContactUs = function(db, redis, event) {
         }
 
         function queryRun(query) {
-            var skip = (query.page - 1) * query.count;
-            var condition = generateSearchCondition(query.filter);
-            var mongoQuery = ContactUsModel.aggregate()
+            const count = query.count;
+            const skip = (query.page - 1) * count;
+            const condition = generateSearchCondition(query.filter);
+            const mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
@@ -198,8 +199,8 @@ var ContactUs = function(db, redis, event) {
                     'country.name' : 1,
                     'country._id' : 1
                 })
-                .limit(query.count)
                 .skip(skip)
+                .limit(count)
                 .sort(query.sortBy)
                 .allowDiskUse(true);
 
@@ -259,7 +260,7 @@ var ContactUs = function(db, redis, event) {
 
         var error;
 
-        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
                 error = new Error();
                 error.status = 400;

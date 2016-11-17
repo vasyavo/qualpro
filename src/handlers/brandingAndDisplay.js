@@ -431,8 +431,8 @@ function BrandingAndDisplay(db, redis, event) {
                     'createdBy.position.name' : 1,
                     'createdBy.accessRole.name' : 1
                 })
-                .limit(limit)
                 .skip(skip)
+                .limit(limit)
                 .sort(query.sortBy)
                 .allowDiskUse(true);
 
