@@ -114,7 +114,7 @@ describe('mobile synchronization', () => {
             assertGetResponse(body);
         });
 
-        it('should get objectives', function *() {
+        xit('should get objectives', function *() {
             const resp = yield Authenticator.master
                 .get('/mobile/objectives')
                 .expect(200);
@@ -134,7 +134,7 @@ describe('mobile synchronization', () => {
             assertGetResponse(body);
         });
 
-        it('should get in store tasks', function *() {
+        xit('should get in store tasks', function *() {
             const resp = yield Authenticator.master
                 .get('/mobile/instoretasks')
                 .expect(200);
@@ -308,7 +308,7 @@ describe('mobile synchronization', () => {
         // todo price survey will be implemented later
     });
 
-    describe('Country Admin', () => {
+    xdescribe('Country Admin', () => {
         it('country admin should pass authentication with password', function *() {
             const resp = yield Authenticator.countryAdmin
                 .post('/mobile/login')
@@ -577,7 +577,7 @@ describe('mobile synchronization', () => {
         // todo price survey will be implemented later
     });
 
-    describe('Area Manager', () => {
+    xdescribe('Area Manager', () => {
         it('area manager should pass authentication with password', function *() {
             const resp = yield Authenticator.areaManager
                 .post('/mobile/login')
