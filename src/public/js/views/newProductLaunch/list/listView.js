@@ -64,7 +64,7 @@ define([
             var $currentEl = this.$el;
             var jsonCollection = this.collection.toJSON();
             var $holder;
-
+debugger;
             $currentEl.html('');
             $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
 

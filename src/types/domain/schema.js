@@ -21,6 +21,7 @@ const schema = new Schema({
         required: true
     },
     parent: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, default: null },
+    xlsParent: { type: Number, default: null },
     createdBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
         date: { type: Date, default: new Date() }

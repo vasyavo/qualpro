@@ -8,7 +8,7 @@ function BrandingAndDisplay(db, redis, event) {
     const FileHandler = require('../handlers/file');
     const fileHandler = new FileHandler(db);
     const BrandingAndDisplayModel = require('../types/brandingAndDisplay/model');
-    const CountryModel = require('./../types/origin/model');
+    const DomainModel = require('./../types/domain/model');
     const CategoryModel = require('./../types/category/model');
     const access = require('../helpers/access')(db);
     const joiValidate = require('../helpers/joiValidate');
@@ -136,6 +136,7 @@ function BrandingAndDisplay(db, redis, event) {
                     dateEnd : {$first : '$dateEnd'},
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'},
+                    country : {$first : '$country'}
                 })
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
@@ -193,18 +194,22 @@ function BrandingAndDisplay(db, redis, event) {
                 brandingAndDisplayModelQuery.exec(cb)
             }
 
-            function getAndMapCountries(brandingAndDisplayModel, cb) {
-                if (!_.get(brandingAndDisplayModel, 'brandingAndDisplayModel[0].createdBy')) {
+            function getAndMapDomains(brandingAndDisplayModel, cb) {
+                if (!_.get(brandingAndDisplayModel, '[0].createdBy')) {
                     return cb(null, brandingAndDisplayModel[0]);
                 }
                 const createdBy = brandingAndDisplayModel[0].createdBy;
-                const origins = _.concat(
+                let origins = _.concat(
                     createdBy.country,
                     createdBy.region,
                     createdBy.subRegion
                 );
 
-                CountryModel
+                origins = _.filter(origins, item => {
+                    return Object.keys(item).length !== 0;
+                });
+
+                DomainModel
                     .find({
                         _id : {
                             $in : origins
@@ -263,7 +268,7 @@ function BrandingAndDisplay(db, redis, event) {
 
             async.waterfall([
                 getBrandingAndDisplayForm,
-                getAndMapCountries,
+                getAndMapDomains,
                 getLinkFromAws
             ], function(err, result) {
                 if (err) {
@@ -346,6 +351,42 @@ function BrandingAndDisplay(db, redis, event) {
                 })
                 .unwind('createdBy')
                 .lookup({
+                    from : CONTENT_TYPES.POSITION + 's',
+                    localField : 'createdBy.position',
+                    foreignField : '_id',
+                    as : 'createdBy.position'
+                })
+                .unwind('createdBy.position')
+                .lookup({
+                    from : CONTENT_TYPES.ACCESSROLE + 's',
+                    localField : 'createdBy.accessRole',
+                    foreignField : '_id',
+                    as : 'createdBy.accessRole'
+                })
+                .unwind('createdBy.accessRole')
+                .unwind('attachments')
+                .lookup({
+                    from : CONTENT_TYPES.FILES,
+                    localField : 'attachments',
+                    foreignField : '_id',
+                    as : 'attachments'
+                })
+                .unwind('attachments')
+                .group({
+                    '_id' : '$_id',
+                    attachments : {$push : '$attachments'},
+                    categories : {$first : '$categories'},
+                    comments : {$first : '$comments'},
+                    branch : {$first : '$branch'},
+                    displayType : {$first : '$displayType'},
+                    outlet : {$first : '$outlet'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'}
+                })
+                .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
                     foreignField : '_id',
@@ -373,6 +414,11 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : 1,
                     displayType : 1,
                     categories : 1,
+                    comments : 1,
+                    'attachments._id' : 1,
+                    'attachments.name' : 1,
+                    'attachments.originalName' : 1,
+                    'attachments.contentType' : 1,
                     'branch._id' : 1,
                     'branch.name' : 1,
                     'outlet._id' : 1,
@@ -380,7 +426,10 @@ function BrandingAndDisplay(db, redis, event) {
                     'createdBy._id' : 1,
                     'createdBy.ID' : 1,
                     'createdBy.lastName' : 1,
-                    'createdBy.firstName' : 1
+                    'createdBy.firstName' : 1,
+                    'createdBy.imageSrc' : 1,
+                    'createdBy.position.name' : 1,
+                    'createdBy.accessRole.name' : 1
                 })
                 .skip(skip)
                 .limit(limit)
@@ -432,22 +481,46 @@ function BrandingAndDisplay(db, redis, event) {
             }
 
             function mapCategories(model, callback) {
-                CategoryModel.find({
-                    _id : {
-                        $in : model.categories
+                async.waterfall([
+                    (cb) => {
+                        getLinkFromAws(model, cb)
+                    },
+
+                    (model, cb) => {
+                        CategoryModel.find({
+                            _id : {
+                                $in : model.categories
+                            }
+                        }, {
+                            name : 1
+                        }).then(function(categories) {
+                            model.categories = categories;
+                            cb(null, model);
+                        }).catch(cb);
                     }
-                }, {
-                    name : 1
-                }).then(function(categories) {
-                    model.categories = categories;
-                    callback(null, model);
-                }).catch(callback);
+                ], callback);
             }
 
             function getData(cb) {
                 mongoQuery.exec(function(err, models) {
                     async.map(models, mapCategories, cb);
                 })
+            }
+
+            function getLinkFromAws(brandingAndDisplayModel, cb) {
+                if (!_.get(brandingAndDisplayModel, 'attachments')) {
+                    return cb(null, brandingAndDisplayModel || {});
+                }
+                async.each(brandingAndDisplayModel.attachments,
+                    function(file, callback) {
+                        file.url = fileHandler.computeUrl(file.name);
+                        callback();
+                    }, function(err) {
+                        if (err) {
+                            cb(err);
+                        }
+                        cb(null, brandingAndDisplayModel);
+                    });
             }
 
             async.parallel([

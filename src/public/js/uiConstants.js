@@ -41,6 +41,7 @@
         CONFIGURATIONS        : 'configurations',
         CONTACT_US            : 'contactUs',
 
+
         PRICESURVEY                  : 'priceSurvey',
         SHELFSHARESANALYSIS          : 'shelfSharesAnalysis',
         COMPETITORPROMOTIONACTIVITIES: 'competitorPromotionActivities',
