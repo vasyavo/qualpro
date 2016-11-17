@@ -7118,10 +7118,7 @@ const generate = (callback) => {
                     level
                 }, {
                     $set: {
-                        name: {
-                            en: name,
-                            ar: name
-                        },
+                        'name.en': name,
                         level,
                         roleAccess
                     }
