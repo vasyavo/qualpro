@@ -51,15 +51,18 @@ schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY] = {};
 
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.SUPER_ADMIN] = {
     create: schemas.brandingAndDisplay.create,
-    read: schemas.brandingAndDisplay.getAll
+    read: schemas.brandingAndDisplay.getAll,
+    update: schemas.brandingAndDisplay.update
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.MASTER_ADMIN] = {
     create: schemas.brandingAndDisplay.create,
-    read: schemas.brandingAndDisplay.getAll
+    read: schemas.brandingAndDisplay.getAll,
+    update: schemas.brandingAndDisplay.update
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.COUNTRY_ADMIN] = {
     create: schemas.brandingAndDisplay.create,
-    read: schemas.brandingAndDisplay.getAll
+    read: schemas.brandingAndDisplay.getAll,
+    update: schemas.brandingAndDisplay.update
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.AREA_MANAGER] = {
     create: schemas.brandingAndDisplay.create
@@ -78,11 +81,13 @@ schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.CASH_VAN] = {
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.MASTER_UPLOADER] = {
     create: schemas.brandingAndDisplay.create,
-    read: schemas.brandingAndDisplay.getAll
+    read: schemas.brandingAndDisplay.getAll,
+    update: schemas.brandingAndDisplay.update
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.COUNTRY_UPLOADER] = {
     create: schemas.brandingAndDisplay.create,
-    read: schemas.brandingAndDisplay.getAll
+    read: schemas.brandingAndDisplay.getAll,
+    update: schemas.brandingAndDisplay.update
 };
 
 module.exports = schemasByRole;

@@ -21,6 +21,23 @@ const customJoi = Joi.extend({
         }
     ]
 });
+const customMongoJoi = Joi.extend({
+    base : Joi.string(),
+    name : 'mongoQuering',
+    language : {
+        commentsMongoPush : 'can\'t convert to mongo query'
+    },
+    rules : [
+        {
+            name : 'commentsMongoPush',
+            validate(params, value, state, options) {
+                return {
+                    comments : value
+                };
+            }
+        }
+    ]
+});
 
 function currentDate() {
     return moment().utc().format('YYYY-MM-DD HH:mm:ss');
@@ -69,8 +86,12 @@ const getAll = Joi.object().keys({
         endDate : currentDate()
     })
 });
+const update = Joi.object().keys({
+    $push : customMongoJoi.mongoQuering().commentsMongoPush()
+}).rename('comment', '$push');
 
 module.exports = {
     create,
-    getAll
+    getAll,
+    update
 };

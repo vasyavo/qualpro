@@ -28,5 +28,11 @@ module.exports = function(db, redis, event) {
         })
     }, handler.getAll);
 
+    router.put('/:id([0-9a-fA-F]{24})', function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, function(err) {
+            err ? next(err) : next();
+        })
+    }, handler.updateById);
+
     return router;
 };

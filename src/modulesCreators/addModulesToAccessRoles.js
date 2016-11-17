@@ -664,7 +664,7 @@ const superAdmin = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : false,
             read   : true
         },
@@ -1368,7 +1368,7 @@ const masterAdmin = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : false,
             read   : true
         },
@@ -2025,7 +2025,7 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : false,
             read   : true
         },
@@ -5758,7 +5758,7 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : false,
             read   : true
         },
@@ -6387,7 +6387,7 @@ commentsAccess,
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : false,
             read   : true
         },
