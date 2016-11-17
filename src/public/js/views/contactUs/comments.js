@@ -19,22 +19,41 @@ define(function (require) {
         template: _.template(CommentsTemplate),
 
         saveComment : function () {
-            let comment = this.$el.find('#comment').val();
+            const self = this;
+            let commentInput = this.$el.find('#comment');
+            let comment = commentInput.val();
             if (comment) {
                 dataService.putData(`contactUs/${this.modelAttrs._id}`, {
                     comment : comment
                 }, (err, response) => {
-                    debugger;
-                    //todo render added comment
+                    if (err) {
+                        App.renderErrors([
+                            ERROR_MESSAGES.commentNotAdded[App.currentUser.currentLanguage]
+                        ]);
+                    }
+
+                    commentInput.val('');
+
+                    let WrapCommentDiv = document.createElement('div');
+                    WrapCommentDiv.className = 'ui-dialog-content ui-widget-content templateWrap';
+
+                    let innerDiv = document.createElement('div');
+                    innerDiv.className = 'commentBlock flrow flexColumn';
+
+                    let span = document.createElement('span');
+                    span.innerHTML = comment;
+
+                    innerDiv.appendChild(span);
+                    WrapCommentDiv.appendChild(innerDiv);
+
+                    this.$el.find('#comments-holder').append(WrapCommentDiv);
                 });
             }
         },
 
         render: function () {
             const self = this;
-            dataService.getData('comment', {
-                objectiveId : this.modelAttrs._id
-            }, (err, response) => {
+            dataService.getData(`contactUs/${this.modelAttrs._id}`, {}, (err, response) => {
                 if (err) {
                     return App.renderErrors([
                         ERROR_MESSAGES.statusNotChanged[App.currentUser.currentLanguage]
@@ -44,12 +63,12 @@ define(function (require) {
                 var formString;
 
                 formString = self.$el.html(self.template({
-                    comments  : response.data,
+                    comments  : response.comments,
                     translation: self.translation
                 }));
 
                 self.$el = formString.dialog({
-                    dialogClass  : 'create-dialog competitorBranding-dialog',
+                    dialogClass  : 'ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-dialog-buttons ui-draggable allDialogsClass create-dialog dialog-small',
                     width        : '700',
                     showCancelBtn: true,
                     buttons      : {

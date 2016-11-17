@@ -125,6 +125,9 @@ Http Code | Error Type           |  Error                             | Details
 + dateStart: `2016-11-01T13:09:14.000Z` (string)
 + dateEnd: `2016-11-01T13:09:14.000Z` (string)
 
+## UpdateBrandingAndDisplay
++ comment: `some comment` (string)
+
 ## BrandingAndDisplayCreateRes
 + _id: `5818b01a13187de020871b63` (string)
 + createdBy: `5818b01a13187de020871b63` (string)
@@ -331,5 +334,20 @@ Get brandingAndDisplay reports.
     + Attributes
         + total: 1 (number)
         + data (array[BrandingAndDisplayShort])
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Update By Id BrandingAndDisplay [/brandingAndDisplay/{id}]
+
+### Update By Id [PUT]
+Update BrandingAndDisplay by id.
+
++ Parameters
+    + id - brandingAndDisplay _id
+
++ Request (application/json)
+    + Attributes (UpdateBrandingAndDisplay)
++ Response 200 (application/json)
+    + Attributes (BrandingAndDisplayCreate)
 + Response 400 (application/json)
     + Attributes (GenericError)

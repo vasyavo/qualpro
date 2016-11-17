@@ -51,7 +51,8 @@ define([
 
             this.preView = new PreView({
                 model      : model,
-                translation: this.translation
+                translation: this.translation,
+                tabName    : this.tabName
             });
             this.preView.on('modelSaved', function (model) {
                 self.collection.add(model, {merge: true});

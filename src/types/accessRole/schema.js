@@ -43,6 +43,4 @@ const schema = new Schema({
     }
 }, { collection: 'accessRoles' });
 
-schema.index({ name: 1 }, { unique: true });
-
 module.exports = schema;

@@ -479,6 +479,37 @@ function BrandingAndDisplay(db, redis, event) {
             queryRun(query);
         });
     }
+
+    this.updateById = function(req, res, next) {
+        function queryRun(id, body) {
+            BrandingAndDisplayModel.findByIdAndUpdate(id, body, {
+                new : true
+            }).exec(function(err, result) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.send(200, result);
+            });
+        }
+
+        var id = req.params.id;
+        var body = req.body;
+        var error;
+
+        joiValidate(body, req.session.level, CONTENT_TYPES.BRANDING_AND_DISPLAY, 'update', function(err, body) {
+            if (err) {
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
+            }
+
+            queryRun(id, body);
+        });
+    }
 }
 
 module.exports = BrandingAndDisplay;
