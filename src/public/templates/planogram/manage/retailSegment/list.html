@@ -3,8 +3,6 @@
     <td>
         <% if (item.name) { %>
         <input data-key="name" data-language="current" class="displayable" readonly value="<%=item.name.currentLanguage || ''%>">
-        <input data-key="name" data-language="en" class="editable" readonly value="<%=item.name.en || ''%>">
-        <input data-key="name" data-language="ar" class="editable" readonly value="<%=item.name.ar || ''%>">
         <% } %>
     </td>
 </tr>
