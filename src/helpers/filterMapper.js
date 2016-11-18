@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var moment = require('moment');
 var FILTERS_CONSTANTS = require('../public/js/constants/filters');
