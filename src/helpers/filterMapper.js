@@ -229,7 +229,7 @@ var FilterMapper = function () {
             if (!filterValue || !filterValue.values) {
                 filter[filterKey] = {
                     type: 'ObjectId',
-                    values: filterValue
+                    values: personnelLocation
                 };
             } else {
                 filterValue.values = _.intersection(filterValue.values, personnelLocation);
