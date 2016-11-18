@@ -308,7 +308,7 @@ describe('mobile synchronization', () => {
         // todo price survey will be implemented later
     });
 
-    describe('Country Admin', () => {
+    xdescribe('Country Admin', () => {
         it('country admin should pass authentication with password', function *() {
             const resp = yield Authenticator.countryAdmin
                 .post('/mobile/login')
