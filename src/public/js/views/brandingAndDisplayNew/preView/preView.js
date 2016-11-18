@@ -331,6 +331,7 @@ define([
         },
 
         render: function () {
+            var self = this;
             dataService.getData(`${CONTENT_TYPES.BRANDING_AND_DISPLAY}/${this.model.get('_id')}`, {}, (err, model) => {
                 if (err) {
                     return App.renderErrors([ERROR_MESSAGES.readError]);
@@ -349,14 +350,13 @@ define([
                 model.displayTypeString = model.displayType[0].name[currentLanguage];
                 model.startDate = moment(model.startDate).format('DD.MM.YYYY');
                 model.endDate = moment(model.endDate).format('DD.MM.YYYY');
-                model.countryString = model.createdBy.country[0].name[currentLanguage];
-                model.regionString = model.createdBy.region[0].name[currentLanguage];
-                model.subRegionString = model.createdBy.subRegion[0].name[currentLanguage];
+                model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;
+                model.regionString = (model.createdBy.region.length) ? model.createdBy.region[0].name[currentLanguage] : self.translation.missedData;
+                model.subRegionString = (model.createdBy.subRegion.length) ? model.createdBy.subRegion[0].name[currentLanguage] : self.translation.missedData;
 
                 model.createdBy.userName = `${model.createdBy.firstName[currentLanguage]} ${model.createdBy.lastName[currentLanguage]}`;
 
                 var formString;
-                var self = this;
 
                 formString = this.$el.html(this.template({
                     jsonModel  : model,
