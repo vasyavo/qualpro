@@ -23,7 +23,7 @@
         <div class="locationTop flexRow">
             <div class="flexColumn">
                 <div class="flexRow">
-                    <div class="locationTitle"><%= translation.productCategory + ': ' + model.category.name.currentLanguage %></div>
+                    <div class="locationTitle"><%= (model.category && model.category.name && model.category.name.currentLanguage) ? translation.productCategory + ': ' + model.category.name.currentLanguage : '' %></div>
                     <span class="textSmall"></span>
                 </div>
                 <div class="fontSmall fontGray textContainer">
