@@ -472,10 +472,14 @@ function importPersonnel(callback) {
                     patch.accessRole = population.accessRole ?
                         population.accessRole._id : null;
 
-                    const query = {
-                        'firstName.en': patch.firstName.en,
-                        'lastName.en': patch.lastName.en
-                    };
+                    const query = {};
+
+                    if (patch.email) {
+                        query.email = patch.email;
+                    } else {
+                        query['firstName.en'] = patch.firstName.en;
+                        query['lastName.en'] = patch.lastName.en;
+                    }
 
                     PersonnelModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
                 });
