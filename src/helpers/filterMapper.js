@@ -210,25 +210,29 @@ var FilterMapper = function () {
         return filterObject;
     };
 
-    this.setFilterLocation = function (filter, personnel, location, context) {
-        var filterKey = location;
+    this.setFilterLocation = (filter, personnel, location, context) => {
+        let filterKey = location;
 
         if (location === context) {
             filterKey = '_id';
         }
 
-        if (personnel[location].length) {
-            personnel[location].forEach(function (locationId, index) {
-                personnel[location][index] = locationId.toString();
+        const personnelLocation = personnel[location];
+
+        if (personnelLocation && personnelLocation.length) {
+            personnelLocation.forEach((locationId, index) => {
+                personnelLocation[index] = locationId.toString();
             });
 
-            if (!filter[filterKey] || !filter[filterKey].values) {
+            const filterValue = filter[filterKey];
+
+            if (!filterValue || !filterValue.values) {
                 filter[filterKey] = {
-                    type  : 'ObjectId',
-                    values: personnel[location]
+                    type: 'ObjectId',
+                    values: personnelLocation
                 };
             } else {
-                filter[filterKey].values = _.intersection(filter[filterKey].values, personnel[location]);
+                filterValue.values = _.intersection(filterValue.values, personnelLocation);
             }
         }
     };
