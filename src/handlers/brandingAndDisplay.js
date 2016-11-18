@@ -296,6 +296,10 @@ function BrandingAndDisplay(db, redis, event) {
                 'subRegion',
                 'region'
             ];
+            if (query && query.time) {
+                query.startDate = query.time.values[0];
+                query.endDate = query.time.values[1];
+            }
             var match = {
                 createdAt : {
                     $gte : new Date(query.startDate),
