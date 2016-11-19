@@ -410,179 +410,181 @@ describe('mobile synchronization', () => {
         // todo price survey will be implemented later
     });
 
-    describe('Staging database pulling', () => {
+    if (!config.isCI) {
+        describe('Staging database pulling', () => {
 
-        it('should works', function(done) {
-            const timeToPullDatabase = 60 * 10 * 1000;
+            it('should works', function(done) {
+                const timeToPullDatabase = 60 * 10 * 1000;
 
-            this.timeout(timeToPullDatabase);
+                this.timeout(timeToPullDatabase);
 
-            const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
+                const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
 
-            shell.chmod('+x', pathToScript);
+                shell.chmod('+x', pathToScript);
 
-            async.waterfall([
+                async.waterfall([
 
-                (cb) => {
-                    shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
-                        if (code !== 0) {
-                            return cb('Something wrong with database pulling')
-                        }
+                    (cb) => {
+                        shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
+                            if (code !== 0) {
+                                return cb('Something wrong with database pulling')
+                            }
 
-                        cb();
-                    });
-                },
+                            cb();
+                        });
+                    },
 
-                (cb) => {
-                    spawnDefaults(cb);
-                }
+                    (cb) => {
+                        spawnDefaults(cb);
+                    }
 
-            ], (err) => {
-                if (err) {
-                    return done(err);
-                }
+                ], (err) => {
+                    if (err) {
+                        return done(err);
+                    }
 
-                done();
+                    done();
+                });
             });
+
         });
 
-    });
+        describe('Country Admin', () => {
 
-    describe('Country Admin', () => {
+            it('should pass authentication with password', function *() {
+                const resp = yield Authenticator.countryAdmin
+                    .post('/mobile/login')
+                    .send({
+                        login: 'ca_uae@yopmail.com', //todo change to variables
+                        pass: '123456'
+                    })
+                    .expect(200);
 
-        it('should pass authentication with password', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .post('/mobile/login')
-                .send({
-                    login: 'ca_uae@yopmail.com', //todo change to variables
-                    pass: '123456'
-                })
-                .expect(200);
+                const body = resp.body;
 
-            const body = resp.body;
+                expect(body).to.be.an('Object')
+            });
 
-            expect(body).to.be.an('Object')
+            shouldGetActivityList(Authenticator.countryAdmin);
+
+            shouldSyncActivityList(Authenticator.countryAdmin);
+
+            shouldGetLocation(Authenticator.countryAdmin);
+
+            shouldSyncLocation(Authenticator.countryAdmin);
+
+            shouldGetPersonnel(Authenticator.countryAdmin);
+
+            shouldSyncPersonnel(Authenticator.countryAdmin);
+
+            shouldGetObjectives(Authenticator.countryAdmin);
+
+            shouldSyncObjectives(Authenticator.countryAdmin);
+
+            shouldGetInStoreTasks(Authenticator.countryAdmin);
+
+            shouldSyncInStoreTasks(Authenticator.countryAdmin);
+
+            shouldGetPromotions(Authenticator.countryAdmin);
+
+            shouldSyncPromotions(Authenticator.countryAdmin);
+
+            shouldGetCurrentUser(Authenticator.countryAdmin);
+
+            shouldGetContractYearly(Authenticator.countryAdmin);
+
+            shouldSyncContractYearly(Authenticator.countryAdmin);
+
+            shouldGetContractSecondary(Authenticator.countryAdmin);
+
+            shouldSyncContractSecondary(Authenticator.countryAdmin);
+
+            shouldGetRetailSegment(Authenticator.countryAdmin);
+
+            shouldSyncRetailSegment(Authenticator.countryAdmin);
+
+            shouldGetOutlet(Authenticator.countryAdmin);
+
+            shouldSyncOutlet(Authenticator.countryAdmin);
+
+            shouldGetBranch(Authenticator.countryAdmin);
+
+            shouldSyncBranch(Authenticator.countryAdmin);
+
+            shouldGetBrandingActivity(Authenticator.countryAdmin);
+
+            shouldGetBrandingActivity(Authenticator.countryAdmin);
+
+            // todo price survey will be implemented later
         });
 
-        shouldGetActivityList(Authenticator.countryAdmin);
+        describe('Area Manager', () => {
+            it('should pass authentication with password', function *() {
+                const resp = yield Authenticator.areaManager
+                    .post('/mobile/login')
+                    .send({
+                        login: 'am_uae@yopmail.com', //todo change to variables
+                        pass: '123456'
+                    })
+                    .expect(200);
 
-        shouldSyncActivityList(Authenticator.countryAdmin);
+                const body = resp.body;
 
-        shouldGetLocation(Authenticator.countryAdmin);
+                expect(body).to.be.an('Object')
+            });
 
-        shouldSyncLocation(Authenticator.countryAdmin);
+            shouldGetActivityList(Authenticator.areaManager);
 
-        shouldGetPersonnel(Authenticator.countryAdmin);
+            shouldSyncActivityList(Authenticator.areaManager);
 
-        shouldSyncPersonnel(Authenticator.countryAdmin);
+            shouldGetLocation(Authenticator.areaManager);
 
-        shouldGetObjectives(Authenticator.countryAdmin);
+            shouldSyncLocation(Authenticator.areaManager);
 
-        shouldSyncObjectives(Authenticator.countryAdmin);
+            shouldGetPersonnel(Authenticator.areaManager);
 
-        shouldGetInStoreTasks(Authenticator.countryAdmin);
+            shouldSyncPersonnel(Authenticator.areaManager);
 
-        shouldSyncInStoreTasks(Authenticator.countryAdmin);
+            shouldGetObjectives(Authenticator.areaManager);
 
-        shouldGetPromotions(Authenticator.countryAdmin);
+            shouldSyncObjectives(Authenticator.areaManager);
 
-        shouldSyncPromotions(Authenticator.countryAdmin);
+            shouldGetInStoreTasks(Authenticator.areaManager);
 
-        shouldGetCurrentUser(Authenticator.countryAdmin);
+            shouldSyncInStoreTasks(Authenticator.areaManager);
 
-        shouldGetContractYearly(Authenticator.countryAdmin);
+            shouldGetPromotions(Authenticator.areaManager);
 
-        shouldSyncContractYearly(Authenticator.countryAdmin);
+            shouldSyncPromotions(Authenticator.areaManager);
 
-        shouldGetContractSecondary(Authenticator.countryAdmin);
+            shouldGetCurrentUser(Authenticator.areaManager);
 
-        shouldSyncContractSecondary(Authenticator.countryAdmin);
+            shouldGetContractYearly(Authenticator.areaManager);
 
-        shouldGetRetailSegment(Authenticator.countryAdmin);
+            shouldSyncContractYearly(Authenticator.areaManager);
 
-        shouldSyncRetailSegment(Authenticator.countryAdmin);
+            shouldGetContractSecondary(Authenticator.areaManager);
 
-        shouldGetOutlet(Authenticator.countryAdmin);
+            shouldSyncContractSecondary(Authenticator.areaManager);
 
-        shouldSyncOutlet(Authenticator.countryAdmin);
+            shouldGetRetailSegment(Authenticator.areaManager);
 
-        shouldGetBranch(Authenticator.countryAdmin);
+            shouldSyncRetailSegment(Authenticator.areaManager);
 
-        shouldSyncBranch(Authenticator.countryAdmin);
+            shouldGetOutlet(Authenticator.areaManager);
 
-        shouldGetBrandingActivity(Authenticator.countryAdmin);
+            shouldSyncOutlet(Authenticator.areaManager);
 
-        shouldGetBrandingActivity(Authenticator.countryAdmin);
+            shouldGetBranch(Authenticator.areaManager);
 
-        // todo price survey will be implemented later
-    });
+            shouldSyncBranch(Authenticator.areaManager);
 
-    describe('Area Manager', () => {
-        it('should pass authentication with password', function *() {
-            const resp = yield Authenticator.areaManager
-                .post('/mobile/login')
-                .send({
-                    login: 'am_uae@yopmail.com', //todo change to variables
-                    pass: '123456'
-                })
-                .expect(200);
+            shouldGetBrandingActivity(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldGetBrandingActivity(Authenticator.areaManager);
 
-            expect(body).to.be.an('Object')
+            // todo price survey will be implemented later
         });
-
-        shouldGetActivityList(Authenticator.areaManager);
-
-        shouldSyncActivityList(Authenticator.areaManager);
-
-        shouldGetLocation(Authenticator.areaManager);
-
-        shouldSyncLocation(Authenticator.areaManager);
-
-        shouldGetPersonnel(Authenticator.areaManager);
-
-        shouldSyncPersonnel(Authenticator.areaManager);
-
-        shouldGetObjectives(Authenticator.areaManager);
-
-        shouldSyncObjectives(Authenticator.areaManager);
-
-        shouldGetInStoreTasks(Authenticator.areaManager);
-
-        shouldSyncInStoreTasks(Authenticator.areaManager);
-
-        shouldGetPromotions(Authenticator.areaManager);
-
-        shouldSyncPromotions(Authenticator.areaManager);
-
-        shouldGetCurrentUser(Authenticator.areaManager);
-
-        shouldGetContractYearly(Authenticator.areaManager);
-
-        shouldSyncContractYearly(Authenticator.areaManager);
-
-        shouldGetContractSecondary(Authenticator.areaManager);
-
-        shouldSyncContractSecondary(Authenticator.areaManager);
-
-        shouldGetRetailSegment(Authenticator.areaManager);
-
-        shouldSyncRetailSegment(Authenticator.areaManager);
-
-        shouldGetOutlet(Authenticator.areaManager);
-
-        shouldSyncOutlet(Authenticator.areaManager);
-
-        shouldGetBranch(Authenticator.areaManager);
-
-        shouldSyncBranch(Authenticator.areaManager);
-
-        shouldGetBrandingActivity(Authenticator.areaManager);
-
-        shouldGetBrandingActivity(Authenticator.areaManager);
-
-        // todo price survey will be implemented later
-    });
+    }
 
 });
