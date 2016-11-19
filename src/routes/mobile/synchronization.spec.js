@@ -17,52 +17,23 @@ const assertGetResponse = (body) => {
     expect(body.lastSyncDate).to.be.a('String');
 };
 
+function shouldGetActivityList(agent) {
+    it('should get activity list', function *() {
+        const resp = yield agent
+            .get('/mobile/activityList')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
 describe('mobile synchronization', () => {
 
-    before(function(done) {
-        const timeToPullDatabase = 60 * 10 * 1000;
-
-        this.timeout(timeToPullDatabase);
-
-        const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
-
-        shell.chmod('+x', pathToScript);
-
-        async.waterfall([
-
-            (cb) => {
-                shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
-                    if (code !== 0) {
-                        return cb('Something wrong with database pulling')
-                    }
-
-                    cb();
-                });
-            },
-
-            (cb) => {
-                spawnDefaults(cb);
-            }
-
-        ], (err) => {
-            if (err) {
-                return done(err);
-            }
-
-            done();
-        });
-    });
-
     describe('Master Admin', () => {
-        it('should get activity list', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/activityList')
-                .expect(200);
 
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
+        shouldGetActivityList(Authenticator.master);
 
         it('should sync activity list', function *() {
             const resp = yield Authenticator.master
@@ -308,7 +279,45 @@ describe('mobile synchronization', () => {
         // todo price survey will be implemented later
     });
 
-    xdescribe('Country Admin', () => {
+    describe('Staging database pulling', () => {
+
+        it('should works', function(done) {
+            const timeToPullDatabase = 60 * 10 * 1000;
+
+            this.timeout(timeToPullDatabase);
+
+            const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
+
+            shell.chmod('+x', pathToScript);
+
+            async.waterfall([
+
+                (cb) => {
+                    shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
+                        if (code !== 0) {
+                            return cb('Something wrong with database pulling')
+                        }
+
+                        cb();
+                    });
+                },
+
+                (cb) => {
+                    spawnDefaults(cb);
+                }
+
+            ], (err) => {
+                if (err) {
+                    return done(err);
+                }
+
+                done();
+            });
+        });
+
+    });
+
+    describe('Country Admin', () => {
         it('country admin should pass authentication with password', function *() {
             const resp = yield Authenticator.countryAdmin
                 .post('/mobile/login')
@@ -323,15 +332,7 @@ describe('mobile synchronization', () => {
             expect(body).to.be.an('Object')
         });
 
-        it('should get activity list', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/activityList')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
+        shouldGetActivityList(Authenticator.countryAdmin);
 
         it('should sync activity list', function *() {
             const resp = yield Authenticator.countryAdmin
@@ -577,7 +578,7 @@ describe('mobile synchronization', () => {
         // todo price survey will be implemented later
     });
 
-    xdescribe('Area Manager', () => {
+    describe('Area Manager', () => {
         it('area manager should pass authentication with password', function *() {
             const resp = yield Authenticator.areaManager
                 .post('/mobile/login')

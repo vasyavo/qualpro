@@ -1,8 +1,6 @@
-/**
- * @see {@link https://nodejs.org/api/events.html}
- * @class EventEmiter
- */
-'use strict';
+const logger = require('./../utils/logger');
+const errorHandler = require('./../utils/errorHandler');
+const addRequestId = require('express-request-id')();
 
 module.exports = function (app, db, event) {
     // var express = require('express');
@@ -118,6 +116,8 @@ module.exports = function (app, db, event) {
      cookie   : 'currentLanguage',
      directory: __dirname + '/locales'
      });*/
+
+    app.use(addRequestId);
 
     app.use(sessionValidator);
     //  app.use(i18n.init);
@@ -352,39 +352,11 @@ module.exports = function (app, db, event) {
         }
 
         if (req.accepts('json')) {
-            return res.json({error: RESPONSES.PAGE_NOT_FOUND});
+            return res.json({ error: RESPONSES.PAGE_NOT_FOUND });
         }
 
         res.type('txt');
         res.send(RESPONSES.PAGE_NOT_FOUND);
-    }
-
-    function errorHandler(err, req, res, next) {
-        var status = err.status || 500;
-
-        if (process.env.NODE_ENV === 'production') {
-            if (status === 401) {
-                logWriter.log('', err.message + '\n' + err.stack);
-            }
-
-            if (err.code === 11000 || err.code === 11001) {
-                err.message = 'Record with such data is already exists';
-            }
-
-            res.status(status).send({
-                error : err.message,
-                details : err.details
-            });
-        } else {
-            if (status !== 401) {
-                logWriter.log('', err.message + '\n' + err.stack);
-            }
-
-            res.status(status).send({
-                error: err.message + '\n' + err.stack,
-                details : err.details
-            });
-        }
     }
 
     function csrfErrorParser(err, req, res, next) {
