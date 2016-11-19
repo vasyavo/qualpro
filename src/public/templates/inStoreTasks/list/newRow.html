@@ -6,9 +6,9 @@
                 <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="right flexColumn">
-                <div class="userName"><%= App.currentUser.firstName.currentLanguage + ' ' + App.currentUser.lastName.currentLanguage%></div>
-                <div class="description fontGray"><%= App.currentUser.accessRole ? App.currentUser.accessRole.name.currentLanguage : '' %></div>
-                <div class="description fontGray"><%= App.currentUser.position ? App.currentUser.position.name.currentLanguage : '' %></div>
+                <div class="userName"><%= model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage %></div>
+                <div class="description fontGray"><%= model.createdBy.user.accessRole ? model.createdBy.user.accessRole.name.currentLanguage : '' %></div>
+                <div class="description fontGray"><%= model.createdBy.user.position ? model.createdBy.user.position.name.currentLanguage : '' %></div>
             </div>
         </div>
         <div class="middle flexColumn">

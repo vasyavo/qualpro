@@ -28,6 +28,7 @@ define([
         noTranslation: 'no Translation',
         skipped      : 'Skipped',
         commentText  : 'Comment Text',
+        missedData   : 'Missed data',
 
         // topBar
         all        : 'Al Alali Branding & Display report',

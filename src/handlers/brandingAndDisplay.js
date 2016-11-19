@@ -205,10 +205,6 @@ function BrandingAndDisplay(db, redis, event) {
                     createdBy.subRegion
                 );
 
-                origins = _.filter(origins, item => {
-                    return Object.keys(item).length !== 0;
-                });
-
                 DomainModel
                     .find({
                         _id : {
@@ -300,6 +296,10 @@ function BrandingAndDisplay(db, redis, event) {
                 'subRegion',
                 'region'
             ];
+            if (query && query.time) {
+                query.startDate = query.time.values[0];
+                query.endDate = query.time.values[1];
+            }
             var match = {
                 createdAt : {
                     $gte : new Date(query.startDate),
@@ -344,6 +344,12 @@ function BrandingAndDisplay(db, redis, event) {
             const mongoQuery = BrandingAndDisplayModel.aggregate()
                 .append(condition.formCondition)
                 .lookup({
+                    from : CONTENT_TYPES.COMMENT + 's',
+                    localField : '_id',
+                    foreignField : 'taskId',
+                    as : 'commentaries'
+                })
+                .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
                     foreignField : '_id',
@@ -376,7 +382,7 @@ function BrandingAndDisplay(db, redis, event) {
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
                     categories : {$first : '$categories'},
-                    comments : {$first : '$comments'},
+                    commentaries : {$first : '$commentaries'},
                     branch : {$first : '$branch'},
                     displayType : {$first : '$displayType'},
                     outlet : {$first : '$outlet'},
@@ -414,7 +420,7 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : 1,
                     displayType : 1,
                     categories : 1,
-                    comments : 1,
+                    'commentaries.body' : 1,
                     'attachments._id' : 1,
                     'attachments.name' : 1,
                     'attachments.originalName' : 1,

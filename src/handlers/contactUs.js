@@ -133,6 +133,10 @@ var ContactUs = function(db, redis, event) {
         function queryRun(query) {
             const count = query.count;
             const skip = (query.page - 1) * count;
+            if (query.filter && query.filter.time) {
+                query.filter.startDate = query.filter.time.values[0];
+                query.filter.endDate = query.filter.time.values[1];
+            }
             const condition = generateSearchCondition(query.filter);
             const mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
@@ -260,7 +264,7 @@ var ContactUs = function(db, redis, event) {
 
         var error;
 
-        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
                 error = new Error();
                 error.status = 400;

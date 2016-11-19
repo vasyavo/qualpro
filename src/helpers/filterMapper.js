@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var moment = require('moment');
 var FILTERS_CONSTANTS = require('../public/js/constants/filters');
@@ -180,7 +182,7 @@ var FilterMapper = function () {
             }
         } else {
             for (filterName in filter) {
-                if (filterName !== 'translated') {
+                if (filterName !== 'translated' && filterName !== 'type') {
                     filterValues = filter[filterName].values || [];
                     filterType = filter[filterName].type || getType(filterName);
                     filterOptions = filter[filterName].options || null;
