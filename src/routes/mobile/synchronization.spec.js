@@ -17,6 +17,41 @@ const assertGetResponse = (body) => {
     expect(body.lastSyncDate).to.be.a('String');
 };
 
+/*
+* BEGIN:
+*  - activity
+*  - location
+*  - personnel
+*  - objective
+*  - in store
+*  - price survey
+*  - shelf share
+*  - competitor promo activity
+*  - competitor display report
+*  - achievement form
+*  - new product launch
+* IF [Cash Van, Merchandiser, Salesman] :
+*  - alalai promo evaluation
+*  - branding display report
+*  - questionnaire
+* THEN:
+*  - planogram
+*  - item prices
+*  - category
+*  - competitors
+* IF [Master Admin, Country Admin, Area Manager, Area in Charge Manager, Salesman]:
+*  - contract yearly
+*  - contract secondary
+* IF [Merchandiser]:
+*  - contract yearly
+* THEN:
+*  - document
+*  - note
+*  - notification
+*  - all meta
+*
+* */
+
 function shouldGetActivityList(agent) {
     it('should get activity list', function *() {
         const resp = yield agent
