@@ -815,15 +815,18 @@ var Contract = function (db, redis, event) {
                 skip,
                 limit
             });
-            const aggregation = ContractYearlyModel.aggregate(pipeLine);
-
-            aggregation.options = {
-                allowDiskUse: true
-            };
 
             async.waterfall([
 
-                aggregation.exec,
+                (cb) => {
+                    const aggregation = ContractYearlyModel.aggreagate(pipeLine);
+
+                    aggregation.options = {
+                        allowDiskUse: true
+                    };
+
+                    aggregation.exec(cb);
+                },
 
                 (response, cb) => {
                     let personnelIds = [];
@@ -840,7 +843,7 @@ var Contract = function (db, redis, event) {
                     }
 
                     if (response && response.data && response.data.length) {
-                        response.data = _.map(response.data, (model) => {
+                        response.data = response.data.map((model) => {
                             if (model.description) {
                                 model.description = {
                                     en: _.unescape(model.description.en),
@@ -858,7 +861,7 @@ var Contract = function (db, redis, event) {
 
                             personnelIds.push(model.createdBy.user._id);
 
-                            const documentsId = _.map(model.documents, '_id');
+                            const documentsId = model.documents.map((item) => (item._id));
 
                             fileIds.push(...documentsId);
 
