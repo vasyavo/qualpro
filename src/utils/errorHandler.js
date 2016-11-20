@@ -13,5 +13,5 @@ module.exports = (err, req, res, next) => {
         message: err.message
     };
 
-    res.send(status).send(body);
+    res.status(status).send(body);
 };
