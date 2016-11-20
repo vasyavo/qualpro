@@ -819,7 +819,7 @@ var Contract = function (db, redis, event) {
             async.waterfall([
 
                 (cb) => {
-                    const aggregation = ContractYearlyModel.aggreagate(pipeLine);
+                    const aggregation = ContractYearlyModel.aggregate(pipeLine);
 
                     aggregation.options = {
                         allowDiskUse: true
