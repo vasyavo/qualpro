@@ -1,8 +1,6 @@
-/**
- * @see {@link https://nodejs.org/api/events.html}
- * @class EventEmiter
- */
-'use strict';
+const logger = require('./../utils/logger');
+const errorHandler = require('./../utils/errorHandler');
+const addRequestId = require('express-request-id')();
 
 module.exports = function(app, db, event) {
     // var express = require('express');
@@ -121,6 +119,8 @@ module.exports = function(app, db, event) {
      cookie   : 'currentLanguage',
      directory: __dirname + '/locales'
      });*/
+
+    app.use(addRequestId);
 
     app.use(sessionValidator);
     //  app.use(i18n.init);
@@ -359,6 +359,7 @@ module.exports = function(app, db, event) {
 
         if (req.accepts('json')) {
             return res.json({error : RESPONSES.PAGE_NOT_FOUND});
+
         }
 
         res.type('txt');

@@ -9,6 +9,6 @@ const areaManager = request.agent(server);
 module.exports = {
     su: agentSu,
     master: agentMaster,
-    countryAdmin : countryAdmin,
-    areaManager : areaManager
+    countryAdmin,
+    areaManager
 };

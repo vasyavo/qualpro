@@ -17,833 +17,574 @@ const assertGetResponse = (body) => {
     expect(body.lastSyncDate).to.be.a('String');
 };
 
+/*
+* BEGIN:
+*  - activity
+*  - location
+*  - personnel
+*  - objective
+*  - in store
+*  - price survey
+*  - shelf share
+*  - competitor promo activity
+*  - competitor display report
+*  - achievement form
+*  - new product launch
+* IF [Cash Van, Merchandiser, Salesman] :
+*  - alalai promo evaluation
+*  - branding display report
+*  - questionnaire
+* THEN:
+*  - planogram
+*  - item prices
+*  - category
+*  - competitors
+* IF [Master Admin, Country Admin, Area Manager, Area in Charge Manager, Salesman]:
+*  - contract yearly
+*  - contract secondary
+* IF [Merchandiser]:
+*  - contract yearly
+* THEN:
+*  - document
+*  - note
+*  - notification
+*  - all meta
+*
+* */
+
+function shouldGetActivityList(agent) {
+    it('should get activity list', function *() {
+        const resp = yield agent
+            .get('/mobile/activityList')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncActivityList(agent) {
+    it('should sync activity list', function *() {
+        const resp = yield agent
+            .get('/mobile/activityList/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetLocation(agent) {
+    it('should get location', function *() {
+        const resp = yield agent
+            .get('/mobile/domain')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncLocation(agent) {
+    it('should sync location', function *() {
+        const resp = yield agent
+            .get('/mobile/domain/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetPersonnel(agent) {
+    it('should get personnel', function *() {
+        const resp = yield agent
+            .get('/mobile/personnel')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncPersonnel(agent) {
+    it('should sync personnel', function *() {
+        const resp = yield agent
+            .get('/mobile/personnel/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetObjectives(agent) {
+    it('should get objectives', function *() {
+        const resp = yield agent
+            .get('/mobile/objectives')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncObjectives(agent) {
+    it('should sync objectives', function *() {
+        const resp = yield agent
+            .get('/mobile/objectives/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetInStoreTasks(agent) {
+    it('should get in store tasks', function *() {
+        const resp = yield agent
+            .get('/mobile/instoretasks')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncInStoreTasks(agent) {
+    it('should sync in store tasks', function *() {
+        const resp = yield agent
+            .get('/mobile/instoretasks/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetPromotions(agent) {
+    it('should get promotions', function *() {
+        const resp = yield agent
+            .get('/mobile/promotions')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncPromotions(agent) {
+    it('should sync promotions', function *() {
+        const resp = yield agent
+            .get('/mobile/promotions/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetCurrentUser(agent) {
+    it('should get current user', function *() {
+        const resp = yield agent
+            .get('/mobile/personnel/currentUser')
+            .expect(200);
+
+        const user = resp.body;
+
+        expect(user).to.be.an('Object');
+        expect(user).to.have.property('_id');
+    });
+}
+
+function shouldGetContractYearly(agent) {
+    it('should get contract yearly', function *() {
+        const resp = yield agent
+            .get('/mobile/contractsYearly')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncContractYearly(agent) {
+    it('should sync contract yearly', function *() {
+        const resp = yield agent
+            .get('/mobile/contractsYearly/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetContractSecondary(agent) {
+    it('should get contract secondary', function *() {
+        const resp = yield agent
+            .get('/mobile/contractsSecondary')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncContractSecondary(agent) {
+    it('should sync contract secondary', function *() {
+        const resp = yield agent
+            .get('/mobile/contractsSecondary/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetRetailSegment(agent) {
+    it('should get retail segment', function *() {
+        const resp = yield agent
+            .get('/mobile/retailSegment')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncRetailSegment(agent) {
+    it('should sync retail segment', function *() {
+        const resp = yield agent
+            .get('/mobile/retailSegment/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetOutlet(agent) {
+    it('should get outlet', function *() {
+        const resp = yield agent
+            .get('/mobile/outlet')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncOutlet(agent) {
+    it('should sync outlet', function *() {
+        const resp = yield agent
+            .get('/mobile/outlet/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetBranch(agent) {
+    it('should get branch', function *() {
+        const resp = yield agent
+            .get('/mobile/branch')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncBranch(agent) {
+    it('should sync branch', function *() {
+        const resp = yield agent
+            .get('/mobile/branch/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldGetBrandingActivity(agent) {
+    it('should get branding activity (in past branding and display)', function *() {
+        const resp = yield agent
+            .get('/mobile/brandingActivity')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
+function shouldSyncBrandingActivity(agent) {
+    it('should sync branding activity (in past branding and display)', function *() {
+        const resp = yield agent
+            .get('/mobile/brandingActivity/sync')
+            .expect(200);
+
+        const body = resp.body;
+
+        assertGetResponse(body);
+    });
+}
+
 describe('mobile synchronization', () => {
 
-    before(function(done) {
-        const timeToPullDatabase = 60 * 10 * 1000;
+    describe('Master Admin', () => {
 
-        this.timeout(timeToPullDatabase);
+        shouldGetActivityList(Authenticator.master);
 
-        const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
+        shouldSyncActivityList(Authenticator.master);
 
-        shell.chmod('+x', pathToScript);
+        shouldGetLocation(Authenticator.master);
 
-        async.waterfall([
+        shouldSyncLocation(Authenticator.master);
 
-            (cb) => {
-                shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
-                    if (code !== 0) {
-                        return cb('Something wrong with database pulling')
+        shouldGetPersonnel(Authenticator.master);
+
+        shouldSyncPersonnel(Authenticator.master);
+
+        shouldGetObjectives(Authenticator.master);
+
+        shouldSyncObjectives(Authenticator.master);
+
+        shouldGetInStoreTasks(Authenticator.master);
+
+        shouldSyncInStoreTasks(Authenticator.master);
+
+        shouldGetPromotions(Authenticator.master);
+
+        shouldSyncPromotions(Authenticator.master);
+
+        shouldGetCurrentUser(Authenticator.master);
+
+        shouldGetContractYearly(Authenticator.master);
+
+        shouldSyncContractYearly(Authenticator.master);
+
+        shouldGetContractSecondary(Authenticator.master);
+
+        shouldSyncContractSecondary(Authenticator.master);
+
+        shouldGetRetailSegment(Authenticator.master);
+
+        shouldSyncRetailSegment(Authenticator.master);
+
+        shouldGetOutlet(Authenticator.master);
+
+        shouldSyncOutlet(Authenticator.master);
+
+        shouldGetBranch(Authenticator.master);
+
+        shouldSyncBranch(Authenticator.master);
+
+        shouldGetBrandingActivity(Authenticator.master);
+
+        shouldGetBrandingActivity(Authenticator.master);
+
+        // todo price survey will be implemented later
+    });
+
+    if (!config.isCI) {
+        describe('Staging database pulling', () => {
+
+            it('should works', function(done) {
+                const timeToPullDatabase = 60 * 10 * 1000;
+
+                this.timeout(timeToPullDatabase);
+
+                const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
+
+                shell.chmod('+x', pathToScript);
+
+                async.waterfall([
+
+                    (cb) => {
+                        shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
+                            if (code !== 0) {
+                                return cb('Something wrong with database pulling')
+                            }
+
+                            cb();
+                        });
+                    },
+
+                    (cb) => {
+                        spawnDefaults(cb);
                     }
 
-                    cb();
+                ], (err) => {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
                 });
-            },
+            });
 
-            (cb) => {
-                spawnDefaults(cb);
-            }
-
-        ], (err) => {
-            if (err) {
-                return done(err);
-            }
-
-            done();
-        });
-    });
-
-    describe('Master Admin', () => {
-        it('should get activity list', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/activityList')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync activity list', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/activityList/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get location', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/domain')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync location', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/domain/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get personnel', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/personnel')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync personnel', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/personnel/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        xit('should get objectives', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/objectives')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync objectives', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/objectives/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        xit('should get in store tasks', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/instoretasks')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync in store tasks', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/instoretasks/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get promotions', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/promotions')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync promotions', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/promotions/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get current user', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/personnel/currentUser')
-                .expect(200);
-
-            const user = resp.body;
-
-            expect(user).to.be.an('Object');
-            expect(user).to.have.property('_id');
-        });
-
-        it('should get contract yearly', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/contractsYearly')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync contract yearly', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/contractsYearly/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get contract secondary', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/contractsSecondary')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync contract secondary', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/contractsSecondary/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get retail segment', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/retailSegment')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync retail segment', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/retailSegment/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get outlet', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/outlet')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync outlet', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/outlet/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get branch', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/branch')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync branch', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/branch/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/brandingActivity')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.master
-                .get('/mobile/brandingActivity/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        // todo price survey will be implemented later
-    });
-
-    xdescribe('Country Admin', () => {
-        it('country admin should pass authentication with password', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .post('/mobile/login')
-                .send({
-                    login: 'ca_uae@yopmail.com', //todo change to variables
-                    pass: '123456'
-                })
-                .expect(200);
-
-            const body = resp.body;
-
-            expect(body).to.be.an('Object')
-        });
-
-        it('should get activity list', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/activityList')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync activity list', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/activityList/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get location', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/domain')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync location', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/domain/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get personnel', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/personnel')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync personnel', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/personnel/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get objectives', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/objectives')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync objectives', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/objectives/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get in store tasks', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/instoretasks')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync in store tasks', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/instoretasks/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get promotions', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/promotions')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync promotions', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/promotions/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get current user', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/personnel/currentUser')
-                .expect(200);
-
-            const user = resp.body;
-
-            expect(user).to.be.an('Object');
-            expect(user).to.have.property('_id');
-        });
-
-        it('should get contract yearly', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/contractsYearly')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync contract yearly', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/contractsYearly/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get contract secondary', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/contractsSecondary')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync contract secondary', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/contractsSecondary/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get retail segment', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/retailSegment')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync retail segment', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/retailSegment/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get outlet', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/outlet')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
         });
 
-        it('should sync outlet', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/outlet/sync')
-                .expect(200);
+        describe('Country Admin', () => {
 
-            const body = resp.body;
+            it('should pass authentication with password', function *() {
+                const resp = yield Authenticator.countryAdmin
+                    .post('/mobile/login')
+                    .send({
+                        login: 'ca_uae@yopmail.com', //todo change to variables
+                        pass: '123456'
+                    })
+                    .expect(200);
 
-            assertGetResponse(body);
-        });
-
-        it('should get branch', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/branch')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync branch', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/branch/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/brandingActivity')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.countryAdmin
-                .get('/mobile/brandingActivity/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        // todo price survey will be implemented later
-    });
-
-    xdescribe('Area Manager', () => {
-        it('area manager should pass authentication with password', function *() {
-            const resp = yield Authenticator.areaManager
-                .post('/mobile/login')
-                .send({
-                    login: 'am_uae@yopmail.com', //todo change to variables
-                    pass: '123456'
-                })
-                .expect(200);
-
-            const body = resp.body;
-
-            expect(body).to.be.an('Object')
-        });
-
-        it('should get activity list', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/activityList')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync activity list', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/activityList/sync')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should get location', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/domain')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
+                const body = resp.body;
 
-        it('should sync location', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/domain/sync')
-                .expect(200);
+                expect(body).to.be.an('Object')
+            });
 
-            const body = resp.body;
+            shouldGetActivityList(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
-
-        it('should get personnel', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/personnel')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync personnel', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/personnel/sync')
-                .expect(200);
-
-            const body = resp.body;
+            shouldSyncActivityList(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
-
-        it('should get objectives', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/objectives')
-                .expect(200);
-
-            const body = resp.body;
-
-            assertGetResponse(body);
-        });
-
-        it('should sync objectives', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/objectives/sync')
-                .expect(200);
+            shouldGetLocation(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldSyncLocation(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
+            shouldGetPersonnel(Authenticator.countryAdmin);
 
-        it('should get in store tasks', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/instoretasks')
-                .expect(200);
+            shouldSyncPersonnel(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldGetObjectives(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
+            shouldSyncObjectives(Authenticator.countryAdmin);
 
-        it('should sync in store tasks', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/instoretasks/sync')
-                .expect(200);
+            shouldGetInStoreTasks(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldSyncInStoreTasks(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
+            shouldGetPromotions(Authenticator.countryAdmin);
 
-        it('should get promotions', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/promotions')
-                .expect(200);
+            shouldSyncPromotions(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldGetCurrentUser(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
+            shouldGetContractYearly(Authenticator.countryAdmin);
 
-        it('should sync promotions', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/promotions/sync')
-                .expect(200);
+            shouldSyncContractYearly(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldGetContractSecondary(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
+            shouldSyncContractSecondary(Authenticator.countryAdmin);
 
-        it('should get current user', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/personnel/currentUser')
-                .expect(200);
+            shouldGetRetailSegment(Authenticator.countryAdmin);
 
-            const user = resp.body;
+            shouldSyncRetailSegment(Authenticator.countryAdmin);
 
-            expect(user).to.be.an('Object');
-            expect(user).to.have.property('_id');
-        });
+            shouldGetOutlet(Authenticator.countryAdmin);
 
-        it('should get contract yearly', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/contractsYearly')
-                .expect(200);
+            shouldSyncOutlet(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldGetBranch(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
-        });
+            shouldSyncBranch(Authenticator.countryAdmin);
 
-        it('should sync contract yearly', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/contractsYearly/sync')
-                .expect(200);
+            shouldGetBrandingActivity(Authenticator.countryAdmin);
 
-            const body = resp.body;
+            shouldGetBrandingActivity(Authenticator.countryAdmin);
 
-            assertGetResponse(body);
+            // todo price survey will be implemented later
         });
-
-        it('should get contract secondary', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/contractsSecondary')
-                .expect(200);
 
-            const body = resp.body;
+        describe('Area Manager', () => {
+            it('should pass authentication with password', function *() {
+                const resp = yield Authenticator.areaManager
+                    .post('/mobile/login')
+                    .send({
+                        login: 'am_uae@yopmail.com', //todo change to variables
+                        pass: '123456'
+                    })
+                    .expect(200);
 
-            assertGetResponse(body);
-        });
+                const body = resp.body;
 
-        it('should sync contract secondary', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/contractsSecondary/sync')
-                .expect(200);
+                expect(body).to.be.an('Object')
+            });
 
-            const body = resp.body;
+            shouldGetActivityList(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldSyncActivityList(Authenticator.areaManager);
 
-        it('should get retail segment', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/retailSegment')
-                .expect(200);
+            shouldGetLocation(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldSyncLocation(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldGetPersonnel(Authenticator.areaManager);
 
-        it('should sync retail segment', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/retailSegment/sync')
-                .expect(200);
+            shouldSyncPersonnel(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldGetObjectives(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldSyncObjectives(Authenticator.areaManager);
 
-        it('should get outlet', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/outlet')
-                .expect(200);
+            shouldGetInStoreTasks(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldSyncInStoreTasks(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldGetPromotions(Authenticator.areaManager);
 
-        it('should sync outlet', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/outlet/sync')
-                .expect(200);
+            shouldSyncPromotions(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldGetCurrentUser(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldGetContractYearly(Authenticator.areaManager);
 
-        it('should get branch', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/branch')
-                .expect(200);
+            shouldSyncContractYearly(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldGetContractSecondary(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldSyncContractSecondary(Authenticator.areaManager);
 
-        it('should sync branch', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/branch/sync')
-                .expect(200);
+            shouldGetRetailSegment(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldSyncRetailSegment(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldGetOutlet(Authenticator.areaManager);
 
-        it('should get branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/brandingActivity')
-                .expect(200);
+            shouldSyncOutlet(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldGetBranch(Authenticator.areaManager);
 
-            assertGetResponse(body);
-        });
+            shouldSyncBranch(Authenticator.areaManager);
 
-        it('should sync branding and activity (in past branding and display)', function *() {
-            const resp = yield Authenticator.areaManager
-                .get('/mobile/brandingActivity/sync')
-                .expect(200);
+            shouldGetBrandingActivity(Authenticator.areaManager);
 
-            const body = resp.body;
+            shouldGetBrandingActivity(Authenticator.areaManager);
 
-            assertGetResponse(body);
+            // todo price survey will be implemented later
         });
-
-        // todo price survey will be implemented later
-    });
+    }
 
 });

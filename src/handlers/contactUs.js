@@ -264,7 +264,7 @@ var ContactUs = function(db, redis, event) {
 
         var error;
 
-        joiValidate(req.query, 1/*req.session.level*/, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
+        joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
                 error = new Error();
                 error.status = 400;

@@ -129,14 +129,15 @@ function BrandingAndDisplay(db, redis, event) {
                     attachments : {$push : '$attachments'},
                     categories : {$first : '$categories'},
                     branch : {$first : '$branch'},
+                    subRegion : {$first : '$subRegion'},
+                    region : {$first : '$region'},
                     displayType : {$first : '$displayType'},
                     outlet : {$first : '$outlet'},
                     description : {$first : '$description'},
                     createdAt : {$first : '$createdAt'},
                     dateEnd : {$first : '$dateEnd'},
                     dateStart : {$first : '$dateStart'},
-                    createdBy : {$first : '$createdBy'},
-                    country : {$first : '$country'}
+                    createdBy : {$first : '$createdBy'}
                 })
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
@@ -157,14 +158,28 @@ function BrandingAndDisplay(db, redis, event) {
                     foreignField : '_id',
                     as : 'outlet'
                 })
+                .unwind('outlet')
                 .lookup({
                     from : CONTENT_TYPES.BRANCH + 'es',
                     localField : 'branch',
                     foreignField : '_id',
                     as : 'branch'
                 })
-                .unwind('outlet')
                 .unwind('branch')
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'branch.subRegion',
+                    foreignField : '_id',
+                    as : 'subRegion'
+                })
+                .unwind('subRegion')
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'subRegion.parent',
+                    foreignField : '_id',
+                    as : 'region'
+                })
+                .unwind('region')
                 .project({
                     createdAt : 1,
                     description : 1,
@@ -176,6 +191,10 @@ function BrandingAndDisplay(db, redis, event) {
                     'attachments.originalName' : 1,
                     'categories._id' : 1,
                     'categories.name' : 1,
+                    'subRegion._id' : 1,
+                    'subRegion.name' : 1,
+                    'region._id' : 1,
+                    'region.name' : 1,
                     'branch._id' : 1,
                     'branch.name' : 1,
                     'outlet._id' : 1,
@@ -184,9 +203,7 @@ function BrandingAndDisplay(db, redis, event) {
                     'createdBy.ID' : 1,
                     'createdBy.lastName' : 1,
                     'createdBy.firstName' : 1,
-                    'createdBy.country' : 1,
-                    'createdBy.subRegion' : 1,
-                    'createdBy.region' : 1
+                    'createdBy.country' : 1
                 })
                 .allowDiskUse(true);
 
@@ -200,9 +217,7 @@ function BrandingAndDisplay(db, redis, event) {
                 }
                 const createdBy = brandingAndDisplayModel[0].createdBy;
                 let origins = _.concat(
-                    createdBy.country,
-                    createdBy.region,
-                    createdBy.subRegion
+                    createdBy.country
                 );
 
                 DomainModel
@@ -220,22 +235,6 @@ function BrandingAndDisplay(db, redis, event) {
                         }
                         createdBy.country = _.filter(countries, function(country) {
                             if (_.includes(_.map(createdBy.country, o => o.toString()),
-                                    country._id.toString()
-                                )) {
-                                return country
-                            }
-                        });
-
-                        createdBy.region = _.filter(countries, function(country) {
-                            if (_.includes(_.map(createdBy.region, o => o.toString()),
-                                    country._id.toString()
-                                )) {
-                                return country
-                            }
-                        });
-
-                        createdBy.subRegion = _.filter(countries, function(country) {
-                            if (_.includes(_.map(createdBy.subRegion, o => o.toString()),
                                     country._id.toString()
                                 )) {
                                 return country
@@ -355,7 +354,21 @@ function BrandingAndDisplay(db, redis, event) {
                     foreignField : '_id',
                     as : 'createdBy'
                 })
-                .unwind('createdBy')
+                .append([{
+                    $unwind: {
+                        path                      : 'createdBy',
+                        preserveNullAndEmptyArrays: true
+                    }
+                }])
+                //.unwind('createdBy')
+                .unwind('createdBy.country')
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'createdBy.country',
+                    foreignField : '_id',
+                    as : 'countries'
+                })
+                .unwind('countries')
                 .lookup({
                     from : CONTENT_TYPES.POSITION + 's',
                     localField : 'createdBy.position',
@@ -372,7 +385,7 @@ function BrandingAndDisplay(db, redis, event) {
                 .unwind('createdBy.accessRole')
                 .append([{
                     $unwind: {
-                        path                      : '$attachments',
+                        path                      : 'attachments',
                         preserveNullAndEmptyArrays: true
                     }
                 }])
@@ -392,8 +405,12 @@ function BrandingAndDisplay(db, redis, event) {
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
                     categories : {$first : '$categories'},
+                    countries : {$first : '$countries'},
                     commentaries : {$first : '$commentaries'},
                     branch : {$first : '$branch'},
+                    subRegion : {$first : '$subRegion'},
+                    region : {$first : '$region'},
+                    retailSegment : {$first : '$retailSegment'},
                     displayType : {$first : '$displayType'},
                     outlet : {$first : '$outlet'},
                     description : {$first : '$description'},
@@ -414,14 +431,35 @@ function BrandingAndDisplay(db, redis, event) {
                     foreignField : '_id',
                     as : 'outlet'
                 })
+                .unwind('outlet')
                 .lookup({
                     from : CONTENT_TYPES.BRANCH + 'es',
                     localField : 'branch',
                     foreignField : '_id',
                     as : 'branch'
                 })
-                .unwind('outlet')
                 .unwind('branch')
+                .lookup({
+                    from : CONTENT_TYPES.RETAILSEGMENT + 's',
+                    localField : 'branch.retailSegment',
+                    foreignField : '_id',
+                    as : 'retailSegment'
+                })
+                .unwind('retailSegment')
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'branch.subRegion',
+                    foreignField : '_id',
+                    as : 'subRegion'
+                })
+                .unwind('subRegion')
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'subRegion.parent',
+                    foreignField : '_id',
+                    as : 'region'
+                })
+                .unwind('region')
                 .append(condition.foreignCondition)
                 .project({
                     createdAt : 1,
@@ -430,6 +468,8 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : 1,
                     displayType : 1,
                     categories : 1,
+                    'countries._id' : 1,
+                    'countries.name' : 1,
                     'commentaries.body' : 1,
                     'attachments._id' : 1,
                     'attachments.name' : 1,
@@ -437,6 +477,12 @@ function BrandingAndDisplay(db, redis, event) {
                     'attachments.contentType' : 1,
                     'branch._id' : 1,
                     'branch.name' : 1,
+                    'retailSegment._id' : 1,
+                    'retailSegment.name' : 1,
+                    'subRegion._id' : 1,
+                    'subRegion.name' : 1,
+                    'region._id' : 1,
+                    'region.name' : 1,
                     'outlet._id' : 1,
                     'outlet.name' : 1,
                     'createdBy._id' : 1,
@@ -568,7 +614,7 @@ function BrandingAndDisplay(db, redis, event) {
 
             queryRun(query);
         });
-    }
+    };
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {

@@ -182,7 +182,7 @@ var FilterMapper = function () {
             }
         } else {
             for (filterName in filter) {
-                if (filterName !== 'translated') {
+                if (filterName !== 'translated' && filterName !== 'type') {
                     filterValues = filter[filterName].values || [];
                     filterType = filter[filterName].type || getType(filterName);
                     filterOptions = filter[filterName].options || null;

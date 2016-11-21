@@ -52,7 +52,7 @@ define([
             $curEl.find('#startDate').datepicker({
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 defaultDate: new Date(),
                 onClose    : function (selectedDate) {
                     $curEl.find('#endDate').datepicker('option', 'minDate', selectedDate);
@@ -62,7 +62,7 @@ define([
             $curEl.find('#endDate').datepicker({
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 defaultDate: new Date(),
                 onClose    : function (selectedDate) {
                     $curEl.find('#startDate').datepicker('option', 'maxDate', selectedDate);

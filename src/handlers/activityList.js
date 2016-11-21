@@ -371,7 +371,7 @@ var Personnel = function(db, redis, event) {
             }
 
             if (currentUser.accessRoleLevel === 4) {
-                regionsMathArray = {subRegion : {$in : currentUser.subRegion || afterIteMTypeQuery.subRegion}};
+                regionsMathArray = {subRegion : {$in : [currentUser.subRegion] || afterIteMTypeQuery.subRegion}};
             }
             if (currentUser.accessRoleLevel === 3) {
                 regionsMathArray = {region : {$in : currentUser.region || afterIteMTypeQuery.region}};
@@ -795,19 +795,15 @@ var Personnel = function(db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed, personnel) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
+        async.waterfall([
 
-                return next(err);
+            async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
+
+            (allowed, personnel) => {
+                queryRun(personnel);
             }
 
-            queryRun(personnel);
-        });
+        ]);
     };
 
     this.getAll = function(req, res, next) {
@@ -946,21 +942,15 @@ var Personnel = function(db, redis, event) {
 
         }
 
-        access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, function(err, allowed, personnel) {
-            var error;
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                error = new Error();
-                error.status = 403;
+        async.waterfall([
 
-                return next(error);
+            async.apply(access.getReadAccess, req, ACL_MODULES.ACTIVITY_LIST),
+
+            (allowed, personnel) => {
+                queryRun(personnel);
             }
 
-            queryRun(personnel);
-        });
-
+        ]);
     };
 };
 

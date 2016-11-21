@@ -739,7 +739,7 @@ define([
             startDateObj = {
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 defaultDate: new Date(dateStart),
                 onClose    : function (selectedDate) {
                     $dueDate.datepicker('option', 'minDate', selectedDate);
@@ -749,7 +749,7 @@ define([
             endDateObj = {
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 defaultDate: new Date(dateEnd),
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);

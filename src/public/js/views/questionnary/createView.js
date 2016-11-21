@@ -438,7 +438,7 @@ define([
             $endDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
                 defaultDate: new Date(dateEnd)

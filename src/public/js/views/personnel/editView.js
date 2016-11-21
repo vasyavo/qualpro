@@ -206,7 +206,7 @@ define([
                     changeYear : true,
                     maxDate    : new Date(),
                     defaultDate: new Date(moment(model.get('dateJoined'), 'DD.MM.YYYY')),
-                    yearRange  : '-100y:c+nn'
+                    yearRange  : '-20y:c+10y'
                 });
 
                 this.logic.showDomainsRows(currentUserAccessRoleLevel);
