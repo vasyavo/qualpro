@@ -95,6 +95,7 @@ function BrandingAndDisplay(db, redis, event) {
                         _id : new ObjectId(id)
                     }
                 }])
+
                 .unwind('categories')
                 .lookup({
                     from : 'categories',
@@ -103,6 +104,7 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'categories'
                 })
                 .unwind('$categories')
+
                 .group({
                     '_id' : '$_id',
                     categories : {$push : '$categories'},
@@ -116,6 +118,7 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'},
                 })
+
                 .unwind('attachments')
                 .lookup({
                     from : CONTENT_TYPES.FILES,
@@ -124,11 +127,14 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'attachments'
                 })
                 .unwind('$attachments')
+
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
                     categories : {$first : '$categories'},
                     branch : {$first : '$branch'},
+                    subRegion : {$first : '$subRegion'},
+                    region : {$first : '$region'},
                     displayType : {$first : '$displayType'},
                     outlet : {$first : '$outlet'},
                     description : {$first : '$description'},
@@ -138,6 +144,7 @@ function BrandingAndDisplay(db, redis, event) {
                     createdBy : {$first : '$createdBy'},
                     country : {$first : '$country'}
                 })
+
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
@@ -145,26 +152,46 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'createdBy'
                 })
                 .unwind('createdBy')
+
                 .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
                     foreignField : '_id',
                     as : 'displayType'
                 })
+
                 .lookup({
                     from : CONTENT_TYPES.OUTLET + 's',
                     localField : 'outlet',
                     foreignField : '_id',
                     as : 'outlet'
                 })
+                .unwind('outlet')
+
                 .lookup({
                     from : CONTENT_TYPES.BRANCH + 'es',
                     localField : 'branch',
                     foreignField : '_id',
                     as : 'branch'
                 })
-                .unwind('outlet')
                 .unwind('branch')
+
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'branch.subRegion',
+                    foreignField : '_id',
+                    as : 'subRegion'
+                })
+                .unwind('subRegion')
+
+                .lookup({
+                    from : CONTENT_TYPES.DOMAIN + 's',
+                    localField : 'subRegion.parent',
+                    foreignField : '_id',
+                    as : 'region'
+                })
+                .unwind('region')
+
                 .project({
                     createdAt : 1,
                     description : 1,
@@ -176,6 +203,10 @@ function BrandingAndDisplay(db, redis, event) {
                     'attachments.originalName' : 1,
                     'categories._id' : 1,
                     'categories.name' : 1,
+                    'subRegion._id' : 1,
+                    'subRegion.name' : 1,
+                    'region._id' : 1,
+                    'region.name' : 1,
                     'branch._id' : 1,
                     'branch.name' : 1,
                     'outlet._id' : 1,
@@ -343,12 +374,14 @@ function BrandingAndDisplay(db, redis, event) {
             const condition = generateSearchCondition(query.filter);
             const mongoQuery = BrandingAndDisplayModel.aggregate()
                 .append(condition.formCondition)
+
                 .lookup({
                     from : CONTENT_TYPES.COMMENT + 's',
                     localField : '_id',
                     foreignField : 'taskId',
                     as : 'commentaries'
                 })
+
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
@@ -373,6 +406,7 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'createdBy.position'
                 })
                 .unwind('createdBy.position')
+
                 .lookup({
                     from : CONTENT_TYPES.ACCESSROLE + 's',
                     localField : 'createdBy.accessRole',
@@ -380,6 +414,7 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'createdBy.accessRole'
                 })
                 .unwind('createdBy.accessRole')
+
                 .unwind('attachments')
                 .lookup({
                     from : CONTENT_TYPES.FILES,
@@ -388,6 +423,7 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'attachments'
                 })
                 .unwind('attachments')
+
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
@@ -397,6 +433,7 @@ function BrandingAndDisplay(db, redis, event) {
                     branch : {$first : '$branch'},
                     subRegion : {$first : '$subRegion'},
                     region : {$first : '$region'},
+                    retailSegment : {$first : '$retailSegment'},
                     displayType : {$first : '$displayType'},
                     outlet : {$first : '$outlet'},
                     description : {$first : '$description'},
@@ -405,6 +442,7 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'}
                 })
+
                 .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
@@ -427,6 +465,14 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'branch'
                 })
                 .unwind('branch')
+
+                .lookup({
+                    from : CONTENT_TYPES.RETAILSEGMENT + 's',
+                    localField : 'branch.retailSegment',
+                    foreignField : '_id',
+                    as : 'retailSegment'
+                })
+                .unwind('retailSegment')
 
                 .lookup({
                     from : CONTENT_TYPES.DOMAIN + 's',
@@ -461,6 +507,8 @@ function BrandingAndDisplay(db, redis, event) {
                     'attachments.contentType' : 1,
                     'branch._id' : 1,
                     'branch.name' : 1,
+                    'retailSegment._id' : 1,
+                    'retailSegment.name' : 1,
                     'subRegion._id' : 1,
                     'subRegion.name' : 1,
                     'region._id' : 1,
