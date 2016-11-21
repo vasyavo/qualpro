@@ -514,7 +514,7 @@ define([
             $startDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(endDate),
                 defaultDate: new Date(dateStart),
@@ -526,7 +526,7 @@ define([
             $dueDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(endDate),
                 defaultDate: new Date(endDate),
