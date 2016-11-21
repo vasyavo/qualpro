@@ -141,8 +141,7 @@ function BrandingAndDisplay(db, redis, event) {
                     createdAt : {$first : '$createdAt'},
                     dateEnd : {$first : '$dateEnd'},
                     dateStart : {$first : '$dateStart'},
-                    createdBy : {$first : '$createdBy'},
-                    country : {$first : '$country'}
+                    createdBy : {$first : '$createdBy'}
                 })
 
                 .lookup({
@@ -215,9 +214,7 @@ function BrandingAndDisplay(db, redis, event) {
                     'createdBy.ID' : 1,
                     'createdBy.lastName' : 1,
                     'createdBy.firstName' : 1,
-                    'createdBy.country' : 1,
-                    'createdBy.subRegion' : 1,
-                    'createdBy.region' : 1
+                    'createdBy.country' : 1
                 })
                 .allowDiskUse(true);
 
@@ -231,9 +228,7 @@ function BrandingAndDisplay(db, redis, event) {
                 }
                 const createdBy = brandingAndDisplayModel[0].createdBy;
                 let origins = _.concat(
-                    createdBy.country,
-                    createdBy.region,
-                    createdBy.subRegion
+                    createdBy.country
                 );
 
                 DomainModel
@@ -251,22 +246,6 @@ function BrandingAndDisplay(db, redis, event) {
                         }
                         createdBy.country = _.filter(countries, function(country) {
                             if (_.includes(_.map(createdBy.country, o => o.toString()),
-                                    country._id.toString()
-                                )) {
-                                return country
-                            }
-                        });
-
-                        createdBy.region = _.filter(countries, function(country) {
-                            if (_.includes(_.map(createdBy.region, o => o.toString()),
-                                    country._id.toString()
-                                )) {
-                                return country
-                            }
-                        });
-
-                        createdBy.subRegion = _.filter(countries, function(country) {
-                            if (_.includes(_.map(createdBy.subRegion, o => o.toString()),
                                     country._id.toString()
                                 )) {
                                 return country

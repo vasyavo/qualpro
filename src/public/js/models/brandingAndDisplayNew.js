@@ -48,7 +48,7 @@ define([
 
             modelParse: function (model) {
                 let location = [];
-debugger;
+
                 model.countryString = model.countries ? model.countries.name[App.currentUser.currentLanguage] : '';
                 location.push(model.countryString);
 
