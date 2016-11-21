@@ -663,8 +663,8 @@ define([
                         },
                         'status'        : {
                             type   : 'string',
-                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed'],
+                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED, OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
+                            names  : ['Closed', 'Draft'],
                             options: {$nin: true}
                         }
                     }]
