@@ -1815,6 +1815,7 @@ var Objectives = function (db, redis, event) {
             var aggregation;
             var ids;
             var currentUserLevel = req.session.level;
+            let arrayOfSubordinateUsersId = [];
 
             if (query._ids) {
                 ids = query._ids.split(',');
@@ -1833,17 +1834,29 @@ var Objectives = function (db, redis, event) {
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             async.waterfall([
+                (cb) => {
+                    PersonnelModel.find({manager: req.session.uId})
+                        .select('_id')
+                        .lean()
+                        .exec(cb);
+                },
 
-                async.apply(coveredByMe, PersonnelModel, ObjectId(req.session.uId)),
+                function (arrayOfUserId, cb) {
+                    arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
+                        return model._id
+                    });
+                    coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
+                },
 
-                (coveredIds, cb) => {
+                function (coveredIds, cb) {
                     pipeLine = getAllPipeline({
                         aggregateHelper : aggregateHelper,
                         queryObject     : queryObject,
                         isMobile        : req.isMobile,
                         forSync         : true,
                         coveredIds      : coveredIds,
-                        currentUserLevel: currentUserLevel
+                        currentUserLevel: currentUserLevel,
+                        subordinates : arrayOfSubordinateUsersId
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);
@@ -1937,6 +1950,25 @@ var Objectives = function (db, redis, event) {
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
+                        const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
+                            return ObjectId.toString();
+                        });
+                        const dataMyCC = response.data.map((objective) => {
+                            let assignedToId;
+                            let createdById;
+                            const currentUserId = req.session.uId;
+                            if (_.isObject(objective.assignedTo[0])) {
+                                assignedToId = objective.assignedTo[0]._id.toString();
+                            }
+                            if (_.isObject(objective.createdBy.user)) {
+                                createdById = objective.createdBy.user._id.toString();
+                            }
+                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
+                                objective.myCC = true;
+                            }
+                            return objective;
+                        });
+                        response.data = dataMyCC;
                         next({status: 200, body: response});
                     })
                 });
@@ -2060,18 +2092,18 @@ var Objectives = function (db, redis, event) {
                             .lean()
                             .exec(cb);
                     } else {
-                        cb(null, true);
+                        cb(null);
                     }
                 },
                 function (arrayOfUserId, cb) {
-                    if (isMobile) {
+                    if (myCC || isMobile) {
                         //array of subordinate users id, to send on android app
                         arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
                             return model._id
                         });
                     }
                     if (myCC) {
-                        queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
+                        queryObject.$and[0]['assignedTo'].$in = arrayOfSubordinateUsersId;
                         //arrayOfSubordinateUsersId = arrayOfUserId;
                     }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
@@ -2091,9 +2123,8 @@ var Objectives = function (db, redis, event) {
                         skip             : skip,
                         limit            : limit,
                         coveredIds       : coveredIds,
-                        coveredPlusSubordinates,
                         subordinates : arrayOfSubordinateUsersId,
-                        currentUserLevel : currentUserLevel,
+                        currentUserLevel : currentUserLevel
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);

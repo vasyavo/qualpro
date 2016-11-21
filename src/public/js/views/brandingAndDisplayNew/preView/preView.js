@@ -351,8 +351,8 @@ define([
                 model.startDate = moment(model.startDate).format('DD.MM.YYYY');
                 model.endDate = moment(model.endDate).format('DD.MM.YYYY');
                 model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;
-                model.regionString = (model.createdBy.region.length) ? model.createdBy.region[0].name[currentLanguage] : self.translation.missedData;
-                model.subRegionString = (model.createdBy.subRegion.length) ? model.createdBy.subRegion[0].name[currentLanguage] : self.translation.missedData;
+                model.regionString = (model.region) ? model.region.name[currentLanguage] : self.translation.missedData;
+                model.subRegionString = (model.subRegion) ? model.subRegion.name[currentLanguage] : self.translation.missedData;
 
                 model.createdBy.userName = `${model.createdBy.firstName[currentLanguage]} ${model.createdBy.lastName[currentLanguage]}`;
 

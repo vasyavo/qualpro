@@ -5,7 +5,7 @@ module.exports = (err, req, res, next) => {
     const requestId = req.id;
     const stackTrace = err.stack;
 
-    logger.error(`Happened in request ${requestId} with status ${status}: `, stackTrace);
+    logger.error(`User id: ${req.session.uId}.`, `Happened in request ${requestId} with status ${status}: `, stackTrace);
 
     const body = {
         status,

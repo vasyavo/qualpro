@@ -867,7 +867,7 @@ var InStoreReports = function (db, redis, event) {
     };
 
     function getAllPipeLine(options) {
-        const coveredPlusSubordinates = options.coveredPlusSubordinates;
+        const subordinates = options.subordinates;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var positionFilter = options.positionFilter;
@@ -898,7 +898,7 @@ var InStoreReports = function (db, redis, event) {
                     $match: {
                         $or: [
                             {
-                                assignedTo: {$in: coveredPlusSubordinates},
+                                assignedTo: {$in: subordinates},
                                 status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
                             },
                             {
@@ -1202,6 +1202,7 @@ var InStoreReports = function (db, redis, event) {
             var positionFilter;
             var aggregation;
             var ids;
+            let arrayOfSubordinateUsersId = [];
 
             if (query._ids) {
                 ids = query._ids.split(',');
@@ -1233,9 +1234,19 @@ var InStoreReports = function (db, redis, event) {
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             async.waterfall([
+                (cb) => {
+                    PersonnelModel.find({manager: req.session.uId})
+                        .select('_id')
+                        .lean()
+                        .exec(cb);
+                },
 
-                async.apply(coveredByMe, PersonnelModel, ObjectId(req.session.uId)),
-
+                function (arrayOfUserId, cb) {
+                    arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
+                        return model._id
+                    });
+                    coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
+                },
                 function (coveredIds, cb) {
                     pipeLine = getAllPipeLine({
                         aggregateHelper : aggregateHelper,
@@ -1244,7 +1255,8 @@ var InStoreReports = function (db, redis, event) {
                         isMobile        : req.isMobile,
                         coveredIds      : coveredIds,
                         forSync         : true,
-                        currentUserLevel: currentUserLevel
+                        currentUserLevel: currentUserLevel,
+                        subordinates : arrayOfSubordinateUsersId
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);
@@ -1318,6 +1330,25 @@ var InStoreReports = function (db, redis, event) {
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
+                        const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
+                            return ObjectId.toString();
+                        });
+                        const dataMyCC = response.data.map((objective) => {
+                            let assignedToId;
+                            let createdById;
+                            const currentUserId = req.session.uId;
+                            if (_.isObject(objective.assignedTo[0])) {
+                                assignedToId = objective.assignedTo[0]._id.toString();
+                            }
+                            if (_.isObject(objective.createdBy.user)) {
+                                createdById = objective.createdBy.user._id.toString();
+                            }
+                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
+                                objective.myCC = true;
+                            }
+                            return objective;
+                        });
+                        response.data = dataMyCC;
                         next({status: 200, body: response});
                     })
                 });
@@ -1441,23 +1472,20 @@ var InStoreReports = function (db, redis, event) {
                             .lean()
                             .exec(cb);
                     } else {
-                        cb(null, true);
+                        cb(null);
                     }
                 },
 
-                (arrayOfUserId, cb) => {
-
-                    if (isMobile) {
+                function (arrayOfUserId, cb) {
+                    if (myCC || isMobile) {
                         //array of subordinate users id, to send on android app
                         arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
                             return model._id
                         });
                     }
-
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
                     }
-
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },
 
@@ -1534,8 +1562,6 @@ var InStoreReports = function (db, redis, event) {
                         delete queryObject.cover;
                     }
 
-                    const coveredPlusSubordinates = coveredIds.concat(arrayOfSubordinateUsersId);
-
                     aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
                     pipeLine = getAllPipeLine({
@@ -1549,8 +1575,7 @@ var InStoreReports = function (db, redis, event) {
                         limit            : limit,
                         coveredIds       : coveredIds,
                         currentUserLevel : currentUserLevel,
-                        subordinates : arrayOfSubordinateUsersId,
-                        coveredPlusSubordinates
+                        subordinates : arrayOfSubordinateUsersId
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);
@@ -1707,9 +1732,15 @@ var InStoreReports = function (db, redis, event) {
                             return ObjectId.toString();
                         });
                         const dataMyCC = response.data.map((objective) => {
-                            const assignedToId = objective.assignedTo[0]._id.toString();
-                            const createdById = objective.createdBy.user._id.toString();
+                            let assignedToId;
+                            let createdById;
                             const currentUserId = req.session.uId;
+                            if (_.isObject(objective.assignedTo[0])) {
+                                assignedToId = objective.assignedTo[0]._id.toString();
+                            }
+                            if (_.isObject(objective.createdBy.user)) {
+                                createdById = objective.createdBy.user._id.toString();
+                            }
                             if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
                                 objective.myCC = true;
                             }

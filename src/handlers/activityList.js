@@ -371,10 +371,10 @@ var Personnel = function(db, redis, event) {
             }
 
             if (currentUser.accessRoleLevel === 4) {
-                regionsMathArray = {subRegion : {$in : currentUser.subRegion || afterIteMTypeQuery.subRegion}};
+                regionsMathArray = {subRegion : {$in : [currentUser.subRegion] || afterIteMTypeQuery.subRegion}};
             }
             if (currentUser.accessRoleLevel === 3) {
-                regionsMathArray = {region : {$in : currentUser.region || afterIteMTypeQuery.region}};
+                regionsMathArray = {region : {$in : [currentUser.region] || afterIteMTypeQuery.region}};
             }
             if (currentUser.accessRoleLevel === 2) {
                 regionsMathArray = {country : {$in : currentUser.country || afterIteMTypeQuery.country}};
