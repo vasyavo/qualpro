@@ -47,16 +47,32 @@ define([
             },
 
             modelParse: function (model) {
-                model.categoryString = this.modelMapper('category', model);
-                model.countryString = model.country ? model.country.name.currentLanguage : '';
+                let location = [];
+debugger;
+                model.countryString = model.countries ? model.countries.name[App.currentUser.currentLanguage] : '';
+                location.push(model.countryString);
+
                 model.regionString = model.region ? model.region.name.currentLanguage : '';
-                model.subRegionString = model.subRegion ? model.subRegion.name.currentLanguage : '';
-                model.retailSegmentString = model.retailSegment ? model.retailSegment.name.currentLanguage : '';
+                location.push(model.regionString);
+
+                model.subRegionString = model.subRegion ? model.subRegion.name[App.currentUser.currentLanguage] : '';
+                location.push(model.subRegionString);
+
+                //model.retailSegmentString = model.retailSegment ? model.retailSegment.name.currentLanguage : '';
+                //location.push(model.retailSegmentString);
+
                 model.outletString = model.outlet ? model.outlet.name.currentLanguage : '';
+                location.push(model.outletString);
+
                 model.branchString = model.branch ? model.branch.name.currentLanguage : '';
+                location.push(model.branchString);
+
+                model.categoryString = this.modelMapper('categories', model);
                 model.displayTypeString = model.displayType ? model.displayType[0].name[App.currentUser.currentLanguage] : '';
 
-                model.location = model.countryString + '>' + model.regionString + '>' + model.subRegionString + '>' + model.retailSegmentString + '>' + model.outletString + '>' + model.branchString;
+                model.location = location.filter(function (value) {
+                    return value;
+                }).join(' > ');
             }
         });
 
