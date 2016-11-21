@@ -1,33 +1,30 @@
-'use strict';
-module.exports = function (PersonnelModel, myId, cb) {
-    var _ = require('underscore');
-    var aggregation;
-    var pipeLine = [];
-
-    pipeLine.push({
+module.exports = (PersonnelModel, myId, cb) => {
+    const pipeLine = [{
         $match: {
             'vacation.cover': myId
         }
-    });
-
-    pipeLine.push({
+    }, {
         $group: {
             _id: null,
-            ids: {$addToSet: '$_id'}
+            ids: {
+                $addToSet: '$_id'
+            }
         }
-    });
+    }];
 
-    aggregation = PersonnelModel.aggregate(pipeLine);
+    const aggregation = PersonnelModel.aggregate(pipeLine);
 
     aggregation.options = {
         allowDiskUse: true
     };
 
-    aggregation.exec(function (err, response) {
+    aggregation.exec((err, response) => {
         if (err) {
-            console.log(err);
-        } else {
-            cb(null, response[0] ? response[0].ids.concat([myId]) : [myId]);
+            return cb(err);
         }
+        const data = response[0] ?
+            response[0].ids.concat([myId]) : [myId];
+
+        cb(null, data);
     });
 };
