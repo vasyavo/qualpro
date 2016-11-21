@@ -2060,18 +2060,18 @@ var Objectives = function (db, redis, event) {
                             .lean()
                             .exec(cb);
                     } else {
-                        cb(null, true);
+                        cb(null);
                     }
                 },
                 function (arrayOfUserId, cb) {
-                    if (isMobile) {
+                    if (myCC || isMobile) {
                         //array of subordinate users id, to send on android app
                         arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
                             return model._id
                         });
                     }
                     if (myCC) {
-                        queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
+                        queryObject.$and[0]['assignedTo'].$in = arrayOfSubordinateUsersId;
                         //arrayOfSubordinateUsersId = arrayOfUserId;
                     }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);

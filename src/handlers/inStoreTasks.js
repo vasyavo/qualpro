@@ -1441,12 +1441,12 @@ var InStoreReports = function (db, redis, event) {
                             .lean()
                             .exec(cb);
                     } else {
-                        cb(null, true);
+                        cb(null);
                     }
                 },
 
                 function (arrayOfUserId, cb) {
-                    if (isMobile) {
+                    if (myCC || isMobile) {
                         //array of subordinate users id, to send on android app
                         arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
                             return model._id
