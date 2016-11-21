@@ -218,8 +218,13 @@ define([
 
             if (obj.currentPage === 1 && !prevPage.hasClass('disabled')) {
                 prevPage.addClass('disabled');
+                nextPage.removeClass('disabled');
+            } else if (obj.currentPage === 1 && prevPage.hasClass('disabled')) {
+                prevPage.addClass('disabled');
+                nextPage.removeClass('disabled');
             } else if (obj.currentPage === allPages && !nextPage.hasClass('disabled')) {
                 nextPage.addClass('disabled');
+                prevPage.removeClass('disabled');
             } else {
                 prevPage.removeClass('disabled');
                 nextPage.removeClass('disabled');

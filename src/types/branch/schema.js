@@ -1,3 +1,4 @@
+'use strict';
 const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const async = require('async');

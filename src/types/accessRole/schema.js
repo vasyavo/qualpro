@@ -1,3 +1,5 @@
+'use strict';
+
 const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
@@ -40,7 +42,5 @@ const schema = new Schema({
         date: { type: Date, default: Date.now }
     }
 }, { collection: 'accessRoles' });
-
-schema.index({ name: 1 }, { unique: true });
 
 module.exports = schema;

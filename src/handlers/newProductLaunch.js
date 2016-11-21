@@ -1,4 +1,4 @@
-var NewProductLaunch = function (db, redis, event) {
+var NewProductLaunch = function(db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -19,32 +19,33 @@ var NewProductLaunch = function (db, redis, event) {
     var self = this;
 
     var $defProjection = {
-        _id              : 1,
-        additionalComment: 1,
-        category         : 1,
-        variant          : 1,
-        brand            : 1,
-        country          : 1,
-        region           : 1,
-        subRegion        : 1,
-        retailSegment    : 1,
-        outlet           : 1,
-        branch           : 1,
-        origin           : 1,
-        price            : 1,
-        packing          : 1,
-        location         : 1,
-        displayType      : 1,
-        distributor      : 1,
-        shelfLifeStart   : 1,
-        shelfLifeEnd     : 1,
-        archived         : 1,
-        createdBy        : 1,
-        editedBy         : 1,
-        attachments      : 1
+        _id : 1,
+        additionalComment : 1,
+        category_name : 1,
+        category : 1,
+        variant : 1,
+        brand : 1,
+        country : 1,
+        region : 1,
+        subRegion : 1,
+        retailSegment : 1,
+        outlet : 1,
+        branch : 1,
+        origin : 1,
+        price : 1,
+        packing : 1,
+        location : 1,
+        displayType : 1,
+        distributor : 1,
+        shelfLifeStart : 1,
+        shelfLifeEnd : 1,
+        archived : 1,
+        createdBy : 1,
+        editedBy : 1,
+        attachments : 1
     };
 
-    this.create = function (req, res, next) {
+    this.create = function(req, res, next) {
         function queryRun(body) {
             var files = req.files;
             var isMobile = req.isMobile;
@@ -55,13 +56,13 @@ var NewProductLaunch = function (db, redis, event) {
 
             async.waterfall([
 
-                function (cb) {
+                function(cb) {
                     if (!files) {
                         return cb(null, []);
                     }
 
                     //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'newProductLaunch', function (err, filesIds) {
+                    fileHandler.uploadFile(userId, files, 'newProductLaunch', function(err, filesIds) {
                         if (err) {
                             return cb(err);
                         }
@@ -70,27 +71,33 @@ var NewProductLaunch = function (db, redis, event) {
                     });
                 },
 
-                function (filesIds, cb) {
+                function(filesIds, cb) {
                     var createdBy = {
-                        user: userId,
-                        date: new Date()
+                        user : userId,
+                        date : new Date()
                     };
                     if (body.additionalComment) {
                         body.additionalComment = {
-                            en: _.escape(body.additionalComment.en),
-                            ar: _.escape(body.additionalComment.ar)
+                            en : _.escape(body.additionalComment.en),
+                            ar : _.escape(body.additionalComment.ar)
+                        };
+                    }
+                    if (body.category_name) {
+                        body.category_name = {
+                            en : _.escape(body.category_name.en),
+                            ar : _.escape(body.category_name.ar)
                         };
                     }
                     if (body.location) {
                         body.location = {
-                            en: _.escape(body.location.en),
-                            ar: _.escape(body.location.ar)
+                            en : _.escape(body.location.en),
+                            ar : _.escape(body.location.ar)
                         };
                     }
                     if (body.distributor) {
                         body.distributor = {
-                            en: _.escape(body.distributor.en),
-                            ar: _.escape(body.distributor.ar)
+                            en : _.escape(body.distributor.en),
+                            ar : _.escape(body.distributor.ar)
                         };
                     }
                     if (body.brand && body.brand.name) {
@@ -113,54 +120,58 @@ var NewProductLaunch = function (db, redis, event) {
                     }
 
                     newProductLaunch = {
-                        additionalComment: body.additionalComment,
-                        category         : body.category,
-                        brand            : body.brand,
-                        variant          : body.variant,
-                        country          : body.country,
-                        region           : body.region,
-                        subRegion        : body.subRegion,
-                        retailSegment    : body.retailSegment,
-                        outlet           : body.outlet,
-                        branch           : body.branch,
-                        origin           : body.origin,
-                        price            : body.price,
-                        packing          : body.packing,
-                        location         : body.location,
-                        attachments      : filesIds,
-                        displayType      : body.displayType,
-                        distributor      : body.distributor,
-                        shelfLifeStart   : body.shelfLifeStart,
-                        shelfLifeEnd     : body.shelfLifeEnd,
-                        createdBy        : createdBy,
-                        editedBy         : createdBy,
+                        additionalComment : body.additionalComment,
+                        category : body.category,
+                        category_name : body.category_name,
+                        brand : body.brand,
+                        variant : body.variant,
+                        country : body.country,
+                        region : body.region,
+                        subRegion : body.subRegion,
+                        retailSegment : body.retailSegment,
+                        outlet : body.outlet,
+                        branch : body.branch,
+                        origin : body.origin,
+                        price : body.price,
+                        packing : body.packing,
+                        location : body.location,
+                        attachments : filesIds,
+                        displayType : body.displayType,
+                        distributor : body.distributor,
+                        shelfLifeStart : body.shelfLifeStart,
+                        shelfLifeEnd : body.shelfLifeEnd,
+                        createdBy : createdBy,
+                        editedBy : createdBy,
                     };
 
                     model = new NewProductLaunchModel(newProductLaunch);
-                    model.save(function (err, model) {
+                    model.save(function(err, model) {
                         if (err) {
                             return cb(err);
                         }
 
                         event.emit('activityChange', {
-                            module    : ACL_MODULES.NEW_PRODUCT_LAUNCH,
-                            actionType: ACTIVITY_TYPES.CREATED,
+                            module : ACL_MODULES.NEW_PRODUCT_LAUNCH,
+                            actionType : ACTIVITY_TYPES.CREATED,
                             createdBy : model.get('createdBy'),
-                            itemId    : model._id,
-                            itemType  : CONTENT_TYPES.NEWPRODUCTLAUNCH
+                            itemId : model._id,
+                            itemType : CONTENT_TYPES.NEWPRODUCTLAUNCH
                         });
 
                         cb(null, model);
                     });
                 },
 
-                function (newProductLaunchModel, cb) {
+                function(newProductLaunchModel, cb) {
                     var id = newProductLaunchModel.get('_id');
 
-                    self.getByIdAggr({id: id, isMobile: isMobile}, cb);
+                    self.getByIdAggr({
+                        id : id,
+                        isMobile : isMobile
+                    }, cb);
                 }
 
-            ], function (err, result) {
+            ], function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -170,40 +181,28 @@ var NewProductLaunch = function (db, redis, event) {
 
         }
 
-        access.getWriteAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function (err, allowed) {
-            var body;
+        var body;
 
+        try {
+            if (req.body.data) {
+                body = JSON.parse(req.body.data);
+            } else {
+                body = req.body;
+            }
+        } catch (err) {
+            return next(err);
+        }
+
+        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.NEWPRODUCTLAUNCH, 'create', function(err, saveData) {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.NEWPRODUCTLAUNCH, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            queryRun(saveData);
         });
     };
 
-    this.getAll = function (req, res, next) {
+    this.getAll = function(req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
             var isMobile = req.isMobile;
@@ -250,41 +249,41 @@ var NewProductLaunch = function (db, redis, event) {
             delete filter.globalSearch;
 
             queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
-                filter     : filter,
-                personnel  : personnel
+                contentType : CONTENT_TYPES.NEWPRODUCTLAUNCH,
+                filter : filter,
+                personnel : personnel
             });
 
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             if (queryObject.position && queryObject.position.$in) {
                 positionFilter = {
-                    'createdBy.user.position': queryObject.position
+                    'createdBy.user.position' : queryObject.position
                 };
 
                 delete queryObject.position;
             }
 
             pipeLine = getAllPipeline({
-                aggregateHelper  : aggregateHelper,
-                queryObject      : queryObject,
-                positionFilter   : positionFilter,
-                searchFieldsArray: searchFieldsArray,
-                filterSearch     : filterSearch,
-                skip             : skip,
-                limit            : limit,
-                isMobile         : isMobile
+                aggregateHelper : aggregateHelper,
+                queryObject : queryObject,
+                positionFilter : positionFilter,
+                searchFieldsArray : searchFieldsArray,
+                filterSearch : filterSearch,
+                skip : skip,
+                limit : limit,
+                isMobile : isMobile
             });
 
             aggregation = NewProductLaunchModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse: true
+                allowDiskUse : true
             };
 
-            aggregation.exec(function (err, response) {
+            aggregation.exec(function(err, response) {
                 var options = {
-                    data: {}
+                    data : {}
                 };
                 var personnelIds = [];
                 var fileIds = [];
@@ -293,29 +292,35 @@ var NewProductLaunch = function (db, redis, event) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                response = response && response[0] ? response[0] : {
+                    data : [],
+                    total : 0
+                };
 
                 if (!response.data.length) {
-                    return next({status: 200, body: response});
+                    return next({
+                        status : 200,
+                        body : response
+                    });
                 }
 
-                response.data = _.map(response.data, function (element) {
+                response.data = _.map(response.data, function(element) {
                     if (element.additionalComment) {
                         element.additionalComment = {
-                            en: _.unescape(element.additionalComment.en),
-                            ar: _.unescape(element.additionalComment.ar)
+                            en : _.unescape(element.additionalComment.en),
+                            ar : _.unescape(element.additionalComment.ar)
                         };
                     }
                     if (element.location) {
                         element.location = {
-                            en: _.unescape(element.location.en),
-                            ar: _.unescape(element.location.ar)
+                            en : _.unescape(element.location.en),
+                            ar : _.unescape(element.location.ar)
                         };
                     }
                     if (element.distributor) {
                         element.distributor = {
-                            en: _.unescape(element.distributor.en),
-                            ar: _.unescape(element.distributor.ar)
+                            en : _.unescape(element.distributor.en),
+                            ar : _.unescape(element.distributor.ar)
                         };
                     }
                     if (element.brand && element.brand.name) {
@@ -323,8 +328,8 @@ var NewProductLaunch = function (db, redis, event) {
                             element.brand.name = _.unescape(element.brand.name);
                         } else {
                             element.brand.name = {
-                                en: _.unescape(element.brand.name.en),
-                                ar: _.unescape(element.brand.name.ar)
+                                en : _.unescape(element.brand.name.en),
+                                ar : _.unescape(element.brand.name.ar)
                             };
                         }
                     }
@@ -333,8 +338,8 @@ var NewProductLaunch = function (db, redis, event) {
                             element.variant.name = _.unescape(element.variant.name);
                         } else {
                             element.variant.name = {
-                                en: _.unescape(element.variant.name.en),
-                                ar: _.unescape(element.variant.name.ar)
+                                en : _.unescape(element.variant.name.en),
+                                ar : _.unescape(element.variant.name.ar)
                             };
                         }
                     }
@@ -359,7 +364,7 @@ var NewProductLaunch = function (db, redis, event) {
                 options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
                 options.data[CONTENT_TYPES.FILES] = fileIds;
 
-                getImagesHelper.getImages(options, function (err, result) {
+                getImagesHelper.getImages(options, function(err, result) {
                     var fieldNames = {};
                     var setOptions;
                     if (err) {
@@ -367,33 +372,24 @@ var NewProductLaunch = function (db, redis, event) {
                     }
 
                     setOptions = {
-                        response  : response,
-                        imgsObject: result
+                        response : response,
+                        imgsObject : result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                    getImagesHelper.setIntoResult(setOptions, function(response) {
+                        next({
+                            status : 200,
+                            body : response
+                        });
                     })
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function (err, allowed, personnel) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            queryRun(personnel);
-        });
+        queryRun(req.personnel);
     };
 
     function getAllPipeline(options) {
@@ -406,120 +402,120 @@ var NewProductLaunch = function (db, redis, event) {
         var limit = options.limit;
         var isMobile = options.isMobile;
         var forSync = options.forSync;
-        var employeeFilter = queryObject.personnel ? {'createdBy.user': _.pick(queryObject, 'personnel').personnel} : {};
+        var employeeFilter = queryObject.personnel ? {'createdBy.user' : _.pick(queryObject, 'personnel').personnel} : {};
         var pipeLine = [];
 
         delete queryObject.personnel;
 
         pipeLine.push({
-            $match: queryObject
+            $match : queryObject
         });
 
         pipeLine.push({
-            $match: employeeFilter
+            $match : employeeFilter
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'extension', 'createdBy']
+            from : 'files',
+            key : 'attachments',
+            addProjection : ['contentType', 'originalName', 'extension', 'createdBy']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'domains',
-            key          : 'country',
-            isArray      : false,
-            addProjection: ['currency']
+            from : 'domains',
+            key : 'country',
+            isArray : false,
+            addProjection : ['currency']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'region',
-            isArray: false
+            from : 'domains',
+            key : 'region',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'subRegion',
-            isArray: false
+            from : 'domains',
+            key : 'subRegion',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'retailSegments',
-            key    : 'retailSegment',
-            isArray: false
+            from : 'retailSegments',
+            key : 'retailSegment',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'outlets',
-            key    : 'outlet',
-            isArray: false
+            from : 'outlets',
+            key : 'outlet',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'branches',
-            key    : 'branch',
-            isArray: false
+            from : 'branches',
+            key : 'branch',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'categories',
-            key    : 'category',
-            isArray: false
+            from : 'categories',
+            key : 'category',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'displayTypes',
-            key    : 'displayType',
-            isArray: false
+            from : 'displayTypes',
+            key : 'displayType',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'brands',
-            key            : 'brand._id',
-            isArray        : false,
-            includeSiblings: {brand: {name: 1}}
+            from : 'brands',
+            key : 'brand._id',
+            isArray : false,
+            includeSiblings : {brand : {name : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'variants',
-            key            : 'variant._id',
-            isArray        : false,
-            includeSiblings: {variant: {name: 1}}
+            from : 'variants',
+            key : 'variant._id',
+            isArray : false,
+            includeSiblings : {variant : {name : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'origins',
-            key    : 'origin',
-            isArray: false
+            from : 'origins',
+            key : 'origin',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         if (positionFilter) {
             pipeLine.push({
-                $match: positionFilter
+                $match : positionFilter
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
+            from : 'accessRoles',
+            key : 'createdBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
                         position : 1,
-                        firstName: 1,
+                        firstName : 1,
                         lastName : 1
                     }
                 }
@@ -527,17 +523,17 @@ var NewProductLaunch = function (db, redis, event) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName : 1
                     }
                 }
             }
@@ -545,25 +541,25 @@ var NewProductLaunch = function (db, redis, event) {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
+                from : 'personnels',
+                key : 'editedBy.user',
+                isArray : false,
+                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                includeSiblings : {editedBy : {date : 1}}
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'editedBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -571,17 +567,17 @@ var NewProductLaunch = function (db, redis, event) {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'editedBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -589,81 +585,81 @@ var NewProductLaunch = function (db, redis, event) {
         }
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                brand  : {
+            $project : aggregateHelper.getProjection({
+                brand : {
                     _id : '$brand._id._id',
-                    name: {$ifNull: ['$brand._id.name', '$brand.name']}
+                    name : {$ifNull : ['$brand._id.name', '$brand.name']}
                 },
-                variant: {
+                variant : {
                     _id : '$variant._id._id',
-                    name: {$ifNull: ['$variant._id.name', '$variant.name']}
+                    name : {$ifNull : ['$variant._id.name', '$variant.name']}
                 }
             })
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                brand   : {
-                    _id : {$ifNull: ['$brand._id', '$brand.name']},
-                    name: 1
+            $project : aggregateHelper.getProjection({
+                brand : {
+                    _id : {$ifNull : ['$brand._id', '$brand.name']},
+                    name : 1
                 },
                 variant : {
-                    _id : {$ifNull: ['$variant._id', '$variant.name']},
-                    name: 1
+                    _id : {$ifNull : ['$variant._id', '$variant.name']},
+                    name : 1
                 },
                 /*lastDate: {
-                    $ifNull: [
-                        '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }*/
+                 $ifNull: [
+                 '$editedBy.date',
+                 '$createdBy.date'
+                 ]
+                 }*/
             })
         });
 
-       /* if (!forSync) {
-            pipeLine.push({
-                $sort: {
-                    lastDate: -1
-                }
-            });
+        /* if (!forSync) {
+         pipeLine.push({
+         $sort: {
+         lastDate: -1
+         }
+         });
 
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
+         pipeLine.push({
+         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
+         });
 
-            pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-        }
+         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
+         }
 
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
+         if (limit && limit !== -1) {
+         pipeLine.push({
+         $skip: skip
+         });
 
-            pipeLine.push({
-                $limit: limit
-            });
-        }
+         pipeLine.push({
+         $limit: limit
+         });
+         }
 
-        if (!forSync) {
-            pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
-        }*/
+         if (!forSync) {
+         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
+         }*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit
+            isMobile : isMobile,
+            searchFieldsArray : searchFieldsArray,
+            filterSearch : filterSearch,
+            skip : skip,
+            limit : limit
         }));
 
         return pipeLine;
     }
 
-    this.getById = function (req, res, next) {
+    this.getById = function(req, res, next) {
         function queryRun() {
             var id = ObjectId(req.params.id);
 
-            self.getByIdAggr({id: id}, function (err, result) {
+            self.getByIdAggr({id : id}, function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -672,22 +668,10 @@ var NewProductLaunch = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function (err, allowed) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            queryRun();
-        });
+        queryRun();
     };
 
-    this.getByIdAggr = function (options, callback) {
+    this.getByIdAggr = function(options, callback) {
         var aggregateHelper;
         var pipeLine = [];
         var aggregation;
@@ -697,105 +681,105 @@ var NewProductLaunch = function (db, redis, event) {
         aggregateHelper = new AggregationHelper($defProjection);
 
         pipeLine.push({
-            $match: {_id: id}
+            $match : {_id : id}
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'extension', 'createdBy']
+            from : 'files',
+            key : 'attachments',
+            addProjection : ['contentType', 'originalName', 'extension', 'createdBy']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'domains',
-            key          : 'country',
-            isArray      : false,
-            addProjection: ['currency']
+            from : 'domains',
+            key : 'country',
+            isArray : false,
+            addProjection : ['currency']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'region',
-            isArray: false
+            from : 'domains',
+            key : 'region',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'subRegion',
-            isArray: false
+            from : 'domains',
+            key : 'subRegion',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'retailSegments',
-            key    : 'retailSegment',
-            isArray: false
+            from : 'retailSegments',
+            key : 'retailSegment',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'outlets',
-            key    : 'outlet',
-            isArray: false
+            from : 'outlets',
+            key : 'outlet',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'branches',
-            key    : 'branch',
-            isArray: false
+            from : 'branches',
+            key : 'branch',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'displayTypes',
-            key    : 'displayType',
-            isArray: false
+            from : 'displayTypes',
+            key : 'displayType',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'categories',
-            key    : 'category',
-            isArray: false
+            from : 'categories',
+            key : 'category',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'brands',
-            key            : 'brand._id',
-            isArray        : false,
-            includeSiblings: {brand: {name: 1}}
+            from : 'brands',
+            key : 'brand._id',
+            isArray : false,
+            includeSiblings : {brand : {name : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'competitorVariants',
-            key            : 'variant._id',
-            isArray        : false,
-            includeSiblings: {variant: {name: 1}}
+            from : 'competitorVariants',
+            key : 'variant._id',
+            isArray : false,
+            includeSiblings : {variant : {name : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'origins',
-            key    : 'origin',
-            isArray: false
+            from : 'origins',
+            key : 'origin',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         if (!isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'createdBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    createdBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'createdBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    createdBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -803,17 +787,17 @@ var NewProductLaunch = function (db, redis, event) {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'createdBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    createdBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'createdBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    createdBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -821,30 +805,30 @@ var NewProductLaunch = function (db, redis, event) {
         }
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                brand  : {
+            $project : aggregateHelper.getProjection({
+                brand : {
                     _id : '$brand._id._id',
-                    name: {$ifNull: ['$brand._id.name', '$brand.name']}
+                    name : {$ifNull : ['$brand._id.name', '$brand.name']}
                 },
-                variant: {
+                variant : {
                     _id : '$variant._id._id',
-                    name: {$ifNull: ['$variant._id.name', '$variant.name']}
+                    name : {$ifNull : ['$variant._id.name', '$variant.name']}
                 }
             })
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                brand  : {
-                    _id : {$ifNull: ['$brand._id', '$brand.name']},
-                    name: 1
+            $project : aggregateHelper.getProjection({
+                brand : {
+                    _id : {$ifNull : ['$brand._id', '$brand.name']},
+                    name : 1
                 },
-                variant: {
-                    _id : {$ifNull: ['$variant._id', '$variant.name']},
-                    name: 1
+                variant : {
+                    _id : {$ifNull : ['$variant._id', '$variant.name']},
+                    name : 1
                 },
-                lastDate: {
-                    $ifNull: [
+                lastDate : {
+                    $ifNull : [
                         '$editedBy.date',
                         '$createdBy.date'
                     ]
@@ -855,12 +839,12 @@ var NewProductLaunch = function (db, redis, event) {
         aggregation = NewProductLaunchModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse: true
+            allowDiskUse : true
         };
 
-        aggregation.exec(function (err, response) {
+        aggregation.exec(function(err, response) {
             var options = {
-                data: {}
+                data : {}
             };
             var personnelIds = [];
             var fileIds;
@@ -877,20 +861,20 @@ var NewProductLaunch = function (db, redis, event) {
 
             if (response.additionalComment) {
                 response.additionalComment = {
-                    en: _.unescape(response.additionalComment.en),
-                    ar: _.unescape(response.additionalComment.ar)
+                    en : _.unescape(response.additionalComment.en),
+                    ar : _.unescape(response.additionalComment.ar)
                 };
             }
             if (response.location) {
                 response.location = {
-                    en: _.unescape(response.location.en),
-                    ar: _.unescape(response.location.ar)
+                    en : _.unescape(response.location.en),
+                    ar : _.unescape(response.location.ar)
                 };
             }
             if (response.distributor) {
                 response.distributor = {
-                    en: _.unescape(response.distributor.en),
-                    ar: _.unescape(response.distributor.ar)
+                    en : _.unescape(response.distributor.en),
+                    ar : _.unescape(response.distributor.ar)
                 };
             }
             if (response.brand && response.brand.name) {
@@ -898,8 +882,8 @@ var NewProductLaunch = function (db, redis, event) {
                     response.brand.name = _.unescape(response.brand.name);
                 } else {
                     response.brand.name = {
-                        en: _.unescape(response.brand.name.en),
-                        ar: _.unescape(response.brand.name.ar)
+                        en : _.unescape(response.brand.name.en),
+                        ar : _.unescape(response.brand.name.ar)
                     };
                 }
             }
@@ -908,8 +892,8 @@ var NewProductLaunch = function (db, redis, event) {
                     response.variant.name = _.unescape(response.variant.name);
                 } else {
                     response.variant.name = {
-                        en: _.unescape(response.variant.name.en),
-                        ar: _.unescape(response.variant.name.ar)
+                        en : _.unescape(response.variant.name.en),
+                        ar : _.unescape(response.variant.name.ar)
                     };
                 }
             }
@@ -929,7 +913,7 @@ var NewProductLaunch = function (db, redis, event) {
             options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
             options.data[CONTENT_TYPES.FILES] = fileIds;
 
-            getImagesHelper.getImages(options, function (err, result) {
+            getImagesHelper.getImages(options, function(err, result) {
                 var fieldNames = {};
                 var setOptions;
                 if (err) {
@@ -937,14 +921,14 @@ var NewProductLaunch = function (db, redis, event) {
                 }
 
                 setOptions = {
-                    response  : response,
-                    imgsObject: result
+                    response : response,
+                    imgsObject : result
                 };
                 fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                 fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                 setOptions.fields = fieldNames;
 
-                getImagesHelper.setIntoResult(setOptions, function (response) {
+                getImagesHelper.setIntoResult(setOptions, function(response) {
                     callback(null, response);
                 })
             });

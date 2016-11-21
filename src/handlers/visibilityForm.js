@@ -1,3 +1,4 @@
+'use strict';
 var VisibilityForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');

@@ -1362,7 +1362,7 @@ var Personnel = function (db, redis, event) {
 
             locationField = locationsByLevel[level];
 
-            if (locationField && !personnel[locationField].length) {
+            if (locationField && personnel[locationField] && !personnel[locationField].length) {
                 error = new Error('You have no location. Please contact with administration.');
                 error.status = 403;
 
@@ -2424,12 +2424,15 @@ var Personnel = function (db, redis, event) {
                 queryRun(personnel, cb);
             }
 
-        ], (err, response) => {
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
 
-            return res.status(200).send(response);
+            return next({
+                status: 200,
+                body
+            });
         });
     };
 

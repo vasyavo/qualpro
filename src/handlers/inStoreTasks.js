@@ -1,3 +1,5 @@
+'use strict';
+
 var InStoreReports = function (db, redis, event) {
     var async = require('async');
     var _ = require('underscore');
@@ -425,7 +427,6 @@ var InStoreReports = function (db, redis, event) {
                                 ar: updateObject.description.ar ? _.escape(updateObject.description.ar) : ''
                             };
                         }
-
 
                         inStoreTaskModel
                             .update(fullUpdate, function (err) {
@@ -866,6 +867,7 @@ var InStoreReports = function (db, redis, event) {
     };
 
     function getAllPipeLine(options) {
+        const coveredPlusSubordinates = options.coveredPlusSubordinates;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var positionFilter = options.positionFilter;
@@ -884,24 +886,50 @@ var InStoreReports = function (db, redis, event) {
             $match: queryObject
         });
 
-        if (currentUserLevel && currentUserLevel !== 1) {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            assignedTo: {$in: coveredIds},
-                            status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
-                        },
-                        {
-                            'history.assignedTo': {$in: coveredIds},
-                            status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
-                        },
-                        {
-                            'createdBy.user': {$in: coveredIds}
-                        }
-                    ]
-                }
-            });
+        if (currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+            const allowedAccessRoles = [
+                ACL_CONSTANTS.COUNTRY_ADMIN,
+                ACL_CONSTANTS.AREA_MANAGER,
+                ACL_CONSTANTS.AREA_IN_CHARGE
+            ];
+
+            if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
+                pipeLine.push({
+                    $match: {
+                        $or: [
+                            {
+                                assignedTo: {$in: coveredPlusSubordinates},
+                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                            },
+                            {
+                                'history.assignedTo': {$in: coveredIds},
+                                status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                            },
+                            {
+                                'createdBy.user': {$in: coveredIds}
+                            }
+                        ]
+                    }
+                });
+            } else {
+                pipeLine.push({
+                    $match: {
+                        $or: [
+                            {
+                                assignedTo: {$in: coveredIds},
+                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                            },
+                            {
+                                'history.assignedTo': {$in: coveredIds},
+                                status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                            },
+                            {
+                                'createdBy.user': {$in: coveredIds}
+                            }
+                        ]
+                    }
+                });
+            }
         }
 
         if (!isMobile) {
@@ -1328,6 +1356,7 @@ var InStoreReports = function (db, redis, event) {
             var uId = req.session.uId;
             var currentUserLevel = req.session.level;
             let myCC = filter.myCC;
+            let arrayOfSubordinateUsersId = [];
 
             var searchFieldsArray = [
                 'title.en',
@@ -1406,7 +1435,7 @@ var InStoreReports = function (db, redis, event) {
             async.waterfall([
                 // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
                 (cb) => {
-                    if (myCC) {
+                    if (myCC || isMobile) {
                         PersonnelModel.find({manager: req.session.uId})
                             .select('_id')
                             .lean()
@@ -1417,6 +1446,12 @@ var InStoreReports = function (db, redis, event) {
                 },
 
                 function (arrayOfUserId, cb) {
+                    if (isMobile) {
+                        //array of subordinate users id, to send on android app
+                        arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
+                            return model._id
+                        });
+                    }
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
                     }
@@ -1496,6 +1531,8 @@ var InStoreReports = function (db, redis, event) {
                         delete queryObject.cover;
                     }
 
+                    const coveredPlusSubordinates = coveredIds.concat(arrayOfSubordinateUsersId);
+
                     aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
                     pipeLine = getAllPipeLine({
@@ -1508,7 +1545,9 @@ var InStoreReports = function (db, redis, event) {
                         skip             : skip,
                         limit            : limit,
                         coveredIds       : coveredIds,
-                        currentUserLevel : currentUserLevel
+                        currentUserLevel : currentUserLevel,
+                        subordinates : arrayOfSubordinateUsersId,
+                        coveredPlusSubordinates
                     });
 
                     aggregation = ObjectiveModel.aggregate(pipeLine);
@@ -1661,6 +1700,19 @@ var InStoreReports = function (db, redis, event) {
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
+                        const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
+                            return ObjectId.toString();
+                        });
+                        const dataMyCC = response.data.map((objective) => {
+                            const assignedToId = objective.assignedTo[0]._id.toString();
+                            const createdById = objective.createdBy.user._id.toString();
+                            const currentUserId = req.session.uId;
+                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
+                                objective.myCC = true;
+                            }
+                            return objective;
+                        });
+                        response.data = dataMyCC;
                         next({status: 200, body: response});
                     })
                 });

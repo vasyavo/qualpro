@@ -1,3 +1,5 @@
+'use strict';
+
 const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
@@ -23,10 +25,11 @@ const schema = new Schema({
     region: [{ type: ObjectId, ref: CONTENT_TYPES.DOMAIN }],
     subRegion: [{ type: ObjectId, ref: CONTENT_TYPES.DOMAIN }],
     branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH }],
-    email: { type: String/*, index: {unique: true, sparse: true}*/ },
-    phoneNumber: { type: String, index: { unique: true, sparse: true } },
+    email: { type: String },
+    phoneNumber: { type: String },
     super: { type: Boolean, default: false },
     manager: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+    xlsManager: { type: Number, default: null },
     position: { type: ObjectId, ref: CONTENT_TYPES.POSITION, default: null },
     accessRole: { type: ObjectId, ref: CONTENT_TYPES.ROLE, default: null },
     dateJoined: Date,

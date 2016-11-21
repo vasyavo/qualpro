@@ -2,6 +2,8 @@ var ActivityHelper = function (db, redis, app) {
     'use strict';
 
     var async = require('async');
+    var logger = require('../utils/logger');
+    const models = require('../types');
     var mongoose = require('mongoose');
     var _ = require('lodash');
     var Pushes = require('../helpers/pushes');
@@ -78,16 +80,6 @@ var ActivityHelper = function (db, redis, app) {
     };
 
     var $defProjections = {};
-    var models = {};
-
-    var schemas = mongoose.Schemas;
-    var schemaModelName;
-
-    for (var key in schemas) {
-        schemaModelName = key;
-        models[key] = db.model(schemaModelName, schemas[schemaModelName]);
-    }
-    models[CONTENT_TYPES.OBJECTIVES] = require('./../types/objective/model');
 
     $defProjections[CONTENT_TYPES.OBJECTIVES]
         = $defProjections[CONTENT_TYPES.INSTORETASKS]
@@ -640,6 +632,7 @@ var ActivityHelper = function (db, redis, app) {
             }));
         }
 
+        logger.info('Model that triggers when creating new activity:', options.itemType);
         aggregation = models[options.itemType].aggregate(pipeLine);
 
         aggregation.exec(function (err, result) {

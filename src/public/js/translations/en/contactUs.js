@@ -5,35 +5,27 @@ define([
 ], function (_, paginationTranslation, filtersTranslation) {
     var translation = {
         // list view
-        brand      : 'Brand',
-        category   : 'Category',
-        displayType: 'Display Type',
-        startDate  : 'Start date',
-        endDate    : 'Due date',
-        location   : 'Location',
+        title: 'Title',
+        type: 'Type',
+        resolved : 'resolved',
 
         // preview
-        titlePreview : 'View Branding & Display Activity',
-        country      : 'Country',
-        region       : 'Region',
-        subRegion    : 'Sub-Region',
-        retailSegment: 'Trade Channel',
-        outlet       : 'Customer',
-        branch       : 'Branch',
+        employeeName : 'Employee Name',
+        country : 'Country',
+        dateCreated  : 'Date Created',
+        status : 'Status',
+        titlePreview : 'Contact Us',
         description  : 'Description',
         attachments  : 'Attachments',
         files        : 'Files',
-        attachBtn    : 'Attach',
-        sendBtn      : 'Send',
         noTranslation: 'no Translation',
-        skipped      : 'Skipped',
-        commentText  : 'Comment Text',
+        resolveBtn : 'Resolve',
+        comments : 'Comments',
 
         // topBar
-        all        : 'Competitor branding & display report',
+        all        : 'Contact Us',
         okBtn      : 'Ok',
-        dialogTitle: 'Comment attachments'
-
+        sendBtn    : 'Send'
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);

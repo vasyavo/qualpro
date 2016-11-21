@@ -1,3 +1,4 @@
+'use strict';
 const mongoose = require('mongoose');
 const schema = require('./schema');
 const contenType = require('./../../public/js/constants/contentType.js').COMPETITORVARIANT;

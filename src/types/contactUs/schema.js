@@ -1,3 +1,4 @@
+'use strict';
 const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
@@ -9,20 +10,14 @@ const schema = new Schema({
     type : {
         type : String
     },
-    module : {
-        type : String
-    },
     status : {
         type : String
     },
-    comment : {
-        type : String
+    comments : {
+        type : Array,
+        default : []
     },
-    attachments : {
-        type : ObjectId,
-        ref : CONTENT_TYPES.FILES,
-        default : null
-    },
+    attachments : { type: Array, default: [] },
     createdBy : {
         type : ObjectId,
         ref : CONTENT_TYPES.PERSONNEL,

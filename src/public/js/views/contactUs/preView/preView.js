@@ -2,11 +2,12 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/contactUs/preview.html',
     'text!templates/file/preView.html',
-    'text!templates/objectives/comments/comment.html',
-    'text!templates/objectives/comments/newRow.html',
+    'views/contactUs/comments',
     'collections/file/collection',
+    'models/contactUs',
     'models/file',
     'models/comment',
     'views/baseDialog',
@@ -20,8 +21,8 @@ define([
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
     'constants/errorMessages'
-], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
-             FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentsView,
+             FileCollection, Model, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
              CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
 
@@ -29,8 +30,6 @@ define([
         contentType: CONTENT_TYPES.CONTACT_US,
 
         template             : _.template(PreviewTemplate),
-        commentTemplate      : _.template(CommentTemplate),
-        newCommentTemplate   : _.template(NewCommentTemplate),
         fileTemplate         : _.template(FileTemplate),
         CONSTANTS            : CONSTANTS,
         ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
@@ -41,7 +40,9 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #resolve'                  : 'setStatusResolved',
+            'click #comments'                 : 'showCommentsDialog'
         },
 
         initialize: function (options) {
@@ -49,10 +50,36 @@ define([
             this.model = options.model;
             this.files = new FileCollection();
             this.previewFiles = new FileCollection(this.model.get('attachments'), true);
-            _.bindAll(this, 'fileSelected', 'renderComment');
+            _.bindAll(this, 'fileSelected');
 
             this.makeRender();
             this.render();
+        },
+
+        showCommentsDialog : function () {
+            new CommentsView({
+                modelAttrs : this.model.toJSON(),
+                translation : this.translation
+            });
+        },
+
+        setStatusResolved : function (event) {
+            var self = this;
+            if (this.model.get('status') === 'new') {
+                dataService.putData(`${CONTENT_TYPES.CONTACT_US}/${self.model.get('_id')}`, {
+                    status : 'resolved'
+                }, (err, response) => {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.statusNotChanged[App.currentUser.currentLanguage]
+                        ]);
+                    }
+
+                    self.trigger('modelChanged', response);
+
+                    self.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: function (e) {
@@ -232,85 +259,6 @@ define([
             $descriptionBlock.toggleClass('showAllDescription');
         },
 
-        sendComment: function () {
-            var commentModel = new CommentModel();
-            var self = this;
-            this.commentBody = {
-                commentText: this.$el.find('#commentInput').val(),
-                objectiveId: this.model.get('_id'),
-                context    : CONTENT_TYPES.COMPETITORBRANDING
-            };
-
-            commentModel.setFieldsNames(this.translation);
-
-            commentModel.validate(this.commentBody, function (err) {
-                if (err && err.length) {
-                    App.renderErrors(err);
-                } else {
-                    self.checkForEmptyInput(self.files, self.$el);
-                    self.$el.find('#commentForm').submit();
-                }
-            });
-        },
-
-        commentFormSubmit: function (e) {
-            var context = e.data.context;
-            var data = new FormData(this);
-
-            e.preventDefault();
-            data.append('data', JSON.stringify(context.commentBody));
-
-            $.ajax({
-                url        : context.commentCollection.url,
-                type       : 'POST',
-                data       : data,
-                contentType: false,
-                processData: false,
-                success    : function (comment) {
-                    var commentModel = new CommentModel(comment, {parse: true});
-                    var jsonComment = commentModel.toJSON();
-
-                    context.commentCollection.add(commentModel);
-                    context.model.set({comments: _.pluck(context.commentCollection, '_id')});
-                    context.$el.find('#commentWrapper').prepend(context.newCommentTemplate(
-                        {
-                            comment      : jsonComment,
-                            translation  : this.translation,
-                            notShowAttach: false
-                        }
-                    ));
-                    context.$el.find('#commentInput').val('');
-                    context.files.reset([]);
-                    context.$el.find('#commentForm').html('');
-                    context.chengeCountOfAttachedFilesToComment('');
-
-                    if (context.commentCollection.length === 1) {
-                        context.$el.find('.objectivesPaddingBlock').show();
-                    }
-                }
-            });
-
-        },
-
-        renderComment: function () {
-            var $commentWrapper = this.$el.find('#commentWrapper');
-            var $commentScrollableContainer = $commentWrapper.closest('.innerScroll');
-            var jsonCollection = this.commentCollection.toJSON();
-
-            if (jsonCollection.length) {
-                $commentScrollableContainer.show();
-            }
-
-            $commentWrapper.html('');
-            $commentWrapper.append(this.commentTemplate({
-                collection   : jsonCollection,
-                translation  : this.translation,
-                notShowAttach: false
-            }));
-
-            return this;
-        },
-
         setSelectedFiles: function (files) {
             var self = this;
             var $fileContainer = self.$el.find('#objectiveFileThumbnail');
@@ -330,72 +278,61 @@ define([
         },
 
         render: function () {
-            var jsonModel = this.model.toJSON();
-            var formString;
-            var self = this;
+            const self = this;
+            dataService.getData(`contactUs/${self.model.get('_id')}`, {}, function (err, modelData) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.readError[App.currentUser.currentLanguage]
+                    ]);
+                }
 
-            formString = this.$el.html(this.template({
-                jsonModel  : jsonModel,
-                translation: this.translation
-            }));
+                var jsonModel = modelData;
+                var formString;
 
-            this.$el = formString.dialog({
-                dialogClass  : 'create-dialog competitorBranding-dialog',
-                width        : '1000',
-                showCancelBtn: false,
-                buttons      : {
-                    save: {
-                        text : self.translation.okBtn,
-                        class: 'btn saveBtn',
-                        click: function () {
-                            if (self.model.changedAttributes()) {
-                                self.trigger('modelChanged', self.model.get('comments').length || '');
+                jsonModel.creator.name = `${jsonModel.creator.firstName[App.currentUser.currentLanguage]} ${jsonModel.creator.lastName[App.currentUser.currentLanguage]}`;
+                jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
+
+                formString = self.$el.html(self.template({
+                    jsonModel  : jsonModel,
+                    translation: self.translation
+                }));
+
+                self.$el = formString.dialog({
+                    dialogClass  : 'create-dialog competitorBranding-dialog',
+                    width        : '1000',
+                    showCancelBtn: false,
+                    buttons      : {
+                        save: {
+                            text : self.translation.okBtn,
+                            class: 'btn saveBtn',
+                            click: function () {
+                                self.undelegateEvents();
+                                self.$el.dialog('close').dialog('destroy').remove();
                             }
-
-                            self.undelegateEvents();
-                            self.$el.dialog('close').dialog('destroy').remove();
                         }
+                    },
+
+                    close: function () {
+                        var model = self.model;
+                        var id;
+                        var previousAttributes;
+
+                        if (model.changedAttributes()) {
+                            id = model.get('_id');
+                            previousAttributes = model.previousAttributes();
+                            model.clear();
+                            model.set(previousAttributes);
+                            model.set({_id: id});
+                        }
+
+                        $('body').css({overflow: 'inherit'});
                     }
-                },
+                });
 
-                close: function () {
-                    var model = self.model;
-                    var id;
-                    var previousAttributes;
+                self.delegateEvents(this.events);
 
-                    if (model.changedAttributes()) {
-                        id = model.get('_id');
-                        previousAttributes = model.previousAttributes();
-                        model.clear();
-                        model.set(previousAttributes);
-                        model.set({_id: id});
-                    }
-
-                    $('body').css({overflow: 'inherit'});
-                }
+                return self;
             });
-
-            this.$el.find('#commentForm').on('submit', {
-                body   : this.commentBody,
-                context: this
-            }, this.commentFormSubmit);
-            this.$el.find('#fileThumbnail').hide();
-
-            this.setSelectedFiles(jsonModel.attachments);
-
-            this.commentCollection = new CommentCollection({
-                data: {
-                    objectiveId: this.model.get('_id'),
-                    context    : CONTENT_TYPES.COMPETITORBRANDING,
-                    reset      : true
-                }
-            });
-
-            this.commentCollection.on('reset', this.renderComment, this);
-
-            this.delegateEvents(this.events);
-
-            return this;
         }
     });
 

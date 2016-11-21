@@ -760,7 +760,7 @@ define([
             startDateObj = {
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateStart, 'DD.MM.YYYY').toDate(),
@@ -772,7 +772,7 @@ define([
             endDateObj = {
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate(),

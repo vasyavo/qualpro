@@ -4,7 +4,7 @@ const config = require('./../config');
 require('winston-mongodb');
 
 const logger = new (winston.Logger)({
-    transports: config.isTest ? [] : [
+    transports: [
         new (winston.transports.Console)({
             colorize: true,
             json: false,

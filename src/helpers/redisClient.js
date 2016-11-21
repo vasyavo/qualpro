@@ -24,13 +24,29 @@ function CacheStore() {
         }
     }
 
+    function writeToStorageHash(key, field, value) {
+        client.hmset(key, field, value);
+    }
+
+    function getValuesStorageHash(key, callback) {
+        client.hvals(key, callback);
+    }
+
+    function getValueHashByField(key, field, callback) {
+        client.hget(key, field, callback);
+    }
+
+    function removeStorageHashByField(key, field) {
+        client.hdel(key, field);
+    }
+
     function incrementAndGet(key, callback) {
         client.incr(key, callback);
 
     }
 
     function readFromStorage(key, callback) {
-        client.get(key, function (err, value) {
+        client.get(key, function(err, value) {
             if (err) {
                 callback(err);
             } else {
@@ -44,16 +60,20 @@ function CacheStore() {
     }
 
     return {
-        incrementAndGet  : incrementAndGet,
-        writeToStorage   : writeToStorage,
-        removeFromStorage: removeFromStorage,
-        readFromStorage  : readFromStorage
+        incrementAndGet,
+        writeToStorage,
+        removeFromStorage,
+        readFromStorage,
+        writeToStorageHash,
+        getValuesStorageHash,
+        removeStorageHashByField,
+        getValueHashByField
     };
 }
 
 const cacheStore = new CacheStore();
 
 module.exports = {
-    redisClient: client,
+    redisClient : client,
     cacheStore
 };

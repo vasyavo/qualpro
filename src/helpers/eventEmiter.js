@@ -1,3 +1,5 @@
+'use strict';
+
 var activityHelper = require('../helpers/activity');
 var personnelHelper = require('../helpers/personnel');
 var notificationHelper = require('../helpers/notification');

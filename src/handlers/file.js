@@ -1,3 +1,5 @@
+'use strict';
+
 var Files = function (db) {
     var async = require('async');
     var fs = require('fs');
