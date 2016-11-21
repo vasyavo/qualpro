@@ -854,14 +854,22 @@ var Contract = function (db, redis, event) {
                             model.documents.forEach((item) => {
                                 const itUser = item.createdBy.user;
 
-                                if (itUser) {
+                                if (itUser && itUser._id) {
                                     personnelIds.push(itUser._id);
                                 }
                             });
 
-                            personnelIds.push(model.createdBy.user._id);
+                            const createdByUser = model.createdBy.user;
 
-                            const documentsId = model.documents.map((item) => (item._id));
+                            if (createdByUser && createdByUser._id) {
+                                personnelIds.push(createdByUser._id);
+                            }
+
+                            const documentsId = model.documents
+                                .filter((item) => {
+                                    return item && item._id;
+                                })
+                                .map((item) => (item._id));
 
                             fileIds.push(...documentsId);
 
@@ -871,7 +879,7 @@ var Contract = function (db, redis, event) {
 
                     personnelIds = _.uniqBy(personnelIds, 'id');
 
-                    cb({
+                    cb(null, {
                         personnelIds,
                         fileIds,
                         response
@@ -905,8 +913,11 @@ var Contract = function (db, redis, event) {
                             fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
                             fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
 
-                            getImagesHelper.setIntoResult(setOptions, cb);
-                        },
+                            getImagesHelper.setIntoResult(setOptions, (data) => {
+                                // fixme incorrect error callback format
+                                cb(null, data);
+                            });
+                        }
 
                     ], cb);
                 },

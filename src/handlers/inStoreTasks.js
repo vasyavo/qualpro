@@ -1233,9 +1233,9 @@ var InStoreReports = function (db, redis, event) {
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             async.waterfall([
-                function (cb) {
-                    coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
-                },
+
+                async.apply(coveredByMe, PersonnelModel, ObjectId(req.session.uId)),
+
                 function (coveredIds, cb) {
                     pipeLine = getAllPipeLine({
                         aggregateHelper : aggregateHelper,
@@ -1445,16 +1445,19 @@ var InStoreReports = function (db, redis, event) {
                     }
                 },
 
-                function (arrayOfUserId, cb) {
+                (arrayOfUserId, cb) => {
+
                     if (isMobile) {
                         //array of subordinate users id, to send on android app
                         arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
                             return model._id
                         });
                     }
+
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
                     }
+
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },
 

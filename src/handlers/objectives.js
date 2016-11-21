@@ -1833,10 +1833,10 @@ var Objectives = function (db, redis, event) {
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             async.waterfall([
-                function (cb) {
-                    coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
-                },
-                function (coveredIds, cb) {
+
+                async.apply(coveredByMe, PersonnelModel, ObjectId(req.session.uId)),
+
+                (coveredIds, cb) => {
                     pipeLine = getAllPipeline({
                         aggregateHelper : aggregateHelper,
                         queryObject     : queryObject,

@@ -1,62 +1,49 @@
-var GetImagesHelper = function (db, redis, app) {
-    'use strict';
-    var mongoose = require('mongoose');
-    var async = require('async');
-    var _ = require('lodash');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var schemas = mongoose.Schemas;
+const mongoose = require('mongoose');
+const async = require('async');
+const _ = require('lodash');
+const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+const mongo = require('./../utils/mongo');
+const schemas = mongoose.Schemas;
 
-    this.getImages = function (options, cb) {
-        var data = options.data;
-        var modelNames = Object.keys(data);
-        var schemaModelName;
-        var models = {};
-        var parallelTasks = {};
-        var $defProjectionImages = {
+var GetImagesHelper = function(db) {
+    this.getImages = (options, cb) => {
+        const data = options.data;
+        const modelNames = Object.keys(data);
+        const models = {};
+        const parallelTasks = {};
+        const $defProjectionImages = {
             imageSrc: 1,
             preview : 1
         };
+
         if (modelNames && modelNames.length) {
-            modelNames.forEach(function (key) {
-                schemaModelName = key;
-                models[key] = db.model(schemaModelName, schemas[schemaModelName]);
+            modelNames.forEach((key) => {
+                models[key] = db.model(key, schemas[key]);
             });
         }
 
 
-        function gen(Model, name) {
-            return function (parallelCb) {
-                var pipeLine = [];
-                pipeLine.push({
+        function getWhereIdIn(model, name) {
+            return (cb) => {
+                const pipeLine = [{
                     $match: {
-                        _id: {$in: data[name]}
+                        _id: {
+                            $in: data[name]
+                        }
                     }
-                });
-
-                pipeLine.push({
+                }, {
                     $project: $defProjectionImages
-                });
+                }];
 
-                Model.aggregate(pipeLine, function (err, result) {
-                    if (err) {
-                        return parallelCb(err);
-                    }
-
-                    return parallelCb(null, result);
-                });
+                model.aggregate(pipeLine, cb);
             };
         }
 
-        for (var key in models) {
-            parallelTasks[key] = gen(models[key], key);
+        for (let key in models) {
+            parallelTasks[key] = getWhereIdIn(models[key], key);
         }
 
-        async.parallel(parallelTasks, function (err, result) {
-            if (err) {
-                return cb(err);
-            }
-            return cb(null, result);
-        });
+        async.parallel(parallelTasks, cb);
     };
 
     this.setIntoResult = function (options, cb) {
@@ -76,18 +63,28 @@ var GetImagesHelper = function (db, redis, app) {
         }
 
         function getImageById(key, field) {
-            var imgSrcObject = _.find(result[key], {_id: field._id});
-            if (imgSrcObject && [CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.DOMAIN, CONTENT_TYPES.OUTLET, CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH].indexOf(key) !== -1) {
+            const imgSrcObject = _.find(result[key], { _id: field._id });
+
+            if (imgSrcObject && [
+                CONTENT_TYPES.PERSONNEL,
+                CONTENT_TYPES.DOMAIN,
+                CONTENT_TYPES.OUTLET,
+                CONTENT_TYPES.RETAILSEGMENT,
+                CONTENT_TYPES.BRANCH
+            ].indexOf(key) !== -1) {
                 field.imageSrc = imgSrcObject.imageSrc;
-            } else if (imgSrcObject && [CONTENT_TYPES.FILES, CONTENT_TYPES.DOCUMENTS].indexOf(key) !== -1) {
+            } else if (imgSrcObject && [
+                CONTENT_TYPES.FILES,
+                CONTENT_TYPES.DOCUMENTS
+            ].indexOf(key) !== -1) {
                 field.preview = imgSrcObject.preview;
             }
             return field;
         }
 
         function findAndSet(key, name, element, array) {
-            var strArray = name.split('.');
-            var length = strArray.length;
+            const strArray = name.split('.');
+            const length = strArray.length;
 
             switch (length) {
                 case 0:
@@ -103,8 +100,8 @@ var GetImagesHelper = function (db, redis, app) {
                         return element;
                     }
 
-                    element[strArray[0]] = _.map(element[strArray[0]], function (el) {
-                        return getImageById(key, el);
+                    element[strArray[0]] = element[strArray[0]].map((item) => {
+                        return getImageById(key, item);
                     });
                     return element;
                     break;
@@ -118,8 +115,8 @@ var GetImagesHelper = function (db, redis, app) {
                         return element;
                     }
 
-                    element[strArray[0]][strArray[1]] = _.map(element[strArray[0]], function (el) {
-                        return getImageById(key, el[strArray[1]]);
+                    element[strArray[0]][strArray[1]] = element[strArray[0]].map((item) => {
+                        return getImageById(key, item[strArray[1]]);
                     });
                     return element;
                     break;
@@ -133,8 +130,14 @@ var GetImagesHelper = function (db, redis, app) {
                         return element;
                     }
 
-                    element[strArray[0]][strArray[1]] = _.map(element[strArray[0]], function (el) {
-                        return getImageById(key, el[strArray[1]][strArray[2]]);
+                    element[strArray[0]][strArray[1]] = element[strArray[0]].map((item) => {
+                        const field = item[strArray[1]][strArray[2]];
+
+                        if (field) {
+                            return getImageById(key, field);
+                        }
+
+                        return item;
                     });
                     return element;
                     break;
@@ -156,22 +159,24 @@ var GetImagesHelper = function (db, redis, app) {
             mapObject.push(response);
         }
 
-        keys.forEach(function (key) {
+        keys.forEach((key) => {
             if (!fields[key].length) {
-                mapObject = _.map(mapObject, function (element) {
-                    return getImageById(key, element);
+                mapObject = mapObject.map((field) => {
+                    return getImageById(key, field);
                 });
-            } else {
-                fields[key].forEach(function (name) {
-                    mapObject = _.map(mapObject, function (model) {
-                        if (typeof name === 'string') {
-                            return findAndSet(key, name, model);
-                        } else if (Array.isArray(name)) {
-                            return findAndSet(key, name[0], model, true);
-                        }
-                    });
-                });
+
+                return null;
             }
+
+            fields[key].forEach((name) => {
+                mapObject = mapObject.map((model) => {
+                    if (_.isString(name)) {
+                        return findAndSet(key, name, model);
+                    } else if (Array.isArray(name)) {
+                        return findAndSet(key, name[0], model, true);
+                    }
+                });
+            });
         });
 
         if (isArray) {
@@ -183,6 +188,7 @@ var GetImagesHelper = function (db, redis, app) {
             resultToSend = mapObject[0];
         }
 
+        // fixme incorrect error callback format, should be: return cb(null, data);
         return cb(resultToSend);
     };
 };
