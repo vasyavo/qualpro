@@ -470,16 +470,16 @@ const superAdmin = [
 {
     module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
-        archive: false,
-        edit   : false,
-        write  : false,
+        archive: true,
+        edit   : true,
+        write  : true,
         read   : true
     },
     mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        archive: true,
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -665,7 +665,7 @@ const superAdmin = [
         cms   : {
             archive: false,
             edit   : true,
-            write  : false,
+            write  : true,
             read   : true
         },
         mobile: {
@@ -1143,16 +1143,16 @@ const masterAdmin = [
 {
     module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
-        archive: false,
-        edit   : false,
-        write  : false,
+        archive: true,
+        edit   : true,
+        write  : true,
         read   : true
     },
     mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        archive: true,
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -1196,7 +1196,7 @@ const masterAdmin = [
     mobile: {
         upload: false,
         edit  : false,
-        write : false,
+        write : true,
         read  : true
     }
 },
@@ -1211,7 +1211,7 @@ const masterAdmin = [
     mobile: {
         upload: false,
         edit  : false,
-        write : false,
+        write : true,
         read  : true
     }
 },
@@ -1369,7 +1369,7 @@ const masterAdmin = [
         cms   : {
             archive: false,
             edit   : true,
-            write  : false,
+            write  : true,
             read   : true
         },
         mobile: {
@@ -1846,7 +1846,7 @@ const countryAdmin = [
     cms   : {
         archive: false,
         edit   : false,
-        write  : false,
+        write  : true,
         read   : true
     },
     mobile: {
@@ -1912,7 +1912,7 @@ const countryAdmin = [
     mobile: {
         archive: false,
         edit   : false,
-        write  : false,
+        write  : true,
         read   : true
     }
 },
@@ -1957,7 +1957,7 @@ const countryAdmin = [
     mobile: {
         upload: false,
         edit  : false,
-        write : false,
+        write : true,
         read  : true
     }
 },
@@ -2527,7 +2527,7 @@ const areaFiledManager = [
     mobile: {
         archive: false,
         edit   : false,
-        write  : false,
+        write  : true,
         read   : true
     }
 },
@@ -2587,7 +2587,7 @@ const areaFiledManager = [
     mobile: {
         upload: false,
         edit  : false,
-        write : false,
+        write : true,
         read  : true
     }
 },
@@ -5524,9 +5524,9 @@ const masterUpload = [
     },
     mobile: {
         archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -5539,24 +5539,24 @@ const masterUpload = [
     },
     mobile: {
         archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
     module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
-        archive: false,
-        edit   : false,
-        write  : false,
+        archive: true,
+        edit   : true,
+        write  : true,
         read   : true
     },
     mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        archive: true,
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -5599,9 +5599,9 @@ const masterUpload = [
     },
     mobile: {
         archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -5759,7 +5759,7 @@ commentsAccess,
         cms   : {
             archive: false,
             edit   : true,
-            write  : false,
+            write  : true,
             read   : true
         },
         mobile: {
@@ -6227,9 +6227,9 @@ const countryUpload = [
     },
     mobile: {
         archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -6242,24 +6242,24 @@ const countryUpload = [
     },
     mobile: {
         archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
     module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
     cms   : {
-        archive: false,
-        edit   : false,
-        write  : false,
+        archive: true,
+        edit   : true,
+        write  : true,
         read   : true
     },
     mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        archive: true,
+        edit   : true,
+        write  : true,
+        read   : true
     }
 },
 {
@@ -6297,7 +6297,7 @@ const countryUpload = [
     cms   : {
         archive: false,
         edit   : false,
-        write  : false,
+        write  : true,
         read   : true
     },
     mobile: {
@@ -6388,7 +6388,7 @@ commentsAccess,
         cms   : {
             archive: false,
             edit   : true,
-            write  : false,
+            write  : true,
             read   : true
         },
         mobile: {
