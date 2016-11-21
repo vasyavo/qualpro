@@ -4,7 +4,7 @@
  */
 'use strict';
 
-module.exports = function (app, db, event) {
+module.exports = function(app, db, event) {
     // var express = require('express');
     var path = require('path');
     var logWriter = require('../helpers/logWriter');
@@ -16,7 +16,10 @@ module.exports = function (app, db, event) {
     var redis = require('../helpers/redisClient');
 
     var csurf = require('csurf');
-    var csrfProtection = csurf({ignoreMethods: ['GET', 'POST'], cookie: true});
+    var csrfProtection = csurf({
+        ignoreMethods : ['GET', 'POST'],
+        cookie : true
+    });
 
     // var i18n = require('i18n');
 
@@ -90,7 +93,7 @@ module.exports = function (app, db, event) {
     var RESPONSES = require('../constants/responses');
     var CONSTANTS = require('../constants/mainConstants');
 
-    var sessionValidator = function (req, res, next) {
+    var sessionValidator = function(req, res, next) {
         var session = req.session;
         var year = 31536000000;
 
@@ -122,18 +125,18 @@ module.exports = function (app, db, event) {
     app.use(sessionValidator);
     //  app.use(i18n.init);
 
-    app.get('/', csrfProtection, function (req, res, next) {
+    app.get('/', csrfProtection, function(req, res, next) {
         //ToDo remove (res.cookie) this one after test sms
         //res.cookie('lang', 'ae');
-        res.render('index.html', {csrfToken: req.csrfToken()});
+        res.render('index.html', {csrfToken : req.csrfToken()});
     });
 
     // endpoint for handling api documents
-    app.get('/docs', function (req, res, next) {
+    app.get('/docs', function(req, res, next) {
         res.render(process.cwd() + '/API_documentation/qualPro_API.html');
     });
 
-    app.get('/authenticated', function (req, res, next) {
+    app.get('/authenticated', function(req, res, next) {
         if (req.session && req.session.loggedIn) {
             res.send(200);
         } else {
@@ -142,69 +145,69 @@ module.exports = function (app, db, event) {
     });
     app.get('/modules', checkAuth, modulesHandler.getAll);
     app.post('/login', csrfProtection, personnelHandler.login);
-    app.post('/mobile/login', function (req, res, next) {
+    app.post('/mobile/login', function(req, res, next) {
         req.isMobile = true;
 
         next();
     }, csrfProtection, personnelHandler.login);
 
-    app.post('/upload', multipartMiddleware, function (req, res, next) {
+    app.post('/upload', multipartMiddleware, function(req, res, next) {
         var localFs = new LocalFs();
         var id = req.session.uId;
         var content = req.headers.contenttype;
         var folderName = path.join(content, id);
         var fileData = req.files.attachfile;
 
-        localFs.postFile(folderName, fileData, function (err) {
+        localFs.postFile(folderName, fileData, function(err) {
             if (err) {
                 return next(err);
             }
 
-            res.status(201).send({success: 'file(\'s) uploaded success'});
+            res.status(201).send({success : 'file(\'s) uploaded success'});
         });
     });
 
-    app.get('/passwordChange/:forgotToken', csrfProtection, function (req, res, next) {
+    app.get('/passwordChange/:forgotToken', csrfProtection, function(req, res, next) {
         var forgotToken = req.params.forgotToken;
 
         res.render('changePassword', {
-            host       : process.env.HOST,
-            forgotToken: forgotToken,
-            csrfToken  : req.csrfToken()
+            host : process.env.HOST,
+            forgotToken : forgotToken,
+            csrfToken : req.csrfToken()
         });
     });
 
-    app.get('/passwordChangeNotification/:messageObj', csrfProtection, function (req, res, next) {
+    app.get('/passwordChangeNotification/:messageObj', csrfProtection, function(req, res, next) {
         var messageObj = JSON.parse(req.params.messageObj);
 
         res.render('passwordChangeNotification', {
-            host      : process.env.HOST,
-            messageObj: messageObj
+            host : process.env.HOST,
+            messageObj : messageObj
         });
     });
 
-    app.get('/verificateCode/:phoneNumber', csrfProtection, function (req, res, next) {
+    app.get('/verificateCode/:phoneNumber', csrfProtection, function(req, res, next) {
         var phoneNumber = req.params.phoneNumber;
 
         res.render('enterCode.html', {
-            host       : process.env.HOST,
-            csrfToken  : req.csrfToken(),
-            phoneNumber: phoneNumber,
+            host : process.env.HOST,
+            csrfToken : req.csrfToken(),
+            phoneNumber : phoneNumber,
             sendSMSUrl : 'forgotPass'
         });
     });
-    app.get('/messageSent', csrfProtection, function (req, res, next) {
+    app.get('/messageSent', csrfProtection, function(req, res, next) {
 
         res.render('emailMessageWasSent.html', {
-            host     : process.env.HOST,
-            csrfToken: req.csrfToken()
+            host : process.env.HOST,
+            csrfToken : req.csrfToken()
         });
     });
     app.post('/forgotPass', csrfProtection, personnelHandler.forgotPassword);
 
-    app.get('/logout', csrfProtection, function (req, res, next) {
+    app.get('/logout', csrfProtection, function(req, res, next) {
         if (req.session) {
-            req.session.destroy(function (err) {
+            req.session.destroy(function(err) {
                 if (err) {
                     return next(err);
                 }
@@ -218,9 +221,9 @@ module.exports = function (app, db, event) {
         res.clearCookie();
     });
 
-    app.get('/mobile/logout', csrfProtection, function (req, res, next) {
+    app.get('/mobile/logout', csrfProtection, function(req, res, next) {
         if (req.session) {
-            req.session.destroy(function (err) {
+            req.session.destroy(function(err) {
                 if (err) {
                     return next(err);
                 }
@@ -294,14 +297,17 @@ module.exports = function (app, db, event) {
 
     app.use('/form', formRouter);
 
-    app.get('/breadcrumbs', function (req, res, next) {
+    app.get('/breadcrumbs', function(req, res, next) {
         var breadcrumb = req.query.breadcrumb;
         var ids = breadcrumb.ids;
         var type = breadcrumb.type;
         var BreadcrumbsHelper = require('../helpers/breadcrumbsHelper');
         var breadcrumbsHelper = new BreadcrumbsHelper(db);
 
-        breadcrumbsHelper.getBreadcrumbs({ids: ids, type: type}, function (err, resp) {
+        breadcrumbsHelper.getBreadcrumbs({
+            ids : ids,
+            type : type
+        }, function(err, resp) {
             if (err) {
                 return next(err);
             }
@@ -310,20 +316,20 @@ module.exports = function (app, db, event) {
         });
     });
 
-    app.get('/sms/:phoneNumber/:testType', function (req, res, next) {
+    app.get('/sms/:phoneNumber/:testType', function(req, res, next) {
         var testType = req.params.testType;
         var phoneNumber = req.params.phoneNumber;
         var Sms = require('../helpers/smsSender');
         var smsSender = new Sms();
 
         var forgotPassOptions = {
-            phoneNumber: phoneNumber,
-            resetCode  : 123456
+            phoneNumber : phoneNumber,
+            resetCode : 123456
         };
 
         var newPassOptions = {
-            phoneNumber: phoneNumber,
-            password   : 'hdf67wefbhu87wef'
+            phoneNumber : phoneNumber,
+            password : 'hdf67wefbhu87wef'
         };
 
         function resultCb(err, message) {
@@ -352,7 +358,7 @@ module.exports = function (app, db, event) {
         }
 
         if (req.accepts('json')) {
-            return res.json({error: RESPONSES.PAGE_NOT_FOUND});
+            return res.json({error : RESPONSES.PAGE_NOT_FOUND});
         }
 
         res.type('txt');
@@ -381,7 +387,7 @@ module.exports = function (app, db, event) {
             }
 
             res.status(status).send({
-                error: err.message + '\n' + err.stack,
+                error : err.message + '\n' + err.stack,
                 details : err.details
             });
         }
@@ -399,7 +405,7 @@ module.exports = function (app, db, event) {
         }
 
         if (req.accepts('json')) {
-            return res.json({error: 'form tampered with'});
+            return res.json({error : 'form tampered with'});
         }
 
         res.type('txt');

@@ -370,14 +370,24 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'createdBy.accessRole'
                 })
                 .unwind('createdBy.accessRole')
-                .unwind('attachments')
+                .append([{
+                    $unwind: {
+                        path                      : '$attachments',
+                        preserveNullAndEmptyArrays: true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.FILES,
                     localField : 'attachments',
                     foreignField : '_id',
                     as : 'attachments'
                 })
-                .unwind('attachments')
+                .append([{
+                    $unwind: {
+                        path                      : '$attachments',
+                        preserveNullAndEmptyArrays: true
+                    }
+                }])
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
@@ -510,7 +520,7 @@ function BrandingAndDisplay(db, redis, event) {
             function getData(cb) {
                 mongoQuery.exec(function(err, models) {
                     async.map(models, mapCategories, cb);
-                })
+                });
             }
 
             function getLinkFromAws(brandingAndDisplayModel, cb) {
@@ -540,6 +550,7 @@ function BrandingAndDisplay(db, redis, event) {
 
                 res.send(200, {
                     total : count,
+                    length : result[1].length,
                     data : result[1]
                 });
             });
