@@ -205,37 +205,9 @@ module.exports = function(app, db, event) {
     });
     app.post('/forgotPass', csrfProtection, personnelHandler.forgotPassword);
 
-    app.get('/logout', csrfProtection, function(req, res, next) {
-        if (req.session) {
-            req.session.destroy(function(err) {
-                if (err) {
-                    return next(err);
-                }
+    app.get('/logout', csrfProtection, personnelHandler.logout);
 
-                res.status(200).send();
-            });
-        } else {
-            res.status(200).send();
-        }
-
-        res.clearCookie();
-    });
-
-    app.get('/mobile/logout', csrfProtection, function(req, res, next) {
-        if (req.session) {
-            req.session.destroy(function(err) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.status(200).send();
-            });
-        } else {
-            res.status(200).send();
-        }
-
-        res.clearCookie();
-    });
+    app.get('/mobile/logout', csrfProtection, personnelHandler.logout);
     app.use('/activityList', activityList);
     app.use('/brandingAndDisplayNew', brandingAndDisplayRouter);
     app.use('/brandingActivity', brandingActivityRouter);
