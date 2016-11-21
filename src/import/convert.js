@@ -18,7 +18,7 @@ const PositionModel = require('./../types/position/model');
 const CurrencyModel = require('./../types/currency/model');
 
 const whereSheets = `${config.workingDirectory}/src/import/`;
-const timestamp = 'Nov_15_2016';
+const timestamp = 'Nov_21_2016';
 
 const mergeOptions = {
     upsert: true,
