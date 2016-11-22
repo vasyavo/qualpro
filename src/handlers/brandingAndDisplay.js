@@ -95,14 +95,25 @@ function BrandingAndDisplay(db, redis, event) {
                         _id : new ObjectId(id)
                     }
                 }])
-                .unwind('categories')
+                .append({
+                    $unwind : {
+                        path : '$categories',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
+                //.unwind('categories')
                 .lookup({
                     from : 'categories',
                     localField : 'categories',
                     foreignField : '_id',
                     as : 'categories'
                 })
-                .unwind('$categories')
+                .append({
+                    $unwind : {
+                        path : '$categories',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .group({
                     '_id' : '$_id',
                     categories : {$push : '$categories'},
@@ -354,13 +365,14 @@ function BrandingAndDisplay(db, redis, event) {
                     foreignField : '_id',
                     as : 'createdBy'
                 })
-                .append([{
-                    $unwind: {
-                        path                      : 'createdBy',
-                        preserveNullAndEmptyArrays: true
-                    }
-                }])
-                //.unwind('createdBy')
+                .unwind('createdBy')
+                .lookup({
+                    from : CONTENT_TYPES.POSITION + 's',
+                    localField : 'createdBy.position',
+                    foreignField : '_id',
+                    as : 'createdBy.position'
+                })
+                .unwind('createdBy.position')
                 .unwind('createdBy.country')
                 .lookup({
                     from : CONTENT_TYPES.DOMAIN + 's',
@@ -370,37 +382,20 @@ function BrandingAndDisplay(db, redis, event) {
                 })
                 .unwind('countries')
                 .lookup({
-                    from : CONTENT_TYPES.POSITION + 's',
-                    localField : 'createdBy.position',
-                    foreignField : '_id',
-                    as : 'createdBy.position'
-                })
-                .unwind('createdBy.position')
-                .lookup({
                     from : CONTENT_TYPES.ACCESSROLE + 's',
                     localField : 'createdBy.accessRole',
                     foreignField : '_id',
                     as : 'createdBy.accessRole'
                 })
                 .unwind('createdBy.accessRole')
-                .append([{
-                    $unwind: {
-                        path                      : 'attachments',
-                        preserveNullAndEmptyArrays: true
-                    }
-                }])
+                .unwind('attachments')
                 .lookup({
                     from : CONTENT_TYPES.FILES,
                     localField : 'attachments',
                     foreignField : '_id',
                     as : 'attachments'
                 })
-                .append([{
-                    $unwind: {
-                        path                      : '$attachments',
-                        preserveNullAndEmptyArrays: true
-                    }
-                }])
+                .unwind('attachments')
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
@@ -596,7 +591,6 @@ function BrandingAndDisplay(db, redis, event) {
 
                 res.send(200, {
                     total : count,
-                    length : result[1].length,
                     data : result[1]
                 });
             });
@@ -614,7 +608,7 @@ function BrandingAndDisplay(db, redis, event) {
 
             queryRun(query);
         });
-    };
+    }
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {
