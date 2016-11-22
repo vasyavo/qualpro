@@ -95,14 +95,25 @@ function BrandingAndDisplay(db, redis, event) {
                         _id : new ObjectId(id)
                     }
                 }])
-                .unwind('categories')
+                .append({
+                    $unwind : {
+                        path : '$categories',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
+                //.unwind('categories')
                 .lookup({
                     from : 'categories',
                     localField : 'categories',
                     foreignField : '_id',
                     as : 'categories'
                 })
-                .unwind('$categories')
+                .append({
+                    $unwind : {
+                        path : '$categories',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .group({
                     '_id' : '$_id',
                     categories : {$push : '$categories'},

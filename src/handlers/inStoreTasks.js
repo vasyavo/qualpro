@@ -1472,7 +1472,7 @@ var InStoreReports = function (db, redis, event) {
                             .lean()
                             .exec(cb);
                     } else {
-                        cb(null);
+                        cb(null, true);
                     }
                 },
 
@@ -1484,7 +1484,7 @@ var InStoreReports = function (db, redis, event) {
                         });
                     }
                     if (myCC) {
-                        queryObject.$and[0]['assignedTo'].$in = [arrayOfUserId[0]._id];
+                        queryObject.$and[0]['assignedTo'].$in = arrayOfSubordinateUsersId;
                     }
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },

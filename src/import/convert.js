@@ -391,37 +391,54 @@ function importPersonnel(callback) {
 
                 if (country) {
                     parallelJobs.country = (cb) => {
+                        const countries = country
+                            .split(',')
+                            .map((item) => (item.trim()));
                         const query = {
-                            'name.en': country
+                            'name.en': {
+                                $in: countries
+                            }
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb)
                     };
                 }
 
                 if (region) {
                     parallelJobs.region = (cb) => {
+                        const regions = region
+                            .split(',')
+                            .map((item) => (item.trim()));
                         const query = {
-                            'name.en': region
+                            'name.en': {
+                                $in: regions
+                            }
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb)
                     }
                 }
 
                 if (subRegion) {
                     parallelJobs.subRegion = (cb) => {
+                        const subRegions = subRegion
+                            .split(',')
+                            .map((item) => (item.trim()));
                         const query = {
-                            'name.en': subRegion
+                            'name.en': {
+                                $in: subRegions
+                            }
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb)
                     };
                 }
 
                 if (branch) {
                     parallelJobs.branch = (cb) => {
-                        const branches = branch.split('| ');
+                        const branches = branch
+                            .split('|')
+                            .map((item) => (item.trim()));
                         const query = {
                             'name.en': {
                                 $in: branches
@@ -457,16 +474,22 @@ function importPersonnel(callback) {
                         return mapCb(err);
                     }
 
-                    patch.country = population.country ?
-                        [population.country._id] : null;
-                    patch.region = population.region ?
-                        [population.region._id] : null;
-                    patch.subRegion = population.subRegion ?
-                        [population.subRegion._id] : null;
-                    patch.branch = population.branch ?
+                    patch.country = Array.isArray(population.country) ?
+                        population.country.map((model) => {
+                            return model._id;
+                        }) : [];
+                    patch.region = Array.isArray(population.region) ?
+                        population.region.map((model) => {
+                            return model._id;
+                        }) : [];
+                    patch.subRegion = Array.isArray(population.subRegion) ?
+                        population.subRegion.map((model) => {
+                            return model._id;
+                        }) : [];
+                    patch.branch = Array.isArray(population.branch) ?
                         population.branch.map((model) => {
-                           return model._id;
-                        }) : null;
+                            return model._id;
+                        }) : [];
                     patch.position = population.position ?
                         population.position._id : null;
                     patch.accessRole = population.accessRole ?
