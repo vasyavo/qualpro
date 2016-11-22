@@ -122,21 +122,7 @@ module.exports = function (db, app, redis, event) {
      */
     // router.post('/login', personnelHandler.login);
 
-    app.get('/logout', csrfProtection, function (req, res, next) {
-        if (req.session) {
-            req.session.destroy(function (err) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.status(200).send();
-            });
-        } else {
-            res.status(200).send();
-        }
-
-        res.clearCookie();
-    });
+    app.get('/logout', csrfProtection, personnelHandler.logout);
     app.post('/login', function (req, res, next) {
         req.isMobile = true;
 

@@ -56,6 +56,23 @@ module.exports = function(io, unreadCache) {
             });
         });
 
+        socket.on('logout', function() {
+            const _this = this;
+
+            redis.cacheStore.getValueHashByField(onlineKey, _this.id, function(err, uid) {
+                if (err) {
+                    return next(err);
+                }
+
+                redis.cacheStore.removeStorageHashByField(onlineKey, _this.id);
+
+                console.log('----logout-----');
+                socket.broadcast.to('online_status').emit('goOffline', {
+                    uid
+                });
+            });
+        });
+
         socket.on('unsubscribe_online_status', function() {
             socket.leave('online_status');
         });
