@@ -41,6 +41,8 @@ define([
             var self = this;
 
             $.get('/logout', function () {
+                App.socket.emit('logout');
+
                 delete App.currentUser;
 
                 self.changeStyle('en');
