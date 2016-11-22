@@ -473,9 +473,6 @@ function importPersonnel(callback) {
                     if (err) {
                         return mapCb(err);
                     }
-                    if (patch.email === 'am_uae@yopmail.com') {
-                        console.log()
-                    }
 
                     patch.country = Array.isArray(population.country) ?
                         population.country.map((model) => {
