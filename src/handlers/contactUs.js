@@ -131,9 +131,14 @@ var ContactUs = function(db, redis, event) {
         }
 
         function queryRun(query) {
-            var skip = (query.page - 1) * query.count;
-            var condition = generateSearchCondition(query.filter);
-            var mongoQuery = ContactUsModel.aggregate()
+            const count = query.count;
+            const skip = (query.page - 1) * count;
+            if (query.filter && query.filter.time) {
+                query.filter.startDate = query.filter.time.values[0];
+                query.filter.endDate = query.filter.time.values[1];
+            }
+            const condition = generateSearchCondition(query.filter);
+            const mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
@@ -198,8 +203,8 @@ var ContactUs = function(db, redis, event) {
                     'country.name' : 1,
                     'country._id' : 1
                 })
-                .limit(query.count)
                 .skip(skip)
+                .limit(count)
                 .sort(query.sortBy)
                 .allowDiskUse(true);
 

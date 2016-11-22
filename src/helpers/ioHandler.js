@@ -1,24 +1,34 @@
-module.exports = function (io, unreadCache) {
+module.exports = function(io, unreadCache) {
     "use strict";
 
-    var _ = require('lodash');
-    var logWriter = require('../helpers/logWriter.js');
-    var MAIN_CONSTANTS = require('../constants/mainConstants.js');
-    var actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
-    var redis = unreadCache.redis;
+    const _ = require('lodash');
+    const async = require('async');
+    const logWriter = require('../helpers/logWriter.js');
+    const MAIN_CONSTANTS = require('../constants/mainConstants.js');
+    const actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
+    const redis = unreadCache.redis;
+    const onlineKey = 'online';
 
-    io.sockets.on('connection', function (socket) {
+    io.sockets.on('connection', function(socket) {
         console.log('----socket connected-----');
 
-        socket.on('save_socket_connection', function (data) {
-            var that = this;
+        socket.on('save_socket_connection', function(data) {
+            var _this = this;
             var userId = data.uId;
-            var actionKey = actionKeyTemplate({userId: userId, moduleId: 'alalali'});
+            var actionKey = actionKeyTemplate({
+                userId : userId,
+                moduleId : 'alalali'
+            });
 
-            that.uId = data.uId;
-            unreadCache.setUserSocketId(data.uId, that.id);
+            _this.uId = data.uId;
+            unreadCache.setUserSocketId(data.uId, _this.id);
+            redis.cacheStore.writeToStorageHash(onlineKey, _this.id, data.uId);
 
-            redis.cacheStore.readFromStorage(actionKey, function (err, number) {
+            socket.broadcast.to('online_status').emit('goOnline', {
+                uid : _this.uId
+            });
+
+            redis.cacheStore.readFromStorage(actionKey, function(err, number) {
                 if (err) {
                     return next(err);
                 }
@@ -26,14 +36,63 @@ module.exports = function (io, unreadCache) {
                 if (!number) {
                     number = 0
                 }
-                socket.emit('message', {badge: number});
+                socket.emit('message', {badge : number});
             });
 
         });
 
-        socket.on('disconnect', function () {
-            console.log('disconnect');
-            unreadCache.deleteUserSocketId(this.uId, this.id);
+
+        socket.on('subscribe_online_status', function() {
+            socket.join('online_status');
+
+            redis.cacheStore.getValuesStorageHash(onlineKey, function(err, online) {
+                if (err) {
+                    return next(err);
+                }
+
+                socket.emit('online', {
+                    online : _.uniq(online)
+                });
+            });
+        });
+
+        socket.on('logout', function() {
+            const _this = this;
+
+            redis.cacheStore.getValueHashByField(onlineKey, _this.id, function(err, uid) {
+                if (err) {
+                    return next(err);
+                }
+
+                redis.cacheStore.removeStorageHashByField(onlineKey, _this.id);
+
+                console.log('----logout-----');
+                socket.broadcast.to('online_status').emit('goOffline', {
+                    uid
+                });
+            });
+        });
+
+        socket.on('unsubscribe_online_status', function() {
+            socket.leave('online_status');
+        });
+
+        socket.on('disconnect', function() {
+            const _this = this;
+
+            redis.cacheStore.getValueHashByField(onlineKey, _this.id, function(err, uid) {
+                if (err) {
+                    return next(err);
+                }
+
+                unreadCache.deleteUserSocketId(this.uId, this.id);
+                redis.cacheStore.removeStorageHashByField(onlineKey, _this.id);
+
+                console.log('----socket disconnected-----');
+                socket.broadcast.to('online_status').emit('goOffline', {
+                    uid
+                });
+            });
         });
     });
 };

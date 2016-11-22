@@ -351,3 +351,79 @@ Update BrandingAndDisplay by id.
     + Attributes (BrandingAndDisplayCreate)
 + Response 400 (application/json)
     + Attributes (GenericError)
+
+# Group Online Status
+
+## Send  event save_socket_connection [/socket.io]
+
+### save_socket_connection [POST]
+Register current user and his user id in cache
++ Request (text/plain)
+    + Attributes
+        + uId : `5818b01a13187de020871b63` (string, required)
+        + event : save_socket_connection (string, required)
++ Response 200
+
+## Send  event save_socket_connection [/socket.io]
+
+### subscribe_online_status [POST]
+Subscribe to listen who is online
++ Request (text/plain)
+    + Attributes
+        + event : subscribe_online_status (string, required)
+
++ Response 200
+
+## Listen to event online [/socket.io]
+
+### online [GET]
+Get uid online users
++ Request (text/plain)
+    + Attributes
+        + event : online (string, required)
++ Response 200
+    + Attributes
+        + online : 5818b01a13187de020871b63,5818b01a13187de020871b63 (array)
+
+## Listen to event goOnline [/socket.io]
+
+### goOnline [GET]
+Get uid user who go online
++ Request (text/plain)
+    + Attributes
+        + event : goOnline (string, required)
++ Response 200
+    + Attributes
+        + uid : 5818b01a13187de020871b63 (string)
+
+## Listen to event goOffline [/socket.io]
+
+### goOffline [GET]
+Get uid user who go offline
++ Request (text/plain)
+    + Attributes
+        + event : goOffline (string, required)
++ Response 200
+    + Attributes
+        + uid : 5818b01a13187de020871b63 (string)
+
+
+## Send  event unsubscribe_online_status [/socket.io]
+
+### unsubscribe_online_status [POST]
+Unsubscribe to listen who is online
++ Request (text/plain)
+    + Attributes
+        + event : unsubscribe_online_status (string, required)
+
++ Response 200
+
+## Send  event logout [/socket.io]
+
+### logout [POST]
+Unsubscribe to listen who is online
++ Request (text/plain)
+    + Attributes
+        + event : logout (string, required)
+
++ Response 200

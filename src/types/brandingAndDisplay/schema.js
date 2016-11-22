@@ -28,6 +28,10 @@ const schema = new Schema({
         type: Date
     },
     attachments: { type: Array, default: [] },
+    comments : {
+        type : Array,
+        default : []
+    },
     description: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }

@@ -626,7 +626,7 @@ var BrandingActivity = function (db, redis, event) {
                         actionType: ACTIVITY_TYPES.CREATED,
                         createdBy : body.createdBy,
                         itemId    : model._id,
-                        itemType  : CONTENT_TYPES.BRANDINGANDDISPLAY
+                        itemType  : CONTENT_TYPES.BRANDING_ACTIVITY
                     });
 
                     cb(null, model);
@@ -673,8 +673,7 @@ var BrandingActivity = function (db, redis, event) {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRANDINGANDDISPLAY, 'create', function (err, saveData) {
-
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRANDING_ACTIVITY, 'create', function (err, saveData) {
                 if (err) {
                     return next(err);
                 }

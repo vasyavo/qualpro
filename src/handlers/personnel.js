@@ -36,6 +36,7 @@ var Personnel = function (db, redis, event) {
     var logWriter = require('../helpers/logWriter.js');
     var SomeEvents = require('../helpers/someEvents');
     var someEvents = new SomeEvents();
+    var app = require('../server')
 
     var $defProjection = {
         _id             : 1,
@@ -1362,7 +1363,7 @@ var Personnel = function (db, redis, event) {
 
             locationField = locationsByLevel[level];
 
-            if (locationField && !personnel[locationField].length) {
+            if (locationField && personnel[locationField] && !personnel[locationField].length) {
                 error = new Error('You have no location. Please contact with administration.');
                 error.status = 403;
 
@@ -3494,6 +3495,22 @@ var Personnel = function (db, redis, event) {
             }
         });
     };
+
+    this.logout = function(req, res, next) {
+        if (req.session) {
+            req.session.destroy(function(err) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send();
+            });
+        } else {
+            res.status(200).send();
+        }
+
+        res.clearCookie();
+    }
 };
 
 module.exports = Personnel;

@@ -135,7 +135,7 @@ function (Backbone, $, _, CreateTemplate, BaseView, Model, common, populate, cou
             $curEl.find('#dateJoined').datepicker({
                 changeMonth: true,
                 changeYear : true,
-                yearRange  : '-100y:c+nn',
+                yearRange  : '-20y:c+10y',
                 maxDate    : new Date(),
                 defaultDate: new Date()
             });

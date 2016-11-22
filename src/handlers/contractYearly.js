@@ -716,21 +716,15 @@ var Contract = function (db, redis, event) {
     };
 
     this.getAll = function (req, res, next) {
-        function queryRun(personnel) {
-            var query = req.query;
-            var filter = query.filter || {};
-            var page = query.page || 1;
-            var contentType = query.contentType;
-            var limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
-            var aggregateHelper;
-            var filterMapper = new FilterMapper();
-            var filterSearch = filter.globalSearch || '';
-            var queryObject;
-            var pipeLine;
-            var aggregation;
-            var positionFilter = {};
-            var searchFieldsArray = [
+        function queryRun(personnel, callback) {
+            const query = req.query;
+            const filter = query.filter || {};
+            const page = query.page || 1;
+            const limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
+            const skip = (page - 1) * limit;
+            const filterSearch = filter.globalSearch || '';
+            const isMobile = req.isMobile;
+            const searchFieldsArray = [
                 'description.en',
                 'description.ar',
                 'country.name.en',
@@ -765,7 +759,8 @@ var Contract = function (db, redis, event) {
 
             delete filter.globalSearch;
 
-            queryObject = filterMapper.mapFilter({
+            const filterMapper = new FilterMapper();
+            const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.CONTRACTSYEARLY,
                 filter     : filter,
                 personnel  : personnel
@@ -776,14 +771,12 @@ var Contract = function (db, redis, event) {
                 delete queryObject.personnel;
             }
 
+            const positionFilter = {};
+
             if (queryObject.position && queryObject.position.$in) {
-                positionFilter = {
-                    $or: [
-                        {
-                            'createdBy.user.position': queryObject.position
-                        }
-                    ]
-                };
+                positionFilter.$or = [{
+                    'createdBy.user.position': queryObject.position
+                }];
 
                 delete queryObject.position;
             }
@@ -811,98 +804,144 @@ var Contract = function (db, redis, event) {
             } else {
                 queryObject.$or = orCondition;
             }
-
-            aggregateHelper = new AggregationHelper($defProjection, queryObject);
-
-            pipeLine = getAllPipeline({
-                aggregateHelper  : aggregateHelper,
-                queryObject      : queryObject,
-                positionFilter   : positionFilter,
-                isMobile         : req.isMobile,
-                searchFieldsArray: searchFieldsArray,
-                filterSearch     : filterSearch,
-                skip             : skip,
-                limit            : limit
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const pipeLine = getAllPipeline({
+                aggregateHelper,
+                queryObject,
+                positionFilter,
+                isMobile,
+                searchFieldsArray,
+                filterSearch,
+                skip,
+                limit
             });
 
-            aggregation = ContractYearlyModel.aggregate(pipeLine);
+            async.waterfall([
 
-            aggregation.options = {
-                allowDiskUse: true
-            };
+                (cb) => {
+                    const aggregation = ContractYearlyModel.aggregate(pipeLine);
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-                if (err) {
-                    return next(err);
-                }
+                    aggregation.options = {
+                        allowDiskUse: true
+                    };
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                    aggregation.exec(cb);
+                },
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
+                (response, cb) => {
+                    let personnelIds = [];
+                    const fileIds = [];
 
-                if (response && response.data && response.data.length) {
-                    response.data = _.map(response.data, function (model) {
-                        if (model.description) {
-                            model.description = {
-                                en: _.unescape(model.description.en),
-                                ar: _.unescape(model.description.ar)
-                            };
-                        }
-                        _.map(model.documents, function (el) {
-                            personnelIds.push(el.createdBy.user._id);
+                    response = response && response[0] ?
+                        response[0] : { data: [], total: 0 };
+
+                    if (!response.data.length) {
+                        return next({
+                            status: 200,
+                            body: response
                         });
-                        personnelIds.push(model.createdBy.user._id);
-                        fileIds = _.union(fileIds, _.map(model.documents, '_id'));
-
-                        return model;
-                    });
-                }
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
                     }
 
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
-                    setOptions.fields = fieldNames;
+                    if (response && response.data && response.data.length) {
+                        response.data = response.data.map((model) => {
+                            if (model.description) {
+                                model.description = {
+                                    en: _.unescape(model.description.en),
+                                    ar: _.unescape(model.description.ar)
+                                };
+                            }
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                            model.documents.forEach((item) => {
+                                const itUser = item.createdBy.user;
+
+                                if (itUser && itUser._id) {
+                                    personnelIds.push(itUser._id);
+                                }
+                            });
+
+                            const createdByUser = model.createdBy.user;
+
+                            if (createdByUser && createdByUser._id) {
+                                personnelIds.push(createdByUser._id);
+                            }
+
+                            const documentsId = model.documents
+                                .filter((item) => {
+                                    return item && item._id;
+                                })
+                                .map((item) => (item._id));
+
+                            fileIds.push(...documentsId);
+
+                            return model;
+                        });
+                    }
+
+                    personnelIds = _.uniqBy(personnelIds, 'id');
+
+                    cb(null, {
+                        personnelIds,
+                        fileIds,
+                        response
                     })
-                });
-            });
+                },
+
+                (data, cb) => {
+                    const personnelIds = data.personnelIds;
+                    const fileIds = data.fileIds;
+                    const response = data.response;
+
+                    const options = {
+                        data: {}
+                    };
+
+                    options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
+                    options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
+
+                    async.waterfall([
+
+                        async.apply(getImagesHelper.getImages, options),
+
+                        (result, cb) => {
+                            const fieldNames = {};
+                            const setOptions = {
+                                response,
+                                imgsObject: result,
+                                fields: fieldNames
+                            };
+
+                            fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
+                            fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
+
+                            getImagesHelper.setIntoResult(setOptions, (data) => {
+                                // fixme incorrect error callback format
+                                cb(null, data);
+                            });
+                        }
+
+                    ], cb);
+                },
+
+            ], callback);
         }
 
-        access.getReadAccess(req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY, function (err, allowed, personnel) {
+        async.waterfall([
+
+            async.apply(access.getReadAccess, req, ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY),
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb)
+            }
+
+        ], (err, response) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun(personnel);
+            next({
+                status: 200,
+                body: response
+            });
         });
     };
 
