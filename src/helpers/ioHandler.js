@@ -3,6 +3,7 @@ module.exports = function(io, unreadCache) {
 
     const _ = require('lodash');
     const async = require('async');
+    const logger = require('../utils/logger');
     const logWriter = require('../helpers/logWriter.js');
     const MAIN_CONSTANTS = require('../constants/mainConstants.js');
     const actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
@@ -66,7 +67,7 @@ module.exports = function(io, unreadCache) {
 
                 redis.cacheStore.removeStorageHashByField(onlineKey, _this.id);
 
-                console.log('----logout-----');
+                logger.info('----logout-----');
                 socket.broadcast.to('online_status').emit('goOffline', {
                     uid
                 });
@@ -88,7 +89,7 @@ module.exports = function(io, unreadCache) {
                 unreadCache.deleteUserSocketId(this.uId, this.id);
                 redis.cacheStore.removeStorageHashByField(onlineKey, _this.id);
 
-                console.log('----socket disconnected-----');
+                logger.info('----socket disconnected-----');
                 socket.broadcast.to('online_status').emit('goOffline', {
                     uid
                 });

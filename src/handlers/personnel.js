@@ -36,7 +36,8 @@ var Personnel = function (db, redis, event) {
     var logWriter = require('../helpers/logWriter.js');
     var SomeEvents = require('../helpers/someEvents');
     var someEvents = new SomeEvents();
-    var app = require('../server')
+    var app = require('../server');
+    const socketIO = require('socket.io');
 
     var $defProjection = {
         _id             : 1,
@@ -3503,6 +3504,7 @@ var Personnel = function (db, redis, event) {
                     return next(err);
                 }
 
+                socketIO.emit('logout');
                 res.status(200).send();
             });
         } else {
