@@ -80,7 +80,8 @@ const getAll = Joi.object().keys({
         subRegion : objectIdsCollection,
         position : objectIdsCollection,
         startDate : Joi.date().default(startOfYear, 'start of a year date'),
-        endDate : Joi.date().default(currentDate, 'current date')
+        endDate : Joi.date().default(currentDate, 'current date'),
+        globalSearch : Joi.string()
     }).rename('personnel', 'createdBy').default({
         startDate : startOfYear(),
         endDate : currentDate()
