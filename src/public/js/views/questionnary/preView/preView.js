@@ -149,126 +149,209 @@ define([
                     d   : arc
                 });
 
-            arcs.append('polyline')
+            rect = arcs.append("rect").attr({
+                x: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    x = Math.cos(midAngle) * 110;
+                    sign = (x > 0) ? 1 : -1;
+                    labelX = x + (5 * sign);
+                    if(centroid[0] > 0) {
+                        return labelX;
+                    }
+                    return labelX - 140;
+                },
+                y: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    y = Math.sin(midAngle) * 110 -30;
+                    return y + 12;
+                },
+                width    : 16,
+                height   : 16,
+                fill     : function (d, i) {
+                    return color(i);
+                }
+            });
+
+            rectNumber = arcs.append('text').attr({
+                x: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    x = Math.cos(midAngle) * 110;
+                    sign = (x > 0) ? 1 : -1;
+                    labelX = x + (5 * sign);
+                    if(centroid[0] > 0) {
+                        return labelX + 8;
+                    }
+                    return labelX - 140 + 8;
+                },
+                y: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    y = Math.sin(midAngle) * 110 -30;
+                    return y + 22;
+                },
+                "text-anchor": 'middle',
+                "font-size"  : '12px',
+                "fill"       : "#fff"
+            }).text(function (d, i) {
+                return i + 1;
+            });
+
+            percent = arcs.append('text').attr({
+                x: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    x = Math.cos(midAngle) * 110;
+                    sign = (x > 0) ? 1 : -1;
+                    labelX = x + (5 * sign);
+                    if(centroid[0] > 0) {
+                        return labelX + 40;
+                    }
+                    return labelX - 140 + 40;
+                },
+                y: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    y = Math.sin(midAngle) * 110 -30;
+                    return y + 22;
+                },
+                "text-anchor": 'middle',
+                "font-size"  : '12px',
+                "font-weight": 'bold'
+            }).text(function (d, i) {
+                return percentArray[i] + '%';
+            });
+
+            optionsCount = arcs.append('text').attr({
+                x: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    x = Math.cos(midAngle) * 110;
+                    sign = (x > 0) ? 1 : -1;
+                    labelX = x + (5 * sign);
+                    if(centroid[0] > 0) {
+                        return labelX + 72;
+                    }
+                    return labelX - 140 + 72;
+                },
+                y: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    y = Math.sin(midAngle) * 110 -30;
+                    return y + 22;
+                },
+                "text-anchor": 'middle',
+                "font-size"  : '12px'
+            }).text(function (d, i) {
+                return ' ( ' + optionsCountArray[i] + ' )';
+            });
+
+            textLabels = arcs.append("text").attr({
+                x: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    x = Math.cos(midAngle) * 110;
+                    sign = (x > 0) ? 1 : -1;
+                    labelX = x + (5 * sign);
+                    if(centroid[0] > 0) {
+                        return labelX;
+                    }
+                    return labelX - 145;
+                },
+                y: function (d) {
+                    centroid = arc.centroid(d);
+                    midAngle = Math.atan2(centroid[1], centroid[0]);
+                    y = Math.sin(midAngle) * 110;
+                    return y + 10;
+                },
+                'text-anchor': 'start',
+                "font-size"  : '12px',
+                'font-style' : 'italic'
+            }).text(function (d, i) {
+                return options[i].currentLanguage.capitalizer('firstCaps');
+            });
+
+            textLines = arcs.append("polyline")
                 .style({
                     fill          : 'none',
                     stroke        : 'black',
                     'stroke-width': 1
-                })
-                .attr({
-                    points: function (d, i) {
-                        var startPoint = arc.centroid(d);
-                        var endPoint = outerArc.centroid(d);
-                        var horizontalLinePoint;
+                }).attr({
+                points: function (d, i) {
+                    var startPoint = arc.centroid(d);
+                    var endPoint = outerArc.centroid(d);
+                    var horizontalLinePoint;
 
-                        if (endPoint[0] > 0) {
-                            horizontalLinePoint = [endPoint[0] + 150, endPoint[1]];
-                        } else {
-                            horizontalLinePoint = [endPoint[0] - 150, endPoint[1]];
-                        }
-
-                        horizontalLinePoints.push(horizontalLinePoint);
-
-                        return startPoint.join(', ') + ' ' + endPoint.join(', ') + ' ' + horizontalLinePoint.join(', ');
+                    if (endPoint[0] > 0) {
+                        horizontalLinePoint = [endPoint[0] + 150, endPoint[1]];
+                    } else {
+                        horizontalLinePoint = [endPoint[0] - 150, endPoint[1]];
                     }
+
+                    horizontalLinePoints.push(horizontalLinePoint);
+
+                    return startPoint.join(', ') + ' ' + endPoint.join(', ') + ' ' + horizontalLinePoint.join(', ');
+                },
+                'class': "label-line",
+                "fill" : "#000",
+                "stroke": '#393939'
+            });
+
+            alpha = 0.5;
+            spacing = 40;
+
+            function push() {
+                again = false;
+                textLabels.each(function (d) {
+                    a = this;
+                    da = d3.select(a);
+                    y1 = da.attr("y");
+                    textLabels.each(function (d) {
+                        b = this;
+                        if (a == b) return;
+                        db = d3.select(b);
+                        if (da.attr("text-anchor") != db.attr("text-anchor")) return;
+                        if (da.attr("x") < 0 && db.attr("x") > 0 || da.attr("x") > 0 && db.attr("x") < 0) return;
+                        y2 = db.attr("y");
+                        deltaY = y1 - y2;
+
+                        if (Math.abs(deltaY) > spacing) return;
+
+                        again = true;
+                        sign = deltaY > 0 ? 1 : -1;
+                        adjust = sign * alpha;
+                        da.attr("y",+y1 + adjust);
+                        db.attr("y",+y2 - adjust);
+                    });
                 });
-
-            arcs.append('rect')
-                .attr({
-                    transform: function (d, i) {
-                        var translate = horizontalLinePoints[i];
-
-                        if (translate[0] > 0) {
-                            translate[0] -= 140;
-                        }
-
-                        translate[1] -= 20;
-
-                        return 'translate(' + translate + ')';
-                    },
-                    width    : 16,
-                    height   : 16,
-                    fill     : function (d, i) {
-                        return color(i);
-                    }
-                });
-
-            arcs
-                .append('text')
-                .attr({
-                    transform    : function (d, i) {
-                        var translate = horizontalLinePoints[i];
-
-                        translate[0] += 8;
-                        translate[1] += 12;
-
-                        return 'translate(' + translate + ')';
-                    },
-                    "text-anchor": 'middle',
-                    "font-size"  : '12px',
-                    "fill"       : "#fff"
-                }).text(function (d, i) {
-                return i + 1;
-            });
-
-            arcs
-                .append('text')
-                .attr({
-                    transform    : function (d, i) {
-                        var translate = horizontalLinePoints[i];
-
-                        if (translate[0] > 0) {
-                            translate[0] += 32;
-                        } else {
-                            translate[0] += 30;
-                        }
-
-                        return 'translate(' + translate + ')';
-                    },
-                    "text-anchor": 'middle',
-                    "font-size"  : '12px',
-                    "font-weight": 'bold'
-                }).text(function (d, i) {
-                return percentArray[i] + '%';
-            });
-
-            arcs
-                .append('text')
-                .attr({
-                    transform    : function (d, i) {
-                        var translate = horizontalLinePoints[i];
-
-                        if (translate[0] > 0) {
-                            translate[0] += 35;
-                        } else {
-                            translate[0] += 35;
-                        }
-
-                        return 'translate(' + translate + ')';
-                    },
-                    "text-anchor": 'middle',
-                    "font-size"  : '12px'
-                }).text(function (d, i) {
-                return ' ( ' + optionsCountArray[i] + ' )';
-            });
-
-            arcs
-                .append('text')
-                .attr({
-                    transform    : function (d, i) {
-                        var translate = horizontalLinePoints[i];
-
-                        translate[0] -= 50;
-                        translate[1] += 20;
-
-                        return 'translate(' + translate + ')';
-                    },
-                    "text-anchor": 'middle',
-                    "font-size"  : '12px',
-                    'font-style' : 'italic'
-                }).text(function (d, i) {
-                return options[i].currentLanguage.capitalizer('firstCaps');
-            });
+                if(again) {
+                    labelElements = textLabels[0];
+                    textLines.attr("y2",function(d, i) {
+                        labelForLine = d3.select(labelElements[i]);
+                        return labelForLine.attr("y");
+                    });
+                    rect.attr("y", function (d, i) {
+                        labelForLine = d3.select(labelElements[i]);
+                        return labelForLine.attr("y") - 28;
+                    });
+                    rectNumber.attr("y", function (d, i) {
+                        labelForLine = d3.select(labelElements[i]);
+                        return labelForLine.attr("y") - 16;
+                    });
+                    percent.attr("y", function (d, i) {
+                        labelForLine = d3.select(labelElements[i]);
+                        return labelForLine.attr("y") - 16;
+                    });
+                    optionsCount.attr("y", function (d, i) {
+                        labelForLine = d3.select(labelElements[i]);
+                        return labelForLine.attr("y") - 16;
+                    });
+                    setTimeout(push, 10)
+                }
+            }
+            push();
         },
 
         renderFullRespondentsList: function () {
