@@ -837,12 +837,16 @@ a {
 }
 .searchInputWrap label:after,
 .dialogCategoryInputWrap label:after {
+  line-height: 2.4;
   content: '\e929';
   position: absolute;
   top: 0;
   left: 11px;
   font-family: 'icomoon';
   color: #c4c4c4;
+}
+.filterBar .searchInputWrap label:after {
+  line-height: 3.4;
 }
 .dialogCategoryInputWrap label:after {
   top: 10px;
@@ -4442,7 +4446,8 @@ a.disabled {
   height: calc(100% - 90px);
   padding: 30px;
 }
-.contactUsForm .block-right {
+.contactUsForm .block-right,
+.contactUsForm .block-left {
   height: 100%;
 }
 .contactUsForm .descriptionValue {
@@ -4932,10 +4937,35 @@ a.disabled {
 .consumerSurveyForm .blockObjective .arabicIcon {
   margin-left: 70px;
 }
+.consumerSurveyForm .dropDownInput input {
+  background: white;
+}
+.createConsumer .consumerSurveyForm {
+  position: relative;
+  height: calc(100% - 263px);
+}
+.createConsumer .consumerSurveyForm .dropDownInput input {
+  min-width: auto;
+}
+.createConsumer .consumerSurveyForm .absoluteContent tr th,
+.createConsumer .consumerSurveyForm .absoluteContent tr td {
+  text-align: left;
+  padding: 0 15px;
+}
+.createConsumer .consumerSurveyForm .absoluteContent tr th input:not([type=checkbox]),
+.createConsumer .consumerSurveyForm .absoluteContent tr td input:not([type=checkbox]) {
+  height: 30px;
+}
+.createConsumer .consumerSurveyForm .blockObjective {
+  position: relative;
+}
 .consumerSurveyPreviewForm .userLogo {
   width: 70px;
   height: 70px;
   margin-left: 15px;
+}
+.consumerSurveyPreviewForm .consumersList {
+  height: calc(100% - 100px);
 }
 .consumerSurveyPreviewForm .consumersList .templateWrap {
   background: white;
@@ -9198,7 +9228,7 @@ table.fancytree-ext-table {
   margin: 7px 0 0 5px;
 }
 .questionsSearchBlock .searchLabel:after {
-  top: 7px;
+  line-height: 2.4;
 }
 .questionsSearchBlock .searchInput {
   height: 36px;
