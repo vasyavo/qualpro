@@ -2092,7 +2092,7 @@ var Objectives = function (db, redis, event) {
                             .lean()
                             .exec(cb);
                     } else {
-                        cb(null);
+                        cb(null, true);
                     }
                 },
                 function (arrayOfUserId, cb) {
