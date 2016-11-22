@@ -391,31 +391,40 @@ function importPersonnel(callback) {
 
                 if (country) {
                     parallelJobs.country = (cb) => {
+                        const countries = country.split(',');
                         const query = {
-                            'name.en': country
+                            'name.en': {
+                                $in: countries
+                            }
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb)
                     };
                 }
 
                 if (region) {
                     parallelJobs.region = (cb) => {
+                        const regions = region.split(',');
                         const query = {
-                            'name.en': region
+                            'name.en': {
+                                $in: regions
+                            }
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb)
                     }
                 }
 
                 if (subRegion) {
                     parallelJobs.subRegion = (cb) => {
+                        const subRegions = subRegion.split(',');
                         const query = {
-                            'name.en': subRegion
+                            'name.en': {
+                                $in: subRegions
+                            }
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb)
                     };
                 }
 
@@ -457,16 +466,10 @@ function importPersonnel(callback) {
                         return mapCb(err);
                     }
 
-                    patch.country = population.country ?
-                        [population.country._id] : null;
-                    patch.region = population.region ?
-                        [population.region._id] : null;
-                    patch.subRegion = population.subRegion ?
-                        [population.subRegion._id] : null;
-                    patch.branch = population.branch ?
-                        population.branch.map((model) => {
-                           return model._id;
-                        }) : null;
+                    patch.country = population.country.map((model) => (model._id));
+                    patch.region = population.region.map((model) => (model._id));
+                    patch.subRegion = population.subRegion.map((model) => (model._id));
+                    patch.branch = population.branch.map((model) => (model._id));
                     patch.position = population.position ?
                         population.position._id : null;
                     patch.accessRole = population.accessRole ?
