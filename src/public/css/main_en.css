@@ -837,12 +837,16 @@ a {
 }
 .searchInputWrap label:after,
 .dialogCategoryInputWrap label:after {
+  line-height: 2.4;
   content: '\e929';
   position: absolute;
   top: 0;
   left: 11px;
   font-family: 'icomoon';
   color: #c4c4c4;
+}
+.filterBar .searchInputWrap label:after {
+  line-height: 3.4;
 }
 .dialogCategoryInputWrap label:after {
   top: 10px;
@@ -1059,6 +1063,12 @@ p {
 .black {
   color: #000000;
 }
+.red {
+  color: #c62828;
+}
+.green {
+  color: #00c853;
+}
 .fontBold {
   font-family: 'proxima_nova_ltsemibold', sans-serif;
 }
@@ -1085,6 +1095,9 @@ p {
 .fontMicro {
   font-size: 10px;
   font-size: 0.625rem;
+}
+.uppercase {
+  text-transform: uppercase;
 }
 @media screen and (max-width: 992px) {
   .wrapper .topMenuHolder .loginPanel {
@@ -4442,7 +4455,8 @@ a.disabled {
   height: calc(100% - 90px);
   padding: 30px;
 }
-.contactUsForm .block-right {
+.contactUsForm .block-right,
+.contactUsForm .block-left {
   height: 100%;
 }
 .contactUsForm .descriptionValue {
@@ -4932,10 +4946,35 @@ a.disabled {
 .consumerSurveyForm .blockObjective .arabicIcon {
   margin-left: 70px;
 }
+.consumerSurveyForm .dropDownInput input {
+  background: white;
+}
+.createConsumer .consumerSurveyForm {
+  position: relative;
+  height: calc(100% - 263px);
+}
+.createConsumer .consumerSurveyForm .dropDownInput input {
+  min-width: auto;
+}
+.createConsumer .consumerSurveyForm .absoluteContent tr th,
+.createConsumer .consumerSurveyForm .absoluteContent tr td {
+  text-align: left;
+  padding: 0 15px;
+}
+.createConsumer .consumerSurveyForm .absoluteContent tr th input:not([type=checkbox]),
+.createConsumer .consumerSurveyForm .absoluteContent tr td input:not([type=checkbox]) {
+  height: 30px;
+}
+.createConsumer .consumerSurveyForm .blockObjective {
+  position: relative;
+}
 .consumerSurveyPreviewForm .userLogo {
   width: 70px;
   height: 70px;
   margin-left: 15px;
+}
+.consumerSurveyPreviewForm .consumersList {
+  height: calc(100% - 100px);
 }
 .consumerSurveyPreviewForm .consumersList .templateWrap {
   background: white;
@@ -4958,6 +4997,12 @@ a.disabled {
 }
 .consumerSurveyPreviewForm .bottomWrap .location {
   padding: 0 10px 10px 20px;
+}
+.objectivesLinkForm {
+  padding: 20px 20px 100px;
+}
+.objectivesLinkForm .table {
+  width: 100%;
 }
 .no-close .ui-dialog-titlebar-close {
   display: none;
@@ -6176,6 +6221,9 @@ ul.newSelectList .miniStylePagination {
   margin-right: 10px;
   padding-bottom: 15px;
 }
+.fileThumbnailItem:hover {
+  cursor: pointer;
+}
 .fileThumbnailItem .iconThumbnail {
   width: 50px;
   height: 75px;
@@ -6968,6 +7016,54 @@ ul.newSelectList .miniStylePagination {
   width: 100%;
   max-width: 520px;
   margin: 5px;
+}
+.objectivesVisibilityPreview {
+  height: calc(100% - 48px);
+}
+.objectivesVisibilityPreview .block-left,
+.objectivesVisibilityPreview .block-right {
+  width: 50%;
+  padding: 10px 20px;
+}
+.objectivesVisibilityPreview .checkboxLabel {
+  top: 2px;
+}
+.objectivesVisibilityPreview .customCheckbox:not(.onoffswitch-checkbox) + label {
+  display: inline-block;
+}
+.objectivesVisibilityPreview .item {
+  padding: 0;
+}
+.objectivesVisibilityPreview .item .bordered {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #fbf8f8;
+  border-radius: 10px;
+  -webkit-box-shadow: 0px 0px 12px -5px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 12px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 0px 12px -5px rgba(0, 0, 0, 0.75);
+}
+.objectivesVisibilityPreview .item .block-right {
+  position: relative;
+}
+.objectivesVisibilityPreview .item .block-right:before {
+  content: "";
+  width: 1px;
+  height: 80%;
+  border: 1px solid #f2f0f4;
+  position: absolute;
+  left: 0;
+  margin: 25px 0;
+}
+.objectivesVisibilityPreview .fileThumbnail {
+  width: auto;
+  padding: 0;
+  padding-right: 10px;
+}
+.objectivesVisibilityPreview .fileThumbnail .brandItem {
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
 }
 /** TABLES **/
 table:not(.ui-datepicker-calendar) {
@@ -9198,7 +9294,7 @@ table.fancytree-ext-table {
   margin: 7px 0 0 5px;
 }
 .questionsSearchBlock .searchLabel:after {
-  top: 7px;
+  line-height: 2.4;
 }
 .questionsSearchBlock .searchInput {
   height: 36px;

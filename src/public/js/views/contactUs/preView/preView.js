@@ -4,8 +4,9 @@ define([
     'jQuery',
     'moment',
     'text!templates/contactUs/preview.html',
-    'text!templates/file/preView.html',
-    'views/contactUs/comments',
+    'text!templates/contactUs/filePreView.html',
+    'text!templates/objectives/comments/comment.html',
+    'text!templates/objectives/comments/newRow.html',
     'collections/file/collection',
     'models/contactUs',
     'models/file',
@@ -21,7 +22,7 @@ define([
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
     'constants/errorMessages'
-], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentsView,
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, Model, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
              CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
@@ -30,6 +31,8 @@ define([
         contentType: CONTENT_TYPES.CONTACT_US,
 
         template             : _.template(PreviewTemplate),
+        commentTemplate      : _.template(CommentTemplate),
+        newCommentTemplate   : _.template(NewCommentTemplate),
         fileTemplate         : _.template(FileTemplate),
         CONSTANTS            : CONSTANTS,
         ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
@@ -49,23 +52,15 @@ define([
             this.translation = options.translation;
             this.model = options.model;
             this.files = new FileCollection();
-            this.previewFiles = new FileCollection(this.model.get('attachments'), true);
-            _.bindAll(this, 'fileSelected');
+            _.bindAll(this, 'fileSelected', 'renderComment');
 
             this.makeRender();
             this.render();
         },
 
-        showCommentsDialog : function () {
-            new CommentsView({
-                modelAttrs : this.model.toJSON(),
-                translation : this.translation
-            });
-        },
-
-        setStatusResolved : function (event) {
+        setStatusResolved : function () {
             var self = this;
-            if (this.model.get('status') === 'new') {
+            if (self.model.get('status') === 'new') {
                 dataService.putData(`${CONTENT_TYPES.CONTACT_US}/${self.model.get('_id')}`, {
                     status : 'resolved'
                 }, (err, response) => {
@@ -259,6 +254,85 @@ define([
             $descriptionBlock.toggleClass('showAllDescription');
         },
 
+        sendComment: function () {
+            var commentModel = new CommentModel();
+            var self = this;
+            this.commentBody = {
+                commentText: this.$el.find('#commentInput').val(),
+                objectiveId: this.model.get('_id'),
+                context    : CONTENT_TYPES.COMPETITORBRANDING
+            };
+
+            commentModel.setFieldsNames(this.translation);
+
+            commentModel.validate(this.commentBody, function (err) {
+                if (err && err.length) {
+                    App.renderErrors(err);
+                } else {
+                    self.checkForEmptyInput(self.files, self.$el);
+                    self.$el.find('#commentForm').submit();
+                }
+            });
+        },
+
+        commentFormSubmit: function (e) {
+            var context = e.data.context;
+            var data = new FormData(this);
+
+            e.preventDefault();
+            data.append('data', JSON.stringify(context.commentBody));
+
+            $.ajax({
+                url        : context.commentCollection.url,
+                type       : 'POST',
+                data       : data,
+                contentType: false,
+                processData: false,
+                success    : function (comment) {
+                    var commentModel = new CommentModel(comment, {parse: true});
+                    var jsonComment = commentModel.toJSON();
+
+                    context.commentCollection.add(commentModel);
+                    context.model.set({comments: _.pluck(context.commentCollection, '_id')});
+                    context.$el.find('#commentWrapper').prepend(context.newCommentTemplate(
+                        {
+                            comment      : jsonComment,
+                            translation  : this.translation,
+                            notShowAttach: false
+                        }
+                    ));
+                    context.$el.find('#commentInput').val('');
+                    context.files.reset([]);
+                    context.$el.find('#commentForm').html('');
+                    context.chengeCountOfAttachedFilesToComment('');
+
+                    if (context.commentCollection.length === 1) {
+                        context.$el.find('.objectivesPaddingBlock').show();
+                    }
+                }
+            });
+
+        },
+
+        renderComment: function () {
+            var $commentWrapper = this.$el.find('#commentWrapper');
+            var $commentScrollableContainer = $commentWrapper.closest('.innerScroll');
+            var jsonCollection = this.commentCollection.toJSON();
+
+            if (jsonCollection.length) {
+                $commentScrollableContainer.show();
+            }
+
+            $commentWrapper.html('');
+            $commentWrapper.append(this.commentTemplate({
+                collection   : jsonCollection,
+                translation  : this.translation,
+                notShowAttach: false
+            }));
+
+            return this;
+        },
+
         setSelectedFiles: function (files) {
             var self = this;
             var $fileContainer = self.$el.find('#objectiveFileThumbnail');
@@ -289,6 +363,10 @@ define([
                 var jsonModel = modelData;
                 var formString;
 
+                if (jsonModel.attachments) {
+                    self.previewFiles = new FileCollection(jsonModel.attachments, true);
+                }
+
                 jsonModel.creator.name = `${jsonModel.creator.firstName[App.currentUser.currentLanguage]} ${jsonModel.creator.lastName[App.currentUser.currentLanguage]}`;
                 jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
 
@@ -302,6 +380,12 @@ define([
                     width        : '1000',
                     showCancelBtn: false,
                     buttons      : {
+                        resolve : {
+                            text : self.translation.resolveBtn,
+                            class : `btn ${jsonModel.status === 'resolved' ? 'hidden' : ''}`,
+                            click : self.setStatusResolved.bind(self)
+                        },
+
                         save: {
                             text : self.translation.okBtn,
                             class: 'btn saveBtn',
@@ -328,6 +412,24 @@ define([
                         $('body').css({overflow: 'inherit'});
                     }
                 });
+
+                self.$el.find('#commentForm').on('submit', {
+                    body   : self.commentBody,
+                    context: self
+                }, self.commentFormSubmit);
+                self.$el.find('#fileThumbnail').hide();
+
+                self.setSelectedFiles(jsonModel.attachments);
+
+                self.commentCollection = new CommentCollection({
+                    data: {
+                        objectiveId: self.model.get('_id'),
+                        context    : CONTENT_TYPES.CONTACT_US,
+                        reset      : true
+                    }
+                });
+
+                self.commentCollection.on('reset', self.renderComment, self);
 
                 self.delegateEvents(this.events);
 

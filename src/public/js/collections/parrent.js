@@ -238,6 +238,10 @@ function (Backbone, Cookies, CONSTANTS, CONTENT_TYPES) {
                 return response;
             }
 
+            if (response.online) {
+                response.data = this.setOnlineStatusToUsers(response.data, response.online);
+            }
+
             this.totalRecords = response.total;
 
             this.trigger('renderFinished', {

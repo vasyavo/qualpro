@@ -111,7 +111,7 @@ describe('mobile authentication', () => {
     });
 
     it('should register super user', function *() {
-        this.timeout(4000);
+        this.timeout(5000);
         const confirmNewUserRegistrationMailerSpy = this.sandbox.spy(mailer, 'confirmNewUserRegistration');
 
         const resp = yield request(server)

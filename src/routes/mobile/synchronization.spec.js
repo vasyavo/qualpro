@@ -36,7 +36,7 @@ describe('mobile synchronization', () => {
                     (cb) => {
                         shell.exec(pathToScript, { async: true }, (code, stdout, stderr) => {
                             if (code !== 0) {
-                                return cb('Something wrong with database pulling')
+                                return cb('Something wrong with database pulling');
                             }
 
                             cb();
