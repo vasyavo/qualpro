@@ -4989,6 +4989,12 @@ a.disabled {
 .consumerSurveyPreviewForm .bottomWrap .location {
   padding: 0 10px 10px 20px;
 }
+.objectivesLinkForm {
+  padding: 20px 20px 100px;
+}
+.objectivesLinkForm .table {
+  width: 100%;
+}
 .no-close .ui-dialog-titlebar-close {
   display: none;
 }
