@@ -272,6 +272,20 @@ define([
             });
 
             $currentEl.append(this.listItemsView.render());
+
+            //subscribing on online status of users
+            App.socket.emit('subscribe_online_status');
+
+            App.socket.on('goOnline', (userId) => {
+                const onlineBadge = $(`#online-user-${userId.uid}`);
+                onlineBadge.removeClass('hidden');
+            });
+
+            App.socket.on('goOffline', (userId) => {
+                const onlineBadge = $(`#online-user-${userId.uid}`);
+                onlineBadge.addClass('hidden');
+            });
+
             return this;
         },
 
