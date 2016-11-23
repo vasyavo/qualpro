@@ -4,7 +4,7 @@ define([
     'jQuery',
     'moment',
     'text!templates/contactUs/preview.html',
-    'text!templates/file/preView.html',
+    'text!templates/contactUs/filePreView.html',
     'text!templates/objectives/comments/comment.html',
     'text!templates/objectives/comments/newRow.html',
     'collections/file/collection',
@@ -354,14 +354,12 @@ define([
 
         render: function () {
             const self = this;
-            debugger;
             dataService.getData(`contactUs/${self.model.get('_id')}`, {}, function (err, modelData) {
                 if (err) {
                     return App.renderErrors([
                         ERROR_MESSAGES.readError[App.currentUser.currentLanguage]
                     ]);
                 }
-                debugger;
 
                 var jsonModel = modelData;
                 var formString;

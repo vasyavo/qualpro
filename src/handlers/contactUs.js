@@ -171,7 +171,8 @@ var ContactUs = function(db, redis, event) {
                     'createdBy.user.country' : 1,
                     'createdBy.user.lastName' : 1,
                     'createdBy.user.firstName' : 1,
-                    'createdBy.user.position' : 1
+                    'createdBy.user.position' : 1,
+                    'createdBy.user.imageSrc' : 1
                 })
                 .append(condition.foreignCondition)
                 .lookup({
