@@ -157,7 +157,6 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                 })
                 .project({
@@ -187,7 +186,6 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
@@ -205,7 +203,6 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'country.name' : 1,
                     'country._id' : 1
@@ -358,7 +355,8 @@ var ContactUs = function(db, redis, event) {
                         }
                     }, {
                         name : 1,
-                        originalName : 1
+                        originalName : 1,
+                        contentType : 1
                     })
                     .lean()
                     .exec(function(err, attachments) {

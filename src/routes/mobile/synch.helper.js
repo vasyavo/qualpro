@@ -537,7 +537,7 @@ function shouldSyncPlanogram(agent) {
 }
 
 function shouldGetItemPrices(agent) {
-    it('should get item prices', function *() {
+    xit('should get item prices', function *() {
         const resp = yield agent
             .get('/mobile/itemsPrices')
             .expect(200);
@@ -585,7 +585,7 @@ function shouldSyncDocuments(agent) {
 function shouldGetAlAlaliPromoEvaluation(agent) {
     it('should get Al Alai promo evaluation', function *() {
         const resp = yield agent
-            .get('/mobile/promotionsItems/')
+            .get('/mobile/promotionsItems')
             .expect(200);
 
         const body = resp.body;

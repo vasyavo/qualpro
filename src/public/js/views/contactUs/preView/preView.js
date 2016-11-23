@@ -52,7 +52,6 @@ define([
             this.translation = options.translation;
             this.model = options.model;
             this.files = new FileCollection();
-            this.previewFiles = new FileCollection(this.model.get('attachments'), true);
             _.bindAll(this, 'fileSelected', 'renderComment');
 
             this.makeRender();
@@ -363,6 +362,10 @@ define([
 
                 var jsonModel = modelData;
                 var formString;
+
+                if (jsonModel.attachments) {
+                    self.previewFiles = new FileCollection(jsonModel.attachments, true);
+                }
 
                 jsonModel.creator.name = `${jsonModel.creator.firstName[App.currentUser.currentLanguage]} ${jsonModel.creator.lastName[App.currentUser.currentLanguage]}`;
                 jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
