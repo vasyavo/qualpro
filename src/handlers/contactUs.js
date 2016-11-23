@@ -141,6 +141,12 @@ var ContactUs = function(db, redis, event) {
             const mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
                 .lookup({
+                    from : CONTENT_TYPES.COMMENT + 's',
+                    localField : '_id',
+                    foreignField : 'taskId',
+                    as : 'commentaries'
+                })
+                .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
                     foreignField : '_id',
@@ -159,7 +165,7 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
+                    'commentaries.body' : 1,
                     'createdBy.user._id' : 1,
                     'createdBy.user.ID' : 1,
                     'createdBy.user.country' : 1,
