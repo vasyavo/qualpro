@@ -101,7 +101,6 @@ function BrandingAndDisplay(db, redis, event) {
                         preserveNullAndEmptyArrays : true
                     }
                 })
-                //.unwind('categories')
                 .lookup({
                     from : 'categories',
                     localField : 'categories',
@@ -127,14 +126,24 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'},
                 })
-                .unwind('attachments')
+                .append({
+                    $unwind : {
+                        path : '$attachments',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.FILES,
                     localField : 'attachments',
                     foreignField : '_id',
                     as : 'attachments'
                 })
-                .unwind('$attachments')
+                .append({
+                    $unwind : {
+                        path : '$attachments',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
@@ -157,11 +166,36 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'createdBy'
                 })
                 .unwind('createdBy')
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
                     foreignField : '_id',
                     as : 'displayType'
+                })
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
+                .group({
+                    '_id' : '$_id',
+                    displayType : {$push : '$displayType'},
+                    branch : {$first : '$branch'},
+                    categories : {$first : '$categories'},
+                    outlet : {$first : '$outlet'},
+                    attachments : {$first : '$attachments'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'},
                 })
                 .lookup({
                     from : CONTENT_TYPES.OUTLET + 's',
@@ -496,11 +530,36 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'}
                 })
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
                     foreignField : '_id',
                     as : 'displayType'
+                })
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
+                .group({
+                    '_id' : '$_id',
+                    displayType : {$push : '$displayType'},
+                    branch : {$first : '$branch'},
+                    categories : {$first : '$categories'},
+                    outlet : {$first : '$outlet'},
+                    attachments : {$first : '$attachments'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'},
                 })
                 .lookup({
                     from : CONTENT_TYPES.OUTLET + 's',
