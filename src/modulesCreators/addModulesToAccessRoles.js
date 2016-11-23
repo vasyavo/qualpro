@@ -2306,7 +2306,8 @@ const areaFiledManager = [
         write : false,
         read  : true
     }
-}, {
+},
+{
     module: ACL_MODULES.CONTRACT_SECONDARY,
     cms   : {
         upload: true,
@@ -2320,7 +2321,8 @@ const areaFiledManager = [
         write : true,
         read  : true
     }
-}, {
+},
+{
     module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
     cms   : {
         edit : false,
@@ -2332,7 +2334,8 @@ const areaFiledManager = [
         write: true,
         read : true
     }
-}, {
+},
+{
     module: ACL_MODULES.CUSTOM_REPORT,
     cms   : {
         edit : false,
@@ -2344,7 +2347,8 @@ const areaFiledManager = [
         write: false,
         read : false
     }
-}, {
+},
+{
     module: ACL_MODULES.NOTE,
     cms   : {
         archive: true,
@@ -2358,7 +2362,8 @@ const areaFiledManager = [
         write  : true,
         read   : true
     }
-}, {
+},
+{
     module: ACL_MODULES.NOTIFICATION,
     cms   : {
         edit : true,
@@ -2370,7 +2375,8 @@ const areaFiledManager = [
         write: false,
         read : true
     }
-}, {
+},
+{
     module: ACL_MODULES.SETTINGS,
     cms   : {
         archive: false,
@@ -2384,7 +2390,8 @@ const areaFiledManager = [
         write  : false,
         read   : false
     }
-}, {
+},
+{
     module: ACL_MODULES.LOGIN_CREDENTIALS,
     cms   : {
         archive: false,
@@ -2398,21 +2405,8 @@ const areaFiledManager = [
         write  : false,
         read   : false
     }
-}, {
-    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
-    cms   : {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
-    },
-    mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
-    }
-}, {
+},
+{
     module: 30,
     cms   : {
         archive: false,
@@ -2441,7 +2435,8 @@ const areaFiledManager = [
         write  : true,
         read   : true
     }
-}, {
+},
+{
     module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
     cms   : {
         archive: false,
@@ -2593,7 +2588,7 @@ const areaFiledManager = [
 },
 commentsAccess,
 {
-    module: 31,
+    module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
         archive: false,
         edit   : false,
@@ -2607,50 +2602,51 @@ commentsAccess,
         read   : true
     }
 },
-    {
-        module: 43,
-        cms   : {
-            archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
-        },
-        mobile: {
-            archive: false,
-            edit   : false,
-            write  : true,
-            read   : false
-        }
-    }, {
-        module: 44,
-        cms   : {
-            archive: false,
-            edit   : false,
-            write  : false,
-            read   : true
-        },
-        mobile: {
-            archive: false,
-            edit   : true,
-            write  : false,
-            read   : true
-        }
+{
+    module: ACL_MODULES.CONTACT_US,
+    cms   : {
+        archive: false,
+        edit   : false,
+        write  : false,
+        read   : false
     },
-    {
-        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
-        cms   : {
-            archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
-        },
-        mobile: {
+    mobile: {
             archive: false,
             edit   : false,
             write  : true,
             read   : false
         }
+},
+{
+    module: ACL_MODULES.CONSUMER_SURVEY,
+    cms   : {
+        archive: false,
+        edit   : false,
+        write  : false,
+        read   : true
+    },
+    mobile: {
+        archive: false,
+        edit   : true,
+        write  : false,
+        read   : true
     }
+},
+{
+    module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+    cms   : {
+        archive: false,
+        edit   : false,
+        write  : false,
+        read   : false
+    },
+    mobile: {
+        archive: false,
+        edit   : false,
+        write  : true,
+        read   : false
+    }
+}
 ];
 
 const areaInChargeManager = [
@@ -3820,7 +3816,8 @@ const salesman = [
         write  : true,
         read   : true
     }
-}, commentsAccess,
+},
+commentsAccess,
 {
     module: 31,
     cms   : {
@@ -7080,7 +7077,7 @@ for (let level in accessRolesData) {
 
     accessRoles.push({
         roleAccess
-    })
+    });
 }
 
 const levels = [
