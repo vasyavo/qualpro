@@ -16,11 +16,11 @@ const schema = new Schema({
         type: ObjectId,
         ref: CONTENT_TYPES.BRANCH
     },
-    displayType: {
+    displayType: [{
         type: Number,
         ref: CONTENT_TYPES.DISPLAYTYPE,
         default: 16
-    },
+    }],
     dateStart: {
         type: Date
     },

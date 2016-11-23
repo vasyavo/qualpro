@@ -6,7 +6,7 @@ const BrandingActivityHandler = require('./../handlers/brandingAndDisplay');
 const multipart = require('connect-multiparty');
 const multipartMiddleware = multipart();
 
-var ACL_MODULES = require('./../constants/aclModulesNames');
+const ACL_MODULES = require('./../constants/aclModulesNames');
 
 
 module.exports = function(db, redis, event) {

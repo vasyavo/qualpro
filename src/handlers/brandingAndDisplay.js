@@ -101,7 +101,6 @@ function BrandingAndDisplay(db, redis, event) {
                         preserveNullAndEmptyArrays : true
                     }
                 })
-                //.unwind('categories')
                 .lookup({
                     from : 'categories',
                     localField : 'categories',
@@ -127,14 +126,24 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'},
                 })
-                .unwind('attachments')
+                .append({
+                    $unwind : {
+                        path : '$attachments',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.FILES,
                     localField : 'attachments',
                     foreignField : '_id',
                     as : 'attachments'
                 })
-                .unwind('$attachments')
+                .append({
+                    $unwind : {
+                        path : '$attachments',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
@@ -157,11 +166,36 @@ function BrandingAndDisplay(db, redis, event) {
                     as : 'createdBy'
                 })
                 .unwind('createdBy')
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
                     foreignField : '_id',
                     as : 'displayType'
+                })
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
+                .group({
+                    '_id' : '$_id',
+                    displayType : {$push : '$displayType'},
+                    branch : {$first : '$branch'},
+                    categories : {$first : '$categories'},
+                    outlet : {$first : '$outlet'},
+                    attachments : {$first : '$attachments'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'},
                 })
                 .lookup({
                     from : CONTENT_TYPES.OUTLET + 's',
@@ -294,6 +328,7 @@ function BrandingAndDisplay(db, redis, event) {
         var error;
 
         function generateSearchCondition(query) {
+            const globalSearch = query.globalSearch
             var searchVariants = [
                 'outlet',
                 'branch',
@@ -319,6 +354,7 @@ function BrandingAndDisplay(db, redis, event) {
             var fMatch = {};
             var formCondition = [];
             var foreignCondition = [];
+            const searchCondition = [];
 
             _.forOwn(query, function(value, key) {
                 if (_.includes(searchVariants, key)) {
@@ -336,14 +372,43 @@ function BrandingAndDisplay(db, redis, event) {
             formCondition.push({
                 $match : match
             });
-
             foreignCondition.push({
                 $match : fMatch
             });
 
+            if (globalSearch) {
+                const regex = new RegExp(`.*${query.globalSearch}.*`, 'ig');
+
+                searchCondition.push({
+                    $match : {
+                        $or : [
+                            {
+                                'createdBy.lastName.ar' : {$regex : regex}
+                            },
+                            {
+                                'createdBy.lastName.en' : {$regex : regex}
+                            },
+                            {
+                                'createdBy.firstName.ar' : {$regex : regex}
+                            },
+                            {
+                                'createdBy.firstName.en' : {$regex : regex}
+                            },
+                            {
+                                'categories.name.en' : {$regex : regex}
+                            },
+                            {
+                                'categories.name.ar' : {$regex : regex}
+                            }
+                        ]
+                    }
+                })
+            }
+
             return {
                 formCondition : formCondition,
-                foreignCondition : foreignCondition
+                foreignCondition : foreignCondition,
+                searchCondition : searchCondition
             };
         }
 
@@ -365,14 +430,12 @@ function BrandingAndDisplay(db, redis, event) {
                     foreignField : '_id',
                     as : 'createdBy'
                 })
-                .unwind('createdBy')
-                .lookup({
-                    from : CONTENT_TYPES.POSITION + 's',
-                    localField : 'createdBy.position',
-                    foreignField : '_id',
-                    as : 'createdBy.position'
-                })
-                .unwind('createdBy.position')
+                .append([{
+                    $unwind : {
+                        path : '$createdBy',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .unwind('createdBy.country')
                 .lookup({
                     from : CONTENT_TYPES.DOMAIN + 's',
@@ -382,20 +445,37 @@ function BrandingAndDisplay(db, redis, event) {
                 })
                 .unwind('countries')
                 .lookup({
+                    from : CONTENT_TYPES.POSITION + 's',
+                    localField : 'createdBy.position',
+                    foreignField : '_id',
+                    as : 'createdBy.position'
+                })
+                .unwind('createdBy.position')
+                .lookup({
                     from : CONTENT_TYPES.ACCESSROLE + 's',
                     localField : 'createdBy.accessRole',
                     foreignField : '_id',
                     as : 'createdBy.accessRole'
                 })
                 .unwind('createdBy.accessRole')
-                .unwind('attachments')
+                .append([{
+                    $unwind : {
+                        path : '$attachments',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.FILES,
                     localField : 'attachments',
                     foreignField : '_id',
                     as : 'attachments'
                 })
-                .unwind('attachments')
+                .append([{
+                    $unwind : {
+                        path : '$attachments',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .group({
                     '_id' : '$_id',
                     attachments : {$push : '$attachments'},
@@ -414,11 +494,72 @@ function BrandingAndDisplay(db, redis, event) {
                     dateStart : {$first : '$dateStart'},
                     createdBy : {$first : '$createdBy'}
                 })
+                .append([{
+                    $unwind : {
+                        path : '$categories',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
+                .lookup({
+                    from : 'categories',
+                    localField : 'categories',
+                    foreignField : '_id',
+                    as : 'categories'
+                })
+                .append([{
+                    $unwind : {
+                        path : '$categories',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
+                .group({
+                    '_id' : '$_id',
+                    categories : {$push : '$categories'},
+                    attachments : {$first : '$attachments'},
+                    countries : {$first : '$countries'},
+                    commentaries : {$first : '$commentaries'},
+                    branch : {$first : '$branch'},
+                    subRegion : {$first : '$subRegion'},
+                    region : {$first : '$region'},
+                    retailSegment : {$first : '$retailSegment'},
+                    displayType : {$first : '$displayType'},
+                    outlet : {$first : '$outlet'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'}
+                })
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.DISPLAYTYPE + 's',
                     localField : 'displayType',
                     foreignField : '_id',
                     as : 'displayType'
+                })
+                .append({
+                    $unwind : {
+                        path : '$displayType',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
+                .group({
+                    '_id' : '$_id',
+                    displayType : {$push : '$displayType'},
+                    branch : {$first : '$branch'},
+                    categories : {$first : '$categories'},
+                    outlet : {$first : '$outlet'},
+                    attachments : {$first : '$attachments'},
+                    description : {$first : '$description'},
+                    createdAt : {$first : '$createdAt'},
+                    dateEnd : {$first : '$dateEnd'},
+                    dateStart : {$first : '$dateStart'},
+                    createdBy : {$first : '$createdBy'},
                 })
                 .lookup({
                     from : CONTENT_TYPES.OUTLET + 's',
@@ -456,13 +597,15 @@ function BrandingAndDisplay(db, redis, event) {
                 })
                 .unwind('region')
                 .append(condition.foreignCondition)
+                .append(condition.searchCondition)
                 .project({
                     createdAt : 1,
                     description : 1,
                     dateEnd : 1,
                     dateStart : 1,
                     displayType : 1,
-                    categories : 1,
+                    'categories._id' : 1,
+                    'categories.name' : 1,
                     'countries._id' : 1,
                     'countries.name' : 1,
                     'commentaries.body' : 1,
@@ -502,7 +645,12 @@ function BrandingAndDisplay(db, redis, event) {
                         foreignField : '_id',
                         as : 'createdBy'
                     })
-                    .unwind('createdBy')
+                    .append([{
+                        $unwind : {
+                            path : '$createdBy',
+                            preserveNullAndEmptyArrays : true
+                        }
+                    }])
                     .lookup({
                         from : CONTENT_TYPES.DISPLAYTYPE + 's',
                         localField : 'displayType',
@@ -523,7 +671,44 @@ function BrandingAndDisplay(db, redis, event) {
                     })
                     .unwind('outlet')
                     .unwind('branch')
+                    .append([{
+                        $unwind : {
+                            path : '$categories',
+                            preserveNullAndEmptyArrays : true
+                        }
+                    }])
+                    .lookup({
+                        from : 'categories',
+                        localField : 'categories',
+                        foreignField : '_id',
+                        as : 'categories'
+                    })
+                    .append([{
+                        $unwind : {
+                            path : '$categories',
+                            preserveNullAndEmptyArrays : true
+                        }
+                    }])
+                    .group({
+                        '_id' : '$_id',
+                        categories : {$push : '$categories'},
+                        attachments : {$first : '$attachments'},
+                        countries : {$first : '$countries'},
+                        commentaries : {$first : '$commentaries'},
+                        branch : {$first : '$branch'},
+                        subRegion : {$first : '$subRegion'},
+                        region : {$first : '$region'},
+                        retailSegment : {$first : '$retailSegment'},
+                        displayType : {$first : '$displayType'},
+                        outlet : {$first : '$outlet'},
+                        description : {$first : '$description'},
+                        createdAt : {$first : '$createdAt'},
+                        dateEnd : {$first : '$dateEnd'},
+                        dateStart : {$first : '$dateStart'},
+                        createdBy : {$first : '$createdBy'}
+                    })
                     .append(condition.foreignCondition)
+                    .append(condition.searchCondition)
                     .append([
                         {
                             $group : {
@@ -537,31 +722,8 @@ function BrandingAndDisplay(db, redis, event) {
                     .exec(cb)
             }
 
-            function mapCategories(model, callback) {
-                async.waterfall([
-                    (cb) => {
-                        getLinkFromAws(model, cb)
-                    },
-
-                    (model, cb) => {
-                        CategoryModel.find({
-                            _id : {
-                                $in : model.categories
-                            }
-                        }, {
-                            name : 1
-                        }).then(function(categories) {
-                            model.categories = categories;
-                            cb(null, model);
-                        }).catch(cb);
-                    }
-                ], callback);
-            }
-
             function getData(cb) {
-                mongoQuery.exec(function(err, models) {
-                    async.map(models, mapCategories, cb);
-                });
+                mongoQuery.exec(cb);
             }
 
             function getLinkFromAws(brandingAndDisplayModel, cb) {
@@ -608,7 +770,7 @@ function BrandingAndDisplay(db, redis, event) {
 
             queryRun(query);
         });
-    }
+    };
 
     this.updateById = function(req, res, next) {
         function queryRun(id, body) {

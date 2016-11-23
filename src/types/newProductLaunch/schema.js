@@ -33,7 +33,11 @@ const schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
-    displayType: { type: Number, ref: CONTENT_TYPES.DISPLAYTYPE, default: 16 },
+    displayType: [{
+        type: Number,
+        ref: CONTENT_TYPES.DISPLAYTYPE,
+        default: 16
+    }],
     distributor: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }

@@ -140,6 +140,12 @@ var ContactUs = function(db, redis, event) {
             const condition = generateSearchCondition(query.filter);
             const mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
+                .append({
+                    $unwind : {
+                        path : '$commentaries',
+                        preserveNullAndEmptyArrays : true
+                    }
+                })
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
                     localField : 'createdBy',
@@ -151,7 +157,6 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                 })
                 .project({
@@ -159,13 +164,13 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user._id' : 1,
                     'createdBy.user.ID' : 1,
                     'createdBy.user.country' : 1,
                     'createdBy.user.lastName' : 1,
                     'createdBy.user.firstName' : 1,
-                    'createdBy.user.position' : 1
+                    'createdBy.user.position' : 1,
+                    'createdBy.user.imageSrc' : 1
                 })
                 .append(condition.foreignCondition)
                 .lookup({
@@ -180,7 +185,6 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
@@ -198,7 +202,6 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
-                    comments : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'country.name' : 1,
                     'country._id' : 1
@@ -351,7 +354,8 @@ var ContactUs = function(db, redis, event) {
                         }
                     }, {
                         name : 1,
-                        originalName : 1
+                        originalName : 1,
+                        contentType : 1
                     })
                     .lean()
                     .exec(function(err, attachments) {

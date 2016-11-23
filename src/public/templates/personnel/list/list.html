@@ -8,8 +8,11 @@
         <label for="<%=personnel._id%>" class="checkboxLabel"></label>
     </td>
     <% } %>
-    <td class="firstName"><%=personnel.firstName.currentLanguage%></td>
-    <td class="lastName"><%=personnel.lastName.currentLanguage%></td>
+    <td class="firstName">
+        <%- personnel.firstName.currentLanguage %>
+        <p id="online-user-<%- personnel._id %>" class="<%- personnel.online ? '' : 'hidden' %>">Online</p>
+    </td>
+    <td class="lastName"><%- personnel.lastName.currentLanguage %></td>
     <td>
         <%= personnel.position ? personnel.position.name.currentLanguage : ''%>
         <span class="userPost"><%= personnel.accessRole ? personnel.accessRole.name.currentLanguage : ''%></span>

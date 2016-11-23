@@ -243,7 +243,7 @@ var Promotions = function (db, redis, event) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                 from   : 'displayTypes',
                 key    : 'displayType',
-                isArray: false
+                isArray: true
             }));
 
             pipeLine.push({

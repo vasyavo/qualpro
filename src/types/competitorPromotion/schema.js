@@ -21,7 +21,11 @@ const schema = new Schema({
     price: { type: String, default: '', require: true },
     packing: { type: String, default: '', require: true },
     expiry: { type: Date },
-    displayType: { type: Number, ref: CONTENT_TYPES.DISPLAYTYPE, default: 16, require: true },
+    displayType: [{
+        type: Number,
+        ref: CONTENT_TYPES.DISPLAYTYPE,
+        default: 16
+    }],
     dateStart: { type: Date },
     dateEnd: { type: Date },
     comments: [{ type: ObjectId, ref: CONTENT_TYPES.COMMENT, default: null }],

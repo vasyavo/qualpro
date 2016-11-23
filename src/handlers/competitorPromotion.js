@@ -87,9 +87,6 @@ var CompetitorBranding = function (db, redis, event) {
                     if (body.packing) {
                         body.packing = _.escape(body.packing);
                     }
-                    if (body.displayType) {
-                        body.displayType = _.escape(body.displayType);
-                    }
                     var competitorPromotion = {
                         description  : body.description,
                         category     : body.category,
@@ -459,7 +456,7 @@ var CompetitorBranding = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'displayTypes',
             key    : 'displayType',
-            isArray: false
+            isArray: true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -641,7 +638,7 @@ var CompetitorBranding = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'displayTypes',
             key    : 'displayType',
-            isArray: false
+            isArray: true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

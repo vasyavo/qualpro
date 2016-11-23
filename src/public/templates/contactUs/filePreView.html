@@ -1,0 +1,10 @@
+<div data-id="<%= model.cid || model._id || model.document%>" class="fileThumbnailItem brandItem masonryThumbnail">
+    <div class="thumbnail_js thumbnailBody">
+        <% if (model.url) { %>
+        <img src="<%= model.url %>" style="max-width: 100%">
+        <% } else {%>
+        <div class="iconThumbnail <%= model.type %>"></div>
+        <% } %>
+        <div class="objectivesFileName fontMicro"><%= model.originalName || model.name %></div>
+    </div>
+</div>
