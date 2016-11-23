@@ -237,7 +237,7 @@ function (Backbone, Cookies, CONSTANTS, CONTENT_TYPES) {
             if (response instanceof Array) {
                 return response;
             }
-debugger;
+
             if (response.online) {
                 response.data = this.setOnlineStatusToUsers(response.data, response.online);
             }
