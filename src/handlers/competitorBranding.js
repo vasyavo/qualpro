@@ -82,9 +82,6 @@ var CompetitorBranding = function(db, redis, event) {
                             ar : _.escape(body.location.ar)
                         };
                     }
-                    if (body.displayType) {
-                        body.displayType = _.escape(body.displayType);
-                    }
 
                     competitorBrand = {
                         description : body.description,
