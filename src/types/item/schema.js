@@ -13,8 +13,8 @@ const LocationSchema = new Schema({
 
 const schema = new Schema({
     name: {
-        en: { type: String, default: '', index: { unique: true, sparse: true } },
-        ar: { type: String, default: '', index: { unique: true, sparse: true } }
+        en: { type: String, default: '' },
+        ar: { type: String, default: '' }
     },
     barCode: { type: String, default: '' },
     packing: { type: String, default: '' },
