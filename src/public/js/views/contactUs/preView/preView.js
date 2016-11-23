@@ -58,9 +58,9 @@ define([
             this.render();
         },
 
-        setStatusResolved : function (event) {
+        setStatusResolved : function () {
             var self = this;
-            if (this.model.get('status') === 'new') {
+            if (self.model.get('status') === 'new') {
                 dataService.putData(`${CONTENT_TYPES.CONTACT_US}/${self.model.get('_id')}`, {
                     status : 'resolved'
                 }, (err, response) => {
@@ -380,6 +380,12 @@ define([
                     width        : '1000',
                     showCancelBtn: false,
                     buttons      : {
+                        resolve : {
+                            text : self.translation.resolveBtn,
+                            class : `btn ${jsonModel.status === 'resolved' ? 'hidden' : ''}`,
+                            click : self.setStatusResolved.bind(self)
+                        },
+
                         save: {
                             text : self.translation.okBtn,
                             class: 'btn saveBtn',

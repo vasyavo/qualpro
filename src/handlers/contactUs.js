@@ -208,7 +208,7 @@ var ContactUs = function(db, redis, event) {
                 })
                 .skip(skip)
                 .limit(count)
-                .sort(query.sortBy)
+                .sort(`-${query.sortBy}`)
                 .allowDiskUse(true);
 
             function getCount(cb) {
