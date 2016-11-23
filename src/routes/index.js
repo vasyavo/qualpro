@@ -122,6 +122,11 @@ module.exports = function(app, db, event) {
 
     app.use(addRequestId);
 
+    app.use((req, res, next) => {
+        req.io =
+        next();
+    });
+
     app.use(sessionValidator);
     //  app.use(i18n.init);
 

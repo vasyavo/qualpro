@@ -36,7 +36,8 @@ var Personnel = function (db, redis, event) {
     var logWriter = require('../helpers/logWriter.js');
     var SomeEvents = require('../helpers/someEvents');
     var someEvents = new SomeEvents();
-    var app = require('../server')
+    var app = require('../server');
+    const redisClient = require('../helpers/redisClient');
 
     var $defProjection = {
         _id             : 1,
@@ -2417,14 +2418,45 @@ var Personnel = function (db, redis, event) {
             }, callback);
         }
 
+        function defineOnlineUsers(body, callback) {
+            async.parallel([
+                (cb) => {
+                    redisClient.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, onlineUsers);
+                    });
+                },
+
+                (cb) => {
+                    const arrayOfId = body.data
+                        .map((item) => (item._id.toString()));
+                    cb(null, arrayOfId);
+                },
+            ], (err, pairOfArrays) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                const onlineUsers = _.intersection(...pairOfArrays);
+
+                body.online = onlineUsers;
+
+                callback(null, body);
+            });
+        };
+
         async.waterfall([
 
             async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
 
             (allowed, personnel, cb) => {
                 queryRun(personnel, cb);
-            }
+            },
 
+            defineOnlineUsers
         ], (err, body) => {
             if (err) {
                 return next(err);
