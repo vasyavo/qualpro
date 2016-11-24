@@ -47,9 +47,11 @@ const schema = new Schema({
         }
     }
 }, { collection: 'items' });
-
 schema.pre('save', function(next) {
     this.ppt = Math.round(this.ppt * 100);
+    this.rspMin = Math.round(this.rspMin * 100);
+    this.rspMax = Math.round(this.rspMax * 100);
+    this.pptPerCase = Math.round(this.pptPerCase * 100);
     next();
 });
 
@@ -57,17 +59,26 @@ schema.pre('update', function(next) {
     if (this._update.$set && this._update.$set.ppt) {
         const item = this._conditions._id;
         const price = this._update.$set.ppt;
+        const rspMin = this._update.$set.rspMin;
+        const rspMax = this._update.$set.rspMax;
+        const pptPerCase = this._update.$set.pptPerCase;
         const createdBy = this._update.$set.editedBy;
 
         this.update({}, {
             $set: {
-                ppt: Math.round(price * 100)
+                ppt: Math.round(price * 100),
+                rspMin: Math.round(rspMin * 100),
+                rspMax: Math.round(rspMax * 100),
+                pptPerCase: Math.round(pptPerCase * 100),
             }
         });
 
         return ItemHistoryModel.create({
             item: item,
             ppt: price,
+            rspMin: rspMin,
+            rspMax: rspMax,
+            pptPerCase: pptPerCase,
             createdBy: createdBy
         }, function(err) {
             if (err) {
@@ -82,9 +93,18 @@ schema.pre('update', function(next) {
 });
 
 schema.post('findOne', function(model) {
-    var price = model.get('ppt');
+    var price = model.get('ppt'),
+        rspMin = model.get('rspMin'),
+        rspMax = model.get('rspMax'),
+        pptPerCase = model.get('pptPerCase');
 
-    model.set('ppt', price / 100);
+    model.set({
+        'ppt': price,
+        'rspMin': rspMin,
+        'rspMax': rspMax,
+        'pptPerCase': pptPerCase
+    });
+
 });
 
 module.exports = schema;
