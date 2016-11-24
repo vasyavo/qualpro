@@ -2,6 +2,7 @@ const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 const ItemHistoryModel = require('./../itemHistory/model');
+const _ = require('lodash');
 
 const LocationSchema = new Schema({
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
@@ -92,19 +93,23 @@ schema.pre('update', function(next) {
     next();
 });
 
-schema.post('findOne', function(model) {
-    var price = model.get('ppt'),
-        rspMin = model.get('rspMin'),
-        rspMax = model.get('rspMax'),
-        pptPerCase = model.get('pptPerCase');
+schema.post('findOne', (model, next) => {
+    if (model) {
+        const price = model.get('ppt');
+        const rspMin = model.get('rspMin');
+        const rspMax = model.get('rspMax');
+        const pptPerCase = model.get('pptPerCase');
 
-    model.set({
-        'ppt': price,
-        'rspMin': rspMin,
-        'rspMax': rspMax,
-        'pptPerCase': pptPerCase
-    });
-
+        if (_.isInteger(price)) {
+            model.set({
+                'ppt': price,
+                'rspMin': rspMin,
+                'rspMax': rspMax,
+                'pptPerCase': pptPerCase
+            });
+        }
+    }
+    next();
 });
 
 module.exports = schema;

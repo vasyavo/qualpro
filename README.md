@@ -64,21 +64,6 @@ Ask credentials in your administrator.
  - `NODE_APP_INSTANCE`
  - `UPLOADER_TYPE` Currently available only with AmazonS3.
 
-##### Database configurations:
- - `DB_USER`
- - `DB_PASS`
- - `DB_HOST`
- - `DB_PORT`
- - `DB_NAME`
-
-##### Redis host :
- - `REDIS_HOST`
-
-##### Socket connection settings:
- - `SOCKET_DB_HOST`
- - `SOCKET_DB_PORT`
- - `SOCKET_DB`
-
 ##### Twilio credentials are:
  - `SMS_ACCOUNT_SID`
  - `SMS_AUTH_TOKEN`
@@ -96,4 +81,3 @@ Ask credentials in your administrator.
 ##### Heroku:
  - `REDIS_URL` Redis url which passed by Heroku Redis addon
  - `MONGODB_URI` MongoDB url passed by mLab addon
- - `MONGOHQ_URL` MongoDB url which passed by Compose.io addon
