@@ -23,9 +23,6 @@ config.localhost = host ? host : `https://${config.host}:${config.port}`;
 config.nodeAppInstance = parseInt(process.env.NODE_APP_INSTANCE, 10) || 0;
 config.nodePort = config.port + config.nodeAppInstance;
 
-// Heroku Compose.io addon variable
-const mongohqUrl = process.env.MONGOHQ_URL || process.env.MONGODB_URI;
-
 /* Database configurations */
 config.mongodbUri = process.env.MONGODB_URI;
 /* Database configurations */
@@ -44,26 +41,14 @@ config.twilio = twilio;
 /* Twilio configurations */
 
 /* following code is copied from vcs and modified */
-const mongoConfig = {
-    db    : {native_parser: true},
-    server: {poolSize: 5},
-    // replset: { rs_name: 'myReplicaSetName' },
-    user  : process.env.DB_USER,
-    pass  : process.env.DB_PASS,
-    w     : 1,
-    j     : true
-    // mongos: true
-};
-
 const sessionConfig = (db) => {
     return {
         mongooseConnection: db,
-        autoRemove        : 'interval',
+        autoRemove: 'interval',
         autoRemoveInterval: 1 // in prod mode should be more, 10
     };
 };
 
-config.mongoConfig = mongoConfig;
 config.sessionConfig = sessionConfig;
 /* end of copy */
 
@@ -73,13 +58,13 @@ config.sessionConfig = sessionConfig;
 const awsS3Config = {
     bucketName: process.env.AWS_S3_BUCKET,
     region: process.env.AWS_S3_REGION,
-    accessKeyId : process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey : process.env.AWS_SECRET_ACCESS_KEY,
-    imageUrlDurationSec : 60 * 60 * 24 * 365 * 10
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    imageUrlDurationSec: 60 * 60 * 24 * 365 * 10
 };
 
 config.aws = {
-    s3 : awsS3Config
+    s3: awsS3Config
 };
 
 // path to file with credentials
@@ -98,8 +83,8 @@ if (fs.existsSync(config.awsCredentialsPath)) {
     config.aws.s3 = Object.assign({}, awsS3Config, {
         accessKeyId,
         secretAccessKey,
-        bucketName : nconf.get('AWS_S3_BUCKET'),
-        region : nconf.get('AWS_S3_REGION')
+        bucketName: nconf.get('AWS_S3_BUCKET'),
+        region: nconf.get('AWS_S3_REGION')
     });
 
     process.env.AWS_ACCESS_KEY_ID = accessKeyId;
