@@ -32,11 +32,11 @@ mongo.on('connected', () => {
         },
 
         (creators, cb) => {
-            server.listen(config.nodePort, cb);
+            server.listen(config.port, cb);
         }
 
     ], (err) => {
-        logger.info(`Server started at port ${config.nodePort} in ${config.env} environment:`, config);
+        logger.info(`Server started at port ${config.port} in ${config.env} environment:`, config);
     })
 });
 

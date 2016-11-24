@@ -831,7 +831,8 @@ function importBranch(callback) {
                 if (subRegion) {
                     parallelJobs.subRegion = (cb) => {
                         const query = {
-                            'name.en': subRegion
+                            'name.en': subRegion,
+                            type: 'subRegion'
                         };
 
                         LocationModel.findOne(query).select('_id').lean().exec(cb);
@@ -939,7 +940,8 @@ function importPersonnel(callback) {
                         const query = {
                             'name.en': {
                                 $in: countries
-                            }
+                            },
+                            type: 'country'
                         };
 
                         LocationModel.find(query).select('_id').lean().exec(cb)
@@ -954,7 +956,8 @@ function importPersonnel(callback) {
                         const query = {
                             'name.en': {
                                 $in: regions
-                            }
+                            },
+                            type: 'region'
                         };
 
                         LocationModel.find(query).select('_id').lean().exec(cb)
@@ -969,7 +972,8 @@ function importPersonnel(callback) {
                         const query = {
                             'name.en': {
                                 $in: subRegions
-                            }
+                            },
+                            type: 'subRegion'
                         };
 
                         LocationModel.find(query).select('_id').lean().exec(cb)
