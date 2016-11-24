@@ -139,6 +139,18 @@ const readCsv = (name, cb) => {
     createReadStream(filePath).pipe(converter);
 };
 
+const trimObjectValues = (obj) => {
+    for (let key in obj) {
+        const value = obj[key];
+
+        if (_.isString(value)) {
+            obj[key] = value.trim();
+        }
+    }
+
+    return obj;
+};
+
 // sequence is important
 async.series([
 
@@ -177,7 +189,8 @@ function importDisplayType(callback) {
         async.apply(readCsv, 'Display'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, eachCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -189,7 +202,7 @@ function importDisplayType(callback) {
                     'name.en': patch.name.en
                 };
 
-                DisplayTypeModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                DisplayTypeModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -202,7 +215,8 @@ function importCategory(callback) {
         async.apply(readCsv, 'Category'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, eachCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -214,7 +228,7 @@ function importCategory(callback) {
                     'name.en': patch.name.en
                 };
 
-                CategoryModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                CategoryModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -232,7 +246,8 @@ function importVariant(callback) {
                 fetchCategory,
 
                 (categoryCollection, cb) => {
-                    async.mapLimit(data, 10, (obj, eachCb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const patch = Object.assign({}, {
                             ID: obj.ID,
                             name: {
@@ -251,7 +266,7 @@ function importVariant(callback) {
                             'name.en': patch.name.en
                         };
 
-                        VariantModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                        VariantModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
                     }, cb)
                 }
 
@@ -281,7 +296,8 @@ function importItem(callback) {
                 },
 
                 (collections, cb) => {
-                    async.mapLimit(data, 10, (obj, eachCb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const patch = Object.assign({}, {
                             ID: obj.ID,
                             name: {
@@ -299,33 +315,30 @@ function importItem(callback) {
 
                         patch.origin = [getOriginIdByEnName({
                             collection: collections.origin,
-                            name: _.isString(patch.origin) ?
-                                patch.origin.trim() : patch.origin
+                            name: patch.origin
                         })].filter((item) => (item));
 
                         patch.category = getCategoryIdByEnName({
                             collection: collections.category,
-                            name: _.isString(patch.country) ?
-                                patch.country.trim() : patch.country
+                            name: patch.country
                         });
 
                         patch.variant = getVariantIdByEnName({
                             collection: collections.variant,
-                            name: _.isString(patch.variant) ?
-                                patch.variant.trim() : patch.variant
+                            name: patch.variant
                         });
 
                         patch.country = getLocationIdByEnName({
                             collection: collections.country,
-                            name: _.isString(patch.country) ?
-                                patch.country.trim() : patch.country
+                            name: patch.country
                         });
 
                         const query = {
-                            'name.en': patch.name.en
+                            'name.en': patch.name.en,
+                            barCode: patch.barCode
                         };
 
-                        ItemModel.findOneAndUpdate(query, patch, mergeOptions, eachCb);
+                        ItemModel.findOneAndUpdate(query, patch, mergeOptions, mapCb);
                     }, cb)
                 }
 
@@ -355,7 +368,8 @@ function importCompetitorItem(callback) {
                 },
 
                 (collections, cb) => {
-                    async.mapLimit(data, 50, (obj, eachCb) => {
+                    async.mapLimit(data, 50, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const patch = Object.assign({}, {
                             ID: obj.ID,
                             name: {
@@ -365,43 +379,41 @@ function importCompetitorItem(callback) {
                             packing: obj.Size,
                             brand: obj.Brand,
                             variant: obj.Variant,
-                            country: obj.Country
+                            country: obj.Country,
+                            origin: [obj.Origin]
                         });
 
-                        const originEnName = obj.Origin;
+                        const originId = getOriginIdByEnName({
+                            collection: collections.origin,
+                            name: patch.origin
+                        });
 
-                        patch.origin = [];
-
-                        if (_.isString(originEnName) && originEnName.length > 0) {
-                            patch.origin = [getOriginIdByEnName({
-                                collection: collections.origin,
-                                name: originEnName
-                            })].filter((item) => (item))
-                        }
+                        patch.origin = [originId].filter((item) => (item));
 
                         patch.brand = getBrandIdByEnName({
                             collection: collections.brand,
-                            name: _.isString(patch.brand) ?
-                                patch.brand.trim() : patch.brand
+                            name: patch.brand
                         });
 
                         patch.variant = getVariantIdByEnName({
                             collection: collections.variant,
-                            name: _.isString(patch.variant) ?
-                                patch.variant.trim() : patch.variant
+                            name: patch.variant
                         });
 
                         patch.country = getLocationIdByEnName({
                             collection: collections.country,
-                            name: _.isString(patch.country) ?
-                                patch.country.trim() : patch.country
+                            name: patch.country
                         });
 
                         const query = {
-                            'name.en': patch.name.en
+                            'name.en': patch.name.en,
+                            packing: patch.packing,
+                            brand: patch.brand,
+                            variant: patch.variant,
+                            country: patch.country
                         };
 
-                        CompetitorItemModel.findOneAndUpdate(query, patch, mergeOptions, eachCb);
+                        CompetitorItemModel.findOneAndUpdate(query, patch, mergeOptions, mapCb);
                     }, cb)
                 }
 
@@ -422,7 +434,8 @@ function importCompetitorVariant(callback) {
                 fetchCategory,
 
                 (categoryCollection, cb) => {
-                    async.mapLimit(data, 10, (obj, eachCb) => {
+                    async.mapLimit(data, 50, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const patch = Object.assign({}, {
                             ID: obj.ID,
                             name: {
@@ -438,10 +451,11 @@ function importCompetitorVariant(callback) {
                         });
 
                         const query = {
-                            'name.en': patch.name.en
+                            'name.en': patch.name.en,
+                            country: patch.country
                         };
 
-                        CompetitorVariantModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                        CompetitorVariantModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
                     }, cb)
                 }
 
@@ -457,7 +471,8 @@ function importBrand(callback) {
         async.apply(readCsv, 'Brand'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, eachCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -469,7 +484,7 @@ function importBrand(callback) {
                     'name.en': patch.name.en
                 };
 
-                BrandModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                BrandModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -482,7 +497,8 @@ function importOrigin(callback) {
         async.apply(readCsv, 'Origin'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, eachCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -494,7 +510,7 @@ function importOrigin(callback) {
                     'name.en': patch.name.en
                 };
 
-                OriginModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                OriginModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -507,7 +523,8 @@ function importCurrency(callback) {
         async.apply(readCsv, 'Currency'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, eachCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     _id: obj._id,
                     name: obj.name
@@ -516,7 +533,7 @@ function importCurrency(callback) {
                     'name': patch.name
                 };
 
-                CurrencyModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                CurrencyModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -529,7 +546,8 @@ function importPosition(callback) {
         async.apply(readCsv, 'Position'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, eachCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -541,7 +559,7 @@ function importPosition(callback) {
                     'name.en': patch.name.en
                 };
 
-                PositionModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                PositionModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -554,7 +572,8 @@ function importRole(callback) {
         async.apply(readCsv, 'Role'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, mapCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     name: {
                         en: obj['Name (EN)'],
@@ -578,7 +597,8 @@ function importOutlet(callback) {
         async.apply(readCsv, 'Outlet'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, mapCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -603,7 +623,8 @@ function importRetailSegment(callback) {
         async.apply(readCsv, 'RetailSegment'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (obj, mapCb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -633,7 +654,8 @@ function importDomain(callback) {
                 fetchCurrency,
 
                 (currencyCollection, cb) => {
-                    async.mapLimit(data, 10, (obj, mapCb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const parentProp = obj.Parent === 'null' ? null : obj.Parent;
                         const currencyProp = obj.Currency;
 
@@ -698,7 +720,8 @@ function importBranch(callback) {
         async.apply(readCsv, 'Branch'),
 
         (data, cb) => {
-            async.mapLimit(data, 300, (obj, mapCb) => {
+            async.mapLimit(data, 300, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -783,7 +806,8 @@ function importPersonnel(callback) {
         async.apply(readCsv, 'Personnel'),
 
         (data, cb) => {
-            async.mapLimit(data, 300, (obj, mapCb) => {
+            async.mapLimit(data, 300, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     firstName: {
@@ -801,7 +825,11 @@ function importPersonnel(callback) {
                 const dateJoined = obj['Date of joining'];
 
                 if (dateJoined) {
-                //    patch.dateJoined = moment(dateJoined, 'MMDDYY')
+                    const momentDateJoined = moment(dateJoined, 'MM/DD/YY');
+
+                    if (momentDateJoined.isValid()) {
+                        patch.dateJoined = momentDateJoined.toDate();
+                    }
                 }
 
                 const country = obj['Country'];
