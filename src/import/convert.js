@@ -790,8 +790,9 @@ function importDomain(callback) {
                             parent: parent ? parent.toString() : null
                         };
 
-                        LocationModel.findOneAndUpdate(query, patch, {
-                            new: true
+                        LocationModel.update(query, patch, {
+                            new: true,
+                            multi:true
                         }, mapCb);
                     }, cb)
                 }
