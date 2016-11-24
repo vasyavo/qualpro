@@ -31,11 +31,6 @@ const CompetitorItemModel = require('./../types/competitorItem/model');
 const whereSheets = `${config.workingDirectory}/src/import/`;
 const timestamp = 'Nov_21_2016';
 
-const mergeOptions = {
-    upsert: true,
-    new: true
-};
-
 const fetchCurrency = (callback) => {
     CurrencyModel.find({}).select('_id name').lean().exec(callback);
 };
@@ -182,6 +177,43 @@ async.series([
     process.exit(0);
 });
 
+const patchRecord = (options, callback) => {
+    const query = options.query;
+    const patch = options.patch;
+    const DatabaseModel = options.model;
+
+    async.waterfall([
+
+        (cb) => {
+            DatabaseModel.findOne(query, cb);
+        },
+
+        (existingModel, cb) => {
+            if (existingModel === null) {
+                const databaseModel = new DatabaseModel();
+
+                databaseModel.set(patch);
+                return databaseModel.save((err) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, databaseModel);
+                });
+            }
+
+            existingModel.set(patch);
+            existingModel.save((err) => {
+                if (err) {
+                    return cb(err);
+                }
+
+                cb(null, existingModel);
+            });
+        }
+
+    ], callback);
+};
 
 function importDisplayType(callback) {
     async.waterfall([
@@ -202,7 +234,11 @@ function importDisplayType(callback) {
                     'name.en': patch.name.en
                 };
 
-                DisplayTypeModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: DisplayTypeModel
+                }, mapCb);
             }, cb)
         }
 
@@ -228,7 +264,11 @@ function importCategory(callback) {
                     'name.en': patch.name.en
                 };
 
-                CategoryModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: CategoryModel
+                }, mapCb);
             }, cb)
         }
 
@@ -266,7 +306,11 @@ function importVariant(callback) {
                             'name.en': patch.name.en
                         };
 
-                        VariantModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                        patchRecord({
+                            query,
+                            patch,
+                            model: VariantModel
+                        }, mapCb);
                     }, cb)
                 }
 
@@ -320,7 +364,7 @@ function importItem(callback) {
 
                         patch.category = getCategoryIdByEnName({
                             collection: collections.category,
-                            name: patch.country
+                            name: patch.category
                         });
 
                         patch.variant = getVariantIdByEnName({
@@ -338,7 +382,11 @@ function importItem(callback) {
                             barCode: patch.barCode
                         };
 
-                        ItemModel.findOneAndUpdate(query, patch, mergeOptions, mapCb);
+                        patchRecord({
+                            query,
+                            patch,
+                            model: ItemModel
+                        }, mapCb);
                     }, cb)
                 }
 
@@ -413,7 +461,11 @@ function importCompetitorItem(callback) {
                             country: patch.country
                         };
 
-                        CompetitorItemModel.findOneAndUpdate(query, patch, mergeOptions, mapCb);
+                        patchRecord({
+                            query,
+                            patch,
+                            model: CompetitorItemModel
+                        }, mapCb);
                     }, cb)
                 }
 
@@ -455,7 +507,11 @@ function importCompetitorVariant(callback) {
                             country: patch.country
                         };
 
-                        CompetitorVariantModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                        patchRecord({
+                            query,
+                            patch,
+                            model: CompetitorVariantModel
+                        }, mapCb);
                     }, cb)
                 }
 
@@ -484,7 +540,11 @@ function importBrand(callback) {
                     'name.en': patch.name.en
                 };
 
-                BrandModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: BrandModel
+                }, mapCb);
             }, cb)
         }
 
@@ -510,7 +570,11 @@ function importOrigin(callback) {
                     'name.en': patch.name.en
                 };
 
-                OriginModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: OriginModel
+                }, mapCb);
             }, cb)
         }
 
@@ -533,7 +597,11 @@ function importCurrency(callback) {
                     'name': patch.name
                 };
 
-                CurrencyModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: CurrencyModel
+                }, mapCb);
             }, cb)
         }
 
@@ -559,7 +627,11 @@ function importPosition(callback) {
                     'name.en': patch.name.en
                 };
 
-                PositionModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: PositionModel
+                }, mapCb);
             }, cb)
         }
 
@@ -584,7 +656,11 @@ function importRole(callback) {
                     'name.en': patch.name.en
                 };
 
-                AccessRoleModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: AccessRoleModel
+                }, mapCb);
             }, cb)
         }
 
@@ -610,7 +686,11 @@ function importOutlet(callback) {
                     'name.en': patch.name.en
                 };
 
-                OutletModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: OutletModel
+                }, mapCb);
             }, cb)
         }
 
@@ -636,7 +716,11 @@ function importRetailSegment(callback) {
                     'name.en': patch.name.en
                 };
 
-                RetailSegmentModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: RetailSegmentModel
+                }, mapCb);
             }, cb)
         }
 
@@ -685,7 +769,11 @@ function importDomain(callback) {
                             type: patch.type
                         };
 
-                        LocationModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                        patchRecord({
+                            query,
+                            patch,
+                            model: LocationModel
+                        }, mapCb);
                     }, cb)
                 },
 
@@ -782,17 +870,17 @@ function importBranch(callback) {
                         population.outlet._id : null;
 
                     const query = {
-                        'name.en': patch.en
+                        'name.en': patch.name.en,
+                        subRegion: patch.subRegion,
+                        retailSegment: patch.retailSegment,
+                        outlet: patch.outlet
                     };
 
-                    BranchModel.findOneAndUpdate(query, patch, mergeOptions, (err, model) => {
-                        if (err) {
-                            console.error('Branch import failed for object:', obj, 'and patch:', patch, '. With error:', err);
-                            return mapCb(err);
-                        }
-
-                        mapCb(null, model);
-                    })
+                    patchRecord({
+                        query,
+                        patch,
+                        model: BranchModel
+                    }, mapCb);
                 });
             }, cb);
         }
@@ -957,7 +1045,11 @@ function importPersonnel(callback) {
                         query['lastName.en'] = patch.lastName.en;
                     }
 
-                    PersonnelModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                    patchRecord({
+                        query,
+                        patch,
+                        model: PersonnelModel
+                    }, mapCb);
                 });
             }, cb);
         },
