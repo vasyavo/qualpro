@@ -20,12 +20,10 @@ const schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
-    displayType: {
+    displayType: [{
         type: Number,
-        ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16,
-        require: true
-    },
+        ref: CONTENT_TYPES.DISPLAYTYPE
+    }],
     dateStart: { type: Date },
     dateEnd: { type: Date },
     comments: [{ type: ObjectId, ref: CONTENT_TYPES.COMMENT, default: null }],

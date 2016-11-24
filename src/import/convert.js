@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 const mongoXlsx = require('mongo-xlsx');
+const Converter = require("csvtojson").Converter;
 const async = require('async');
 const fs = require('fs');
 const moment = require('moment');
+const createReadStream = fs.createReadStream;
+const _ = require('lodash');
 
 mongoose.Schemas = mongoose.Schemas || {};
 const config = require('./../config');
@@ -16,6 +19,14 @@ const PersonnelModel = require('./../types/personnel/model');
 const AccessRoleModel = require('./../types/accessRole/model');
 const PositionModel = require('./../types/position/model');
 const CurrencyModel = require('./../types/currency/model');
+const OriginModel = require('./../types/origin/model');
+const BrandModel = require('./../types/brand/model');
+const CategoryModel = require('./../types/category/model');
+const VariantModel = require('./../types/variant/model');
+const DisplayTypeModel = require('./../types/displayType/model');
+const CompetitorVariantModel = require('./../types/competitorVariant/model');
+const ItemModel = require('./../types/item/model');
+const CompetitorItemModel = require('./../types/competitorItem/model');
 
 const whereSheets = `${config.workingDirectory}/src/import/`;
 const timestamp = 'Nov_21_2016';
@@ -25,11 +36,31 @@ const mergeOptions = {
     new: true
 };
 
-function fetchCurrency(callback) {
+const fetchCurrency = (callback) => {
     CurrencyModel.find({}).select('_id name').lean().exec(callback);
-}
+};
 
-function getCurrencyIdByName(options) {
+const fetchCategory = (callback) => {
+    CategoryModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchOrigin = (callback) => {
+    OriginModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchLocation = (callback) => {
+    LocationModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchVariant = (callback) => {
+    VariantModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchBrand = (callback) => {
+    BrandModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const getCurrencyIdByName = (options) => {
     const collection = options.collection;
     const name = options.name;
 
@@ -77,36 +108,89 @@ function getCurrencyIdByName(options) {
     }
 
     return null;
-}
+};
 
+const getSampleIdByEnNamePrototype = (options) => {
+    const collection = options.collection;
+    const name = options.name;
+
+    return collection
+        .filter((item) => {
+            return item.name.en === name;
+        })
+        .map((item) => (item._id))
+        .pop() || null;
+};
+
+const getCategoryIdByEnName = getSampleIdByEnNamePrototype;
+const getOriginIdByEnName = getSampleIdByEnNamePrototype;
+const getVariantIdByEnName = getSampleIdByEnNamePrototype;
+const getLocationIdByEnName = getSampleIdByEnNamePrototype;
+const getBrandIdByEnName = getSampleIdByEnNamePrototype;
+
+const readCsv = (name, cb) => {
+    const converter = new Converter({});
+    const filePath = `${whereSheets}${timestamp}/${name}.csv`;
+
+    converter.on('end_parsed', (array) => {
+        cb(null, array)
+    });
+
+    createReadStream(filePath).pipe(converter);
+};
+
+const trimObjectValues = (obj) => {
+    for (let key in obj) {
+        const value = obj[key];
+
+        if (_.isString(value)) {
+            obj[key] = value.trim();
+        }
+    }
+
+    return obj;
+};
+
+// sequence is important
 async.series([
 
+    importDisplayType,
+    importCategory,
+    importVariant,
+    importCompetitorVariant,
+    importBrand,
+    importOrigin,
+    importCurrency,
     importRole,
     importRetailSegment,
     importOutlet,
     importPosition,
     importDomain,
+    importItem,
+    importCompetitorItem,
     importBranch,
     importPersonnel
 
 ], (err) => {
     if (err) {
-        return console.log(err);
+        console.log(err);
+        process.exit(1);
+        return;
     }
 
-    return console.log('Done!');
+    console.log('Done!');
+    process.exit(0);
 });
 
 
-function importPosition(callback) {
+function importDisplayType(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Position.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Display'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, eachCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -118,7 +202,364 @@ function importPosition(callback) {
                     'name.en': patch.name.en
                 };
 
-                PositionModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                DisplayTypeModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importCategory(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Category'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                CategoryModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importVariant(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Variant'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                fetchCategory,
+
+                (categoryCollection, cb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            category: obj.Category
+                        });
+
+                        patch.category = getCategoryIdByEnName({
+                            collection: categoryCollection,
+                            name: patch.category
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en
+                        };
+
+                        VariantModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importItem(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Item'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                (cb) => {
+                    async.parallel({
+
+                        origin: fetchOrigin,
+                        category: fetchCategory,
+                        variant: fetchVariant,
+                        country: fetchLocation,
+
+                    }, cb);
+                },
+
+                (collections, cb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            barCode: obj.Barcode,
+                            packing: obj.Packing,
+                            ppt: obj.PPT,
+                            origin: obj.Origin,
+                            category: obj.Category,
+                            variant: obj.Variant,
+                            country: obj.Country
+                        });
+
+                        patch.origin = [getOriginIdByEnName({
+                            collection: collections.origin,
+                            name: patch.origin
+                        })].filter((item) => (item));
+
+                        patch.category = getCategoryIdByEnName({
+                            collection: collections.category,
+                            name: patch.country
+                        });
+
+                        patch.variant = getVariantIdByEnName({
+                            collection: collections.variant,
+                            name: patch.variant
+                        });
+
+                        patch.country = getLocationIdByEnName({
+                            collection: collections.country,
+                            name: patch.country
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en,
+                            barCode: patch.barCode
+                        };
+
+                        ItemModel.findOneAndUpdate(query, patch, mergeOptions, mapCb);
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importCompetitorItem(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'CompetitorItem'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                (cb) => {
+                    async.parallel({
+
+                        origin: fetchOrigin,
+                        brand: fetchBrand,
+                        variant: fetchVariant,
+                        country: fetchLocation,
+
+                    }, cb);
+                },
+
+                (collections, cb) => {
+                    async.mapLimit(data, 50, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            packing: obj.Size,
+                            brand: obj.Brand,
+                            variant: obj.Variant,
+                            country: obj.Country,
+                            origin: [obj.Origin]
+                        });
+
+                        const originId = getOriginIdByEnName({
+                            collection: collections.origin,
+                            name: patch.origin
+                        });
+
+                        patch.origin = [originId].filter((item) => (item));
+
+                        patch.brand = getBrandIdByEnName({
+                            collection: collections.brand,
+                            name: patch.brand
+                        });
+
+                        patch.variant = getVariantIdByEnName({
+                            collection: collections.variant,
+                            name: patch.variant
+                        });
+
+                        patch.country = getLocationIdByEnName({
+                            collection: collections.country,
+                            name: patch.country
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en,
+                            packing: patch.packing,
+                            brand: patch.brand,
+                            variant: patch.variant,
+                            country: patch.country
+                        };
+
+                        CompetitorItemModel.findOneAndUpdate(query, patch, mergeOptions, mapCb);
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importCompetitorVariant(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'CompetitorVariant'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                fetchCategory,
+
+                (categoryCollection, cb) => {
+                    async.mapLimit(data, 50, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            category: obj.Category
+                        });
+
+                        patch.category = getCategoryIdByEnName({
+                            collection: categoryCollection,
+                            name: patch.category
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en,
+                            country: patch.country
+                        };
+
+                        CompetitorVariantModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importBrand(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Brand'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                BrandModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importOrigin(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Origin'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                OriginModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importCurrency(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Currency'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    _id: obj._id,
+                    name: obj.name
+                });
+                const query = {
+                    'name': patch.name
+                };
+
+                CurrencyModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importPosition(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Position'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                PositionModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
             }, cb)
         }
 
@@ -128,12 +569,11 @@ function importPosition(callback) {
 function importRole(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Role.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Role'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     name: {
                         en: obj['Name (EN)'],
@@ -154,12 +594,11 @@ function importRole(callback) {
 function importOutlet(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Outlet.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Outlet'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -181,12 +620,11 @@ function importOutlet(callback) {
 function importRetailSegment(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/RetailSegment.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'RetailSegment'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -208,17 +646,16 @@ function importRetailSegment(callback) {
 function importDomain(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Domain.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Domain'),
 
-        (mongoData, name, cb) => {
+        (data, cb) => {
             async.waterfall([
 
                 fetchCurrency,
 
                 (currencyCollection, cb) => {
-                    async.mapLimit(mongoData, 10, (obj, mapCb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const parentProp = obj.Parent === 'null' ? null : obj.Parent;
                         const currencyProp = obj.Currency;
 
@@ -280,12 +717,11 @@ function importDomain(callback) {
 function importBranch(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Branch.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Branch'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 300, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 300, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -301,39 +737,45 @@ function importBranch(callback) {
                 const retailSegment = obj['Retail Segment'];
                 const outlet = obj['Outlet'];
 
-                async.parallel({
+                const parallelJobs = {};
 
-                    location: (cb) => {
+                if (subRegion) {
+                    parallelJobs.subRegion = (cb) => {
                         const query = {
                             'name.en': subRegion
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
-                    },
+                        LocationModel.findOne(query).select('_id').lean().exec(cb);
+                    }
+                }
 
-                    retailSegment: (cb) => {
+                if (retailSegment) {
+                    parallelJobs.retailSegment = (cb) => {
                         const query = {
                             'name.en': retailSegment
                         };
 
-                        RetailSegmentModel.findOne(query).select('_id').lean().exec(cb)
-                    },
+                        RetailSegmentModel.findOne(query).select('_id').lean().exec(cb);
+                    }
+                }
 
-                    outlet: (cb) => {
+                if (outlet) {
+                    parallelJobs.outlet = (cb) => {
                         const query = {
                             'name.en': outlet
                         };
 
-                        OutletModel.findOne(query).select('_id').lean().exec(cb)
+                        OutletModel.findOne(query).select('_id').lean().exec(cb);
                     }
+                }
 
-                }, (err, population) => {
+                async.parallel(parallelJobs, (err, population) => {
                     if (err) {
                         return mapCb(err);
                     }
 
-                    patch.subRegion = population.location ?
-                        population.location._id : null;
+                    patch.subRegion = population.subRegion ?
+                        population.subRegion._id : null;
                     patch.retailSegment = population.retailSegment ?
                         population.retailSegment._id : null;
                     patch.outlet = population.outlet ?
@@ -343,7 +785,14 @@ function importBranch(callback) {
                         'name.en': patch.en
                     };
 
-                    BranchModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                    BranchModel.findOneAndUpdate(query, patch, mergeOptions, (err, model) => {
+                        if (err) {
+                            console.error('Branch import failed for object:', obj, 'and patch:', patch, '. With error:', err);
+                            return mapCb(err);
+                        }
+
+                        mapCb(null, model);
+                    })
                 });
             }, cb);
         }
@@ -354,12 +803,11 @@ function importBranch(callback) {
 function importPersonnel(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Personnel.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Personnel'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 300, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 300, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     firstName: {
@@ -371,13 +819,18 @@ function importPersonnel(callback) {
                         ar: obj['Last Name (AR)']
                     },
                     email: obj['Email'],
-                    phoneNumber: obj['PhoneNumber']
+                    phoneNumber: obj['PhoneNumber'],
+                    xlsManager: obj.Manager
                 });
 
                 const dateJoined = obj['Date of joining'];
 
                 if (dateJoined) {
-                //    patch.dateJoined = moment(dateJoined, 'MMDDYY')
+                    const momentDateJoined = moment(dateJoined, 'MM/DD/YY');
+
+                    if (momentDateJoined.isValid()) {
+                        patch.dateJoined = momentDateJoined.toDate();
+                    }
                 }
 
                 const country = obj['Country'];
@@ -520,8 +973,9 @@ function importPersonnel(callback) {
                     manager: model.get('_id')
                 };
 
-                PersonnelModel.findOneAndUpdate(query, patch, {
-                    new: true
+                PersonnelModel.update(query, patch, {
+                    new: true,
+                    multi: true
                 }, mapCb);
             }, cb)
         }

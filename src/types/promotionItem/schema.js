@@ -22,11 +22,11 @@ const schema = new Schema({
     sellIn: [{ type: Number, default: 0 }],
     closingStock: [{ type: Number, default: 0 }],
     sellOut: [{ type: Number, default: 0 }],
-    displayType: {
+    displayType: [{
         type: Number,
         ref: CONTENT_TYPES.DISPLAYTYPE,
         default: 16
-    },
+    }],
     comment: { type: ObjectId, ref: CONTENT_TYPES.COMMENT, default: null },
     createdBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
