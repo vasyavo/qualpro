@@ -2567,6 +2567,11 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .assignContainer .assignUl li:hover {
   background-color: #cfd8dc;
 }
+.online {
+  color: green;
+  padding: 5px 0;
+  font-size: 0.9em;
+}
 /* "inset-2-dark" */
 .mCS-qualPro .mCSB_scrollTools {
   background-color: #ffffff;
