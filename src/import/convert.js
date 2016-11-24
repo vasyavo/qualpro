@@ -819,7 +819,8 @@ function importPersonnel(callback) {
                         ar: obj['Last Name (AR)']
                     },
                     email: obj['Email'],
-                    phoneNumber: obj['PhoneNumber']
+                    phoneNumber: obj['PhoneNumber'],
+                    xlsManager: obj.Manager
                 });
 
                 const dateJoined = obj['Date of joining'];
@@ -972,8 +973,9 @@ function importPersonnel(callback) {
                     manager: model.get('_id')
                 };
 
-                PersonnelModel.findOneAndUpdate(query, patch, {
-                    new: true
+                PersonnelModel.update(query, patch, {
+                    new: true,
+                    multi: true
                 }, mapCb);
             }, cb)
         }
