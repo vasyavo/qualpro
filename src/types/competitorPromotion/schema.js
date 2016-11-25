@@ -20,6 +20,7 @@ const schema = new Schema({
     promotion: { type: String, default: '', require: true },
     price: { type: String, default: '', require: true },
     packing: { type: String, default: '', require: true },
+    packingType: { type: String, enum: ['gm', 'ml', ''], default: ''},
     expiry: { type: Date },
     displayType: [{
         type: Number,
