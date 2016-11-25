@@ -2971,8 +2971,7 @@ var Personnel = function (db, redis, event) {
             if (body.sendPass && !(body.oldPass || body.newPass)) {
                 generatedPassword = PasswordManager.generatePassword();
 
-                const salt = bcrypt.genSaltSync(10);
-                const hash = bcrypt.hashSync(generatedPassword, salt);
+                const hash = PasswordManager.encryptPasswordSync(generatedPassword);
                 const token = generator.generate();
 
                 body.pass = hash;
@@ -3066,8 +3065,7 @@ var Personnel = function (db, redis, event) {
                     currentUser: (parallelCb) => {
                         if (body.newPass && body.oldPass) {
                             if (bcrypt.compareSync(body.oldPass, model.pass)) {
-                                const salt = bcrypt.genSalt(10);
-                                const hash = bcrypt.hashSync(body.newPass, salt);
+                                const hash = PasswordManager.encryptPasswordSync(body.newPass);
 
                                 body.pass = hash;
                             } else {

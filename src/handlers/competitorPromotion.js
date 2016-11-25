@@ -1,4 +1,4 @@
-var CompetitorBranding = function (db, redis, event) {
+var CompetitorBranding = function(db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -24,32 +24,33 @@ var CompetitorBranding = function (db, redis, event) {
     var self = this;
 
     var $defProjection = {
-        _id          : 1,
-        description  : 1,
-        category     : 1,
-        brand        : 1,
-        country      : 1,
-        region       : 1,
-        subRegion    : 1,
-        retailSegment: 1,
-        outlet       : 1,
-        branch       : 1,
-        origin       : 1,
-        promotion    : 1,
-        price        : 1,
-        packing      : 1,
-        expiry       : 1,
-        displayType  : 1,
-        dateStart    : 1,
-        dateEnd      : 1,
-        archived     : 1,
-        createdBy    : 1,
-        editedBy     : 1,
-        attachments  : 1,
-        comments     : 1
+        _id : 1,
+        description : 1,
+        category : 1,
+        brand : 1,
+        country : 1,
+        region : 1,
+        subRegion : 1,
+        retailSegment : 1,
+        outlet : 1,
+        branch : 1,
+        origin : 1,
+        promotion : 1,
+        price : 1,
+        packing : 1,
+        packingType : 1,
+        expiry : 1,
+        displayType : 1,
+        dateStart : 1,
+        dateEnd : 1,
+        archived : 1,
+        createdBy : 1,
+        editedBy : 1,
+        attachments : 1,
+        comments : 1
     };
 
-    this.create = function (req, res, next) {
+    this.create = function(req, res, next) {
         function queryRun(body) {
             var files = req.files;
             var session = req.session;
@@ -57,7 +58,7 @@ var CompetitorBranding = function (db, redis, event) {
 
             async.waterfall([
 
-                function (cb) {
+                function(cb) {
                     if (!files) {
                         return cb(null, []);
                     }
@@ -66,16 +67,16 @@ var CompetitorBranding = function (db, redis, event) {
                     fileHandler.uploadFile(userId, files, 'competitorPromotion', cb);
                 },
 
-                function (filesIds, cb) {
+                function(filesIds, cb) {
                     var createdBy = {
-                        user: req.session.uId,
-                        date: new Date()
+                        user : req.session.uId,
+                        date : new Date()
                     };
 
                     if (body.description) {
                         body.description = {
-                            en: _.escape(body.description.en),
-                            ar: _.escape(body.description.ar)
+                            en : _.escape(body.description.en),
+                            ar : _.escape(body.description.ar)
                         };
                     }
                     if (body.promotion) {
@@ -88,42 +89,42 @@ var CompetitorBranding = function (db, redis, event) {
                         body.packing = _.escape(body.packing);
                     }
                     var competitorPromotion = {
-                        description  : body.description,
-                        category     : body.category,
-                        brand        : body.brand,
-                        country      : body.country,
-                        region       : body.region,
-                        subRegion    : body.subRegion,
-                        retailSegment: body.retailSegment,
-                        outlet       : body.outlet,
-                        branch       : body.branch,
-                        origin       : body.origin,
-                        promotion    : body.promotion,
-                        price        : body.price,
-                        packing      : body.packing,
-                        expiry       : body.expiry,
-                        attachments  : filesIds,
-                        displayType  : body.displayType,
-                        dateStart    : body.dateStart,
-                        dateEnd      : body.dateEnd,
-                        createdBy    : createdBy,
-                        editedBy     : createdBy
+                        description : body.description,
+                        category : body.category,
+                        brand : body.brand,
+                        country : body.country,
+                        region : body.region,
+                        subRegion : body.subRegion,
+                        retailSegment : body.retailSegment,
+                        outlet : body.outlet,
+                        branch : body.branch,
+                        origin : body.origin,
+                        promotion : body.promotion,
+                        price : body.price,
+                        packing : body.packing,
+                        expiry : body.expiry,
+                        attachments : filesIds,
+                        displayType : body.displayType,
+                        dateStart : body.dateStart,
+                        dateEnd : body.dateEnd,
+                        createdBy : createdBy,
+                        editedBy : createdBy
                     };
 
                     CompetitorPromotionModel.create(competitorPromotion, cb);
                 },
 
-                function (model, cb) {
+                function(model, cb) {
                     if (body.commentText) {
                         body.commentText = _.escape(body.commentText);
                     }
                     var saveObj = {
-                        text       : body.commentText,
-                        objectiveId: model._id,
-                        userId     : userId
+                        text : body.commentText,
+                        objectiveId : model._id,
+                        userId : userId
                     };
 
-                    commentCreator(saveObj, CompetitorPromotionModel, function (err, comment) {
+                    commentCreator(saveObj, CompetitorPromotionModel, function(err, comment) {
                         if (err) {
                             return cb(err);
                         }
@@ -132,21 +133,21 @@ var CompetitorBranding = function (db, redis, event) {
                     });
                 },
 
-                function (model, comment, cb) {
-                    CompetitorPromotionModel.findByIdAndUpdate(model._id, {$push: {comments: comment._id}}, {new: true}, cb);
+                function(model, comment, cb) {
+                    CompetitorPromotionModel.findByIdAndUpdate(model._id, {$push : {comments : comment._id}}, {new : true}, cb);
                 }
 
-            ], function (err, result) {
+            ], function(err, result) {
                 if (err) {
                     return next(err);
                 }
 
                 event.emit('activityChange', {
-                    module    : ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
-                    actionType: ACTIVITY_TYPES.CREATED,
+                    module : ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
+                    actionType : ACTIVITY_TYPES.CREATED,
                     createdBy : result.get('createdBy'),
-                    itemId    : result._id,
-                    itemType  : CONTENT_TYPES.COMPETITORPROMOTION
+                    itemId : result._id,
+                    itemType : CONTENT_TYPES.COMPETITORPROMOTION
                 });
 
                 res.status(201).send(result);
@@ -154,7 +155,7 @@ var CompetitorBranding = function (db, redis, event) {
 
         }
 
-        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err, allowed) {
             var body;
 
             if (err) {
@@ -177,7 +178,7 @@ var CompetitorBranding = function (db, redis, event) {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.COMPETITORPROMOTION, 'create', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.COMPETITORPROMOTION, 'create', function(err, saveData) {
                 if (err) {
                     return next(err);
                 }
@@ -187,7 +188,7 @@ var CompetitorBranding = function (db, redis, event) {
         });
     };
 
-    this.getAll = function (req, res, next) {
+    this.getAll = function(req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
             var filter = query.filter || {};
@@ -233,14 +234,14 @@ var CompetitorBranding = function (db, redis, event) {
             delete filter.globalSearch;
 
             queryObject = query.filter ? filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.COMPETITORPROMOTION,
-                filter     : filter,
-                personnel  : personnel
+                contentType : CONTENT_TYPES.COMPETITORPROMOTION,
+                filter : filter,
+                personnel : personnel
             }) : {};
 
             if (queryObject.position && queryObject.position.$in) {
                 positionFilter = {
-                    'createdBy.user.position': queryObject.position
+                    'createdBy.user.position' : queryObject.position
                 };
 
                 delete queryObject.position;
@@ -249,24 +250,24 @@ var CompetitorBranding = function (db, redis, event) {
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             pipeLine = getAllPipeline({
-                aggregateHelper  : aggregateHelper,
-                queryObject      : queryObject,
-                positionFilter   : positionFilter,
-                searchFieldsArray: searchFieldsArray,
-                filterSearch     : filterSearch,
-                skip             : skip,
-                limit            : limit
+                aggregateHelper : aggregateHelper,
+                queryObject : queryObject,
+                positionFilter : positionFilter,
+                searchFieldsArray : searchFieldsArray,
+                filterSearch : filterSearch,
+                skip : skip,
+                limit : limit
             });
 
             aggregation = CompetitorPromotionModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse: true
+                allowDiskUse : true
             };
 
-            aggregation.exec(function (err, response) {
+            aggregation.exec(function(err, response) {
                 var options = {
-                    data: {}
+                    data : {}
                 };
                 var personnelIds = [];
                 var fileIds = [];
@@ -274,13 +275,16 @@ var CompetitorBranding = function (db, redis, event) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                response = response && response[0] ? response[0] : {
+                    data : [],
+                    total : 0
+                };
 
-                response.data = _.map(response.data, function (model) {
+                response.data = _.map(response.data, function(model) {
                     if (model.description) {
                         model.description = {
-                            ar: _.unescape(model.description.ar),
-                            en: _.unescape(model.description.en)
+                            ar : _.unescape(model.description.ar),
+                            en : _.unescape(model.description.en)
                         };
                     }
                     if (model.promotion) {
@@ -299,14 +303,17 @@ var CompetitorBranding = function (db, redis, event) {
                 });
 
                 if (!response.data.length) {
-                    return next({status: 200, body: response});
+                    return next({
+                        status : 200,
+                        body : response
+                    });
                 }
 
                 personnelIds = _.uniqBy(personnelIds, 'id');
                 options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
                 options.data[CONTENT_TYPES.FILES] = fileIds;
 
-                getImagesHelper.getImages(options, function (err, result) {
+                getImagesHelper.getImages(options, function(err, result) {
                     var fieldNames = {};
                     var setOptions;
                     if (err) {
@@ -314,21 +321,24 @@ var CompetitorBranding = function (db, redis, event) {
                     }
 
                     setOptions = {
-                        response  : response,
-                        imgsObject: result
+                        response : response,
+                        imgsObject : result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                    getImagesHelper.setIntoResult(setOptions, function(response) {
+                        next({
+                            status : 200,
+                            body : response
+                        });
                     })
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -343,12 +353,15 @@ var CompetitorBranding = function (db, redis, event) {
         });
     };
 
-    this.getById = function (req, res, next) {
+    this.getById = function(req, res, next) {
         function queryRun() {
             var id = ObjectId(req.params.id);
             var isMobile = req.isMobile;
 
-            self.getByIdAggr({id: ObjectId(id), isMobile: isMobile}, function (err, result) {
+            self.getByIdAggr({
+                id : ObjectId(id),
+                isMobile : isMobile
+            }, function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -357,7 +370,7 @@ var CompetitorBranding = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -382,109 +395,109 @@ var CompetitorBranding = function (db, redis, event) {
         var skip = options.skip;
         var limit = options.limit;
         var forSync = options.forSync;
-        var employeeFilter = queryObject.personnel ? {'createdBy.user': _.pick(queryObject, 'personnel').personnel} : {};
+        var employeeFilter = queryObject.personnel ? {'createdBy.user' : _.pick(queryObject, 'personnel').personnel} : {};
         var pipeLine = [];
 
         delete queryObject.personnel;
 
         pipeLine.push({
-            $match: queryObject
+            $match : queryObject
         });
 
         pipeLine.push({
-            $match: employeeFilter
+            $match : employeeFilter
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy']
+            from : 'files',
+            key : 'attachments',
+            addProjection : ['contentType', 'originalName', 'createdBy']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'country',
-            isArray: false
+            from : 'domains',
+            key : 'country',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'region',
-            isArray: false
+            from : 'domains',
+            key : 'region',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'subRegion',
-            isArray: false
+            from : 'domains',
+            key : 'subRegion',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'retailSegments',
-            key    : 'retailSegment',
-            isArray: false
+            from : 'retailSegments',
+            key : 'retailSegment',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'outlets',
-            key    : 'outlet',
-            isArray: false
+            from : 'outlets',
+            key : 'outlet',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'branches',
-            key    : 'branch',
-            isArray: false
+            from : 'branches',
+            key : 'branch',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'categories',
+            from : 'categories',
             key : 'category'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'origins',
+            from : 'origins',
             key : 'origin'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'brands',
-            key    : 'brand',
-            isArray: false
+            from : 'brands',
+            key : 'brand',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'displayTypes',
-            key    : 'displayType',
-            isArray: true
+            from : 'displayTypes',
+            key : 'displayType',
+            isArray : true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         if (positionFilter) {
             pipeLine.push({
-                $match: positionFilter
+                $match : positionFilter
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
+            from : 'accessRoles',
+            key : 'createdBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
                         position : 1,
-                        firstName: 1,
+                        firstName : 1,
                         lastName : 1
                     }
                 }
@@ -492,17 +505,17 @@ var CompetitorBranding = function (db, redis, event) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName : 1
                     }
                 }
             }
@@ -510,25 +523,25 @@ var CompetitorBranding = function (db, redis, event) {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
+                from : 'personnels',
+                key : 'editedBy.user',
+                isArray : false,
+                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                includeSiblings : {editedBy : {date : 1}}
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'editedBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -536,17 +549,17 @@ var CompetitorBranding = function (db, redis, event) {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'editedBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -554,17 +567,17 @@ var CompetitorBranding = function (db, redis, event) {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit
+            isMobile : isMobile,
+            searchFieldsArray : searchFieldsArray,
+            filterSearch : filterSearch,
+            skip : skip,
+            limit : limit
         }));
 
         return pipeLine;
     }
 
-    this.getByIdAggr = function (options, callback) {
+    this.getByIdAggr = function(options, callback) {
         var aggregateHelper;
         var pipeLine = [];
         var aggregation;
@@ -574,94 +587,94 @@ var CompetitorBranding = function (db, redis, event) {
         aggregateHelper = new AggregationHelper($defProjection);
 
         pipeLine.push({
-            $match: {_id: id}
+            $match : {_id : id}
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy']
+            from : 'files',
+            key : 'attachments',
+            addProjection : ['contentType', 'originalName', 'createdBy']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'country',
-            isArray: false
+            from : 'domains',
+            key : 'country',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'region',
-            isArray: false
+            from : 'domains',
+            key : 'region',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'subRegion',
-            isArray: false
+            from : 'domains',
+            key : 'subRegion',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'retailSegments',
-            key    : 'retailSegment',
-            isArray: false
+            from : 'retailSegments',
+            key : 'retailSegment',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'outlets',
-            key    : 'outlet',
-            isArray: false
+            from : 'outlets',
+            key : 'outlet',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'branches',
-            key    : 'branch',
-            isArray: false
+            from : 'branches',
+            key : 'branch',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'categories',
+            from : 'categories',
             key : 'category'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'brands',
-            key    : 'brand',
-            isArray: false
+            from : 'brands',
+            key : 'brand',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'origins',
+            from : 'origins',
             key : 'origin'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'displayTypes',
-            key    : 'displayType',
-            isArray: true
+            from : 'displayTypes',
+            key : 'displayType',
+            isArray : true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         if (!isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'createdBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    createdBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'createdBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    createdBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -669,17 +682,17 @@ var CompetitorBranding = function (db, redis, event) {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'createdBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    createdBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'createdBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    createdBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -689,12 +702,12 @@ var CompetitorBranding = function (db, redis, event) {
         aggregation = CompetitorPromotionModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse: true
+            allowDiskUse : true
         };
 
-        aggregation.exec(function (err, response) {
+        aggregation.exec(function(err, response) {
             var options = {
-                data: {}
+                data : {}
             };
             var personnelIds = [];
             var fileIds;
@@ -710,8 +723,8 @@ var CompetitorBranding = function (db, redis, event) {
 
             if (response.description) {
                 response.description = {
-                    ar: _.unescape(response.description.ar),
-                    en: _.unescape(response.description.en)
+                    ar : _.unescape(response.description.ar),
+                    en : _.unescape(response.description.en)
                 };
             }
             if (response.promotion) {
@@ -730,7 +743,7 @@ var CompetitorBranding = function (db, redis, event) {
             options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
             options.data[CONTENT_TYPES.FILES] = fileIds;
 
-            getImagesHelper.getImages(options, function (err, result) {
+            getImagesHelper.getImages(options, function(err, result) {
                 var fieldNames = {};
                 var setOptions;
                 if (err) {
@@ -738,14 +751,14 @@ var CompetitorBranding = function (db, redis, event) {
                 }
 
                 setOptions = {
-                    response  : response,
-                    imgsObject: result
+                    response : response,
+                    imgsObject : result
                 };
                 fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                 fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                 setOptions.fields = fieldNames;
 
-                getImagesHelper.setIntoResult(setOptions, function (response) {
+                getImagesHelper.setIntoResult(setOptions, function(response) {
                     callback(null, response);
                 })
             });

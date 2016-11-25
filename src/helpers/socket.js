@@ -25,9 +25,6 @@ module.exports = (server) => {
         'xhr-polling'
     ]);
 
-    pub.select(parseInt(process.env.SOCKET_DB));
-    sub.select(parseInt(process.env.SOCKET_DB));
-
     io.adapter(redisAdapter(config.redisUrl, {
         pubClient: pub,
         subClient: sub

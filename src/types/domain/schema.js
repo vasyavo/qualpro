@@ -17,7 +17,7 @@ const schema = new Schema({
     topArchived: { type: Boolean, default: false },
     type: {
         type: String,
-        enum: ['country', 'region', 'subRegion'/*, 'retailSegment', 'outlet', 'branch'*/],
+        enum: ['country', 'region', 'subRegion'],
         required: true
     },
     parent: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, default: null },
