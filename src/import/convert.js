@@ -6,6 +6,7 @@ const fs = require('fs');
 const moment = require('moment');
 const createReadStream = fs.createReadStream;
 const _ = require('lodash');
+const PasswordManager = require('./../helpers/passwordManager');
 
 mongoose.Schemas = mongoose.Schemas || {};
 const config = require('./../config');
@@ -890,6 +891,20 @@ function importBranch(callback) {
     ], callback);
 }
 
+const setStandardPasswordToYopmail = (patch) => {
+    if (/yopmail/.test(patch.email)) {
+        const demoPassword = '123456'; // fixme
+        const timestamp = new Date();
+
+        patch.pass = PasswordManager.encryptPasswordSync(demoPassword);
+        patch.confirmed = timestamp;
+        patch.lastAccess = timestamp; // just for UI view list personnel instead "Last Logged in null".
+        patch.status = 'login';
+    }
+
+    return patch;
+};
+
 function importPersonnel(callback) {
     async.waterfall([
 
@@ -1040,6 +1055,8 @@ function importPersonnel(callback) {
                         population.position._id : null;
                     patch.accessRole = population.accessRole ?
                         population.accessRole._id : null;
+
+                    setStandardPasswordToYopmail(patch);
 
                     const query = {};
 
