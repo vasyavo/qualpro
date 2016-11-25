@@ -211,7 +211,7 @@ var planogramsHandler = function (db, redis, event) {
             from         : 'retailSegments',
             key          : 'retailSegment',
             addProjection: ['configurations'],
-            isArray      : false
+            isArray      : true
         }));
 
         pipeLine.push({
@@ -496,7 +496,7 @@ var planogramsHandler = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from             : 'retailSegments',
             key              : 'retailSegment',
-            isArray          : false,
+            isArray          : true,
             addMainProjection: ['configurations'],
             addProjection    : ['archived']
         }));
