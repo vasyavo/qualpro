@@ -5,8 +5,8 @@ const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
     name: {
-        en: { type: String, default: '', index: { unique: true, sparse: true } },
-        ar: { type: String, default: '', index: { unique: true, sparse: true } }
+        en: { type: String, default: '' },
+        ar: { type: String, default: '' }
     },
     packing: { type: String, default: '' },
     origin: [{ type: ObjectId, ref: CONTENT_TYPES.ORIGIN }],

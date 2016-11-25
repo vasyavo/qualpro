@@ -2,6 +2,7 @@ const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 const ItemHistoryModel = require('./../itemHistory/model');
+const _ = require('lodash');
 
 const LocationSchema = new Schema({
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
@@ -13,8 +14,8 @@ const LocationSchema = new Schema({
 
 const schema = new Schema({
     name: {
-        en: { type: String, default: '', index: { unique: true, sparse: true } },
-        ar: { type: String, default: '', index: { unique: true, sparse: true } }
+        en: { type: String, default: '' },
+        ar: { type: String, default: '' }
     },
     barCode: { type: String, default: '' },
     packing: { type: String, default: '' },
@@ -47,9 +48,11 @@ const schema = new Schema({
         }
     }
 }, { collection: 'items' });
-
 schema.pre('save', function(next) {
     this.ppt = Math.round(this.ppt * 100);
+    this.rspMin = Math.round(this.rspMin * 100);
+    this.rspMax = Math.round(this.rspMax * 100);
+    this.pptPerCase = Math.round(this.pptPerCase * 100);
     next();
 });
 
@@ -57,17 +60,26 @@ schema.pre('update', function(next) {
     if (this._update.$set && this._update.$set.ppt) {
         const item = this._conditions._id;
         const price = this._update.$set.ppt;
+        const rspMin = this._update.$set.rspMin;
+        const rspMax = this._update.$set.rspMax;
+        const pptPerCase = this._update.$set.pptPerCase;
         const createdBy = this._update.$set.editedBy;
 
         this.update({}, {
             $set: {
-                ppt: Math.round(price * 100)
+                ppt: Math.round(price * 100),
+                rspMin: Math.round(rspMin * 100),
+                rspMax: Math.round(rspMax * 100),
+                pptPerCase: Math.round(pptPerCase * 100),
             }
         });
 
         return ItemHistoryModel.create({
             item: item,
             ppt: price,
+            rspMin: rspMin,
+            rspMax: rspMax,
+            pptPerCase: pptPerCase,
             createdBy: createdBy
         }, function(err) {
             if (err) {
@@ -81,10 +93,23 @@ schema.pre('update', function(next) {
     next();
 });
 
-schema.post('findOne', function(model) {
-    var price = model.get('ppt');
+schema.post('findOne', (model, next) => {
+    if (model) {
+        const price = model.get('ppt');
+        const rspMin = model.get('rspMin');
+        const rspMax = model.get('rspMax');
+        const pptPerCase = model.get('pptPerCase');
 
-    model.set('ppt', price / 100);
+        if (_.isInteger(price)) {
+            model.set({
+                'ppt': price,
+                'rspMin': rspMin,
+                'rspMax': rspMax,
+                'pptPerCase': pptPerCase
+            });
+        }
+    }
+    next();
 });
 
 module.exports = schema;

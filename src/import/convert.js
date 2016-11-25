@@ -1,8 +1,12 @@
 const mongoose = require('mongoose');
 const mongoXlsx = require('mongo-xlsx');
+const Converter = require("csvtojson").Converter;
 const async = require('async');
 const fs = require('fs');
 const moment = require('moment');
+const createReadStream = fs.createReadStream;
+const _ = require('lodash');
+const PasswordManager = require('./../helpers/passwordManager');
 
 mongoose.Schemas = mongoose.Schemas || {};
 const config = require('./../config');
@@ -16,20 +20,43 @@ const PersonnelModel = require('./../types/personnel/model');
 const AccessRoleModel = require('./../types/accessRole/model');
 const PositionModel = require('./../types/position/model');
 const CurrencyModel = require('./../types/currency/model');
+const OriginModel = require('./../types/origin/model');
+const BrandModel = require('./../types/brand/model');
+const CategoryModel = require('./../types/category/model');
+const VariantModel = require('./../types/variant/model');
+const DisplayTypeModel = require('./../types/displayType/model');
+const CompetitorVariantModel = require('./../types/competitorVariant/model');
+const ItemModel = require('./../types/item/model');
+const CompetitorItemModel = require('./../types/competitorItem/model');
 
 const whereSheets = `${config.workingDirectory}/src/import/`;
 const timestamp = 'Nov_21_2016';
 
-const mergeOptions = {
-    upsert: true,
-    new: true
+const fetchCurrency = (callback) => {
+    CurrencyModel.find({}).select('_id name').lean().exec(callback);
 };
 
-function fetchCurrency(callback) {
-    CurrencyModel.find({}).select('_id name').lean().exec(callback);
-}
+const fetchCategory = (callback) => {
+    CategoryModel.find({}).select('_id name.en').lean().exec(callback);
+};
 
-function getCurrencyIdByName(options) {
+const fetchOrigin = (callback) => {
+    OriginModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchLocation = (callback) => {
+    LocationModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchVariant = (callback) => {
+    VariantModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchBrand = (callback) => {
+    BrandModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const getCurrencyIdByName = (options) => {
     const collection = options.collection;
     const name = options.name;
 
@@ -77,36 +104,126 @@ function getCurrencyIdByName(options) {
     }
 
     return null;
-}
+};
 
+const getSampleIdByEnNamePrototype = (options) => {
+    const collection = options.collection;
+    const name = options.name;
+
+    return collection
+        .filter((item) => {
+            return item.name.en === name;
+        })
+        .map((item) => (item._id))
+        .pop() || null;
+};
+
+const getCategoryIdByEnName = getSampleIdByEnNamePrototype;
+const getOriginIdByEnName = getSampleIdByEnNamePrototype;
+const getVariantIdByEnName = getSampleIdByEnNamePrototype;
+const getLocationIdByEnName = getSampleIdByEnNamePrototype;
+const getBrandIdByEnName = getSampleIdByEnNamePrototype;
+
+const readCsv = (name, cb) => {
+    const converter = new Converter({});
+    const filePath = `${whereSheets}${timestamp}/${name}.csv`;
+
+    converter.on('end_parsed', (array) => {
+        cb(null, array)
+    });
+
+    createReadStream(filePath).pipe(converter);
+};
+
+const trimObjectValues = (obj) => {
+    for (let key in obj) {
+        const value = obj[key];
+
+        if (_.isString(value)) {
+            obj[key] = value.trim();
+        }
+    }
+
+    return obj;
+};
+
+// sequence is important
 async.series([
 
+    importDisplayType,
+    importCategory,
+    importVariant,
+    importCompetitorVariant,
+    importBrand,
+    importOrigin,
+    importCurrency,
     importRole,
     importRetailSegment,
     importOutlet,
     importPosition,
     importDomain,
+    importItem,
+    importCompetitorItem,
     importBranch,
     importPersonnel
 
 ], (err) => {
     if (err) {
-        return console.log(err);
+        console.log(err);
+        process.exit(1);
+        return;
     }
 
-    return console.log('Done!');
+    console.log('Done!');
+    process.exit(0);
 });
 
+const patchRecord = (options, callback) => {
+    const query = options.query;
+    const patch = options.patch;
+    const DatabaseModel = options.model;
 
-function importPosition(callback) {
     async.waterfall([
 
         (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Position.xlsx`, null, cb);
+            DatabaseModel.findOne(query, cb);
         },
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, eachCb) => {
+        (existingModel, cb) => {
+            if (existingModel === null) {
+                const databaseModel = new DatabaseModel();
+
+                databaseModel.set(patch);
+                return databaseModel.save((err) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, databaseModel);
+                });
+            }
+
+            existingModel.set(patch);
+            existingModel.save((err) => {
+                if (err) {
+                    return cb(err);
+                }
+
+                cb(null, existingModel);
+            });
+        }
+
+    ], callback);
+};
+
+function importDisplayType(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Display'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -118,7 +235,404 @@ function importPosition(callback) {
                     'name.en': patch.name.en
                 };
 
-                PositionModel.findOneAndUpdate(query, patch, mergeOptions, eachCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: DisplayTypeModel
+                }, mapCb);
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importCategory(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Category'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                patchRecord({
+                    query,
+                    patch,
+                    model: CategoryModel
+                }, mapCb);
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importVariant(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Variant'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                fetchCategory,
+
+                (categoryCollection, cb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            category: obj.Category
+                        });
+
+                        patch.category = getCategoryIdByEnName({
+                            collection: categoryCollection,
+                            name: patch.category
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en
+                        };
+
+                        patchRecord({
+                            query,
+                            patch,
+                            model: VariantModel
+                        }, mapCb);
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importItem(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Item'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                (cb) => {
+                    async.parallel({
+
+                        origin: fetchOrigin,
+                        category: fetchCategory,
+                        variant: fetchVariant,
+                        country: fetchLocation,
+
+                    }, cb);
+                },
+
+                (collections, cb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            barCode: obj.Barcode,
+                            packing: obj.Packing,
+                            ppt: obj.PPT,
+                            origin: obj.Origin,
+                            category: obj.Category,
+                            variant: obj.Variant,
+                            country: obj.Country
+                        });
+
+                        patch.origin = [getOriginIdByEnName({
+                            collection: collections.origin,
+                            name: patch.origin
+                        })].filter((item) => (item));
+
+                        patch.category = getCategoryIdByEnName({
+                            collection: collections.category,
+                            name: patch.category
+                        });
+
+                        patch.variant = getVariantIdByEnName({
+                            collection: collections.variant,
+                            name: patch.variant
+                        });
+
+                        patch.country = getLocationIdByEnName({
+                            collection: collections.country,
+                            name: patch.country
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en,
+                            barCode: patch.barCode
+                        };
+
+                        patchRecord({
+                            query,
+                            patch,
+                            model: ItemModel
+                        }, mapCb);
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importCompetitorItem(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'CompetitorItem'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                (cb) => {
+                    async.parallel({
+
+                        origin: fetchOrigin,
+                        brand: fetchBrand,
+                        variant: fetchVariant,
+                        country: fetchLocation,
+
+                    }, cb);
+                },
+
+                (collections, cb) => {
+                    async.mapLimit(data, 50, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            packing: obj.Size,
+                            brand: obj.Brand,
+                            variant: obj.Variant,
+                            country: obj.Country,
+                            origin: [obj.Origin]
+                        });
+
+                        const originId = getOriginIdByEnName({
+                            collection: collections.origin,
+                            name: patch.origin
+                        });
+
+                        patch.origin = [originId].filter((item) => (item));
+
+                        patch.brand = getBrandIdByEnName({
+                            collection: collections.brand,
+                            name: patch.brand
+                        });
+
+                        patch.variant = getVariantIdByEnName({
+                            collection: collections.variant,
+                            name: patch.variant
+                        });
+
+                        patch.country = getLocationIdByEnName({
+                            collection: collections.country,
+                            name: patch.country
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en,
+                            packing: patch.packing,
+                            brand: patch.brand,
+                            variant: patch.variant,
+                            country: patch.country
+                        };
+
+                        patchRecord({
+                            query,
+                            patch,
+                            model: CompetitorItemModel
+                        }, mapCb);
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importCompetitorVariant(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'CompetitorVariant'),
+
+        (data, cb) => {
+            async.waterfall([
+
+                fetchCategory,
+
+                (categoryCollection, cb) => {
+                    async.mapLimit(data, 50, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
+                        const patch = Object.assign({}, {
+                            ID: obj.ID,
+                            name: {
+                                en: obj['Name (EN)'],
+                                ar: obj['Name (AR)']
+                            },
+                            category: obj.Category
+                        });
+
+                        patch.category = getCategoryIdByEnName({
+                            collection: categoryCollection,
+                            name: patch.category
+                        });
+
+                        const query = {
+                            'name.en': patch.name.en,
+                            country: patch.country
+                        };
+
+                        patchRecord({
+                            query,
+                            patch,
+                            model: CompetitorVariantModel
+                        }, mapCb);
+                    }, cb)
+                }
+
+            ], cb);
+        }
+
+    ], callback);
+}
+
+function importBrand(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Brand'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                patchRecord({
+                    query,
+                    patch,
+                    model: BrandModel
+                }, mapCb);
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importOrigin(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Origin'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                patchRecord({
+                    query,
+                    patch,
+                    model: OriginModel
+                }, mapCb);
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importCurrency(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Currency'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    _id: obj._id,
+                    name: obj.name
+                });
+                const query = {
+                    'name': patch.name
+                };
+
+                patchRecord({
+                    query,
+                    patch,
+                    model: CurrencyModel
+                }, mapCb);
+            }, cb)
+        }
+
+    ], callback);
+}
+
+function importPosition(callback) {
+    async.waterfall([
+
+        async.apply(readCsv, 'Position'),
+
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
+                const patch = Object.assign({}, {
+                    ID: obj.ID,
+                    name: {
+                        en: obj['Name (EN)'],
+                        ar: obj['Name (AR)']
+                    }
+                });
+                const query = {
+                    'name.en': patch.name.en
+                };
+
+                patchRecord({
+                    query,
+                    patch,
+                    model: PositionModel
+                }, mapCb);
             }, cb)
         }
 
@@ -128,12 +642,11 @@ function importPosition(callback) {
 function importRole(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Role.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Role'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     name: {
                         en: obj['Name (EN)'],
@@ -144,7 +657,11 @@ function importRole(callback) {
                     'name.en': patch.name.en
                 };
 
-                AccessRoleModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: AccessRoleModel
+                }, mapCb);
             }, cb)
         }
 
@@ -154,12 +671,11 @@ function importRole(callback) {
 function importOutlet(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Outlet.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Outlet'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -171,7 +687,11 @@ function importOutlet(callback) {
                     'name.en': patch.name.en
                 };
 
-                OutletModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: OutletModel
+                }, mapCb);
             }, cb)
         }
 
@@ -181,12 +701,11 @@ function importOutlet(callback) {
 function importRetailSegment(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/RetailSegment.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'RetailSegment'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 10, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -198,7 +717,11 @@ function importRetailSegment(callback) {
                     'name.en': patch.name.en
                 };
 
-                RetailSegmentModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                patchRecord({
+                    query,
+                    patch,
+                    model: RetailSegmentModel
+                }, mapCb);
             }, cb)
         }
 
@@ -208,17 +731,16 @@ function importRetailSegment(callback) {
 function importDomain(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Domain.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Domain'),
 
-        (mongoData, name, cb) => {
+        (data, cb) => {
             async.waterfall([
 
                 fetchCurrency,
 
                 (currencyCollection, cb) => {
-                    async.mapLimit(mongoData, 10, (obj, mapCb) => {
+                    async.mapLimit(data, 10, (sourceObj, mapCb) => {
+                        const obj = trimObjectValues(sourceObj);
                         const parentProp = obj.Parent === 'null' ? null : obj.Parent;
                         const currencyProp = obj.Currency;
 
@@ -248,7 +770,11 @@ function importDomain(callback) {
                             type: patch.type
                         };
 
-                        LocationModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                        patchRecord({
+                            query,
+                            patch,
+                            model: LocationModel
+                        }, mapCb);
                     }, cb)
                 },
 
@@ -265,8 +791,9 @@ function importDomain(callback) {
                             parent: parent ? parent.toString() : null
                         };
 
-                        LocationModel.findOneAndUpdate(query, patch, {
-                            new: true
+                        LocationModel.update(query, patch, {
+                            new: true,
+                            multi:true
                         }, mapCb);
                     }, cb)
                 }
@@ -280,12 +807,11 @@ function importDomain(callback) {
 function importBranch(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Branch.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Branch'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 300, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 300, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
@@ -301,49 +827,63 @@ function importBranch(callback) {
                 const retailSegment = obj['Retail Segment'];
                 const outlet = obj['Outlet'];
 
-                async.parallel({
+                const parallelJobs = {};
 
-                    location: (cb) => {
+                if (subRegion) {
+                    parallelJobs.subRegion = (cb) => {
                         const query = {
-                            'name.en': subRegion
+                            'name.en': subRegion,
+                            type: 'subRegion'
                         };
 
-                        LocationModel.findOne(query).select('_id').lean().exec(cb)
-                    },
+                        LocationModel.findOne(query).select('_id').lean().exec(cb);
+                    }
+                }
 
-                    retailSegment: (cb) => {
+                if (retailSegment) {
+                    parallelJobs.retailSegment = (cb) => {
                         const query = {
                             'name.en': retailSegment
                         };
 
-                        RetailSegmentModel.findOne(query).select('_id').lean().exec(cb)
-                    },
+                        RetailSegmentModel.findOne(query).select('_id').lean().exec(cb);
+                    }
+                }
 
-                    outlet: (cb) => {
+                if (outlet) {
+                    parallelJobs.outlet = (cb) => {
                         const query = {
                             'name.en': outlet
                         };
 
-                        OutletModel.findOne(query).select('_id').lean().exec(cb)
+                        OutletModel.findOne(query).select('_id').lean().exec(cb);
                     }
+                }
 
-                }, (err, population) => {
+                async.parallel(parallelJobs, (err, population) => {
                     if (err) {
                         return mapCb(err);
                     }
 
-                    patch.subRegion = population.location ?
-                        population.location._id : null;
+                    patch.subRegion = population.subRegion ?
+                        population.subRegion._id : null;
                     patch.retailSegment = population.retailSegment ?
                         population.retailSegment._id : null;
                     patch.outlet = population.outlet ?
                         population.outlet._id : null;
 
                     const query = {
-                        'name.en': patch.en
+                        'name.en': patch.name.en,
+                        subRegion: patch.subRegion,
+                        retailSegment: patch.retailSegment,
+                        outlet: patch.outlet
                     };
 
-                    BranchModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                    patchRecord({
+                        query,
+                        patch,
+                        model: BranchModel
+                    }, mapCb);
                 });
             }, cb);
         }
@@ -351,15 +891,28 @@ function importBranch(callback) {
     ], callback);
 }
 
+const setStandardPasswordToYopmail = (patch) => {
+    if (/yopmail/.test(patch.email)) {
+        const demoPassword = '123456'; // fixme
+        const timestamp = new Date();
+
+        patch.pass = PasswordManager.encryptPasswordSync(demoPassword);
+        patch.confirmed = timestamp;
+        patch.lastAccess = timestamp; // just for UI view list personnel instead "Last Logged in null".
+        patch.status = 'login';
+    }
+
+    return patch;
+};
+
 function importPersonnel(callback) {
     async.waterfall([
 
-        (cb) => {
-            mongoXlsx.xlsx2MongoData(`${whereSheets}${timestamp}/Personnel.xlsx`, null, cb);
-        },
+        async.apply(readCsv, 'Personnel'),
 
-        (mongoData, name, cb) => {
-            async.mapLimit(mongoData, 300, (obj, mapCb) => {
+        (data, cb) => {
+            async.mapLimit(data, 300, (sourceObj, mapCb) => {
+                const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     firstName: {
@@ -371,13 +924,18 @@ function importPersonnel(callback) {
                         ar: obj['Last Name (AR)']
                     },
                     email: obj['Email'],
-                    phoneNumber: obj['PhoneNumber']
+                    phoneNumber: obj['PhoneNumber'],
+                    xlsManager: obj.Manager
                 });
 
                 const dateJoined = obj['Date of joining'];
 
                 if (dateJoined) {
-                //    patch.dateJoined = moment(dateJoined, 'MMDDYY')
+                    const momentDateJoined = moment(dateJoined, 'MM/DD/YY');
+
+                    if (momentDateJoined.isValid()) {
+                        patch.dateJoined = momentDateJoined.toDate();
+                    }
                 }
 
                 const country = obj['Country'];
@@ -397,7 +955,8 @@ function importPersonnel(callback) {
                         const query = {
                             'name.en': {
                                 $in: countries
-                            }
+                            },
+                            type: 'country'
                         };
 
                         LocationModel.find(query).select('_id').lean().exec(cb)
@@ -412,7 +971,8 @@ function importPersonnel(callback) {
                         const query = {
                             'name.en': {
                                 $in: regions
-                            }
+                            },
+                            type: 'region'
                         };
 
                         LocationModel.find(query).select('_id').lean().exec(cb)
@@ -427,7 +987,8 @@ function importPersonnel(callback) {
                         const query = {
                             'name.en': {
                                 $in: subRegions
-                            }
+                            },
+                            type: 'subRegion'
                         };
 
                         LocationModel.find(query).select('_id').lean().exec(cb)
@@ -495,6 +1056,8 @@ function importPersonnel(callback) {
                     patch.accessRole = population.accessRole ?
                         population.accessRole._id : null;
 
+                    setStandardPasswordToYopmail(patch);
+
                     const query = {};
 
                     if (patch.email) {
@@ -504,7 +1067,11 @@ function importPersonnel(callback) {
                         query['lastName.en'] = patch.lastName.en;
                     }
 
-                    PersonnelModel.findOneAndUpdate(query, patch, mergeOptions, mapCb)
+                    patchRecord({
+                        query,
+                        patch,
+                        model: PersonnelModel
+                    }, mapCb);
                 });
             }, cb);
         },
@@ -520,8 +1087,9 @@ function importPersonnel(callback) {
                     manager: model.get('_id')
                 };
 
-                PersonnelModel.findOneAndUpdate(query, patch, {
-                    new: true
+                PersonnelModel.update(query, patch, {
+                    new: true,
+                    multi: true
                 }, mapCb);
             }, cb)
         }

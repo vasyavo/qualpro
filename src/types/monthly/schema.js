@@ -5,7 +5,6 @@ const OTHER_CONSTANTS = require('../../public/js/constants/otherConstants.js');
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
 const objective = new Schema({
-    _id: { type: ObjectId, required: true },
     title: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
@@ -18,7 +17,6 @@ const objective = new Schema({
 });
 
 const report = new Schema({
-    _id: { type: ObjectId, required: true },
     type: { type: String, required: true },
     date: { type: Date, required: true }
 });

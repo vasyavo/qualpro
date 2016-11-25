@@ -7112,7 +7112,7 @@ const generate = (callback) => {
                 const name = levels[level];
 
                 AccessRoleModel.findOneAndUpdate({
-                    level
+                    'name.en': name
                 }, {
                     $set: {
                         'name.en': name,

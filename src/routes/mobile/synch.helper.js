@@ -60,9 +60,9 @@ const assertGetResponse = (body) => {
  * - item prices
  * - category
  * - competitor:
- *  - brand - ???
- *  - item - ???
- *  - variant - ???
+ *  - brand - ??? @GET("mobile/brand")
+ *  - item - ??? @GET("mobile/competitorItem")
+ *  - variant - ??? @GET("mobile/competitorVariant")
  * - documents
  * - contract yearly
  * - contract secondary
