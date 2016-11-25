@@ -25,6 +25,7 @@ var NewProductLaunch = function(db, redis, event) {
         category : 1,
         variant : 1,
         brand : 1,
+        packingType : 1,
         country : 1,
         region : 1,
         subRegion : 1,
