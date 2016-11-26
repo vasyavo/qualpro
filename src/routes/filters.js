@@ -9,24 +9,31 @@ module.exports = function(db, app, redis) {
     var csrfProtection = app.get('csrfProtection');
     var checkAuth = access.checkAuth;
 
-    router.use(function(req, res, next) {
-        PersonnelModel.findById(req.session.uId, {
+    const storePersonnelBeforeInMiddleware = (req, res, next) => {
+        const uid = req.session.uId;
+        const selection = {
             country : 1,
             region : 1,
             subRegion : 1,
             branch : 1
-        }).lean().exec(function(err, personnel) {
-            if (err) {
-                return next(err);
-            }
+        };
 
-            if (personnel) {
-                req.personnelModel = personnel;
-            }
+        PersonnelModel.findById(uid, selection)
+            .lean()
+            .exec((err, personnel) => {
+                if (err) {
+                    return next(err);
+                }
 
-            next();
-        });
-    });
+                if (personnel) {
+                    req.personnelModel = personnel;
+                }
+
+                next();
+            });
+    };
+
+    router.use(storePersonnelBeforeInMiddleware); // fixme why this middleware mounted before auth check?
 
     router.get('/priceSurvey', checkAuth, handler.priceSurveyFilters);
     router.get('/shelfShares', checkAuth, handler.shelfSharesFilters);

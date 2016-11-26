@@ -49,6 +49,8 @@ ls -al - check right
 chmod 755 ./API_documentation/update_docs.sh - full access
 ```
 
+Debugging with `node-inspector` do not works with node version higher than *6.3.1*
+
 #### Settings
 
 All project settings are stored in `config` folder, the main config file is `index.js`.

@@ -48,8 +48,8 @@ var FilterMapper = function () {
                 result[operator] = array.objectID();
                 break;
             case 'integer':
-                result[operator] = _.map(array, function (element) {
-                    return parseInt(element);
+                result[operator] = array.map((item) => {
+                    return parseInt(item);
                 });
                 break;
             case 'string':
@@ -59,14 +59,14 @@ var FilterMapper = function () {
                 result[operator] = [];
                 break;
             case 'boolean':
-                result[operator] = _.map(array, function (element) {
-                    return element === 'true';
+                result[operator] = array.map((item) => {
+                    return item === 'true';
                 });
                 break;
             case 'collection':
-                result = _.map(array, function (filter) {
+                result = array.map((filter) => {
                     return self.mapFilter({
-                        filter: filter
+                        filter
                     });
                 });
                 break;
@@ -141,25 +141,12 @@ var FilterMapper = function () {
      */
 
     this.mapFilter = function (options) {
-        var contentType = options.contentType;
-        var filter = options.filter;
-        var context = options.context;
-        var personnel = options.personnel;
-        var filterObject = {};
-        var filterValues;
-        var filterType;
-        var filterName;
-        var filterOptions;
-        /*
-         var haveTimeFilter = filter && (filter.time || filter.fromTime || filter.toTime);
-         var fromTime;
-         var toTime;
-         var timeData;
-         */
-        var backendKeys = [];
-        var filtersConstantsObject = contentType ? FILTERS_CONSTANTS.FILTERS[contentType] : null;
-
-        filter = filter || {};
+        const contentType = options.contentType;
+        const filter = options.filter || {};
+        const context = options.context;
+        const personnel = options.personnel;
+        const filterObject = {};
+        const filtersConstantsObject = contentType ? FILTERS_CONSTANTS.FILTERS[contentType] : null;
 
         if (personnel) {
             this.setFilterLocation(filter, personnel, 'country', context);
@@ -168,12 +155,11 @@ var FilterMapper = function () {
         }
 
         if (context && allowedFilters[context]) {
-            for (filterName in filter) {
+            for (let filterName in filter) {
                 if (filterName !== 'translated') {
-
-                    filterValues = filter[filterName].values || filter[filterName];
-                    filterType = filter[filterName].type || getType(filterName);
-                    filterOptions = filter[filterName].options || null;
+                    const filterValues = filter[filterName].values || filter[filterName];
+                    const filterType = filter[filterName].type || getType(filterName);
+                    const filterOptions = filter[filterName].options || null;
 
                     if (allowedFilters[context].indexOf(filterName) !== -1 && filterValues.length) {
                         filterObject[filterName] = ConvertType(filterValues, filterType, filterOptions);
@@ -181,30 +167,28 @@ var FilterMapper = function () {
                 }
             }
         } else {
-            for (filterName in filter) {
+            for (let filterName in filter) {
                 if (filterName !== 'translated' && filterName !== 'type') {
-                    filterValues = filter[filterName].values || [];
-                    filterType = filter[filterName].type || getType(filterName);
-                    filterOptions = filter[filterName].options || null;
-
-                    // if (filterValues && filterValues.length) {
-                    backendKeys = filtersConstantsObject && filtersConstantsObject[filterName] ? filtersConstantsObject[filterName].backendKeys || [] : [];
+                    const filterValues = filter[filterName].values || [];
+                    const filterType = filter[filterName].type || getType(filterName);
+                    const filterOptions = filter[filterName].options || null;
+                    const backendKeys = filtersConstantsObject && filtersConstantsObject[filterName] ?
+                        filtersConstantsObject[filterName].backendKeys || [] : [];
 
                     if (backendKeys.length) {
                         if (!filterObject.$or) {
                             filterObject.$or = [];
                         }
 
-                        _.map(backendKeys, function (keysObject) {
-                            var resObj = {};
+                        backendKeys.forEach((keysObject) => {
+                            const resObj = {};
+
                             resObj[keysObject.key] = ConvertType(filterValues, filterType, keysObject.operator);
                             filterObject.$or.push(resObj);
                         });
                     } else {
                         filterObject[filterName] = ConvertType(filterValues, filterType, filterOptions);
                     }
-
-                    // }
                 }
             }
         }
@@ -212,6 +196,9 @@ var FilterMapper = function () {
         return filterObject;
     };
 
+    /*
+    * Store intersection between set of possible location ID provided in query and assigned to personnel
+    * */
     this.setFilterLocation = (filter, personnel, location, context) => {
         let filterKey = location;
 
@@ -222,12 +209,14 @@ var FilterMapper = function () {
         const personnelLocation = personnel[location];
 
         if (personnelLocation && personnelLocation.length) {
+            // convert ObjectId to string
             personnelLocation.forEach((locationId, index) => {
                 personnelLocation[index] = locationId.toString();
             });
 
             const filterValue = filter[filterKey];
 
+            // update location (country, region and sub region) a filter
             if (!filterValue || !filterValue.values) {
                 filter[filterKey] = {
                     type: 'ObjectId',
