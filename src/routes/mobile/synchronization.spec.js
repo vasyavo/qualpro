@@ -20,7 +20,7 @@ describe('mobile synchronization', () => {
 
     });
 
-    if (!config.isCI) {
+    if (!config.pullDbOnCI) {
         describe('Staging database pulling', () => {
 
             it('should works', function(done) {
