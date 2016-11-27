@@ -47,14 +47,7 @@ module.exports = function (db, app, redis, event) {
     var originRouter = require('./origin')(db, redis, event);
     var contactUsRouter = require('./contactUs')(db, redis, event);
 
-    var csurf = require('csurf');
-    var csrfProtection = csurf({ignoreMethods: ['GET', 'POST'], cookie: true});
-
-    router.use(function (req, res, next) {
-        req.isMobile = true;
-
-        next();
-    });
+    router.use(require('./../utils/setIsMobileToMiddleware'));
 
     router.use('/personnel', require('./mobile/personnel')(db, app, event, redis));
     router.use('/activityList', activityListRouter);
@@ -120,14 +113,6 @@ module.exports = function (db, app, redis, event) {
      * @method /mobile/login
      * @instance
      */
-    // router.post('/login', personnelHandler.login);
-
-    app.get('/logout', csrfProtection, personnelHandler.logout);
-    app.post('/login', function (req, res, next) {
-        req.isMobile = true;
-
-        next();
-    }, csrfProtection, personnelHandler.login);
 
     /**
      * __Type__ 'POST'

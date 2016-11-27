@@ -49,7 +49,11 @@ ls -al - check right
 chmod 755 ./API_documentation/update_docs.sh - full access
 ```
 
+#### Node Inspector
 Debugging with `node-inspector` do not works with node version higher than *6.3.1*
+https://github.com/node-inspector/node-inspector/issues/907
+You should edit `...\node_modules\node-inspector\lib\InjectorClient.js` file at line 111
+`if(NM.length > 0) cb(error, NM[0].ref);`
 
 #### Settings
 
