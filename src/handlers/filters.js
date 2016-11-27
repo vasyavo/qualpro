@@ -141,36 +141,35 @@ var Filters = function(db, redis) {
     }
 
     function redisFilters(options, callback) {
-        var filterExists = options.filterExists || false;
-        var filtersObject = options.filtersObject || {};
-        var personnelId = options.personnelId;
-        var contentType = options.contentType;
-        var currentSelected = options.currentSelected;
+        const filterExists = options.filterExists || false;
+        const filtersObject = options.filtersObject || {};
+        const personnelId = options.personnelId;
+        const contentType = options.contentType;
+        const currentSelected = options.currentSelected;
+        const key = `${personnelId}.${contentType}`;
 
-        var key = personnelId + '.' + contentType;
-
-        if (filterExists) {
-            redis.cacheStore.readFromStorage(key, function(err, value) {
-                var valueJSON;
-
-                if (err) {
-                    return callback(err);
-                }
-
-                if (value && currentSelected) {
-                    valueJSON = JSON.parse(value);
-                    filtersObject[currentSelected] = valueJSON[currentSelected];
-                }
-
-                redis.cacheStore.writeToStorage(key, JSON.stringify(filtersObject), '864000');
-
-                return callback(null, filtersObject);
-            });
-        } else {
+        if (!filterExists) {
             redis.cacheStore.writeToStorage(key, JSON.stringify(filtersObject), '864000');
 
             return callback(null, filtersObject);
         }
+
+        async.waterfall([
+
+            async.apply(redis.cacheStore.readFromStorage, key),
+
+            (value, cb) => {
+                if (value && currentSelected) {
+                    const valueJSON = JSON.parse(value);
+
+                    filtersObject[currentSelected] = valueJSON[currentSelected];
+                }
+
+                redis.cacheStore.writeToStorage(key, JSON.stringify(filtersObject), '864000');
+                cb(null, filtersObject);
+            }
+
+        ], callback);
     }
 
     function getObjectiveFilters(req, res, next, cb) {
@@ -2932,8 +2931,8 @@ var Filters = function(db, redis) {
         pipeLine.push({
             $project : {
                 country : {$arrayElemAt : ['$country', 0]},
-                region : {$arrayElemAt : ['$region', 0]},
-                subRegion : {$arrayElemAt : ['$subRegion', 0]},
+                region : {$arrayElemAt : ['$region', 0]}, // fixme personnel has many regions in demo
+                subRegion : {$arrayElemAt : ['$subRegion', 0]}, // fixme personnel has many sub regions in demo
                 branch : {$arrayElemAt : ['$branch', 0]},
                 position : {$arrayElemAt : ['$position', 0]},
                 status : 1

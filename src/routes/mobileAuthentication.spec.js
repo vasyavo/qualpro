@@ -223,4 +223,54 @@ describe('mobile authentication', () => {
         expect(body).to.be.an('Object')
     });
 
+    it('master should logout on mobile', function *() {
+        const resp = yield Authenticator.master
+            .get('/mobile/logout')
+            .send({})
+            .expect(200);
+
+        const body = resp.body;
+
+        expect(body).to.be.an('Object')
+    });
+
+    it('master should sign in on desktop', function *() {
+        const resp = yield Authenticator.master
+            .post('/login')
+            .send({
+                login: user.email,
+                pass: user.pass
+            })
+            .expect(200);
+
+        const body = resp.body;
+
+        expect(body).to.be.an('Object')
+    });
+
+    it('master should logout on desktop', function *() {
+        const resp = yield Authenticator.master
+            .get('/logout')
+            .send({})
+            .expect(200);
+
+        const body = resp.body;
+
+        expect(body).to.be.an('Object')
+    });
+
+    it('master should sign in with mobile app again', function *() {
+        const resp = yield Authenticator.master
+            .post('/mobile/login')
+            .send({
+                login: user.email,
+                pass: user.pass
+            })
+            .expect(200);
+
+        const body = resp.body;
+
+        expect(body).to.be.an('Object')
+    });
+
 });

@@ -1,35 +1,28 @@
+const fs = require('fs');
+const path = require('path');
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart();
+const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
+const notFoundHandler = require('./../utils/notFound');
+const csrfProtection = require('./../utils/csrfProtection');
+const checkAuth = require('./../utils/isAuth');
 const addRequestId = require('express-request-id')();
+const config = require('./../config');
 
 module.exports = function(app, db, event) {
-    // var express = require('express');
-    var path = require('path');
     var logWriter = require('../helpers/logWriter');
-    var fs = require('fs');
-    var multipart = require('connect-multiparty');
-    var multipartMiddleware = multipart();
-    var mongoose = require('mongoose');
-
     var redis = require('../helpers/redisClient');
 
-    var csurf = require('csurf');
-    var csrfProtection = csurf({
-        ignoreMethods : ['GET', 'POST'],
-        cookie : true
-    });
-
-    // var i18n = require('i18n');
-
     app.set('csrfProtection', csrfProtection);
+
     require('../helpers/eventEmiter')(db, redis, event, app);
 
     var LocalFs = require('../helpers/localFs');
 
     var DocsHandler = require('../handlers/docs');
-    var PersonnelHandler = require('../handlers/personnel');
     var ModuleslHandler = require('../handlers/modules');
-    var personnelHandler = new PersonnelHandler(db);
     var modulesHandler = new ModuleslHandler(db);
     var docsHandler = new DocsHandler(db);
 
@@ -88,7 +81,6 @@ module.exports = function(app, db, event) {
 
     var displayTypeRouter = require('./displayType')(db, redis, event);
 
-    var RESPONSES = require('../constants/responses');
     var CONSTANTS = require('../constants/mainConstants');
 
     var sessionValidator = function(req, res, next) {
@@ -106,29 +98,9 @@ module.exports = function(app, db, event) {
         next();
     };
 
-    function checkAuth(req, res, next) {
-        if (req.session && req.session.loggedIn) {
-            next();
-        } else {
-            res.send(401);
-        }
-    }
-
-    /*i18n.configure({
-     locales  : ['en', 'ar'],
-     cookie   : 'currentLanguage',
-     directory: __dirname + '/locales'
-     });*/
-
     app.use(addRequestId);
 
-    app.use((req, res, next) => {
-        req.io =
-        next();
-    });
-
     app.use(sessionValidator);
-    //  app.use(i18n.init);
 
     app.get('/', csrfProtection, function(req, res, next) {
         //ToDo remove (res.cookie) this one after test sms
@@ -141,20 +113,7 @@ module.exports = function(app, db, event) {
         res.render(process.cwd() + '/API_documentation/qualPro_API.html');
     });
 
-    app.get('/authenticated', function(req, res, next) {
-        if (req.session && req.session.loggedIn) {
-            res.send(200);
-        } else {
-            res.send(401);
-        }
-    });
     app.get('/modules', checkAuth, modulesHandler.getAll);
-    app.post('/login', csrfProtection, personnelHandler.login);
-    app.post('/mobile/login', function(req, res, next) {
-        req.isMobile = true;
-
-        next();
-    }, csrfProtection, personnelHandler.login);
 
     app.post('/upload', multipartMiddleware, function(req, res, next) {
         var localFs = new LocalFs();
@@ -172,47 +131,8 @@ module.exports = function(app, db, event) {
         });
     });
 
-    app.get('/passwordChange/:forgotToken', csrfProtection, function(req, res, next) {
-        var forgotToken = req.params.forgotToken;
+    app.use(require('./../stories/user-registration'));
 
-        res.render('changePassword', {
-            host : process.env.HOST,
-            forgotToken : forgotToken,
-            csrfToken : req.csrfToken()
-        });
-    });
-
-    app.get('/passwordChangeNotification/:messageObj', csrfProtection, function(req, res, next) {
-        var messageObj = JSON.parse(req.params.messageObj);
-
-        res.render('passwordChangeNotification', {
-            host : process.env.HOST,
-            messageObj : messageObj
-        });
-    });
-
-    app.get('/verificateCode/:phoneNumber', csrfProtection, function(req, res, next) {
-        var phoneNumber = req.params.phoneNumber;
-
-        res.render('enterCode.html', {
-            host : process.env.HOST,
-            csrfToken : req.csrfToken(),
-            phoneNumber : phoneNumber,
-            sendSMSUrl : 'forgotPass'
-        });
-    });
-    app.get('/messageSent', csrfProtection, function(req, res, next) {
-
-        res.render('emailMessageWasSent.html', {
-            host : process.env.HOST,
-            csrfToken : req.csrfToken()
-        });
-    });
-    app.post('/forgotPass', csrfProtection, personnelHandler.forgotPassword);
-
-    app.get('/logout', csrfProtection, personnelHandler.logout);
-
-    app.get('/mobile/logout', csrfProtection, personnelHandler.logout);
     app.use('/activityList', activityList);
     app.use('/brandingAndDisplayNew', brandingAndDisplayRouter);
     app.use('/brandingActivity', brandingActivityRouter);
@@ -293,84 +213,6 @@ module.exports = function(app, db, event) {
         });
     });
 
-    app.get('/sms/:phoneNumber/:testType', function(req, res, next) {
-        var testType = req.params.testType;
-        var phoneNumber = req.params.phoneNumber;
-        var Sms = require('../helpers/smsSender');
-        var smsSender = new Sms();
-
-        var forgotPassOptions = {
-            phoneNumber : phoneNumber,
-            resetCode : 123456
-        };
-
-        var newPassOptions = {
-            phoneNumber : phoneNumber,
-            password : 'hdf67wefbhu87wef'
-        };
-
-        function resultCb(err, message) {
-            if (err) {
-                return next(err);
-            }
-
-            res.status(200).send(message);
-        }
-
-        switch (testType) {
-            case 'forgotPass':
-                smsSender.forgotPassword(forgotPassOptions, res, resultCb);
-                break;
-            case 'newPassword':
-                smsSender.sendNewPassword(newPassOptions, res, resultCb);
-        }
-
-    });
-
-    function notFound(req, res, next) {
-        res.status(404);
-
-        if (req.accepts('html')) {
-            return res.send(RESPONSES.PAGE_NOT_FOUND);
-        }
-
-        if (req.accepts('json')) {
-            return res.json({error : RESPONSES.PAGE_NOT_FOUND});
-
-        }
-
-        res.type('txt');
-        res.send(RESPONSES.PAGE_NOT_FOUND);
-    }
-
-    function errorHandler(err, req, res, next) {
-        var status = err.status || 500;
-
-        if (process.env.NODE_ENV === 'production') {
-            if (status === 401) {
-                logWriter.log('', err.message + '\n' + err.stack);
-            }
-
-            if (err.code === 11000 || err.code === 11001) {
-                err.message = 'Record with such data is already exists';
-            }
-
-            res.status(status).send({
-                error : err.message,
-                details : err.details
-            });
-        } else {
-            if (status !== 401) {
-                logWriter.log('', err.message + '\n' + err.stack);
-            }
-
-            res.status(status).send({
-                error : err.message + '\n' + err.stack,
-                details : err.details
-            });
-        }
-    }
-
     function csrfErrorParser(err, req, res, next) {
         if (err.code !== 'EBADCSRFTOKEN') {
             return next(err);
@@ -406,7 +248,7 @@ module.exports = function(app, db, event) {
         res.status(status).send(body);
     }
 
-    app.use(notFound);
+    app.use(notFoundHandler);
     app.use(sendData);
     app.use(csrfErrorParser);
     app.use(errorHandler);

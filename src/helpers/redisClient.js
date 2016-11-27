@@ -46,13 +46,7 @@ function CacheStore() {
     }
 
     function readFromStorage(key, callback) {
-        client.get(key, function(err, value) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, value);
-            }
-        });
+        client.get(key, callback);
     }
 
     function removeFromStorage(key) {
