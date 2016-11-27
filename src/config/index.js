@@ -94,7 +94,7 @@ if (fs.existsSync(config.awsCredentialsPath)) {
 config.uploaderType = 'AmazonS3';
 
 config.isCI = process.env.CI;
-config.pullDbOnCI = process.env.PULL_DB_ON_CI;
+config.pullDbOnCI = process.env.PULL_DB_ON_CI || false;
 
 // import this file at begin of server.js
 module.exports = config;
