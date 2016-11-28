@@ -36,7 +36,7 @@ define([
             this.editAfter = options.editAfter;
             this.oldAjaxObj = options.oldAjaxObj;
             this.filesIdToDeleted = [];
-debugger;
+
             if (this.forCreate) {
                 if (options.savedVisibilityModel) {
                     this.model = options.savedVisibilityModel;
@@ -92,20 +92,19 @@ debugger;
                 container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';
             }
 
-            debugger;
             if (checkbox.checked) {
                 this.$el.find('.bannerImage').html(container);
                 this.$el.find('.close').addClass('hidden');
                 this.$el.find('.uploadInput').attr('disabled', true);
 
-                this.model.set('applyToAll', true);
+                this.model.set('applyFileToAll', true);
             } else {
                 this.$el.find('.bannerImage').html('');
                 this.$el.find(`#imageMy-${file.branch}`).html(container);
                 this.$el.find(`#removeFile-${file.branch}`).removeClass('hidden');
                 this.$el.find('.uploadInput').attr('disabled', false);
 
-                this.model.set('applyToAll', false);
+                this.model.unset('applyFileToAll');
             }
         },
 
@@ -131,7 +130,6 @@ debugger;
         },
 
         formSend: function (e) {
-debugger;
             var context = e.data.context;
             var data = new FormData(this);
             var $curEl = context.$el;
@@ -199,7 +197,6 @@ debugger;
         },
 
         imageIsLoaded: function (branchId, e) {
-            debugger;
             var res = e.target.result;
             var container;
             var type = res.substr(0, 10);
@@ -248,7 +245,7 @@ debugger;
             var file;
             var error;
             let currentBranchId = '';
-debugger;
+
             if (input.files && input.files[0]) {
                 file = input.files[0];
                 if (file.size > fileSizeMax) {
@@ -284,6 +281,7 @@ debugger;
             var descriptionAfter = this.model.get('descriptionAfter');
             var files = savedFiles ? savedFiles : before.files || {};
             var filesAfter = savedAfterFiles ? savedAfterFiles : after.files || {};
+            const applyFileToAll = this.model.get('applyFileToAll');
 
             if (this.editAfter) {
                 descriptionAfter = descriptionAfter ? descriptionAfter : after.description || '';
@@ -310,7 +308,6 @@ debugger;
                 }));
             } else {
                 let oldFiles = this.model.get('files') || [];
-                debugger;
 
                 this.outlets = this.outlets.map((outlet) => {
                     outlet.branches.map((branch) => {
@@ -337,7 +334,6 @@ debugger;
 
                 $formString = $(self.template({
                     description: this.description,
-                    model      : this.model.toJSON(),
                     outlets    : this.outlets,
                     allowed    : allowed,
                     translation: this.translation
@@ -357,13 +353,13 @@ debugger;
 
                     cancel: {
                         text : self.translation.cancelBtn,
-                        click: function () {
-                            debugger;
-                            self.model.set('files', []);
+                        click: function() {
+                            // todo
                         }
                     }
                 }
             });
+
             this.$el.find('#mainVisForm').on('submit', {context: this}, this.formSend);
 
             this.outlets.map((outlet) => {
@@ -372,6 +368,22 @@ debugger;
                     self.$el.find(`#removeFile-${branch._id}`).bind('click', self.removeFile.bind(self));
                 });
             });
+
+            if (applyFileToAll) {
+                const file = savedFiles[0];
+                let container;
+
+                if (file.contentType === 'data:video') {
+                    container = '<video width="400" controls><source src="' + file.url + '"></video>';
+                } else {
+                    container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';
+                }
+
+                this.$el.find('#apply-to-all').attr('checked', true);
+                this.$el.find('.bannerImage').html(container);
+                this.$el.find('.close').addClass('hidden');
+                this.$el.find('.uploadInput').attr('disabled', true);
+            }
 
             /*if (!Object.keys(files).length) {
                 this.$el.find('#removeFile').addClass('hidden');
