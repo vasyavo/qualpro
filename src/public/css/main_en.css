@@ -845,6 +845,10 @@ a {
   font-family: 'icomoon';
   color: #c4c4c4;
 }
+label[for=searchInputcountry]:after {
+  top: 0!important;
+  line-height: 2.4!important;
+}
 .filterBar .searchInputWrap label:after {
   line-height: 3.4;
 }
@@ -1866,6 +1870,12 @@ input:invalid {
   font-size: 16px;
   font-size: 1rem;
 }
+label[for=searchInputcountry]:after,
+label[for=searchInputoutlet]:after,
+label[for=searchInputretailSegment]:after {
+  top: 0!important;
+  line-height: 2.4!important;
+}
 .filterName input {
   height: 40px;
   width: 185px;
@@ -2571,6 +2581,9 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   color: green;
   padding: 5px 0;
   font-size: 0.9em;
+}
+.online:after {
+  content: 'online';
 }
 /* "inset-2-dark" */
 .mCS-qualPro .mCSB_scrollTools {
@@ -6998,7 +7011,7 @@ ul.newSelectList .miniStylePagination {
   line-height: 20px;
 }
 .objectivesDescValue {
-  height: 105px;
+  /*height: 105px;*/
   overflow: hidden;
 }
 .afterTextBlock {

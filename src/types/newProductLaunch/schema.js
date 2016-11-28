@@ -29,6 +29,7 @@ const schema = new Schema({
     origin: { type: ObjectId, ref: CONTENT_TYPES.ORIGIN },
     price: { type: String, default: '' },
     packing: { type: String, default: '' },
+    packingType: { type: String, enum: ['gm', 'ml', ''], default: ''},
     location: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
