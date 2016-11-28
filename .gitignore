@@ -46,10 +46,13 @@ node_modules
 /API_documentation/qualPro_API.html
 
 # System test
-restore-staging-db.sh
+reproduce-staging-db.sh
+reproduce-production-db.sh
 staging_database
+production_database
 
 # Temporary files
 src/import/**/~$*.*
 
+# Environment configurations
 src/config/.env.production
