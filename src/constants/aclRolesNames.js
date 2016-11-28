@@ -7,8 +7,8 @@ module.exports = {
     SALES_MAN : 5,
     MERCHANDISER : 6,
     CASH_VAN : 7,
-    MASTER_UPLOADER : 8,
-    COUNTRY_UPLOADER : 9,
-    TRADE_MARKETER : 10,
+    TRADE_MARKETER : 8,
+    MASTER_UPLOADER : 9,
+    COUNTRY_UPLOADER : 10,
     VIRTUAL : 11
 };

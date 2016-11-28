@@ -10,6 +10,7 @@ const shortId = require('shortid');
 const Authenticator = require('./../../authenticator');
 const synch = require('./synch.helper');
 
+const herokuAppEnv = process.env.HEROKU_APP_ENV;
 
 describe('mobile synchronization', () => {
 
@@ -19,7 +20,7 @@ describe('mobile synchronization', () => {
 
     });
 
-    if (!config.isCI) {
+    if (!config.isCI && config.pullDbOnCI) {
         describe('Staging database pulling', () => {
 
             it('should works', function(done) {
@@ -27,7 +28,7 @@ describe('mobile synchronization', () => {
 
                 this.timeout(timeToPullDatabase);
 
-                const pathToScript = `${config.workingDirectory}restore-staging-db.sh`;
+                const pathToScript = `${config.workingDirectory}reproduce-${herokuAppEnv}-db.sh`;
 
                 shell.chmod('+x', pathToScript);
 
