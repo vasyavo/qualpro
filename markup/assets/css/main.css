@@ -6998,7 +6998,7 @@ ul.newSelectList .miniStylePagination {
   line-height: 20px;
 }
 .objectivesDescValue {
-  height: 105px;
+  /*height: 105px;*/
   overflow: hidden;
 }
 .afterTextBlock {
