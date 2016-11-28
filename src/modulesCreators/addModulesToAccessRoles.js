@@ -651,7 +651,7 @@ const superAdmin = [
             archive: false,
             edit   : true,
             write  : false,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -1355,7 +1355,7 @@ const masterAdmin = [
             archive: false,
             edit   : true,
             write  : true,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -2012,7 +2012,7 @@ commentsAccess,
             archive: false,
             edit   : true,
             write  : true,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -2623,13 +2623,13 @@ commentsAccess,
         archive: false,
         edit   : false,
         write  : false,
-        read   : true
+        read   : false
     },
     mobile: {
         archive: false,
         edit   : true,
         write  : false,
-        read   : true
+        read   : false
     }
 },
 {
@@ -3238,7 +3238,7 @@ commentsAccess,
             archive: false,
             edit   : false,
             write  : false,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -3853,7 +3853,7 @@ commentsAccess,
             archive: false,
             edit   : false,
             write  : false,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -4467,7 +4467,7 @@ const merchandiser = [
             archive: false,
             edit   : false,
             write  : false,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -5081,7 +5081,7 @@ const cashVan = [
             archive: false,
             edit   : false,
             write  : false,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
@@ -5742,7 +5742,7 @@ commentsAccess,
             archive: false,
             edit   : true,
             write  : true,
-            read   : true
+            read   : false
         },
         mobile: {
             archive: false,
