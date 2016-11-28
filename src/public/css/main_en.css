@@ -845,6 +845,10 @@ a {
   font-family: 'icomoon';
   color: #c4c4c4;
 }
+label[for=searchInputcountry]:after {
+  top: 0!important;
+  line-height: 2.4!important;
+}
 .filterBar .searchInputWrap label:after {
   line-height: 3.4;
 }
@@ -1865,6 +1869,12 @@ input:invalid {
   font-weight: normal;
   font-size: 16px;
   font-size: 1rem;
+}
+label[for=searchInputcountry]:after,
+label[for=searchInputoutlet]:after,
+label[for=searchInputretailSegment]:after {
+  top: 0!important;
+  line-height: 2.4!important;
 }
 .filterName input {
   height: 40px;
@@ -6998,7 +7008,7 @@ ul.newSelectList .miniStylePagination {
   line-height: 20px;
 }
 .objectivesDescValue {
-  height: 105px;
+  /*height: 105px;*/
   overflow: hidden;
 }
 .afterTextBlock {
