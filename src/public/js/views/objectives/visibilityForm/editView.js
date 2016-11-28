@@ -19,7 +19,8 @@ define([
         errors: {},
 
         events: {
-            'change #inputAfter' : 'imageTest'
+            'change #inputAfter' : 'imageTest',
+            'change #apply-to-all' : 'applyFileToAllBranches'
         },
 
         initialize: function (options) {
@@ -64,7 +65,48 @@ debugger;
                     });
                 }
             }
+        },
 
+        applyFileToAllBranches : function (event) {
+            let checkbox = event.target;
+            let files = this.model.get('files');
+            let container;
+
+            if (!files && !files.length) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.fileNotSelected[App.currentUser.currentLanguage]
+                ]);
+            }
+
+            if (files.length > 1) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.selectOneFile[App.currentUser.currentLanguage]
+                ]);
+            }
+
+            const file = files[0];
+
+            if (file.contentType === 'data:video') {
+                container = '<video width="400" controls><source src="' + file.url + '"></video>';
+            } else {
+                container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';
+            }
+
+            debugger;
+            if (checkbox.checked) {
+                this.$el.find('.bannerImage').html(container);
+                this.$el.find('.close').addClass('hidden');
+                this.$el.find('.uploadInput').attr('disabled', true);
+
+                this.model.set('applyToAll', true);
+            } else {
+                this.$el.find('.bannerImage').html('');
+                this.$el.find(`#imageMy-${file.branch}`).html(container);
+                this.$el.find(`#removeFile-${file.branch}`).removeClass('hidden');
+                this.$el.find('.uploadInput').attr('disabled', false);
+
+                this.model.set('applyToAll', false);
+            }
         },
 
         removeFile: function (e) {
