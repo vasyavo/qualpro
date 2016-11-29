@@ -20,9 +20,9 @@ const schema = new Schema({
     outlet: [{ type: ObjectId, ref: CONTENT_TYPES.OUTLET, default: null }],
     branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH, default: null }],
     displayType: {
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     },
 
     barcode: { type: String, default: '' },
