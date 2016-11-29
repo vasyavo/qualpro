@@ -7002,6 +7002,7 @@ ul.newSelectList .miniStylePagination {
 }
 .objectivesDescValue {
   /*height: 105px;*/
+  padding-right: 10px;
   overflow: hidden;
 }
 .afterTextBlock {
