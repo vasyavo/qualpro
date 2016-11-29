@@ -5,6 +5,7 @@ const multipartMiddleware = multipart();
 const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
+const IncomingRequestPayloadLogger = require('../utils/IncomingRequestPayloadLogger');
 const notFoundHandler = require('./../utils/notFound');
 const csrfProtection = require('./../utils/csrfProtection');
 const checkAuth = require('./../utils/isAuth');
@@ -99,6 +100,8 @@ module.exports = function(app, db, event) {
     };
 
     app.use(addRequestId);
+
+    app.use(IncomingRequestPayloadLogger);
 
     app.use(sessionValidator);
 
