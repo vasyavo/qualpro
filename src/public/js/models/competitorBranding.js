@@ -55,7 +55,7 @@ define([
                 model.outletString = model.outlet ? model.outlet.name.currentLanguage : '';
                 model.branchString = model.branch ? model.branch.name.currentLanguage : '';
                 model.brandString = model.brand ? model.brand.name.currentLanguage : '';
-                model.displayTypeString = model.displayType ? model.displayType.name.currentLanguage : '';
+                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.name.currentLanguage : '';
 
                 model.location = model.countryString + '>' + model.regionString + '>' + model.subRegionString + '>' + model.retailSegmentString + '>' + model.outletString + '>' + model.branchString;
             }
