@@ -8,6 +8,8 @@ chmod 755 ./API_documentation/update_docs.sh
 chmod +x ./API_documentation/update_docs.sh
 npm run docs
 
+sudo apt-get install imagemagick
+
 # Get additional scripts
 chmod +x ./get-scripts.sh
 ./get-scripts.sh
