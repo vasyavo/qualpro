@@ -79,6 +79,7 @@ define([
 
         addPlanogram: function () {
             var self = this;
+            debugger;
             this.body = {
                 country      : this.selectedCountryId,
                 retailSegment: this.selectedRetailSegmentId,
@@ -165,7 +166,9 @@ define([
             } else if (itemName === 'product') {
                 this.selectedProductId = itemId;
             } else if (itemName === 'configuration') {
-                this.selectedConfigurationId = itemId;
+                debugger;
+                const configName = (data.model && data.model.name) ? data.model.name : '';
+                this.selectedConfigurationId = configName | itemId;
             }
         },
 

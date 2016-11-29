@@ -251,6 +251,14 @@
         commentNotAdded : {
             en: 'Comment not added',
             ar: '' //todo
+        },
+        fileNotSelected : {
+            en: 'File not selected',
+            ar: '' //todo
+        },
+        selectOneFile : {
+            en: 'Select only one file',
+            ar: '' //todo
         }
     };
 
