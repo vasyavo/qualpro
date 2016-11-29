@@ -3606,6 +3606,7 @@ a.disabled {
 .formThumbnail,
 .formIconWrap {
   display: inline-block;
+  cursor: pointer;
 }
 .formThumbnail:before,
 .formIconWrap:before,
