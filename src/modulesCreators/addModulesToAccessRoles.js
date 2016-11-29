@@ -3012,16 +3012,16 @@ const areaInChargeManager = [
 }, {
     module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
     cms   : {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        archive: true,
+        edit   : true,
+        write  : true,
+        read   : true
     },
     mobile: {
-        archive: false,
-        edit   : false,
-        write  : false,
-        read   : false
+        archive: true,
+        edit   : true,
+        write  : true,
+        read   : true
     }
 }, {
     module: 30,
