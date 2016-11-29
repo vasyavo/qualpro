@@ -18,3 +18,4 @@ describe('how server works', () => {
 
 require('./routes/mobileAuthentication.spec');
 require('./routes/mobile/synchronization.spec');
+require('./routes/mobile/roles.spec');
