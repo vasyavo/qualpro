@@ -7,7 +7,7 @@ define([
     ],
     function (parent, validation, custom, CONSTANTS, CONTENT_TYPES) {
         var Model = parent.extend({
-            defaults      : {},
+            defaults: {},
             attachmentsKey: 'attachments',
 
             multilanguageFields: [
