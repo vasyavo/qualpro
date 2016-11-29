@@ -28,7 +28,6 @@ var planogramsHandler = function(db, redis, event) {
         product : 1,
         fileID : 1,
         configuration : 1,
-        configurations : 1,
         editedBy : 1,
         createdBy : 1,
         archived : 1
@@ -213,38 +212,8 @@ var planogramsHandler = function(db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'retailSegments',
             key : 'retailSegment',
-            addProjection : ['configurations'],
-            isArray : false
+            isArray : true
         }));
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                configuration : {
-                    $filter : {
-                        input : '$retailSegment.configurations',
-                        as : 'configuration',
-                        cond : {$eq : ['$$configuration._id', '$configuration']}
-                    }
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                configuration : {
-                    $arrayElemAt : ['$configuration', 0]
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                configuration : {
-                    _id : 1,
-                    name : '$configuration.configuration'
-                }
-            })
-        });
 
         aggregation = PlanogramModel.aggregate(pipeLine);
 
@@ -401,7 +370,7 @@ var planogramsHandler = function(db, redis, event) {
         var pipeLine = [];
 
         pipeLine.push({
-            $match : {}
+            $match : queryObject
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -502,16 +471,8 @@ var planogramsHandler = function(db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from             : 'retailSegments',
             key              : 'retailSegment',
-            isArray          : true
-        }));
-
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from             : 'retailSegments',
-            key              : 'retailSegment',
-            isArray          : false,
-            addMainProjection: ['configurations'],
-            addProjection    : ['archived']
+            isArray          : true,
+            addProjection : ['archived']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -537,63 +498,6 @@ var planogramsHandler = function(db, redis, event) {
                 }
             });
         }
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    $filter: {
-                        input: '$configurations',
-                        as   : 'configuration',
-                        cond : {$eq: ['$$configuration._id', '$configuration']}
-                    }
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {$arrayElemAt: ['$configuration', 0]}
-            })
-        });
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    _id : 1,
-                    name: '$configuration.configuration'
-                }
-            })
-        });
-
-        pipeLine.push({
-            $sort: {
-                'configuration.name': 1
-            }
-        });
-
-        /*if (!isMobile) {
-         pipeLine.push({
-         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         pipeLine.push({
-         $sort: sort
-         });
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile : isMobile,
@@ -738,7 +642,7 @@ var planogramsHandler = function(db, redis, event) {
                 'retailSegment.name.ar',
                 'category.name.en',
                 'category.name.ar',
-                'configuration.name'
+                'configuration'
             ];
 
             var sort = query.sort || {
