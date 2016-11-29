@@ -3616,6 +3616,7 @@ a.disabled {
 .formThumbnail,
 .formIconWrap {
   display: inline-block;
+  cursor: pointer;
 }
 .formThumbnail:before,
 .formIconWrap:before,
@@ -7012,6 +7013,7 @@ ul.newSelectList .miniStylePagination {
 }
 .objectivesDescValue {
   /*height: 105px;*/
+  padding-right: 10px;
   overflow: hidden;
 }
 .afterTextBlock {
@@ -9188,6 +9190,10 @@ table.fancytree-ext-table {
 }
 .questionnarieWrap .filterBar .filterContentHolder .filtersFullHolder {
   padding: 10px 0 10px 20px;
+}
+.questionnarieWrap .searchInputWrap label:after {
+  top: 0;
+  line-height: 2.4;
 }
 .questionnarie-form {
   height: calc(100% - 75px) !important;
