@@ -78,8 +78,6 @@ define([
         },
 
         updateCommentsCountOnListView : function () {
-            debugger;
-
             let comments = this.model.get('comments');
 
             comments = comments ? comments : [];
@@ -123,7 +121,7 @@ define([
 
             this.fileDialogView = new FileDialogView({
                 files      : this.files,
-                dialogTitle: this.translation.dialogTitle,
+                dialogTitle: this.translation.attachmentsDialogTitle,
                 translation: this.translation,
                 buttonName : this.translation.attachBtn
             });
@@ -270,7 +268,7 @@ define([
             this.commentBody = {
                 commentText: this.$el.find('#commentInput').val(),
                 objectiveId: this.model.get('_id'),
-                context    : CONTENT_TYPES.COMPETITORBRANDING
+                context    : CONTENT_TYPES.CONTACT_US
             };
 
             commentModel.setFieldsNames(this.translation);
