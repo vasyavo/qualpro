@@ -129,16 +129,10 @@ var AchievementForm = function (db, redis, event) {
 
         }
 
-        access.getWriteAccess(req, 37, function (err, allowed) {
+        access.getWriteAccess(req, 37, function (err) {
             var body;
 
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
