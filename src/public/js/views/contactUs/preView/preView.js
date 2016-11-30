@@ -63,18 +63,28 @@ define([
             if (self.model.get('status') === 'new') {
                 dataService.putData(`${CONTENT_TYPES.CONTACT_US}/${self.model.get('_id')}`, {
                     status : 'resolved'
-                }, (err, response) => {
+                }, (err) => {
                     if (err) {
                         return App.renderErrors([
                             ERROR_MESSAGES.statusNotChanged[App.currentUser.currentLanguage]
                         ]);
                     }
 
-                    self.trigger('modelChanged', response);
+                    self.trigger('set-status-resolved');
 
                     self.$el.dialog('close').dialog('destroy').remove();
                 });
             }
+        },
+
+        updateCommentsCountOnListView : function () {
+            debugger;
+
+            let comments = this.model.get('comments');
+
+            comments = comments ? comments : [];
+
+            this.trigger('update-comments', comments.length);
         },
 
         showFilePreviewDialog: function (e) {
@@ -320,6 +330,7 @@ define([
             var jsonCollection = this.commentCollection.toJSON();
 
             if (jsonCollection.length) {
+                this.model.set('comments', jsonCollection);
                 $commentScrollableContainer.show();
             }
 
@@ -383,7 +394,12 @@ define([
                         resolve : {
                             text : self.translation.resolveBtn,
                             class : `btn ${jsonModel.status === 'resolved' ? 'hidden' : ''}`,
-                            click : self.setStatusResolved.bind(self)
+                            click : function() {
+                                self.undelegateEvents();
+
+                                self.updateCommentsCountOnListView();
+                                self.setStatusResolved();
+                            }
                         },
 
                         save: {
@@ -391,6 +407,8 @@ define([
                             class: 'btn saveBtn',
                             click: function () {
                                 self.undelegateEvents();
+
+                                self.updateCommentsCountOnListView();
                                 self.$el.dialog('close').dialog('destroy').remove();
                             }
                         }
