@@ -132,30 +132,16 @@ var VisibilityForm = function(db, redis, event) {
     };
 
     function processFiles(body, applyToAll, callback) {
-        const files = lo.get(body, 'before.files');
+        const filesBefore = lo.get(body, 'before.files');
+        const filesAfter = lo.get(body, 'after.files');
+        const userId = lo.get(body, 'updatedBy.user') || lo.get(body, 'createdBy.user');
 
-        if (applyToAll) {
-            const base = lo.find(files, o => !lo.isEmpty(o.file));
-
-            fileHandler.uploadFileFromBase64(body.createdBy.user, base.file, CONTENT_TYPES.VISIBILITYFORM, function(err, fileId) {
-                if (err) {
-                    return callback(err);
-                }
-                body.before.files = lo.map(body.before.files, o => {
-                    o.file = fileId;
-                    o.branch = o.branch;
-
-                    return o;
-                });
-
-                return callback(null, body);
-            });
-        } else {
+        function bulkUpload(files, callback) {
             async.map(files, function(file, cb) {
                 if (!file.file) {
                     return cb();
                 }
-                fileHandler.uploadFileFromBase64(body.createdBy.user, file.file, CONTENT_TYPES.VISIBILITYFORM, function(err, filesId) {
+                fileHandler.uploadFileFromBase64(userId, file.file, CONTENT_TYPES.VISIBILITYFORM, function(err, filesId) {
                     if (err) {
                         return cb(err);
                     }
@@ -166,8 +152,53 @@ var VisibilityForm = function(db, redis, event) {
                 if (err) {
                     return callback(err);
                 }
+                callback();
+            })
+        }
+        function uploadOne(file, path, callback) {
+            fileHandler.uploadFileFromBase64(userId, file.file, CONTENT_TYPES.VISIBILITYFORM, function(err, fileId) {
+                if (err) {
+                    return callback(err);
+                }
+                let pathValue = lo.get(body, path);
+
+                pathValue = lo.map(lo.get(body, path), o => {
+                    o.file = fileId;
+                    o.branch = o.branch;
+
+                    return o;
+                });
+
+                return callback();
+            });
+        }
+        if (applyToAll) {
+            const baseBefore = lo.find(filesBefore, o => !lo.isEmpty(o.file));
+            const baseAfter = lo.find(filesAfter, o => !lo.isEmpty(o.file));
+            const tasks = [];
+
+            if (baseBefore) {
+                tasks.push(async.apply(uploadOne, baseBefore, 'before.files'))
+            }
+            if (baseAfter) {
+                tasks.push(async.apply(uploadOne, baseAfter, 'after.files'))
+            }
+            async.parallel(tasks, function(err) {
+                if (err) {
+                    return callback(err);
+                }
                 callback(null, body);
             })
+        } else {
+            async.parallel([
+                async.apply(bulkUpload, filesBefore),
+                async.apply(bulkUpload, filesAfter)
+            ], function(err) {
+                if (err) {
+                    return callback(err);
+                }
+                callback(null, body);
+            });
         }
     }
 
@@ -206,6 +237,57 @@ var VisibilityForm = function(db, redis, event) {
             user : userId
         };
         joiValidate(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'create', function(err, saveData) {
+            if (err) {
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
+            }
+
+
+            queryRun(saveData);
+        });
+    };
+
+    this.newUpdate = function(req, res, next) {
+        const applyToAll = req.query.applyToAll;
+        const id = req.params.id;
+        const body = req.body;
+        const userId = req.session.uId;
+        let error;
+
+        function queryRun(body) {
+            function saveFormToDB(form, cb) {
+                VisibilityFormModel.findByIdAndUpdate({_id : id}, {$set : form}, cb);
+            }
+
+            async.waterfall([
+                async.apply(processFiles, body, applyToAll),
+                saveFormToDB
+            ], function(err, result) {
+                if (err) {
+                    return next(err);
+                }
+
+                // event.emit('activityChange', {
+                //     module : module,
+                //     actionType : ACTIVITY_TYPES.UPDATED,
+                //     createdBy : result.editedBy,
+                //     itemId : result.objective._id,
+                //     itemType : result.objective.context,
+                //     itemDetails : CONTENT_TYPES.VISIBILITYFORM
+                // });
+
+                res.send(201, result)
+            });
+        }
+
+        body.updatedBy = {
+            user : userId
+        };
+        joiValidate(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function(err, saveData) {
             if (err) {
                 error = new Error();
                 error.status = 400;
