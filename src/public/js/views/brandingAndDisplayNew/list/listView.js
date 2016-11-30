@@ -48,6 +48,7 @@ define([
                     model      : model,
                     translation: this.translation
                 });
+
                 this.preView.on('modelChanged', function (count) {
                     self.changeCommentCount(count, $targetRow);
                 });

@@ -104,7 +104,7 @@
                                     <span><%= translation.origin %></span>
                                 </div>
                                 <div class="cell">
-                                    <span id="origin"><%= model.origin.name.currentLanguage %></span>
+                                    <span id="origin"><%= (model.origin && model.origin.name) ? model.origin.name.currentLanguage : '' %></span>
                                 </div>
                             </div>
                             <div class="row">

@@ -17,6 +17,10 @@
             </div>
         </div>
         <div class="middle flexRowStart"></div>
+        <div class="bottom flexRowStart">
+            <span class="userClip"><%= (model.attachments && model.attachments.length) ? model.attachments.length : '0' %></span>
+            <span class="userMassage"><%- (model.commentaries && model.commentaries.length) ? model.commentaries.length : '0' %></span>
+        </div>
     </div>
     <div class="locationBlock flexGrow flexColumn">
         <div class="locationTop flexRow">

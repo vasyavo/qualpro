@@ -52,7 +52,7 @@ var BodyValidator = (function() {
     };
 
     validationFunctions[CONTENT_TYPE.SHELFSHARES] = function(value, key, allowedObject) {
-        return !_.includes(allowedObject, key);
+        return _.includes(allowedObject, key);
     };
 
     validationFunctions[CONTENT_TYPE.INSTORETASKS] = function(value, key, allowedObject) {

@@ -848,11 +848,6 @@
             mandatory  : false,
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.BRAND] = getFilterConstant({
-            displayName: {en: 'Brand', ar: 'العلالي'},
-            mandatory  : false,
-            filterType : 'multiSelect'
-        });
         brandingAndDisplayFilter[CONSTANTS.COUNTRY] = getFilterConstant({
             displayName: {en: 'Country', ar: 'الدولة'},
             mandatory  : true,
@@ -912,7 +907,6 @@
         ];
         brandingAndDisplayFilter.array = [
             CONSTANTS.CATEGORY,
-            CONSTANTS.BRAND,
             CONSTANTS.COUNTRY,
             CONSTANTS.REGION,
             CONSTANTS.SUBREGION,

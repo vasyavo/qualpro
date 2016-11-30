@@ -189,6 +189,15 @@ var VisibilityForm = function(db, redis, event) {
                 if (err) {
                     return next(err);
                 }
+
+                event.emit('activityChange', {
+                    module : ACL_MODULES.OBJECTIVE,
+                    actionType : ACTIVITY_TYPES.CREATED,
+                    createdBy : result.get('createdBy'),
+                    itemId : result._id,
+                    itemType : CONTENT_TYPES.VISIBILITYFORM
+                });
+
                 res.send(201, result)
             });
         }
