@@ -211,6 +211,7 @@ define([
             $currentEl.html(this.template({
                 translation: this.translation
             }));
+
             $currentEl.find('#priceSurveyHeader').html(this.headerTemplate({
                 branchesAll      : branchesAll,
                 branchesAllLenght: branchesAllLenght,
