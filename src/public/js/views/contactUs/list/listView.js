@@ -47,10 +47,12 @@ define([
                     translation: this.translation
                 });
 
-                this.preView.on('modelChanged', function (newModel) {
-                    let modelToUpdate = self.collection.get(newModel._id);
-                    modelToUpdate.set({status: self.translation.resolved});
-                    self.showMoreContent(self.collection);
+                this.preView.on('set-status-resolved', function () {
+                    $targetRow.find('.inProgress').html('resolved');
+                });
+
+                this.preView.on('update-comments', function (count) {
+                    self.changeCommentCount(count, $targetRow);
                 });
             },
 
