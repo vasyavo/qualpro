@@ -2582,6 +2582,9 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   padding: 5px 0;
   font-size: 0.9em;
 }
+.online:after {
+  content: 'online';
+}
 /* "inset-2-dark" */
 .mCS-qualPro .mCSB_scrollTools {
   background-color: #ffffff;
@@ -7009,6 +7012,7 @@ ul.newSelectList .miniStylePagination {
 }
 .objectivesDescValue {
   /*height: 105px;*/
+  padding-right: 10px;
   overflow: hidden;
 }
 .afterTextBlock {
