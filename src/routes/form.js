@@ -689,6 +689,12 @@ module.exports = function(db, redis, event) {
         })
     }, visibilityFormHandler.update);
 
+    router.patch('/visibility/v2/:id', multipartMiddleware, multipartMiddleware, function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.newUpdate);
+
 
     // router.delete('/visibility/:id', visibilityFormHandler.deleteById);
 

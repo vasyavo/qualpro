@@ -93,34 +93,44 @@ schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.COUNTRY_UPLOADER] = 
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM] = {};
 
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.SUPER_ADMIN] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.MASTER_ADMIN] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.COUNTRY_ADMIN] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.AREA_MANAGER] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.AREA_IN_CHARGE] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.SALES_MAN] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.MERCHANDISER] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.CASH_VAN] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.MASTER_UPLOADER] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM][ACL_ROLES.COUNTRY_UPLOADER] = {
-    create: schemas.visibilityForm.create
+    create: schemas.visibilityForm.create,
+    update: schemas.visibilityForm.update
 };
 
 module.exports = schemasByRole;

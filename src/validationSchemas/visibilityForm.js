@@ -5,7 +5,6 @@ const ObjectId = mongoose.Types.ObjectId;
 
 Joi.objectId = require('joi-objectid')(Joi);
 
-const CONSTANTS = require('../constants/mainConstants');
 const customJoi = Joi.extend({
     base : Joi.objectId(),
     name : 'objectId',
@@ -44,8 +43,22 @@ const create = Joi.object().keys({
         files : Joi.array().items(beforeItem).min(1)
     })
 });
+const update = Joi.object().keys({
+    updatedBy : {
+        user : Joi.objectId().default(Joi.ref('createdBy.user')),
+        date : Joi.date().default(currentDate, 'current date')
+    },
+    objective : Joi.objectId().required(),
+    before : Joi.object().keys({
+        files : Joi.array().items(beforeItem).min(1)
+    }),
+    after : Joi.object().keys({
+        files : Joi.array().items(beforeItem).min(1)
+    })
+});
 
 
 module.exports = {
-    create
+    create,
+    update
 };
