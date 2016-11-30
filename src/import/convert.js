@@ -535,7 +535,8 @@ function importBrand(callback) {
                     name: {
                         en: obj['Name (EN)'],
                         ar: obj['Name (AR)']
-                    }
+                    },
+                    ourCompany: !!obj['Our company']
                 });
                 const query = {
                     'name.en': patch.name.en
