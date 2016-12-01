@@ -28,9 +28,22 @@
     <div class="locationBlock flexGrow flexColumn">
         <div class="locationTop">
             <div class="flexRow">
-                <span class="textSmall"></span>
+                <div class="flexColumn locationTitleWrap">
+                    <span class="textSmall"></span>
+                    <div class="fontSmall fontGray textEllipsis multiEllipsis"><%= model.description[currentLanguage] %></div>
+                </div>
+                <div class="bannerWrap floatRight">
+                    <div class="bannerMin">
+                        <div class="bannerMd fileThumbnailItem brandItem masonryThumbnail">
+                            <div class="thumbnail_js thumbnailBody">
+                                <!--insert image here-->
+                                <img src="images/tuna.jpg" alt="">
+                                <!--insert image here-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="fontSmall fontGray textEllipsis multiEllipsis"><%= model.description[currentLanguage] %></div>
         </div>
         <div class="locationBottom flexRowStart">
             <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location %>: <%= country.join(', ') || 'No translation' %> </span>
