@@ -183,6 +183,34 @@ Http Code | Error Type           |  Error                             | Details
         + en (string)
         + ar (string)
 
+## VisibilityFormAfterBefore
++ file : base64String (string)
++ branch : 5818b01a13187de020871b63 (string)
+
+## VisibilityFormAfterBeforeDone
++ _id: `5818b01a13187de020871b63` (string)
++ file : base64String (string)
++ branch : 5818b01a13187de020871b63 (string)
+
+## VisibilityFormCreate
++ objective: `5818b01a13187de020871b63` (string, required)
++ before
+    + files (array[VisibilityFormAfterBefore])
+
+## VisibilityFormDone
++ _id: `5818b01a13187de020871b63` (string)
++ objective: `5818b01a13187de020871b63` (string, required)
++ createdBy
+    + user: `5818b01a13187de020871b63` (string)
+    + date: `2016-11-01T13:09:14.000Z` (string)
++ editedBy
+    + user: `5818b01a13187de020871b63` (string)
+    + date: `2016-11-01T13:09:14.000Z` (string)
++ before
+    + files (array[VisibilityFormAfterBeforeDone])
++ after
+    + files (array[VisibilityFormAfterBeforeDone])
+
 # Group ContactUs
 
 ## Send contactUs form [/mobile/contactUs]
@@ -427,3 +455,33 @@ Unsubscribe to listen who is online
         + event : logout (string, required)
 
 + Response 200
+
+# Group Visibility Form
+
+## Create Visibility Form [/form/visibility/v2]
+
+### Create [POST]
+Create Visibility Form
+
++ Request (application/json)
+    + Attributes (VisibilityFormCreate)
++ Response 200 (application/json)
+    + Attributes (VisibilityFormDone)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Update Visibility Form [/form/visibility/v2/{id}]
+
+### Update [PATCH]
+Update Visibility Form
+
++ Parameters
+    + id: `5818b01a13187de020871b63` (string)
+
++ Request (application/json)
+    + Attributes (VisibilityFormCreate)
++ Response 200 (application/json)
+    + Attributes (VisibilityFormDone)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+

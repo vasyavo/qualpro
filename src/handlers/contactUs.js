@@ -140,11 +140,11 @@ var ContactUs = function(db, redis, event) {
             const condition = generateSearchCondition(query.filter);
             const mongoQuery = ContactUsModel.aggregate()
                 .append(condition.formCondition)
-                .append({
-                    $unwind : {
-                        path : '$commentaries',
-                        preserveNullAndEmptyArrays : true
-                    }
+                .lookup({
+                    from : CONTENT_TYPES.COMMENT + 's',
+                    localField : '_id',
+                    foreignField : 'taskId',
+                    as : 'commentaries'
                 })
                 .lookup({
                     from : CONTENT_TYPES.PERSONNEL + 's',
@@ -157,6 +157,8 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    attachments : 1,
+                    'commentaries.body' : 1,
                     'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
                 })
                 .project({
@@ -164,6 +166,8 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    attachments : 1,
+                    'commentaries.body' : 1,
                     'createdBy.user._id' : 1,
                     'createdBy.user.ID' : 1,
                     'createdBy.user.country' : 1,
@@ -185,6 +189,8 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    attachments : 1,
+                    'commentaries.body' : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'position.name' : 1,
                     'position._id' : 1
@@ -202,6 +208,8 @@ var ContactUs = function(db, redis, event) {
                     createdAt : 1,
                     description : 1,
                     status : 1,
+                    attachments : 1,
+                    'commentaries.body' : 1,
                     'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
                     'country.name' : 1,
                     'country._id' : 1

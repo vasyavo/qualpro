@@ -12,10 +12,13 @@ var VisibilityFormHandler = require('../handlers/visibilityForm');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
+const ACL_MODULES = require('./../constants/aclModulesNames');
+
 module.exports = function(db, redis, event) {
-    var distributionFormHandler = new DistributionFormHandler(db, redis, event);
-    var visibilityFormHandler = new VisibilityFormHandler(db, redis, event);
-    var checkAuth = access.checkAuth;
+    const distributionFormHandler = new DistributionFormHandler(db, redis, event);
+    const visibilityFormHandler = new VisibilityFormHandler(db, redis, event);
+    const access = require('./../helpers/access')(db);
+    const checkAuth = require('./../helpers/access').checkAuth;
 
     router.use(checkAuth);
 
@@ -467,7 +470,17 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.post('/visibility', multipartMiddleware, visibilityFormHandler.create);
+    router.post('/visibility', multipartMiddleware, function(req, res, next) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.create);
+
+    router.post('/visibility/v2', multipartMiddleware, function(req, res, next) {
+        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.bulkCreate);
 
     /**
      * __Type__ `GET`
@@ -545,7 +558,11 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.get('/visibility', visibilityFormHandler.getAll);
+    router.get('/visibility', function(req, res, next) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.getAll);
 
     /**
      * __Type__ `GET`
@@ -596,7 +613,11 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.get('/visibility/:id', visibilityFormHandler.getById);
+    router.get('/visibility/:id', function(req, res, next) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.getById);
 
     /**
      * __Type__ 'PUT'
@@ -627,7 +648,11 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.put('/visibility/:id', multipartMiddleware, visibilityFormHandler.update);
+    router.put('/visibility/:id', multipartMiddleware, function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.update);
 
 
     /**
@@ -658,7 +683,17 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.patch('/visibility/:id', multipartMiddleware, visibilityFormHandler.update);
+    router.patch('/visibility/:id', multipartMiddleware, multipartMiddleware, function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.update);
+
+    router.patch('/visibility/v2/:id', multipartMiddleware, multipartMiddleware, function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function(err) {
+            err ? next(err) : next();
+        })
+    }, visibilityFormHandler.newUpdate);
 
 
     // router.delete('/visibility/:id', visibilityFormHandler.deleteById);
