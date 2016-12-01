@@ -5723,7 +5723,7 @@ commentsAccess,
     }
 },
     {
-        module: 43,
+        module: ACL_MODULES.CONTACT_US,
         cms   : {
             archive: false,
             edit   : true,
@@ -6380,21 +6380,37 @@ commentsAccess,
         read   : true
     }
 },
-    {
-        module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
-        cms   : {
-            archive: false,
-            edit   : true,
-            write  : true,
-            read   : true
-        },
-        mobile: {
-            archive: false,
-            edit   : false,
-            write  : true,
-            read   : false
-        }
+{
+    module: ACL_MODULES.CONTACT_US,
+    cms   : {
+        archive: false,
+        edit   : false,
+        write  : false,
+        read   : true
+    },
+    mobile: {
+        archive: false,
+        edit   : false,
+        write  : false,
+        read   : true
     }
+
+},
+{
+    module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
+    cms   : {
+        archive: false,
+        edit   : true,
+        write  : true,
+        read   : true
+    },
+    mobile: {
+        archive: false,
+        edit   : false,
+        write  : true,
+        read   : false
+    }
+}
 ];
 
 const tradeMarketer = [
