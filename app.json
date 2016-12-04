@@ -1,0 +1,103 @@
+{
+  "name": "Qual Pro",
+  "description": "This app does one thing, and does it well.",
+  "keywords": [
+    "productivity"
+  ],
+  "website": "",
+  "repository": "https://github.com/rhinobuccaneers/qualpro.git",
+  "logo": "",
+  "success_url": "/",
+  "scripts": {
+  },
+  "env": {
+    "WEB_CONCURRENCY": {
+      "description": "The number of processes to run.",
+      "value": "5"
+    },
+    "NODE_ENV": {
+      "required": true,
+      "description": "Node environment",
+      "value": "development"
+    },
+    "PORT": {
+      "required": false,
+      "description": "Node port"
+    },
+    "REDIS_URL": {
+      "required": true,
+      "description": "Redis uri",
+      "value": "Not specified."
+    },
+    "MONGODB_URI": {
+      "required": true,
+      "description": "MongoDB uri",
+      "value": "Not specified."
+    },
+    "SENDGRID_APIKEY": {
+      "required": true,
+      "description": "SendGrid API key",
+      "value": "Not specified."
+    },
+    "SMS_ACCOUNT_SID": {
+      "required": true,
+      "description": "Twilio account SID",
+      "value": "Not specified."
+    },
+    "SMS_AUTH_TOKEN": {
+      "required": true,
+      "description": "Twilio authentication token",
+      "value": "Not specified."
+    },
+    "SMS_NUMBER": {
+      "required": true,
+      "description": "Twilio sms number",
+      "value": "Not specified."
+    },
+    "AWS_S3_BUCKET": {
+      "required": true,
+      "description": "Name of bucket on S3",
+      "value": "Not specified."
+    },
+    "AWS_S3_REGION": {
+      "required": true,
+      "description": "S3 region",
+      "value": "Not specified."
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "required": true,
+      "description": "AWS access key ID",
+      "value": "Not specified."
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "required": true,
+      "description": "AWS secret access key",
+      "value": "Not specified."
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 3,
+      "size": "standard-2x"
+    }
+  },
+  "addons": [
+    {
+      "plan": "mongolab:shared-cluster-1",
+      "options": {
+        "version": "3.2.11"
+      }
+    },
+    {
+      "plan": "papertrail:fixa"
+    },
+    {
+      "plan": "heroku-redis:premium-0"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
