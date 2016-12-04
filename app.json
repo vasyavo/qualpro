@@ -25,12 +25,12 @@
       "description": "Node port"
     },
     "REDIS_URL": {
-      "required": true,
+      "required": false,
       "description": "Redis uri",
       "value": "Not specified."
     },
     "MONGODB_URI": {
-      "required": true,
+      "required": false,
       "description": "MongoDB uri",
       "value": "Not specified."
     },
