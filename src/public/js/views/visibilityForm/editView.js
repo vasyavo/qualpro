@@ -122,7 +122,7 @@ define([
                         context.model.set('descriptionAfter', newAfterDescription);
 
                         if (context.oldAjaxObj) {
-                            context.oldAjaxObj.data.append('description', newAfterDescription);
+                            context.oldAjaxObj.data.set('description', newAfterDescription);
                             context.oldAjaxObj.model = context.model;
                         }
 

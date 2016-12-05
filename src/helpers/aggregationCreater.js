@@ -1,6 +1,4 @@
-'use strict';
-
-var _ = require('lodash');
+const _ = require('lodash');
 
 var AggregationHelper = function (defProjection, filter) {
     var $defProjection = defProjection;
@@ -92,64 +90,60 @@ var AggregationHelper = function (defProjection, filter) {
         return getGroup(this.getProjection(), object);
     };
 
-    this.setTotal = function () {
-        var defProjection = _.assign({}, $defProjection);
-        var defProjectionKeys = _.keys(defProjection);
-        var project = {};
+    this.setTotal = () => {
+        const defProjection = Object.assign({}, $defProjection);
+        const defProjectionKeys = Object.keys(defProjection);
+        const project = {};
 
-        defProjectionKeys.forEach(function (key) {
-            project[key] = '$data.' + key;
+        defProjectionKeys.forEach((key) => {
+            project[key] = `$data.${key}`;
         });
 
         project.total = 1;
 
-        return [
-            {
-                $group: {
-                    _id  : null,
-                    total: {$sum: 1},
-                    data : {$push: '$$ROOT'}
-                }
-            },
-            {
-                $unwind: {
-                    path                      : '$data',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: project
+        return [{
+            $group: {
+                _id: null,
+                total: { $sum: 1 },
+                data: { $push: '$$ROOT' }
             }
-        ];
+        }, {
+            $unwind: {
+                path: '$data',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: project
+        }];
     };
 
-    this.groupForUi = function () {
-        return [
-            {
-                $group: {
-                    _id : '$total',
-                    data: {$push: '$$ROOT'}
-                }
-            },
-            {
-                $project: {
-                    _id  : 0,
-                    total: '$_id',
-                    data : 1
-                }
+    this.groupForUi = () => {
+        return [{
+            $group: {
+                _id: '$total',
+                data: { $push: '$$ROOT' }
             }
-        ];
+        }, {
+            $project: {
+                _id: 0,
+                total: '$_id',
+                data: 1
+            }
+        }];
     };
 
-    this.getSearchMatch = function (array, searchValue) {
-        var regExps = searchValue.split(' ');
-        var resultArray = [];
+    this.getSearchMatch = (array, searchValue) => {
+        const regExps = searchValue.split(' ');
+        const resultArray = [];
 
-        array.forEach(function (element) {
-            var regExpObject = {};
+        array.forEach((element) => {
+            const regExpObject = {};
 
-            regExps.forEach(function (regExp) {
-                regExpObject[element] = {$regex: regExp, $options: 'i'};
+            regExps.forEach((regExp) => {
+                regExpObject[element] = {
+                    $regex: regExp,
+                    $options: 'i'
+                };
                 resultArray.push(regExpObject);
             });
         });
@@ -159,25 +153,27 @@ var AggregationHelper = function (defProjection, filter) {
         };
     };
 
-    this.getProjection = function (object, includeSiblings) {
-        var defProjection = _.assign({}, $defProjection);
-        var item;
-        var keyName;
-        var i;
-        var innerObj = {};
+    this.getProjection = (object, includeSiblings) => {
+        const defProjection = Object.assign({}, $defProjection);
 
         if (object) {
-            for (item in object) {
+            for (let item in object) {
                 if (object.hasOwnProperty(item)) {
-                    keyName = item.split('.');
+                    const keyName = item.split('.');
+
                     if (keyName.length > 1) {
+                        const innerObj = {};
+
                         innerObj[keyName[keyName.length - 1]] = object[item];
                         delete object[item];
-                        for (i = keyName.length - 2; i > 0; i--) {
-                            innerObj[keyName[i]] = _.assign({}, innerObj);
+
+                        for (let i = keyName.length - 2; i > 0; i--) {
+                            innerObj[keyName[i]] = Object.assign({}, innerObj);
                             delete innerObj[keyName[i + 1]];
                         }
-                        object[keyName[0]] = _.assign({}, innerObj);
+
+                        object[keyName[0]] = Object.assign({}, innerObj);
+
                         if (includeSiblings) {
                             _.merge(object, includeSiblings);
                         }
@@ -188,6 +184,7 @@ var AggregationHelper = function (defProjection, filter) {
 
             return object;
         }
+
         return defProjection;
     };
 
@@ -349,21 +346,21 @@ var AggregationHelper = function (defProjection, filter) {
         return resultArray;
     };
 
-    this.endOfPipeLine = function (options) {
-        var isMobile = options.isMobile;
-        var searchFieldsArray = options.searchFieldsArray;
-        var filterSearch = options.filterSearch;
-        var skip = options.skip;
-        var limit = options.limit;
-        var sort = options.sort;
-        var creationDate = options.creationDate;
-        var pipeLine = [];
+    this.endOfPipeLine = (options) => {
+        const isMobile = options.isMobile;
+        const searchFieldsArray = options.searchFieldsArray;
+        const filterSearch = options.filterSearch;
+        const skip = options.skip;
+        const limit = options.limit;
+        const sort = options.sort;
+        const creationDate = options.creationDate;
+        const pipeLine = [];
 
         if (isMobile && creationDate) {
             pipeLine.push({
                 $project: self.getProjection({
                     creationDate: '$createdBy.date',
-                    updateDate  : '$editedBy.date'
+                    updateDate: '$editedBy.date'
                 })
             });
         }
@@ -397,7 +394,7 @@ var AggregationHelper = function (defProjection, filter) {
             });
         }
 
-        pipeLine = _.union(pipeLine, self.setTotal());
+        pipeLine.push(...self.setTotal());
 
         if (limit && limit !== -1) {
             pipeLine.push({
@@ -409,7 +406,7 @@ var AggregationHelper = function (defProjection, filter) {
             });
         }
 
-        pipeLine = _.union(pipeLine, self.groupForUi());
+        pipeLine.push(...self.groupForUi());
 
         return pipeLine;
     };

@@ -1,3 +1,4 @@
+const util = require('util');
 const winston = require('winston');
 const config = require('./../config');
 
@@ -16,5 +17,11 @@ const logger = new (winston.Logger)({
         }),
     ],
 });
+
+logger.inspect = (...args) => {
+    const inspected = util.inspect(args, {showHidden: false, depth: null});
+
+    console.log(inspected);
+};
 
 module.exports = logger;

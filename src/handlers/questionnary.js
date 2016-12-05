@@ -283,266 +283,227 @@ var QuestionnaryHandler = function (db, redis, event) {
     };
 
     this.getAll = function (req, res, next) {
-        function queryRun(personnel) {
-            var isMobile = req.isMobile;
-            var query = req.query;
-            var page = query.page || 1;
-            var limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
-            var filterMapper = new FilterMapper();
-            var queryObject = query.filter || {};
-            var aggregateHelper;
-            var key;
-            var pipeLine = [];
-            var aggregation;
-            var waterFallTasks = [];
-            var positionFilter;
-            var personnelFilter;
-            var publisherFilter;
+        function queryRun(personnel, callback) {
+            const isMobile = req.isMobile;
+            const query = req.query;
+            const page = query.page || 1;
+            const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
+            const skip = (page - 1) * limit;
+            const filterMapper = new FilterMapper();
+            const queryFilter = query.filter || {};
 
-            var sort = query.sort || {
+            const sort = query.sort || {
                     lastDate: -1
                 };
 
-            delete queryObject.globalSearch;
-            queryObject = filterMapper.mapFilter({
+            const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.QUESTIONNARIES,
-                filter     : query.filter || {}
+                filter: queryFilter
             });
 
-            for (key in sort) {
+            for (let key in sort) {
                 sort[key] = parseInt(sort[key], 10);
             }
+
+            let positionFilter;
 
             if (queryObject.position) {
                 positionFilter = queryObject.position;
                 delete queryObject.position;
             }
 
+            let personnelFilter;
+
             if (queryObject.personnel) {
                 personnelFilter = queryObject.personnel;
                 delete queryObject.personnel;
             }
+
+            let publisherFilter;
 
             if (queryObject.publisher) {
                 publisherFilter = queryObject.publisher;
                 delete queryObject.publisher;
             }
 
-            aggregateHelper = new AggregationHelper($defProjection);
+            const aggregateHelper = new AggregationHelper($defProjection);
+            const pipeline = [];
 
-            pipeLine.push({
+            pipeline.push({
                 $match: queryObject
             });
 
-            function endOfWaterFall(ids, waterFallCb) {
-                if (ids && typeof ids !== 'function') {
-                    pipeLine.push({
-                        $match: {
-                            _id: {
-                                $nin: ids.objectID()
+            async.waterfall([
+
+                (cb) => {
+                    if (personnelFilter) {
+                        pipeline.push({
+                            $match: {
+                                personnels: personnelFilter
                             }
-                        }
-                    });
-                } else {
-                    waterFallCb = ids;
-                }
-
-                if (personnelFilter) {
-                    pipeLine.push({
-                        $match: {
-                            personnels: personnelFilter
-                        }
-                    });
-                }
-
-                if (publisherFilter) {
-                    pipeLine.push({
-                        $match: {
-                            'createdBy.user': publisherFilter
-                        }
-                    });
-                }
-
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'personnels',
-                    key            : 'createdBy.user',
-                    isArray        : false,
-                    addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                    includeSiblings: {createdBy: {date: 1}}
-                }));
-
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from             : 'personnels',
-                    key              : 'personnels',
-                    addMainProjection: ['position'],
-                    isArray          : true
-                }));
-
-                if (positionFilter) {
-                    pipeLine.push({
-                        $match: {
-                            $or: [
-                                {
-                                    position: positionFilter
-                                },
-                                {
-                                    'createdBy.user.position': positionFilter
-                                }
-                            ]
-                        }
-                    });
-                }
-
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'accessRoles',
-                    key            : 'createdBy.user.accessRole',
-                    isArray        : false,
-                    addProjection  : ['_id', 'name', 'level'],
-                    includeSiblings: {
-                        createdBy: {
-                            date: 1,
-                            user: {
-                                _id      : 1,
-                                position : 1,
-                                firstName: 1,
-                                lastName : 1
-                            }
-                        }
+                        });
                     }
-                }));
 
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'positions',
-                    key            : 'createdBy.user.position',
-                    isArray        : false,
-                    includeSiblings: {
-                        createdBy: {
-                            date: 1,
-                            user: {
-                                _id       : 1,
-                                accessRole: 1,
-                                firstName : 1,
-                                lastName  : 1
+                    if (publisherFilter) {
+                        pipeline.push({
+                            $match: {
+                                'createdBy.user': publisherFilter
                             }
-                        }
+                        });
                     }
-                }));
 
-                if (isMobile) {
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'personnels',
-                        key            : 'editedBy.user',
-                        isArray        : false,
-                        addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                        includeSiblings: {editedBy: {date: 1}}
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'personnels',
+                        key: 'createdBy.user',
+                        isArray: false,
+                        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                        includeSiblings: { createdBy: { date: 1 } }
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'accessRoles',
-                        key            : 'editedBy.user.accessRole',
-                        isArray        : false,
-                        addProjection  : ['_id', 'name', 'level'],
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'personnels',
+                        key: 'personnels',
+                        addMainProjection: ['position'],
+                        isArray: true
+                    }));
+
+                    if (positionFilter) {
+                        pipeline.push({
+                            $match: {
+                                $or: [
+                                    {
+                                        position: positionFilter
+                                    },
+                                    {
+                                        'createdBy.user.position': positionFilter
+                                    }
+                                ]
+                            }
+                        });
+                    }
+
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'accessRoles',
+                        key: 'createdBy.user.accessRole',
+                        isArray: false,
+                        addProjection: ['_id', 'name', 'level'],
                         includeSiblings: {
-                            editedBy: {
+                            createdBy: {
                                 date: 1,
                                 user: {
-                                    _id      : 1,
-                                    position : 1,
+                                    _id: 1,
+                                    position: 1,
                                     firstName: 1,
-                                    lastName : 1
+                                    lastName: 1
                                 }
                             }
                         }
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'positions',
-                        key            : 'editedBy.user.position',
-                        isArray        : false,
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'positions',
+                        key: 'createdBy.user.position',
+                        isArray: false,
                         includeSiblings: {
-                            editedBy: {
+                            createdBy: {
                                 date: 1,
                                 user: {
-                                    _id       : 1,
+                                    _id: 1,
                                     accessRole: 1,
-                                    firstName : 1,
-                                    lastName  : 1
+                                    firstName: 1,
+                                    lastName: 1
                                 }
                             }
                         }
                     }));
-                }
 
-                pipeLine.push({
-                    $unwind: {
-                        path                      : '$personnels',
-                        preserveNullAndEmptyArrays: true
-                    }
-                });
+                    if (isMobile) {
+                        pipeline.push(...aggregateHelper.aggregationPartMaker({
+                            from: 'personnels',
+                            key: 'editedBy.user',
+                            isArray: false,
+                            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                            includeSiblings: { editedBy: { date: 1 } }
+                        }));
 
-                pipeLine.push({
-                    $project: aggregateHelper.getProjection({
-                        personnel: '$personnels._id'
-                    })
-                });
+                        pipeline.push(...aggregateHelper.aggregationPartMaker({
+                            from: 'accessRoles',
+                            key: 'editedBy.user.accessRole',
+                            isArray: false,
+                            addProjection: ['_id', 'name', 'level'],
+                            includeSiblings: {
+                                editedBy: {
+                                    date: 1,
+                                    user: {
+                                        _id: 1,
+                                        position: 1,
+                                        firstName: 1,
+                                        lastName: 1
+                                    }
+                                }
+                            }
+                        }));
 
-                pipeLine.push({
-                    $group: aggregateHelper.getGroupObject({
-                        personnels: {$addToSet: '$personnel'}
-                    })
-                });
-
-                /*pipeLine.push({
-                 $project: aggregateHelper.getProjection({
-                 lastDate: {
-                 $ifNull: [
-                 '$editedBy.date',
-                 '$createdBy.date'
-                 ]
-                 }
-                 })
-                 });
-
-                 pipeLine.push({
-                 $sort: sort
-                 });
-
-                 pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-                 if (limit && limit !== -1) {
-                 pipeLine.push({
-                 $skip: skip
-                 });
-
-                 pipeLine.push({
-                 $limit: limit
-                 });
-                 }
-
-                 pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
-                pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-                    isMobile: isMobile,
-                    skip    : skip,
-                    limit   : limit,
-                    sort    : sort
-                }));
-
-                aggregation = QuestionnariesModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse: true
-                };
-
-                aggregation.exec(function (err, response) {
-                    if (err) {
-                        return waterFallCb(err);
+                        pipeline.push(...aggregateHelper.aggregationPartMaker({
+                            from: 'positions',
+                            key: 'editedBy.user.position',
+                            isArray: false,
+                            includeSiblings: {
+                                editedBy: {
+                                    date: 1,
+                                    user: {
+                                        _id: 1,
+                                        accessRole: 1,
+                                        firstName: 1,
+                                        lastName: 1
+                                    }
+                                }
+                            }
+                        }));
                     }
 
-                    if (response.length) {
-                        response[0].data = _.map(response[0].data, function (model) {
-                            if (model) {
+                    pipeline.push({
+                        $unwind: {
+                            path: '$personnels',
+                            preserveNullAndEmptyArrays: true
+                        }
+                    });
+
+                    pipeline.push({
+                        $project: aggregateHelper.getProjection({
+                            personnel: '$personnels._id'
+                        })
+                    });
+
+                    pipeline.push({
+                        $group: aggregateHelper.getGroupObject({
+                            personnels: {
+                                $addToSet: '$personnel'
+                            }
+                        })
+                    });
+
+                    pipeline.push(...aggregateHelper.endOfPipeLine({
+                        isMobile,
+                        skip,
+                        limit,
+                        sort
+                    }));
+
+                    const aggregation = QuestionnariesModel.aggregate(pipeline);
+
+                    aggregation.options = {
+                        allowDiskUse: true
+                    };
+
+                    aggregation.exec(cb);
+                },
+
+                (result, cb) => {
+                    if (result.length) {
+                        result[0].data = result[0].data
+                            .filter((item) => (item))
+                            .map((model) => {
                                 if (model.title) {
                                     model.title = {
                                         en: _.unescape(model.title.en),
@@ -551,72 +512,75 @@ var QuestionnaryHandler = function (db, redis, event) {
                                 }
 
                                 if (model.questions && model.questions.length) {
-                                    model.questions = _.map(model.questions, function (question) {
-                                        if (question.title) {
-                                            question.title = {
-                                                en: _.unescape(question.title.en),
-                                                ar: _.unescape(question.title.ar)
-                                            };
-                                        }
-                                        if (question.options && question.options.length) {
-                                            question.options = _.map(question.options, function (option) {
-                                                if (option) {
-                                                    return {
-                                                        en: _.unescape(option.en),
-                                                        ar: _.unescape(option.ar)
-                                                    };
-                                                }
-                                            });
-                                        }
-                                        return question;
-                                    });
-                                }
-                            }
+                                    model.questions = model.questions
+                                        .filter((item) => (item))
+                                        .map((question) => {
+                                            if (question.title) {
+                                                question.title = {
+                                                    en: _.unescape(question.title.en),
+                                                    ar: _.unescape(question.title.ar)
+                                                };
+                                            }
 
-                            return model;
-                        });
+                                            if (question.options && question.options.length) {
+                                                question.options = question.options
+                                                    .filter((item) => (item))
+                                                    .map((option) => {
+                                                        return {
+                                                            en: _.unescape(option.en),
+                                                            ar: _.unescape(option.ar)
+                                                        };
+                                                    });
+                                            }
+
+                                            return question;
+                                        });
+                                }
+
+                                return model;
+                            });
                     }
 
-                    waterFallCb(null, response);
-                });
-            }
+                    const body = result && result[0] ?
+                        result[0] : { data: [], total: 0 };
 
-            waterFallTasks.push(endOfWaterFall);
+                    if (req.session.level !== 1) {
+                        body.data = body.data.filter((question) => {
+                            const personnelArray = question.personnels.fromObjectID();
+                            const isEnoughMembers = question.personnels && personnelArray.length;
+                            const isMember = personnelArray.indexOf(personnel.id) !== -1;
+                            const isCreator = question.createdBy.user._id.toString() === personnel.id;
 
-            async.waterfall(waterFallTasks, function (err, result) {
-                if (err) {
-                    return next(err);
+                            return isEnoughMembers && (isMember || isCreator);
+                        });
+
+                        body.total = body.data.length;
+                    }
+
+                    cb(null, result);
                 }
 
-                result = result && result[0] ? result[0] : {data: [], total: 0};
-
-                if (req.session.level !== 1) {
-                    result.data = _.filter(result.data, function (question) {
-                        var personnelArray = question.personnels.fromObjectID();
-                        return !question.personnels || !personnelArray.length || personnelArray.indexOf(personnel.id) !== -1 || question.createdBy.user._id.toString() === personnel.id;
-                    });
-                    result.total = result.data.length;
-                }
-
-                next({status: 200, body: result});
-            });
-
+            ], callback);
         }
 
-        access.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed, personnel) {
+        async.waterfall([
+
+            async.apply(access.getReadAccess, req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE),
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
+            }
+
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun(personnel);
+            return next({
+                status: 200,
+                body
+            });
         });
-
     };
 
     this.create = function (req, res, next) {

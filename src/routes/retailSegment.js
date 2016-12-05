@@ -111,6 +111,9 @@ module.exports = function (db, redis, event) {
 
     router.get('/getForDD', handler.getForDD);
 
+    //uses for get configs of provided retailSegments id
+    router.get('/forConfigs', handler.getConfigurations);
+
     /**
      * __Type__ `GET`
      *

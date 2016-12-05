@@ -1652,6 +1652,9 @@ fieldset .inner .form-holder .title span {
 .close {
   margin: 5px 7px;
 }
+.close:hover {
+  cursor: pointer;
+}
 .logoTop {
   position: absolute;
   z-index: 190;
@@ -3616,6 +3619,7 @@ a.disabled {
 .formThumbnail,
 .formIconWrap {
   display: inline-block;
+  cursor: pointer;
 }
 .formThumbnail:before,
 .formIconWrap:before,
@@ -4746,7 +4750,7 @@ a.disabled {
   height: calc(100% - 75px) !important;
 }
 .notesDialog .form-holder .notesCreateDialog {
-  height: calc(100% - 50px);
+  height: calc(100% - 120px);
 }
 .notesDialog .form-holder .notesBody {
   height: calc(100% - 45px);
@@ -4787,6 +4791,9 @@ a.disabled {
   width: 100%;
   height: 400px;
   resize: none;
+}
+.notesCreateDialogWrap .attachments {
+  padding: 10px 0;
 }
 .notesPreviewDialog {
   height: 90%!important;
@@ -6676,6 +6683,9 @@ ul.newSelectList .miniStylePagination {
   width: 100%;
   margin: 0;
 }
+.bannerMd img {
+  width: 100px;
+}
 .banner_textBlock {
   float: left;
 }
@@ -6848,7 +6858,7 @@ ul.newSelectList .miniStylePagination {
 .attachmentsBlock {
   min-height: 134px;
 }
-.attachmentsBlock .attachmentsHeader {
+.attachmentsBlock .attachmentsHeader, .attachmentsBody {
   padding: 10px 20px;
 }
 .attachmentsBlock .attachmentsHeader:before,
@@ -6878,6 +6888,19 @@ ul.newSelectList .miniStylePagination {
   clear: both;
   width: 100%;
 }
+.attachmentsBlock .upload {
+  width: auto;
+  margin: 0;
+}
+.attachmentItem {
+  background: #F2F0F4;
+  padding: 5px 10px;
+  margin-top: 5px;
+}
+.attachmentItem .close {
+  margin: 0;
+}
+
 .formBlock {
   padding: 10px 20px;
 }
@@ -9190,6 +9213,10 @@ table.fancytree-ext-table {
 .questionnarieWrap .filterBar .filterContentHolder .filtersFullHolder {
   padding: 10px 0 10px 20px;
 }
+.questionnarieWrap .searchInputWrap label:after {
+  top: 0;
+  line-height: 2.4;
+}
 .questionnarie-form {
   height: calc(100% - 75px) !important;
 }
@@ -9771,6 +9798,17 @@ table.fancytree-ext-table {
 }
 .documentsAttachFile {
   width: 205px !important;
+}
+.attachFile {
+  position: absolute;
+  right: 25px;
+}
+.attachFile:hover {
+  cursor: pointer;
+}
+.attachFile:after {
+  content: url('../images/clip.png');
+
 }
 .brandingDisplayTable .commentDescription {
   border-top: 1px solid #cfd8dc !important;
