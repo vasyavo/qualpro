@@ -1,11 +1,11 @@
 const async = require('async');
+const ObjectId = require('bson-objectid');
 const _ = require('underscore');
 const lodash = require('lodash');
 const mongoose = require('mongoose');
 const QuestionnaryModel = require('./../types/questionnaries/model');
 const QuestionnaryAnswerModel = require('./../types/questionnariesAnswer/model');
 const PersonnelModel = require('./../types/personnel/model');
-const ObjectId = mongoose.Types.ObjectId;
 const ACL_CONSTANTS = require('../constants/aclRolesNames');
 const ACL_MODULES = require('../constants/aclModulesNames');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -65,6 +65,7 @@ const QuestionnaryHandler = function (db, redis, event) {
         const personnel = options.personnel;
         const accessRoleLevel = options.accessRoleLevel;
         const result = options.result;
+        const personnelId = personnel._id.toString();
 
         if (result.length) {
             result[0].data = result[0].data
@@ -114,9 +115,18 @@ const QuestionnaryHandler = function (db, redis, event) {
             body.data = body.data.filter((question) => {
                 const personnelArray = question.personnels.fromObjectID();
                 const isEnoughMembers = question.personnels && personnelArray.length;
-                const isMember = personnelArray.indexOf(personnel.id) !== -1;
+                const isMember = personnelArray.indexOf(personnelId) !== -1;
                 const creator = question.createdBy.user;
-                const isCreator = creator && creator._id.toString() === personnel.id;
+
+                let isCreator = null;
+
+                if (ObjectId.isValid(creator)) {
+                    // fixme: should check it here as sync aggregation do not includes projection for $createdBy.user
+                    isCreator = creator && creator.toString() === personnelId;
+                } else {
+                    // fixme: if $createdBy.user already projected then get only _id
+                    isCreator = creator && creator._id.toString() === personnelId;
+                }
 
                 return isCreator || (isEnoughMembers && isMember);
             });

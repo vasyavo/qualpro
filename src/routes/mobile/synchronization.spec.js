@@ -98,6 +98,29 @@ describe('mobile synchronization', () => {
             synch.standardPack.forEach((item) => item.apply(null, [Authenticator.areaManager]));
 
         });
+
+        describe('Merchandiser', () => {
+
+            it('should pass authentication with password', function *() {
+                const resp = yield Authenticator.merchandiser
+                    .post('/mobile/login')
+                    .send({
+                        login: 'mc_uae@yopmail.com', //todo change to variables
+                        pass: '123456'
+                    })
+                    .expect(200);
+
+                const body = resp.body;
+
+                expect(body).to.be.an('Object')
+            });
+
+            [
+                ...synch.standardPack,
+                synch.shouldSyncQuestionnary
+            ].forEach((item) => item.apply(null, [Authenticator.merchandiser]));
+
+        });
     }
 
 });
