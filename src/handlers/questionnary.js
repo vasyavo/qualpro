@@ -1,283 +1,255 @@
-var QuestionnaryHandler = function (db, redis, event) {
-    var async = require('async');
-    var _ = require('underscore');
-    var lodash = require('lodash');
-    var mongoose = require('mongoose');
-    var ACL_CONSTANTS = require('../constants/aclRolesNames');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')(db);
-    var CONSTANTS = require('../constants/mainConstants');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var FilterMapper = require('../helpers/filterMapper');
-    var bodyValidator = require('../helpers/bodyValidator');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
-    var ObjectId = mongoose.Types.ObjectId;
-    var QuestionnariesModel = require('./../types/questionnaries/model');
-    var QuestionnariesAnswerModel = require('./../types/questionnariesAnswer/model');
-    var PersonnelModel = require('./../types/personnel/model');
+const async = require('async');
+const _ = require('underscore');
+const lodash = require('lodash');
+const mongoose = require('mongoose');
+const QuestionnaryModel = require('./../types/questionnaries/model');
+const QuestionnaryAnswerModel = require('./../types/questionnariesAnswer/model');
+const PersonnelModel = require('./../types/personnel/model');
+const ObjectId = mongoose.Types.ObjectId;
+const ACL_CONSTANTS = require('../constants/aclRolesNames');
+const ACL_MODULES = require('../constants/aclModulesNames');
+const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+const CONSTANTS = require('../constants/mainConstants');
+const ACTIVITY_TYPES = require('../constants/activityTypes');
+const FilterMapper = require('../helpers/filterMapper');
+const bodyValidator = require('../helpers/bodyValidator');
+const AggregationHelper = require('../helpers/aggregationCreater');
+const access = require('../helpers/access')();
+const GetImageHelper = require('../helpers/getImages');
 
-    var $defProjection = {
-        _id          : 1,
-        title        : 1,
-        dueDate      : 1,
-        country      : 1,
-        region       : 1,
-        subRegion    : 1,
+const QuestionnaryHandler = function (db, redis, event) {
+    const getImagesHelper = new GetImageHelper(db);
+    const $defProjection = {
+        _id: 1,
+        title: 1,
+        dueDate: 1,
+        country: 1,
+        region: 1,
+        subRegion: 1,
         retailSegment: 1,
-        outlet       : 1,
-        branch       : 1,
-        countAll     : 1,
+        outlet: 1,
+        branch: 1,
+        countAll: 1,
         countAnswered: 1,
-        status       : 1,
-        questions    : 1,
-        location     : 1,
-        editedBy     : 1,
-        createdBy    : 1,
-        creationDate : 1,
-        updateDate   : 1,
-        position     : 1,
-        personnels   : 1
+        status: 1,
+        questions: 1,
+        location: 1,
+        editedBy: 1,
+        createdBy: 1,
+        creationDate: 1,
+        updateDate: 1,
+        position: 1,
+        personnels: 1
     };
-
-    var $answerDefProjection = {
-        _id           : 1,
-        personnel     : 1,
-        personnelId   : 1,
+    const $answerDefProjection = {
+        _id: 1,
+        personnel: 1,
+        personnelId: 1,
         questionnaryId: 1,
-        questionId    : 1,
-        optionIndex   : 1,
-        editedBy      : 1,
-        createdBy     : 1,
-        branch        : 1,
-        outlet        : 1,
-        retailSegment : 1,
-        subRegion     : 1,
-        region        : 1,
-        country       : 1,
-        text          : 1,
-        position      : 1
+        questionId: 1,
+        optionIndex: 1,
+        editedBy: 1,
+        createdBy: 1,
+        branch: 1,
+        outlet: 1,
+        retailSegment: 1,
+        subRegion: 1,
+        region: 1,
+        country: 1,
+        text: 1,
+        position: 1
     };
-    var self = this;
+    const self = this;
 
-    function getAnsweredQuestions(userId, cb) {
-        var pipeline = [];
+    const filterRetrievedResultOnGetAll = (options, cb) => {
+        const personnel = options.personnel;
+        const accessRoleLevel = options.accessRoleLevel;
+        const result = options.result;
 
-        pipeline.push({
-            $match: {
-                personnelId: ObjectId(userId)
-            }
-        });
-
-        pipeline.push({
-            $group: {
-                _id : null,
-                _ids: {$addToSet: '$_id'}
-            }
-        });
-
-        QuestionnariesAnswerModel.aggregate(pipeline, function (err, result) {
-            if (err) {
-                return cb(err);
-            }
-
-            if (result && result.length) {
-                result = result[0];
-
-                return cb(null, result._ids);
-            }
-
-            return cb(null, []);
-        });
-    }
-
-    this.getAllForSync = function (req, res, next) {
-        function queryRun(personnel) {
-            var query = req.query;
-            var page = query.page || 1;
-            var isMobile = req.isMobile;
-            var lastLogOut = new Date(query.lastLogOut);
-            var limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
-            var filterMapper = new FilterMapper();
-            var queryObject = query.filter || {};
-            var aggregateHelper;
-            var key;
-            var pipeLine = [];
-            var aggregation;
-            var waterFallTasks = [];
-
-            var sort = query.sort || {lastDate: -1};
-
-            delete queryObject.globalSearch;
-
-            queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.QUESTIONNARIES,
-                filter     : query.filter || {}
-            });
-
-            for (key in sort) {
-                sort[key] = parseInt(sort[key], 10);
-            }
-
-            aggregateHelper = new AggregationHelper($defProjection, queryObject);
-
-            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
-
-            queryObject.$or = [
-                {'createdBy.user': personnel._id},
-                {
-                    'createdBy.user': {
-                        $ne: personnel._id
-                    },
-
-                    status: {
-                        $eq: 'active'
-                    }
-                }
-            ];
-
-            pipeLine.push({
-                $match: queryObject
-            });
-
-            function endOfWaterFall(ids, waterFallCb) {
-                if (ids && typeof ids !== 'function') {
-                    pipeLine.push({
-                        $match: {
-                            _id: {
-                                $nin: ids.objectID()
-                            }
-                        }
-                    });
-                } else {
-                    waterFallCb = ids;
-                }
-
-                if (isMobile) {
-                    pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            creationDate: '$createdBy.date',
-                            updateDate  : '$editedBy.date'
-                        })
-                    });
-                }
-
-                pipeLine.push({
-                    $project: aggregateHelper.getProjection({
-                        lastDate: {
-                            $ifNull: [
-                                '$editedBy.date',
-                                '$createdBy.date'
-                            ]
-                        }
-                    })
-                });
-
-                pipeLine.push({
-                    $sort: sort
-                });
-
-                pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-                pipeLine.push({
-                    $skip: skip
-                });
-
-                pipeLine.push({
-                    $limit: limit
-                });
-
-                pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
-
-                aggregation = QuestionnariesModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse: true
-                };
-
-                aggregation.exec(function (err, response) {
-                    if (err) {
-                        return waterFallCb(err);
+        if (result.length) {
+            result[0].data = result[0].data
+                .filter((item) => (item))
+                .map((model) => {
+                    if (model.title) {
+                        model.title = {
+                            en: _.unescape(model.title.en),
+                            ar: _.unescape(model.title.ar)
+                        };
                     }
 
-                    if (response.length) {
-                        response[0].data = _.map(response[0].data, function (model) {
-                            if (model) {
-                                if (model.title) {
-                                    model.title = {
-                                        en: _.unescape(model.title.en),
-                                        ar: _.unescape(model.title.ar)
+                    if (model.questions && model.questions.length) {
+                        model.questions = model.questions
+                            .filter((item) => (item))
+                            .map((question) => {
+                                if (question.title) {
+                                    question.title = {
+                                        en: _.unescape(question.title.en),
+                                        ar: _.unescape(question.title.ar)
                                     };
                                 }
 
-                                if (model.questions && model.questions.length) {
-                                    model.questions = _.map(model.questions, function (question) {
-                                        if (question.title) {
-                                            question.title = {
-                                                en: _.unescape(question.title.en),
-                                                ar: _.unescape(question.title.ar)
+                                if (question.options && question.options.length) {
+                                    question.options = question.options
+                                        .filter((item) => (item))
+                                        .map((option) => {
+                                            return {
+                                                en: _.unescape(option.en),
+                                                ar: _.unescape(option.ar)
                                             };
-                                        }
-                                        if (question.options && question.options.length) {
-                                            question.options = _.map(question.options, function (option) {
-                                                if (option) {
-                                                    return {
-                                                        en: _.unescape(option.en),
-                                                        ar: _.unescape(option.ar)
-                                                    };
-                                                }
-                                            });
-                                        }
-                                        return question;
-                                    });
+                                        });
                                 }
-                            }
 
-                            return model;
+                                return question;
+                            });
+                    }
+
+                    return model;
+                });
+        }
+
+        const body = result && result[0] ?
+            result[0] : { data: [], total: 0 };
+
+        if (accessRoleLevel !== 1) {
+            body.data = body.data.filter((question) => {
+                const personnelArray = question.personnels.fromObjectID();
+                const isEnoughMembers = question.personnels && personnelArray.length;
+                const isMember = personnelArray.indexOf(personnel.id) !== -1;
+                const isCreator = question.createdBy.user._id.toString() === personnel.id;
+
+                return isCreator || (isEnoughMembers && isMember);
+            });
+
+            body.total = body.data.length;
+        }
+
+        cb(null, body);
+    };
+
+    this.getAllForSync = function (req, res, next) {
+        function queryRun(personnel, callback) {
+            const query = req.query;
+            const page = query.page || 1;
+            const isMobile = req.isMobile;
+            const accessRoleLevel = req.session.level;
+            const lastLogOut = new Date(query.lastLogOut);
+            const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
+            const skip = (page - 1) * limit;
+            const filterMapper = new FilterMapper();
+            const queryFilter = query.filter || {};
+
+            const sort = query.sort || {
+                lastDate: -1
+            };
+
+            delete queryFilter.globalSearch;
+
+            const queryObject = filterMapper.mapFilter({
+                contentType: CONTENT_TYPES.QUESTIONNARIES,
+                filter: queryFilter
+            });
+
+            for (let key in sort) {
+                sort[key] = parseInt(sort[key], 10);
+            }
+
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+
+            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
+
+            queryObject.$or = [{
+                'createdBy.user': personnel._id
+            }, {
+                'createdBy.user': {
+                    $ne: personnel._id
+                },
+                status: {
+                    $eq: 'active'
+                }
+            }];
+
+            const pipeline = [];
+
+            pipeline.push({
+                $match: queryObject
+            });
+
+            async.waterfall([
+
+                (cb) => {
+                    if (isMobile) {
+                        pipeline.push({
+                            $project: aggregateHelper.getProjection({
+                                creationDate: '$createdBy.date',
+                                updateDate: '$editedBy.date'
+                            })
                         });
                     }
 
-                    waterFallCb(null, response);
-                });
-            }
-
-            waterFallTasks.push(endOfWaterFall);
-
-            async.waterfall(waterFallTasks, function (err, result) {
-                if (err) {
-                    return next(err);
-                }
-
-                result = result && result[0] ? result[0] : {data: [], total: 0};
-
-                if (req.session.level !== 1) {
-                    result.data = _.filter(result.data, function (question) {
-                        var personnelArray = question.personnels.fromObjectID();
-                        return !question.personnels || !personnelArray.length || personnelArray.indexOf(personnel.id) !== -1;
+                    pipeline.push({
+                        $project: aggregateHelper.getProjection({
+                            lastDate: {
+                                $ifNull: [
+                                    '$editedBy.date',
+                                    '$createdBy.date'
+                                ]
+                            }
+                        })
                     });
+
+                    pipeline.push({
+                        $sort: sort
+                    });
+
+                    pipeline.push(...aggregateHelper.setTotal());
+
+                    pipeline.push({
+                        $skip: skip
+                    });
+
+                    pipeline.push({
+                        $limit: limit
+                    });
+
+                    pipeline.push(...aggregateHelper.groupForUi());
+
+                    const aggregation = QuestionnaryModel.aggregate(pipeline);
+
+                    aggregation.options = {
+                        allowDiskUse: true
+                    };
+
+                    aggregation.exec(cb);
+                },
+
+                (result, cb) => {
+                    filterRetrievedResultOnGetAll({
+                        personnel,
+                        accessRoleLevel,
+                        result
+                    }, cb);
                 }
 
-                // res.status(200).send(result);
-
-                next({status: 200, body: result});
-            });
+            ], callback);
         }
 
-        access.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed, personnel) {
+        async.waterfall([
+
+            async.apply(access.getReadAccess, req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE),
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
+            }
+
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun(personnel);
+            return next({
+                status: 200,
+                body
+            });
         });
 
     };
@@ -287,6 +259,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             const isMobile = req.isMobile;
             const query = req.query;
             const page = query.page || 1;
+            const accessRoleLevel = req.session.level;
             const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
             const skip = (page - 1) * limit;
             const filterMapper = new FilterMapper();
@@ -490,7 +463,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                         sort
                     }));
 
-                    const aggregation = QuestionnariesModel.aggregate(pipeline);
+                    const aggregation = QuestionnaryModel.aggregate(pipeline);
 
                     aggregation.options = {
                         allowDiskUse: true
@@ -500,64 +473,11 @@ var QuestionnaryHandler = function (db, redis, event) {
                 },
 
                 (result, cb) => {
-                    if (result.length) {
-                        result[0].data = result[0].data
-                            .filter((item) => (item))
-                            .map((model) => {
-                                if (model.title) {
-                                    model.title = {
-                                        en: _.unescape(model.title.en),
-                                        ar: _.unescape(model.title.ar)
-                                    };
-                                }
-
-                                if (model.questions && model.questions.length) {
-                                    model.questions = model.questions
-                                        .filter((item) => (item))
-                                        .map((question) => {
-                                            if (question.title) {
-                                                question.title = {
-                                                    en: _.unescape(question.title.en),
-                                                    ar: _.unescape(question.title.ar)
-                                                };
-                                            }
-
-                                            if (question.options && question.options.length) {
-                                                question.options = question.options
-                                                    .filter((item) => (item))
-                                                    .map((option) => {
-                                                        return {
-                                                            en: _.unescape(option.en),
-                                                            ar: _.unescape(option.ar)
-                                                        };
-                                                    });
-                                            }
-
-                                            return question;
-                                        });
-                                }
-
-                                return model;
-                            });
-                    }
-
-                    const body = result && result[0] ?
-                        result[0] : { data: [], total: 0 };
-
-                    if (req.session.level !== 1) {
-                        body.data = body.data.filter((question) => {
-                            const personnelArray = question.personnels.fromObjectID();
-                            const isEnoughMembers = question.personnels && personnelArray.length;
-                            const isMember = personnelArray.indexOf(personnel.id) !== -1;
-                            const isCreator = question.createdBy.user._id.toString() === personnel.id;
-
-                            return isEnoughMembers && (isMember || isCreator);
-                        });
-
-                        body.total = body.data.length;
-                    }
-
-                    cb(null, body);
+                    filterRetrievedResultOnGetAll({
+                        personnel,
+                        accessRoleLevel,
+                        result
+                    }, cb);
                 }
 
             ], callback);
@@ -775,7 +695,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                         body.status = 'active';
                     }
 
-                    QuestionnariesModel.create(body, function (err, result) {
+                    QuestionnaryModel.create(body, function (err, result) {
                         if (err) {
                             return waterfallCb(err);
                         }
@@ -963,7 +883,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                     };
                     body.status = body.send ? 'active' : 'draft';
 
-                    QuestionnariesModel.findByIdAndUpdate(id, fullUpdate, {new: true}, function (err, result) {
+                    QuestionnaryModel.findByIdAndUpdate(id, fullUpdate, {new: true}, function (err, result) {
                         if (err) {
                             return waterfallCb(err);
                         }
@@ -1093,7 +1013,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                 key : 'branch'
             }));
 
-            aggregation = QuestionnariesAnswerModel.aggregate(pipeLine);
+            aggregation = QuestionnaryAnswerModel.aggregate(pipeLine);
 
             aggregation.options = {
                 allowDiskUse: true
@@ -1200,7 +1120,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                                     personnelId   : personnelId,
                                     questionnaryId: newAnswer.questionnaryId
                                 };
-                                QuestionnariesAnswerModel.findOne(query, function (err, result) {
+                                QuestionnaryAnswerModel.findOne(query, function (err, result) {
                                     if (err) {
                                         return waterfallCb(err);
                                     }
@@ -1217,7 +1137,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                                     questionId    : newAnswer.questionId,
                                     branch        : newAnswer.branch
                                 };
-                                QuestionnariesAnswerModel.findOne(query, function (err, result) {
+                                QuestionnaryAnswerModel.findOne(query, function (err, result) {
                                     if (err) {
                                         return waterfallCb(err);
                                     }
@@ -1235,7 +1155,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                                 if (questionAnswerIdToUpdate) {
                                     newAnswer.editedBy = createdBy;
 
-                                    QuestionnariesAnswerModel.update({_id: questionAnswerIdToUpdate}, {$set: newAnswer}, function (err) {
+                                    QuestionnaryAnswerModel.update({_id: questionAnswerIdToUpdate}, {$set: newAnswer}, function (err) {
                                         if (err) {
                                             return waterfallCb(err);
                                         }
@@ -1246,7 +1166,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                                     newAnswer.createdBy = createdBy;
                                     newAnswer.editedBy = createdBy;
 
-                                    QuestionnariesAnswerModel.create(newAnswer, function (err) {
+                                    QuestionnaryAnswerModel.create(newAnswer, function (err) {
                                         if (err) {
                                             return waterfallCb(err);
                                         }
@@ -1268,7 +1188,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                     });
                 },
                 function (waterfallCB) {
-                    QuestionnariesModel.findById(body.questionnaryId, function (err, questionnary) {
+                    QuestionnaryModel.findById(body.questionnaryId, function (err, questionnary) {
                         var error;
 
                         if (err) {
@@ -1300,7 +1220,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                         user: personnelId,
                         date: new Date()
                     };
-                    QuestionnariesModel.findByIdAndUpdate(body.questionnaryId, updater, function (err) {
+                    QuestionnaryModel.findByIdAndUpdate(body.questionnaryId, updater, function (err) {
                         if (err) {
                             return waterfallCB(err);
                         }
@@ -1421,7 +1341,7 @@ var QuestionnaryHandler = function (db, redis, event) {
             })
         });
 
-        aggregation = QuestionnariesModel.aggregate(pipeLine);
+        aggregation = QuestionnaryModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true
