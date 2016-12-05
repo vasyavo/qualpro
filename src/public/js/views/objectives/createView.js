@@ -17,7 +17,7 @@ define([
     'collections/file/collection',
     'models/file',
     'helpers/implementShowHideArabicInputIn',
-    'views/visibilityForm/editView',
+    'views/objectives/visibilityForm/editView',
     'constants/otherConstants',
     'moment',
     'async',
@@ -120,6 +120,7 @@ define([
 
             this.linkedForm = null;
             this.branchesForVisibility = [];
+            this.outletsForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
             $el.find('#formThumbnail').html('');
@@ -143,19 +144,21 @@ define([
             }
 
             description = {
-                en: this.$el.find('.objectivesTextarea[data-property="en"]').val(),
-                ar: this.$el.find('.objectivesTextarea[data-property="ar"]').val()
+                en: CKEDITOR.instances.editor1.document.getBody().getText(),
+                ar: CKEDITOR.instances.editor2.document.getBody().getText()
             };
-
+debugger;
             this.visibilityForm = new VisibilityEditView({
                 forCreate           : true,
                 savedVisibilityModel: this.savedVisibilityModel,
-                branchName          : this.branchesForVisibility.join(', '),
+                outlets             : this.outletsForVisibility,
                 description         : description,
                 oldAjaxObj          : this.visibilityFormAjax,
                 translation         : self.translation
             });
+
             this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
+                debugger;
                 self.visibilityFormAjax = ajaxObj;
                 self.savedVisibilityModel = ajaxObj.model;
             });
@@ -405,9 +408,32 @@ define([
             this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
                 return item._id;
             });
-            this.branchesForVisibility = _.map(this.branchesForVisibility, function (branch) {
-                return branch.name.currentLanguage;
+
+            this.outletsForVisibility = _.filter(this.outletsForVisibility, function (outlet) {
+                return self.locations.outlet.indexOf(outlet._id) !== -1;
             });
+            this.outletsForVisibility = _.uniq(this.outletsForVisibility, false, function (item) {
+                return item._id;
+            });
+            this.outletsForVisibility = _.map(this.outletsForVisibility, function (outlet) {
+                let result = {
+                    name : outlet.name.currentLanguage,
+                    _id : outlet._id,
+                    branches : []
+                };
+
+                self.branchesForVisibility.map((branch) => {
+                    if (outlet._id === branch.outlet) {
+                        result.branches.push({
+                            name : branch.name.currentLanguage,
+                            _id : branch._id
+                        });
+                    }
+                });
+
+                return result;
+            });
+
 
             this.$el.find('#personnelLocation').html(data.location);
             this.$el.find('#personnelLocation').attr('data-location', data.location);
@@ -437,6 +463,7 @@ define([
                 var smCvMzLevels = [5, 6, 7];
 
                 self.branchesForVisibility = [];
+                self.outletsForVisibility = [];
                 self.dontShowDistributionForm = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
                 self.treeView = new TreeView({
                     ids        : personnelsIds,
@@ -448,6 +475,7 @@ define([
 
                 jsonPersonnels.forEach(function (personnel) {
                     self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                    self.outletsForVisibility = self.outletsForVisibility.concat(personnel.outlet);
                 });
 
                 if (jsonPersonnels.length && !self.linkedForm) {
