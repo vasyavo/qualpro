@@ -264,13 +264,14 @@ var RetailSegmentHandler = function (db, redis, event) {
 
     this.getById = function (req, res, next) {
         function queryRun() {
-            var id = req.params.id;
+            const id = req.params.id;
 
             RetailSegmentModel.findById(id)
                 .exec(function (err, result) {
                     if (err) {
                         return next(err);
                     }
+
                     if (result && result.name) {
                         result.name = {
                             en: result.name.en ? _.unescape(result.name.en) : '',
@@ -294,6 +295,44 @@ var RetailSegmentHandler = function (db, redis, event) {
             }
 
             queryRun();
+        });
+    };
+
+    // uses when need to get configurations from provided retailSegments id
+    this.getConfigurations = function (req, res, next) {
+        const arrayOfRetailSegmentsId = req.query.arrayOfId.split(',');
+        const configs = [];
+
+        async.each(arrayOfRetailSegmentsId, (id, callback) => {
+            RetailSegmentModel.findById(id)
+                .exec(function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    async.each(result.configurations, (config, cb) => {
+                        configs.push({
+                            _id : config._id,
+                            configuration : config.configuration
+                        });
+
+                        cb(null);
+                    }, (err) => {
+                        if (err) {
+                            return callback(err);
+                        }
+                    });
+
+                    callback(null);
+                });
+        }, (err) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send({
+                configurations : configs
+            });
         });
     };
 

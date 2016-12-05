@@ -1,3 +1,6 @@
+const BsonObjectId = require('bson-objectid');
+const RetailSegmentModel = require('./../types/retailSegment/model');
+
 var planogramsHandler = function(db, redis, event) {
     var async = require('async');
     var mongoose = require('mongoose');
@@ -34,100 +37,132 @@ var planogramsHandler = function(db, redis, event) {
     };
 
     this.create = function(req, res, next) {
-        function queryRun(body) {
-            var files = req.files ? req.files : null;
-            var session = req.session;
-            var userId = session.uId;
-            var model;
-            for (var key in body) {
-                body[key] = ObjectId(body[key]);
-            }
+        function queryRun(body, callback) {
+            const files = req.files ? req.files : null;
+            const session = req.session;
+            const userId = session.uId;
+            const configurationId = body.configuration;
 
             async.waterfall([
-                function(callback) {
-                    if (!files) {
-                        return callback(null, []);
+
+                // retrieve retail segment which has configuration name by provided configuration id
+                (cb) => {
+                    RetailSegmentModel.findOne({ 'configurations._id': configurationId }, 'configurations', cb)
+                },
+
+                // pick configuraiton name from result set and upload attached picture
+                function(retailSegment, cb) {
+                    const configurationName = retailSegment.configurations.filter((item) => {
+                        return `${item._id}` === configurationId;
+                    }).map((item) => {
+                        return item.configuration;
+                    }).pop();
+
+                    if (!configurationName) {
+                        return cb('No such configuration found.');
                     }
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, function(err, fileId) {
+
+                    if (!files) {
+                        return cb(null, []);
+                    }
+
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, (err, fileId) => {
                         if (err) {
-                            return callback(err);
+                            return cb(err);
                         }
-                        callback(null, fileId[0]);
+                        cb(null, {
+                            fileId: fileId.pop(),
+                            configurationName
+                        });
                     });
                 },
-                function(fileId, callback) {
-                    var createdBy = {
+                function(options, cb) {
+                    const configurationName = options.configurationName;
+                    const fileId = options.fileId;
+                    const createdBy = {
                         user : ObjectId(userId),
                         date : new Date()
                     };
 
-                    body.fileID = fileId;
-                    body.createdBy = createdBy;
-                    body.editedBy = createdBy;
+                    const dataToSave = Object.assign({}, body, {
+                        fileID: fileId,
+                        configuration: {
+                            _id : configurationId,
+                            name : configurationName
+                        },
+                        createdBy,
+                        editedBy: createdBy
+                    });
 
-                    model = new PlanogramModel(body);
-                    model.save(function(err, result) {
-                        if (err) {
-                            callback(err);
+                    const model = new PlanogramModel();
+
+                    model.set(dataToSave);
+
+                    model.save((err, model, numAffected) => {
+                        // tip: do not remove numAffected
+                        if  (err) {
+                            return cb(err);
                         }
 
-                        callback(null, result);
+                        cb(null, model);
                     });
                 },
-                function(planogramModel, callback) {
+                function(planogramModel, cb) {
                     var id = planogramModel.get('_id');
 
                     self.getByIdAggr({
                         id : id,
                         isMobile : req.isMobile
-                    }, callback);
+                    }, cb);
                 }
 
-            ], function(err, result) {
-                if (err) {
-                    return next(err);
-                }
-
-                event.emit('activityChange', {
-                    module : ACL_MODULES.PLANOGRAM,
-                    actionType : ACTIVITY_TYPES.CREATED,
-                    createdBy : result.createdBy,
-                    itemId : result._id,
-                    itemType : CONTENT_TYPES.PLANOGRAM
-                });
-
-                res.status(201).send(result);
-            });
+            ], callback);
         }
 
-        access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
-            var body = req.body;
+        async.waterfall([
+
+            async.apply(access.getWriteAccess, req, ACL_MODULES.PLANOGRAM),
+
+            (allowed, entity, cb) => {
+                let body = req.body;
+
+                try {
+                    if (req.body.data) {
+                        body = JSON.parse(req.body.data);
+                    } else {
+                        body = req.body;
+                    }
+                } catch (err) {
+                    return cb(err);
+                }
+
+                cb(null, body);
+            },
+
+            (body, cb) => {
+                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', (err, saveData) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    queryRun(saveData, cb);
+                });
+            }
+
+        ], function(err, result) {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', function(err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
+            event.emit('activityChange', {
+                module : ACL_MODULES.PLANOGRAM,
+                actionType : ACTIVITY_TYPES.CREATED,
+                createdBy : result.createdBy,
+                itemId : result._id,
+                itemType : CONTENT_TYPES.PLANOGRAM
             });
+
+            res.status(201).send(result);
         });
     };
 
@@ -777,10 +812,6 @@ var planogramsHandler = function(db, redis, event) {
             var userId = req.session.uId;
             var id = req.params.id;
 
-            for (var key in body) {
-                body[key] = ObjectId(body[key]);
-            }
-
             body.editedBy = {
                 user : ObjectId(userId),
                 date : new Date()
@@ -837,17 +868,10 @@ var planogramsHandler = function(db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function(err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function(err) {
             var body = req.body;
 
             if (err) {
-                return next(err);
-            }
-
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
