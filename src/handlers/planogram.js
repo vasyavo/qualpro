@@ -86,7 +86,10 @@ var planogramsHandler = function(db, redis, event) {
 
                     const dataToSave = Object.assign({}, body, {
                         fileID: fileId,
-                        configuration: configurationName,
+                        configuration: {
+                            _id : configurationId,
+                            name : configurationName
+                        },
                         createdBy,
                         editedBy: createdBy
                     });
@@ -809,10 +812,6 @@ var planogramsHandler = function(db, redis, event) {
             var userId = req.session.uId;
             var id = req.params.id;
 
-            for (var key in body) {
-                body[key] = ObjectId(body[key]);
-            }
-
             body.editedBy = {
                 user : ObjectId(userId),
                 date : new Date()
@@ -869,17 +868,10 @@ var planogramsHandler = function(db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function(err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function(err) {
             var body = req.body;
 
             if (err) {
-                return next(err);
-            }
-
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 

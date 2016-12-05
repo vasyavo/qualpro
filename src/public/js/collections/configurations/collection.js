@@ -23,7 +23,6 @@ define([
             },
 
             parse: function (response) {
-                debugger;
                 return response.configurations.map((item) => {
                     return {
                         _id : item._id,
