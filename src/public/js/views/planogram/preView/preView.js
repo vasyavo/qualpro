@@ -69,6 +69,10 @@ define([
 
         render: function () {
             var modelJSON = this.model.toJSON();
+debugger;
+            modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
+                return item.name.currentLanguage;
+            }).join(', ');
 
             this.$el.html(this.template({
                 translation : this.translation,
