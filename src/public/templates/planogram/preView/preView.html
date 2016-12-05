@@ -16,7 +16,7 @@
                     <% if(!activityList){%>
                     <% if([3,4].indexOf(App.currentUser.accessRole.level) === -1 ){ %>
                     <button id="editPlanogram" type="button" class="readonlyVisible greyBtn" role="button">
-                        <%= translation.editBtn%>
+                        <%= translation.editBtn %>
                     </button>
                     <% }%>
                     <% }else{%>
@@ -63,7 +63,7 @@
                             </label>
                         </div>
                         <div class="cell">
-                            <span id="configuration" class="textEllipsis hoverFullText descriptionViewContent"><%= model.configuration ? model.configuration : '' %></span>
+                            <span id="configuration" class="textEllipsis hoverFullText descriptionViewContent"><%= model.configuration ? model.configuration.name : '' %></span>
                         </div>
                     </div>
                 </div>
