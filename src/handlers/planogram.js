@@ -91,9 +91,18 @@ var planogramsHandler = function(db, redis, event) {
                         editedBy: createdBy
                     });
 
-                    const model = new PlanogramModel(dataToSave);
+                    const model = new PlanogramModel();
 
-                    model.save(cb);
+                    model.set(dataToSave);
+
+                    model.save((err, model, numAffected) => {
+                        // tip: do not remove numAffected
+                        if  (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model);
+                    });
                 },
                 function(planogramModel, cb) {
                     var id = planogramModel.get('_id');
