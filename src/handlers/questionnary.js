@@ -115,7 +115,8 @@ const QuestionnaryHandler = function (db, redis, event) {
                 const personnelArray = question.personnels.fromObjectID();
                 const isEnoughMembers = question.personnels && personnelArray.length;
                 const isMember = personnelArray.indexOf(personnel.id) !== -1;
-                const isCreator = question.createdBy.user._id.toString() === personnel.id;
+                const creator = question.createdBy.user;
+                const isCreator = creator && creator._id.toString() === personnel.id;
 
                 return isCreator || (isEnoughMembers && isMember);
             });
