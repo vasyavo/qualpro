@@ -122,7 +122,7 @@ define([
 
         selectItem: function (data) {
             var itemName = data.contentType;
-            var itemId = data.model._id;
+            var itemId = (data.model) ? data.model._id : null;
 
             if (itemName === 'country') {
 
@@ -145,8 +145,11 @@ define([
                 });
 
             } else if (itemName === 'retailSegment') {
+                debugger;
 
-                this.selectedRetailSegmentId = itemId;
+                const arrayOfSelectedRetailSegmentsId = data.selectedValuesIds || [];
+
+                this.selectedRetailSegmentId = arrayOfSelectedRetailSegmentsId;
 
                 this.$el.find('#productSelect input').val('');
                 this.$el.find('#configurationSelect input').val('');
@@ -154,21 +157,21 @@ define([
                 this.itemsPricesCollection.fetch({
                     data: {
                         countryId    : this.selectedCountryId,
-                        retailSegment: itemId,
-                        forDd        : true
+                        retailSegment: arrayOfSelectedRetailSegmentsId,
+                        forDd        : true,
+                        multi        : true
                     },
 
                     reset: true
                 });
 
-                this.configurationsCollection.fetchFromRetailSegmentId(itemId);
+                this.configurationsCollection.fetchFromRetailSegmentId(arrayOfSelectedRetailSegmentsId);
 
             } else if (itemName === 'product') {
                 this.selectedProductId = itemId;
             } else if (itemName === 'configuration') {
                 debugger;
-                const configName = (data.model && data.model.name) ? data.model.name : '';
-                this.selectedConfigurationId = configName | itemId;
+                this.selectedConfigurationId = itemId;
             }
         },
 
@@ -192,7 +195,10 @@ define([
                 translation : this.translation,
                 dropDownList: this.retailSegmentCollection,
                 displayText : this.translation.retailSegment,
-                contentType : CONTENT_TYPES.RETAILSEGMENT
+                contentType : CONTENT_TYPES.RETAILSEGMENT,
+                multiSelect : true,
+                noSingleSelectEvent : true,
+                noAutoSelectOne : true
             });
 
             this.retailSegmentDropDownView.on('changeItem', this.selectItem, this);

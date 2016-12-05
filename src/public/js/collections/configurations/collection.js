@@ -10,7 +10,7 @@ define([
             contentType: null,
 
             url: function () {
-                return '/retailSegment/' + this.retailSegmentId;
+                return `/retailSegment/forConfigs?arrayOfId=${this.retailSegmentId}`;
             },
 
             initialize: function () {
@@ -23,7 +23,8 @@ define([
             },
 
             parse: function (response) {
-                return _.map(response.configurations, function (item) {
+                debugger;
+                return response.configurations.map((item) => {
                     return {
                         _id : item._id,
                         name: item.configuration

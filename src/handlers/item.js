@@ -883,7 +883,20 @@ var Item = function (db, event) {
     this.getForDd = function (queryObject, query, res, next) {
         queryObject = {};
         queryObject.country = objectId(query.countryId);
-        queryObject.retailSegment = objectId(query.retailSegment);
+
+        if (query.multi) {
+            let arrayOfRetailSegmentsId;
+
+            arrayOfRetailSegmentsId = query.retailSegment.map((item) => {
+                return objectId(item);
+            });
+
+            queryObject.retailSegment = {
+                $in : arrayOfRetailSegmentsId
+            };
+        } else {
+            queryObject.retailSegment = objectId(query.retailSegment);
+        }
 
         ItemModel
             .find({

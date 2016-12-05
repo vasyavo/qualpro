@@ -43,7 +43,7 @@
                             </label>
                         </div>
                         <div class="cell">
-                            <span id="retailSegment" class="textEllipsis hoverFullText descriptionViewContent"><%= model.retailSegment ? model.retailSegment.name.currentLanguage : '' %></span>
+                            <span id="retailSegment" class="textEllipsis hoverFullText descriptionViewContent"><%= model.retailSegmentString ? model.retailSegmentString : model.retailSegment[0].name.currentLanguage || '' %></span>
                         </div>
                     </div>
                     <div class="row">
@@ -63,7 +63,7 @@
                             </label>
                         </div>
                         <div class="cell">
-                            <span id="configuration" class="textEllipsis hoverFullText descriptionViewContent"><%= model.configuration ? model.configuration.name : '' %></span>
+                            <span id="configuration" class="textEllipsis hoverFullText descriptionViewContent"><%= model.configuration ? model.configuration : '' %></span>
                         </div>
                     </div>
                 </div>
