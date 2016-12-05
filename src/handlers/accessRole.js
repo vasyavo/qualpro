@@ -1,15 +1,18 @@
 var AccessRole = function (db) {
     var CONSTANTS = require('../constants/mainConstants');
+    var ACL_ROLES = require('../constants/aclRolesNames');
     var AccessRoleModel = require('./../types/accessRole/model');
 
     this.getForDD = function (req, res, next) {
         var query = req.query;
         var level = req.session.level;
 
-        query.level = {$gt: 0};
+        query.level = {$gt: ACL_ROLES.SUPER_ADMIN};
 
         if (level !== 1) {
-            query.level = level < 8 ? {$gt: level, $lt: 8} : {$gt: 2, $lt: 8};
+            query.level = level < ACL_ROLES.MASTER_UPLOADER
+                ? {$gt: level, $lt: ACL_ROLES.MASTER_UPLOADER}
+                : {$gt: ACL_ROLES.COUNTRY_ADMIN, $lt: ACL_ROLES.MASTER_UPLOADER};
         }
 
         AccessRoleModel.find(query, '_id name level')

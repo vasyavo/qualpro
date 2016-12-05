@@ -1,8 +1,9 @@
 'use strict';
-var VisibilityForm = function (db, redis, event) {
+var VisibilityForm = function(db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('underscore');
+    var lo = require('lodash');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var VALIDATION = require('../public/js/constants/validation.js');
     var CONSTANTS = require('../constants/mainConstants');
@@ -16,57 +17,58 @@ var VisibilityForm = function (db, redis, event) {
     var validator = require('validator');
     var fileHandler = new FileHandler(db);
     var bodyValidator = require('../helpers/bodyValidator');
+    const joiValidate = require('../helpers/joiValidate');
     var self = this;
     var $defProjection = {
-        _id        : 1,
-        createdBy  : 1,
-        editedBy   : 1,
-        objective  : 1,
-        before     : 1,
-        files      : 1,
-        after      : 1,
-        description: 1
+        _id : 1,
+        createdBy : 1,
+        editedBy : 1,
+        objective : 1,
+        before : 1,
+        files : 1,
+        after : 1,
+        description : 1
     };
 
-    this.createForm = function (userId, body, files, callback) {
+    this.createForm = function(userId, body, files, callback) {
         var createdBy = {
-            user: userId,
-            date: new Date()
+            user : userId,
+            date : new Date()
         };
         var model;
         var before;
         var visibilityForm;
 
         async.waterfall([
-            function (cb) {
+            function(cb) {
                 if (!files) {
                     return cb(null, []);
                 }
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.VISIBILITYFORM, function (err, filesIds) {
+                fileHandler.uploadFile(userId, files, CONTENT_TYPES.VISIBILITYFORM, function(err, filesIds) {
                     if (err) {
                         return cb(err);
                     }
                     cb(null, filesIds);
                 });
             },
-            function (filesIds, cb) {
+            function(filesIds, cb) {
 
                 if (!body) {
                     return cb(Error('Request body is empty'));
                 }
                 before = {
-                    files: filesIds
+                    files : filesIds
                 };
 
                 visibilityForm = {
-                    objective: body.objective,
-                    createdBy: createdBy,
+                    objective : body.objective,
+                    createdBy : createdBy,
                     editedBy : createdBy,
-                    before   : before
+                    before : before
                 };
 
                 model = new VisibilityFormModel(visibilityForm);
-                model.save(function (err, model) {
+                model.save(function(err, model) {
                     if (err) {
                         return cb(err);
                     }
@@ -74,7 +76,7 @@ var VisibilityForm = function (db, redis, event) {
                     cb(null, model);
                 });
             }
-        ], function (err, result) {
+        ], function(err, result) {
             if (err) {
                 return callback(err);
             }
@@ -83,29 +85,29 @@ var VisibilityForm = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
+    this.create = function(req, res, next) {
         function queryRun(body) {
             var files = req.files;
             var userId = req.session.uId;
 
-            self.createForm(userId, body, files, function (err, result) {
+            self.createForm(userId, body, files, function(err, result) {
                 if (err) {
                     return next(err);
                 }
 
                 event.emit('activityChange', {
-                    module    : ACL_MODULES.OBJECTIVE,
-                    actionType: ACTIVITY_TYPES.CREATED,
+                    module : ACL_MODULES.OBJECTIVE,
+                    actionType : ACTIVITY_TYPES.CREATED,
                     createdBy : result.get('createdBy'),
-                    itemId    : result._id,
-                    itemType  : CONTENT_TYPES.VISIBILITYFORM
+                    itemId : result._id,
+                    itemType : CONTENT_TYPES.VISIBILITYFORM
                 });
 
                 if (req.isMobile) {
                     VisibilityFormModel.populate(result, {
-                        path  : 'createdBy.user',
-                        select: '_id, firstName, lastName'
-                    }, function (err, result) {
+                        path : 'createdBy.user',
+                        select : '_id, firstName, lastName'
+                    }, function(err, result) {
                         if (err) {
                             return next(err);
                         }
@@ -116,28 +118,188 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body = req.body;
+        var body = req.body;
 
+        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'create', function(err, saveData) {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
+            queryRun(saveData);
+        });
+
+
+    };
+
+    function processFiles(body, applyToAll, callback) {
+        const filesBefore = lo.get(body, 'before.files');
+        const filesAfter = lo.get(body, 'after.files');
+        const userId = lo.get(body, 'updatedBy.user') || lo.get(body, 'createdBy.user');
+
+        function bulkUpload(files, callback) {
+            async.map(files, function(file, cb) {
+                if (!file.file) {
+                    return cb();
+                }
+                fileHandler.uploadFileFromBase64(userId, file.file, CONTENT_TYPES.VISIBILITYFORM, function(err, filesId) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    file.file = filesId;
+                    cb();
+                });
+            }, function(err) {
+                if (err) {
+                    return callback(err);
+                }
+                callback();
+            })
+        }
+        function uploadOne(file, path, callback) {
+            fileHandler.uploadFileFromBase64(userId, file.file, CONTENT_TYPES.VISIBILITYFORM, function(err, fileId) {
+                if (err) {
+                    return callback(err);
+                }
+                let pathValue = lo.get(body, path);
+
+                pathValue = lo.map(lo.get(body, path), o => {
+                    o.file = fileId;
+                    o.branch = o.branch;
+
+                    return o;
+                });
+
+                return callback();
+            });
+        }
+        if (applyToAll) {
+            const baseBefore = lo.find(filesBefore, o => !lo.isEmpty(o.file));
+            const baseAfter = lo.find(filesAfter, o => !lo.isEmpty(o.file));
+            const tasks = [];
+
+            if (baseBefore) {
+                tasks.push(async.apply(uploadOne, baseBefore, 'before.files'))
+            }
+            if (baseAfter) {
+                tasks.push(async.apply(uploadOne, baseAfter, 'after.files'))
+            }
+            async.parallel(tasks, function(err) {
+                if (err) {
+                    return callback(err);
+                }
+                callback(null, body);
+            })
+        } else {
+            async.parallel([
+                async.apply(bulkUpload, filesBefore),
+                async.apply(bulkUpload, filesAfter)
+            ], function(err) {
+                if (err) {
+                    return callback(err);
+                }
+                callback(null, body);
+            });
+        }
+    }
+
+    this.bulkCreate = function(req, res, next) {
+        const applyToAll = req.query.applyToAll;
+        const body = req.body;
+        const userId = req.session.uId;
+        let error;
+
+        function queryRun(body) {
+            function saveFormToDB(form, cb) {
+                new VisibilityFormModel(form).save(cb)
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'create', function (err, saveData) {
+            async.waterfall([
+                async.apply(processFiles, body, applyToAll),
+                saveFormToDB
+            ], function(err, result) {
                 if (err) {
                     return next(err);
                 }
 
-                queryRun(saveData);
-            });
-        });
+                event.emit('activityChange', {
+                    module : ACL_MODULES.OBJECTIVE,
+                    actionType : ACTIVITY_TYPES.CREATED,
+                    createdBy : result.get('createdBy'),
+                    itemId : result._id,
+                    itemType : CONTENT_TYPES.VISIBILITYFORM
+                });
 
+                res.send(201, result)
+            });
+        }
+
+        body.createdBy = {
+            user : userId
+        };
+        joiValidate(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'create', function(err, saveData) {
+            if (err) {
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
+            }
+
+
+            queryRun(saveData);
+        });
+    };
+
+    this.newUpdate = function(req, res, next) {
+        const applyToAll = req.query.applyToAll;
+        const id = req.params.id;
+        const body = req.body;
+        const userId = req.session.uId;
+        let error;
+
+        function queryRun(body) {
+            function saveFormToDB(form, cb) {
+                VisibilityFormModel.findByIdAndUpdate({_id : id}, {$set : form}, cb);
+            }
+
+            async.waterfall([
+                async.apply(processFiles, body, applyToAll),
+                saveFormToDB
+            ], function(err, result) {
+                if (err) {
+                    return next(err);
+                }
+
+                // event.emit('activityChange', {
+                //     module : module,
+                //     actionType : ACTIVITY_TYPES.UPDATED,
+                //     createdBy : result.editedBy,
+                //     itemId : result.objective._id,
+                //     itemType : result.objective.context,
+                //     itemDetails : CONTENT_TYPES.VISIBILITYFORM
+                // });
+
+                res.send(201, result)
+            });
+        }
+
+        body.updatedBy = {
+            user : userId
+        };
+        joiValidate(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function(err, saveData) {
+            if (err) {
+                error = new Error();
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
+            }
+
+
+            queryRun(saveData);
+        });
     };
 
     function getAllAggregate(options, callback) {
@@ -150,53 +312,53 @@ var VisibilityForm = function (db, redis, event) {
         var aggregation;
 
         var $lookup2 = {
-            from        : 'files',
-            localField  : 'before.files',
-            foreignField: '_id',
-            as          : 'before.files'
+            from : 'files',
+            localField : 'before.files',
+            foreignField : '_id',
+            as : 'before.files'
         };
         var $lookup3 = {
-            from        : 'files',
-            localField  : 'after.files',
-            foreignField: '_id',
-            as          : 'after.files'
+            from : 'files',
+            localField : 'after.files',
+            foreignField : '_id',
+            as : 'after.files'
         };
 
         pipeline.push({
-            $match: queryObject
+            $match : queryObject
         });
 
         pipeline.push({
-            $project: {
-                _id      : 1,
-                objective: 1,
+            $project : {
+                _id : 1,
+                objective : 1,
                 editedBy : 1,
-                before   : 1,
-                after    : 1,
-                createdBy: 1
+                before : 1,
+                after : 1,
+                createdBy : 1
             }
         });
 
         pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
+            from : 'accessRoles',
+            key : 'createdBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
                         position : 1,
-                        firstName: 1,
+                        firstName : 1,
                         lastName : 1
                     }
                 }
@@ -204,17 +366,17 @@ var VisibilityForm = function (db, redis, event) {
         }));
 
         pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName : 1
                     }
                 }
             }
@@ -222,25 +384,25 @@ var VisibilityForm = function (db, redis, event) {
 
         if (isMobile) {
             pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
+                from : 'personnels',
+                key : 'editedBy.user',
+                isArray : false,
+                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                includeSiblings : {editedBy : {date : 1}}
             }));
 
             pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'editedBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -248,17 +410,17 @@ var VisibilityForm = function (db, redis, event) {
             }));
 
             pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'editedBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -266,92 +428,92 @@ var VisibilityForm = function (db, redis, event) {
         }
 
         pipeline.push({
-            $unwind: {
-                path                      : '$before.files',
-                preserveNullAndEmptyArrays: true
+            $unwind : {
+                path : '$before.files',
+                preserveNullAndEmptyArrays : true
             }
         });
 
         pipeline.push({
-            $unwind: {
-                path                      : '$after.files',
-                preserveNullAndEmptyArrays: true
+            $unwind : {
+                path : '$after.files',
+                preserveNullAndEmptyArrays : true
             }
         });
 
-        pipeline.push({$lookup: $lookup2});
+        pipeline.push({$lookup : $lookup2});
 
-        pipeline.push({$lookup: $lookup3});
+        pipeline.push({$lookup : $lookup3});
 
         pipeline.push({
-            $project: {
-                _id      : 1,
-                objective: 1,
+            $project : {
+                _id : 1,
+                objective : 1,
                 editedBy : 1,
-                before   : {
-                    files      : {$arrayElemAt: ['$before.files', 0]},
-                    description: 1
+                before : {
+                    files : {$arrayElemAt : ['$before.files', 0]},
+                    description : 1
                 },
 
-                after: {
-                    files      : {$arrayElemAt: ['$after.files', 0]},
-                    description: 1
+                after : {
+                    files : {$arrayElemAt : ['$after.files', 0]},
+                    description : 1
                 },
 
-                createdBy: 1
+                createdBy : 1
             }
         });
 
         pipeline.push({
-            $project: {
-                _id      : 1,
-                objective: 1,
+            $project : {
+                _id : 1,
+                objective : 1,
                 editedBy : 1,
-                before   : {
-                    files: {
-                        _id         : '$before.files._id',
-                        fileName    : '$before.files.name',
+                before : {
+                    files : {
+                        _id : '$before.files._id',
+                        fileName : '$before.files.name',
                         contentType : '$before.files.contentType',
-                        originalName: '$before.files.originalName',
-                        extension   : '$before.files.extension'
+                        originalName : '$before.files.originalName',
+                        extension : '$before.files.extension'
                     },
 
-                    description: 1
+                    description : 1
                 },
 
-                after    : {
-                    files: {
-                        _id         : '$after.files._id',
-                        fileName    : '$after.files.name',
+                after : {
+                    files : {
+                        _id : '$after.files._id',
+                        fileName : '$after.files.name',
                         contentType : '$after.files.contentType',
-                        originalName: '$after.files.originalName',
-                        extension   : '$after.files.extension'
+                        originalName : '$after.files.originalName',
+                        extension : '$after.files.extension'
                     },
 
-                    description: 1
+                    description : 1
                 },
-                createdBy: 1
+                createdBy : 1
             }
         });
 
         if (limit && limit !== -1) {
             pipeline.push({
-                $skip: skip
+                $skip : skip
             });
 
             pipeline.push({
-                $limit: limit
+                $limit : limit
             });
         }
 
         aggregation = VisibilityFormModel.aggregate(pipeline);
 
-        aggregation.exec(function (err, result) {
+        aggregation.exec(function(err, result) {
             if (err) {
                 return callback(err);
             }
 
-            result = _.map(result, function (element) {
+            result = _.map(result, function(element) {
                 var nameBefore;
                 var urlBefore;
                 var nameAfter;
@@ -384,7 +546,7 @@ var VisibilityForm = function (db, redis, event) {
         });
     };
 
-    this.getAllForSync = function (req, res, next) {
+    this.getAllForSync = function(req, res, next) {
         function queryRun() {
             var query = req.query || {};
             var lastLogOut = new Date(query.lastLogOut);
@@ -396,7 +558,7 @@ var VisibilityForm = function (db, redis, event) {
                 ids = query._id.split(',');
                 ids = ids.objectID();
                 queryObject._id = {
-                    $in: ids
+                    $in : ids
                 };
 
             }
@@ -405,40 +567,46 @@ var VisibilityForm = function (db, redis, event) {
                 ids = query.objective.split(',');
                 ids = ids.objectID();
                 queryObject.objective = {
-                    $in: ids
+                    $in : ids
                 };
             }
 
             queryObject.$or = [{
-                'editedBy.date': {$gt: lastLogOut}
+                'editedBy.date' : {$gt : lastLogOut}
             }, {
-                $and: [{
-                    'createdBy.date': {$gt: lastLogOut}
+                $and : [{
+                    'createdBy.date' : {$gt : lastLogOut}
                 }, {
-                    'editedBy.date': {$exists: false}
+                    'editedBy.date' : {$exists : false}
                 }]
             }];
 
             getAllAggregate({
-                aggregateHelper: aggregateHelper,
-                queryObject    : queryObject
-            }, function (err, result) {
+                aggregateHelper : aggregateHelper,
+                queryObject : queryObject
+            }, function(err, result) {
                 if (err) {
                     return next(err);
                 }
 
-                result = _.map(result, function (element) {
+                result = _.map(result, function(element) {
                     if (element.after && element.after.description) {
                         element.after.description = _.unescape(element.after.description);
                     }
                     return element;
                 });
 
-                next({status: 200, body: {data: result, total: result.length}});
+                next({
+                    status : 200,
+                    body : {
+                        data : result,
+                        total : result.length
+                    }
+                });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -453,7 +621,7 @@ var VisibilityForm = function (db, redis, event) {
         });
     };
 
-    this.getAll = function (req, res, next) {
+    this.getAll = function(req, res, next) {
         function queryRun() {
             var query = req.query || {};
             var page = query.page || 1;
@@ -469,7 +637,7 @@ var VisibilityForm = function (db, redis, event) {
                 ids = query._id.split(',');
                 ids = ids.objectID();
                 queryObject._id = {
-                    $in: ids
+                    $in : ids
                 };
 
             }
@@ -478,17 +646,17 @@ var VisibilityForm = function (db, redis, event) {
                 ids = query.objective.split(',');
                 ids = ids.objectID();
                 queryObject.objective = {
-                    $in: ids
+                    $in : ids
                 };
             }
 
             async.waterfall([
-                function (waterfallCb) {
+                function(waterfallCb) {
                     if (!isMobile) {
                         return waterfallCb(null, null);
                     }
                     key = req.session.id + '.' + 'visibility';
-                    redis.cacheStore.readFromStorage(key, function (err, value) {
+                    redis.cacheStore.readFromStorage(key, function(err, value) {
                         var valueJSON;
 
                         if (err) {
@@ -504,38 +672,44 @@ var VisibilityForm = function (db, redis, event) {
 
                     });
                 },
-                function (ids, waterfallCb) {
+                function(ids, waterfallCb) {
                     if (ids && ids.length) {
                         if (queryObject._id) {
                             queryObject._id.$in = _.union(queryObject._id.$in, ids.objectID());
                         } else {
                             queryObject._id = {
-                                $in: ids.objectID()
+                                $in : ids.objectID()
                             };
                         }
                     }
                     getAllAggregate({
-                        aggregateHelper: aggregateHelper,
-                        queryObject    : queryObject,
-                        skip           : skip,
-                        limit          : limit,
-                        isMobile       : isMobile
-                    }, function (err, result) {
+                        aggregateHelper : aggregateHelper,
+                        queryObject : queryObject,
+                        skip : skip,
+                        limit : limit,
+                        isMobile : isMobile
+                    }, function(err, result) {
                         if (err) {
                             return waterfallCb(err);
                         }
 
-                        result = _.map(result, function (element) {
+                        result = _.map(result, function(element) {
                             if (element.after && element.after.description) {
                                 element.after.description = _.unescape(element.after.description);
                             }
                             return element;
                         });
 
-                        waterfallCb(null, {status: 200, body: {data: result, total: result.length}});
+                        waterfallCb(null, {
+                            status : 200,
+                            body : {
+                                data : result,
+                                total : result.length
+                            }
+                        });
                     });
                 }
-            ], function (err, result) {
+            ], function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -543,22 +717,10 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            queryRun();
-        });
+        queryRun();
     };
 
-    this.update = function (req, res, next) {
+    this.update = function(req, res, next) {
         function queryRun(body) {
             var id = req.params.id;
             var userId = req.session.uId;
@@ -567,8 +729,8 @@ var VisibilityForm = function (db, redis, event) {
             var fileDeleted = body && body.isNewFile && !body.isNewFile.length;
             var aggregateHelper = new AggregationHelper($defProjection);
             var editedBy = {
-                user: objectId(userId),
-                date: new Date()
+                user : objectId(userId),
+                date : new Date()
             };
             var visibilityForm = {};
             var waterfallTasks = [];
@@ -585,7 +747,7 @@ var VisibilityForm = function (db, redis, event) {
                     return cb(null, []);
                 }
 
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.VISIBILITYFORM, function (err, filesIds) {
+                fileHandler.uploadFile(userId, files, CONTENT_TYPES.VISIBILITYFORM, function(err, filesIds) {
                     if (err) {
                         return cb(err);
                     }
@@ -595,7 +757,7 @@ var VisibilityForm = function (db, redis, event) {
             }
 
             function deleteFile(filesBackend, cb) {
-                fileHandler.deleteFew(filesBackend, function (err, filesIds) {
+                fileHandler.deleteFew(filesBackend, function(err, filesIds) {
                     if (err) {
                         return cb(err);
                     }
@@ -624,15 +786,15 @@ var VisibilityForm = function (db, redis, event) {
                     cb = filesIds;
                 }
 
-                VisibilityFormModel.findByIdAndUpdate({_id: id}, {$set: visibilityForm}, function (err, model) {
+                VisibilityFormModel.findByIdAndUpdate({_id : id}, {$set : visibilityForm}, function(err, model) {
                     if (err) {
                         return cb(err);
                     }
 
                     VisibilityFormModel.populate(model, {
-                        path  : 'objective',
-                        select: 'context'
-                    }, function (err, model) {
+                        path : 'objective',
+                        select : 'context'
+                    }, function(err, model) {
                         if (err) {
                             return cb(err);
                         }
@@ -641,24 +803,24 @@ var VisibilityForm = function (db, redis, event) {
                             ACL_MODULES.IN_STORE_REPORTING;
 
                         event.emit('activityChange', {
-                            module     : module,
+                            module : module,
                             actionType : ACTIVITY_TYPES.UPDATED,
-                            createdBy  : visibilityForm.editedBy,
-                            itemId     : model.objective._id,
-                            itemType   : model.objective.context,
-                            itemDetails: CONTENT_TYPES.VISIBILITYFORM
+                            createdBy : visibilityForm.editedBy,
+                            itemId : model.objective._id,
+                            itemType : model.objective.context,
+                            itemDetails : CONTENT_TYPES.VISIBILITYFORM
                         });
 
                         getAllAggregate({
-                            aggregateHelper: aggregateHelper,
-                            queryObject    : {_id: objectId(id)},
-                            isMobile       : req.isMobile
-                        }, function (err, result) {
+                            aggregateHelper : aggregateHelper,
+                            queryObject : {_id : objectId(id)},
+                            isMobile : req.isMobile
+                        }, function(err, result) {
                             if (err) {
                                 return next(err);
                             }
 
-                            result = _.map(result, function (element) {
+                            result = _.map(result, function(element) {
                                 if (element.after && element.after.description) {
                                     element.after.description = _.unescape(element.after.description);
                                 }
@@ -673,15 +835,15 @@ var VisibilityForm = function (db, redis, event) {
 
             function getVisibility(cb) {
                 getAllAggregate({
-                    aggregateHelper: aggregateHelper,
-                    queryObject    : {_id: objectId(id)}
-                }, function (err, result) {
+                    aggregateHelper : aggregateHelper,
+                    queryObject : {_id : objectId(id)}
+                }, function(err, result) {
                     var filesBackend;
                     if (err) {
                         return cb(err);
                     }
 
-                    result = _.map(result, function (element) {
+                    result = _.map(result, function(element) {
                         if (element.after && element.after.description) {
                             element.after.description = _.unescape(element.after.description);
                         }
@@ -707,7 +869,7 @@ var VisibilityForm = function (db, redis, event) {
             }
 
             async.waterfall(waterfallTasks,
-                function (err, result) {
+                function(err, result) {
                     if (err) {
                         return next(err);
                     }
@@ -717,38 +879,27 @@ var VisibilityForm = function (db, redis, event) {
             );
         }
 
-        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body = req.body;
+        var body = req.body;
 
-            try {
-                if (body.data) {
-                    body = JSON.parse(body.data);
-                }
-            } catch (err) {
-                return next(err);
+        try {
+            if (body.data) {
+                body = JSON.parse(body.data);
             }
+        } catch (err) {
+            return next(err);
+        }
 
+        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function(err, saveData) {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            queryRun(saveData);
         });
+
     };
 
-    this.getById = function (req, res, next) {
+    this.getById = function(req, res, next) {
         function queryRun() {
             var id = req.params.id;
             var aggregateHelper = new AggregationHelper($defProjection);
@@ -761,14 +912,14 @@ var VisibilityForm = function (db, redis, event) {
             }
 
             getAllAggregate({
-                aggregateHelper: aggregateHelper,
-                queryObject    : {_id: objectId(id)}
-            }, function (err, result) {
+                aggregateHelper : aggregateHelper,
+                queryObject : {_id : objectId(id)}
+            }, function(err, result) {
                 if (err) {
                     return next(err);
                 }
 
-                result = _.map(result, function (element) {
+                result = _.map(result, function(element) {
                     if (element.after && element.after.description) {
                         element.after.description = _.unescape(element.after.description);
                     }
@@ -779,27 +930,14 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            queryRun();
-        });
-
+        queryRun();
     };
 
-    this.deleteById = function (req, res, next) {
+    this.deleteById = function(req, res, next) {
         function queryRun() {
             var id = req.params.id;
 
-            VisibilityFormModel.findByIdAndRemove(id, function (err, result) {
+            VisibilityFormModel.findByIdAndRemove(id, function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -807,7 +945,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function(err, allowed) {
             if (err) {
                 return next(err);
             }

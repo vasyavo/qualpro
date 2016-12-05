@@ -557,7 +557,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                         body.total = body.data.length;
                     }
 
-                    cb(null, result);
+                    cb(null, body);
                 }
 
             ], callback);

@@ -10,21 +10,31 @@ const schema = new Schema({
     },
     before: {
         files: [{
-            type: ObjectId,
-            ref: CONTENT_TYPES.FILES,
-            default: null
+            file : {
+                type: ObjectId,
+                ref: CONTENT_TYPES.FILES,
+                default: null
+            },
+            branch : {
+                type: ObjectId,
+                ref: CONTENT_TYPES.BRANCH,
+                default: null
+            }
         }]
     },
     after: {
         files: [{
-            type: ObjectId,
-            ref: CONTENT_TYPES.FILES,
-            default: null
-        }],
-        description: {
-            type: String,
-            default: ''
-        }
+            file : {
+                type: ObjectId,
+                ref: CONTENT_TYPES.FILES,
+                default: null
+            },
+            branch : {
+                type: ObjectId,
+                ref: CONTENT_TYPES.BRANCH,
+                default: null
+            }
+        }]
     },
     createdBy: {
         user: {

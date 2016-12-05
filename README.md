@@ -1,12 +1,17 @@
 ### A Qual Pro CMS
 
-[ ![Codeship Status for rhinobuccaneers/master](https://codeship.com/projects/d26237f0-7138-0134-8443-66707d799ba6/status?branch=master)](https://github.com/rhinobuccaneers/qualpro)
+![Build status][ci-url]
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)][heroku-repo]
+
+[heroku-repo]: https://heroku.com/deploy?template=https://github.com/rhinobuccaneers/qualpro.git
+[ci-url]: https://codeship.com/projects/d26237f0-7138-0134-8443-66707d799ba6/status?branch=master
 
 Project powered by Javascript & Node.js 6.5.0:
-- ECMAScript 5.1
+- ECMAScript 2015
 - Backbone, AMD
 - Express 4
-- MongoDB 3.2, Redis
+- MongoDB 3.2.10, Redis
 - AWS S3, Twillio, SendGrid
 
 ## Development process
@@ -67,7 +72,6 @@ Ask credentials in your administrator.
 ##### General settings of instance:
  - `HOST`
  - `PORT`
- - `NODE_APP_INSTANCE`
  - `UPLOADER_TYPE` Currently available only with AmazonS3.
 
 ##### Twilio credentials are:

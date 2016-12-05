@@ -7081,9 +7081,9 @@ const accessRolesData = {
     5: salesman,
     6: merchandiser,
     7: cashVan,
-    8: masterUpload,
-    9: countryUpload,
-    10: tradeMarketer
+    8: tradeMarketer,
+    9: masterUpload,
+    10: countryUpload
 };
 
 const accessRoles = [];
@@ -7105,9 +7105,9 @@ const levels = [
     'Sales Man',
     'Merchandiser',
     'Cash van',
+    'Trade marketer',
     'Master uploader',
-    'Country uploader',
-    'Trade marketer'
+    'Country uploader'
 ];
 
 const generate = (callback) => {
