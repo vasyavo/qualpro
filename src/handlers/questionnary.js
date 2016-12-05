@@ -1,3 +1,5 @@
+const logger = require('./../utils/logger');
+
 var QuestionnaryHandler = function (db, redis, event) {
     var async = require('async');
     var _ = require('underscore');
@@ -544,6 +546,8 @@ var QuestionnaryHandler = function (db, redis, event) {
                     const body = result && result[0] ?
                         result[0] : { data: [], total: 0 };
 
+                    logger.inspect(body);
+
                     if (req.session.level !== 1) {
                         body.data = body.data.filter((question) => {
                             const personnelArray = question.personnels.fromObjectID();
@@ -557,7 +561,7 @@ var QuestionnaryHandler = function (db, redis, event) {
                         body.total = body.data.length;
                     }
 
-                    cb(null, result);
+                    cb(null, body);
                 }
 
             ], callback);
