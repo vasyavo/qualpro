@@ -166,7 +166,6 @@ const QuestionnaryHandler = function (db, redis, event) {
             }
 
             const aggregateHelper = new AggregationHelper($defProjection, queryObject);
-            const currentDate = new Date();
 
             queryObject.$and = [{
                 // standard synchronization behaviour
@@ -195,6 +194,8 @@ const QuestionnaryHandler = function (db, redis, event) {
 
             if (isMobile) {
                 // user sees only ongoing questionnaire via mobile app
+                const currentDate = new Date();
+
                 queryObject.$and.push({
                     dueDate: {
                         $lt: currentDate
@@ -300,8 +301,8 @@ const QuestionnaryHandler = function (db, redis, event) {
             const queryFilter = query.filter || {};
 
             const sort = query.sort || {
-                    lastDate: -1
-                };
+                lastDate: -1
+            };
 
             const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.QUESTIONNARIES,
@@ -331,6 +332,15 @@ const QuestionnaryHandler = function (db, redis, event) {
             if (queryObject.publisher) {
                 publisherFilter = queryObject.publisher;
                 delete queryObject.publisher;
+            }
+
+            if (isMobile) {
+                // user sees only ongoing questionnaire via mobile app
+                const currentDate = new Date();
+
+                queryObject.dueDate = {
+                    $lt: currentDate
+                };
             }
 
             const aggregateHelper = new AggregationHelper($defProjection);
