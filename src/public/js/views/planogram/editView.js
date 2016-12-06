@@ -36,7 +36,7 @@ define([
 
         initialize: function (options) {
             var countryId;
-            var retailSegmentId;
+            let retailSegments;
             var modelJSON;
 
             _.bindAll(this, 'render');
@@ -46,7 +46,9 @@ define([
 
             modelJSON = this.currentModel.toJSON();
             countryId = modelJSON.country._id;
-            retailSegmentId = modelJSON.retailSegment._id;
+            retailSegments = modelJSON.retailSegment.map((item) => {
+                return item._id;
+            });
 
             this.responseObj = {};
             this.makeRender();
@@ -55,11 +57,12 @@ define([
             this.retailSegmentCollection = new RetailSegmentCollection({countryId: countryId});
             this.itemsPricesCollection = new ItemsPricesCollection({
                 countryId    : countryId,
-                retailSegment: retailSegmentId,
-                forDd        : true
+                retailSegment: retailSegments,
+                forDd        : true,
+                multi        : true
             });
             this.configurationsCollection = new ConfigurationsCollection({create: false});
-            this.configurationsCollection.fetchFromRetailSegmentId(retailSegmentId);
+            this.configurationsCollection.fetchFromRetailSegmentId(retailSegments);
 
             this.render();
         },
@@ -145,9 +148,9 @@ define([
             var self = this;
 
             self.selectedCountryId = modelJSON.country && modelJSON.country._id || null;
-            self.selectedRetailSegmentId = modelJSON.retailSegment && modelJSON.retailSegment._id || null;
+            self.selectedRetailSegmentId = modelJSON.retailSegment && modelJSON.retailSegment || null;
             self.selectedProductId = modelJSON.product && modelJSON.product._id || null;
-            self.selectedConfigurationId = modelJSON.configuration && modelJSON.configuration._id || null;
+            self.selectedConfigurationId = modelJSON.configuration && modelJSON.configuration || null;
 
             this.countryDropDownView = new dropDownView({
                 translation   : this.translation,
@@ -206,9 +209,12 @@ define([
             this.retailSegmentDropDownView = new dropDownView({
                 translation   : this.translation,
                 dropDownList  : this.retailSegmentCollection,
-                selectedValues: [modelJSON.retailSegment],
+                selectedValues: modelJSON.retailSegment,
                 displayText   : this.translation.retailSegment,
-                contentType   : CONTENT_TYPES.RETAILSEGMENT
+                contentType   : CONTENT_TYPES.RETAILSEGMENT,
+                multiSelect   : true,
+                noSingleSelectEvent : true,
+                noAutoSelectOne : true
             });
 
             this.retailSegmentDropDownView.on('changeItem', function (data) {
@@ -216,7 +222,9 @@ define([
                 var productModel;
                 var configurationModel;
 
-                self.selectedRetailSegmentId = model._id;
+                const arrayOfSelectedRetailSegmentsId = data.selectedValuesIds || [];
+
+                self.selectedRetailSegmentId = arrayOfSelectedRetailSegmentsId;
 
                 self.productDropDownView.removeSelected();
                 productModel = self.itemsPricesCollection.get(self.selectedProductId);
@@ -237,12 +245,13 @@ define([
                     data : {
                         countryId    : self.selectedCountryId,
                         retailSegment: self.selectedRetailSegmentId,
-                        forDd        : true
+                        forDd        : true,
+                        multi        : true
                     },
                     reset: true
                 });
 
-                self.configurationsCollection.fetchFromRetailSegmentId(self.selectedRetailSegmentId);
+                self.configurationsCollection.fetchFromRetailSegmentId(arrayOfSelectedRetailSegmentsId);
             });
             $formString.find('#retailSegmentSelect').append(this.retailSegmentDropDownView.el);
 
@@ -270,9 +279,7 @@ define([
             });
 
             this.configurationDropDownView.on('changeItem', function (data) {
-                var model = data.model;
-
-                self.selectedConfigurationId = model._id;
+                self.selectedConfigurationId = data.model;
             });
             $formString.find('#configurationSelect').append(this.configurationDropDownView.el);
 

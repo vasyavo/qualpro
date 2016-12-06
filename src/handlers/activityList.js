@@ -807,30 +807,21 @@ var Personnel = function(db, redis, event) {
     };
 
     this.getAll = function(req, res, next) {
-        function queryRun(activity) {
-            var isMobile = req.isMobile;
-            var query = req.query;
-            var page = query.page || 1;
-            var limit = parseInt(query.count) || parseInt(CONSTANTS.LIST_COUNT);
-            var skip = (page - 1) * limit;
-            var supervisorFilter = query.supervisorFilter;
-            var positionFilter = {};
-
-            var filterMapper = new FilterMapper();
-            var filter = query.filter || {};
-            var filterSearch = filter.globalSearch || '';
-
-            var queryObject;
-            var queryObjectAfterLookup = {};
-            var key;
-            var aggregation;
-            var pipeLine;
-            var sort = {
+        function queryRun(activity, callback) {
+            const isMobile = req.isMobile;
+            const query = req.query;
+            const page = query.page || 1;
+            const limit = parseInt(query.count) || parseInt(CONSTANTS.LIST_COUNT);
+            const skip = (page - 1) * limit;
+            const uid = req.session.uId;
+            const filterMapper = new FilterMapper();
+            const filter = query.filter || {};
+            const filterSearch = filter.globalSearch || '';
+            const sort = {
                 'createdBy.date' : -1
             };
 
-            var aggregateHelper;
-            var searchFieldsArray = [
+            const searchFieldsArray = [
                 'createdBy.user.firstName.en',
                 'createdBy.user.firstName.ar',
                 'createdBy.user.lastName.en',
@@ -848,7 +839,7 @@ var Personnel = function(db, redis, event) {
 
             delete filter.globalSearch;
 
-            queryObject = filterMapper.mapFilter({
+            const queryObject = filterMapper.mapFilter({
                 contentType : CONTENT_TYPES.ACTIVITYLIST,
                 filter : filter,
                 personnel : activity
@@ -856,47 +847,50 @@ var Personnel = function(db, redis, event) {
 
             delete  queryObject.archived;
 
+            const positionFilter = {};
+
             if (queryObject.position && queryObject.position.$in) {
-                positionFilter = {'createdBy.user.position' : queryObject.position};
+                positionFilter['createdBy.user.position'] = queryObject.position
 
                 delete queryObject.position;
             }
 
-            for (key in sort) {
+            for (let key in sort) {
                 sort[key] = parseInt(sort[key]);
             }
 
-            getUserInfo(req.session.uId, function(err, currentUser) {
+            async.waterfall([
 
-                aggregateHelper = new AggregationHelper($defProjection, queryObject);
+                async.apply(getUserInfo, uid),
 
-                pipeLine = getAllPipelineActivity({
-                    queryObject : queryObject,
-                    aggregateHelper : aggregateHelper,
-                    searchFieldsArray : searchFieldsArray,
-                    filterSearch : filterSearch,
-                    limit : limit,
-                    skip : skip,
-                    sort : sort,
-                    currentUser : currentUser,
-                    positionFilter : positionFilter,
-                    isMobile : isMobile
-                });
+                (currentUser, cb) => {
+                    const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+                    const pipeLine = getAllPipelineActivity({
+                        queryObject,
+                        aggregateHelper,
+                        searchFieldsArray,
+                        filterSearch,
+                        limit,
+                        skip,
+                        sort,
+                        currentUser,
+                        positionFilter,
+                        isMobile
+                    });
 
-                aggregation = ActivityListModel.aggregate(pipeLine);
+                    const aggregation = ActivityListModel.aggregate(pipeLine);
 
-                aggregation.exec(function(err, response) {
-                    var idsPersonnel = [];
-                    var options = {
-                        data : {}
-                    };
-                    if (err) {
-                        return next(err);
-                    }
-                    response = response.length ? response[0] : {
-                        data : [],
-                        total : 0
-                    };
+                    aggregation.exec(cb);
+                },
+
+                (response, cb) => {
+                    let idsPersonnel = [];
+
+                    response = response.length ?
+                        response[0] : {
+                            data : [],
+                            total : 0
+                        };
 
                     if (!response.data.length) {
                         return next({
@@ -905,52 +899,77 @@ var Personnel = function(db, redis, event) {
                         });
                     }
 
-                    _.map(response.data, function(model) {
+                    _.forEach(response.data, (model) => {
                         idsPersonnel.push(model.createdBy.user._id);
                     });
 
-                    idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                    options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
 
-                    getImagesHelper.getImages(options, function(err, result) {
-                        var fieldNames = {};
-                        var setOptions;
-                        if (err) {
-                            return next(err);
+                    const options = {
+                        data : {
+                            [CONTENT_TYPES.PERSONNEL]: _.uniqBy(idsPersonnel, 'id')
                         }
+                    };
 
-                        setOptions = {
-                            response : response,
-                            imgsObject : result
-                        };
-                        fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                        setOptions.fields = fieldNames;
+                    cb(null, {
+                        response,
+                        options
+                    });
+                },
 
-                        getImagesHelper.setIntoResult(setOptions, function(response) {
-                            _.map(response.data, function(element) {
-                                element.module = MODULE_NAMES[element.module._id];
-                            });
-
-                            next({
-                                status : 200,
-                                body : response
-                            });
+                (data, cb) => {
+                    getImagesHelper.getImages(data.options, (err, result) => {
+                        cb(err, {
+                            response: data.response,
+                            result
                         })
                     });
-                });
-            });
+                },
 
+                (data, cb) => {
+                    const options = {
+                        response: data.response,
+                        imgsObject: data.result,
+                        fields: {
+                            [CONTENT_TYPES.PERSONNEL]: ['createdBy.user']
+                        }
+                    };
+
+                    getImagesHelper.setIntoResult(options, (response) => {
+                        cb(null, response);
+                    });
+                },
+
+                (response, cb) => {
+                    response.data = response.data.map((item) => {
+                        item.module = MODULE_NAMES[item.module._id];
+
+                        return item;
+                    });
+
+                    cb(null, response);
+                }
+
+            ], callback);
         }
 
         async.waterfall([
 
             async.apply(access.getReadAccess, req, ACL_MODULES.ACTIVITY_LIST),
 
-            (allowed, personnel) => {
-                queryRun(personnel);
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
             }
 
-        ]);
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            return next({
+                status: 200,
+                body
+            });
+        });
     };
 };
 

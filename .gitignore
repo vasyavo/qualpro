@@ -55,6 +55,7 @@ production_database
 src/import/**/~$*.*
 
 # Environment configurations
+src/config/.env.staging
 src/config/.env.production
 
 # Restore staging db script

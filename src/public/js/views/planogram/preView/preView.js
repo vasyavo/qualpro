@@ -61,7 +61,8 @@ define([
             editView.on('modelSaved', function (model) {
                 self.$el.html(self.template({
                     translation: self.translation,
-                    model      : model.toJSON()
+                    model      : model.toJSON(),
+                    activityList : self.activityList
                 }));
                 self.trigger('modelSaved', model);
             })
@@ -69,6 +70,10 @@ define([
 
         render: function () {
             var modelJSON = this.model.toJSON();
+
+            modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
+                return item.name.currentLanguage;
+            }).join(', ');
 
             this.$el.html(this.template({
                 translation : this.translation,

@@ -528,6 +528,20 @@ function importBrand(callback) {
         async.apply(readCsv, 'Brand'),
 
         (data, cb) => {
+            /* todo */
+            const ourBrand = {
+                archived : false,
+                ourCompany : true,
+                imageSrc : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWAQMAAAAGz+OhAAAABlBMVEXNy8v///83JiJ6AAABlUlEQVRIx+3UMWrEQAyFYQ0Dcekj+ApbpgjrK6XcbuZocxQfYUoXZhRJtmGfxhAIKUJYNbt8jX+EZXrNv5vEzKszltmQglpDi6zzMxuuTJ/pbdXGX7fvn9uIwlXzn7VQe4trb8PW29hiZxOHC8sXVpK3kZfZ28B1YobX6C3yOvI++bApsAbalNOINdBmOWzOicNh9bQyc/a2SOCD0KoESiXYOuj/CLZFuw2wFuw20rOxBOovmATqKsA0UFYBpoHJmQbOJYJp4FQDmAaOG4Fp4NDQ2DZICcw2mNFsg3kGs8DizAInNA1cnGmgs6KB3jSwepPAOjqTQG83Cfx09i6BN2cfEkjO7hLobZbAzjI3mtxeSuLOFgn0ViUQrY6rbhBt2HSDzppuEGyNrBtECyyBEWwjPc0A1ihpoDMLTM/GFKsGguX9isEKkQaCyW1pIJjdUYtg+x0FMN5vB63snxmwlR4aCMZsG3RmGzxt2s02uKDZBgt8YNk2mA8LO+1XjGOBnY0XNlxYvLCg5odzb4n6udNrXnPOF+LsukzuroMwAAAAAElFTkSuQmCC',
+                name : {
+                    ar : 'Al alali',
+                    en : 'Al alali'
+                }
+            };
+
+            data.push(ourBrand);
+            /* todo */
+
             async.mapLimit(data, 10, (sourceObj, mapCb) => {
                 const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
@@ -535,7 +549,8 @@ function importBrand(callback) {
                     name: {
                         en: obj['Name (EN)'],
                         ar: obj['Name (AR)']
-                    }
+                    },
+                    ourCompany: !!obj['Our company']
                 });
                 const query = {
                     'name.en': patch.name.en

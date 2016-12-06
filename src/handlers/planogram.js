@@ -1,4 +1,7 @@
-var planogramsHandler = function (db, redis, event) {
+const BsonObjectId = require('bson-objectid');
+const RetailSegmentModel = require('./../types/retailSegment/model');
+
+var planogramsHandler = function(db, redis, event) {
     var async = require('async');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
@@ -22,114 +25,148 @@ var planogramsHandler = function (db, redis, event) {
     var ObjectId = mongoose.Types.ObjectId;
     var self = this;
     var $defProjection = {
-        _id           : 1,
-        country       : 1,
+        _id : 1,
+        country : 1,
         retailSegment : 1,
-        product       : 1,
-        fileID        : 1,
+        product : 1,
+        fileID : 1,
         configuration : 1,
-        configurations: 1,
-        editedBy      : 1,
-        createdBy     : 1,
-        archived      : 1
+        editedBy : 1,
+        createdBy : 1,
+        archived : 1
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var files = req.files ? req.files : null;
-            var session = req.session;
-            var userId = session.uId;
-            var model;
-            for (var key in body) {
-                body[key] = ObjectId(body[key]);
-            }
+    this.create = function(req, res, next) {
+        function queryRun(body, callback) {
+            const files = req.files ? req.files : null;
+            const session = req.session;
+            const userId = session.uId;
+            const configurationId = body.configuration;
 
             async.waterfall([
-                function (callback) {
-                    if (!files) {
-                        return callback(null, []);
+
+                // retrieve retail segment which has configuration name by provided configuration id
+                (cb) => {
+                    RetailSegmentModel.findOne({ 'configurations._id': configurationId }, 'configurations', cb)
+                },
+
+                // pick configuraiton name from result set and upload attached picture
+                function(retailSegment, cb) {
+                    const configurationName = retailSegment.configurations.filter((item) => {
+                        return `${item._id}` === configurationId;
+                    }).map((item) => {
+                        return item.configuration;
+                    }).pop();
+
+                    if (!configurationName) {
+                        return cb('No such configuration found.');
                     }
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, function (err, fileId) {
+
+                    if (!files) {
+                        return cb(null, []);
+                    }
+
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, (err, fileId) => {
                         if (err) {
-                            return callback(err);
+                            return cb(err);
                         }
-                        callback(null, fileId[0]);
+                        cb(null, {
+                            fileId: fileId.pop(),
+                            configurationName
+                        });
                     });
                 },
-                function (fileId, callback) {
-                    var createdBy = {
-                        user: ObjectId(userId),
-                        date: new Date()
+                function(options, cb) {
+                    const configurationName = options.configurationName;
+                    const fileId = options.fileId;
+                    const createdBy = {
+                        user : ObjectId(userId),
+                        date : new Date()
                     };
 
-                    body.fileID = fileId;
-                    body.createdBy = createdBy;
-                    body.editedBy = createdBy;
+                    const dataToSave = Object.assign({}, body, {
+                        fileID: fileId,
+                        configuration: {
+                            _id : configurationId,
+                            name : configurationName
+                        },
+                        createdBy,
+                        editedBy: createdBy
+                    });
 
-                    model = new PlanogramModel(body);
-                    model.save(function (err, result) {
-                        if (err) {
-                            callback(err);
+                    const model = new PlanogramModel();
+
+                    model.set(dataToSave);
+
+                    model.save((err, model, numAffected) => {
+                        // tip: do not remove numAffected
+                        if  (err) {
+                            return cb(err);
                         }
 
-                        callback(null, result);
+                        cb(null, model);
                     });
                 },
-                function (planogramModel, callback) {
+                function(planogramModel, cb) {
                     var id = planogramModel.get('_id');
 
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, callback);
+                    self.getByIdAggr({
+                        id : id,
+                        isMobile : req.isMobile
+                    }, cb);
                 }
 
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
-
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.PLANOGRAM,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : result.createdBy,
-                    itemId    : result._id,
-                    itemType  : CONTENT_TYPES.PLANOGRAM
-                });
-
-                res.status(201).send(result);
-            });
+            ], callback);
         }
 
-        access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
-            var body = req.body;
+        async.waterfall([
+
+            async.apply(access.getWriteAccess, req, ACL_MODULES.PLANOGRAM),
+
+            (allowed, entity, cb) => {
+                let body = req.body;
+
+                try {
+                    if (req.body.data) {
+                        body = JSON.parse(req.body.data);
+                    } else {
+                        body = req.body;
+                    }
+                } catch (err) {
+                    return cb(err);
+                }
+
+                cb(null, body);
+            },
+
+            (body, cb) => {
+                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', (err, saveData) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    queryRun(saveData, cb);
+                });
+            }
+
+        ], function(err, result) {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
+            event.emit('activityChange', {
+                module : ACL_MODULES.PLANOGRAM,
+                actionType : ACTIVITY_TYPES.CREATED,
+                createdBy : result.createdBy,
+                itemId : result._id,
+                itemType : CONTENT_TYPES.PLANOGRAM
             });
+
+            res.status(201).send(result);
         });
     };
 
-    this.getByIdAggr = function (options, callback) {
+    this.getByIdAggr = function(options, callback) {
         var aggregateHelper;
         var pipeLine = [];
         var aggregation;
@@ -139,37 +176,37 @@ var planogramsHandler = function (db, redis, event) {
         aggregateHelper = new AggregationHelper($defProjection);
 
         pipeLine.push({
-            $match: {_id: id}
+            $match : {_id : id}
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'fileID',
-            addProjection: ['contentType', 'originalName', 'createdBy'],
-            isArray      : false
+            from : 'files',
+            key : 'fileID',
+            addProjection : ['contentType', 'originalName', 'createdBy'],
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         if (!isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'createdBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    createdBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'createdBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    createdBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -177,17 +214,17 @@ var planogramsHandler = function (db, redis, event) {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'createdBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    createdBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'createdBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    createdBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -196,62 +233,32 @@ var planogramsHandler = function (db, redis, event) {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'categories',
-            key    : 'product',
-            isArray: false
+            from : 'categories',
+            key : 'product',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'country',
-            isArray: false
+            from : 'domains',
+            key : 'country',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'retailSegments',
-            key          : 'retailSegment',
-            addProjection: ['configurations'],
-            isArray      : false
+            from : 'retailSegments',
+            key : 'retailSegment',
+            isArray : true
         }));
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    $filter: {
-                        input: '$retailSegment.configurations',
-                        as   : 'configuration',
-                        cond : {$eq: ['$$configuration._id', '$configuration']}
-                    }
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    $arrayElemAt: ['$configuration', 0]
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    _id : 1,
-                    name: '$configuration.configuration'
-                }
-            })
-        });
 
         aggregation = PlanogramModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse: true
+            allowDiskUse : true
         };
 
-        aggregation.exec(function (err, response) {
+        aggregation.exec(function(err, response) {
             var options = {
-                data: {}
+                data : {}
             };
             var personnelIds = [];
             var fileIds = [];
@@ -272,7 +279,7 @@ var planogramsHandler = function (db, redis, event) {
             options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
             options.data[CONTENT_TYPES.FILES] = fileIds;
 
-            getImagesHelper.getImages(options, function (err, result) {
+            getImagesHelper.getImages(options, function(err, result) {
                 var fieldNames = {};
                 var setOptions;
                 if (err) {
@@ -280,57 +287,57 @@ var planogramsHandler = function (db, redis, event) {
                 }
 
                 setOptions = {
-                    response  : response,
-                    imgsObject: result
+                    response : response,
+                    imgsObject : result
                 };
                 fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                 fieldNames[CONTENT_TYPES.FILES] = ['fileID'];
                 setOptions.fields = fieldNames;
 
-                getImagesHelper.setIntoResult(setOptions, function (response) {
+                getImagesHelper.setIntoResult(setOptions, function(response) {
                     callback(null, response);
                 })
             });
         });
     };
 
-    this.archive = function (req, res, next) {
+    this.archive = function(req, res, next) {
         function queryRun() {
             var idsToArchive = req.body.ids.objectID();
             var archived = req.body.archived === 'false' ? false : !!req.body.archived;
             var uId = req.session.uId;
             var editedBy = {
-                user: req.session.uId,
-                date: Date.now()
+                user : req.session.uId,
+                date : Date.now()
             };
             var type = ACTIVITY_TYPES.ARCHIVED;
             var options = [
                 {
-                    idsToArchive   : idsToArchive,
-                    keyForCondition: '_id',
-                    archived       : archived,
-                    model          : PlanogramModel
+                    idsToArchive : idsToArchive,
+                    keyForCondition : '_id',
+                    archived : archived,
+                    model : PlanogramModel
                 }
             ];
             if (!archived) {
                 type = ACTIVITY_TYPES.UNARCHIVED;
             }
 
-            archiver.archive(uId, options, function (err) {
+            archiver.archive(uId, options, function(err) {
                 if (err) {
                     return next(err);
                 }
-                async.eachSeries(idsToArchive, function (item, callback) {
+                async.eachSeries(idsToArchive, function(item, callback) {
                     event.emit('activityChange', {
-                        module    : ACL_MODULES.PLANOGRAM,
-                        actionType: type,
+                        module : ACL_MODULES.PLANOGRAM,
+                        actionType : type,
                         createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.PLANOGRAM
+                        itemId : item,
+                        itemType : CONTENT_TYPES.PLANOGRAM
                     });
                     callback();
 
-                }, function (err) {
+                }, function(err) {
                     if (err) {
                         logWriter.log('planogram archived error', err);
                     }
@@ -341,7 +348,7 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -356,11 +363,14 @@ var planogramsHandler = function (db, redis, event) {
         });
     };
 
-    this.getById = function (req, res, next) {
+    this.getById = function(req, res, next) {
         function queryRun() {
             var id = req.params.id;
 
-            self.getByIdAggr({id: ObjectId(id), isMobile: req.isMobile}, function (err, model) {
+            self.getByIdAggr({
+                id : ObjectId(id),
+                isMobile : req.isMobile
+            }, function(err, model) {
                 if (err) {
                     return next(err);
                 }
@@ -368,7 +378,7 @@ var planogramsHandler = function (db, redis, event) {
             })
         }
 
-        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -395,29 +405,29 @@ var planogramsHandler = function (db, redis, event) {
         var pipeLine = [];
 
         pipeLine.push({
-            $match: queryObject
+            $match : queryObject
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
+            from : 'accessRoles',
+            key : 'createdBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
                         position : 1,
-                        firstName: 1,
+                        firstName : 1,
                         lastName : 1
                     }
                 }
@@ -425,17 +435,17 @@ var planogramsHandler = function (db, redis, event) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName : 1
                     }
                 }
             }
@@ -443,25 +453,25 @@ var planogramsHandler = function (db, redis, event) {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
+                from : 'personnels',
+                key : 'editedBy.user',
+                isArray : false,
+                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                includeSiblings : {editedBy : {date : 1}}
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
+                from : 'accessRoles',
+                key : 'editedBy.user.accessRole',
+                isArray : false,
+                addProjection : ['_id', 'name', 'level'],
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
                             position : 1,
-                            firstName: 1,
+                            firstName : 1,
                             lastName : 1
                         }
                     }
@@ -469,17 +479,17 @@ var planogramsHandler = function (db, redis, event) {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
+                from : 'positions',
+                key : 'editedBy.user.position',
+                isArray : false,
+                includeSiblings : {
+                    editedBy : {
+                        date : 1,
+                        user : {
+                            _id : 1,
+                            accessRole : 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName : 1
                         }
                     }
                 }
@@ -487,120 +497,62 @@ var planogramsHandler = function (db, redis, event) {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'domains',
-            key          : 'country',
-            isArray      : false,
-            addProjection: ['archived']
+            from : 'domains',
+            key : 'country',
+            isArray : false,
+            addProjection : ['archived']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from             : 'retailSegments',
             key              : 'retailSegment',
-            isArray          : false,
-            addMainProjection: ['configurations'],
-            addProjection    : ['archived']
+            isArray          : true,
+            addProjection : ['archived']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'categories',
-            key          : 'product',
-            isArray      : false,
-            addProjection: ['archived']
+            from : 'categories',
+            key : 'product',
+            isArray : false,
+            addProjection : ['archived']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'fileID',
-            addProjection: ['contentType', 'originalName', 'createdBy'],
-            isArray      : false
+            from : 'files',
+            key : 'fileID',
+            addProjection : ['contentType', 'originalName', 'createdBy'],
+            isArray : false
         }));
 
         if (!isMobile) {
             pipeLine.push({
-                $match: {
-                    'retailSegment.archived': false,
-                    'product.archived'      : false,
-                    'country.archived'      : false
+                $match : {
+                    'retailSegment.archived' : false,
+                    'product.archived' : false,
+                    'country.archived' : false
                 }
             });
         }
 
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    $filter: {
-                        input: '$configurations',
-                        as   : 'configuration',
-                        cond : {$eq: ['$$configuration._id', '$configuration']}
-                    }
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {$arrayElemAt: ['$configuration', 0]}
-            })
-        });
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                configuration: {
-                    _id : 1,
-                    name: '$configuration.configuration'
-                }
-            })
-        });
-
-        pipeLine.push({
-            $sort: {
-                'configuration.name': 1
-            }
-        });
-
-        /*if (!isMobile) {
-         pipeLine.push({
-         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         pipeLine.push({
-         $sort: sort
-         });
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit,
-            sort             : sort
+            isMobile : isMobile,
+            searchFieldsArray : searchFieldsArray,
+            filterSearch : filterSearch,
+            skip : skip,
+            limit : limit,
+            sort : sort
         }));
 
         return pipeLine;
     }
 
-    this.getAllForSync = function (req, res, next) {
+    this.getAllForSync = function(req, res, next) {
         function queryRun() {
             var query = req.query;
             var isMobile = req.isMobile;
             var lastLogOut = new Date(query.lastLogOut);
             var aggregateHelper = new AggregationHelper($defProjection);
-            var sort = {'createdBy.date': -1};
+            var sort = {'createdBy.date' : -1};
             var queryObject = {};
             var pipeLine;
             var aggregation;
@@ -608,32 +560,32 @@ var planogramsHandler = function (db, redis, event) {
 
             if (query._ids) {
                 ids = query._ids.split(',');
-                ids = _.map(ids, function (id) {
+                ids = _.map(ids, function(id) {
                     return ObjectId(id);
                 });
                 queryObject._id = {
-                    $in: ids
+                    $in : ids
                 };
             }
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             pipeLine = getAllPipeLine({
-                queryObject    : queryObject,
-                aggregateHelper: aggregateHelper,
-                isMobile       : isMobile,
-                forSync        : true,
-                sort           : sort
+                queryObject : queryObject,
+                aggregateHelper : aggregateHelper,
+                isMobile : isMobile,
+                forSync : true,
+                sort : sort
             });
 
             aggregation = PlanogramModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse: true
+                allowDiskUse : true
             };
 
-            aggregation.exec(function (err, response) {
+            aggregation.exec(function(err, response) {
                 var options = {
-                    data: {}
+                    data : {}
                 };
                 var personnelIds = [];
                 var fileIds = [];
@@ -642,13 +594,19 @@ var planogramsHandler = function (db, redis, event) {
                     return next(err);
                 }
 
-                response = response && response.length ? response[0] : {data: [], total: 0};
+                response = response && response.length ? response[0] : {
+                    data : [],
+                    total : 0
+                };
 
                 if (!response.data.length) {
-                    return next({status: 200, body: response});
+                    return next({
+                        status : 200,
+                        body : response
+                    });
                 }
 
-                _.map(response.data, function (element) {
+                _.map(response.data, function(element) {
                     personnelIds.push(element.createdBy.user._id);
                     fileIds.push(element.fileID._id);
                 });
@@ -658,7 +616,7 @@ var planogramsHandler = function (db, redis, event) {
                 options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
                 options.data[CONTENT_TYPES.FILES] = fileIds;
 
-                getImagesHelper.getImages(options, function (err, result) {
+                getImagesHelper.getImages(options, function(err, result) {
                     var fieldNames = {};
                     var setOptions;
                     if (err) {
@@ -666,21 +624,24 @@ var planogramsHandler = function (db, redis, event) {
                     }
 
                     setOptions = {
-                        response  : response,
-                        imgsObject: result
+                        response : response,
+                        imgsObject : result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = ['fileID'];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                    getImagesHelper.setIntoResult(setOptions, function(response) {
+                        next({
+                            status : 200,
+                            body : response
+                        });
                     })
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -695,7 +656,7 @@ var planogramsHandler = function (db, redis, event) {
         });
     };
 
-    this.getAll = function (req, res, next) {
+    this.getAll = function(req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
             var page = query.page || 1;
@@ -716,18 +677,18 @@ var planogramsHandler = function (db, redis, event) {
                 'retailSegment.name.ar',
                 'category.name.en',
                 'category.name.ar',
-                'configuration.name'
+                'configuration'
             ];
 
             var sort = query.sort || {
-                    'editedBy.date': 1
+                    'editedBy.date' : 1
                 };
 
             delete queryObject.globalSearch;
             queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.PLANOGRAM,
-                filter     : query.filter || {},
-                personnel  : personnel
+                contentType : CONTENT_TYPES.PLANOGRAM,
+                filter : query.filter || {},
+                personnel : personnel
             });
 
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
@@ -746,23 +707,23 @@ var planogramsHandler = function (db, redis, event) {
                 var aggregation;
 
                 var pipeLine = getAllPipeLine({
-                    queryObject      : queryObject,
-                    aggregateHelper  : aggregateHelper,
-                    isMobile         : isMobile,
-                    searchFieldsArray: searchFieldsArray,
-                    filterSearch     : filterSearch,
-                    skip             : skip,
-                    limit            : limit,
-                    sort             : sort
+                    queryObject : queryObject,
+                    aggregateHelper : aggregateHelper,
+                    isMobile : isMobile,
+                    searchFieldsArray : searchFieldsArray,
+                    filterSearch : filterSearch,
+                    skip : skip,
+                    limit : limit,
+                    sort : sort
                 });
 
                 aggregation = PlanogramModel.aggregate(pipeLine);
 
                 aggregation.options = {
-                    allowDiskUse: true
+                    allowDiskUse : true
                 };
 
-                aggregation.exec(function (err, result) {
+                aggregation.exec(function(err, result) {
                     if (err) {
                         return parallelCb(err);
                     }
@@ -773,12 +734,12 @@ var planogramsHandler = function (db, redis, event) {
             }
 
             parallelTasks = {
-                data: contentFinder
+                data : contentFinder
             };
 
-            async.parallel(parallelTasks, function (err, response) {
+            async.parallel(parallelTasks, function(err, response) {
                 var options = {
-                    data: {}
+                    data : {}
                 };
                 var personnelIds = [];
                 var fileIds = [];
@@ -787,13 +748,19 @@ var planogramsHandler = function (db, redis, event) {
                     return next(err);
                 }
 
-                response = response && response.data && response.data.length ? response.data[0] : {data: [], total: 0};
+                response = response && response.data && response.data.length ? response.data[0] : {
+                    data : [],
+                    total : 0
+                };
 
                 if (!response.data.length) {
-                    return next({status: 200, body: response});
+                    return next({
+                        status : 200,
+                        body : response
+                    });
                 }
 
-                _.map(response.data, function (element) {
+                _.map(response.data, function(element) {
                     personnelIds.push(element.createdBy.user._id);
                     if (element.fileID && element.fileID._id) {
                         fileIds.push(element.fileID._id);
@@ -805,7 +772,7 @@ var planogramsHandler = function (db, redis, event) {
                 options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
                 options.data[CONTENT_TYPES.FILES] = fileIds;
 
-                getImagesHelper.getImages(options, function (err, result) {
+                getImagesHelper.getImages(options, function(err, result) {
                     var fieldNames = {};
                     var setOptions;
                     if (err) {
@@ -813,28 +780,25 @@ var planogramsHandler = function (db, redis, event) {
                     }
 
                     setOptions = {
-                        response  : response,
-                        imgsObject: result
+                        response : response,
+                        imgsObject : result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = ['fileID'];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                    getImagesHelper.setIntoResult(setOptions, function(response) {
+                        next({
+                            status : 200,
+                            body : response
+                        });
                     })
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed, personnel) {
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
@@ -842,61 +806,60 @@ var planogramsHandler = function (db, redis, event) {
         });
     };
 
-    this.update = function (req, res, next) {
+    this.update = function(req, res, next) {
         function queryRun(body) {
             var files = req.files.inputImg.name ? req.files : null;
             var userId = req.session.uId;
             var id = req.params.id;
 
-            for (var key in body) {
-                body[key] = ObjectId(body[key]);
-            }
-
             body.editedBy = {
-                user: ObjectId(userId),
-                date: new Date()
+                user : ObjectId(userId),
+                date : new Date()
             };
 
             async.waterfall([
-                function (callback) {
+                function(callback) {
                     if (!files) {
                         return callback(null, null);
                     }
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, function (err, fileId) {
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, function(err, fileId) {
                         if (err) {
                             return callback(err);
                         }
                         callback(null, fileId[0]);
                     })
                 },
-                function (fileId, callback) {
+                function(fileId, callback) {
                     if (fileId) {
                         body.fileID = fileId;
                     }
-                    PlanogramModel.findByIdAndUpdate(id, {$set: body}, {new: true})
-                        .exec(function (err, model) {
+                    PlanogramModel.findByIdAndUpdate(id, {$set : body}, {new : true})
+                        .exec(function(err, model) {
                             if (err) {
                                 return callback(err);
                             }
 
                             event.emit('activityChange', {
-                                module    : ACL_MODULES.PLANOGRAM,
-                                actionType: ACTIVITY_TYPES.UPDATED,
+                                module : ACL_MODULES.PLANOGRAM,
+                                actionType : ACTIVITY_TYPES.UPDATED,
                                 createdBy : body.editedBy,
-                                itemId    : id,
-                                itemType  : CONTENT_TYPES.PLANOGRAM
+                                itemId : id,
+                                itemType : CONTENT_TYPES.PLANOGRAM
                             });
 
                             callback(null, model);
                         });
                 },
-                function (model, callback) {
+                function(model, callback) {
                     var id = model.get('_id');
 
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, callback);
+                    self.getByIdAggr({
+                        id : id,
+                        isMobile : req.isMobile
+                    }, callback);
                 }
 
-            ], function (err, model) {
+            ], function(err, model) {
                 if (err) {
                     return next(err);
                 }
@@ -905,17 +868,10 @@ var planogramsHandler = function (db, redis, event) {
             });
         }
 
-        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function(err) {
             var body = req.body;
 
             if (err) {
-                return next(err);
-            }
-
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
@@ -930,7 +886,7 @@ var planogramsHandler = function (db, redis, event) {
             }
 
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'update', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'update', function(err, saveData) {
                 if (err) {
                     return next(err);
                 }

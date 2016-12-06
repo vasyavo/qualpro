@@ -347,7 +347,7 @@ define([
                 model.descriptionString = model.description[currentLanguage];
                 model.branchString = model.branch.name[currentLanguage];
                 model.outletString = model.outlet.name[currentLanguage];
-                model.displayTypeString = model.displayType[0].name[currentLanguage];
+                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType[0].name[currentLanguage] : '';
                 model.startDate = moment(model.startDate).format('DD.MM.YYYY');
                 model.endDate = moment(model.endDate).format('DD.MM.YYYY');
                 model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;

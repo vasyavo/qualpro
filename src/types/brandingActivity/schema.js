@@ -14,9 +14,9 @@ const schema = new Schema({
     outlet: [{ type: ObjectId, ref: CONTENT_TYPES.OUTLET }],
     branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH }],
     displayType: {
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     },
     dateStart: { type: Date },
     dateEnd: { type: Date },

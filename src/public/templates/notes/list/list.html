@@ -5,12 +5,31 @@
         <span class="fontBold textEllipsis"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></span>
     </div>
     <div class="locationBlock">
-        <div class="locationTitle">
-            <span class="fontBold"><%= model.title || '' %></span>
-            <span class="dates floatRight"><%=model.createdBy.date || ''%></span>
+        <div class="locationTop">
+            <div class="flexRow">
+                <div class="flexColumn locationTitlewrap">
+                    <span class="fontBold"><%= model.title || '' %></span>
+
+                    <div class="fontSmall"><%=model.theme || ''%></div>
+                    <div class="fontSmall fontGray textEllipsis multiEllipsis childEllipsis"><%=model.description || ''%></div>
+                </div>
+                <div>
+                    <div class="bannerWrap floatLeft">
+                        <div class="bannerMin bannerWithoutBorder">
+                            <div class="bannerMd fileThumbnailItem brandItem masonryThumbnail">
+                                <div class="thumbnail_js thumbnailBody">
+                                    <!--insert image here-->
+                                    <img src="images/tuna.jpg" alt="">
+                                    <!--insert image here-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="dates floatRight"><%=model.createdBy.date || ''%></span>
+                </div>
+            </div>
+
         </div>
-        <div class="fontSmall"><%=model.theme || ''%></div>
-        <div class="fontSmall fontGray textEllipsis multiEllipsis childEllipsis"><%=model.description || ''%></div>
     </div>
     <div class="actionsBlock">
         <span class="editContent bottomLine"></span>
