@@ -798,6 +798,37 @@ const standardPack = [
     shouldGetAccessRoles,
 ];
 
+const merchandiserPack = [
+    shouldGetActivityList,
+    shouldGetLocation,
+    shouldGetRetailSegment,
+    shouldGetOutlet,
+    shouldGetBranch,
+    shouldGetPersonnel,
+    shouldGetObjectives,
+    shouldGetInStoreTasks,
+    shouldGetPlanogram,
+    shouldGetItemPrices,
+
+    shouldGetDocuments,
+    shouldGetContractYearly,
+
+    shouldGetAlAlaliPromoEvaluation,
+    shouldGetCompetitorPromoActivity,
+    shouldGetShelfShare,
+    shouldGetNewProductLaunch,
+
+    shouldGetBrandingActivity,
+    shouldGetBrandingAndDisplayReport,
+    shouldGetCompetitorDisplayReport,
+    shouldGetAchievementForm,
+    shouldGetQuestionnary,
+    shouldGetNotifications,
+    shouldGetNotes,
+    shouldGetOrigins,
+    shouldGetAccessRoles,
+];
+
 module.exports = {
     shouldGetActivityList,
     shouldSyncActivityList,
@@ -887,5 +918,6 @@ module.exports = {
 
     getAllMeta,
 
-    standardPack
+    standardPack,
+    merchandiserPack
 };
