@@ -21,8 +21,9 @@ const schema = new Schema({
         ar: { type: String, default: '' }
     },
     displayType: [{
-        type: Number,
-        ref: CONTENT_TYPES.DISPLAYTYPE
+        type: ObjectId,
+        ref: CONTENT_TYPES.DISPLAYTYPE,
+        default : null
     }],
     dateStart: { type: Date },
     dateEnd: { type: Date },

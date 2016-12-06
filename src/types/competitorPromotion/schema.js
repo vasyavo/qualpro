@@ -23,9 +23,9 @@ const schema = new Schema({
     packingType: { type: String, enum: ['gm', 'ml', ''], default: ''},
     expiry: { type: Date },
     displayType: [{
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     }],
     dateStart: { type: Date },
     dateEnd: { type: Date },
