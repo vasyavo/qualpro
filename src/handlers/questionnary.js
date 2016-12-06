@@ -198,7 +198,7 @@ const QuestionnaryHandler = function (db, redis, event) {
 
                 queryObject.$and.push({
                     dueDate: {
-                        $lt: currentDate
+                        $gt: currentDate
                     }
                 });
             }
@@ -339,7 +339,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                 const currentDate = new Date();
 
                 queryObject.dueDate = {
-                    $lt: currentDate
+                    $gt: currentDate
                 };
             }
 
