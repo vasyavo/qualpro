@@ -134,7 +134,7 @@ define(['Backbone',
             if (data.login === '') {
                 loginForm.addClass('notRegister');
             }
-
+debugger;
             $.ajax({
                 url : '/login',
                 type: 'POST',
@@ -156,6 +156,7 @@ define(['Backbone',
                                 App.currentUser = newCurrentUser.toJSON();
                                 $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
                                 moment.locale(App.currentUser.currentLanguage);
+                                debugger;
                                 custom.runApplication(true);
                             },
                             error  : function () {
