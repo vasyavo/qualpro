@@ -7072,19 +7072,19 @@ const tradeMarketer = [
     }
 ];
 
-const accessRolesData = {
-    0: superAdmin,
-    1: masterAdmin,
-    2: countryAdmin,
-    3: areaFiledManager,
-    4: areaInChargeManager,
-    5: salesman,
-    6: merchandiser,
-    7: cashVan,
-    8: tradeMarketer,
-    9: masterUpload,
-    10: countryUpload
-};
+const accessRolesData = [
+    superAdmin,
+    masterAdmin,
+    countryAdmin,
+    areaFiledManager,
+    areaInChargeManager,
+    salesman,
+    merchandiser,
+    cashVan,
+    tradeMarketer,
+    masterUpload,
+    countryUpload
+];
 
 const accessRoles = [];
 
@@ -7097,7 +7097,7 @@ for (let level in accessRolesData) {
 }
 
 const levels = [
-    'Super User',
+    'Super Admin',
     'Master Admin',
     'Country Admin',
     'Area Manager',
@@ -7135,9 +7135,15 @@ const generate = (callback) => {
                     roleAccess
                 }, {
                     new: true,
-                    upsert: true,
-                    runValidators: true
-                }, eachCb);
+                    upsert: true
+                }, (err, model) => {
+                    if (model) {
+                        // tip: goal of it that we cat use it in tests.
+                        accessRoles[level].id = model._id.toString();
+                    }
+
+                    eachCb(err, model);
+                });
             }, cb);
         }
 
