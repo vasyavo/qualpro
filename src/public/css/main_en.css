@@ -6848,6 +6848,10 @@ ul.newSelectList .miniStylePagination {
   bottom: 0;
   left: 0;
 }
+.bannerBlock {
+  position: absolute;
+  right: 20%;
+}
 .previewLocation .locationPath {
   padding: 10px;
   border-bottom: 1px solid #cfd8dc;

@@ -35,19 +35,16 @@ var AggregationHelper = function (defProjection, filter) {
         return resultObject;
     }
 
-    this.setSyncQuery = function (queryObject, lastLogOut) {
-        queryObject.$or = [
-            {
-                'editedBy.date': {
-                    $gt: lastLogOut
-                }
-            },
-            {
-                'createdBy.date': {
-                    $gt: lastLogOut
-                }
+    this.setSyncQuery = (queryObject, lastLogOut) => {
+        queryObject.$or = [{
+            'editedBy.date': {
+                $gt: lastLogOut
             }
-        ];
+        }, {
+            'createdBy.date': {
+                $gt: lastLogOut
+            }
+        }];
     };
 
     this.translatedCond = function (language, fields, translated) {
