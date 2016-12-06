@@ -7130,21 +7130,14 @@ const generate = (callback) => {
                 AccessRoleModel.findOneAndUpdate({
                     'name.en': name
                 }, {
-                    $set: {
-                        'name.en': name,
-                        level,
-                        roleAccess
-                    }
+                    'name.en': name,
+                    level,
+                    roleAccess
                 }, {
                     new: true,
-                    upsert: true
-                }, (err, model) => {
-                    if (model) {
-                        accessRoles[level].id = model._id.toString();
-                    }
-
-                    eachCb(err, model);
-                });
+                    upsert: true,
+                    runValidators: true
+                }, eachCb);
             }, cb);
         }
 
