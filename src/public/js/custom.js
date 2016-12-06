@@ -16,6 +16,19 @@ define([
             Backbone.history.start({silent: true});
         }
 
+        if (!success) {
+            return getCurrentUserFails();
+        }
+
+        function getCurrentUserFails() {
+            if (App.requestedURL === null) {
+                App.requestedURL = Backbone.history.fragment === 'login/confirmed' ? null : Backbone.history.fragment;
+            }
+
+            Backbone.history.fragment = '';
+            return Backbone.history.navigate('login', {trigger: true});
+        }
+
         function loadUrl(success) {
             if (success) {
                 url = Backbone.history.fragment;
@@ -30,14 +43,6 @@ define([
 
                 Backbone.history.fragment = "";
                 Backbone.history.navigate(url, {trigger: true});
-
-            } else {
-                if (App.requestedURL === null) {
-                    App.requestedURL = Backbone.history.fragment === 'login/confirmed' ? null : Backbone.history.fragment;
-                }
-
-                Backbone.history.fragment = '';
-                Backbone.history.navigate('login', {trigger: true});
             }
         }
 
@@ -54,11 +59,14 @@ define([
                         App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
                     },
 
-                    error: function () {
-                        App.render({
-                            type   : 'error',
-                            message: ERROR_MESSAGES.canNotFetchCurrentUser.en + '</br>' + ERROR_MESSAGES.canNotFetchCurrentUser.ar
-                        });
+                    error: function (err) {
+                        const status = err.status;
+                        switch (status) {
+                            case 401 :
+                                getCurrentUserFails();
+                                break;
+                            default : break;
+                        }
                     }
                 });
             } else {
