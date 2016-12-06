@@ -1,4 +1,5 @@
 const async = require('async');
+const logger = require('./../utils/logger');
 const ObjectId = require('bson-objectid');
 const _ = require('underscore');
 const lodash = require('lodash');
@@ -165,19 +166,41 @@ const QuestionnaryHandler = function (db, redis, event) {
             }
 
             const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const currentDate = new Date();
 
-            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
-
-            queryObject.$or = [{
-                'createdBy.user': personnel._id
+            queryObject.$and = [{
+                // standard synchronization behaviour
+                $or : [{
+                    'editedBy.date': {
+                        $gt: lastLogOut
+                    }
+                }, {
+                    'createdBy.date': {
+                        $gt: lastLogOut
+                    }
+                }]
             }, {
-                'createdBy.user': {
-                    $ne: personnel._id
-                },
-                status: {
-                    $eq: 'active'
-                }
+                // user should see questionnaire which are related to him, probably which are active
+                $or: [{
+                    'createdBy.user': personnel._id
+                }, {
+                    'createdBy.user': {
+                        $ne: personnel._id
+                    },
+                    status: {
+                        $eq: 'active'
+                    }
+                }]
             }];
+
+            if (isMobile) {
+                // user sees only ongoing questionnaire via mobile app
+                queryObject.$and.push({
+                    dueDate: {
+                        $lt: currentDate
+                    }
+                });
+            }
 
             const pipeline = [];
 
@@ -190,7 +213,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                 (cb) => {
                     if (isMobile) {
                         pipeline.push({
-                            $project: aggregateHelper.getProjection({
+                            $project: Object.assign({}, $defProjection, {
                                 creationDate: '$createdBy.date',
                                 updateDate: '$editedBy.date'
                             })
@@ -198,7 +221,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                     }
 
                     pipeline.push({
-                        $project: aggregateHelper.getProjection({
+                        $project: Object.assign({}, $defProjection, {
                             lastDate: {
                                 $ifNull: [
                                     '$editedBy.date',
