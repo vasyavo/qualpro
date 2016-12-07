@@ -1069,19 +1069,24 @@ var Personnel = function (db, redis, event) {
             async.waterfall([
 
                 (cb) => {
-                    AccessRoleModel.create({
-                        name : {
-                            en: 'Super Admin',
-                            ar: 'Super Admin'
-                        },
+                    AccessRoleModel.findOne({
                         level: 0
-                    }, cb);
+                    }, cb)
                 },
 
                 (accessRole, cb) => {
+                    if (!accessRole) {
+                        return cb('Super access role not existing.')
+                    }
+
                     su.accessRole = accessRole._id;
 
-                    PersonnelModel.create(su, cb);
+                    const personnelModel = new PersonnelModel();
+
+                    personnelModel.set(su);
+                    personnelModel.save((err, model, numAffected) => {
+                        cb(err, model);
+                    });
                 },
 
                 // SU only one, email should be sent in waterfall
@@ -1209,7 +1214,12 @@ var Personnel = function (db, redis, event) {
                         return res.status(400).send('User with such credentials already exist')
                     }
 
-                    PersonnelModel.create(body, cb);
+                    const personnelModel = new PersonnelModel();
+
+                    personnelModel.set(body);
+                    personnelModel.save((err, model, numAffected) => {
+                        cb(err, model);
+                    });
                 },
 
                 (personnel, cb) => {
