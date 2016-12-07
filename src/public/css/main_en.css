@@ -3590,6 +3590,12 @@ a.disabled {
 .thumbnail .arrowLeft:after {
   content: '\e935' !important;
 }
+.thumbnail .folder {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  padding: 25px 20px 0;
+}
 .thumbnailBody:before,
 .thumbnailBody:after {
   content: "";
