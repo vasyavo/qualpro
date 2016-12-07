@@ -1,9 +1,10 @@
 const async = require('async');
 const logger = require('./../utils/logger');
-const ObjectId = require('bson-objectid');
 const _ = require('underscore');
 const lodash = require('lodash');
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
+const isValidObjectId = require('bson-objectid').isValid;
 const QuestionnaryModel = require('./../types/questionnaries/model');
 const QuestionnaryAnswerModel = require('./../types/questionnariesAnswer/model');
 const PersonnelModel = require('./../types/personnel/model');
@@ -121,7 +122,7 @@ const QuestionnaryHandler = function (db, redis, event) {
 
                 let isCreator = null;
 
-                if (ObjectId.isValid(creator)) {
+                if (isValidObjectId(creator)) {
                     // fixme: should check it here as sync aggregation do not includes projection for $createdBy.user
                     isCreator = creator && creator.toString() === personnelId;
                 } else {
