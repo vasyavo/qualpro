@@ -6460,6 +6460,7 @@ const tradeMarketer = [
     }
 ];
 
+// sequence is important
 const accessRolesData = [
     superAdmin,
     masterAdmin,
@@ -6469,9 +6470,9 @@ const accessRolesData = [
     salesman,
     merchandiser,
     cashVan,
-    tradeMarketer,
     masterUpload,
-    countryUpload
+    countryUpload,
+    tradeMarketer
 ];
 
 const accessRoles = [];
@@ -6484,6 +6485,7 @@ for (let level in accessRolesData) {
     });
 }
 
+// sequence is important
 const levels = [
     'Super Admin',
     'Master Admin',
@@ -6493,9 +6495,9 @@ const levels = [
     'Sales Man',
     'Merchandiser',
     'Cash van',
-    'Trade marketer',
     'Master uploader',
-    'Country uploader'
+    'Country uploader',
+    'Trade marketer'
 ];
 
 const generate = (callback) => {
