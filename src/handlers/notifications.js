@@ -1,3 +1,5 @@
+const FileHandler = require('../handlers/file');
+
 var Notifications = function (db, redis, event) {
     var _ = require('lodash');
     var async = require('async');
@@ -17,7 +19,9 @@ var Notifications = function (db, redis, event) {
     var ObjectId = mongoose.Types.ObjectId;
     var self = this;
 
-    var $defProjection = {
+    const fileHandler = new FileHandler(db);
+
+    let $defProjection = {
         _id          : 1,
         createdBy    : 1,
         recipients   : 1,
@@ -30,7 +34,8 @@ var Notifications = function (db, redis, event) {
         position     : 1,
         retailSegment: 1,
         outlet       : 1,
-        length       : 1
+        length       : 1,
+        attachments  : 1
     };
 
     function redisNotifications(options, callback) {
@@ -87,6 +92,8 @@ var Notifications = function (db, redis, event) {
     }
 
     function getAllPipeLine(options) {
+        const withAttachments = options.withAttachments;
+        const afterCreate = options.afterCreate;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject || {};
         var isMobile = options.isMobile;
@@ -334,6 +341,37 @@ var Notifications = function (db, redis, event) {
             }));
         }
 
+        if (afterCreate || withAttachments) {
+            pipeLine.push(...aggregateHelper.aggregationPartMaker({
+                from : CONTENT_TYPES.FILES,
+                key : 'attachments',
+                isArray: true,
+                addProjection : ['_id', 'name', 'preview']
+            }));
+            /*pipeLine.push({
+                $unwind : {
+                    path: '$attachments'
+                }
+            });
+
+            pipeLine.push({
+                $lookup : {
+                    from: CONTENT_TYPES.FILES,
+                    localField: 'attachments',
+                    foreignField : '_id',
+                    as: 'attachments'
+                }
+            });*/
+
+            /*pipeLine.push({
+                $group : {
+                    _id : '$_id',
+                    attachments : {$push: '$attachments'},
+                    createdBy : {$first : '$createdBy'}
+                }
+            });*/
+        }
+
         pipeLine.push({
             $project: {
                 _id        : 1,
@@ -342,7 +380,8 @@ var Notifications = function (db, redis, event) {
                 editedBy   : 1,
                 description: 1,
                 position   : 1,
-                recipients : 1
+                recipients : 1,
+                attachments: 1
             }
         });
 
@@ -526,7 +565,8 @@ var Notifications = function (db, redis, event) {
                 skip           : skip,
                 limit          : limit,
                 isMobile       : isMobile,
-                personnelId    : personnel._id
+                personnelId    : personnel._id,
+                withAttachments : true
             });
 
             aggregation = NotificationModel.aggregate(pipeLine);
@@ -604,17 +644,18 @@ var Notifications = function (db, redis, event) {
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var session = req.session;
-            var userId = session.uId;
-            var createdBy = {
+            const userId = req.session.uId;
+            const createdBy = {
                 user: ObjectId(userId),
                 date: new Date()
             };
-            var model;
-            var pipeLine;
-            var aggregateHelper;
-            var queryObject;
-            var aggregation;
+
+            if (body.description) {
+                body.description = {
+                    en: _.unescape(body.description.en),
+                    ar: _.unescape(body.description.ar)
+                };
+            }
 
             for (var key in body) {
                 if (typeof(body[key]) === 'string' && body[key]) {
@@ -625,47 +666,70 @@ var Notifications = function (db, redis, event) {
                 }
             }
 
-            if (body.description) {
-                body.description = {
-                    en: _.unescape(body.description.en),
-                    ar: _.unescape(body.description.ar)
-                };
-            }
-
             body.createdBy = createdBy;
-            model = new NotificationModel(body);
-            model.save(function (err, model) {
-                if (err) {
-                    return next(err);
-                }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.NOTIFICATION,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : model.createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.NOTIFICATIONS
-                });
+            async.waterfall([
+                (cb) => {
+                    const files = req.files;
 
-                aggregateHelper = new AggregationHelper($defProjection);
-
-                queryObject = {_id: model._id};
-
-                pipeLine = getAllPipeLine({
-                    aggregateHelper: aggregateHelper,
-                    queryObject    : queryObject
-                });
-
-                aggregation = NotificationModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse: true
-                };
-
-                aggregation.exec(function (err, response) {
-                    if (err) {
-                        return next(err);
+                    if (!files) {
+                        return cb(null, []);
                     }
+
+                    fileHandler.uploadFile(userId, files, 'notification', function (err, filesIds) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, filesIds);
+                    });
+                },
+
+                (arrayOfFilesId, cb) => {
+                    body.attachments = arrayOfFilesId;
+
+                    const model = new NotificationModel(body);
+                    model.save(body, (err, model, numAffected) => {
+                        // tip: do not remove numAffected
+                        if  (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model);
+                    });
+                },
+
+                (model, cb) => {
+                    event.emit('activityChange', {
+                        module: ACL_MODULES.NOTIFICATION,
+                        actionType: ACTIVITY_TYPES.CREATED,
+                        createdBy: model.createdBy,
+                        itemId: model._id,
+                        itemType: CONTENT_TYPES.NOTIFICATIONS
+                    });
+
+                    const aggregateHelper = new AggregationHelper($defProjection);
+
+                    const queryObject = {
+                        _id: model._id
+                    };
+
+                    const pipeLine = getAllPipeLine({
+                        aggregateHelper: aggregateHelper,
+                        queryObject: queryObject,
+                        afterCreate: true
+                    });
+
+                    let aggregation = NotificationModel.aggregate(pipeLine);
+
+                    aggregation.options = {
+                        allowDiskUse: true
+                    };
+
+                    aggregation.exec(cb);
+                },
+
+                (response, cb) => {
                     if (response.length) {
                         response = response[0];
                         response = response.data && response.data.length ? response.data[0] : response;
@@ -676,78 +740,79 @@ var Notifications = function (db, redis, event) {
                                 en: _.unescape(response.description.en)
                             };
                         }
-
                     }
 
                     redisNotifications({
                         currentUserId     : userId,
                         notificationObject: response,
                         contentType       : CONTENT_TYPES.NOTIFICATIONS
-                    }, function (err, response) {
-                        var idsPersonnel;
-                        var options = {
-                            data: {}
+                    }, cb);
+                },
+
+                (responseFromRedis, cb) => {
+                    let idsPersonnel;
+                    let options = {
+                        data: {}
+                    };
+
+                    if (responseFromRedis.description) {
+                        responseFromRedis.description = {
+                            en: _.unescape(responseFromRedis.description.en),
+                            ar: _.unescape(responseFromRedis.description.ar)
                         };
+                    }
+
+                    if (!Object.keys(responseFromRedis).length) {
+                        return cb(null, responseFromRedis);
+                    }
+
+                    idsPersonnel = _.union([responseFromRedis.createdBy.user._id], _.map(responseFromRedis.recipients, '_id'));
+                    idsPersonnel = _.uniqBy(idsPersonnel, 'id');
+                    options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
+
+                    getImagesHelper.getImages(options, (err, resultFromImageHelper) => {
                         if (err) {
-                            return next(err);
+                            return cb(err);
                         }
 
-                        if (response.description) {
-                            response.description = {
-                                en: _.unescape(response.description.en),
-                                ar: _.unescape(response.description.ar)
-                            };
-                        }
-
-                        if (!Object.keys(response).length) {
-                            return next({status: 200, body: response});
-                        }
-
-                        idsPersonnel = _.union([response.createdBy.user._id], _.map(response.recipients, '_id'));
-                        idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return next(err);
-                            }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = [['recipients'], 'createdBy.user'];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                next({status: 200, body: response});
-                            })
-                        });
+                        cb(null, resultFromImageHelper, responseFromRedis);
                     });
+                },
+            ], (err, resultFromImageHelper, responseFromRedis) => {
+                if (err) {
+                    return next(err);
+                }
+
+                if (!responseFromRedis) {
+                    return next({
+                        status: 200,
+                        body: resultFromImageHelper
+                    });
+                }
+
+                let fieldNames = {};
+                let setOptions = {
+                    response  : responseFromRedis,
+                    imgsObject: resultFromImageHelper
+                };
+
+                fieldNames[CONTENT_TYPES.PERSONNEL] = [['recipients'], 'createdBy.user'];
+                setOptions.fields = fieldNames;
+
+                getImagesHelper.setIntoResult(setOptions, function (response) {
+                    next({status: 200, body: response});
                 });
             });
         }
 
         access.getWriteAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed) {
-
-            var body;
-
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            body = req.body;
+            const body = JSON.parse(req.body.data);
 
             bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.NOTIFICATIONS, 'create', function (err, saveData) {
-
                 if (err) {
                     return next(err);
                 }
@@ -761,9 +826,35 @@ var Notifications = function (db, redis, event) {
         function queryRun() {
             var id = ObjectId(req.params.id);
 
-            self.getByIdAggr({id: id}, function (err, result) {
+            function getLinkFromAws(notificationModel, callback) {
+                if (!_.get(notificationModel, 'attachments')) {
+                    return callback(null, notificationModel || {});
+                }
+                async.each(notificationModel.attachments,
+                    function(file, cb) {
+                        file.url = fileHandler.computeUrl(file.name);
+                        cb();
+                    }, function(err) {
+                        if (err) {
+                            callback(err);
+                        }
+                        callback(null, notificationModel);
+                    });
+            }
+
+            async.waterfall([
+                (cb) => {
+                    self.getByIdAggr({
+                        id
+                    }, cb);
+                },
+
+                (notificationModel, cb) => {
+                    getLinkFromAws(notificationModel, cb);
+                }
+            ], (err, result) => {
                 if (err) {
-                    return next(err);
+                    next(err);
                 }
 
                 res.status(200).send(result);
@@ -945,6 +1036,13 @@ var Notifications = function (db, redis, event) {
                 }
             }));
         }
+
+        pipeLine.push(...aggregateHelper.aggregationPartMaker({
+            from : CONTENT_TYPES.FILES,
+            key : 'attachments',
+            isArray: true,
+            addProjection : ['_id', 'name', 'originalName']
+        }));
 
         if (isMobile) {
             pipeLine.push({
