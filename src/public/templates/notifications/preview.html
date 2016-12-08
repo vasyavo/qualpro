@@ -128,9 +128,9 @@
                         <span class="filesTitle">Files</span>
                         <div id="objectiveFileThumbnail" class="fileThumbnail">
                             <% jsonModel.attachments.map((attachment) => { %>
-                                <div data-id="58402f3ddfb67b1100fa68ba" class="fileThumbnailItem brandItem masonryThumbnail">
+                                <div data-id="<%- attachment._id %>" class="fileThumbnailItem brandItem masonryThumbnail">
                                     <div class="thumbnail_js thumbnailBody">
-                                        <img src="<%- attachment.url %>">
+                                        <img src="<%- attachment.preview %>">
                                         <div class="objectivesFileName fontMicro"><%- attachment.originalName %></div>
                                     </div>
                                 </div>

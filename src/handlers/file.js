@@ -253,13 +253,11 @@ var Files = function (db) {
                     },
 
                     function (waterfallCb) {
-                        var convertOptions;
-
                         if (OTHER_CONSTANTS.IMAGE_CONTENT_TYPES.indexOf(fileOptions.type) === -1) {
                             return waterfallCb(null);
                         }
 
-                        convertOptions = {
+                        const convertOptions = {
                             srcData: fileOptions.data,
                             width  : 150,
                             quality: 1,
@@ -267,43 +265,35 @@ var Files = function (db) {
                         };
 
                         im.resize(convertOptions, function (err, stdout) {
-                            var base64Image;
-                            var prefix = "data:" + fileOptions.type + ";base64,";
-
                             if (err) {
                                 return waterfallCb(err);
                             }
 
-                            base64Image = new Buffer(stdout, 'binary').toString('base64');
+                            const prefix = "data:" + fileOptions.type + ";base64,";
+                            const base64Image = new Buffer(stdout, 'binary').toString('base64');
                             fileOptions.preview = prefix + base64Image;
                             waterfallCb(null);
                         });
                     },
 
                     function (waterfallCb) {
-                        var inputFileName;
-                        var outputFile;
-
                         if (!_.includes(OTHER_CONSTANTS.OTHER_FORMATS, fileOptions.type)) {
                             return waterfallCb(null);
                         }
 
-                        inputFileName = fileOptions.tempPath  + '[0]';
-                        outputFile = '/tmp/' + fileOptions.name + '.png';
+                        const inputFileName = fileOptions.tempPath  + '[0]';
+                        const outputFile = '/tmp/' + fileOptions.name + '.png';
 
                         im.convert([inputFileName, '-resize', '150x150', outputFile],
                             function (err, stdout) {
-                                var base64Image;
                                 // var prefix = 'data:' + fileOptions.type + ';base64,';
-                                var prefix = 'data:image/png;base64,';
-                                var convertedFile;
-
                                 if (err) {
                                     return waterfallCb(err);
                                 }
 
-                                convertedFile = fs.readFileSync(outputFile, 'binary');
-                                base64Image = new Buffer(convertedFile, 'binary').toString('base64');
+                                const prefix = 'data:image/png;base64,';
+                                const convertedFile = fs.readFileSync(outputFile, 'binary');
+                                const base64Image = new Buffer(convertedFile, 'binary').toString('base64');
                                 fileOptions.preview = prefix + base64Image;
                                 waterfallCb(null);
                             });

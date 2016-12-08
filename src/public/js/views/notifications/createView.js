@@ -112,7 +112,7 @@ define([
             var context = e.data.context;
             var data = new FormData(this);
             var currentLanguage = App.currentUser.currentLanguage;
-            debugger;
+
             e.preventDefault();
             data.append('data', JSON.stringify(context.body));
 
@@ -123,11 +123,9 @@ define([
                 contentType: false,
                 processData: false,
                 success    : function (xhr) {
-                    debugger;
                     var model = new Model(xhr, {parse: true});
 
                     context.trigger('modelSaved', model);
-
                 },
                 error      : function (xhr) {
                     App.render({type: 'error', message: xhr.responseText});
