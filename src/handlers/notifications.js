@@ -1041,7 +1041,7 @@ var Notifications = function (db, redis, event) {
             from : CONTENT_TYPES.FILES,
             key : 'attachments',
             isArray: true,
-            addProjection : ['_id', 'name', 'originalName']
+            addProjection : ['_id', 'name', 'originalName', 'preview']
         }));
 
         if (isMobile) {
