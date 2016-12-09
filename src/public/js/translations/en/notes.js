@@ -22,6 +22,10 @@ define([
         theme      : 'Subject',
         createBtn  : 'Create',
         cancelBtn  : 'Cancel',
+        attach     : 'Attach',
+        attachmentsDialogTitle : 'Note Files',
+        attachments : 'Attachments',
+        attachFiles : 'Attach Files',
 
         // edit
         editTitle   : 'Edit Note',

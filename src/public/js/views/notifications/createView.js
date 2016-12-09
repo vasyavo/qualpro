@@ -52,7 +52,7 @@ define([
         },
 
         events : {
-            'click .attachFiles' : 'showAttachDialog'
+            'click #attachFiles' : 'showAttachDialog'
         },
 
         sendNotification: function (cb) {
@@ -95,17 +95,6 @@ define([
 
             self.$el.find('#mainForm').submit();
             cb();
-
-           /* this.model.save(notification, {
-                wait   : true,
-                success: function (data) {
-                    self.trigger('modelSaved', data);
-                    cb();
-                },
-                error  : function (model, xhr) {
-                    App.render({type: 'error', message: xhr.responseText});
-                }
-            });*/
         },
 
         formSubmit: function (e) {
@@ -216,7 +205,6 @@ define([
                 self.fileDialogView.trigger('fileSelected', fileModel);
                 App.masonryGrid.call(self.$el);
             };
-
         },
 
         renderLocations: function () {

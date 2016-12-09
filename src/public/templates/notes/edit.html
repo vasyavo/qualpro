@@ -21,14 +21,29 @@
                        maxlength="32"
                        data-translation="theme"
                        placeholder="<%=translation.theme %>"/>
+                <span id="attach-file" class="attachFile floatRight"></span>
             </div>
         </div>
         <div class="notesBody">
             <textarea id="description"
                       class="noteTextarea"
                       data-property="en"
-                      value=""><%= jsonModel.description %></textarea>
+                      value=""><%= jsonModel.description %>
+            </textarea>
+
+            <div id="attachments" class="attachmentsBlock">
+                <div class="attachmentsHeader">
+                    <span class="attachmentsDescription fontBold"><%- translation.attachments %></span>
+                </div>
+                <div class="formBlock borderBottom">
+                    <div id="formThumbnail"></div>
+                </div>
+                <div class="promotionFilesBlock ">
+                    <form action="" method="post" id="mainForm"></form>
+                    <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock masonryThumbnailsWrapper"></div>
+                </div>
+            </div>
+
         </div>
-        <form action="" method="post" id="mainForm"></form>
     </div>
 </div>

@@ -17,11 +17,23 @@
             <span class="fontBold" data-translation="theme"><%=translation.theme %></span>
             <span id="theme"><%= jsonModel.theme || '' %></span>
         </div>
-
         <div class="notesPreviewBodyWrap">
             <span class="fontBold" data-translation="description"><%=translation.description %>:</span>
             <div class="notesPreviewBody scrollable">
                 <span id="description"><%= jsonModel.description || '' %></span>
+                <div class="filesBlock borderBottom" id="objectiveFiles" style="display: block;">
+                    <span class="filesTitle">Files</span>
+                    <div id="objectiveFileThumbnail" class="fileThumbnail">
+                        <% jsonModel.attachments.map((attachment) => { %>
+                        <div data-id="<%- attachment._id %>" class="fileThumbnailItem brandItem masonryThumbnail">
+                            <div class="thumbnail_js thumbnailBody">
+                                <img src="<%- attachment.url %>">
+                                <div class="objectivesFileName fontMicro"><%- attachment.originalName %></div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

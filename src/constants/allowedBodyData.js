@@ -4,43 +4,43 @@ var allowedParams = {};
 allowedParams[CONTENT_TYPES.NOTES] = {
     0: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     1: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     2: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     3: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     4: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     5: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     6: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     7: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     8: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     9: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     }
 };
 

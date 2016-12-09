@@ -953,6 +953,10 @@ function importPersonnel(callback) {
                     }
                 }
 
+                if (patch.email) {
+                    patch.email.toLowerCase();
+                }
+
                 const country = obj['Country'];
                 const region = obj['Region'];
                 const subRegion = obj['Sub-Region'];

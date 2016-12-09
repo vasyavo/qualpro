@@ -1,4 +1,4 @@
-<div data-id="<%= model.cid || model._id || model.document%>" class="fileThumbnailItem brandItem masonryThumbnail">
+<div id="<%- model._id %>" data-id="<%- model.cid || model._id || model.document %>" class="fileThumbnailItem brandItem masonryThumbnail">
     <div class="thumbnail_js thumbnailBody">
         <% if (model.preview) { %>
         <img src="<%= model.preview %>">

@@ -107,7 +107,9 @@ var Files = function (db) {
             }
         });
 
-        callback(null);
+        if (callback) {
+            callback(null);
+        }
     };
 
     this.computeUrl = function (fileName, bucket) {

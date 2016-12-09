@@ -1,4 +1,5 @@
 const FileHandler = require('../handlers/file');
+const getAwsLinks = require('../reusableComponents/getAwsLinkForAttachmentsFromModel');
 
 var Notifications = function (db, redis, event) {
     var _ = require('lodash');
@@ -348,28 +349,6 @@ var Notifications = function (db, redis, event) {
                 isArray: true,
                 addProjection : ['_id', 'name', 'preview']
             }));
-            /*pipeLine.push({
-                $unwind : {
-                    path: '$attachments'
-                }
-            });
-
-            pipeLine.push({
-                $lookup : {
-                    from: CONTENT_TYPES.FILES,
-                    localField: 'attachments',
-                    foreignField : '_id',
-                    as: 'attachments'
-                }
-            });*/
-
-            /*pipeLine.push({
-                $group : {
-                    _id : '$_id',
-                    attachments : {$push: '$attachments'},
-                    createdBy : {$first : '$createdBy'}
-                }
-            });*/
         }
 
         pipeLine.push({
@@ -676,13 +655,7 @@ var Notifications = function (db, redis, event) {
                         return cb(null, []);
                     }
 
-                    fileHandler.uploadFile(userId, files, 'notification', function (err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, filesIds);
-                    });
+                    fileHandler.uploadFile(userId, files, 'notification', cb);
                 },
 
                 (arrayOfFilesId, cb) => {
@@ -826,22 +799,6 @@ var Notifications = function (db, redis, event) {
         function queryRun() {
             var id = ObjectId(req.params.id);
 
-            function getLinkFromAws(notificationModel, callback) {
-                if (!_.get(notificationModel, 'attachments')) {
-                    return callback(null, notificationModel || {});
-                }
-                async.each(notificationModel.attachments,
-                    function(file, cb) {
-                        file.url = fileHandler.computeUrl(file.name);
-                        cb();
-                    }, function(err) {
-                        if (err) {
-                            callback(err);
-                        }
-                        callback(null, notificationModel);
-                    });
-            }
-
             async.waterfall([
                 (cb) => {
                     self.getByIdAggr({
@@ -850,7 +807,7 @@ var Notifications = function (db, redis, event) {
                 },
 
                 (notificationModel, cb) => {
-                    getLinkFromAws(notificationModel, cb);
+                    getAwsLinks(notificationModel, cb);
                 }
             ], (err, result) => {
                 if (err) {
