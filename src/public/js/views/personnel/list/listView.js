@@ -277,13 +277,17 @@ define([
             App.socket.emit('subscribe_online_status');
 
             App.socket.on('goOnline', (userId) => {
-                const onlineBadge = $(`#online-user-${userId.uid}`);
-                onlineBadge.removeClass('hidden');
+                var onlineStatusTd = $(`#online-${userId.uid}`);
+                var statusTd = $(`#status-${userId.uid}`);
+                onlineStatusTd.removeClass('hidden');
+                statusTd.addClass('hidden');
             });
 
             App.socket.on('goOffline', (userId) => {
-                const onlineBadge = $(`#online-user-${userId.uid}`);
-                onlineBadge.addClass('hidden');
+                var onlineStatusTd = $(`#online-${userId.uid}`);
+                var statusTd = $(`#status-${userId.uid}`);
+                onlineStatusTd.addClass('hidden');
+                statusTd.removeClass('hidden');
             });
 
             return this;
