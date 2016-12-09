@@ -9,7 +9,22 @@
             <span class="dates floatRight"><%=model.createdBy.date || ''%></span>
         </div>
         <div class="fontSmall"><%=model.theme || ''%></div>
-        <div class="fontSmall fontGray textEllipsis multiEllipsis childEllipsis"><%=model.description || ''%></div>
+        <div class="fontSmall fontGray textEllipsis multiEllipsis childEllipsis">
+            <span><%=model.description || ''%></span>
+            <div class="bannerWrap floatLeft">
+                <div class="bannerMin bannerWithoutBorder">
+                    <div class="bannerMd fileThumbnailItem brandItem masonryThumbnail">
+                        <div class="thumbnail_js thumbnailBody">
+                            <!--insert image here-->
+                            <% model.attachments.map((attachment) => { %>
+                                <img src="<%- attachment.url %>">
+                            <% }); %>
+                            <!--insert image here-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="actionsBlock">
         <span class="editContent bottomLine"></span>
