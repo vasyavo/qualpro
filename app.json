@@ -98,6 +98,9 @@
   "buildpacks": [
     {
       "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://bitbucket.org/cf-utilities/cf-buildpack-multi.git"
     }
   ]
 }
