@@ -10,9 +10,10 @@ define([
     'js-cookie',
     'constants/errorMessages',
     'moment',
-    'dataService'
+    'dataService',
+    'constants/aclRoleIndexes'
 ], function (Backbone, $, _, template, shortDescriptionTemplate, personnelPreView,
-             EditView, PersonnelModel, Cookies, ERROR_MESSAGES, moment, dataService) {
+             EditView, PersonnelModel, Cookies, ERROR_MESSAGES, moment, dataService, ACL_ROLE_INDEXES) {
     'use strict';
 
     var TopMenuView = Backbone.View.extend({
@@ -213,8 +214,17 @@ define([
             $holder.html(this.descriptionTemplate(currentUser));
         },
 
-        render: function () {
-            this.$el.html(this.template());
+            render: function () {
+            var userAccessLevel = App.currentUser.accessRole.level;
+            var templateData = {
+                showContactUsBadge : null
+            };
+
+            if (userAccessLevel === ACL_ROLE_INDEXES.MASTER_ADMIN || userAccessLevel === ACL_ROLE_INDEXES.COUNTRY_ADMIN || userAccessLevel === ACL_ROLE_INDEXES.MASTER_UPLOADER || userAccessLevel === ACL_ROLE_INDEXES.COUNTRY_UPLOADER) {
+                templateData.showContactUsBadge = true;
+            }
+
+            this.$el.html(this.template(templateData));
 
             return this;
         }

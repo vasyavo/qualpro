@@ -7,6 +7,7 @@ const schema = new Schema({
     theme: { type: String, default: '', require: true },
     description: { type: String, default: '', require: true },
     archived: { type: Boolean, default: false },
+    attachments : [{ type: ObjectId, ref: CONTENT_TYPES.FILES, default: null }],
     createdBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
         date: { type: Date, default: new Date() }
