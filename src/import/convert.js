@@ -44,12 +44,22 @@ const fetchOrigin = (callback) => {
     OriginModel.find({}).select('_id name.en').lean().exec(callback);
 };
 
-const fetchLocation = (callback) => {
-    LocationModel.find({}).select('_id name.en').lean().exec(callback);
+const fetchDomainCountry = (callback) => {
+    LocationModel
+        .find({
+            type: 'country'
+        })
+        .select('_id name.en')
+        .lean()
+        .exec(callback);
 };
 
 const fetchVariant = (callback) => {
     VariantModel.find({}).select('_id name.en').lean().exec(callback);
+};
+
+const fetchCompetitorVariant = (callback) => {
+    CompetitorVariantModel.find({}).select('_id name.en').lean().exec(callback);
 };
 
 const fetchBrand = (callback) => {
@@ -335,7 +345,7 @@ function importItem(callback) {
                         origin: fetchOrigin,
                         category: fetchCategory,
                         variant: fetchVariant,
-                        country: fetchLocation,
+                        country: fetchDomainCountry,
 
                     }, cb);
                 },
@@ -410,8 +420,8 @@ function importCompetitorItem(callback) {
 
                         origin: fetchOrigin,
                         brand: fetchBrand,
-                        variant: fetchVariant,
-                        country: fetchLocation,
+                        competitorVariant: fetchCompetitorVariant,
+                        country: fetchDomainCountry,
 
                     }, cb);
                 },
@@ -445,7 +455,7 @@ function importCompetitorItem(callback) {
                         });
 
                         patch.variant = getVariantIdByEnName({
-                            collection: collections.variant,
+                            collection: collections.competitorVariant,
                             name: patch.variant
                         });
 
@@ -457,6 +467,7 @@ function importCompetitorItem(callback) {
                         const query = {
                             'name.en': patch.name.en,
                             packing: patch.packing,
+                            origin: patch.origin,
                             brand: patch.brand,
                             variant: patch.variant,
                             country: patch.country
@@ -1115,3 +1126,14 @@ function importPersonnel(callback) {
 
     ], callback);
 }
+
+module.exports = {
+    readCsv,
+    trimObjectValues,
+    fetchOrigin,
+    fetchBrand,
+    fetchCompetitorVariant,
+    fetchDomainCountry,
+    getSampleIdByEnNamePrototype,
+    patchRecord
+};
