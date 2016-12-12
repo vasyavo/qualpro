@@ -3,9 +3,8 @@ const async = require('async');
 const _ = require('lodash');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const mongo = require('./../utils/mongo');
-const schemas = mongoose.Schemas;
 
-var GetImagesHelper = function(db) {
+var GetImagesHelper = function() {
     this.getImages = (options, cb) => {
         const data = options.data;
         const modelNames = Object.keys(data);
@@ -18,7 +17,7 @@ var GetImagesHelper = function(db) {
 
         if (modelNames && modelNames.length) {
             modelNames.forEach((key) => {
-                models[key] = db.model(key, schemas[key]);
+                models[key] = require('./../types')[key];
             });
         }
 
@@ -40,7 +39,9 @@ var GetImagesHelper = function(db) {
         }
 
         for (let key in models) {
-            parallelTasks[key] = getWhereIdIn(models[key], key);
+            const model = models[key];
+
+            parallelTasks[key] = getWhereIdIn(model, key);
         }
 
         async.parallel(parallelTasks, cb);
