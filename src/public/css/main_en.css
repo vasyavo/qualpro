@@ -3891,10 +3891,10 @@ a.disabled {
   cursor: pointer;
   width: 15px;
   height: 15px;
-  top: 2px;
+  top: 9px;
 }
 .selectAll li {
-  padding-top: 5px;
+  padding: 0 15px 0 35px;
   background: #f7f7f7;
   color: #90a9b7;
 }
