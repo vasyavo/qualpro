@@ -73,6 +73,14 @@ define([
                 var jsonCollection = this.collection.toJSON();
                 var $holder;
 
+                jsonCollection.map(function (model) {
+                    model.displayTypeString = model.displayType.map((item) => {
+                        return item.name.currentLanguage;
+                    }).join(', ');
+
+                    return model;
+                });
+
                 $currentEl.html('');
                 $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
 
