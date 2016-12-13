@@ -31,7 +31,7 @@
                     <%= translation.description %>: <%= model.promotion %>
                 </div>
                 <div class="fontSmall fontGray textEllipsis hoverFullText">
-                    <%= translation.displayType %>: <%= model.displayType && model.displayType.name && model.displayType.name.currentLanguage || '' %>
+                    <%- translation.displayType %>: <%- model.displayTypeString ? model.displayTypeString : '' %>
                 </div>
             </div>
             <div class="flexRow bannerBlock">

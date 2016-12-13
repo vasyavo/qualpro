@@ -3,7 +3,7 @@ define([
 ], function (_) {
     return _.extend({}, {
         action   : 'اتخاذ إجراء',
-        disable  : 'إلغاء تفعيل',
+        disable  : 'ارشفة',
         unDisable: 'إعادة تفعيل',
         edit     : 'تعديل'
     });

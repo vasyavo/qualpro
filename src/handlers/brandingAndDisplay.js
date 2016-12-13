@@ -328,7 +328,7 @@ function BrandingAndDisplay(db, redis, event) {
         var error;
 
         function generateSearchCondition(query) {
-            const globalSearch = query.globalSearch
+            const globalSearch = query.globalSearch;
             var searchVariants = [
                 'outlet',
                 'branch',

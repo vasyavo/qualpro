@@ -4774,7 +4774,7 @@ a.disabled {
   height: calc(100% - 75px) !important;
 }
 .notesDialog .form-holder .notesCreateDialog {
-  height: calc(100% - 120px);
+  height: calc(80% - 120px);
 }
 .notesDialog .form-holder .notesBody {
   height: calc(100% - 45px);
@@ -9245,6 +9245,9 @@ table.fancytree-ext-table {
 .questionnarieWrap .searchInputWrap label:after {
   top: 0;
   line-height: 2.4;
+}
+.notesSearch .searchInputWrap label:after {
+  line-height: 1.5;
 }
 .questionnarie-form {
   height: calc(100% - 75px) !important;

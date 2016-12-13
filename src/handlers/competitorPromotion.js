@@ -68,7 +68,7 @@ var CompetitorBranding = function(db, redis, event) {
                 },
 
                 function(filesIds, cb) {
-                    var createdBy = {
+                    let createdBy = {
                         user : req.session.uId,
                         date : new Date()
                     };
@@ -88,7 +88,7 @@ var CompetitorBranding = function(db, redis, event) {
                     if (body.packing) {
                         body.packing = _.escape(body.packing);
                     }
-                    var competitorPromotion = {
+                    let competitorPromotion = {
                         description : body.description,
                         category : body.category,
                         brand : body.brand,
@@ -102,6 +102,7 @@ var CompetitorBranding = function(db, redis, event) {
                         promotion : body.promotion,
                         price : body.price,
                         packing : body.packing,
+                        packingType : body.packingType,
                         expiry : body.expiry,
                         attachments : filesIds,
                         displayType : body.displayType,
@@ -466,10 +467,17 @@ var CompetitorBranding = function(db, redis, event) {
             isArray : false
         }));
 
+        pipeLine.push({
+            $unwind : {
+                path : '$displayType'
+            }
+        });
+
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'displayTypes',
             key : 'displayType',
-            isArray : true
+            isArray : true,
+            addProjection : ['_id', 'name']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

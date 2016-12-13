@@ -89,7 +89,7 @@ var Files = function (db) {
 
             if (!fileModel) {
                 error = new Error('File model not found');
-                error.status = 400;
+                error.status = 404;
                 return next(error);
             }
 
@@ -107,7 +107,9 @@ var Files = function (db) {
             }
         });
 
-        callback(null);
+        if (callback) {
+            callback(null);
+        }
     };
 
     this.computeUrl = function (fileName, bucket) {

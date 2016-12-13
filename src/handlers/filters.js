@@ -1,40 +1,39 @@
-'use strict';
+const mongoose = require('mongoose');
+const async = require('async');
+const _ = require('underscore');
+const PersonnelModel = require('./../types/personnel/model');
+const BrandingActivityModel = require('../types/brandingActivity/model');
+const ObjectiveModel = require('./../types/objective/model');
+const ItemModel = require('./../types/item/model');
+const ActivityListModel = require('./../types/activityList/model');
+const PlanogramModel = require('./../types/planogram/model');
+const QuestionnaryModel = require('./../types/questionnaries/model');
+const CompetitorItemModel = require('./../types/competitorItem/model');
+const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
+const CompetitorBrandingModel = require('./../types/competitorBranding/model');
+const ContractsYearlyModel = require('./../types/contractYearly/model');
+const ContractsSecondaryModel = require('./../types/contractSecondary/model');
+const PromotionModel = require('./../types/promotion/model');
+const DocumentModel = require('./../types/document/model');
+const DomainModel = require('./../types/domain/model');
+const NoteModel = require('./../types/note/model');
+const ShelfSharesModel = require('./../types/shelfShare/model');
+const PriceSurveyModel = require('./../types/priceSurvey/model');
+const NotificationModel = require('./../types/notification/model');
+const BranchModel = require('./../types/branch/model');
+const OutletModel = require('./../types/outlet/model');
+const NewProductLaunchModel = require('./../types/newProductLaunch/model');
+const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+const AggregationHelper = require('../helpers/aggregationCreater');
+const FilterMapper = require('../helpers/filterMapper');
+const FILTERS_CONSTANTS = require('../public/js/constants/filters');
+const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+const logger = require('./../utils/logger');
 
-var mongoose = require('mongoose');
-var Filters = function(db, redis) {
-    var FILTERS_CONSTANTS = require('../public/js/constants/filters');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var FilterMapper = require('../helpers/filterMapper');
-    var async = require('async');
-    var self = this;
+const Filters = function(db, redis) {
+    const self = this;
 
-    const PersonnelModel = require('./../types/personnel/model');
-    const BrandingActivityModel = require('../types/brandingActivity/model');
-    const ObjectiveModel = require('./../types/objective/model');
-    const ItemModel = require('./../types/item/model');
-    const ActivityListModel = require('./../types/activityList/model');
-    const PlanogramModel = require('./../types/planogram/model');
-    const QuestionnaryModel = require('./../types/questionnaries/model');
-    const CompetitorItemModel = require('./../types/competitorItem/model');
-    const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
-    const CompetitorBrandingModel = require('./../types/competitorBranding/model');
-    const ContractsYearlyModel = require('./../types/contractYearly/model');
-    const ContractsSecondaryModel = require('./../types/contractSecondary/model');
-    const PromotionModel = require('./../types/promotion/model');
-    const DocumentModel = require('./../types/document/model');
-    const DomainModel = require('./../types/domain/model');
-    const NoteModel = require('./../types/note/model');
-    const ShelfSharesModel = require('./../types/shelfShare/model');
-    const PriceSurveyModel = require('./../types/priceSurvey/model');
-    const NotificationModel = require('./../types/notification/model');
-    const BranchModel = require('./../types/branch/model');
-    const OutletModel = require('./../types/outlet/model');
-    const NewProductLaunchModel = require('./../types/newProductLaunch/model');
-    const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
-
-    var _ = require('underscore');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var $defProjection = {
+    const $defProjection = {
         _id : 1,
         origin : 1,
         country : 1,
@@ -999,9 +998,9 @@ var Filters = function(db, redis) {
         var positionFilter;
         var brandFilter;
         var aggregateHelper;
-        $defProjection = _.extend({
+        const $defProjectionExtended = Object.assign({}, $defProjection, {
             brands : 1
-        }, $defProjection);
+        });
 
         if (filter.brand) {
             brandFilter = filter.brand;
@@ -1018,7 +1017,7 @@ var Filters = function(db, redis) {
             delete filter.position;
         }
 
-        aggregateHelper = new AggregationHelper($defProjection, filter);
+        aggregateHelper = new AggregationHelper($defProjectionExtended, filter);
 
         if (personnelFilter) {
             pipeLine.push({
@@ -1192,7 +1191,7 @@ var Filters = function(db, redis) {
                 filterExists : filterExists,
                 filtersObject : result,
                 personnelId : req.personnelModel._id,
-                contentType : CONTENT_TYPES.SHELF_SHARE
+                contentType : CONTENT_TYPES.SHELFSHARES
             }, function(err, response) {
                 if (err) {
                     return next(err);
@@ -1800,12 +1799,12 @@ var Filters = function(db, redis) {
         var publisherFilter;
         var pipeLine = [];
 
-        $defProjection = _.extend({
+        const $defProjectionExtended = Object.assign({}, $defProjection, {
             personnels : 1,
             employee : 1,
             publisher : 1,
             personnel : 1
-        }, $defProjection);
+        });
 
         if (filter.position) {
             positionFilter = filter.position;
@@ -1817,7 +1816,7 @@ var Filters = function(db, redis) {
             delete filter.publisher;
         }
 
-        aggregateHelper = new AggregationHelper($defProjection, filter);
+        aggregateHelper = new AggregationHelper($defProjectionExtended, filter);
 
         if (publisherFilter) {
             pipeLine.push({
@@ -2213,11 +2212,12 @@ var Filters = function(db, redis) {
             filter : query.filter,
             personnel : req.personnelModel
         });
-        $defProjection = _.extend({
+
+        const $defProjectionExtended = Object.assign({}, $defProjection, {
             firstName : 1,
             lastName : 1
-        }, $defProjection);
-        var aggregationHelper = new AggregationHelper($defProjection, filter);
+        });
+        var aggregationHelper = new AggregationHelper($defProjectionExtended, filter);
         var aggregation;
         var pipeLine = [];
 
@@ -2581,119 +2581,106 @@ var Filters = function(db, redis) {
     };
 
     this.competitorsListFilters = function(req, res, next) {
-        var query = req.query;
-        var filterMapper = new FilterMapper();
-        var queryFilter = query.filter || {};
-        var currentSelected = query.current;
-        var filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
-        var filter = filterMapper.mapFilter({
-            filter : queryFilter,
-            personnel : req.personnelModel
+        const query = req.query;
+        const filterMapper = new FilterMapper();
+        const queryFilter = query.filter || {};
+        const filter = filterMapper.mapFilter({
+            filter: queryFilter,
+            personnel: req.personnelModel
         });
 
-        var aggregateHelper = new AggregationHelper($defProjection, filter);
+        const aggregateHelper = new AggregationHelper($defProjection, filter);
+        const beforeFilter = _.pick(filter, 'country', 'brand', 'archived');
+        const originFilter = _.pick(filter, 'origin');
+        const afterFilter = _.pick(filter, 'product');
 
-        var beforeFilter = _.pick(filter, 'country', 'brand', 'archived');
-        var originFilter = _.pick(filter, 'origin');
-        var afterFilter = _.pick(filter, 'product');
-        var pipeLine = [];
-        var aggregation;
+        const pipeline = [];
 
-        pipeLine.push({
-            $match : beforeFilter
+        pipeline.push({
+            $match: beforeFilter
         });
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country',
-            as : 'country',
-            isArray : false
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'domains',
+            key: 'country',
+            as: 'country',
+            isArray: false
         }));
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'brands',
-            key : 'brand',
-            as : 'brand',
-            isArray : false
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'brands',
+            key: 'brand',
+            as: 'brand',
+            isArray: false
         }));
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'competitorVariants',
-            key : 'variant',
-            as : 'variant',
-            isArray : false,
-            addMainProjection : ['category']
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'competitorVariants',
+            key: 'variant',
+            as: 'variant',
+            isArray: false,
+            addMainProjection: ['category']
         }));
 
-        pipeLine.push({
-            $match : afterFilter
+        pipeline.push({
+            $match: afterFilter
         });
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'categories',
-            key : 'category',
-            as : 'product',
-            isArray : false
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'categories',
+            key: 'category',
+            as: 'product',
+            isArray: false
         }));
 
-        pipeLine.push({
-            $unwind : {
-                path : '$origin',
-                preserveNullAndEmptyArrays : true
+        pipeline.push({
+            $unwind: {
+                path: '$origin',
+                preserveNullAndEmptyArrays: true
             }
         });
 
-        pipeLine.push({
-            $match : originFilter
+        pipeline.push({
+            $match: originFilter
         });
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'origins',
-            key : 'origin',
-            as : 'origin',
-            isArray : false
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'origins',
+            key: 'origin',
+            as: 'origin',
+            isArray: false
         }));
 
-        pipeLine.push({
-            $group : {
-                _id : null,
-                origin : {$addToSet : '$origin'},
-                country : {$addToSet : '$country'},
-                brand : {$addToSet : '$brand'},
-                product : {$addToSet : '$product'},
-                variant : {$addToSet : '$variant'}
+        pipeline.push({
+            $group: {
+                _id: null,
+                origin: { $addToSet: '$origin' },
+                country: { $addToSet: '$country' },
+                brand: { $addToSet: '$brand' },
+                product: { $addToSet: '$product' },
+                variant: { $addToSet: '$variant' }
             }
         });
 
-        aggregation = CompetitorItemModel.aggregate(pipeLine);
+        const aggregation = CompetitorItemModel.aggregate(pipeline);
 
         aggregation.options = {
-            allowDiskUse : true
+            allowDiskUse: true
         };
 
-        aggregation.exec(function(err, result) {
+        aggregation.exec((err, result) => {
             if (err) {
                 return next(err);
             }
-            result = result[0] || {};
 
-            result = {
-                country : result.country || [],
-                origin : _.flatten(result.origin) || [],
-                brand : result.brand || [],
-                product : result.product || []
+            const groups = result[0] || {};
+            const body = {
+                country: groups.country || [],
+                origin: _.flatten(groups.origin) || [],
+                brand: groups.brand || [],
+                product: groups.product || []
             };
-            redisFilters({
-                currentSelected : currentSelected,
-                filterExists : filterExists,
-                filtersObject : result,
-                personnelId : req.personnelModel._id,
-                contentType : CONTENT_TYPES.COMPETITORITEM
-            }, function(err, response) {
-                if (err) {
-                    return next(err);
-                }
 
-                res.status(200).send(response);
-            });
+            res.status(200).send(body);
         });
     };
 
@@ -3982,12 +3969,12 @@ var Filters = function(db, redis) {
         var pipeLine = [];
         var aggregationHelper;
 
-        $defProjection = _.extend($defProjection, {
+        const $defProjectionExtended = Object.assign({}, $defProjection, {
             firstName : 1,
             lastName : 1,
             personnel : 1
         });
-        aggregationHelper = new AggregationHelper($defProjection, filter);
+        aggregationHelper = new AggregationHelper($defProjectionExtended, filter);
 
         pipeLine.push({
             $match : beforeFilter
@@ -4529,9 +4516,9 @@ var Filters = function(db, redis) {
         var queryForFunction;
         var subRegionIds;
 
-        $defProjection = _.extend({
+        const $defProjectionExtended = Object.assign({}, $defProjection, {
             employee : 1
-        }, $defProjection);
+        });
 
         async.waterfall([
                 function(waterfallCb) {
@@ -4609,7 +4596,7 @@ var Filters = function(db, redis) {
                     });
                 },
                 function(collection, waterfallCb) {
-                    var aggregationHelper = new AggregationHelper($defProjection, filter);
+                    var aggregationHelper = new AggregationHelper($defProjectionExtended, filter);
                     var beforeFilter = _.pick(filter, 'type', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'createdBy');
                     var pipeLine = [];
                     var aggregation;
