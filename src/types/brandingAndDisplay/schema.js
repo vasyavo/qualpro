@@ -17,9 +17,9 @@ const schema = new Schema({
         ref: CONTENT_TYPES.BRANCH
     },
     displayType: [{
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     }],
     dateStart: {
         type: Date

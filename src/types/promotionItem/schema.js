@@ -23,9 +23,9 @@ const schema = new Schema({
     closingStock: [{ type: Number, default: 0 }],
     sellOut: [{ type: Number, default: 0 }],
     displayType: [{
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     }],
     comment: { type: ObjectId, ref: CONTENT_TYPES.COMMENT, default: null },
     createdBy: {
