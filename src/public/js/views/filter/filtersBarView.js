@@ -439,7 +439,8 @@ define([
                 defFilter       : this.defFilter,
                 filterName      : saveObj.filterName,
                 filerConstants  : saveObj.filerConstants,
-                translation     : this.translation
+                translation     : this.translation,
+                showSelectAll   : saveObj.filerConstants.showSelectAll
             });
 
             this.filterViews[saveObj.filterName].on('selectValue', this.selectValue, this);
