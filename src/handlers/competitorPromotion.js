@@ -467,10 +467,17 @@ var CompetitorBranding = function(db, redis, event) {
             isArray : false
         }));
 
+        pipeLine.push({
+            $unwind : {
+                path : '$displayType'
+            }
+        });
+
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'displayTypes',
             key : 'displayType',
-            isArray : true
+            isArray : true,
+            addProjection : ['_id', 'name']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

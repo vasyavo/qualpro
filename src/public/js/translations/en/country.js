@@ -2,8 +2,9 @@ define([
     'Underscore',
     'translations/en/pagination',
     'translations/en/cropImages',
-    'translations/en/filters'
-], function (_, paginationTranslation, cropImagesTranslation, filtersTranslation) {
+    'translations/en/filters',
+    'translations/en/action',
+], function (_, paginationTranslation, cropImagesTranslation, filtersTranslation, actionTranslation) {
     var countryTranslation = {
         crop           : cropImagesTranslation,
         // top bar
@@ -38,5 +39,5 @@ define([
         previewTitle: 'View Country',
         domainName  : 'Country'
     };
-    return _.extend({}, paginationTranslation, filtersTranslation, countryTranslation);
+    return _.extend({}, paginationTranslation, filtersTranslation, countryTranslation, actionTranslation);
 });
