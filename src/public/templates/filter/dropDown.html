@@ -8,6 +8,12 @@
     <div class="forPosition">
         <% } %>
         <div class="dropDownContent dropDownList">
+            <ul class="selectAll <%- showSelectAll ? '' : 'hidden' %>">
+                <li id="select-all-li-<%- contentType %>" class=""> <!-- "checkedValue" or "" -->
+                    <span id="select-all" class="floatRight"></span>
+                    Select All
+                </li>
+            </ul>
             <ul class="dropDownItems">
                 <!-- dropDownContent template -->
             </ul>
