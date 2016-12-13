@@ -326,6 +326,10 @@ define([
             var formString;
             var self = this;
 
+            jsonModel.displayTypeString = jsonModel.displayType.map((item) => {
+                return item.name.currentLanguage;
+            }).join(', ');
+
             formString = this.$el.html(this.template({
                 model      : jsonModel,
                 translation: self.translation
