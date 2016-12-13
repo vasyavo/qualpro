@@ -121,17 +121,12 @@
             var filterType = options.filterType || null;
             var mandatory = options.mandatory || false;
             var singleSelect = options.singleSelect || false;
-            var showSelectAll = options.showSelectAll || false;
 
             resultObject.type = type;
             resultObject.mandatory = mandatory;
             resultObject.singleSelect = singleSelect;
             resultObject.parent = parent;
             resultObject.filterType = filterType;
-
-            if (resultObject.filterType == 'multiSelect' && showSelectAll) {
-                resultObject.showSelectAll = showSelectAll;
-            }
 
             if (displayName) {
                 resultObject.displayName = displayName;
@@ -421,8 +416,7 @@
         personnelFilter[CONSTANTS.SUBREGION] = getFilterConstant({
             displayName: {en: 'Sub-Region', ar: 'المنطقة الفرعية:'},
             parent     : 'region',
-            filterType : 'multiSelect',
-            showSelectAll  : true
+            filterType : 'multiSelect'
         });
         personnelFilter[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
             displayName: {en: 'Trade Channel', ar: 'الفئة التجارية:'},
