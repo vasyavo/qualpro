@@ -508,12 +508,6 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    function consoleLogENV(message) {
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(message);
-        }
-    }
-
     this.getForDD = function (req, res, next) {
         function queryRun() {
             var query = req.query;
@@ -2119,16 +2113,16 @@ var Personnel = function (db, redis, event) {
                 PersonnelModel.aggregate(pipeline).exec(cb);
             },
 
-            (response, cb) => {
+            (result, cb) => {
+                const response = result && result[0] ?
+                    result[0] : { data: [], total: 0 };
+                const ids = response.data.map((item) => (item._id));
                 const options = {
-                    data: {}
+                    data: {
+                        [CONTENT_TYPES.PERSONNEL]: ids
+                    }
+
                 };
-                const ids = _.map(response.data, '_id');
-
-                response = response && response[0] ?
-                    response[0] : { data: [], total: 0 };
-
-                options.data[CONTENT_TYPES.PERSONNEL] = ids;
 
                 cb(null, {
                     response,
