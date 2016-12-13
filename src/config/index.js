@@ -27,6 +27,7 @@ config.mongodbUri = process.env.MONGODB_URI;
 
 config.sendgirdApiKey = process.env.SENDGRID_APIKEY;
 config.redisUrl = process.env.REDIS_URL;
+config.redisSessionDb = process.env.REDIS_SESSION_DB || 7;
 
 /* Twilio configurations */
 const twilio = {
@@ -37,18 +38,6 @@ const twilio = {
 
 config.twilio = twilio;
 /* Twilio configurations */
-
-/* following code is copied from vcs and modified */
-const sessionConfig = (db) => {
-    return {
-        mongooseConnection: db,
-        autoRemove: 'interval',
-        autoRemoveInterval: 1 // in prod mode should be more, 10
-    };
-};
-
-config.sessionConfig = sessionConfig;
-/* end of copy */
 
 /* AWS S3 configurations begin */
 
