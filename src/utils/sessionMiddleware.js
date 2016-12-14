@@ -14,7 +14,8 @@ module.exports = session({
         secure: false,
     },
     resave: false,
-    saveUninitialized: false,
+    rolling: true,
+    saveUninitialized: true,
     store: new RedisStore({
         url: config.redisUrl,
         db: config.redisSessionDb
