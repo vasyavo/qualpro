@@ -1,62 +1,64 @@
-'use strict';
+const async = require('async');
+const _ = require('underscore');
+const lodash = require('lodash');
+const mongoose = require('mongoose');
+const ACL_CONSTANTS = require('./../constants/aclRolesNames');
+const ACL_MODULES = require('./../constants/aclModulesNames');
+const CONTENT_TYPES = require('./../public/js/constants/contentType.js');
+const OTHER_CONSTANTS = require('./../public/js/constants/otherConstants.js');
+const CONSTANTS = require('./../constants/mainConstants');
+const mongo = require('./../utils/mongo');
+const AggregationHelper = require('./../helpers/aggregationCreater');
+const GetImagesHelper = require('./../helpers/getImages');
+const ObjectiveModel = require('././../types/objective/model');
+const PersonnelModel = require('./../types/personnel/model');
+const FilterMapper = require('./../helpers/filterMapper');
+const FileHandler = require('./../handlers/file');
+const ACTIVITY_TYPES = require('./../constants/activityTypes');
+const coveredByMe = require('./../helpers/coveredByMe');
+const FileModel = require('./../types/file/model');
+const VisibilityFormHandler = require('./../handlers/visibilityForm');
+const access = require('./../helpers/access')();
+const bodyValidator = require('./../helpers/bodyValidator');
+const extractBody = require('./../utils/extractBody');
+const event = require('./../utils/eventEmitter');
+const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
 
-var InStoreReports = function (db, redis, event) {
-    var async = require('async');
-    var _ = require('underscore');
-    var lodash = require('lodash');
-    var mongoose = require('mongoose');
-    var ACL_CONSTANTS = require('../constants/aclRolesNames');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
-    var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-    var CONSTANTS = require('../constants/mainConstants');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
-    var ObjectiveModel = require('./../types/objective/model');
-    var PersonnelModel = require('./../types/personnel/model');
-    var FilterMapper = require('../helpers/filterMapper');
-    var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var populateByType = require('../helpers/populateByType');
-    var coveredByMe = require('../helpers/coveredByMe');
-    var ObjectId = mongoose.Types.ObjectId;
-    var FileModel = require('./../types/file/model');
-    var VisibilityFormHandler = require('../handlers/visibilityForm');
-    var visibilityFormHandler = new VisibilityFormHandler(db);
-    var access = require('../helpers/access')(db);
-    var bodyValidator = require('../helpers/bodyValidator');
-    var self = this;
+const ObjectId = mongoose.Types.ObjectId;
+const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+const getImagesHelper = new GetImagesHelper();
+const fileHandler = new FileHandler(mongo.db);
+const visibilityFormHandler = new VisibilityFormHandler(mongo.db);
 
-    var $defProjection = {
-        _id          : 1,
-        title        : 1,
-        description  : 1,
+var InStoreReports = function() {
+    const self = this;
+    const $defProjection = {
+        _id: 1,
+        title: 1,
+        description: 1,
         objectiveType: 1,
-        priority     : 1,
-        status       : 1,
-        assignedTo   : 1,
-        complete     : 1,
-        level        : 1,
-        dateStart    : 1,
-        dateEnd      : 1,
-        dateClosed   : 1,
-        comments     : 1,
-        attachments  : 1,
-        editedBy     : 1,
-        createdBy    : 1,
-        country      : 1,
-        region       : 1,
-        subRegion    : 1,
+        priority: 1,
+        status: 1,
+        assignedTo: 1,
+        complete: 1,
+        level: 1,
+        dateStart: 1,
+        dateEnd: 1,
+        dateClosed: 1,
+        comments: 1,
+        attachments: 1,
+        editedBy: 1,
+        createdBy: 1,
+        country: 1,
+        region: 1,
+        subRegion: 1,
         retailSegment: 1,
-        outlet       : 1,
-        branch       : 1,
-        location     : 1,
-        form         : 1,
-        history      : 1,
-        creationDate : 1,
+        outlet: 1,
+        branch: 1,
+        location: 1,
+        form: 1,
+        history: 1,
+        creationDate: 1,
         updateDate   : 1
     };
 
@@ -142,59 +144,54 @@ var InStoreReports = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
-            var model;
-            var saveObjective;
-            var inStoreTasks;
-            var error;
+    this.create = (req, res, next) => {
+        const accessRoleLevel = req.session.level;
+        const queryRun = (body, callback) => {
+            const files = req.files;
+            const session = req.session;
+            const userId = session.uId;
+            const isMobile = req.isMobile;
 
-            saveObjective = body.saveObjective;
+            const saveObjective = body.saveObjective;
 
             if (!body.formType || body.formType !== 'visibility') {
-                error = new Error('Please link visibility form');
-                return next(error);
+                const error = new Error('Please link visibility form');
+
+                error.status = 400;
+                return callback(error);
             }
 
             if (!body.assignedTo || !body.assignedTo.length) {
-                error = new Error('You must assign person to task');
+                const error = new Error('You must assign person to task');
+
                 error.status = 400;
-                return next(error);
+                return callback(error);
             }
 
             if (body.assignedTo.length !== 1) {
-                error = new Error('In store task can be assigned only to one person');
-                error.status = 400;
-                return next(error);
+                const error = new Error('In store task can be assigned only to one person');
 
+                error.status = 400;
+                return callback(error);
             }
 
             async.waterfall([
 
-                function (cb) {
+                (cb) => {
                     if (!files) {
                         return cb(null, []);
                     }
 
-                    //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, function (err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, filesIds);
-                    });
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, cb);
                 },
 
-                function (filesIds, cb) {
-                    var createdBy = {
+                (filesIds, cb) => {
+                    const createdBy = {
                         user: userId,
                         date: new Date()
                     };
-                    var status = saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
+                    const status = saveObjective ?
+                        OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
 
                     body.title = {
                         en: body.title.en ? _.escape(body.title.en) : '',
@@ -205,126 +202,104 @@ var InStoreReports = function (db, redis, event) {
                         ar: body.description.ar ? _.escape(body.description.ar) : ''
                     };
 
-                    inStoreTasks = {
-                        title        : body.title,
-                        description  : body.description,
+                    const inStoreTasks = {
+                        title: body.title,
+                        description: body.description,
                         objectiveType: body.objectiveType,
-                        priority     : body.priority,
-                        status       : status,
-                        assignedTo   : body.assignedTo,
-                        level        : session.level,
-                        dateStart    : body.dateStart,
-                        dateEnd      : body.dateEnd,
-                        country      : body.country,
-                        region       : body.region,
-                        subRegion    : body.subRegion,
+                        priority: body.priority,
+                        status: status,
+                        assignedTo: body.assignedTo,
+                        level: session.level,
+                        dateStart: body.dateStart,
+                        dateEnd: body.dateEnd,
+                        country: body.country,
+                        region: body.region,
+                        subRegion: body.subRegion,
                         retailSegment: body.retailSegment,
-                        outlet       : body.outlet,
-                        branch       : body.branch,
-                        location     : body.location,
-                        attachments  : filesIds,
-                        context      : CONTENT_TYPES.INSTORETASKS,
-                        createdBy    : createdBy,
-                        editedBy     : createdBy,
-                        history      : {
+                        outlet: body.outlet,
+                        branch: body.branch,
+                        location: body.location,
+                        attachments: filesIds,
+                        context: CONTENT_TYPES.INSTORETASKS,
+                        createdBy,
+                        editedBy: createdBy,
+                        history: {
                             assignedTo: body.assignedTo[0],
-                            index     : 1
+                            index: 1
                         }
                     };
 
-                    model = new ObjectiveModel(inStoreTasks);
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
+                    const model = new ObjectiveModel();
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.IN_STORE_REPORTING,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : createdBy,
-                            itemId    : model._id,
-                            itemType  : CONTENT_TYPES.INSTORETASKS
-                        });
-
-                        cb(null, model);
+                    model.set(inStoreTasks);
+                    model.save((err, model, numAffected) => {
+                        cb(err, model);
                     });
                 },
 
-                function (inStoreTaskModel, cb) {
-                    var data = {
-                        objective  : inStoreTaskModel.get('_id'),
+                (inStoreTaskModel, cb) => {
+                    event.emit('activityChange', {
+                        module: ACL_MODULES.IN_STORE_REPORTING,
+                        actionType: ACTIVITY_TYPES.CREATED,
+                        createdBy: inStoreTaskModel.createdBy,
+                        itemId: inStoreTaskModel._id,
+                        itemType  : CONTENT_TYPES.INSTORETASKS
+                    });
+
+                    const data = {
+                        objective: inStoreTaskModel.get('_id'),
                         description: ''
                     };
 
-                    visibilityFormHandler.createForm(userId, data, null, function (err, formModel) {
-                        if (err) {
-                            return cb(err);
+                    async.waterfall([
+
+                        (cb) => {
+                            visibilityFormHandler.createForm(userId, data, null, cb);
+                        },
+
+                        (formModel, cb) => {
+                            inStoreTaskModel.form = {
+                                _id: formModel.get('_id'),
+                                contentType: body.formType
+                            };
+
+                            inStoreTaskModel.save((err, model, numAffected) => {
+                                cb(err, model);
+                            });
                         }
 
-                        inStoreTaskModel.form = {
-                            _id        : formModel.get('_id'),
-                            contentType: body.formType
-                        };
-
-                        cb(null, inStoreTaskModel);
-                    });
+                    ], cb);
                 },
 
-                function (inStoreTaskModel, cb) {
-                    inStoreTaskModel.save(function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
+                (inStoreTaskModel, cb) => {
+                    const id = inStoreTaskModel.get('_id');
 
-                        cb(null, inStoreTaskModel);
-                    });
-                },
-
-                function (inStoreTaskModel, cb) {
-                    var id = inStoreTaskModel.get('_id');
-
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
+                    self.getByIdAggr({ id, isMobile }, cb);
                 }
 
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+            ], callback);
+        };
 
-                res.status(201).send(result);
-            });
-        }
+        async.waterfall([
 
-        access.getWriteAccess(req, ACL_MODULES.IN_STORE_REPORTING, function (err, allowed) {
-            var body;
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.IN_STORE_REPORTING, cb);
+            },
 
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.INSTORETASKS, 'create', cb);
+            },
+
+            queryRun
+
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.INSTORETASKS, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(201).send(body);
         });
     };
 
@@ -1333,21 +1308,9 @@ var InStoreReports = function (db, redis, event) {
                         const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
                             return ObjectId.toString();
                         });
-                        const dataMyCC = response.data.map((objective) => {
-                            let assignedToId;
-                            let createdById;
-                            const currentUserId = req.session.uId;
-                            if (_.isObject(objective.assignedTo[0])) {
-                                assignedToId = objective.assignedTo[0]._id.toString();
-                            }
-                            if (_.isObject(objective.createdBy.user)) {
-                                createdById = objective.createdBy.user._id.toString();
-                            }
-                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
-                                objective.myCC = true;
-                            }
-                            return objective;
-                        });
+                        const currentUserId = req.session.uId;
+                        const dataMyCC = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
+
                         response.data = dataMyCC;
                         next({status: 200, body: response});
                     })

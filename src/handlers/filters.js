@@ -6483,19 +6483,7 @@ const Filters = function(db, redis) {
                 personnel : result.personnel || []
             };
 
-            redisFilters({
-                currentSelected : currentSelected,
-                filterExists : filterExists,
-                filtersObject : result,
-                personnelId : req.personnelModel._id,
-                contentType : CONTENT_TYPES.CONTACT_US
-            }, function(err, response) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.send(200, response);
-            });
+            res.status(200).send(result);
         });
     };
 

@@ -270,7 +270,8 @@ define([
                     contentType        : CONTENT_TYPES.REGION,
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#regionDd').replaceWith(self.regionDropDown.el);
 
@@ -280,7 +281,8 @@ define([
                     contentType        : CONTENT_TYPES.SUBREGION,
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#subRegionDd').replaceWith(self.subRegionDropDown.el);
 
@@ -290,7 +292,8 @@ define([
                     contentType        : CONTENT_TYPES.RETAILSEGMENT,
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#retailSegmentDd').replaceWith(self.retailSegmentDropDown.el);
 
@@ -300,7 +303,8 @@ define([
                     contentType        : CONTENT_TYPES.OUTLET,
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#outletDd').replaceWith(self.outletDropDown.el);
 
@@ -310,7 +314,8 @@ define([
                     contentType        : CONTENT_TYPES.BRANCH,
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#branchDd').replaceWith(self.branchDropDown.el);
 

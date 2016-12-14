@@ -348,6 +348,15 @@
                 href: CONSTANTS.DOCUMENTS
             },
 
+            43: {
+                _id : 43,
+                name : {
+                    en: 'Contact Us',
+                    ar: '' //todo ar translation
+                },
+                href: CONSTANTS.CONTACT_US
+            },
+
             103: {
                 _id : 103,
                 name: {

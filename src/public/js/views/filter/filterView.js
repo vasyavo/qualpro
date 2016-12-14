@@ -5,9 +5,10 @@ define([
     'constants/filters',
     'js-cookie',
     'text!templates/filter/filterElements.html',
+    'text!templates/filter/filters-empty-search-result.html',
     'collections/filter/filterCollection',
     'views/filter/timeView'
-], function (Backbone, $, _, FILTERSCONSTANTS, Cookies, filterElements, FilterCollection, TimeView) {
+], function (Backbone, $, _, FILTERSCONSTANTS, Cookies, filterElements, filtersEmptySearchResultTemplate, FilterCollection, TimeView) {
     var filterValuesView = Backbone.View.extend({
         elementsTemplate  : _.template(filterElements),
         currentPage       : 1,
@@ -358,9 +359,18 @@ define([
 
             displayCollection = collection.slice(start, end);
 
-            $ulElement.html(self.elementsTemplate({
-                collection: displayCollection
-            }));
+            var collectionsLength = this.checkedCollection.length + this.uncheckedCollection.length;
+
+            if (!collectionsLength && checked) {
+                $ulElement.html('');
+                $ulElement.html(filtersEmptySearchResultTemplate);
+            } else if (!collectionsLength && !checked) {
+                $ulElement.html('');
+            } else if (collectionsLength) {
+                $ulElement.html(self.elementsTemplate({
+                    collection: displayCollection
+                }));
+            }
 
             this.makePagination($paginationLi, {
                 start           : start,
@@ -403,7 +413,9 @@ define([
                 translation      : this.translation
             }));
 
-            this.beforeRenderContent();
+            this.beforeRenderContent({
+                withEmptyResult : false
+            });
 
             $currentEl.find('.' + this.filterName + 'Values .miniStylePagination a').click(function (e) {
                 self.paginationChange(e, self);
