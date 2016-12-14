@@ -149,6 +149,7 @@ var InStoreReports = function() {
             const files = req.files;
             const session = req.session;
             const userId = session.uId;
+            const isMobile = req.isMobile;
 
             const saveObjective = body.saveObjective;
 
