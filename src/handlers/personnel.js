@@ -2305,7 +2305,7 @@ var Personnel = function (db, redis, event) {
     };
 
     this.getAll = function (req, res, next) {
-        function queryRun(personnel, callback) {
+        function queryRun(personnel, onlineUsers, callback) {
             const query = req.query;
             const isMobile = req.isMobile;
             const filter = query.filter || {};
@@ -2389,6 +2389,20 @@ var Personnel = function (db, redis, event) {
                 delete queryObject.outlet;
             }
 
+            if (queryObject.status) {
+                let onlineUserIds = onlineUsers.map(el => ObjectId(el));
+                if (queryObject.status.$in && queryObject.status.$in.length === 1 && ~queryObject.status.$in.indexOf('online')){
+                    delete queryObject.status;
+                    queryObject._id = {
+                        $in : onlineUserIds
+                    }
+                } else {
+                    queryObject._id = {
+                        $nin : onlineUserIds
+                    }
+                }
+            }
+
             if (!queryObject.hasOwnProperty('archived') && !isMobile) {
                 queryObject.archived = false;
             }
@@ -2419,48 +2433,56 @@ var Personnel = function (db, redis, event) {
                 personnelLevel,
                 isMobile,
                 personnel
-            }, callback);
-        }
-
-        function defineOnlineUsers(body, callback) {
-            async.parallel([
-                (cb) => {
-                    redisClient.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, onlineUsers);
-                    });
-                },
-
-                (cb) => {
-                    const arrayOfId = body.data
-                        .map((item) => (item._id.toString()));
-                    cb(null, arrayOfId);
-                },
-            ], (err, pairOfArrays) => {
+            }, (err, body) =>{
                 if (err) {
                     return callback(err);
                 }
 
-                const onlineUsers = _.intersection(...pairOfArrays);
+                body.data.forEach((el)=>{
+                    if (~onlineUsers.indexOf(el._id.toString())){
+                        el.status = 'online';
+                    }
+                });
 
-                body.online = onlineUsers;
+                if (sort && sort.status){
+                    body.data.sort(function (a, b) {
+                        function compareField(elA, elB) {
+                            if (elA.status > elB.status) {
+                                return 1;
+                            } else if (elA.status < elB.status) {
+                                return -1;
+                            }
+                            return 0;
+                        }
+
+                        if (sort.status === 1) {
+                            return compareField(a, b);
+                        }
+
+                        return compareField(b, a);
+                    })
+                }
 
                 callback(null, body);
+            });
+        }
+
+        function defineOnlineUsers(allowed, personnel, callback) {
+
+            redisClient.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                callback(null, personnel, onlineUsers);
             });
         };
 
         async.waterfall([
 
             async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
-
-            (allowed, personnel, cb) => {
-                queryRun(personnel, cb);
-            },
-
-            defineOnlineUsers
+            defineOnlineUsers,
+            queryRun
         ], (err, body) => {
             if (err) {
                 return next(err);

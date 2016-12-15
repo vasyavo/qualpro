@@ -235,14 +235,12 @@ define([
 
                     if (!unlockFilters) {
                         self.$el
-                            .find('.filterName:not(".mandatory")')
-                            .closest('.filterFullContainer')
-                            .addClass('filterBlocked');
+                            .find('.filterName:not(".mandatory") input')
+                            .prop('disabled', true);
                     } else {
                         self.$el
-                            .find('.filterName:not(".mandatory")')
-                            .closest('.filterFullContainer')
-                            .removeClass('filterBlocked');
+                            .find('.filterName:not(".mandatory") input')
+                            .prop('disabled', false);
                     }
 
                     self.useFilterEventState = true;
@@ -258,14 +256,12 @@ define([
 
                 if (!unlockFilters) {
                     self.$el
-                        .find('.filterName:not(".mandatory")')
-                        .closest('.filterFullContainer')
-                        .addClass('filterBlocked');
+                        .find('.filterName:not(".mandatory") input')
+                        .prop('disabled', true);
                 } else {
                     self.$el
-                        .find('.filterName:not(".mandatory")')
-                        .closest('.filterFullContainer')
-                        .removeClass('filterBlocked');
+                        .find('.filterName:not(".mandatory") input')
+                        .prop('disabled', false);
                 }
 
                 self.useFilterEventState = true;
@@ -439,7 +435,8 @@ define([
                 defFilter       : this.defFilter,
                 filterName      : saveObj.filterName,
                 filerConstants  : saveObj.filerConstants,
-                translation     : this.translation
+                translation     : this.translation,
+                showSelectAll   : saveObj.filerConstants.showSelectAll
             });
 
             this.filterViews[saveObj.filterName].on('selectValue', this.selectValue, this);
@@ -478,14 +475,12 @@ define([
 
             if (!unlockFilters) {
                 this.$el
-                    .find('.filterName:not(".mandatory")')
-                    .closest('.filterFullContainer')
-                    .addClass('filterBlocked');
+                    .find('.filterName:not(".mandatory") input')
+                    .prop('disabled', true);
             } else {
                 this.$el
-                    .find('.filterName:not(".mandatory")')
-                    .closest('.filterFullContainer')
-                    .removeClass('filterBlocked');
+                    .find('.filterName:not(".mandatory") input')
+                    .prop('disabled', false);
             }
 
             return this;
