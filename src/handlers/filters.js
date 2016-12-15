@@ -2468,6 +2468,11 @@ const Filters = function(db, redis) {
         delete filter.subRegion;
         delete filter.outlet;
 
+        if (filter.configuration) {
+            filter['configuration._id'] = filter.configuration;
+            delete filter.configuration;
+        }
+
         aggregateHelper = new AggregationHelper($defProjection, filter);
 
         pipeLine.push({
