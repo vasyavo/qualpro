@@ -1,7 +1,7 @@
 <tr data-id="<%=model._id%>" class="listRow">
     <td class="checkboxArea alignCenter">
-        <input type="checkbox" id="<%=model._id%>" value="<%=model._id%>" class="customCheckbox"/>
-        <label for="<%=model._id%>" class="checkboxLabel"></label>
+        <input type="checkbox" id="<%= model._id %>" value="<%= model._id %>" class="customCheckbox"/>
+        <label for="<%= model._id %>" class="checkboxLabel"></label>
     </td>
     <td><%=model.country.name.en || model.country.name.ar%></td>
     <td><%=model.retailSegment.name.en || model.retailSegment.name.ar%></td>
