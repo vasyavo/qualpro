@@ -1,17 +1,17 @@
-'use strict';
+const async = require('async');
+const fs = require('fs');
+const _ = require('lodash');
+const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
+const im = require('imagemagick');
+const mongoose = require('mongoose');
+const config = require('./../config');
+const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
+const FileModel = require('./../types/file/model');
 
-var Files = function (db) {
-    var async = require('async');
-    var fs = require('fs');
-    var _ = require('lodash');
-    var path = require('path');
-    var config = require('../config');
-    var ffmpeg = require('fluent-ffmpeg');
-    var im = require('imagemagick');
-    var mongoose = require('mongoose');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
-    var FileModel = require('./../types/file/model');
-    var ObjectId = mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
+
+module.exports = function() {
     var fileUploaderConfig;
     var fileUploader;
     var self = this;
@@ -117,244 +117,235 @@ var Files = function (db) {
     };
 
     this.uploadFile = function (userId, files, bucket, callback) {
-        var model;
-        var array = [];
-        var filesIds = [];
-        var error;
+        const series = [];
+        const filesId = [];
 
         if (!userId || !files || !bucket) {
-            error = new Error('Not enough params');
-            error.status = 400;
+            const error = new Error('Not enough params');
 
+            error.status = 400;
             return callback(error);
         }
 
-        for (var key in files) {
-            array = array.concat(files[key]);
+        for (let key in files) {
+            series.push(files[key]);
         }
 
-        async.eachSeries(array,
-            function (file, eachCb) {
-                var fileOptions = {
-                    type            : file.type,
-                    extension       : file.originalFilename.substr(file.originalFilename.lastIndexOf('.') + 1),
-                    originalFilename: file.originalFilename,
-                    tempPath        : file.path
-                };
+        async.eachSeries(series, (file, eachCb) => {
+            const fileOptions = {
+                type: file.type,
+                extension: file.originalFilename.substr(file.originalFilename.lastIndexOf('.') + 1),
+                originalFilename: file.originalFilename,
+                tempPath: file.path
+            };
 
-                fileOptions.fileNameWithoutExtension = fileOptions.originalFilename.substr(0, fileOptions.originalFilename.length - fileOptions.extension.length - 1);
+            fileOptions.fileNameWithoutExtension = fileOptions.originalFilename.substr(0, fileOptions.originalFilename.length - fileOptions.extension.length - 1);
 
-                async.waterfall([
-                    function (waterfallCb) {
-                        fs.readFile(fileOptions.tempPath, function (err, buffer) {
-                            if (err) {
-                                return eachCb(err);
+            async.waterfall([
+                (cb) => {
+                    fs.readFile(fileOptions.tempPath, (err, buffer) => {
+                        if (err) {
+                            return eachCb(err);
+                        }
+
+                        fileOptions.data = buffer;
+                        fileOptions.name = createFileName();
+                        cb(null);
+                    });
+                },
+
+                (cb) => {
+                    if (!_.includes(OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, fileOptions.type)) {
+                        return cb(null);
+                    }
+
+                    const videoFormat = 'mp4';
+                    const fileName = fileOptions.name;
+                    const thumbnailPath = `/tmp/${fileName}.png`;
+                    const videoDecPatch = `/tmp/${fileName}dec.mp4`;
+
+                    function deleteFiles(cb) {
+                        fs.unlink(thumbnailPath, (err) => {
+                            if (err && cb) {
+                                cb(err);
                             }
-
-                            fileOptions.data = buffer;
-                            fileOptions.name = createFileName();
-                            waterfallCb(null);
                         });
-                    },
 
-                    function (waterfallCb) {
-                        if (!_.includes(OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, fileOptions.type)) {
-                            return waterfallCb(null);
-                        }
+                        fs.unlink(videoDecPatch, (err) => {
+                            if (err && cb) {
+                                cb(err);
+                            }
+                        });
+                    }
 
-                        var videoFormat = 'mp4';
-                        var fileName = fileOptions.name;
-
-                        var thumbnailPath = '/tmp/' + fileName + '.png';
-                        var videoDecPatch = '/tmp/' + fileName + 'dec.mp4';
-
-                        function deleteFiles(cb) {
-                            fs.unlink(thumbnailPath, function (err) {
-                                if (err && cb) {
-                                    cb(err);
+                    const getFiles = (cb) => {
+                        const readFile = (path, parallelCb) => {
+                            fs.readFile(path, (err, result) => {
+                                if (err) {
+                                    return parallelCb(err);
                                 }
+
+                                parallelCb(null, result);
                             });
+                        };
 
-                            fs.unlink(videoDecPatch, function (err) {
-                                if (err && cb) {
-                                    cb(err);
-                                }
-                            });
-                        }
-
-                        function getFiles(cb) {
-                            function readFile(path, parCb) {
-                                fs.readFile(path, function (err, result) {
-                                    if (err) {
-                                        return parCb(err);
-                                    }
-
-                                    parCb(null, result);
-                                });
+                        async.parallel({
+                            bitmap: async.apply(readFile, thumbnailPath),
+                            video: async.apply(readFile, videoDecPatch)
+                        }, (err, results) => {
+                            if (err) {
+                                return cb(err);
                             }
 
-                            async.parallel({
-                                bitmap: async.apply(readFile, thumbnailPath),
-                                video : async.apply(readFile, videoDecPatch)
-                            }, function (err, results) {
+                            deleteFiles(cb);
+
+                            const result = {
+                                bitmapBase64: new Buffer(results.bitmap).toString('base64'),
+                                videoBuffer: new Buffer(results.video)
+                            };
+
+                            cb(null, result);
+                        });
+                    };
+
+                    ffmpeg(fileOptions.tempPath)
+                        .screenshot({
+                            timestamps: ['1%'],
+                            size: '150x?',
+                            folder: '/tmp',
+                            filename  : `${fileName}.png`
+                        })
+                        .videoCodec('libx264')
+                        .renice(10)
+                        .duration(45)
+                        .toFormat(videoFormat)
+                        .outputOptions('-s 640x480')
+                        .outputOptions('-movflags frag_keyframe+empty_moov')
+                        .output(`/tmp/${fileName}dec.mp4`)
+                        .on('start', (command) => {
+                            console.log(command);
+                        })
+                        .on('end', () => {
+                            getFiles((err, results) => {
                                 if (err) {
                                     return cb(err);
                                 }
 
-                                deleteFiles(cb);
+                                fileOptions.extension = videoFormat;
+                                fileOptions.originalFilename = `${fileName}.${videoFormat}`;
 
-                                var result = {
-                                    bitmapBase64: new Buffer(results.bitmap).toString('base64'),
-                                    videoBuffer : new Buffer(results.video)
-                                };
+                                fileOptions.data = results.videoBuffer;
+                                fileOptions.type = 'video/mp4';
+                                fileOptions.preview = `data:image/png;base64,${results.bitmapBase64}`;
 
-                                cb(null, result);
+                                cb(null);
                             });
-                        }
 
-                        ffmpeg(fileOptions.tempPath)
-                            .screenshot({
-                                timestamps: ['1%'],
-                                size      : '150x?',
-                                folder    : '/tmp',
-                                filename  : fileName + '.png'
-                            })
-                            //.size('320x240')
-                            .videoCodec('libx264')
-                            .renice(10)
-                            .duration(45)
-                            .toFormat(videoFormat)
-                            .outputOptions('-s 640x480')
-                            .outputOptions('-movflags frag_keyframe+empty_moov')
-                            .output('/tmp/' + fileName + 'dec.mp4')
-                            .on('start', function (command) {
-                                console.log(command);
-                            })
-                            .on('end', function () {
-                                getFiles(function (err, results) {
-                                    if (err) {
-                                        return waterfallCb(err);
-                                    }
+                        })
+                        .on('error', (err) => {
+                            deleteFiles();
 
-                                    fileOptions.extension = videoFormat;
-                                    fileOptions.originalFilename = fileName + '.' + videoFormat;
-
-                                    fileOptions.data = results.videoBuffer;
-                                    fileOptions.type = 'video/mp4';
-                                    fileOptions.preview = 'data:image/png;base64,' + results.bitmapBase64;
-
-                                    waterfallCb(null);
-                                });
-
-                            })
-                            .on('error', function (err, stdout, stderr) {
-                                deleteFiles();
-                                err.status = 415;
-                                waterfallCb(err);
-                            });
-                    },
-
-                    function (waterfallCb) {
-                        if (OTHER_CONSTANTS.IMAGE_CONTENT_TYPES.indexOf(fileOptions.type) === -1) {
-                            return waterfallCb(null);
-                        }
-
-                        const convertOptions = {
-                            srcData: fileOptions.data,
-                            width  : 150,
-                            quality: 1,
-                            format : fileOptions.extension
-                        };
-
-                        im.resize(convertOptions, function (err, stdout) {
-                            if (err) {
-                                return waterfallCb(err);
-                            }
-
-                            const prefix = "data:" + fileOptions.type + ";base64,";
-                            const base64Image = new Buffer(stdout, 'binary').toString('base64');
-                            fileOptions.preview = prefix + base64Image;
-                            waterfallCb(null);
+                            err.status = 415;
+                            cb(err);
                         });
-                    },
+                },
 
-                    function (waterfallCb) {
-                        if (!_.includes(OTHER_CONSTANTS.OTHER_FORMATS, fileOptions.type)) {
-                            return waterfallCb(null);
-                        }
-
-                        const inputFileName = fileOptions.tempPath  + '[0]';
-                        const outputFile = '/tmp/' + fileOptions.name + '.png';
-
-                        im.convert([inputFileName, '-resize', '150x150', outputFile],
-                            function (err, stdout) {
-                                // var prefix = 'data:' + fileOptions.type + ';base64,';
-                                if (err) {
-                                    return waterfallCb(err);
-                                }
-
-                                const prefix = 'data:image/png;base64,';
-                                const convertedFile = fs.readFileSync(outputFile, 'binary');
-                                const base64Image = new Buffer(convertedFile, 'binary').toString('base64');
-                                fileOptions.preview = prefix + base64Image;
-                                waterfallCb(null);
-                            });
-                    },
-
-                    function (waterfallCb) {
-                        fileUploader.uploadFile(fileOptions, bucket, function (err) {
-                            if (err) {
-                                return waterfallCb(err);
-                            }
-
-                            waterfallCb(null);
-                        });
-                    },
-
-                    function (waterfallCb) {
-                        var saveData = {
-                            name        : fileOptions.name + '.' + fileOptions.extension,
-                            originalName: fileOptions.originalFilename,
-                            extension   : fileOptions.extension,
-                            contentType : fileOptions.type,
-                            createdBy   : {
-                                user: userId
-                            },
-                            preview     : fileOptions.preview
-                        };
-
-                        model = new FileModel(saveData);
-                        model.save(function (err) {
-                            if (err) {
-                                return waterfallCb(err);
-                            }
-
-                            filesIds.push(model.get('_id'));
-
-                            fs.unlink(fileOptions.tempPath, function (err) {
-                                if (err) {
-                                    console.log(err);
-                                }
-                            });
-
-                            waterfallCb(null);
-                        });
-                    }
-                ], function (err) {
-                    if (err) {
-                        return eachCb(err);
+                (cb) => {
+                    if (OTHER_CONSTANTS.IMAGE_CONTENT_TYPES.indexOf(fileOptions.type) === -1) {
+                        return cb(null);
                     }
 
-                    eachCb(null);
-                });
-            }, function (err) {
-                if (err) {
-                    return callback(err);
+                    const convertOptions = {
+                        srcData: fileOptions.data,
+                        width  : 150,
+                        quality: 1,
+                        format : fileOptions.extension
+                    };
+
+                    im.resize(convertOptions, (err, stdout) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        const prefix = `data:${fileOptions.type};base64,`;
+                        const base64Image = new Buffer(stdout, 'binary').toString('base64');
+                        fileOptions.preview = prefix + base64Image;
+
+                        cb(null);
+                    });
+                },
+
+                (cb) => {
+                    if (!_.includes(OTHER_CONSTANTS.OTHER_FORMATS, fileOptions.type)) {
+                        return cb(null);
+                    }
+
+                    const inputFileName = `${fileOptions.tempPath}[0]`;
+                    const outputFile = `/tmp/${fileOptions.name}.png`;
+
+                    im.convert([inputFileName, '-resize', '150x150', outputFile], (err, stdout) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        const prefix = 'data:image/png;base64,';
+                        const convertedFile = fs.readFileSync(outputFile, 'binary');
+                        const base64Image = new Buffer(convertedFile, 'binary').toString('base64');
+                        fileOptions.preview = prefix + base64Image;
+                        cb(null);
+                    });
+                },
+
+                (cb) => {
+                    fileUploader.uploadFile(fileOptions, bucket, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null);
+                    });
+                },
+
+                (cb) => {
+                    const saveData = {
+                        name: `${fileOptions.name}.${fileOptions.extension}`,
+                        originalName: fileOptions.originalFilename,
+                        extension: fileOptions.extension,
+                        contentType: fileOptions.type,
+                        createdBy: {
+                            user: userId
+                        },
+                        preview: fileOptions.preview
+                    };
+
+                    const model = new FileModel(saveData);
+
+                    model.set(saveData);
+                    model.save((err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        filesId.push(model.get('_id'));
+
+                        // todo: release execution
+                        fs.unlink(fileOptions.tempPath, (err) => {
+                            if (err) {
+                                console.log(err);
+                            }
+                        });
+
+                        cb(null);
+                    });
                 }
+            ], eachCb);
 
-                callback(null, filesIds);
-            });
+        }, (err) => {
+            if (err) {
+                return callback(err);
+            }
+
+            callback(null, filesId);
+        });
     };
 };
-
-module.exports = Files;

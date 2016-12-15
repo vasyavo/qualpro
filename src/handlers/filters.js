@@ -2468,6 +2468,11 @@ const Filters = function(db, redis) {
         delete filter.subRegion;
         delete filter.outlet;
 
+        if (filter.configuration) {
+            filter['configuration._id'] = filter.configuration;
+            delete filter.configuration;
+        }
+
         aggregateHelper = new AggregationHelper($defProjection, filter);
 
         pipeLine.push({
@@ -2491,10 +2496,7 @@ const Filters = function(db, redis) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'retailSegments',
             key : 'retailSegment',
-            as : 'retailSegment',
-            isArray : false,
-            addProjection : ['configurations']
-
+            isArray : true
         }));
 
         pipeLine.push({
@@ -2503,32 +2505,7 @@ const Filters = function(db, redis) {
                 retailSegment : 1,
                 product : 1,
                 configuration : {
-                    $filter : {
-                        input : '$retailSegment.configurations',
-                        as : 'configuration',
-                        cond : {$eq : ['$$configuration._id', '$configuration']}
-                    }
-                }
-            }
-        });
-
-        pipeLine.push({
-            $project : {
-                country : 1,
-                'retailSegment._id' : 1,
-                'retailSegment.name' : 1,
-                product : 1,
-                configuration : {$arrayElemAt : ['$configuration', 0]}
-            }
-        });
-
-        pipeLine.push({
-            $project : {
-                country : 1,
-                retailSegment : 1,
-                product : 1,
-                configuration : {
-                    name : {en : '$configuration.configuration'},
+                    name : {en : '$configuration.name'},
                     _id : 1
                 }
             }
@@ -2538,9 +2515,9 @@ const Filters = function(db, redis) {
             $group : {
                 _id : null,
                 country : {$addToSet : '$country'},
-                retailSegment : {$addToSet : '$retailSegment'},
+                retailSegment : {$first : '$retailSegment'},
                 product : {$addToSet : '$product'},
-                configuration : {$addToSet : '$configuration'}
+                configuration : {$push : '$configuration'}
             }
         });
 
@@ -3023,36 +3000,65 @@ const Filters = function(db, redis) {
             allowDiskUse : true
         };
 
-        aggregation.exec(function(err, result) {
+        aggregation.exec(function (err, result) {
             if (err) {
                 return next(err);
             }
 
             result = result[0] || {};
 
-            result = {
-                country : result.country || [],
-                region : result.region || [],
-                subRegion : result.subRegion || [],
-                branch : result.branch || [],
-                retailSegment : result.retailSegment || [],
-                outlet : result.outlet || [],
-                position : result.position || [],
-                status : mapFiltersValues(result.status, STATUSES)
-            };
+            async.parallel([
+                (pCb) => {
+                    redis.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
+                        if (err) {
+                            return pCb(err);
+                        }
 
-            redisFilters({
-                currentSelected : currentSelected,
-                filterExists : filterExists,
-                filtersObject : result,
-                personnelId : req.personnelModel._id,
-                contentType : CONTENT_TYPES.PERSONNEL
-            }, function(err, response) {
+                        pCb(null, onlineUsers);
+                    });
+                },
+                (pCb)=> {
+                    PersonnelModel.aggregate(pipeLine.slice(0, 2), (err, users)=> {
+                        if (err) {
+                            return pCb(err);
+                        }
+
+                        pCb(null, users.map(el => el._id.toString()));
+                    })
+                }
+            ], (err, pairArrays)=>{
                 if (err) {
                     return next(err);
                 }
 
-                res.status(200).send(response);
+                if (_.intersection(...pairArrays).length){
+                    result.status.push('online');
+                }
+
+                result = {
+                    country      : result.country || [],
+                    region       : result.region || [],
+                    subRegion    : result.subRegion || [],
+                    branch       : result.branch || [],
+                    retailSegment: result.retailSegment || [],
+                    outlet       : result.outlet || [],
+                    position     : result.position || [],
+                    status       : mapFiltersValues(result.status, STATUSES)
+                };
+
+                redisFilters({
+                    currentSelected: currentSelected,
+                    filterExists   : filterExists,
+                    filtersObject  : result,
+                    personnelId    : req.personnelModel._id,
+                    contentType    : CONTENT_TYPES.PERSONNEL
+                }, function (err, response) {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    res.status(200).send(response);
+                });
             });
         });
     };
@@ -6483,19 +6489,7 @@ const Filters = function(db, redis) {
                 personnel : result.personnel || []
             };
 
-            redisFilters({
-                currentSelected : currentSelected,
-                filterExists : filterExists,
-                filtersObject : result,
-                personnelId : req.personnelModel._id,
-                contentType : CONTENT_TYPES.CONTACT_US
-            }, function(err, response) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.send(200, response);
-            });
+            res.status(200).send(result);
         });
     };
 
