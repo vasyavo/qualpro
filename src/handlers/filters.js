@@ -2468,6 +2468,11 @@ const Filters = function(db, redis) {
         delete filter.subRegion;
         delete filter.outlet;
 
+        if (filter.configuration) {
+            filter['configuration._id'] = filter.configuration;
+            delete filter.configuration;
+        }
+
         aggregateHelper = new AggregationHelper($defProjection, filter);
 
         pipeLine.push({
@@ -2491,10 +2496,7 @@ const Filters = function(db, redis) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'retailSegments',
             key : 'retailSegment',
-            as : 'retailSegment',
-            isArray : false,
-            addProjection : ['configurations']
-
+            isArray : true
         }));
 
         pipeLine.push({
@@ -2503,32 +2505,7 @@ const Filters = function(db, redis) {
                 retailSegment : 1,
                 product : 1,
                 configuration : {
-                    $filter : {
-                        input : '$retailSegment.configurations',
-                        as : 'configuration',
-                        cond : {$eq : ['$$configuration._id', '$configuration']}
-                    }
-                }
-            }
-        });
-
-        pipeLine.push({
-            $project : {
-                country : 1,
-                'retailSegment._id' : 1,
-                'retailSegment.name' : 1,
-                product : 1,
-                configuration : {$arrayElemAt : ['$configuration', 0]}
-            }
-        });
-
-        pipeLine.push({
-            $project : {
-                country : 1,
-                retailSegment : 1,
-                product : 1,
-                configuration : {
-                    name : {en : '$configuration.configuration'},
+                    name : {en : '$configuration.name'},
                     _id : 1
                 }
             }
@@ -2538,9 +2515,9 @@ const Filters = function(db, redis) {
             $group : {
                 _id : null,
                 country : {$addToSet : '$country'},
-                retailSegment : {$addToSet : '$retailSegment'},
+                retailSegment : {$first : '$retailSegment'},
                 product : {$addToSet : '$product'},
-                configuration : {$addToSet : '$configuration'}
+                configuration : {$push : '$configuration'}
             }
         });
 

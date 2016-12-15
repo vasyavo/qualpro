@@ -42,7 +42,10 @@ define([
             },
 
             modelParse: function (model) {
-                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.name.currentLanguage : '';
+                model.displayTypeString = model.displayType.map((model) => {
+                    return model.name.currentLanguage;
+                }).join(', ');
+
                 return model;
             }
         });

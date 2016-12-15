@@ -22,6 +22,7 @@ const access = require('./../helpers/access')();
 const bodyValidator = require('./../helpers/bodyValidator');
 const extractBody = require('./../utils/extractBody');
 const event = require('./../utils/eventEmitter');
+const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
 
 const ObjectId = mongoose.Types.ObjectId;
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
@@ -1307,21 +1308,9 @@ var InStoreReports = function() {
                         const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
                             return ObjectId.toString();
                         });
-                        const dataMyCC = response.data.map((objective) => {
-                            let assignedToId;
-                            let createdById;
-                            const currentUserId = req.session.uId;
-                            if (_.isObject(objective.assignedTo[0])) {
-                                assignedToId = objective.assignedTo[0]._id.toString();
-                            }
-                            if (_.isObject(objective.createdBy.user)) {
-                                createdById = objective.createdBy.user._id.toString();
-                            }
-                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
-                                objective.myCC = true;
-                            }
-                            return objective;
-                        });
+                        const currentUserId = req.session.uId;
+                        const dataMyCC = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
+
                         response.data = dataMyCC;
                         next({status: 200, body: response});
                     })
