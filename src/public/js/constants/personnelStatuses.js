@@ -34,6 +34,14 @@
             }
         },
 
+        ONLINE: {
+            _id : 'online',
+            name: {
+                en: 'Online',
+                ar: 'على الانترنت' // toDo translate correctly
+            }
+        },
+
         NEVERLOGIN: {
             _id : 'neverLogin',
             name: {

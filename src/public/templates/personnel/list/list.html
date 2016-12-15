@@ -24,11 +24,8 @@
         <%= (personnel.createdBy && personnel.createdBy.user && personnel.createdBy.user.firstName) ?(personnel.createdBy.user.firstName.currentLanguage || 'System') + ' ' + (personnel.createdBy.user.lastName.currentLanguage || ' ') : '' %>
         <%= (personnel.createdBy && personnel.createdBy.date) ? personnel.createdBy.date : '' %>
     </td>
-    <td id="status-<%- personnel._id %>" class="wordWrapp <%=personnel.status ? personnel.status.classCss : ''%> <%- personnel.online ? 'hidden' : '' %>">
+    <td id="status-<%- personnel._id %>" class="wordWrapp <%=personnel.status ? personnel.status.classCss : ''%>"> <!--todo fix class css online-->
         <%- personnel.status ? personnel.status.message : '' %>
-    </td>
-    <td id="online-<%- personnel._id %>" class="wordWrapp login <%- personnel.online ? '' : 'hidden' %>">
-        Online
     </td>
 </tr>
 <% }) %>
