@@ -686,7 +686,7 @@ var planogramsHandler = function(db, redis, event) {
 
             delete queryObject.globalSearch;
 
-            if (query.filter.configuration) {
+            if (query.filter && query.filter.configuration) {
                 query.filter['configuration._id'] = query.filter.configuration;
                 delete query.filter.configuration;
             }
