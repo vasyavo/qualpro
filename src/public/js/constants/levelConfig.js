@@ -511,6 +511,18 @@ define([
                 }
             ]
         },
+        10           : {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'brandingAndDisplayItems',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/tableBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        },
 
         activityList: {
             preview: [
