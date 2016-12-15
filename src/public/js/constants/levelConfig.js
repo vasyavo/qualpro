@@ -194,6 +194,7 @@ define([
         5           : {
             preview: []
         },
+        10 : inStoreDefaultConfig,
         activityList: {
             preview: [
                 {
