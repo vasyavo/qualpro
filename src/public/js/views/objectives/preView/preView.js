@@ -737,7 +737,7 @@ define([
 
         renderStatus: function (jsonModel) {
             var selector = '#statusDd';
-debugger;
+
             var STATUSES = CONSTANTS.OBJECTIVE_STATUSES;
             var statusId = jsonModel.status._id;
             var coveredIds = App.currentUser.covered ? Object.keys(App.currentUser.covered) : [];
