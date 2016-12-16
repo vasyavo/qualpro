@@ -35,10 +35,9 @@ define([
 
                 if ((url === '') || (url === 'login')) {
                     url = 'qualPro';
-                }
-
-                if (App.currentUser.accessRole.level == ACL_ROLE_INDEXES.MASTER_UPLOADER || App.currentUser.accessRole.level === ACL_ROLE_INDEXES.COUNTRY_UPLOADER) {
-                    url = 'qualPro/country';
+                    if (App.currentUser.accessRole.level == ACL_ROLE_INDEXES.MASTER_UPLOADER || App.currentUser.accessRole.level === ACL_ROLE_INDEXES.COUNTRY_UPLOADER) {
+                        url = 'qualPro/country';
+                    }
                 }
 
                 Backbone.history.fragment = "";
