@@ -8,9 +8,7 @@ define([
     'collections/filter/filterCollection',
     'constants/filters',
     'js-cookie'
-], function ($, _, Backbone, dropDownTemplate,
-             dropDownContentTemplate, filterCollection,
-             FILTERSCONSTANTS, Cookies) {
+], function ($, _, Backbone, dropDownTemplate, dropDownContentTemplate, filterCollection, FILTERSCONSTANTS, Cookies) {
 
     var DropDownView = Backbone.View.extend({
         template       : _.template(dropDownTemplate),
@@ -57,8 +55,10 @@ define([
                     self.removeSelected();
                 }
 
-                $(`#select-all-li-${self.contentType}`).removeClass('checkedValue');
-                $('.dropDownItem.selected').removeClass('selected');
+                if (this.showSelectAll) {
+                    $(`#select-all-li-${self.contentType}`).removeClass('checkedValue');
+                    $('.dropDownItem.selected').removeClass('selected');
+                }
 
                 if (self.checkAll) {
                     self.collection.forEach(function (model) {
