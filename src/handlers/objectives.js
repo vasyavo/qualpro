@@ -929,43 +929,57 @@ var Objectives = function (db, redis, event) {
                     updateObject['description.ar'] = _.escape(description.ar || '');
                 }
 
-                ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
+                ObjectiveModel.findOne({_id: objectiveId}, function(err, model) {
                     if (err) {
                         return waterFallCb(err);
                     }
+                    if (lodash.includes([
+                            OBJECTIVE_STATUSES.FAIL,
+                            OBJECTIVE_STATUSES.CLOSED
+                        ], model.status)) {
+                        let error = new Error(`You could not update task with status: "${model.status}"`);
+                        error.status = 400;
 
-                    if (body.cover) {
-                        updateCover(objectiveModel);
+                        return waterFallCb(error);
                     }
+                    ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
+                        if (err) {
+                            return waterFallCb(err);
+                        }
 
-                    if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
-                        && objectiveModel.objectiveType !== 'individual'
-                        && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
-                        ObjectiveModel
-                            .update({
-                                'parent.1': objectiveModel._id
-                            }, {
-                                $set: {'archived': true}
-                            }, {
-                                multi: true
-                            }, function (err, result) {
-                                if (err) {
-                                    console.log(err);
-                                }
+                        if (body.cover) {
+                            updateCover(objectiveModel);
+                        }
 
-                                console.dir(result);
-                            });
-                    }
+                        if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
+                            && objectiveModel.objectiveType !== 'individual'
+                            && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
+                            ObjectiveModel
+                                .update({
+                                    'parent.1': objectiveModel._id
+                                }, {
+                                    $set: {'archived': true}
+                                }, {
+                                    multi: true
+                                }, function (err, result) {
+                                    if (err) {
+                                        console.log(err);
+                                    }
 
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.OBJECTIVE,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : updateObject.editedBy,
-                        itemId    : objectiveId,
-                        itemType  : CONTENT_TYPES.OBJECTIVES
+                                    console.dir(result);
+                                });
+                        }
+
+                        event.emit('activityChange', {
+                            module    : ACL_MODULES.OBJECTIVE,
+                            actionType: ACTIVITY_TYPES.UPDATED,
+                            createdBy : updateObject.editedBy,
+                            itemId    : objectiveId,
+                            itemType  : CONTENT_TYPES.OBJECTIVES
+                        });
+
+                        waterFallCb(null, objectiveModel);
                     });
-
-                    waterFallCb(null, objectiveModel);
                 });
             }
 
