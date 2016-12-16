@@ -699,8 +699,8 @@ allowedParams[CONTENT_TYPES.INSTORETASKS] = {
         update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     5: {
-        create: [],
-        update: ['status']
+        create: ['title', 'description', 'objectiveType', 'priority', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     6: {
         create: [],
@@ -715,6 +715,10 @@ allowedParams[CONTENT_TYPES.INSTORETASKS] = {
         update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     9: {
+        create: ['title', 'description', 'objectiveType', 'priority', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
+    },
+    10: {
         create: ['title', 'description', 'objectiveType', 'priority', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
         update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     }

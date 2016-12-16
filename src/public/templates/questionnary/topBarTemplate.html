@@ -6,7 +6,7 @@
 </div>
 
 <div id="viewBar" class="viewBar questionnarieView viewBarPadding">
-    <% if([3,4].indexOf(App.currentUser.accessRole.level) === -1) { %>
+    <% if([3, 4, 10].indexOf(App.currentUser.accessRole.level) === -1) { %>
     <span id="createBtn" class="greenBtn" data-translation="newBtn"><%= translation.newBtn %></span>
     <%}%>
     <div id="paginationHolder" class="paginationHolder">

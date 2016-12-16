@@ -70,7 +70,8 @@ var Personnel = function(db, redis, event) {
         6 : [ACL_CONSTANTS.VIRTUAL],
         7 : [ACL_CONSTANTS.VIRTUAL],
         8 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
-        9 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value()
+        9 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
+        10 : [ACL_CONSTANTS.VIRTUAL]
     };
 
     function getAllPipelineActivity(options) {
@@ -370,6 +371,10 @@ var Personnel = function(db, redis, event) {
                 regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
             }
 
+            if (currentUser.accessRoleLevel === ACL_CONSTANTS.TRADE_MARKETER) {
+                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
+            }
+
             if (currentUser.accessRoleLevel === 4) {
                 regionsMathArray = {subRegion : {$in : currentUser.subRegion || afterIteMTypeQuery.subRegion}};
             }
@@ -579,20 +584,18 @@ var Personnel = function(db, redis, event) {
         ]);
 
         aggregation.exec(function(err, result) {
-            var error;
             if (err) {
                 return waterFallCb(err);
             }
 
             if (!result[0]) {
-                error = new Error();
+                const error = new Error();
                 error.message = 'user not found';
                 return waterFallCb(error);
             }
+
             waterFallCb(null, result[0]);
-
         });
-
     }
 
     function getUserInfo(userId, cb) {

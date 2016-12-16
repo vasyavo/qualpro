@@ -2500,6 +2500,12 @@ const Filters = function(db, redis) {
         }));
 
         pipeLine.push({
+            $unwind : {
+                path : '$retailSegment'
+            }
+        });
+
+        pipeLine.push({
             $project : {
                 country : 1,
                 retailSegment : 1,
@@ -2515,7 +2521,7 @@ const Filters = function(db, redis) {
             $group : {
                 _id : null,
                 country : {$addToSet : '$country'},
-                retailSegment : {$first : '$retailSegment'},
+                retailSegment : {$addToSet : '$retailSegment'},
                 product : {$addToSet : '$product'},
                 configuration : {$push : '$configuration'}
             }

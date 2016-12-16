@@ -121,12 +121,17 @@
             var filterType = options.filterType || null;
             var mandatory = options.mandatory || false;
             var singleSelect = options.singleSelect || false;
+            var showSelectAll = options.showSelectAll || false;
 
             resultObject.type = type;
             resultObject.mandatory = mandatory;
             resultObject.singleSelect = singleSelect;
             resultObject.parent = parent;
             resultObject.filterType = filterType;
+
+            if (resultObject.filterType == 'multiSelect' && showSelectAll) {
+                resultObject.showSelectAll = showSelectAll;
+            }
 
             if (displayName) {
                 resultObject.displayName = displayName;
@@ -520,27 +525,32 @@
         createQuestionnary[CONSTANTS.COUNTRY] = getFilterConstant({
             displayName: {en: 'Country', ar: 'الدولة'},
             mandatory  : true,
-            filterType : 'singleSelect'
+            filterType : 'singleSelect',
         });
         createQuestionnary[CONSTANTS.REGION] = getFilterConstant({
             displayName: {en: 'Region', ar: 'المنطقة'},
-            filterType : 'multiSelect'
+            filterType : 'multiSelect',
+            showSelectAll : true
         });
         createQuestionnary[CONSTANTS.SUBREGION] = getFilterConstant({
             displayName: {en: 'Sub-Region', ar: 'المنطقة الفرعية:'},
-            filterType : 'multiSelect'
+            filterType : 'multiSelect',
+            showSelectAll : true
         });
         createQuestionnary[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
             displayName: {en: 'Trade Channel', ar: 'الفئة التجارية:'},
-            filterType : 'multiSelect'
+            filterType : 'multiSelect',
+            showSelectAll : true
         });
         createQuestionnary[CONSTANTS.OUTLET] = getFilterConstant({
             displayName: {en: 'Customer', ar: 'العميل'},
-            filterType : 'multiSelect'
+            filterType : 'multiSelect',
+            showSelectAll : true
         });
         createQuestionnary[CONSTANTS.BRANCH] = getFilterConstant({
             displayName: {en: 'Branch', ar: 'الفرع'},
-            filterType : 'multiSelect'
+            filterType : 'multiSelect',
+            showSelectAll : true
         });
         createQuestionnary[CONSTANTS.POSITION] = getFilterConstant({
             displayName: {en: 'Position', ar: 'المركز الوظيفي'},
