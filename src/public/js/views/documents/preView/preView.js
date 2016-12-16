@@ -114,7 +114,7 @@ define([
                 }
             });
 
-            if (this.activityList) {
+            if (this.activityList && App.currentUser.workAccess) {
                 currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
 
                 require([

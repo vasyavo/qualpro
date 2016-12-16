@@ -19,12 +19,11 @@ const schema = new Schema({
     retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT, default: null }],
     outlet: [{ type: ObjectId, ref: CONTENT_TYPES.OUTLET, default: null }],
     branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH, default: null }],
-    displayType: {
+    displayType: [{
         type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
         default: null
-    },
-
+    }],
     barcode: { type: String, default: '' },
     packing: { type: String, default: '' },
     ppt: { type: Number, default: 0 },

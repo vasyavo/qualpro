@@ -4,7 +4,7 @@
 <% var avgRating = personnel.avgRating ? personnel.avgRating.monthly : 0; %>
 <div class="thumbnail personnel" data-id="<%=personnel._id%>">
     <div class="thumbnailTop">
-        <% if ((level <=2) || (level >= 8)) { %>
+        <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
         <input type="checkbox"
                value="<%=personnel._id%>"
                id="<%=personnel._id%>"
@@ -14,7 +14,7 @@
         <% } %>
         <span class="status <%=personnel.status?personnel.status.classCss:''%>"></span>
         <img class="thumbnailImage" src="<%=personnel.imageSrc%>">
-        <% if( personnel.accessRole && personnel.accessRole.level > 2 && personnel.accessRole.level <8){ %>
+        <% if( personnel.accessRole && personnel.accessRole.level > 2 && personnel.accessRole.level <8 && App.currentUser.workAccess){ %>
         <select class="rating">
             <option value="0"
             <%= avgRating === 0 ? 'selected' : '' %> >0</option>

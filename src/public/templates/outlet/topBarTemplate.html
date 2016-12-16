@@ -22,7 +22,7 @@
             <%=translation.archive%>
         </a>
     </div>
-
+    <% if (App.currentUser.workAccess) { %>
     <% if (App.currentUser.accessRole.level < 3 || App.currentUser.accessRole.level > 7) { %>
         <span id="createBtn" class="createBtn" data-translation="newButton"><%=translation.newButton%></span>
     <% } %>
@@ -43,6 +43,7 @@
             <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn" data-translation="unDisable"><%=translation.unDisable%></li>
         </ul>
     </div>
+    <% } %>
 
     <div id="contentViewSwitcher" class="contentViewSwitcher">
         <ul class="btn-list">

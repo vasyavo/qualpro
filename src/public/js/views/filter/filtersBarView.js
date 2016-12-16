@@ -301,7 +301,8 @@ define([
                 3: ['country', 'region'],
                 4: ['country', 'region', 'subRegion'],
                 8: [],
-                9: ['country']
+                9: ['country'],
+                10: ['country', 'region', 'subRegion', 'branch']
             };
 
             function cloneArrayOfObjects(array) {
