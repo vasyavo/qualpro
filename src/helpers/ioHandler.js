@@ -31,7 +31,7 @@ module.exports = function(io, unreadCache) {
 
             redis.cacheStore.readFromStorage(actionKey, function(err, number) {
                 if (err) {
-                    return next(err);
+                    return logger.error(err);
                 }
 
                 if (!number) {
@@ -48,7 +48,7 @@ module.exports = function(io, unreadCache) {
 
             redis.cacheStore.getValuesStorageHash(onlineKey, function(err, online) {
                 if (err) {
-                    return next(err);
+                    return logger.error(err);
                 }
 
                 socket.emit('online', {
@@ -62,7 +62,7 @@ module.exports = function(io, unreadCache) {
 
             redis.cacheStore.getValueHashByField(onlineKey, _this.id, function(err, uid) {
                 if (err) {
-                    return next(err);
+                    return logger.error(err);
                 }
 
                 redis.cacheStore.removeStorageHashByField(onlineKey, _this.id);
@@ -83,7 +83,7 @@ module.exports = function(io, unreadCache) {
 
             redis.cacheStore.getValueHashByField(onlineKey, _this.id, function(err, uid) {
                 if (err) {
-                    return next(err);
+                    return logger.error(err);
                 }
 
                 unreadCache.deleteUserSocketId(this.uId, this.id);

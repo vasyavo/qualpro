@@ -59,9 +59,15 @@ define([
             });
 
             editView.on('modelSaved', function (model) {
+                debugger;
+                const jsonModel = model.toJSON();
+                jsonModel.retailSegmentString = jsonModel.retailSegment.map((item) => {
+                    return item.name.currentLanguage;
+                }).join(', ');
                 self.$el.html(self.template({
                     translation: self.translation,
-                    model      : model.toJSON()
+                    model      : jsonModel,
+                    activityList : self.activityList
                 }));
                 self.trigger('modelSaved', model);
             })
@@ -69,6 +75,14 @@ define([
 
         render: function () {
             var modelJSON = this.model.toJSON();
+
+            modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
+                return item.name.currentLanguage;
+            }).join(', ');
+
+            modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
+                return item.name.currentLanguage;
+            }).join(', ');
 
             this.$el.html(this.template({
                 translation : this.translation,

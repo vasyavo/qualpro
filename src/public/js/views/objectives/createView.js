@@ -147,7 +147,7 @@ define([
                 en: CKEDITOR.instances.editor1.document.getBody().getText(),
                 ar: CKEDITOR.instances.editor2.document.getBody().getText()
             };
-debugger;
+
             this.visibilityForm = new VisibilityEditView({
                 forCreate           : true,
                 savedVisibilityModel: this.savedVisibilityModel,
@@ -158,7 +158,6 @@ debugger;
             });
 
             this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                debugger;
                 self.visibilityFormAjax = ajaxObj;
                 self.savedVisibilityModel = ajaxObj.model;
             });

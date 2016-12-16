@@ -6,7 +6,16 @@ const schema = new Schema({
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, require: true },
     retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT }],
     product: { type: ObjectId, ref: CONTENT_TYPES.CATEGORY, require: true },
-    configuration: { type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT + '.configurations', require: true },
+    configuration: {
+        _id: {
+            type : ObjectId,
+            require: true
+        },
+        name: {
+            type: String,
+            require: true
+        }
+    },
     fileID: { type: ObjectId, ref: CONTENT_TYPES.FILES, default: null, require: true },
     archived: { type: Boolean, default: false },
     createdBy: {

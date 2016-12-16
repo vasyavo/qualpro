@@ -5,6 +5,7 @@ const multipartMiddleware = multipart();
 const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
+const IncomingRequestPayloadLogger = require('../utils/IncomingRequestPayloadLogger');
 const notFoundHandler = require('./../utils/notFound');
 const csrfProtection = require('./../utils/csrfProtection');
 const checkAuth = require('./../utils/isAuth');
@@ -81,26 +82,9 @@ module.exports = function(app, db, event) {
 
     var displayTypeRouter = require('./displayType')(db, redis, event);
 
-    var CONSTANTS = require('../constants/mainConstants');
-
-    var sessionValidator = function(req, res, next) {
-        var session = req.session;
-        var year = 31536000000;
-
-        if (session) {
-            if (session.rememberMe) {
-                session.cookie.maxAge = year;
-            } else {
-                session.cookie.maxAge = CONSTANTS.SESSION_TTL;
-            }
-        }
-
-        next();
-    };
-
     app.use(addRequestId);
-
-    app.use(sessionValidator);
+    app.use(IncomingRequestPayloadLogger);
+    app.use(require('./../utils/rememberMeMiddleware'));
 
     app.get('/', csrfProtection, function(req, res, next) {
         //ToDo remove (res.cookie) this one after test sms

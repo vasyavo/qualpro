@@ -5,8 +5,9 @@ define([
     'dataService',
     'moment',
     'constants/contentType',
-    'constants/errorMessages'
-], function (Backbone, $, async, dataService, moment, CONSTANTS, ERROR_MESSAGES) {
+    'constants/errorMessages',
+    'constants/aclRoleIndexes'
+], function (Backbone, $, async, dataService, moment, CONSTANTS, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
 
     var runApplication = function (success) {
         var url;
@@ -15,24 +16,64 @@ define([
             Backbone.history.start({silent: true});
         }
 
-        if (success) {
-            url = /*(App.requestedURL !== null) ? App.requestedURL || '' :*/ Backbone.history.fragment;
+        if (!success) {
+            return getCurrentUserFails();
+        }
 
-            if ((url === '') || (url === 'login')) {
-                url = 'qualPro';
-            }
-
-            Backbone.history.fragment = "";
-            Backbone.history.navigate(url, {trigger: true});
-
-        } else {
+        function getCurrentUserFails() {
             if (App.requestedURL === null) {
                 App.requestedURL = Backbone.history.fragment === 'login/confirmed' ? null : Backbone.history.fragment;
             }
 
             Backbone.history.fragment = '';
-            Backbone.history.navigate('login', {trigger: true});
+            return Backbone.history.navigate('login', {trigger: true});
         }
+
+        function loadUrl(success) {
+            if (success) {
+                url = Backbone.history.fragment;
+
+                if ((url === '') || (url === 'login')) {
+                    url = 'qualPro';
+                }
+
+                if (App.currentUser.accessRole.level == ACL_ROLE_INDEXES.MASTER_UPLOADER || App.currentUser.accessRole.level === ACL_ROLE_INDEXES.COUNTRY_UPLOADER) {
+                    url = 'qualPro/country';
+                }
+
+                Backbone.history.fragment = "";
+                Backbone.history.navigate(url, {trigger: true});
+            }
+        }
+
+        require(['models/personnel'], (PersonnelModel) => {
+            if (!App.currentUser) {
+                const currentUser = new PersonnelModel();
+                currentUser.url = '/personnel/currentUser';
+                currentUser.fetch({
+                    success: function (currentUser) {
+                        App.currentUser = currentUser.toJSON();
+                        $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
+                        moment.locale(App.currentUser.currentLanguage);
+                        loadUrl(success);
+                        App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
+                    },
+
+                    error: function (err) {
+                        const status = err.status;
+                        switch (status) {
+                            case 401 :
+                                getCurrentUserFails();
+                                break;
+                            default : break;
+                        }
+                    }
+                });
+            } else {
+                loadUrl(success);
+                App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
+            }
+        });
     };
 
     var getCurrentTab = function (contentType) {

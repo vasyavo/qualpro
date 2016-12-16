@@ -51,8 +51,9 @@ models[CONTENT_TYPES.QUESTIONNARIES_ANSWER] = require('./questionnariesAnswer/mo
 models[CONTENT_TYPES.RETAILSEGMENT] = require('./retailSegment/model');
 models[CONTENT_TYPES.SESSION] = require('./session/model');
 models[CONTENT_TYPES.SHELF] = require('./shelf/model');
-models[CONTENT_TYPES.SHELF] = require('./shelfShare/model');
+models[CONTENT_TYPES.SHELFSHARES] = require('./shelfShare/model');
 models[CONTENT_TYPES.VARIANT] = require('./variant/model');
 models[CONTENT_TYPES.VISIBILITYFORM] = require('./visibilityForm/model');
+models[CONTENT_TYPES.ACHIEVEMENTFORM] = require('./achievementForm/model');
 
 module.exports = models;
