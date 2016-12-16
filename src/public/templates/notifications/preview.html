@@ -124,6 +124,19 @@
             <div class="block-right">
                 <div class="scrollable">
                     <div class="notificationText"><%= jsonModel.description.currentLanguage %></div>
+                    <div class="filesBlock borderBottom" id="objectiveFiles" style="display: block;">
+                        <span class="filesTitle">Files</span>
+                        <div id="objectiveFileThumbnail" class="fileThumbnail">
+                            <% jsonModel.attachments.map((attachment) => { %>
+                                <div data-id="<%- attachment._id %>" class="fileThumbnailItem brandItem masonryThumbnail">
+                                    <div class="thumbnail_js thumbnailBody">
+                                        <img src="<%- attachment.preview %>">
+                                        <div class="objectivesFileName fontMicro"><%- attachment.originalName %></div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

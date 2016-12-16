@@ -37,7 +37,9 @@
                         <div class="bannerMd fileThumbnailItem brandItem masonryThumbnail">
                             <div class="thumbnail_js thumbnailBody">
                                 <!--insert image here-->
-                                <img src="images/tuna.jpg" alt="">
+                                <% model.attachments.map((attachment) => { %>
+                                    <img src="<%- attachment.preview %>">
+                                <% }); %>
                                 <!--insert image here-->
                             </div>
                         </div>

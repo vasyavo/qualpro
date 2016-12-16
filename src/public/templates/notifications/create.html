@@ -132,25 +132,17 @@
                         </div>
                     </div>
                     <!--new feachure start-->
-                    <div class="attachmentsBlock">
+                    <div id="attachments" class="attachmentsBlock">
                         <div class="attachmentsHeader">
-                            <div class="attachmentsDescription fontBold mandatory">Attachments</div>
-                            <div class="upload floatRight">
-                                <p class="uploadValue">Attach Files</p>
-                                <input type="file" value="Edit" id="inputImg" class="uploadInput" accept="image/*">
-                            </div>
+                            <span class="attachmentsDescription fontBold"><%- translation.attachments %></span>
+                            <span id="attachFiles" class="greyBtn right"><%- translation.attachFiles %></span>
                         </div>
-                        <div class="attachmentsBody">
-                            <div class="attachmentItem">
-                                <span class="fontBold">file1.png</span>
-                                <span class="fontGray">(56K)</span>
-                                <span class="floatRight close"></span>
-                            </div>
-                            <div class="attachmentItem">
-                                <span class="fontBold">file1.png</span>
-                                <span class="fontGray">(56K)</span>
-                                <span class="floatRight close"></span>
-                            </div>
+                        <div class="formBlock borderBottom">
+                            <div id="formThumbnail"></div>
+                        </div>
+                        <div class="promotionFilesBlock borderBottom ">
+                            <form action="" method="post" id="mainForm"></form>
+                            <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock masonryThumbnailsWrapper"></div>
                         </div>
                     </div>
                     <!--new feachure end-->

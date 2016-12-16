@@ -4,43 +4,43 @@ var allowedParams = {};
 allowedParams[CONTENT_TYPES.NOTES] = {
     0: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     1: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     2: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     3: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     4: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     5: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     6: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     7: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     8: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     },
     9: {
         create: ['title', 'archived', 'theme', 'description'],
-        update: ['title', 'archived', 'theme', 'description']
+        update: ['title', 'archived', 'theme', 'description', 'filesToDelete']
     }
 };
 
@@ -699,8 +699,8 @@ allowedParams[CONTENT_TYPES.INSTORETASKS] = {
         update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     5: {
-        create: [],
-        update: ['status']
+        create: ['title', 'description', 'objectiveType', 'priority', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     6: {
         create: [],
@@ -715,6 +715,10 @@ allowedParams[CONTENT_TYPES.INSTORETASKS] = {
         update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     9: {
+        create: ['title', 'description', 'objectiveType', 'priority', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
+    },
+    10: {
         create: ['title', 'description', 'objectiveType', 'priority', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
         update: ['title', 'description', 'objectiveType', 'priority', 'status', 'assignedTo', 'complete', 'saveObjective', 'comments', 'attachments', 'formType', 'dateStart', 'dateEnd', 'location', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     }

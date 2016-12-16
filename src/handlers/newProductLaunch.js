@@ -132,6 +132,7 @@ var NewProductLaunch = function(db, redis, event) {
                         origin : body.origin,
                         price : body.price,
                         packing : body.packing,
+                        packingType : body.packingType,
                         location : body.location,
                         attachments : filesIds,
                         displayType : body.displayType,

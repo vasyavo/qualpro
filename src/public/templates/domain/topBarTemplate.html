@@ -29,7 +29,7 @@
     <div class="filterBar singleFilter">
 
     </div>
-    <% if ((level <=2) || (level >= 8)) { %>
+    <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
     <div id="btnHolder">
         <span id="createBtn" class="createBtn" data-translation="newDomain"><%=translation.newDomain%></span>
     </div>
@@ -43,11 +43,11 @@
 
     <div id="actionHolder"
          class="actionHolder actionBtn hidden">
-        <span class="dropDown downArrow triUp">Action</span>
+        <span class="dropDown downArrow triUp"><%=translation.action%></span>
         <ul class="dropDownContent">
-            <li id="editBtn" class="editBtn">Edit</li>
-            <li id="archiveBtn" data-archived-type="false" class="archiveBtn">Disable</li>
-            <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn">Un Disable</li>
+            <li id="editBtn" class="editBtn"><%=translation.edit%></li>
+            <li id="archiveBtn" data-archived-type="false" class="archiveBtn"><%=translation.disable%></li>
+            <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn"><%=translation.unDisable%></li>
         </ul>
     </div>
     <% } %>

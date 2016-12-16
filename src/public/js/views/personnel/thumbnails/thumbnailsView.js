@@ -203,7 +203,7 @@ define([
 
                 level = modelJSON.accessRole && modelJSON.accessRole.level || 1;
 
-                if ((curLevel <= 2 && curLevel >= 8) || checkboxes.length !== 1 || level < 2) {
+                if ((curLevel <= 2 && curLevel >= 8) || checkboxes.length !== 1 || level < 2 && App.currentUser.workAccess) {
                     showAddSupervisor = false;
                 }
 

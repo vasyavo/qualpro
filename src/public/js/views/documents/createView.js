@@ -22,6 +22,7 @@ define([
         template    : _.template(CreateTemplate),
         fileTemplate: _.template(FileTemplate),
         body        : {},
+        ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
 
         events: {
             'click #attachFile': 'showAttachDialog'
@@ -133,7 +134,7 @@ define([
 
                 type = $fileInput.prop('files')[0].type;
 
-                if (type !== 'application/pdf') {
+                if (self.ALLOWED_CONTENT_TYPES.indexOf(type) === -1) {
                     App.render({type: 'error', message: ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage]});
                     return;
                 }
@@ -172,7 +173,7 @@ define([
             var fileModel = new FileModel();
 
             this.files.add(fileModel);
-            this.$el.find('#mainForm').append('<input accept=".pdf" type="file" name="' + fileModel.cid + '" id="' + fileModel.cid + '" style="display: none">');
+            this.$el.find('#mainForm').append('<input accept="' + this.ALLOWED_CONTENT_TYPES.join(', ') + '" type="file" name="' + fileModel.cid + '" id="' + fileModel.cid + '" style="display: none">');
             fileInput = this.$el.find('#' + fileModel.cid);
             fileInput.on('change', {fileInput: fileInput}, this.fileSelected);
             fileInput.click();

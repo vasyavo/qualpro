@@ -11,6 +11,7 @@ const schema = new Schema({
     branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH, default: null }],
     position: [{ type: ObjectId, ref: CONTENT_TYPES.POSITION, default: null }],
     recipients: [{ type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null }],
+    attachments : [{ type: ObjectId, ref: CONTENT_TYPES.FILES, default: null }],
     description: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }

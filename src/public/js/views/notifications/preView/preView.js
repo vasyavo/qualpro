@@ -4,9 +4,11 @@ define([
     'jQuery',
     'constants/contentType',
     'views/baseDialog',
+    'collections/file/collection',
+    'views/fileDialog/fileDialog',
     'text!templates/notifications/preview.html'
 ],
-function (Backbone, _, $, CONTENT_TYPES, BaseView, PreviewTemplate) {
+function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPreviewView, PreviewTemplate) {
     'use strict';
 
     var PreView = BaseView.extend({
@@ -15,13 +17,30 @@ function (Backbone, _, $, CONTENT_TYPES, BaseView, PreviewTemplate) {
         template: _.template(PreviewTemplate),
 
         initialize: function (options) {
-
             this.translation = options.translation;
             this.model = options.model;
             this.language = App.currentUser.currentLanguage;
 
+            this.previewFiles = new FileCollection(this.model.get('attachments'), true);
+
             this.makeRender();
             this.render();
+        },
+
+        events : {
+            'click .fileThumbnailItem' : 'showFilePreview'
+        },
+
+        showFilePreview : function (event) {
+            var target = $(event.target);
+            var $thumbnail = target.closest('.masonryThumbnail');
+            var fileModelId = $thumbnail.attr('data-id');
+            var fileModel = this.previewFiles.get(fileModelId);
+
+            this.fileDialogView = new FileDialogPreviewView({
+                fileModel  : fileModel,
+                translation: this.translation
+            });
         },
 
         render: function () {
@@ -66,6 +85,8 @@ function (Backbone, _, $, CONTENT_TYPES, BaseView, PreviewTemplate) {
                     $('body').css({overflow: 'inherit'});
                 }
             });
+
+            this.delegateEvents(this.events);
         }
     });
 

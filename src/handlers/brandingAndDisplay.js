@@ -328,7 +328,7 @@ function BrandingAndDisplay(db, redis, event) {
         var error;
 
         function generateSearchCondition(query) {
-            const globalSearch = query.globalSearch
+            const globalSearch = query.globalSearch;
             var searchVariants = [
                 'outlet',
                 'branch',
@@ -436,28 +436,48 @@ function BrandingAndDisplay(db, redis, event) {
                         preserveNullAndEmptyArrays : true
                     }
                 }])
-                .unwind('createdBy.country')
+                .append([{
+                    $unwind : {
+                        path : '$createdBy.country',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.DOMAIN + 's',
                     localField : 'createdBy.country',
                     foreignField : '_id',
                     as : 'countries'
                 })
-                .unwind('countries')
+                .append([{
+                    $unwind : {
+                        path : '$countries',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.POSITION + 's',
                     localField : 'createdBy.position',
                     foreignField : '_id',
                     as : 'createdBy.position'
                 })
-                .unwind('createdBy.position')
+                .append([{
+                    $unwind : {
+                        path : '$createdBy.position',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.ACCESSROLE + 's',
                     localField : 'createdBy.accessRole',
                     foreignField : '_id',
                     as : 'createdBy.accessRole'
                 })
-                .unwind('createdBy.accessRole')
+                .append([{
+                    $unwind : {
+                        path : '$createdBy.accessRole',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .append([{
                     $unwind : {
                         path : '$attachments',
@@ -567,35 +587,60 @@ function BrandingAndDisplay(db, redis, event) {
                     foreignField : '_id',
                     as : 'outlet'
                 })
-                .unwind('outlet')
+                .append([{
+                    $unwind : {
+                        path : '$outlet',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.BRANCH + 'es',
                     localField : 'branch',
                     foreignField : '_id',
                     as : 'branch'
                 })
-                .unwind('branch')
+                .append([{
+                    $unwind : {
+                        path : '$branch',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.RETAILSEGMENT + 's',
                     localField : 'branch.retailSegment',
                     foreignField : '_id',
                     as : 'retailSegment'
                 })
-                .unwind('retailSegment')
+                .append([{
+                    $unwind : {
+                        path : '$retailSegment',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.DOMAIN + 's',
                     localField : 'branch.subRegion',
                     foreignField : '_id',
                     as : 'subRegion'
                 })
-                .unwind('subRegion')
+                .append([{
+                    $unwind : {
+                        path : '$subRegion',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .lookup({
                     from : CONTENT_TYPES.DOMAIN + 's',
                     localField : 'subRegion.parent',
                     foreignField : '_id',
                     as : 'region'
                 })
-                .unwind('region')
+                .append([{
+                    $unwind : {
+                        path : '$region',
+                        preserveNullAndEmptyArrays : true
+                    }
+                }])
                 .append(condition.foreignCondition)
                 .append(condition.searchCondition)
                 .project({
@@ -669,8 +714,18 @@ function BrandingAndDisplay(db, redis, event) {
                         foreignField : '_id',
                         as : 'branch'
                     })
-                    .unwind('outlet')
-                    .unwind('branch')
+                    .append([{
+                        $unwind : {
+                            path : '$outlet',
+                            preserveNullAndEmptyArrays : true
+                        }
+                    }])
+                    .append([{
+                        $unwind : {
+                            path : '$branch',
+                            preserveNullAndEmptyArrays : true
+                        }
+                    }])
                     .append([{
                         $unwind : {
                             path : '$categories',

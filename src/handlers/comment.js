@@ -15,6 +15,7 @@ var Comment = function (db, redis, event) {
     var CompetitorBrandingItemModel = require('./../types/brandingActivityItem/model'); // TODO should be double checked
     const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
     const PromotionsItemsModel = require('./../types/promotionItem/model');
+    const ContactUsModel = require('../types/contactUs/model');
     var PromotionsModel = require('./../types/promotion/model');
     var FilesModel = require('./../types/file/model');
     var FileHandler = require('../handlers/file');
@@ -126,6 +127,10 @@ var Comment = function (db, redis, event) {
                 case CONTENT_TYPES.INSTORETASKS:
                     ContextModel = ObjectiveModel;
                     mid = ACL_MODULES.IN_STORE_REPORTING;
+                    break;
+                case CONTENT_TYPES.CONTACT_US :
+                    ContextModel = ContactUsModel;
+                    mid = ACL_MODULES.CONTACT_US;
                     break;
             }
 
@@ -288,8 +293,8 @@ var Comment = function (db, redis, event) {
                 });
             } else {
                 error = new Error();
-                error.status(404);
-                error.message('Model for comments not found');
+                error.status = 404;
+                error.message = 'Model for comments not found';
 
                 next(error);
             }

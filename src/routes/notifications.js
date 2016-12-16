@@ -3,6 +3,9 @@ var router = express.Router();
 var NotificationsHandler = require('../handlers/notifications');
 var access = require('../helpers/access');
 
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart();
+
 module.exports = function (db, redis, event) {
     var handler = new NotificationsHandler(db, redis, event);
     var checkAuth = access.checkAuth;
@@ -68,7 +71,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.post('/', handler.create);
+    router.post('/', multipartMiddleware, handler.create);
 
     router.put('/count', handler.editPersonnelNotificationCount);
 

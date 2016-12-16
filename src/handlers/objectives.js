@@ -1,5 +1,7 @@
 'use strict';
 
+const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
+
 var Objectives = function (db, redis, event) {
     var async = require('async');
     var _ = require('underscore');
@@ -927,43 +929,57 @@ var Objectives = function (db, redis, event) {
                     updateObject['description.ar'] = _.escape(description.ar || '');
                 }
 
-                ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
+                ObjectiveModel.findOne({_id: objectiveId}, function(err, model) {
                     if (err) {
                         return waterFallCb(err);
                     }
+                    if (lodash.includes([
+                            OBJECTIVE_STATUSES.FAIL,
+                            OBJECTIVE_STATUSES.CLOSED
+                        ], model.status)) {
+                        let error = new Error(`You could not update task with status: "${model.status}"`);
+                        error.status = 400;
 
-                    if (body.cover) {
-                        updateCover(objectiveModel);
+                        return waterFallCb(error);
                     }
+                    ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
+                        if (err) {
+                            return waterFallCb(err);
+                        }
 
-                    if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
-                        && objectiveModel.objectiveType !== 'individual'
-                        && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
-                        ObjectiveModel
-                            .update({
-                                'parent.1': objectiveModel._id
-                            }, {
-                                $set: {'archived': true}
-                            }, {
-                                multi: true
-                            }, function (err, result) {
-                                if (err) {
-                                    console.log(err);
-                                }
+                        if (body.cover) {
+                            updateCover(objectiveModel);
+                        }
 
-                                console.dir(result);
-                            });
-                    }
+                        if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
+                            && objectiveModel.objectiveType !== 'individual'
+                            && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
+                            ObjectiveModel
+                                .update({
+                                    'parent.1': objectiveModel._id
+                                }, {
+                                    $set: {'archived': true}
+                                }, {
+                                    multi: true
+                                }, function (err, result) {
+                                    if (err) {
+                                        console.log(err);
+                                    }
 
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.OBJECTIVE,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : updateObject.editedBy,
-                        itemId    : objectiveId,
-                        itemType  : CONTENT_TYPES.OBJECTIVES
+                                    console.dir(result);
+                                });
+                        }
+
+                        event.emit('activityChange', {
+                            module    : ACL_MODULES.OBJECTIVE,
+                            actionType: ACTIVITY_TYPES.UPDATED,
+                            createdBy : updateObject.editedBy,
+                            itemId    : objectiveId,
+                            itemType  : CONTENT_TYPES.OBJECTIVES
+                        });
+
+                        waterFallCb(null, objectiveModel);
                     });
-
-                    waterFallCb(null, objectiveModel);
                 });
             }
 
@@ -1953,21 +1969,9 @@ var Objectives = function (db, redis, event) {
                         const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
                             return ObjectId.toString();
                         });
-                        const dataMyCC = response.data.map((objective) => {
-                            let assignedToId;
-                            let createdById;
-                            const currentUserId = req.session.uId;
-                            if (_.isObject(objective.assignedTo[0])) {
-                                assignedToId = objective.assignedTo[0]._id.toString();
-                            }
-                            if (_.isObject(objective.createdBy.user)) {
-                                createdById = objective.createdBy.user._id.toString();
-                            }
-                            if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
-                                objective.myCC = true;
-                            }
-                            return objective;
-                        });
+                        const currentUserId = req.session.uId;
+                        const dataMyCC = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
+
                         response.data = dataMyCC;
                         next({status: 200, body: response});
                     })

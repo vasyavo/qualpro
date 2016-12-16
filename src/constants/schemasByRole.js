@@ -89,6 +89,11 @@ schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.COUNTRY_UPLOADER] = 
     read: schemas.brandingAndDisplay.getAll,
     update: schemas.brandingAndDisplay.update
 };
+schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.TRADE_MARKETER] = {
+    create: schemas.brandingAndDisplay.create,
+    read: schemas.brandingAndDisplay.getAll,
+    update: schemas.brandingAndDisplay.update
+};
 
 schemasByRole[CONTENT_TYPES.VISIBILITYFORM] = {};
 

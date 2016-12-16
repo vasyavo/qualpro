@@ -3,8 +3,9 @@
 
 <div id="viewBar" class="viewBarPadding">
 
+    <% if (App.currentUser.workAccess){%>
     <span id="createBtn" class="greenBtn" data-translation="newNotification"><%=translation.newNotification%></span>
-
+    <%}%>
     <div id="paginationHolder" class="paginationHolder">
 
     </div>

@@ -2,7 +2,7 @@
 <% var level = App.currentUser.accessRole.level; %>
 <% personnelCollection.forEach(function(personnel, index){ %>
 <tr data-id="<%=personnel._id%>" class="listRow">
-    <% if ((level <= 2 || level >= 8) || showCheckboxes) { %>
+    <% if ((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes  && App.currentUser.workAccess) { %>
     <td class="checkboxArea alignCenter">
         <input type="checkbox" id="<%=personnel._id%>" value="<%=personnel._id%>" class="customCheckbox"/>
         <label for="<%=personnel._id%>" class="checkboxLabel"></label>
@@ -10,7 +10,6 @@
     <% } %>
     <td class="firstName">
         <%- personnel.firstName.currentLanguage %>
-        <p id="online-user-<%- personnel._id %>" class="<%- personnel.online ? 'online' : 'hidden' %>"></p>
     </td>
     <td class="lastName"><%- personnel.lastName.currentLanguage %></td>
     <td>
@@ -25,8 +24,8 @@
         <%= (personnel.createdBy && personnel.createdBy.user && personnel.createdBy.user.firstName) ?(personnel.createdBy.user.firstName.currentLanguage || 'System') + ' ' + (personnel.createdBy.user.lastName.currentLanguage || ' ') : '' %>
         <%= (personnel.createdBy && personnel.createdBy.date) ? personnel.createdBy.date : '' %>
     </td>
-    <td class="wordWrapp <%=personnel.status ? personnel.status.classCss : ''%>">
-        <%=personnel.status ? personnel.status.message : ''%>
+    <td id="status-<%- personnel._id %>" class="wordWrapp <%=personnel.status ? personnel.status.classCss : ''%>"> <!--todo fix class css online-->
+        <%- personnel.status ? personnel.status.message : '' %>
     </td>
 </tr>
 <% }) %>

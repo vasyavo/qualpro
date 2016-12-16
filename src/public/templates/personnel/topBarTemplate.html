@@ -21,9 +21,9 @@
            id="archived"><%= translation.archive %>
         </a>
     </div>
-
-    <% if ((level <=2) || (level >= 8)) { %>
-    <span id="createBtn" class="createBtn" data-translation="newPersonnel"><%= translation.newPersonnel %></span>
+    <% if (App.currentUser.workAccess) {%>
+    <% if ((level <= 2) || ( (level >= 8) && (level <= 9) ) ) { %>
+        <span id="createBtn" class="createBtn" data-translation="newPersonnel"><%= translation.newPersonnel %></span>
     <% } %>
 
     <% if (viewType === 'thumbnails' && ((level <=2) || (level >= 8))) { %>
@@ -51,6 +51,7 @@
         </ul>
     </div>
 
+    <% } %>
     <% } %>
 
     <div id="contentViewSwitcher" class="contentViewSwitcher">

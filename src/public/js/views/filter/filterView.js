@@ -5,9 +5,10 @@ define([
     'constants/filters',
     'js-cookie',
     'text!templates/filter/filterElements.html',
+    'text!templates/filter/filters-empty-search-result.html',
     'collections/filter/filterCollection',
     'views/filter/timeView'
-], function (Backbone, $, _, FILTERSCONSTANTS, Cookies, filterElements, FilterCollection, TimeView) {
+], function (Backbone, $, _, FILTERSCONSTANTS, Cookies, filterElements, filtersEmptySearchResultTemplate, FilterCollection, TimeView) {
     var filterValuesView = Backbone.View.extend({
         elementsTemplate  : _.template(filterElements),
         currentPage       : 1,
@@ -18,7 +19,8 @@ define([
             'click .filterValues li:not(.fixedPeriod)': 'parrentSelectValue',
             'click .dropDown'                         : 'showHideEvent',
             'click .pencil'                           : 'showHideEvent',
-            'click .fixedPeriod'                      : 'showFixedPeriod'
+            'click .fixedPeriod'                      : 'showFixedPeriod',
+            'click .select-all'                       : 'selectAllFilterValues'
         },
 
         initialize: function (options) {
@@ -79,6 +81,36 @@ define([
                 }, 500);
         },
 
+        selectAllFilterValues : function (event) {
+            var selectAllLi = $(event.target).parent();
+            var isSelectAllChecked = selectAllLi.hasClass('checkedValue');
+
+            if (isSelectAllChecked) {
+                selectAllLi.removeClass('checkedValue');
+
+                delete this.filter[this.filterName];
+            } else {
+                selectAllLi.addClass('checkedValue');
+
+                var jsonCollection = this.collection.toJSON();
+
+                var filters = {
+                    type : 'ObjectId',
+                    names : [],
+                    values : []
+                };
+
+                jsonCollection.map((model) => {
+                    filters.names.push(model.name[App.currentUser.currentLanguage]);
+                    filters.values.push(model._id);
+                });
+
+                this.filter[this.filterName] = filters;
+            }
+
+            this.trigger('reloadFilters', this.filterName);
+        },
+
         parrentSelectValue: function (e) {
             var $currentElement = $(e.currentTarget);
             var currentValue = $currentElement.attr('data-value');
@@ -107,12 +139,17 @@ define([
 
             this.selectValue(options);
 
+            if (this.collection.length === this.filter[this.filterName].values.length) {
+                $(`#select-all-${this.filterName}`).children('li').addClass('checkedValue');
+            } else {
+                $(`#select-all-${this.filterName}`).children('li').removeClass('checkedValue');
+            }
+
             if (this.filter[this.filterName] && !this.filter[this.filterName].values.length) {
                 delete this.filter[this.filterName];
             }
 
             this.trigger('reloadFilters', this.filterName);
-
         },
 
         showFixedPeriod: function (e) {
@@ -358,9 +395,18 @@ define([
 
             displayCollection = collection.slice(start, end);
 
-            $ulElement.html(self.elementsTemplate({
-                collection: displayCollection
-            }));
+            var collectionsLength = this.checkedCollection.length + this.uncheckedCollection.length;
+
+            if (!collectionsLength && checked) {
+                $ulElement.html('');
+                $ulElement.html(filtersEmptySearchResultTemplate);
+            } else if (!collectionsLength && !checked) {
+                $ulElement.html('');
+            } else if (collectionsLength) {
+                $ulElement.html(self.elementsTemplate({
+                    collection: displayCollection
+                }));
+            }
 
             this.makePagination($paginationLi, {
                 start           : start,
@@ -400,10 +446,14 @@ define([
                 mandatory        : this.mandatory,
                 currentFilter    : this.currentFilter && !this.currentFilter.options ? this.currentFilter : null,
                 filterInputText  : filterInputText,
-                translation      : this.translation
+                translation      : this.translation,
+                showSelectAll    : this.filerConstants.showSelectAll,
+                valuesCount      : self.collection.length
             }));
 
-            this.beforeRenderContent();
+            this.beforeRenderContent({
+                withEmptyResult : false
+            });
 
             $currentEl.find('.' + this.filterName + 'Values .miniStylePagination a').click(function (e) {
                 self.paginationChange(e, self);

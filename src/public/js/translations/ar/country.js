@@ -2,8 +2,9 @@ define([
     'Underscore',
     'translations/ar/pagination',
     'translations/ar/cropImages',
-    'translations/ar/filters'
-], function (_, paginationTranslation, cropImagesTranslation, filtersTranslation) {
+    'translations/ar/filters',
+    'translations/ar/action',
+], function (_, paginationTranslation, cropImagesTranslation, filtersTranslation, actionsTranslation) {
     var countryTranslation = {
         crop           : cropImagesTranslation,
         // top bar
@@ -38,5 +39,5 @@ define([
         domainName  : 'الدولة'
     };
 
-    return _.extend({}, paginationTranslation, filtersTranslation, countryTranslation);
+    return _.extend({}, paginationTranslation, filtersTranslation, countryTranslation, actionsTranslation);
 });

@@ -2,27 +2,160 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
+    'text!templates/file/preView.html',
     'text!templates/notes/edit.html',
     'views/baseDialog',
     'models/notes',
-    'constants/contentType'
-], function (Backbone, _, $, EditTemplate, BaseView, Model, CONTENT_TYPES) {
+    'collections/file/collection',
+    'models/file',
+    'views/fileDialog/fileDialog',
+    'views/objectives/fileDialogView',
+    'constants/contentType',
+    'constants/otherConstants'
+], function (Backbone, _, $, FileTemplate, EditTemplate, BaseView, Model, FileCollection, FileModel, FileDialogPreviewView, FileDialogView, CONTENT_TYPES, CONSTANTS) {
     'use strict';
 
     var CreateView = BaseView.extend({
         contentType: CONTENT_TYPES.NOTES,
 
         template: _.template(EditTemplate),
+        fileTemplate: _.template(FileTemplate),
 
-        events: {},
+        ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
 
         initialize: function (options) {
-
+            this.files = new FileCollection();
             this.model = options.model;
             this.translation = options.translation;
 
+            this.attachments = _.pluck(this.model.get('attachments'), '_id');
+            this.files = new FileCollection(this.model.get('attachments'), true);
+            this.filesToDelete = [];
+
             this.makeRender();
             this.render();
+
+            this.setSelectedFiles();
+
+            _.bindAll(this, 'fileSelected');
+        },
+
+        events: {
+            'click #attach-file' : 'showAttachDialog',
+            'click .masonryThumbnail' : 'showFilePreviewDialog'
+        },
+
+        setSelectedFiles : function () {
+            var self = this;
+
+            this.files.forEach(function (fileModel) {
+                fileModel = fileModel.toJSON();
+                self.$el.find('#fileThumbnail').append(self.fileTemplate({
+                    model: fileModel
+                }));
+            });
+
+            this.$el.find('#filesBlock').show();
+            App.masonryGrid.call(self.$el);
+        },
+
+        showFilePreviewDialog: function (e) {
+            var $el = $(e.target);
+            var $thumbnail = $el.closest('.masonryThumbnail');
+            var fileModelId = $thumbnail.attr('data-id');
+            var fileModel = this.files.get(fileModelId);
+
+            this.fileDialogView = new FileDialogPreviewView({
+                fileModel  : fileModel,
+                bucket     : this.contentType,
+                translation: this.translation
+            });
+        },
+
+        showAttachDialog: function () {
+            this.fileDialogView = new FileDialogView({
+                files      : this.files,
+                contentType: this.contentType,
+                translation: this.translation,
+                dialogTitle: this.translation.attachmentsDialogTitle,
+                buttonName : this.translation.attach
+            });
+            this.fileDialogView.on('clickAttachFileButton', this.attachFile, this);
+            this.fileDialogView.on('removeFile', this.removeFile, this);
+        },
+
+        attachFile: function () {
+            var fileInput;
+            var fileModel = new FileModel();
+
+            this.files.add(fileModel);
+            this.$el.find('#mainForm').append('<input accept="' + this.ALLOWED_CONTENT_TYPES.join(', ') + '" type="file" name="' + fileModel.cid + '" id="' + fileModel.cid + '" style="display: none">');
+            fileInput = this.$el.find('#' + fileModel.cid);
+            fileInput.on('change', {fileInput: fileInput}, this.fileSelected);
+            fileInput.click();
+        },
+
+        removeFile: function (file) {
+            var $thumbnail = this.$el.find('.fileThumbnailItem[data-id = "' + file.cid + '"]');
+
+            this.filesToDelete.push(file.get('_id'));
+            $thumbnail.remove();
+            this.files.remove(file, {silent: true});
+            this.$el.find('#' + file.get('_id')).remove();
+        },
+
+        fileSelected: function (e) {
+            var self = this;
+            var data = e.data;
+            var $fileInput = $(data.fileInput);
+            var fileCid = $fileInput.attr('id');
+            var fileModel = this.files.get(fileCid);
+            var reader = new FileReader();
+            var currentLanguage = App.currentUser.currentLanguage;
+
+            reader.readAsDataURL(e.target.files[0]);
+            reader.onload = function (elem) {
+                var result = elem.target.result;
+                var selectedFile;
+                var model;
+                var type;
+                if (!result) {
+                    self.files.remove(fileModel);
+                    return;
+                }
+                type = $fileInput.prop('files')[0].type;
+
+                if (self.ALLOWED_CONTENT_TYPES.indexOf(type) === -1) {
+                    App.render({type: 'error', message: ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage]});
+                    return;
+                }
+
+                selectedFile = {
+                    name: $fileInput.prop('files')[0].name,
+                    type: type
+                };
+
+                fileModel.update({
+                    file    : selectedFile,
+                    selected: true,
+                    uploaded: true
+                });
+
+                if (fileModel.getTypeFromContentType(type) === 'image_icon') {
+                    fileModel.set({preview: result});
+                }
+
+                model = fileModel.toJSON();
+                model.cid = fileCid;
+
+                self.$el.find('#fileThumbnail').append(self.fileTemplate({
+                    model: model
+                }));
+
+                self.$el.find('.filesBlock').show();
+                self.fileDialogView.trigger('fileSelected', fileModel);
+                App.masonryGrid.call(self.$el);
+            };
         },
 
         saveNote: function (cb) {
@@ -43,9 +176,21 @@ define([
                 this.body.description = description;
             }
 
-            if (!Object.keys(this.body).length) {
+            const attachmentsIdFromServer = _.pluck(this.model.get('attachments'), '_id');
+            const attachmentsIdLocal = _.pluck(this.files, '_id');
+            let filesChanged = false;
+
+            if (!_.isEqual(attachmentsIdFromServer, attachmentsIdLocal)) {
+                filesChanged = true;
+            }
+
+            if (!Object.keys(this.body).length && !filesChanged) {
                 return cb();
             }
+
+            attachmentsIdFromServer.map((fileId) => {
+                this.files.remove(fileId);
+            });
 
             this.model.setFieldsNames(this.translation, this.body);
 
@@ -62,6 +207,7 @@ define([
         formSubmit: function (e) {
             var context = e.data.context;
             var data = new FormData(this);
+
             var ajaxData = {
                 data       : data,
                 contentType: false,
@@ -75,7 +221,7 @@ define([
 
             e.preventDefault();
 
-            context.body.attachments = context.attachments;
+            context.body.filesToDelete = context.filesToDelete;
             ajaxData.url = context.model.url();
             ajaxData.type = 'PUT';
 

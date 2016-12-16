@@ -21,7 +21,7 @@
            id="archived"><%= translation.archive %>
         </a>
     </div>
-    <% if ((level <=2) || (level >= 8)) { %>
+    <% if ((level <=2) || (level >= 8 && level <= 9) && App.currentUser.workAccess) { %>
     <span id="createBtn" class="createBtn" data-translation="manageCompetitors"><%= translation.manageCompetitors %></span>
 
     <div id="actionHolder"

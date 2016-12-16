@@ -8,10 +8,11 @@ define([
         'populate',
         'constants/otherConstants',
         'constants/contentType',
-        'constants/levelConfig'
+        'constants/levelConfig',
+        'collections/file/collection',
+        'views/fileDialog/fileDialog'
     ],
-    function (Backbone, _, $, PreviewTemplate, Model, BaseView, populate, CONSTANTS, CONTENT_TYPES,
-              LEVEL_CONFIG) {
+    function (Backbone, _, $, PreviewTemplate, Model, BaseView, populate, CONSTANTS, CONTENT_TYPES, LEVEL_CONFIG, FileCollection, FileDialogPreviewView) {
         'use strict';
 
         var PreviewView = BaseView.extend({
@@ -20,18 +21,32 @@ define([
             template : _.template(PreviewTemplate),
             CONSTANTS: CONSTANTS,
 
-            events: {
-                'click #goToBtn': 'goTo'
-            },
-
             initialize: function (options) {
-
                 this.activityList = options.activityList;
                 this.translation = options.translation;
                 this.model = options.model;
 
+                this.previewFiles = new FileCollection(this.model.get('attachments'), true);
+
                 this.makeRender();
                 this.render();
+            },
+
+            events: {
+                'click #goToBtn': 'goTo',
+                'click .fileThumbnailItem' : 'showFilePreview'
+            },
+
+            showFilePreview : function (event) {
+                var target = $(event.target);
+                var $thumbnail = target.closest('.masonryThumbnail');
+                var fileModelId = $thumbnail.attr('data-id');
+                var fileModel = this.previewFiles.get(fileModelId);
+
+                this.fileDialogView = new FileDialogPreviewView({
+                    fileModel  : fileModel,
+                    translation: this.translation
+                });
             },
 
             render: function () {
@@ -63,7 +78,7 @@ define([
                     }
                 });
 
-                if (this.activityList) {
+                if (this.activityList && App.currentUser.workAccess) {
                     currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
 
                     require([

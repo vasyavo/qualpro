@@ -38,7 +38,7 @@ define(['Backbone',
 
         checkEmail: function (e) {
             var target = $(e.target);
-            var value = target.val();
+            var value = target.val().trim();
 
             if (!CONSTANTS.EMAIL_REGEXP.test(value) && !CONSTANTS.PHONE_REGEXP.test(value)) {
                 target.addClass('error');
@@ -107,8 +107,9 @@ define(['Backbone',
             var pass = thisEl.find('#pass').val();
             var checkedEl = thisEl.find('#myonoffswitch');
             var checked = checkedEl.prop('checked');
+            debugger;
             var data = {
-                login     : login,
+                login     : login.trim(),
                 pass      : pass,
                 rememberMe: checked
             };

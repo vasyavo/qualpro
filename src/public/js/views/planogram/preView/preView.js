@@ -59,11 +59,12 @@ define([
             });
 
             editView.on('modelSaved', function (model) {
-                debugger;
                 const jsonModel = model.toJSON();
+
                 jsonModel.retailSegmentString = jsonModel.retailSegment.map((item) => {
                     return item.name.currentLanguage;
                 }).join(', ');
+
                 self.$el.html(self.template({
                     translation: self.translation,
                     model      : jsonModel,
