@@ -755,7 +755,7 @@ define([
 
             var statusToRemove;
 
-            if (condition) {
+            if (condition || jsonModel.myCC) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {
@@ -804,6 +804,8 @@ define([
             }
 
             formString = $(formString);
+
+            jsonModel.myCC = self.tabName === 'myCC';
 
             formString.find('#main').html(this.updatedTemplate({
                 jsonModel   : jsonModel,
