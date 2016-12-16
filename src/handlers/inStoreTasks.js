@@ -6,6 +6,7 @@ const ACL_CONSTANTS = require('./../constants/aclRolesNames');
 const ACL_MODULES = require('./../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../public/js/constants/contentType.js');
 const OTHER_CONSTANTS = require('./../public/js/constants/otherConstants.js');
+const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES
 const CONSTANTS = require('./../constants/mainConstants');
 const mongo = require('./../utils/mongo');
 const AggregationHelper = require('./../helpers/aggregationCreater');
@@ -366,8 +367,11 @@ var InStoreReports = function() {
                             return cb(error);
                         }
 
-                        if (lodash.isEqual(inStoreTaskModel.toJSON().status, 'fail')) {
-                            error = new Error('You could not update task with status: "fail"');
+                        if (lodash.includes([
+                                OBJECTIVE_STATUSES.FAIL,
+                                OBJECTIVE_STATUSES.CLOSED
+                            ], inStoreTaskModel.status)) {
+                            error = new Error(`You could not update task with status: "${inStoreTaskModel.status}"`);
                             error.status = 400;
                             return cb(error);
                         }
