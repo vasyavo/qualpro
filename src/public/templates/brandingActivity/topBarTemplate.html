@@ -4,7 +4,7 @@
 
 <div id="viewBar" class="viewBarPadding">
 
-    <% if ([1, 2, 8, 9].indexOf(App.currentUser.accessRole.level) !== -1) { %>
+    <% if ([1, 2, 8, 9].indexOf(App.currentUser.accessRole.level) !== -1 && App.currentUser.workAccess) { %>
         <span id="createBtn" class="greenBtn" data-translation="newBranding"><%= translation.newBranding%></span>
     <% } %>
 

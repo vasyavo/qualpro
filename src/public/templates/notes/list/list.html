@@ -1,3 +1,5 @@
+<% var currentUser = App.currentUser%>
+<% var access = (currentUser.accessRole.level < 3) || !currentUser.vacation.onLeave%>
 <% collection.forEach(function(model, index){ %>
 <div class="notesItem listRow" data-id="<%= model._id %>">
     <div class="notesUser flexRowStart">
@@ -32,9 +34,11 @@
             </div>
         </div>
     </div>
+    <% if (App.currentUser.workAccess){%>
     <div class="actionsBlock">
         <span class="editContent bottomLine"></span>
         <span class="trash"></span>
     </div>
+    <%}%>
 </div>
 <% }) %>

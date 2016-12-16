@@ -21,7 +21,7 @@
            id="archived"><%= translation.archive %>
         </a>
     </div>
-
+    <% if (App.currentUser.workAccess) {%>
     <% if ((level <= 2) || ( (level >= 8) && (level <= 9) ) ) { %>
         <span id="createBtn" class="createBtn" data-translation="newPersonnel"><%= translation.newPersonnel %></span>
     <% } %>
@@ -51,6 +51,7 @@
         </ul>
     </div>
 
+    <% } %>
     <% } %>
 
     <div id="contentViewSwitcher" class="contentViewSwitcher">
