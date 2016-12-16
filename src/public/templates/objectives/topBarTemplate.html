@@ -44,8 +44,9 @@
         </a>
     </div>
 
+    <% if (App.currentUser.workAccess){%>
     <span id="createBtn" class="readonlyVisible createBtn" data-translation="newObjective"><%= translation.newObjective %></span>
-
+    <%}%>
     <div id="paginationHolder" class="paginationHolder">
 
     </div>

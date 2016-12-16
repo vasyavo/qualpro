@@ -866,7 +866,7 @@ define([
                             return;
                         }
 
-                        if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED) {
+                        if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
                             if (!(individualObjective && config.elementId === 'viewSubObjective')) {
                                 require([config.template], function (template) {
                                     var container = self.$el.find(config.selector);

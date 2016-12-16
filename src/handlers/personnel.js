@@ -1589,6 +1589,8 @@ var Personnel = function (db, redis, event) {
 
                 var key = 'notificationCount' + '#' + response._id;
 
+                response.workAccess = (response.accessRole.level < 3) || !response.vacation.onLeave;
+
                 redis.cacheStore.readFromStorage(key, function (err, value) {
                     var valueJSON;
                     if (err) {
