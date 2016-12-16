@@ -24,7 +24,7 @@ var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
             "display:none" : "" %>>
             <%= translation.logout %>
             </button>-->
-            <% if (!hideButtons && ((level <=2) || (level >= 8))) { %>
+            <% if (!hideButtons && ((level <=2) || ( (level >= 8) && (level <= 9) ) )) { %>
             <button id="unArchiveBtn" type="button" class="readonlyVisible redBtn" role="button"
                     style=<%= (curUser || !archived) ?  "display:none" : "" %>><%= translation.unDisable %>
             </button>

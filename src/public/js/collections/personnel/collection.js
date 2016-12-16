@@ -28,15 +28,6 @@ define([
                     this.getPage(page, options);
                 }
             },
-
-            setOnlineStatusToUsers : function (data, onlineUsers) {
-                return data.map((model) => {
-                    if (onlineUsers.indexOf(model._id) > -1) {
-                        model.online = true;
-                    }
-                    return model;
-                });
-            }
         });
 
         return Collection;

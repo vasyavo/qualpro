@@ -2,7 +2,7 @@
 <% collection.forEach(function(item, index){ %>
 <div class="thumbnail planogram" data-id="<%=item._id%>">
     <div class="thumbnailTop">
-        <% if ((level <=2) || (level >= 8)) { %>
+        <% if ((level <=2) || ( (level >= 8) && (level <= 9) ) ) { %>
         <input type="checkbox"
                value="<%=item._id%>"
                id="<%=item._id%>"
