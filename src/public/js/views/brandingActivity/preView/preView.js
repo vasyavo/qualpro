@@ -170,7 +170,7 @@ define([
                 }
             });
 
-            if ([1, 2, 3, 4, 8, 9].indexOf(level) !== -1) {
+            if ([1, 2, 3, 4, 8, 9].indexOf(level) !== -1 && App.currentUser.workAccess) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template

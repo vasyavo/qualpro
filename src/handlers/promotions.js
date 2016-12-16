@@ -119,7 +119,7 @@ var Promotions = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'displayTypes',
             key    : 'displayType',
-            isArray: false
+            isArray: true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -313,6 +313,7 @@ var Promotions = function (db, redis, event) {
                     en: _.escape(body.promotionType.en),
                     ar: _.escape(body.promotionType.ar)
                 };
+                body.displayType = body.displayType.split(',');
 
                 model = new PromotionModel(body);
                 model.save(function (err, model) {
@@ -724,6 +725,9 @@ var Promotions = function (db, redis, event) {
                     var outlet = updateObject.outlet;
                     var branch = updateObject.branch;
 
+                    if (updateObject.displayType) {
+                        updateObject.displayType = updateObject.displayType.split(',');
+                    }
                     if (quantity) {
                         updateObject.quantity = _.escape(quantity);
                     }
@@ -974,7 +978,7 @@ var Promotions = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'displayTypes',
             key    : 'displayType',
-            isArray: false
+            isArray: true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

@@ -9,7 +9,7 @@ var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
         <div class="avatar noShrink">
             <canvas></canvas>
             <% if(!activityList) {%>
-            <% if (!hideButtons && (((level < modelLevel && ((level <= 2) || (level >= 8))) || [1].indexOf(level) !== -1))) { %>
+            <% if (!hideButtons && (((level < modelLevel && ((level <= 2) || (level >= 8))) || [1].indexOf(level) !== -1)) && App.currentUser.workAccess) { %>
             <button id="editProfile" type="button" class="readonlyVisible greyBtn" role="button">
                 <%= translation.editProfile %>
             </button>
@@ -24,7 +24,7 @@ var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
             "display:none" : "" %>>
             <%= translation.logout %>
             </button>-->
-            <% if (!hideButtons && ((level <=2) || (level >= 8))) { %>
+            <% if (!hideButtons && ((level <=2) || ( (level >= 8) && (level <= 9) ) ) && App.currentUser.workAccess) { %>
             <button id="unArchiveBtn" type="button" class="readonlyVisible redBtn" role="button"
                     style=<%= (curUser || !archived) ?  "display:none" : "" %>><%= translation.unDisable %>
             </button>

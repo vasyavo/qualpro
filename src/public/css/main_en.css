@@ -3888,6 +3888,9 @@ a.disabled {
   cursor: pointer;
   width: 15px;
   height: 15px;
+  top: 2px;
+}
+.cell .selectAll span {
   top: 9px;
 }
 .selectAll li {

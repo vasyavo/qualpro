@@ -366,8 +366,11 @@ var InStoreReports = function() {
                             return cb(error);
                         }
 
-                        if (lodash.isEqual(inStoreTaskModel.toJSON().status, 'fail')) {
-                            error = new Error('You could not update task with status: "fail"');
+                        if (lodash.includes([
+                                OBJECTIVE_STATUSES.FAIL,
+                                OBJECTIVE_STATUSES.CLOSED
+                            ], inStoreTaskModel.status)) {
+                            error = new Error(`You could not update task with status: "${inStoreTaskModel.status}"`);
                             error.status = 400;
                             return cb(error);
                         }

@@ -1338,12 +1338,12 @@ var Personnel = function (db, redis, event) {
                 return next(error);
             }
 
-            if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
+           /* if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
                 error = new Error('You cannot access the app while being on leave');
                 error.status = 400;
 
                 return next(error);
-            }
+            }*/
 
             if (personnel.archived) {
                 error = new Error('Your account is blocked. Please contact with administration.');
@@ -1588,6 +1588,8 @@ var Personnel = function (db, redis, event) {
                 }
 
                 var key = 'notificationCount' + '#' + response._id;
+
+                response.workAccess = (response.accessRole.level < 3) || !response.vacation.onLeave;
 
                 redis.cacheStore.readFromStorage(key, function (err, value) {
                     var valueJSON;

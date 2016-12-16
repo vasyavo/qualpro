@@ -194,6 +194,7 @@ define([
         5           : {
             preview: []
         },
+        10 : inStoreDefaultConfig,
         activityList: {
             preview: [
                 {
@@ -506,6 +507,18 @@ define([
                     elementId      : 'edit',
                     insertType     : 'append',
                     template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        },
+        10           : {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'brandingAndDisplayItems',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/tableBtn.html',
                     forAll         : true,
                     forAllWithoutMy: false
                 }

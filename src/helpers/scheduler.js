@@ -1,6 +1,7 @@
 const async = require('async');
 const nodeScheduler = require('node-schedule');
 const mongoose = require('mongoose');
+const moment = require('moment');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
 const ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -15,19 +16,19 @@ function consoleLogENV(message) {
     }
 }
 
-module.exports = function (db, event) {
+module.exports = function(db, event) {
     function getPipeLine(query) {
         const pipeLine = [];
 
         pipeLine.push({
-            $match: query
+            $match : query
         });
 
         pipeLine.push({
-            $group: {
-                _id: null,
-                ids: {
-                    $addToSet: '$_id'
+            $group : {
+                _id : null,
+                ids : {
+                    $addToSet : '$_id'
                 }
             }
         });
@@ -37,21 +38,24 @@ module.exports = function (db, event) {
 
     function triggerEvent(mid, id, itemType) {
         event.emit('activityChange', {
-            module    : mid,
-            actionType: ACTIVITY_TYPES.UPDATED,
-            createdBy : {user: null, date: new Date()},
-            itemId    : id,
-            itemType  : itemType
+            module : mid,
+            actionType : ACTIVITY_TYPES.UPDATED,
+            createdBy : {
+                user : null,
+                date : new Date()
+            },
+            itemId : id,
+            itemType : itemType
         });
     }
 
     function schedulerCallBack(scheduler, type, updateFunction) {
-        return function (err, resObject) {
+        return function(err, resObject) {
             if (err) {
                 logWriter.log('Scheduler.' + scheduler + '' + type + ' aggregate Err ' + err);
                 consoleLogENV(err);
             } else if (resObject[0] && resObject[0].ids && resObject[0].ids.length) {
-                updateFunction(resObject[0].ids, function (err) {
+                updateFunction(resObject[0].ids, function(err) {
                     if (err) {
                         logWriter.log('Scheduler.brandingAndDisplayExpired Update Err ' + err);
                         consoleLogENV(err);
@@ -67,8 +71,8 @@ module.exports = function (db, event) {
     }
 
     function updateEachGenerator(updateMethod) {
-        return function (ids, cb) {
-            async.each(ids, updateMethod, function (err) {
+        return function(ids, cb) {
+            async.each(ids, updateMethod, function(err) {
                 if (err) {
                     return cb(err);
                 }
@@ -84,23 +88,23 @@ module.exports = function (db, event) {
         var startDate = new Date();
         var endDate = new Date(startDate.getMonth() - 2);
         var query = {
-            lastAccess: {
-                $lte: endDate
+            lastAccess : {
+                $lte : endDate
             },
 
-            temp: false,
+            temp : false,
 
-            status: {
-                $nin: [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id]
+            status : {
+                $nin : [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id]
             }
         };
 
         function updatePersonnel(id, cb) {
             PersonnelModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PERSONNEL_STATUSES.INACTIVE._id
+                $set : {
+                    status : PERSONNEL_STATUSES.INACTIVE._id
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -122,21 +126,21 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
         };
 
         function updateContract(id, cb) {
             ContractYearlyModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -158,21 +162,21 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
         };
 
         function updateContract(id, cb) {
             ContractSecondaryModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -193,22 +197,22 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
 
         };
 
         function updatePromotion(id, cb) {
             PromotionModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -229,22 +233,22 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $in: [PROMOTION_STATUSES.ACTIVE, PROMOTION_STATUSES.DRAFT]
+            status : {
+                $in : [PROMOTION_STATUSES.ACTIVE, PROMOTION_STATUSES.DRAFT]
             }
 
         };
 
         function updatePromotionItems(id, cb) {
             PromotionItemModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -265,22 +269,22 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
 
         };
 
         function updateCompetitorPromotion(id, cb) {
             CompetitorPromotionModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -301,21 +305,21 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
         };
 
         function updateBrandingAndDisplay(id, cb) {
             BrandingAndDisplayModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -336,21 +340,21 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
         };
 
         function updateCompetitorBrandingAndDisplay(id, cb) {
             CompetitorBrandingModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -371,21 +375,21 @@ module.exports = function (db, event) {
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
-            dueDate: {
-                $lt: new Date()
+            dueDate : {
+                $lt : new Date()
             },
 
-            status: {
-                $eq: PROMOTION_STATUSES.ACTIVE
+            status : {
+                $eq : PROMOTION_STATUSES.ACTIVE
             }
         };
 
         function updateQuestionary(id, cb) {
             QuestionnariesModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: PROMOTION_STATUSES.EXPIRED
+                $set : {
+                    status : PROMOTION_STATUSES.EXPIRED
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 if (err) {
                     return cb(err);
                 }
@@ -406,26 +410,24 @@ module.exports = function (db, event) {
         var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
         var query = {
-            dateEnd: {
-                $lt: new Date()
+            dateEnd : {
+                $lt : new Date()
             },
-
-            status: {
-                $in: [
+            status : {
+                $in : [
                     OBJECTIVE_STATUSES.IN_PROGRESS,
                     OBJECTIVE_STATUSES.RE_OPENED,
                     OBJECTIVE_STATUSES.TO_BE_DISCUSSED
                 ]
             }
-
         };
 
         function updateObjective(id, cb) {
             ObjectiveModel.findByIdAndUpdate(id, {
-                $set: {
-                    status: OBJECTIVE_STATUSES.OVER_DUE
+                $set : {
+                    status : OBJECTIVE_STATUSES.OVER_DUE
                 }
-            }, function (err, model) {
+            }, function(err, model) {
                 var type;
                 var mid;
 
@@ -447,8 +449,47 @@ module.exports = function (db, event) {
         ObjectiveModel.aggregate(getPipeLine(query), schedulerCallBack('objectives', 'OverDue', updateEachGenerator(updateObjective)));
     }
 
+    function objectivesFail() {
+        const ObjectiveModel = require('./../types/objective/model');
+        var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+
+        var query = {
+            'editedBy.date' : {
+                $lte : moment().add(-30, 'days')
+            },
+            status : OBJECTIVE_STATUSES.OVER_DUE
+        };
+
+        function updateObjective(id, cb) {
+            ObjectiveModel.findByIdAndUpdate(id, {
+                $set : {
+                    status : OBJECTIVE_STATUSES.FAIL
+                }
+            }, function(err, model) {
+                var type;
+                var mid;
+
+                if (err) {
+                    return cb(err);
+                }
+
+                if (model) {
+                    type = model.context;
+                    mid = type === CONTENT_TYPES.OBJECTIVES ? 7 : 18;
+
+                    triggerEvent(mid, id, type);
+                }
+
+                cb(null);
+            });
+        }
+
+        ObjectiveModel.aggregate(getPipeLine(query), schedulerCallBack('objectives', 'Fail', updateEachGenerator(updateObjective)));
+    }
+
     function Scheduler() {
         var hourlySchedulersArray = [
+            objectivesFail,
             objectivesOverDue,
             contractsYearlyExpired,
             contractsSecondaryExpired,
@@ -462,12 +503,12 @@ module.exports = function (db, event) {
         ];
 
         function addJobs(array, rule) {
-            array.forEach(function (scheduler) {
+            array.forEach(function(scheduler) {
                 nodeScheduler.scheduleJob(rule, scheduler);
             });
         }
 
-        this.initEveryHourScheduler = function () {
+        this.initEveryHourScheduler = function() {
 
             if (!process.env.INITED_SCHEDULER) {
 

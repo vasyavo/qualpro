@@ -1,7 +1,7 @@
 <% var level = App.currentUser.accessRole.level; %>
 <div class="absoluteContent">
     <table>
-        <% if ((level <=2) || (level >= 8)) { %>
+        <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
         <colgroup class="forChange">
             <col width="42px">
         </colgroup>
@@ -16,7 +16,7 @@
 
         <thead class="darkGrayHeader">
         <tr>
-            <% if ((level <=2) || (level >= 8)) { %>
+            <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
             <th class="forChange checkboxArea alignCenter">
                 <input type="checkbox" id="checkAll" class="customCheckbox"/>
                 <label for="checkAll" class="checkboxLabel"></label>
@@ -51,7 +51,7 @@
             <td colspan="7" class="changeColSpan colspanFix">
                 <div class="scrollable">
                     <table class="list">
-                        <% if ((level <=2) || (level >= 8)) { %>
+                        <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
                         <colgroup class="forChange">
                             <col width="42px">
                         </colgroup>
