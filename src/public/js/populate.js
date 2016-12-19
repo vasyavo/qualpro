@@ -172,6 +172,7 @@ define(['Backbone',
             var dropDownView;
             var firstName;
             var lastName;
+            debugger;
             var displayModel = options.displayModel;
 
             if (displayModel && !(displayModel instanceof Array)) {

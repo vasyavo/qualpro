@@ -60,7 +60,7 @@ define([
         outlet             : 'Customer',
         branch             : 'Branch',
         barcode            : 'Barcode',
-        packing            : 'Packing',
+        packing            : 'Weight',
         ppt                : 'PTT',
         totalQuantity      : 'Total Quantity',
         promotionType      : 'Promotion Type',

@@ -5,7 +5,7 @@
 </div>
 
 <div id="viewBar" class="viewBar viewBarPadding">
-    <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess)  { %>
+    <% if (((level <=2) || (level >= 8)) && App.currentUser.workAccess)  { %>
     <span id="createBtn" class="promotionBtn" data-translation="newPromotion"><%= translation.newPromotion %></span>
     <% } %>
 
