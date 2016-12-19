@@ -1375,8 +1375,11 @@ var Personnel = function (db, redis, event) {
                 return next(error);
             }
 
+            let onLeave = personnel.vacation.onLeave;
+
             session.loggedIn = true;
             session.uId = personnel._id;
+            session.onLeave = onLeave;
 
             if (personnel.accessRole) {
                 session.level = personnel.accessRole.level;
@@ -1580,6 +1583,12 @@ var Personnel = function (db, redis, event) {
             personnelFindByIdAndPopulate(options, function (err, response) {
                 if (err) {
                     return next(err);
+                }
+
+                const onLeave = req.session.onLeave;
+
+                if (response.vacation.onLeave != onLeave) {
+                    req.session.onLeave = !onLeave;
                 }
 
                 if (!Object.keys(response).length) {
@@ -3010,11 +3019,17 @@ var Personnel = function (db, redis, event) {
                 if (body.vacation.onLeave) {
                     body.status = PERSONNEL_STATUSES.ONLEAVE._id;
 
+                    req.session.onLeave = true;
+
                     if (!body.vacation.cover) {
                         body.vacation.cover = null;
+
+                        req.session.onLeave = false;
                     }
                 } else {
                     body.vacation.cover = null;
+
+                    req.session.onLeave = false;
 
                     if (body.lastAccess) {
                         body.status = PERSONNEL_STATUSES.LOGIN._id;
