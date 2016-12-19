@@ -447,8 +447,7 @@ define([
                 currentFilter    : this.currentFilter && !this.currentFilter.options ? this.currentFilter : null,
                 filterInputText  : filterInputText,
                 translation      : this.translation,
-                showSelectAll    : this.filerConstants.showSelectAll,
-                valuesCount      : self.collection.length
+                showSelectAll    : this.filerConstants.showSelectAll
             }));
 
             this.beforeRenderContent({
