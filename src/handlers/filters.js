@@ -1797,7 +1797,7 @@ const Filters = function(db, redis) {
 
         var beforeFilter = _.pick(filter, 'subRegion', 'retailSegment', 'outlet');
 
-        // match by 'actionType', 'country', 'region', 'subRegion', 'branch'
+        // match by 'subRegion', 'retailSegment', 'outlet'
         if (Object.keys(beforeFilter).length) {
             pipeLine.push({
                 $match: beforeFilter
@@ -1870,7 +1870,7 @@ const Filters = function(db, redis) {
         // region pipelines END
 
         // country pipelines START
-        if (filter.region) {
+        if (filter.country) {
             pipeLine.push({
                 $match: {
                     country: filter.country
