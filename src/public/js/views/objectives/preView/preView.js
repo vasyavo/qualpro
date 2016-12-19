@@ -755,7 +755,7 @@ define([
 
             var statusToRemove;
 
-            if (condition || jsonModel.myCC) {
+            if (condition || jsonModel.myCC || !App.currentUser.workAccess) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {

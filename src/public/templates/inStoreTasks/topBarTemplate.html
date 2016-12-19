@@ -44,11 +44,10 @@
            id="myCC"><%= translation.myCCTasks %>
         </a>
     </div>
+    <% if (App.currentUser.workAccess) { %>
+        <span id="createBtn" class="createBtn" data-translation="newTask"><%= translation.newTask %></span>
+    <% } %>
 
-    <span id="createBtn" class="createBtn" data-translation="newTask"><%= translation.newTask %></span>
-
-    <div id="paginationHolder" class="paginationHolder">
-
-    </div>
+    <div id="paginationHolder" class="paginationHolder"></div>
 
 </div>
