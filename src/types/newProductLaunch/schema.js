@@ -29,14 +29,15 @@ const schema = new Schema({
     origin: { type: ObjectId, ref: CONTENT_TYPES.ORIGIN },
     price: { type: String, default: '' },
     packing: { type: String, default: '' },
+    packingType: { type: String, enum: ['GM', 'ML', ''], default: ''},
     location: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
     displayType: [{
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     }],
     distributor: {
         en: { type: String, default: '' },

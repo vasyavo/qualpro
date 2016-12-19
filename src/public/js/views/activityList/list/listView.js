@@ -15,20 +15,19 @@ define([
 
 ], function (Backbone, $, _, headerTemplate, Model, personPreView, ListItemsView, filterView,
              paginator, personnelModel, REGEXP, dataService, moment) {
+
     var View = paginator.extend({
         contentType: 'activityList',
         viewType   : 'list',
         template   : _.template(headerTemplate),
 
         events: {
-            'click tr'        : 'rowClick',
             'click tr .person': 'personnelClick'
         },
 
         REGEXP: REGEXP,
 
         initialize: function (options) {
-
             this.translation = options.translation;
             this.tabName = options.tabName;
             this.filter = options.filter;
@@ -42,8 +41,7 @@ define([
             App.badge = 0;
             App.setMenuCount(1, App.badge);
 
-            dataService.deleteData('/activityList/badge', {}, function () {
-            });
+            dataService.deleteData('/activityList/badge', {}, function () {});
             this.makeRender(options);
         },
 
@@ -231,6 +229,9 @@ define([
                 el         : this.$itemsEl,
                 collection : this.collection
             }).render());
+
+            this.$el.find('tr').on('click', _.throttle(this.rowClick.bind(this), 1000));
+
             return this;
         },
 

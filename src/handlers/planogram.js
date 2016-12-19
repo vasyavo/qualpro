@@ -685,6 +685,12 @@ var planogramsHandler = function(db, redis, event) {
                 };
 
             delete queryObject.globalSearch;
+
+            if (query.filter && query.filter.configuration) {
+                query.filter['configuration._id'] = query.filter.configuration;
+                delete query.filter.configuration;
+            }
+
             queryObject = filterMapper.mapFilter({
                 contentType : CONTENT_TYPES.PLANOGRAM,
                 filter : query.filter || {},

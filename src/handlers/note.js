@@ -1,3 +1,7 @@
+const FileHandler = require('../handlers/file');
+const getAwsLinks = require('../reusableComponents/getAwsLinkForAttachmentsFromModel');
+const FileModel = require('../types/file/model');
+
 var Note = function (db, redis, event) {
     'use strict';
 
@@ -19,6 +23,8 @@ var Note = function (db, redis, event) {
     var access = require('../helpers/access')(db);
     var bodyValidator = require('../helpers/bodyValidator');
 
+    const fileHandler = new FileHandler(db);
+
     var self = this;
 
     var $defProjection = {
@@ -27,7 +33,8 @@ var Note = function (db, redis, event) {
         editedBy   : 1,
         title      : 1,
         description: 1,
-        theme      : 1
+        theme      : 1,
+        attachments: 1
     };
 
     function getAllPipeline(options) {
@@ -147,6 +154,13 @@ var Note = function (db, redis, event) {
             }));
         }
 
+        pipeLine.push(...aggregateHelper.aggregationPartMaker({
+            from : CONTENT_TYPES.FILES,
+            key : 'attachments',
+            isArray: true,
+            addProjection : ['_id', 'name', 'originalName', 'preview']
+        }));
+
         /*if (!forSync) {
             pipeLine.push({
                 $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
@@ -182,29 +196,34 @@ var Note = function (db, redis, event) {
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var session = req.session;
-            var userId = session.uId;
-            var model;
-            var noteData;
+            var userId = req.session.uId;
 
             async.waterfall([
 
-                function (cb) {
-                    var createdBy = {
+                (cb) => {
+                    const files = req.files;
+
+                    if (!files) {
+                        return cb(null, []);
+                    }
+
+                    fileHandler.uploadFile(userId, files, 'notes', function (err, filesIds) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, filesIds);
+                    });
+                },
+
+                function (arrayOfFilesId, cb) {
+                    const createdBy = {
                         user: userId,
                         date: new Date()
                     };
-                    if (body.title) {
-                        body.title = _.escape(body.title);
-                    }
-                    if (body.theme) {
-                        body.theme = _.escape(body.theme);
-                    }
-                    if (body.description) {
-                        body.description = _.escape(body.description);
-                    }
 
-                    noteData = {
+                    const noteData = {
+                        attachments: arrayOfFilesId,
                         description: body.description,
                         theme      : body.theme,
                         createdBy  : createdBy,
@@ -212,15 +231,26 @@ var Note = function (db, redis, event) {
                         title      : body.title
                     };
 
-                    model = new NoteModel(noteData);
+                    if (body.title) {
+                        noteData.title = _.escape(body.title);
+                    }
+                    if (body.theme) {
+                        noteData.theme = _.escape(body.theme);
+                    }
+                    if (body.description) {
+                        noteData.description = _.escape(body.description);
+                    }
+
+                    const model = new NoteModel(noteData);
                     model.save(function (err, model) {
                         if (err) {
                             return cb(err);
                         }
+
                         event.emit('activityChange', {
                             module    : ACL_MODULES.NOTE,
                             actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : body.createdBy,
+                            createdBy : createdBy,
                             itemId    : model._id,
                             itemType  : CONTENT_TYPES.NOTES
                         });
@@ -230,9 +260,13 @@ var Note = function (db, redis, event) {
                 },
 
                 function (noteModel, cb) {
-                    var id = noteModel.get('_id');
+                    const id = noteModel.get('_id');
 
                     self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
+                },
+
+                (noteModel, cb) => {
+                    getAwsLinks(noteModel, cb);
                 }
 
             ], function (err, result) {
@@ -285,11 +319,42 @@ var Note = function (db, redis, event) {
 
             async.waterfall([
 
-                function (cb) {
+                (wfcb) => {
+                    if (!updateObject.filesToDelete && !updateObject.filesToDelete.length) {
+                        return wfcb(null);
+                    }
+
+                    async.each(updateObject.filesToDelete, (fileId, cb) => {
+                        FileModel.findByIdAndRemove(fileId, (err, model) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            fileHandler.deleteFile(model.get('name'), 'notes', cb)
+                        });
+                    }, wfcb);
+                },
+
+                (cb) => {
+                    const files = req.files;
+
+                    if (!files) {
+                        return cb(null, []);
+                    }
+
+                    fileHandler.uploadFile(userId, files, 'notification', cb);
+                },
+
+                function (arrayOfNewFilesId, cb) {
+                    arrayOfNewFilesId = arrayOfNewFilesId.map((item) => {
+                        return item.toString();
+                    });
+
                     updateObject.editedBy = {
                         user: ObjectId(userId),
                         date: new Date()
                     };
+                    
                     if (updateObject.title) {
                         updateObject.title = _.escape(updateObject.title);
                     }
@@ -301,17 +366,25 @@ var Note = function (db, redis, event) {
                     }
 
                     NoteModel.findOne({_id: noteId}, function (err, noteModel) {
-                        var error;
-
                         if (err) {
                             return cb(err);
                         }
 
                         if (!noteModel) {
-                            error = new Error('Note not found');
+                            const error = new Error('Note not found');
                             error.status = 400;
                             return cb(error);
                         }
+
+                        const attachments = noteModel.get('attachments').map((item) => {
+                            return item.toString();
+                        });
+                        const attachmentsWithoutDeleted = _.without(attachments, ...updateObject.filesToDelete);
+                        const newAttachments = attachmentsWithoutDeleted.concat(arrayOfNewFilesId);
+
+                        updateObject.attachments = newAttachments;
+
+                        delete updateObject.filesToDelete;
 
                         noteModel.update({$set: updateObject}, function (err) {
                             if (err) {
@@ -333,6 +406,10 @@ var Note = function (db, redis, event) {
 
                 function (id, cb) {
                     self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
+                },
+
+                (noteModel, cb) => {
+                    getAwsLinks(noteModel, cb);
                 }
 
             ], function (err, result) {
@@ -345,17 +422,11 @@ var Note = function (db, redis, event) {
         }
 
         access.getEditAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
-            var updateObject;
-
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
+            var updateObject;
 
             try {
                 if (req.body.data) {
@@ -441,14 +512,15 @@ var Note = function (db, redis, event) {
             };
 
             aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-
                 if (err) {
                     return next(err);
                 }
+
+                const options = {
+                    data: {}
+                };
+
+                let personnelIds = [];
 
                 response = response && response[0] ? response[0] : {data: [], total: 0};
 
@@ -457,6 +529,13 @@ var Note = function (db, redis, event) {
                 }
 
                 response.data = _.map(response.data, function (element) {
+                    if (element.attachments) {
+                        element.attachments.map((file) => {
+                            file.url = fileHandler.computeUrl(file.name);
+
+                            return file;
+                        });
+                    }
                     if (element.title) {
                         element.title = _.unescape(element.title);
                     }
@@ -551,11 +630,30 @@ var Note = function (db, redis, event) {
     };
 
     this.delete = function (req, res, next) {
-        var id = req.params.id;
-        var query;
+        const id = req.params.id;
 
-        query = NoteModel.findByIdAndRemove({_id: id});
-        query.exec(function (err) {
+        const query = NoteModel.findByIdAndRemove({_id: id});
+
+        async.waterfall([
+            (cb) => {
+                query.exec(cb);
+            },
+
+            (noteModel, callback) => {
+                const attachments = noteModel.get('attachments');
+
+                if (!attachments && !attachments.length) {
+                    return callback();
+                }
+
+                async.each(attachments, (fileId, cb) => {
+                    FileModel.findByIdAndRemove(fileId, (err, fileModel) => {
+                        fileHandler.deleteFile(fileModel.get('name'), 'notes', cb);
+                    })
+                }, callback);
+
+            }
+        ], (err) => {
             if (err) {
                 return next(err);
             }
@@ -650,6 +748,13 @@ var Note = function (db, redis, event) {
                 }
             }));
         }
+
+        pipeLine.push(...aggregateHelper.aggregationPartMaker({
+            from : CONTENT_TYPES.FILES,
+            key : 'attachments',
+            isArray: true,
+            addProjection : ['_id', 'name', 'originalName', 'preview']
+        }));
 
         aggregation = NoteModel.aggregate(pipeLine);
 

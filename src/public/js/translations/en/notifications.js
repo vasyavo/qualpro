@@ -12,6 +12,10 @@ define([
         // list
         location             : 'Location',
         // create
+        attachments          : 'Attachments',
+        attachFiles          : 'Attach Files',
+        attachmentsDialogTitle : 'Notification Files',
+        attach               : 'Attach',
         createNotification   : 'Create Notification',
         cancelBtn            : 'Cancel',
         description          : 'Description',

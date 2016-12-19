@@ -134,7 +134,9 @@ define([
             model.outletString = this.modelMapper('outlet', model);
             model.branchString = this.modelMapper('branch', model);
             model.promotionTypeString = model.promotionType ? model.promotionType.currentLanguage : '';
-            model.displayTypeString = model.displayType ? model.displayType.name.currentLanguage : '';
+            model.displayTypeString = model.displayType.map(function (item) {
+                return item.name[App.currentUser.currentLanguage];
+            }).join(', ');
 
             model.location = model.countryString + '>' + model.regionString + '>' + model.subRegionString + '>' + model.retailSegmentString + '>' + model.outletString + '>' + model.branchString;
 

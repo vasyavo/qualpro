@@ -755,7 +755,7 @@ define([
 
             var statusToRemove;
 
-            if (condition) {
+            if (condition || jsonModel.myCC) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {
@@ -804,6 +804,8 @@ define([
             }
 
             formString = $(formString);
+
+            jsonModel.myCC = self.tabName === 'myCC';
 
             formString.find('#main').html(this.updatedTemplate({
                 jsonModel   : jsonModel,
@@ -866,7 +868,7 @@ define([
                             return;
                         }
 
-                        if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED) {
+                        if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
                             if (!(individualObjective && config.elementId === 'viewSubObjective')) {
                                 require([config.template], function (template) {
                                     var container = self.$el.find(config.selector);

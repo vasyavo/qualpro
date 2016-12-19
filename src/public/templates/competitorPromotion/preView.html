@@ -54,7 +54,7 @@
                                 <span><%= translation.packing %></span>
                             </div>
                             <div class="cell textEllipsis hoverFullText">
-                                <span id="packing"><%= model.packing || '' %></span>
+                                <span id="packing"><%= model.packing || '' %> <%- model.packingType || '' %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -124,10 +124,10 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.displayType %></span>
+                                <span><%- translation.displayType %></span>
                             </div>
                             <div class="cell textEllipsis hoverFullText">
-                                <span><%= model.displayType && model.displayType.name && model.displayType.name.currentLanguage || '' %></span>
+                                <span><%- model.displayTypeString ? model.displayTypeString : '' %></span>
                             </div>
                         </div>
                         <div class="row">

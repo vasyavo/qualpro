@@ -1,10 +1,10 @@
-<% var level = App.currentUser.accessRole.level; %>
 <div id="viewBar" class="viewBar notesViewBar">
     <div class="featureTitleWrap" data-translation="all">
         <%=translation.all%>
     </div>
-
+    <% if (App.currentUser.workAccess){%>
     <span id="createBtn" class="createBtn" data-translation="newNote"><%=translation.newNote %></span>
+    <% }%>
     <div class="filterBar singleFilter notesSearch">
 
     </div>

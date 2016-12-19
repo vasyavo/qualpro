@@ -21,9 +21,9 @@
         </a>
     </div>
 
-    <% if ((level <=2) || (level >= 8)) { %>
+    <% if ((level <=2) || ( (level >= 8) && (level <= 9))  && App.currentUser.workAccess ) { %>
     <span id="createBtn" class="createBtn" data-translation="newPlanogram"><%= translation.newPlanogram %></span>
-    <span id="manageBtn" class="linkBtn" data-translation="manageConfigurations"><%= translation.manageConfigurations%></span>
+    <span id="manageBtn" class="linkBtn" data-translation="manageConfigurations"><%= translation.manageConfigurations %></span>
 
     <% if (viewType === 'thumbnails') { %>
     <div class="checkboxArea">

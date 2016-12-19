@@ -2,6 +2,7 @@ define([
     'Backbone',
     'jQuery',
     'Underscore',
+    'moment',
     'views/main/main',
     'views/login/login',
     'views/createSuperAdmin/createSuperAdmin',
@@ -9,13 +10,9 @@ define([
     'dataService',
     'custom',
     'constants/contentType',
-    'models/personnel',
-    'js-cookie',
-    'constants/errorMessages',
-    'moment'
-], function (Backbone, $, _, mainView, LoginView, CreateSuperAdminView,
-             forgotPassView, dataService, custom, CONSTANTS, PersonnelModel, Cookies,
-             ERROR_MESSAGES, moment) {
+    'js-cookie'
+], function (Backbone, $, _, moment, mainView, LoginView, CreateSuperAdminView,
+             forgotPassView, dataService, custom, CONSTANTS, Cookies) {
     'use strict';
 
     var appRouter = Backbone.Router.extend({
@@ -32,7 +29,7 @@ define([
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)'                                                                                                 : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)'                                                                      : 'getDomainList',
-            // 'qualPro/:contentType(/p=:page)(/c=:countPerPage)(/filter=:filter)'                                                                                          : 'getList',
+            // 'qualPro/:contentType(/p=:page)(/c=:countPerPage)(/filter=:filter)'                                                                                                : 'getList',
             'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)'                                                            : 'goToContent',
             'qualPro/:contentType/form/:contentId'                                                                                                                                : 'goToForm',
             '*any'                                                                                                                                                                : 'any'
@@ -154,28 +151,7 @@ define([
                     }
                 }
 
-                if (!App.currentUser) {
-                    currentUser = new PersonnelModel();
-                    currentUser.url = '/personnel/currentUser';
-                    currentUser.fetch({
-                        success: function (currentUser) {
-                            App.currentUser = currentUser.toJSON();
-                            $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
-                            moment.locale(App.currentUser.currentLanguage);
-                            loadContent();
-                            App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-                        },
-                        error  : function () {
-                            App.render({
-                                type   : 'error',
-                                message: ERROR_MESSAGES.canNotFetchCurrentUser.en + '</br>' + ERROR_MESSAGES.canNotFetchCurrentUser.ar
-                            });
-                        }
-                    });
-                } else {
-                    App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-                    loadContent();
-                }
+                loadContent();
 
                 function getContentDomain() {
 
@@ -256,7 +232,6 @@ define([
 
             var defaultFilters;
             var defCurFilter;
-            var currentUser;
 
             if (context.mainView === null) {
                 context.main(contentType);
@@ -315,29 +290,7 @@ define([
                 });
             }
 
-            if (!App.currentUser) {
-                currentUser = new PersonnelModel();
-                currentUser.url = '/personnel/currentUser';
-                currentUser.fetch({
-                    success: function (currentUser) {
-                        App.currentUser = currentUser.toJSON();
-                        $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
-                        moment.locale(App.currentUser.currentLanguage);
-                        loadContent();
-                        App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-                    },
-
-                    error: function () {
-                        App.render({
-                            type   : 'error',
-                            message: ERROR_MESSAGES.canNotFetchCurrentUser.en + '</br>' + ERROR_MESSAGES.canNotFetchCurrentUser.ar
-                        });
-                    }
-                });
-            } else {
-                App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-                loadContent();
-            }
+            loadContent();
         },
 
         goToCustomReport: function (customReportType, tabName, filter) {
@@ -442,29 +395,7 @@ define([
                         });
                     }
 
-                    if (!App.currentUser) {
-                        currentUser = new PersonnelModel();
-                        currentUser.url = '/personnel/currentUser';
-                        currentUser.fetch({
-                            success: function (currentUser) {
-                                App.currentUser = currentUser.toJSON();
-                                $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
-                                moment.locale(App.currentUser.currentLanguage);
-                                loadContent();
-                                App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-                            },
-                            error  : function () {
-                                App.render({
-                                    type   : 'error',
-                                    message: ERROR_MESSAGES.canNotFetchCurrentUser.en + '</br>' + ERROR_MESSAGES.canNotFetchCurrentUser.ar
-                                });
-                            }
-                        });
-                    } else {
-                        App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-                        loadContent();
-                    }
-
+                    loadContent();
                 }
 
                 if (!$loader.hasClass('smallLogo')) {

@@ -927,7 +927,11 @@ var ActivityHelper = function (db, redis, app) {
         var waterFallTasks = [];
         var locationName;
 
-        var levelQuery = {accessRoleLevel: {$in: levelsByLevel[activityObject.accessRoleLevel]}};
+        var levelQuery = {
+            accessRoleLevel: {
+                $in: levelsByLevel[activityObject.accessRoleLevel] || []
+            }
+        };
 
         if (levelsByLevel[7].indexOf(activityObject.accessRoleLevel) > -1) {
             regionsMathArray = {branch: {$in: activityObject.branch}};

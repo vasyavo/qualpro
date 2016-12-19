@@ -14,7 +14,7 @@
 
                     </div>
                     <% if(!activityList){%>
-                    <% if([3,4].indexOf(App.currentUser.accessRole.level) === -1 ){ %>
+                    <% if([3, 4, 10].indexOf(App.currentUser.accessRole.level) === -1 && App.currentUser.workAccess ){ %>
                     <button id="editPlanogram" type="button" class="readonlyVisible greyBtn" role="button">
                         <%= translation.editBtn %>
                     </button>
@@ -43,7 +43,7 @@
                             </label>
                         </div>
                         <div class="cell">
-                            <span id="retailSegment" class="textEllipsis hoverFullText descriptionViewContent"><%= model.retailSegmentString ? model.retailSegmentString : model.retailSegment[0].name.currentLanguage || '' %></span>
+                            <span id="retailSegment" class="textEllipsis hoverFullText descriptionViewContent"><%= model.retailSegmentString ? model.retailSegmentString : '' %></span>
                         </div>
                     </div>
                     <div class="row">

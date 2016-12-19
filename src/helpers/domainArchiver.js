@@ -2,18 +2,6 @@ var CONTENT_TYPES = require('../public/js/constants/contentType.js');
 var SomeEvents = require('./someEvents');
 var someEvents = new SomeEvents();
 
-Array.prototype.add = function (data) {
-    var self = this;
-
-    if (data instanceof Array) {
-        data.forEach(function (val) {
-            self.push(val);
-        });
-    } else {
-        self.push(data);
-    }
-};
-
 function domainArchiver(Model, BranchModel) {
     var contentTypes = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION, CONTENT_TYPES.BRANCH];
     var async = require('async');

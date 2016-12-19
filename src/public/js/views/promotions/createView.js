@@ -274,7 +274,8 @@ define([
                     contentType        : 'region',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#regionDd').replaceWith(self.regionDropDown.el);
 
@@ -284,7 +285,8 @@ define([
                     contentType        : 'subRegion',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#subRegionDd').replaceWith(self.subRegionDropDown.el);
 
@@ -294,7 +296,8 @@ define([
                     contentType        : 'retailSegment',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#retailSegmentDd').replaceWith(self.retailSegmentDropDown.el);
 
@@ -304,7 +307,8 @@ define([
                     contentType        : 'outlet',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#outletDd').replaceWith(self.outletDropDown.el);
 
@@ -314,10 +318,10 @@ define([
                     contentType        : 'branch',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 self.$el.find('#branchDd').replaceWith(self.branchDropDown.el);
-
 
                 self.countryDropDown.collection.reset(result.country, {parse: true});
                 self.regionDropDown.collection.reset(result.region, {parse: true});
@@ -559,7 +563,9 @@ define([
                     contentType: 'displayType',
                     displayText: this.translation.displayType,
                     collection : this.displayTypeCollection.toJSON(),
-                    forPosition: true
+                    forPosition: true,
+                    multiSelect: true,
+                    showSelectAll : true
                 });
             }, this);
 

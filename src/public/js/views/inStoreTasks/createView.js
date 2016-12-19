@@ -267,7 +267,6 @@ define([
                 }
                 type = $fileInput.prop('files')[0].type;
 
-
                 if (self.ALLOWED_CONTENT_TYPES.indexOf(type) === -1) {
                     App.render({type: 'error', message: ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage]});
                     return;

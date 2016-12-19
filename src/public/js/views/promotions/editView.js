@@ -111,8 +111,7 @@ define([
 
             var condition;
 
-            if (['branch', 'outlet', 'retailSegment', 'region', 'subRegion'].indexOf(key) !== -1) {
-
+            if (['branch', 'outlet', 'retailSegment', 'region', 'subRegion', 'displayType'].indexOf(key) !== -1) {
                 condition = true;
                 if (!model[key] || !value || self.duplicate) {
                     condition = false;
@@ -683,7 +682,6 @@ define([
             var startDateObj;
             var endDateObj;
             var defaultCategory;
-            var defaultDisplayType;
             var $curEl;
 
             var buttons = {
@@ -782,15 +780,20 @@ define([
 
             this.displayTypeCollection = new DisplayTypeCollection();
             this.displayTypeCollection.on('reset', function () {
-                defaultDisplayType = this.displayTypeCollection.findWhere({_id: jsonModel.displayType._id});
+                const defaultDisplayTypes = jsonModel.displayType.map(function (item) {
+                    return self.displayTypeCollection.findWhere({_id : item._id}).toJSON();
+                });
+
                 populate.inputDropDown({
                     selector    : '#displayTypeDd',
                     context     : this,
                     contentType : 'displayType',
                     displayText : 'display type',
-                    displayModel: defaultDisplayType.toJSON(),
+                    displayModel: defaultDisplayTypes,
                     collection  : this.displayTypeCollection.toJSON(),
-                    forPosition : true
+                    forPosition : true,
+                    multiSelect : true,
+                    showSelectAll : true
                 });
             }, this);
 

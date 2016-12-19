@@ -68,7 +68,9 @@ define([
                 location.push(model.branchString);
 
                 model.categoryString = this.modelMapper('categories', model);
-                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType[0].name[App.currentUser.currentLanguage] : '';
+                model.displayTypeString = model.displayType.map((model) => {
+                    return model.name.currentLanguage;
+                }).join(', ');
 
                 model.location = location.filter(function (value) {
                     return value;

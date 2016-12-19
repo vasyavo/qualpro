@@ -38,7 +38,7 @@ define(['Backbone',
 
         checkEmail: function (e) {
             var target = $(e.target);
-            var value = target.val();
+            var value = target.val().trim();
 
             if (!CONSTANTS.EMAIL_REGEXP.test(value) && !CONSTANTS.PHONE_REGEXP.test(value)) {
                 target.addClass('error');
@@ -107,8 +107,9 @@ define(['Backbone',
             var pass = thisEl.find('#pass').val();
             var checkedEl = thisEl.find('#myonoffswitch');
             var checked = checkedEl.prop('checked');
+            debugger;
             var data = {
-                login     : login,
+                login     : login.trim(),
                 pass      : pass,
                 rememberMe: checked
             };
@@ -116,12 +117,10 @@ define(['Backbone',
             var errors = thisEl.find('input.error');
 
             if (errors.length) {
-                App.render({
+                return App.render({
                     type   : 'error',
                     message: ERROR_MESSAGES.invalidCredentials.en + '</br>' + ERROR_MESSAGES.invalidCredentials.ar
                 });
-
-                return;
             }
 
             loginForm.removeClass('notRegister');
@@ -131,9 +130,7 @@ define(['Backbone',
             }
             if (err) {
                 loginForm.addClass('notRegister');
-                App.render({type: 'error', message: err});
-
-                return;
+                return App.render({type: 'error', message: err});
             }
             if (data.login === '') {
                 loginForm.addClass('notRegister');

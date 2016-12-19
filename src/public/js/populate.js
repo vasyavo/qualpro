@@ -205,7 +205,8 @@ define(['Backbone',
                 dataProperty  : options.dataProperty,
                 forPosition   : options.forPosition,
                 singleUnselect: options.singleUnselect,
-                multiSelect   : options.multiSelect
+                multiSelect   : options.multiSelect,
+                showSelectAll : options.showSelectAll
             });
 
             $el.replaceWith(dropDownView.el);

@@ -11,7 +11,6 @@ const access = () => {
         const uid = req.session.uId;
         const isMobile = !!req.isMobile;
         const type = isMobile ? 'mobile' : 'cms';
-        const tasks = [];
 
         function findPersonnel(cb) {
             const pipeline = [
@@ -65,9 +64,10 @@ const access = () => {
             });
         }
 
-        tasks.push(findPersonnel, checkRole);
-
-        async.waterfall(tasks, (err, result, personnel) => {
+        async.waterfall([
+            findPersonnel,
+            checkRole
+        ], (err, result, personnel) => {
             if (err) {
                 return callback(err);
             }
@@ -82,7 +82,7 @@ const access = () => {
                     return callback(null, true, personnel);
                 }
 
-                if (!access[accessType]) {
+                if (!access[accessType] || (personnel.accessRole && personnel.accessRole.level > 2 && personnel.vacation && personnel.vacation.onLeave  && accessType !== 'read')) {
                     const err = new Error();
 
                     err.status = 403;

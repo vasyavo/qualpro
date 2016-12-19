@@ -8,9 +8,7 @@ define([
     'collections/filter/filterCollection',
     'constants/filters',
     'js-cookie'
-], function ($, _, Backbone, dropDownTemplate,
-             dropDownContentTemplate, filterCollection,
-             FILTERSCONSTANTS, Cookies) {
+], function ($, _, Backbone, dropDownTemplate, dropDownContentTemplate, filterCollection, FILTERSCONSTANTS, Cookies) {
 
     var DropDownView = Backbone.View.extend({
         template       : _.template(dropDownTemplate),
@@ -23,7 +21,8 @@ define([
             'click .downArrow'           : 'toggleDropDownContent',
             'click .dropDownItem'        : 'itemClick',
             'click .dropDownPagination a': 'paginationChange',
-            'click .counter'             : 'stopPropagation'
+            'click .counter'             : 'stopPropagation',
+            'click #select-all'          : 'selectAllValues'
         },
 
         searchText       : '',
@@ -43,6 +42,7 @@ define([
             this.elementToShow = options.elementToShow || FILTERSCONSTANTS.FILTER_VALUES_COUNT;
             this.noSingleSelectEvent = options.noSingleSelectEvent;
             this.noAutoSelectOne = options.noAutoSelectOne;
+            this.showSelectAll = options.showSelectAll;
 
             this.filteredCollection = new filterCollection(this.collection.toJSON());
 
@@ -53,6 +53,11 @@ define([
             this.collection.on('reset', function () {
                 if (!self.collection.length) {
                     self.removeSelected();
+                }
+
+                if (this.showSelectAll) {
+                    $(`#select-all-li-${self.contentType}`).removeClass('checkedValue');
+                    $('.dropDownItem.selected').removeClass('selected');
                 }
 
                 if (self.checkAll) {
@@ -114,6 +119,32 @@ define([
             this.selectedValues = options.selectedValuesIds ? options.selectedValues : _.pluck(options.selectedValues, 'name') || [];
 
             this.render();
+        },
+
+        selectAllValues : function (event) {
+            var selectAllLi = $(event.target).parent();
+            var isSelectedSelectAll = selectAllLi.hasClass('checkedValue');
+
+            if (isSelectedSelectAll) {
+                this.removeSelected();
+
+                $('.dropDownItem.selected').removeClass('selected');
+                selectAllLi.removeClass('checkedValue');
+            } else {
+                var arrayOfIds = this.collection.toJSON().map((model) => {
+                    return model._id;
+                });
+
+                this.setSelectedByIds({
+                    ids: arrayOfIds
+                });
+
+                selectAllLi.addClass('checkedValue');
+            }
+
+            this.trigger('changeItem', {
+                selectedValuesIds: this.selectedValuesIds
+            });
         },
 
         removeSelected: function (e) {
@@ -302,6 +333,12 @@ define([
                     $el.removeClass('selected');
                 }
 
+                if (this.selectedValues.length === this.collection.length) {
+                    $(`#select-all-li-${this.contentType}`).addClass('checkedValue');
+                } else {
+                    $(`#select-all-li-${this.contentType}`).removeClass('checkedValue');
+                }
+
                 this.trigger('changeItem', {
                     contentType      : this.contentType,
                     $item            : $el,
@@ -445,7 +482,8 @@ define([
                 displayText : this.displayText,
                 forPosition : this.forPosition,
                 contentType : this.contentType,
-                dataProperty: this.dataProperty
+                dataProperty: this.dataProperty,
+                showSelectAll : this.showSelectAll
             }));
 
             if (this.selectedValuesIds.length) {

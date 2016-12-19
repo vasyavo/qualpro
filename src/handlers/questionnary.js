@@ -1,8 +1,10 @@
 const async = require('async');
-const ObjectId = require('bson-objectid');
+const logger = require('./../utils/logger');
 const _ = require('underscore');
 const lodash = require('lodash');
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
+const isValidObjectId = require('bson-objectid').isValid;
 const QuestionnaryModel = require('./../types/questionnaries/model');
 const QuestionnaryAnswerModel = require('./../types/questionnariesAnswer/model');
 const PersonnelModel = require('./../types/personnel/model');
@@ -120,7 +122,7 @@ const QuestionnaryHandler = function (db, redis, event) {
 
                 let isCreator = null;
 
-                if (ObjectId.isValid(creator)) {
+                if (isValidObjectId(creator)) {
                     // fixme: should check it here as sync aggregation do not includes projection for $createdBy.user
                     isCreator = creator && creator.toString() === personnelId;
                 } else {
@@ -166,18 +168,41 @@ const QuestionnaryHandler = function (db, redis, event) {
 
             const aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
-            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
-
-            queryObject.$or = [{
-                'createdBy.user': personnel._id
+            queryObject.$and = [{
+                // standard synchronization behaviour
+                $or : [{
+                    'editedBy.date': {
+                        $gt: lastLogOut
+                    }
+                }, {
+                    'createdBy.date': {
+                        $gt: lastLogOut
+                    }
+                }]
             }, {
-                'createdBy.user': {
-                    $ne: personnel._id
-                },
-                status: {
-                    $eq: 'active'
-                }
+                // user should see questionnaire which are related to him, probably which are active
+                $or: [{
+                    'createdBy.user': personnel._id
+                }, {
+                    'createdBy.user': {
+                        $ne: personnel._id
+                    },
+                    status: {
+                        $eq: 'active'
+                    }
+                }]
             }];
+
+            if (isMobile) {
+                // user sees only ongoing questionnaire via mobile app
+                const currentDate = new Date();
+
+                queryObject.$and.push({
+                    dueDate: {
+                        $gt: currentDate
+                    }
+                });
+            }
 
             const pipeline = [];
 
@@ -190,7 +215,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                 (cb) => {
                     if (isMobile) {
                         pipeline.push({
-                            $project: aggregateHelper.getProjection({
+                            $project: Object.assign({}, $defProjection, {
                                 creationDate: '$createdBy.date',
                                 updateDate: '$editedBy.date'
                             })
@@ -198,7 +223,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                     }
 
                     pipeline.push({
-                        $project: aggregateHelper.getProjection({
+                        $project: Object.assign({}, $defProjection, {
                             lastDate: {
                                 $ifNull: [
                                     '$editedBy.date',
@@ -277,8 +302,8 @@ const QuestionnaryHandler = function (db, redis, event) {
             const queryFilter = query.filter || {};
 
             const sort = query.sort || {
-                    lastDate: -1
-                };
+                lastDate: -1
+            };
 
             const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.QUESTIONNARIES,
@@ -308,6 +333,15 @@ const QuestionnaryHandler = function (db, redis, event) {
             if (queryObject.publisher) {
                 publisherFilter = queryObject.publisher;
                 delete queryObject.publisher;
+            }
+
+            if (isMobile) {
+                // user sees only ongoing questionnaire via mobile app
+                const currentDate = new Date();
+
+                queryObject.dueDate = {
+                    $gt: currentDate
+                };
             }
 
             const aggregateHelper = new AggregationHelper($defProjection);

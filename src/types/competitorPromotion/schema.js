@@ -20,11 +20,12 @@ const schema = new Schema({
     promotion: { type: String, default: '', require: true },
     price: { type: String, default: '', require: true },
     packing: { type: String, default: '', require: true },
+    packingType: { type: String, enum: ['GM', 'ML', ''], default: ''},
     expiry: { type: Date },
     displayType: [{
-        type: Number,
+        type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16
+        default: null
     }],
     dateStart: { type: Date },
     dateEnd: { type: Date },

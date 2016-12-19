@@ -116,7 +116,7 @@ describe('mobile synchronization', () => {
             });
 
             [
-                ...synch.standardPack,
+                ...synch.merchandiserPack,
                 synch.shouldSyncQuestionnary
             ].forEach((item) => item.apply(null, [Authenticator.merchandiser]));
 

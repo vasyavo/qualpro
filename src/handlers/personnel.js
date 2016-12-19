@@ -508,12 +508,6 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    function consoleLogENV(message) {
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(message);
-        }
-    }
-
     this.getForDD = function (req, res, next) {
         function queryRun() {
             var query = req.query;
@@ -1069,19 +1063,24 @@ var Personnel = function (db, redis, event) {
             async.waterfall([
 
                 (cb) => {
-                    AccessRoleModel.create({
-                        name : {
-                            en: 'Super Admin',
-                            ar: 'Super Admin'
-                        },
+                    AccessRoleModel.findOne({
                         level: 0
-                    }, cb);
+                    }, cb)
                 },
 
                 (accessRole, cb) => {
+                    if (!accessRole) {
+                        return cb('Super access role not existing.')
+                    }
+
                     su.accessRole = accessRole._id;
 
-                    PersonnelModel.create(su, cb);
+                    const personnelModel = new PersonnelModel();
+
+                    personnelModel.set(su);
+                    personnelModel.save((err, model, numAffected) => {
+                        cb(err, model);
+                    });
                 },
 
                 // SU only one, email should be sent in waterfall
@@ -1209,7 +1208,12 @@ var Personnel = function (db, redis, event) {
                         return res.status(400).send('User with such credentials already exist')
                     }
 
-                    PersonnelModel.create(body, cb);
+                    const personnelModel = new PersonnelModel();
+
+                    personnelModel.set(body);
+                    personnelModel.save((err, model, numAffected) => {
+                        cb(err, model);
+                    });
                 },
 
                 (personnel, cb) => {
@@ -1334,12 +1338,12 @@ var Personnel = function (db, redis, event) {
                 return next(error);
             }
 
-            if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
+           /* if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
                 error = new Error('You cannot access the app while being on leave');
                 error.status = 400;
 
                 return next(error);
-            }
+            }*/
 
             if (personnel.archived) {
                 error = new Error('Your account is blocked. Please contact with administration.');
@@ -1584,6 +1588,8 @@ var Personnel = function (db, redis, event) {
                 }
 
                 var key = 'notificationCount' + '#' + response._id;
+
+                response.workAccess = (response.accessRole.level < 3) || !response.vacation.onLeave;
 
                 redis.cacheStore.readFromStorage(key, function (err, value) {
                     var valueJSON;
@@ -2109,16 +2115,16 @@ var Personnel = function (db, redis, event) {
                 PersonnelModel.aggregate(pipeline).exec(cb);
             },
 
-            (response, cb) => {
+            (result, cb) => {
+                const response = result && result[0] ?
+                    result[0] : { data: [], total: 0 };
+                const ids = response.data.map((item) => (item._id));
                 const options = {
-                    data: {}
+                    data: {
+                        [CONTENT_TYPES.PERSONNEL]: ids
+                    }
+
                 };
-                const ids = _.map(response.data, '_id');
-
-                response = response && response[0] ?
-                    response[0] : { data: [], total: 0 };
-
-                options.data[CONTENT_TYPES.PERSONNEL] = ids;
 
                 cb(null, {
                     response,
@@ -2301,7 +2307,7 @@ var Personnel = function (db, redis, event) {
     };
 
     this.getAll = function (req, res, next) {
-        function queryRun(personnel, callback) {
+        function queryRun(personnel, onlineUsers, callback) {
             const query = req.query;
             const isMobile = req.isMobile;
             const filter = query.filter || {};
@@ -2385,6 +2391,20 @@ var Personnel = function (db, redis, event) {
                 delete queryObject.outlet;
             }
 
+            if (queryObject.status) {
+                let onlineUserIds = onlineUsers.map(el => ObjectId(el));
+                if (queryObject.status.$in && queryObject.status.$in.length === 1 && ~queryObject.status.$in.indexOf('online')){
+                    delete queryObject.status;
+                    queryObject._id = {
+                        $in : onlineUserIds
+                    }
+                } else {
+                    queryObject._id = {
+                        $nin : onlineUserIds
+                    }
+                }
+            }
+
             if (!queryObject.hasOwnProperty('archived') && !isMobile) {
                 queryObject.archived = false;
             }
@@ -2415,48 +2435,56 @@ var Personnel = function (db, redis, event) {
                 personnelLevel,
                 isMobile,
                 personnel
-            }, callback);
-        }
-
-        function defineOnlineUsers(body, callback) {
-            async.parallel([
-                (cb) => {
-                    redisClient.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, onlineUsers);
-                    });
-                },
-
-                (cb) => {
-                    const arrayOfId = body.data
-                        .map((item) => (item._id.toString()));
-                    cb(null, arrayOfId);
-                },
-            ], (err, pairOfArrays) => {
+            }, (err, body) =>{
                 if (err) {
                     return callback(err);
                 }
 
-                const onlineUsers = _.intersection(...pairOfArrays);
+                body.data.forEach((el)=>{
+                    if (~onlineUsers.indexOf(el._id.toString())){
+                        el.status = 'online';
+                    }
+                });
 
-                body.online = onlineUsers;
+                if (sort && sort.status){
+                    body.data.sort(function (a, b) {
+                        function compareField(elA, elB) {
+                            if (elA.status > elB.status) {
+                                return 1;
+                            } else if (elA.status < elB.status) {
+                                return -1;
+                            }
+                            return 0;
+                        }
+
+                        if (sort.status === 1) {
+                            return compareField(a, b);
+                        }
+
+                        return compareField(b, a);
+                    })
+                }
 
                 callback(null, body);
+            });
+        }
+
+        function defineOnlineUsers(allowed, personnel, callback) {
+
+            redisClient.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                callback(null, personnel, onlineUsers);
             });
         };
 
         async.waterfall([
 
             async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
-
-            (allowed, personnel, cb) => {
-                queryRun(personnel, cb);
-            },
-
-            defineOnlineUsers
+            defineOnlineUsers,
+            queryRun
         ], (err, body) => {
             if (err) {
                 return next(err);
