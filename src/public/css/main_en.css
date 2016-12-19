@@ -582,8 +582,60 @@ a {
 .plusIcon:before,
 .sortArrows:before,
 .question:before,
-.logOut:after {
+.logOut:after,
+.filetype-csv:after,
+.filetype-xlsx:after,
+.filetype-doc:after,
+.filetype-docx:after,
+.filetype-pdf:after,
+.filetype-mp3:after,
+.filetype-mp4:after,
+.filetype-ppt:after,
+.filetype-xml:after,
+.filetype-xls:after,
+.filetype-m4v:after,
+.filetype-m4a:after,
+.filetype-pptx:after {
   font-family: 'icomoon';
+}
+.filetype-csv:after {
+  content: '\e94b';
+}
+.filetype-xlsx:after {
+  content: '\e941'
+}
+.filetype-doc:after {
+  content: '\e940'
+}
+.filetype-docx:after {
+  content: '\e94a'
+}
+.filetype-pdf:after {
+  content: '\e942'
+}
+.filetype-mp3:after {
+  content: '\e949'
+}
+.filetype-mp4:after {
+  content: '\e94c'
+}
+.filetype-ppt:after {
+  content: '\e946'
+}
+.filetype-pptx:after {
+  content: '\e94f'
+}
+.filetype-xml:after {
+  content: '\e94e'
+}
+.filetype-xls:after {
+  content: '\e94d'
+}
+.filetype-m4v:after {
+  content: '\e947'
+}
+.filetype-m4a:after {
+  content: '\e948'
 }
 .bubbleMassage:after {
   content: '\e900';
@@ -10840,7 +10892,21 @@ canvas::selection,
 .video_icon,
 .word_icon,
 .excel_icon,
-.pdf_icon {
+.pdf_icon,
+.filetype-csv,
+.filetype-xlsx,
+.filetype-doc,
+.filetype-docx,
+.filetype-pdf,
+.filetype-mp3,
+.filetype-mp4,
+.filetype-ppt,
+.filetype-xml,
+.filetype-xls,
+.filetype-ppt,
+.filetype-m4v,
+.filetype-m4a,
+.filetype-pptx {
   font-size: 48px;
   text-align: center;
 }
