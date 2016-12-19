@@ -45,7 +45,11 @@
         </a>
     </div>
 
+    <% if (App.currentUser.workAccess) {%>
+
     <span id="createBtn" class="createBtn" data-translation="newTask"><%= translation.newTask %></span>
+
+    <%}%>
 
     <div id="paginationHolder" class="paginationHolder">
 
