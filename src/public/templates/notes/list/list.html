@@ -1,3 +1,5 @@
+<% var currentUser = App.currentUser%>
+<% var access = (currentUser.accessRole.level < 3) || !currentUser.vacation.onLeave%>
 <% collection.forEach(function(model, index){ %>
 <div class="notesItem listRow" data-id="<%= model._id %>">
     <div class="notesUser flexRowStart">
@@ -11,7 +13,7 @@
                     <span class="fontBold"><%= model.title || '' %></span>
 
                     <div class="fontSmall"><%=model.theme || ''%></div>
-                    <div class="fontSmall fontGray textEllipsis multiEllipsis childEllipsis"><%=model.description || ''%></div>
+                    <div class="fontGray textEllipsis multiEllipsis childEllipsis"><%= model.description || ''%></div>
                 </div>
                 <div>
                     <div class="bannerWrap floatLeft">
@@ -19,8 +21,13 @@
                             <div class="bannerMd fileThumbnailItem brandItem masonryThumbnail">
                                 <div class="thumbnail_js thumbnailBody">
                                     <!--insert image here-->
-                                    <img src="images/tuna.jpg" alt="">
-                                    <!--insert image here-->
+                                    <% model.attachments.map((attachment) => { %>
+                                        <div class="filetype-<%- attachment.name.split('.').pop() %> floatLeft">
+                                            <% if(attachment.name.split('.').pop() == 'png' || attachment.name.split('.').pop() == 'jpg') { %>
+                                                <img class="" src="<%- attachment.url %>"/>
+                                            <% } %>
+                                        </div>
+                                    <% }); %>
                                 </div>
                             </div>
                         </div>
@@ -28,12 +35,13 @@
                     <span class="dates floatRight"><%=model.createdBy.date || ''%></span>
                 </div>
             </div>
-
         </div>
     </div>
+    <% if (App.currentUser.workAccess){%>
     <div class="actionsBlock">
         <span class="editContent bottomLine"></span>
         <span class="trash"></span>
     </div>
+    <%}%>
 </div>
 <% }) %>
