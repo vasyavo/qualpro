@@ -11,8 +11,8 @@ var AccessRole = function (db) {
 
         if (level !== 1) {
             query.level = level < ACL_ROLES.MASTER_UPLOADER
-                ? {$gt: level, $lt: ACL_ROLES.MASTER_UPLOADER}
-                : {$gt: ACL_ROLES.COUNTRY_ADMIN, $lt: ACL_ROLES.MASTER_UPLOADER};
+                ? {$gt: level, $lte: ACL_ROLES.TRADE_MARKETER}
+                : {$gt: ACL_ROLES.COUNTRY_ADMIN, $lte: ACL_ROLES.TRADE_MARKETER};
         }
 
         AccessRoleModel.find(query, '_id name level')

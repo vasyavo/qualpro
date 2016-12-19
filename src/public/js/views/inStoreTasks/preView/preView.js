@@ -581,7 +581,7 @@ define([
 
             var statusToRemove;
 
-            if (condition) {
+            if (condition || jsonModel.myCC || !App.currentUser.workAccess) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {
@@ -614,6 +614,8 @@ define([
             var buttons = {};
             var configForTemplate = $.extend([], levelConfig[this.contentType][App.currentUser.accessRole.level].preview);
             var configForActivityList = levelConfig[this.contentType].activityList.preview;
+
+            jsonModel.myCC = self.tabName === 'myCC';
 
             buttons.save = {
                 text : this.translation.okBtn,
@@ -690,22 +692,24 @@ define([
                         var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id;
                         var historyByMe = jsonModel.history;
 
-                        if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
-                            require([
-                                    config.template
-                                ],
-                                function (template) {
-                                    var container = self.$el.find(config.selector);
+                        if (App.currentUser.workAccess) {
+                            if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
+                                require([
+                                        config.template
+                                    ],
+                                    function (template) {
+                                        var container = self.$el.find(config.selector);
 
-                                    template = _.template(template);
+                                        template = _.template(template);
 
-                                    if (!container.find('#' + config.elementId).length) {
-                                        container[config.insertType](template({
-                                            elementId  : config.elementId,
-                                            translation: self.translation
-                                        }));
-                                    }
-                                });
+                                        if (!container.find('#' + config.elementId).length) {
+                                            container[config.insertType](template({
+                                                elementId  : config.elementId,
+                                                translation: self.translation
+                                            }));
+                                        }
+                                    });
+                            }
                         }
                     });
                 } else {
