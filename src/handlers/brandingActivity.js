@@ -832,17 +832,11 @@ var BrandingActivity = function (db, redis, event) {
         }
 
         access.getEditAccess(req, ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY, function (err, allowed) {
-            var updateObject;
-
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
+            let updateObject;
 
             try {
                 if (req.body.data) {
@@ -854,7 +848,7 @@ var BrandingActivity = function (db, redis, event) {
                 return next(err);
             }
 
-            bodyValidator.validateBody(updateObject, req.session.level, CONTENT_TYPES.BRANDINGANDDISPLAY, 'update', function (err, saveData) {
+            bodyValidator.validateBody(updateObject, req.session.level, CONTENT_TYPES.BRANDING_ACTIVITY, 'update', function (err, saveData) {
                 if (err) {
                     return next(err);
                 }
