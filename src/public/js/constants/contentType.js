@@ -71,7 +71,6 @@
         ITEMHISTORY : 'itemHistory',
         DOCUMENTS : 'documents',
         CONTACT_US : 'contactUs',
-        CONSUMER_SURVEY : 'consumerSurvey',
         DISPLAYTYPE : 'displayType',
         MODULE : 'module',
         SESSION : 'session',
@@ -97,7 +96,8 @@
         QUESTIONNARIES : 'questionnary',
         QUESTIONNARIES_ANSWER : 'questionnaryAnswer',
         CREATEQUESTIONNARIES : 'createQuestionnary',
-        CONSUMERS_SURVEY : 'consumersSurvey',
+        CONSUMER_SURVEY : 'consumer-survey',
+        CONSUMER_SURVEY_ANSWER : 'consumer-survey-answer',
         DISPLAY_NAMES : {
             COUNTRY : 'Country',
             REGION : 'Region',

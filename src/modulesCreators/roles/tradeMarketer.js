@@ -491,6 +491,7 @@ module.exports = [
             read   : false
         }
     },
+    require('./../../stories/consumer-survey/acl/tradeMarketer'),
     {
         module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
         cms   : {

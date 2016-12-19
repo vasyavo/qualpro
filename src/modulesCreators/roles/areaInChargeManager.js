@@ -21,7 +21,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -35,7 +35,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -63,7 +63,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -89,15 +89,15 @@ module.exports = [
     }, {
         module: ACL_MODULES.OBJECTIVE,
         cms: {
-            archive: false,
-            edit: false,
-            write: false,
+            archive: true,
+            edit: true,
+            write: true,
             read: true
         },
         mobile: {
-            archive: false,
+            archive: true,
             edit: true,
-            write: false,
+            write: true,
             read: true
         }
     }, {
@@ -176,7 +176,7 @@ module.exports = [
             archive: false,
             edit: true,
             write: true,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -190,13 +190,13 @@ module.exports = [
             archive: false,
             edit: true,
             write: true,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
             edit: true,
             write: true,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.OBJECTIVES_AND_TASKS_FORM,
@@ -204,26 +204,26 @@ module.exports = [
             archive: false,
             edit: true,
             write: true,
-            read: false
-        },
-        mobile: {
-            archive: false,
-            edit: true,
-            write: true,
-            read: false
-        }
-    }, {
-        module: ACL_MODULES.IN_STORE_REPORTING,
-        cms: {
-            archive: false,
-            edit: false,
-            write: false,
             read: true
         },
         mobile: {
             archive: false,
             edit: true,
-            write: false,
+            write: true,
+            read: true
+        }
+    }, {
+        module: ACL_MODULES.IN_STORE_REPORTING,
+        cms: {
+            archive: true,
+            edit: true,
+            write: true,
+            read: true
+        },
+        mobile: {
+            archive: true,
+            edit: true,
+            write: true,
             read: true
         }
     }, {
@@ -246,7 +246,7 @@ module.exports = [
             upload: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             upload: false,
@@ -274,25 +274,25 @@ module.exports = [
             upload: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             upload: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
         cms: {
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.CUSTOM_REPORT,
@@ -323,8 +323,8 @@ module.exports = [
     }, {
         module: ACL_MODULES.NOTIFICATION,
         cms: {
-            edit: false,
-            write: false,
+            edit: true,
+            write: true,
             read: true
         },
         mobile: {
@@ -360,6 +360,20 @@ module.exports = [
             write: false,
             read: false
         }
+    }, {
+        module: 30,
+        cms: {
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
+        },
+        mobile: {
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
+        }
     },
     {
         module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
@@ -367,7 +381,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -380,14 +394,14 @@ module.exports = [
         cms: {
             archive: false,
             edit: true,
-            write: true,
-            read: false
+            write: false,
+            read: true
         },
         mobile: {
             archive: false,
             edit: true,
-            write: true,
-            read: false
+            write: false,
+            read: true
         }
     },
     {
@@ -396,12 +410,12 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
             edit: false,
-            write: true,
+            write: false,
             read: true
         }
     },
@@ -411,13 +425,13 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
@@ -426,7 +440,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -441,7 +455,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
@@ -456,12 +470,12 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
+            edit: false,
+            write: false,
             read: true
         }
     },
@@ -470,14 +484,29 @@ module.exports = [
         cms: {
             archive: false,
             edit: false,
-            write: false,
-            read: false
+            write: true,
+            read: true
         },
         mobile: {
             archive: false,
             edit: false,
             write: true,
-            read: false
+            read: true
+        }
+    },
+    {
+        module: ACL_MODULES.PRICE_SURVEY,
+        cms: {
+            archive: false,
+            edit: false,
+            write: true,
+            read: true
+        },
+        mobile: {
+            archive: false,
+            edit: false,
+            write: true,
+            read: true
         }
     },
     {
@@ -489,25 +518,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            upload: true,
-            edit: true,
-            write: true,
+            upload: false,
+            edit: false,
+            write: false,
             read: true
-        }
-    },
-    {
-        module: ACL_MODULES.PRICE_SURVEY,
-        cms: {
-            archive: false,
-            edit: false,
-            write: true,
-            read: false
-        },
-        mobile: {
-            archive: false,
-            edit: false,
-            write: true,
-            read: false
         }
     },
     {
@@ -570,7 +584,7 @@ module.exports = [
             read: false
         }
     },
-    require('./../../stories/consumer-survey/acl/merchandiser'),
+    require('./../../stories/consumer-survey/acl/areaInChargeManager'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {
