@@ -24,6 +24,10 @@
         <div class="locationTop flexRow">
             <div class="flexColumn">
                 <div class="flexRow">
+                    <div class="locationTitle"><%= translation.brand %>: <%= model.brand && model.brand.name && model.brand.name.currentLanguage || '' %></div>
+                    <span class="textSmall"></span>
+                </div>
+                <div class="flexRow">
                     <div class="locationTitle"><%= translation.category %>: <%= _.map(model.category, function(category) {return category.name.currentLanguage} ).join(', ') %></div>
                     <span class="textSmall"></span>
                 </div>
