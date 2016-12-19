@@ -12,7 +12,7 @@ define([
             origin      : 'Origin',
             promotion   : 'Promotion',
             rsp         : 'RSP',
-            packing     : 'Packing',
+            packing     : 'Weight',
             expiry      : 'Expiry',
             employee    : 'Employee',
             country     : 'Country',

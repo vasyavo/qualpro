@@ -54,7 +54,7 @@ define([
         product          : 'Product',
         variant          : 'Variant',
         item             : 'Item',
-        packing          : 'Packing',
+        packing          : 'Weight',
 
         // link form template
         formType: ' Form Type',
