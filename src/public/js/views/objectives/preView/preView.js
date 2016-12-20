@@ -762,7 +762,6 @@ define([
             if (condition) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
-                debugger;
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {
                     if (createdByMe) {
                         statusToRemove = STATUSES.COMPLETED;
