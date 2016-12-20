@@ -851,10 +851,10 @@ a {
   content: '\e945';
 }
 .question:after {
-  content: '\ea09';
+  content: '\e951';
 }
 .logOut:after {
-  content: '\e946';
+  content: '\e950';
 }
 .contactUs:after {
   display: block;
