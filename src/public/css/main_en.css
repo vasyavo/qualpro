@@ -10938,6 +10938,9 @@ canvas::selection,
   font-size: 48px;
   text-align: center;
 }
+.filetype-png, .filetype-jpg {
+  margin: 0 5px;
+}
 .topBarHolder .viewBar .createBtn:active,
 .ui-dialog-buttonpane .ui-dialog-buttonset .acceptBtn:active,
 .linkBtn:active,
