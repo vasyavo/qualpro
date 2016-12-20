@@ -1921,6 +1921,12 @@ input:invalid {
   font-size: 16px;
   font-size: 1rem;
 }
+label[for=searchInputcountry]:after,
+label[for=searchInputoutlet]:after,
+label[for=searchInputretailSegment]:after {
+  top: 0!important;
+  line-height: 2.4!important;
+}
 .filterName input {
   height: 40px;
   width: 185px;
