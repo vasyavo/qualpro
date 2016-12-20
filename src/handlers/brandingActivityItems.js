@@ -403,7 +403,7 @@ var Promotions = function (db, redis, event) {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRANDINGANDDISPLAYITEMS, 'create', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS, 'create', function (err, saveData) {
                 if (err) {
                     return next(err);
                 }
