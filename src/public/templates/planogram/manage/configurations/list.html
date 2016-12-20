@@ -4,8 +4,9 @@
         <input data-key="_id" type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox">
         <label for="<%=item._id%>" class="checkboxLabel"></label>
     </td>
-    <td>
-        <input data-key="configuration" class="editable" readonly value="<%=item.configuration%>">
+    <td class="configurations-input">
+        <input id="1" type="text" class="editable newRow" placeholder="__" readonly value="<%= item.configuration.split(' ')[0] %>"><label for="1"> cm</label> *
+        <input id="2" type="text" class="editable newRow" placeholder="__" readonly value="<%= item.configuration.split(' ')[2] %>"><label for="2"> rows</label>
     </td>
 </tr>
 <% }) %>

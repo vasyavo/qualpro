@@ -4052,6 +4052,28 @@ a.disabled {
 .createPlanogramForm .table {
   margin-left: 15px;
 }
+.configurations-input {
+  text-align: left;
+}
+.configurations-input input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.configurations-input input{
+  text-align: center;
+  margin-right: 5px;
+  margin-top: 0!important;
+  width: 28px!important;
+  padding:0 3px!important;
+  clear: none!important;
+  display: inline!important;
+  float: none!important;
+}
+.configurations-input input:read-only {
+  padding: 0;
+  margin: 0;
+}
 .thumbnailsHolder {
   position: absolute;
 }
