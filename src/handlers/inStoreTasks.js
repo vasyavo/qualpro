@@ -372,6 +372,14 @@ var InStoreReports = function() {
                             ], inStoreTaskModel.status)) {
                             error = new Error(`You could not update task with status: "${inStoreTaskModel.status}"`);
                             error.status = 400;
+
+                            return cb(error);
+                        }
+
+                        if (inStoreTaskModel.status === OBJECTIVE_STATUSES.OVER_DUE && inStoreTaskModel.createdBy.user !== userId) {
+                            error = new Error(`You could not update task with status: "${inStoreTaskModel.status}"`);
+                            error.status = 400;
+
                             return cb(error);
                         }
 
