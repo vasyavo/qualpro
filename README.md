@@ -54,6 +54,20 @@ ls -al - check right
 chmod 755 ./API_documentation/update_docs.sh - full access
 ```
 
+## Database migrations
+
+To create migration file:
+```
+$ node ./node_modules/mongodb-migrate -runmm create "optional-name-of-migration"
+```
+
+To run migration:
+```
+$ node ./node_modules/mongodb-migrate -runmm up
+```
+
+All parameters you can check [here](https://github.com/afloyd/mongo-migrate)
+
 #### Node Inspector
 Debugging with `node-inspector` do not works with node version higher than *6.3.1*
 https://github.com/node-inspector/node-inspector/issues/907

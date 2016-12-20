@@ -11,3 +11,11 @@ npm run docs
 # Get additional scripts
 chmod +x ./get-scripts.sh
 ./get-scripts.sh
+
+# Make database migration
+if [ ! -z $CI ] ; then
+    echo "Making database migration:"
+    node ./node_modules/mongodb-migrate -runmm -c ./ -dbc "{\"connectionString\": \"${MONGODB_URI}\"}" up
+fi
+
+
