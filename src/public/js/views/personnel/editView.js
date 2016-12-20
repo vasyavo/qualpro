@@ -23,7 +23,7 @@ define([
 
         initialize: function (options) {
             _.bindAll(this, 'render', 'saveItem');
-debugger;
+
             this.logic = createPersonnelViewLogic(this);
             this.currentModel = options.model;
             this.responseObj = {};
