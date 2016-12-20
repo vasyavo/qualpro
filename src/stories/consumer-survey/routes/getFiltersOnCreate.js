@@ -192,9 +192,9 @@ module.exports = wrap(function *(req, res, next) {
         country: groups.country || [],
         region: groups.region || [],
         subRegion: groups.subRegion || [],
-        branch: groups.branch || [],
         retailSegment: groups.retailSegment || [],
         outlet: groups.outlet || [],
+        branch: groups.branch || [],
     };
 
     res.status(200).send(response);

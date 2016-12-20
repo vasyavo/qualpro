@@ -3,9 +3,13 @@ const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    consumerSurveyId: {
+    surveyId: {
         type: ObjectId,
         ref: CONTENT_TYPES.CONSUMER_SURVEY,
+        require: true
+    },
+    questionId: {
+        type: ObjectId,
         require: true
     },
     personnelId: {
@@ -13,9 +17,22 @@ const schema = new Schema({
         ref: CONTENT_TYPES.PERSONNEL,
         require: true
     },
-    questionId: {
-        type: ObjectId,
-        require: true
+    customer: {
+        type: {
+            name: {
+                type: String,
+                required: true,
+            },
+            nationality: {
+                type: String,
+                required: true,
+            },
+            gender: {
+                type: String,
+                required: true,
+            },
+        },
+        required: true
     },
     country: {
         type: ObjectId,
@@ -47,7 +64,9 @@ const schema = new Schema({
         ref: CONTENT_TYPES.BRANCH,
         default: null
     },
-    optionIndex: [{ type: Number }],
+    optionIndex: [{
+        type: Number
+    }],
     text: {
         en: {
             type: String
@@ -78,6 +97,9 @@ const schema = new Schema({
             default: Date.now
         }
     }
-}, { collection: CONTENT_TYPES.QUESTIONNARIES_ANSWER });
+}, {
+    autoIndex: false,
+    collection: CONTENT_TYPES.CONSUMER_SURVEY_ANSWER
+});
 
 module.exports = schema;

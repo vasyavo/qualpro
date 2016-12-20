@@ -7,6 +7,16 @@ const request = require('supertest-as-promised');
 const server = require('./../../../server');
 const faker = require('faker');
 
+const {
+    domainCountrySample,
+    domainRegionSample,
+    domainSubRegionSample,
+    retailSegmentSample,
+    outletSample,
+    branchSample,
+    surveySample
+} = require('./mockData');
+
 const DomainModel = require('./../../../types/domain/model');
 const RetailSegmentModel = require('./../../../types/retailSegment/model');
 const OutletModel = require('./../../../types/outlet/model');
@@ -15,73 +25,6 @@ const BranchModel = require('./../../../types/branch/model');
 const Authenticator = require('./../../../authenticator');
 
 describe('post', () => {
-    const domainCountrySample = {
-        _id: `${ObjectId()}`,
-        name: {
-            en: 'UNITED ARAB EMIRATES',
-        },
-        type: 'country',
-    };
-    const domainRegionSample = {
-        _id: `${ObjectId()}`,
-        name: {
-            en: 'DUBAI',
-        },
-        type: 'region',
-        parent: domainCountrySample._id,
-    };
-    const domainSubRegionSample = {
-        _id: `${ObjectId()}`,
-        name: {
-            en: 'DUBAI',
-        },
-        type: 'subRegion',
-        parent: domainRegionSample._id,
-    };
-    const retailSegmentSample = {
-        _id: `${ObjectId()}`,
-        name: {
-            en: 'Segment C',
-        },
-        subRegions: [domainSubRegionSample._id],
-    };
-    const outletSample = {
-        _id: `${ObjectId()}`,
-        name: {
-            en: 'Kefir',
-        },
-        subRegions: [domainSubRegionSample._id],
-        retailSegments: [retailSegmentSample._id],
-    };
-    const branchSample = {
-        _id: `${ObjectId()}`,
-        name: {
-            en: 'Kefir',
-        },
-        address: {
-            en: 'Uzhhorod, Svobody Ave 40'
-        },
-        subRegion: domainSubRegionSample._id,
-        retailSegment: retailSegmentSample._id,
-        outlet: outletSample._id,
-    };
-    const surveySample = {
-        title: {
-            en: 'test survey',
-        },
-        dueDate: Date.now(),
-        status: 'draft',
-        location: {
-            en: `${domainCountrySample.name.en} > ${domainRegionSample.name.en} > ${domainSubRegionSample.name.en}`,
-        },
-        country: [domainCountrySample._id],
-        region: [domainRegionSample._id],
-        subRegion: [domainSubRegionSample._id],
-        retailSegment: [retailSegmentSample._id],
-        outlet: [outletSample._id],
-        branch: [branchSample._id],
-    };
-
     before(function * () {
         yield Promise.each([
             domainCountrySample,
