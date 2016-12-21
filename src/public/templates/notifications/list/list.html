@@ -36,11 +36,13 @@
                     <div class="bannerMin">
                         <div class="bannerMd fileThumbnailItem brandItem masonryThumbnail">
                             <div class="thumbnail_js thumbnailBody">
-                                <!--insert image here-->
                                 <% model.attachments.map((attachment) => { %>
-                                    <img src="<%- attachment.preview %>">
+                                <div class="filetype-<%- attachment.name.split('.').pop() %> floatLeft">
+                                    <% if(attachment.name.split('.').pop() == 'png' || attachment.name.split('.').pop() == 'jpg') { %>
+                                    <img class="" src="<%- attachment.url %>"/>
+                                    <% } %>
+                                </div>
                                 <% }); %>
-                                <!--insert image here-->
                             </div>
                         </div>
                     </div>
