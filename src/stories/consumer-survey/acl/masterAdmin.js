@@ -5,6 +5,7 @@ module.exports = {
     cms: {
         write: true,
         edit: true,
+        read : true
     },
     mobile: {
         read: true,

@@ -12,7 +12,7 @@ define([
     'use strict';
 
     var View = paginator.extend({
-        contentType: CONTENT_TYPES.CONSUMERS_SURVEY,
+        contentType: CONTENT_TYPES.CONSUMER_SURVEY,
         viewType   : 'list',
         CreateView : CreateView,
 
