@@ -117,6 +117,9 @@ allowedParams[CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS] = {
     },
     9: {
         create: ['brandingAndDisplay', 'branch', 'commentText']
+    },
+    10: {
+        create: ['brandingAndDisplay', 'branch', 'commentText']
     }
 };
 
@@ -150,6 +153,9 @@ allowedParams[CONTENT_TYPES.SHELFSHARES] = {
     },
     9: {
         create: []
+    },
+    10: {
+        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
     }
 };
 
@@ -764,6 +770,10 @@ allowedParams[CONTENT_TYPES.VISIBILITYFORM] = {
     9: {
         create: ['objective', 'description'],
         update: ['description', 'before', 'isNewFile']
+    },
+    10: {
+        create: ['objective', 'description'],
+        update: ['description', 'before', 'isNewFile']
     }
 };
 
@@ -1172,6 +1182,10 @@ allowedParams[CONTENT_TYPES.COMPETITORBRANDING] = {
     9: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
         update: []
+    },
+    10: {
+        create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
+        update: []
     }
 };
 
@@ -1213,6 +1227,10 @@ allowedParams[CONTENT_TYPES.COMPETITORPROMOTION] = {
         update: []
     },
     9: {
+        create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
+        update: []
+    },
+    10: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
         update: []
     }
@@ -1301,6 +1319,10 @@ allowedParams[CONTENT_TYPES.NEWPRODUCTLAUNCH] = {
     9: {
         create: ['additionalComment', 'category', 'packingType', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
         update: []
+    },
+    10: {
+        create: ['additionalComment', 'category', 'packingType', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
+        update: []
     }
 };
 
@@ -1381,6 +1403,10 @@ allowedParams[CONTENT_TYPES.PRICESURVEY] = {
         update: []
     },
     8: {
+        create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
+        update: []
+    },
+    10: {
         create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
         update: []
     }
@@ -1554,6 +1580,9 @@ allowedParams[CONTENT_TYPES.QUESTIONNARIES] = {
     },
     9: {
         create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    10: {
         update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
     }
 };

@@ -146,10 +146,10 @@ module.exports = [
             read   : false
         },
         mobile: {
-            archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
         }
     },
     {
@@ -472,7 +472,7 @@ module.exports = [
         mobile: {
             archive: false,
             edit   : false,
-            write  : false,
+            write  : true,
             read   : false
         }
     },
@@ -532,7 +532,7 @@ module.exports = [
         mobile: {
             archive: false,
             edit   : false,
-            write  : false,
+            write  : true,
             read   : true
         }
     },
