@@ -933,15 +933,25 @@ var Objectives = function (db, redis, event) {
                     if (err) {
                         return waterFallCb(err);
                     }
+
                     if (lodash.includes([
                             OBJECTIVE_STATUSES.FAIL,
                             OBJECTIVE_STATUSES.CLOSED
                         ], model.status)) {
-                        let error = new Error(`You could not update task with status: "${model.status}"`);
+
+                        const error = new Error(`You could not update task with status: "${model.status}"`);
                         error.status = 400;
 
                         return waterFallCb(error);
                     }
+
+                    if (model.status === OBJECTIVE_STATUSES.OVER_DUE && model.createdBy.user.toString() !== userId) {
+                        const error = new Error(`You could not update task with status: "${model.status}"`);
+                        error.status = 400;
+
+                        return waterFallCb(error);
+                    }
+
                     ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
                         if (err) {
                             return waterFallCb(err);

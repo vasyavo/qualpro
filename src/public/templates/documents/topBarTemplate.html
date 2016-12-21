@@ -17,12 +17,15 @@
            id="archived"><%=translation.archive %>
         </a>
     </div>
+
+    <% if (App.currentUser.workAccess){ %>
     <span id="createFolder" class="createBtn" data-translation="newDocument">New Folder</span> <!-- new folder button -->
     <span id="createBtn" class="createBtn" data-translation="newDocument"><%=translation.newDocument %></span>
     <div class="checkboxArea">
         <input type="checkbox" id="checkAll" class="btnCustomCheckbox"/>
         <label for="checkAll" class="btnCheckboxLabel" data-translation="selectAll"><%=translation.selectAll %></label>
     </div>
+
     <div id="actionHolder" class="actionHolder actionBtn hidden">
         <span class="dropDown downArrow triUp" data-translation="action"><%=translation.action%></span>
         <ul class="dropDownContent">
@@ -30,6 +33,7 @@
             <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn" data-translation="unDisable"><%=translation.unDisable%></li>
         </ul>
     </div>
+    <%}%>
     <div id="paginationHolder" class="paginationHolder">
     </div>
 </div>

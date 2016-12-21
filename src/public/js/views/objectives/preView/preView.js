@@ -748,14 +748,18 @@ define([
             var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
                 || (statusId === STATUSES.COMPLETED && !createdByMe)
                 || (statusId === STATUSES.CLOSED)
-                || (statusId === STATUSES.OVER_DUE && !createdByMe);
+                || (statusId === STATUSES.FAIL)
+                || (statusId === STATUSES.OVER_DUE && !createdByMe)
+                || this.activityList
+                || jsonModel.myCC
+                || !App.currentUser.workAccess;
 
             var objectiveStatuses = objectivesStatusHelper(jsonModel);
             var statusDisplayModel = _.findWhere(objectiveStatuses, {_id: statusId});
 
             var statusToRemove;
 
-            if (condition || jsonModel.myCC) {
+            if (condition) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {
@@ -763,7 +767,6 @@ define([
                         statusToRemove = STATUSES.COMPLETED;
                     } else {
                         statusToRemove = STATUSES.FAIL;
-
                     }
 
                     objectiveStatuses = _.filter(objectiveStatuses, function (element) {
@@ -868,7 +871,7 @@ define([
                             return;
                         }
 
-                        if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED) {
+                        if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
                             if (!(individualObjective && config.elementId === 'viewSubObjective')) {
                                 require([config.template], function (template) {
                                     var container = self.$el.find(config.selector);

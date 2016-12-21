@@ -26,7 +26,7 @@ define([
         attachments  : 'Attachments',
         comment      : 'Comment',
         origin       : 'Origin',
-        packing      : 'Packing',
+        packing      : 'Weight',
         price        : 'RSP',
         displayType  : 'Display type',
         distributor  : 'Distributor',

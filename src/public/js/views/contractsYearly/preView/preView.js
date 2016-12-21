@@ -153,7 +153,7 @@ define([
                 }
             });
 
-            if (((level <= 2) || (level >= 8)) && jsonModel.status._id !== 'expired') {
+            if (((level <= 2) || (level >= 8)) && jsonModel.status._id !== 'expired' && App.currentUser.workAccess) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template

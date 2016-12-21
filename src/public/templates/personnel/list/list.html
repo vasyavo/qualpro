@@ -2,7 +2,7 @@
 <% var level = App.currentUser.accessRole.level; %>
 <% personnelCollection.forEach(function(personnel, index){ %>
 <tr data-id="<%=personnel._id%>" class="listRow">
-    <% if ((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes) { %>
+    <% if (((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes) && App.currentUser.workAccess) { %>
     <td class="checkboxArea alignCenter">
         <input type="checkbox" id="<%=personnel._id%>" value="<%=personnel._id%>" class="customCheckbox"/>
         <label for="<%=personnel._id%>" class="checkboxLabel"></label>

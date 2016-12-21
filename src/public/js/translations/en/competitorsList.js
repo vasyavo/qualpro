@@ -15,7 +15,7 @@ define([
         origin           : 'Origin',
         all              : 'Competitor List',
         archive          : 'Archive',
-        packing          : 'Packing',
+        packing          : 'Weight',
         country          : 'Country',
         closeBtn         : 'Close',
         category         : 'Category',

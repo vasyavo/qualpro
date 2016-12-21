@@ -1,6 +1,11 @@
 <div class="domainDialog">
     <div class="title">
         <span data-filter-type="all" class="titleDescription">Add <%=contentType.capitalizer('firstCaps')%></span>
+        <span class="searchInputWrap">
+            <input type="text" data-translation="search" placeholder="Search" id="searchInputpersonnel" class="searchInput" value="" required="">
+
+            <label for="searchInputpersonnel"></label>
+        </span>
         <% if (multiselect) { %>
         <div class="checkboxArea">
             <input type="checkbox" id="checkAll" class="btnCustomCheckbox" <%= selected.length === itemsCount || itemsCount === 1 ? 'checked' : '' %>/>

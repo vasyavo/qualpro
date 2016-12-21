@@ -582,8 +582,60 @@ a {
 .plusIcon:before,
 .sortArrows:before,
 .question:before,
-.logOut:after {
+.logOut:after,
+.filetype-csv:after,
+.filetype-xlsx:after,
+.filetype-doc:after,
+.filetype-docx:after,
+.filetype-pdf:after,
+.filetype-mp3:after,
+.filetype-mp4:after,
+.filetype-ppt:after,
+.filetype-xml:after,
+.filetype-xls:after,
+.filetype-m4v:after,
+.filetype-m4a:after,
+.filetype-pptx:after {
   font-family: 'icomoon';
+}
+.filetype-csv:after {
+  content: '\e94b';
+}
+.filetype-xlsx:after {
+  content: '\e941'
+}
+.filetype-doc:after {
+  content: '\e940'
+}
+.filetype-docx:after {
+  content: '\e94a'
+}
+.filetype-pdf:after {
+  content: '\e942'
+}
+.filetype-mp3:after {
+  content: '\e949'
+}
+.filetype-mp4:after {
+  content: '\e94c'
+}
+.filetype-ppt:after {
+  content: '\e946'
+}
+.filetype-pptx:after {
+  content: '\e94f'
+}
+.filetype-xml:after {
+  content: '\e94e'
+}
+.filetype-xls:after {
+  content: '\e94d'
+}
+.filetype-m4v:after {
+  content: '\e947'
+}
+.filetype-m4a:after {
+  content: '\e948'
 }
 .bubbleMassage:after {
   content: '\e900';
@@ -799,10 +851,10 @@ a {
   content: '\e945';
 }
 .question:after {
-  content: '\ea09';
+  content: '\e951';
 }
 .logOut:after {
-  content: '\e946';
+  content: '\e950';
 }
 .contactUs:after {
   display: block;
@@ -1868,6 +1920,12 @@ input:invalid {
   font-weight: normal;
   font-size: 16px;
   font-size: 1rem;
+}
+label[for=searchInputcountry]:after,
+label[for=searchInputoutlet]:after,
+label[for=searchInputretailSegment]:after {
+  top: 0!important;
+  line-height: 2.4!important;
 }
 .filterName input {
   height: 40px;
@@ -3993,6 +4051,28 @@ a.disabled {
 }
 .createPlanogramForm .table {
   margin-left: 15px;
+}
+.configurations-input {
+  text-align: left;
+}
+.configurations-input input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.configurations-input input{
+  text-align: center;
+  margin-right: 5px;
+  margin-top: 0!important;
+  width: 28px!important;
+  padding:0 3px!important;
+  clear: none!important;
+  display: inline!important;
+  float: none!important;
+}
+.configurations-input input:read-only {
+  padding: 0;
+  margin: 0;
 }
 .thumbnailsHolder {
   position: absolute;
@@ -10840,9 +10920,26 @@ canvas::selection,
 .video_icon,
 .word_icon,
 .excel_icon,
-.pdf_icon {
+.pdf_icon,
+.filetype-csv,
+.filetype-xlsx,
+.filetype-doc,
+.filetype-docx,
+.filetype-pdf,
+.filetype-mp3,
+.filetype-mp4,
+.filetype-ppt,
+.filetype-xml,
+.filetype-xls,
+.filetype-ppt,
+.filetype-m4v,
+.filetype-m4a,
+.filetype-pptx {
   font-size: 48px;
   text-align: center;
+}
+.filetype-png, .filetype-jpg {
+  margin: 0 5px;
 }
 .topBarHolder .viewBar .createBtn:active,
 .ui-dialog-buttonpane .ui-dialog-buttonset .acceptBtn:active,
@@ -11129,7 +11226,16 @@ span.currency {
   -webkit-justify-content: center;
   justify-content: center;
 }
-
+.domainDialog .searchInputWrap{
+  float: right;
+  margin-right: 15px;
+}
+.domainDialog .searchInputWrap input {
+  width: 200px;
+}
+.domainDialog .searchInputWrap label:after {
+  line-height: 3;
+}
 
 
 

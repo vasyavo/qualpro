@@ -127,8 +127,16 @@ module.exports = function() {
             return callback(error);
         }
 
-        for (let key in files) {
-            series.push(files[key]);
+        // if files contains 1 file it will be an object
+        // if files contains 2 files it will be an array of object which are files
+        if (Array.isArray(files.files)) {
+            files.files.forEach((item) => {
+                series.push(item);
+            });
+        } else {
+            for (let key in files) {
+                series.push(files[key]);
+            }
         }
 
         async.eachSeries(series, (file, eachCb) => {

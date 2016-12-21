@@ -107,7 +107,6 @@ define(['Backbone',
             var pass = thisEl.find('#pass').val();
             var checkedEl = thisEl.find('#myonoffswitch');
             var checked = checkedEl.prop('checked');
-            debugger;
             var data = {
                 login     : login.trim(),
                 pass      : pass,
