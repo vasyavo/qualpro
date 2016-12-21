@@ -1538,6 +1538,10 @@ allowedParams[CONTENT_TYPES.DOCUMENTS] = {
     9: {
         create: ['title', 'archived', 'attachments'],
         update: ['title', 'archived']
+    },
+    10: {
+        create: ['title', 'archived', 'attachments'],
+        update: ['title', 'archived']
     }
 };
 

@@ -49,7 +49,7 @@ function startOfYear() {
 const create = Joi.object().keys({
     createdBy : Joi.objectId().required(),
     branch : Joi.objectId().required(),
-    displayType : Joi.array().items(Joi.number().integer()).min(1),
+    displayType : Joi.array().items(Joi.objectId()).min(1),
     outlet : Joi.objectId().required(),
     categories : Joi.array().items(Joi.objectId()),
     description : Joi.object().keys({
