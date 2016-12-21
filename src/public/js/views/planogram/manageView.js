@@ -166,7 +166,7 @@ define([
             var cmInput = $inputs[1].value;
             var rowInput = $inputs[2].value;
 
-            configuration = cmInput + ' cm ' + rowInput + ' rows';
+            configuration = cmInput + ' cm ' + '* ' + rowInput + ' rows';
 
             if (isNaN(cmInput) ||
                 isNaN(rowInput) ||

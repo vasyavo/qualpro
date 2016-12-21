@@ -5,8 +5,8 @@
         <label for="<%=item._id%>" class="checkboxLabel"></label>
     </td>
     <td class="configurations-input">
-        <input id="1" type="text" class="editable newRow" placeholder="__" readonly value="<%= item.configuration.split(' ')[0] %>"><label for="1"> cm</label> *
-        <input id="2" type="text" class="editable newRow" placeholder="__" readonly value="<%= item.configuration.split(' ')[2] %>"><label for="2"> rows</label>
+        <input id="cm" type="text" class="editable newRow" placeholder="__" readonly value="<%= parseInt(item.configuration.split('*')[0]) %>" maxlength="3"><label for="cm"> cm</label> *
+        <input id="rows" type="text" class="editable newRow" placeholder="__" readonly value="<%= parseInt(item.configuration.split('*')[1]) %>" maxlength="2"><label for="rows"> rows</label>
     </td>
 </tr>
 <% }) %>
