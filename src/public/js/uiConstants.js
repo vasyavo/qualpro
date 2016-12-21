@@ -40,6 +40,7 @@
         VISIBILITYFORM        : 'visibilityForm',
         CONFIGURATIONS        : 'configurations',
         CONTACT_US            : 'contactUs',
+        DISPLAY_TYPE          : 'displayType',
 
 
         PRICESURVEY                  : 'priceSurvey',

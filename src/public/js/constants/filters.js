@@ -1334,11 +1334,16 @@
             displayName: {en: 'Configuration', ar: 'أبعاد واحجام التكوين'},
             filterType : 'multiSelect'
         });
+        planogramFilter[CONSTANTS.DISPLAY_TYPE] = getFilterConstant({
+            displayName: {en: 'Display Type', ar: 'نوع العرض'},
+            filterType : 'multiSelect'
+        });
         planogramFilter.array = [
             CONSTANTS.COUNTRY,
             CONSTANTS.RETAILSEGMENT,
             'product',
-            CONSTANTS.CONFIGURATIONS
+            CONSTANTS.CONFIGURATIONS,
+            CONSTANTS.DISPLAY_TYPE
         ];
 
         itemsPricesFilter[CONSTANTS.CATEGORY] = getFilterConstant({

@@ -38,6 +38,7 @@ const Filters = function(db, redis) {
         origin : 1,
         country : 1,
         retailSegment : 1,
+        displayType : 1,
         region : 1,
         subRegion : 1,
         outlet : 1,
@@ -2512,7 +2513,11 @@ const Filters = function(db, redis) {
                 product : 1,
                 configuration : {
                     name : {en : '$configuration.name'},
-                    _id : 1
+                    _id  : 1
+                },
+                displayType : {
+                    _id : {$ifNull: ['$displayType._id', '']},
+                    name: '$displayType.name'
                 }
             }
         });
@@ -2523,7 +2528,24 @@ const Filters = function(db, redis) {
                 country : {$addToSet : '$country'},
                 retailSegment : {$addToSet : '$retailSegment'},
                 product : {$addToSet : '$product'},
-                configuration : {$push : '$configuration'}
+                configuration : {$push : '$configuration'},
+                displayType : {$addToSet : '$displayType'}
+            }
+        });
+
+        pipeLine.push({
+            $project : {
+                country : 1,
+                retailSegment : 1,
+                product : 1,
+                configuration : 1,
+                displayType : {
+                    $filter : {
+                        input: '$displayType',
+                        as: "el",
+                        cond: {$and: [{$ne: ['$$el._id', null]}, {$ne: ['$$el._id', '']}]}
+                    }
+                }
             }
         });
 
@@ -2544,8 +2566,17 @@ const Filters = function(db, redis) {
                 country : result.country || [],
                 retailSegment : result.retailSegment || [],
                 product : result.product || [],
-                configuration : result.configuration || []
+                configuration : result.configuration || [],
+                displayType : result.displayType || []
             };
+
+            result.displayType.push({
+                _id : 'other',
+                name: {
+                    en : 'Other',
+                    ar : ' '//todo add translation
+                }
+            });
 
             redisFilters({
                 currentSelected : currentSelected,

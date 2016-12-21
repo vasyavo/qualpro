@@ -898,44 +898,44 @@ allowedParams[CONTENT_TYPES.OUTLET] = {
 
 allowedParams[CONTENT_TYPES.PLANOGRAM] = {
     0: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     1: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     2: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     3: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     4: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     5: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     6: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     7: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     8: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     },
     9: {
-        create: ['country', 'retailSegment', 'product', 'configuration', 'photo'],
-        update: ['country', 'retailSegment', 'product', 'configuration', 'photo']
+        create: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType'],
+        update: ['country', 'retailSegment', 'product', 'configuration', 'photo', 'displayType']
     }
 };
 

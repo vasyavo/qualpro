@@ -5,11 +5,22 @@
         CANVAS_SIZE     : 135,
         DEFAULT_PER_PAGE: 25,
 
-        DISPLAY_TYPE_DD: [
-            {_id: 'gondola', name: 'Gondola', sortKey: 0},
-            {_id: 'floorStand', name: 'Floor stand', sortKey: 1},
-            {_id: 'metalStand', name: 'Metal stand', sortKey: 2}
-        ],
+        DISPLAY_TYPE_DD: {
+            en : [
+                {_id: 'floorDisplay', name: 'Floor Display', sortKey: 0},
+                {_id: 'gondola', name: 'Gondola', sortKey: 1},
+                {_id: 'thematicStand ', name: 'Thematic Stand', sortKey: 2},
+                {_id: 'shelf', name: 'Shelf', sortKey: 3},
+                {_id: 'other', name: 'Other', sortKey: 4}
+            ],
+            ar : [
+                {_id: 'floorDisplay', name: 'ساحة عرض أرضية', sortKey: 0},
+                {_id: 'gondola', name: 'جندولة', sortKey: 1},
+                {_id: 'thematicStand ', name:  'استاند خاص بحملة ترويج معينة', sortKey: 2},
+                {_id: 'shelf', name: 'رف', sortKey: 3},
+                {_id: 'other', name: ' ', sortKey: 4}
+            ]
+        },
 
         DISPLAY_TYPE: {
             GONDOLA   : 'gondola',

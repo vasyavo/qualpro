@@ -25,6 +25,7 @@
         CURRENCY : 'currency',
         DISTRIBUTIONLIST : 'distributionList',
         DOMAIN : 'domain',
+        DISPLAY_TYPE : 'displayType',
         ITEM : 'item',
         INSTORETASKS : 'inStoreTasks',
         NOTES : 'notes',
