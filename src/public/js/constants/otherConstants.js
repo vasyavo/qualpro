@@ -535,7 +535,7 @@
 
         overDue: [
             overDue,
-            completed,
+            fail,
             toBeDiscussed
         ],
 

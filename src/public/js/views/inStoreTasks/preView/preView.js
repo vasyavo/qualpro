@@ -574,14 +574,18 @@ define([
             var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
                 || (statusId === STATUSES.COMPLETED && !createdByMe)
                 || (statusId === STATUSES.CLOSED)
-                || (statusId === STATUSES.OVER_DUE && !createdByMe);
+                || (statusId === STATUSES.FAIL)
+                || (statusId === STATUSES.OVER_DUE && !createdByMe)
+                || this.activityList
+                || jsonModel.myCC
+                || !App.currentUser.workAccess;
 
             var objectiveStatuses = objectivesStatusHelper(jsonModel);
             var statusDisplayModel = _.findWhere(objectiveStatuses, {_id: statusId});
 
             var statusToRemove;
 
-            if (condition || this.activityList || jsonModel.myCC || !App.currentUser.workAccess) {
+            if (condition) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {

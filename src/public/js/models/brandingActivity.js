@@ -105,7 +105,9 @@ define([
             model.status.name.currentLanguage = model.status.name[currentLanguage];
             model.statusClass = status._id + 'Status';
 
-            model.displayTypeString = model.displayType ? model.displayType.name.currentLanguage : '';
+            model.displayTypeString = model.displayType.map(function (item) {
+                return item.name.currentLanguage;
+            }).join(', ');
             model.countryString = this.modelMapper('country', model);
             model.categoryString = this.modelMapper('category', model);
             model.regionString = this.modelMapper('region', model);

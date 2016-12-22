@@ -851,10 +851,10 @@ a {
   content: '\e945';
 }
 .question:after {
-  content: '\ea09';
+  content: '\e951';
 }
 .logOut:after {
-  content: '\e946';
+  content: '\e950';
 }
 .contactUs:after {
   display: block;
@@ -4051,6 +4051,28 @@ a.disabled {
 }
 .createPlanogramForm .table {
   margin-left: 15px;
+}
+.configurations-input {
+  text-align: left;
+}
+.configurations-input input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.configurations-input input{
+  text-align: center;
+  margin-right: 5px;
+  margin-top: 0!important;
+  width: 28px!important;
+  padding:0 3px!important;
+  clear: none!important;
+  display: inline!important;
+  float: none!important;
+}
+.configurations-input input:read-only {
+  padding: 0;
+  margin: 0;
 }
 .thumbnailsHolder {
   position: absolute;
@@ -10916,6 +10938,9 @@ canvas::selection,
   font-size: 48px;
   text-align: center;
 }
+.filetype-png, .filetype-jpg {
+  margin: 0 5px;
+}
 .topBarHolder .viewBar .createBtn:active,
 .ui-dialog-buttonpane .ui-dialog-buttonset .acceptBtn:active,
 .linkBtn:active,
@@ -11201,7 +11226,13 @@ span.currency {
   -webkit-justify-content: center;
   justify-content: center;
 }
-
-
-
-
+.domainDialog .searchInputWrap{
+  float: right;
+  margin-right: 15px;
+}
+.domainDialog .searchInputWrap input {
+  width: 200px;
+}
+.domainDialog .searchInputWrap label:after, label[for=brandSearch]:after {
+  line-height: 3;
+}

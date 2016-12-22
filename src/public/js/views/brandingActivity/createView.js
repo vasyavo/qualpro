@@ -555,7 +555,9 @@ define([
                     contentType: CONTENT_TYPES.DISPLAYTYPE,
                     displayText: this.translation.displayType,
                     collection : this.displayTypeCollection.toJSON(),
-                    forPosition: true
+                    forPosition: true,
+                    multiSelect : true,
+                    showSelectAll : true
                 });
             }, this);
 

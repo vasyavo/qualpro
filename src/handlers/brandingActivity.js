@@ -132,7 +132,7 @@ var BrandingActivity = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'displayTypes',
             key    : 'displayType',
-            isArray: false
+            isArray: true
 
         }));
 
@@ -377,6 +377,13 @@ var BrandingActivity = function (db, redis, event) {
                         ar: _.unescape(element.description.ar),
                         en: _.unescape(element.description.en)
                     };
+
+                    if (isMobile) {
+                        if (element.displayType && element.displayType.length) {
+                            element.displayType = element.displayType[0];
+                        }
+                    }
+
                     personnelIds.push(element.createdBy.user._id);
                     fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
 
@@ -567,7 +574,7 @@ var BrandingActivity = function (db, redis, event) {
             var saveBrandingAndDisplay = body.save;
             var functions;
 
-            var keys = ['branch', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'category'];
+            var keys = ['branch', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'category', 'displayType'];
             keys.forEach(function (key) {
                 if (typeof body[key] === 'string') {
                     body[key] = body[key].split(',');
@@ -922,7 +929,7 @@ var BrandingActivity = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'displayTypes',
             key    : 'displayType',
-            isArray: false
+            isArray: true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -1029,6 +1036,12 @@ var BrandingActivity = function (db, redis, event) {
 
             if (!keys.length) {
                 return callback(null, response);
+            }
+
+            if (isMobile) {
+                if (response.displayType && response.displayType.length) {
+                    response.displayType = response.displayType[0];
+                }
             }
 
             personnelIds.push(response.createdBy.user._id);
