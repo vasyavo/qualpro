@@ -7,18 +7,18 @@
 
         DISPLAY_TYPE_DD: {
             en : [
-                {_id: 'floorDisplay', name: 'Floor Display', sortKey: 0},
-                {_id: 'gondola', name: 'Gondola', sortKey: 1},
-                {_id: 'thematicStand ', name: 'Thematic Stand', sortKey: 2},
-                {_id: 'shelf', name: 'Shelf', sortKey: 3},
-                {_id: 'other', name: 'Other', sortKey: 4}
+                {_id: 'floorDisplayId', name: 'Floor Display', sortKey: 0},
+                {_id: 'gondolaId', name: 'Gondola', sortKey: 1},
+                {_id: 'thematicStandId ', name: 'Thematic Stand', sortKey: 2},
+                {_id: 'shelfId', name: 'Shelf', sortKey: 3},
+                {_id: 'otherId', name: 'Other', sortKey: 4}
             ],
             ar : [
-                {_id: 'floorDisplay', name: 'ساحة عرض أرضية', sortKey: 0},
-                {_id: 'gondola', name: 'جندولة', sortKey: 1},
-                {_id: 'thematicStand ', name:  'استاند خاص بحملة ترويج معينة', sortKey: 2},
-                {_id: 'shelf', name: 'رف', sortKey: 3},
-                {_id: 'other', name: ' ', sortKey: 4}
+                {_id: 'floorDisplayId', name: 'ساحة عرض أرضية', sortKey: 0},
+                {_id: 'gondolaId', name: 'جندولة', sortKey: 1},
+                {_id: 'thematicStandId', name:  'استاند خاص بحملة ترويج معينة', sortKey: 2},
+                {_id: 'shelfId', name: 'رف', sortKey: 3},
+                {_id: 'otherId', name: ' ', sortKey: 4}
             ]
         },
 

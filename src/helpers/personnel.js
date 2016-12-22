@@ -24,14 +24,6 @@ var PersonnelHelper = function (db, redis, app) {
             var socketArray = [];
             var localSocketArray = [];
 
-            if (options.userOnLeave){
-                pushes.sendPushes(options.userOnLeave, 'on leave', {}, function (err, respond) {
-                    if (err) {
-                        logWriter.log('personnel on leave', err);
-                    }
-                });
-            } // notifications for mobile
-
             sockets.forEach(function (socket) {
                 localSocketArray.push({
                     socketId: socket
@@ -62,6 +54,15 @@ var PersonnelHelper = function (db, redis, app) {
         }
         if (options.userOnLeave) {
             message = 'logOut';
+
+            pushes.sendPushes(options.userOnLeave, 'newActivity', {
+                status : 403
+            }, function (err) {
+                if (err) {
+                    logWriter.log('personnel on leave', err);
+                }
+            }); // notifications for mobile
+
             async.waterfall([async.apply(getSocketsByUserId, options.userOnLeave), createMySocket, async.apply(emitMessageToSocket, message)], function (err, result) {
                 if (err) {
                     return logWriter.log('personnel on leave', err);

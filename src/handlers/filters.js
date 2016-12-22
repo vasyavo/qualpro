@@ -2571,7 +2571,7 @@ const Filters = function(db, redis) {
             };
 
             result.displayType.push({
-                _id : 'other',
+                _id : 'otherId',
                 name: {
                     en : 'Other',
                     ar : ' '//todo add translation
