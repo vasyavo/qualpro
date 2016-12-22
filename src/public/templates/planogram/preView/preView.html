@@ -66,6 +66,17 @@
                             <span id="configuration" class="textEllipsis hoverFullText descriptionViewContent"><%= model.configuration ? model.configuration.name : '' %></span>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="cell">
+                            <label for="displayType" data-translation="displayType">
+                                <%= translation.displayType %>
+                            </label>
+                        </div>
+
+                        <div class="cell">
+                            <span id="displayType" class="textEllipsis hoverFullText descriptionViewContent"><%= model.displayType && model.displayType.name && model.displayType.name.currentLanguage || '' %></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

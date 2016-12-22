@@ -82,7 +82,7 @@ const access = () => {
                     return callback(null, true, personnel);
                 }
 
-                if (!access[accessType] || (personnel.accessRole && personnel.accessRole.level > 2 && personnel.vacation && personnel.vacation.onLeave  && accessType !== 'read')) {
+                if (!access[accessType] || (personnel.accessRole && personnel.accessRole.level > 2 && personnel.vacation && personnel.vacation.onLeave  && accessType !== 'read' && !isMobile)) {
                     const err = new Error();
 
                     err.status = 403;

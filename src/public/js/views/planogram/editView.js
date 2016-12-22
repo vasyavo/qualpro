@@ -8,6 +8,7 @@ define([
     'collections/retailSegment/collection',
     'collections/itemsPrices/collection',
     'collections/configurations/collection',
+    'collections/filter/filterCollection',
     'text!templates/planogram/edit.html',
     'views/baseDialog',
     'views/filter/dropDownView',
@@ -15,7 +16,7 @@ define([
     'common',
     'constants/contentType',
     'constants/errorMessages'
-], function ($, CONSTANTS, OTHER_CONSTANTS, CountryCollection, RetailSegmentCollection, ItemsPricesCollection, ConfigurationsCollection,
+], function ($, CONSTANTS, OTHER_CONSTANTS, CountryCollection, RetailSegmentCollection, ItemsPricesCollection, ConfigurationsCollection, filterCollection,
              template, BaseView, dropDownView, planogramModel, common, CONTENT_TYPES, ERROR_MESSAGES) {
 
     var EditView = BaseView.extend({
@@ -31,7 +32,8 @@ define([
         bodyChange              : null,
 
         events: {
-            'change #inputImg': 'changeImage'
+            'change #inputImg': 'changeImage',
+            'change .createOwn': 'setOwnValue'
         },
 
         initialize: function (options) {
@@ -105,6 +107,9 @@ define([
             if (this.selectedConfigurationId && this.selectedConfigurationId !== model.configuration._id) {
                 this.body.configuration = this.selectedConfigurationId;
             }
+            if (this.selectedDisplayType && this.selectedDisplayType._id !== (model.displayType && model.displayType._id)) {
+                this.body.displayType = this.selectedDisplayType;
+            }
             if (!Object.keys(this.body).length && !this.imgChange) {
                 return this.$el.dialog('close').dialog('destroy').remove();
             }
@@ -118,6 +123,25 @@ define([
                     self.$el.find('#editPlanogramForm').submit();
                 }
             });
+        },
+
+        setOwnValue : function (e){
+            var $target = $(e.target);
+            var type = $target.attr('data-property');
+            var value = $target.val();
+            var self = this;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (type === 'displayType' && value) {
+                this.selectedDisplayType = {
+                    name : {
+                        ar: value,
+                        en: value
+                    }};
+                self.displayTypeDropDownView.selectedValues = [this.selectedDisplayType.name];
+            }
         },
 
         submitForm: function (e) {
@@ -148,9 +172,10 @@ define([
             var self = this;
 
             self.selectedCountryId = modelJSON.country && modelJSON.country._id || null;
-            self.selectedRetailSegmentId = modelJSON.retailSegment && modelJSON.retailSegment || null;
+            self.selectedRetailSegmentId = modelJSON.retailSegment || null;
             self.selectedProductId = modelJSON.product && modelJSON.product._id || null;
-            self.selectedConfigurationId = modelJSON.configuration && modelJSON.configuration || null;
+            self.selectedConfigurationId = modelJSON.configuration || null;
+            self.selectedDisplayType = modelJSON.displayType && modelJSON.displayType || null;
 
             this.countryDropDownView = new dropDownView({
                 translation   : this.translation,
@@ -159,6 +184,41 @@ define([
                 displayText   : this.translation.country,
                 contentType   : CONTENT_TYPES.COUNTRY
             });
+
+            this.displayTypeCollection = new filterCollection();
+
+            if (modelJSON.displayType && !modelJSON.displayType._id){
+                modelJSON.displayType._id = 'other';
+            }
+
+            this.displayTypeDropDownView = new dropDownView({
+                translation : this.translation,
+                dropDownList: this.displayTypeCollection,
+                selectedValues : [modelJSON.displayType],
+                displayText : this.translation.displayType,
+                contentType : CONTENT_TYPES.DISPLAYTYPE
+            });
+
+            this.displayTypeCollection.reset(OTHER_CONSTANTS.DISPLAY_TYPE_DD[App.currentUser.currentLanguage]);
+            this.displayTypeDropDownView.on('changeItem', function (data) {
+                var modelId = data.model._id;
+                var input = data.$selector;
+
+                if (modelId === 'other'){
+                    input.addClass('createOwn');
+                    self.displayTypeDropDownView.selectedValues = [];
+                    input.focus();
+                } else {
+                    self.selectedDisplayType = {
+                        _id : modelId,
+                        name : {
+                            en : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id : modelId}).name,
+                            ar : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id : modelId}).name
+                        }
+                    };
+                }
+            });
+            $formString.find('#displayTypeSelect').append(this.displayTypeDropDownView.el);
 
             this.countryDropDownView.on('changeItem', function (data) {
                 var model = data.model;

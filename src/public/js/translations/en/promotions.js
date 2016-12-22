@@ -29,7 +29,7 @@ define([
         attachments        : 'Attachments',
         attachFiles        : 'Attach Files',
         inputBarcode       : 'Input barcode',
-        inputPacking       : 'Input packing',
+        inputPacking       : 'Input weight',
         inputPpt           : 'Input ppt',
         inputTotalQuantity : 'Input total quantity',
         description        : 'Description',

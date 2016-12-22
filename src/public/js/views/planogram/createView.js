@@ -13,11 +13,12 @@ define([
     'collections/retailSegment/collection',
     'collections/itemsPrices/collection',
     'collections/configurations/collection',
+    'collections/filter/filterCollection',
     'dataService',
     'constants/contentType',
     'constants/errorMessages'
 ], function (_, $, CONSTANTS, OTHER_CONSTANTS, common, CreateTemplate, Model, BaseView, DropDownView, PlanogramCollection,
-             CountryCollection, RetailSegmentCollection, ItemsPricesCollection, ConfigurationsCollection,
+             CountryCollection, RetailSegmentCollection, ItemsPricesCollection, ConfigurationsCollection, filterCollection,
              dataService, CONTENT_TYPES, ERROR_MESSAGES) {
 
     var manageView = BaseView.extend({
@@ -27,7 +28,8 @@ define([
         attachCount: 0,
 
         events: {
-            'change #inputImg': 'fileSelected'
+            'change #inputImg' : 'fileSelected',
+            'change .createOwn': 'setOwnValue'
         },
 
         initialize: function (options) {
@@ -52,6 +54,24 @@ define([
 
             this.makeRender();
             this.render();
+        },
+
+        setOwnValue : function (e){
+            var $target = $(e.target);
+            var type = $target.attr('data-property');
+            var value = $target.val();
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (type === 'displayType' && value) {
+                this.selectedDisplayType = {
+                    name : {
+                        ar: value,
+                        en: value
+                    }};
+                this.displayTypeDropDownView.selectedValues = [this.selectedDisplayType.name];
+            }
         },
 
         fileSelected: function (e) {
@@ -83,7 +103,8 @@ define([
                 country      : this.selectedCountryId,
                 retailSegment: this.selectedRetailSegmentId,
                 product      : this.selectedProductId,
-                configuration: this.selectedConfigurationId
+                configuration: this.selectedConfigurationId,
+                displayType  : this.selectedDisplayType
             };
             this.body.photo = this.attachCount;
 
@@ -122,6 +143,7 @@ define([
         selectItem: function (data) {
             var itemName = data.contentType;
             var itemId = (data.model) ? data.model._id : null;
+            var input = data.$selector;
 
             if (itemName === 'country') {
 
@@ -169,6 +191,20 @@ define([
                 this.selectedProductId = itemId;
             } else if (itemName === 'configuration') {
                 this.selectedConfigurationId = itemId;
+            } else if (itemName === 'displayType') {
+                if (itemId === 'other'){
+                    input.addClass('createOwn');
+                    this.displayTypeDropDownView.selectedValues = [];
+                    input.focus();
+                } else {
+                    this.selectedDisplayType = {
+                        _id : itemId,
+                        name : {
+                            en : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id : itemId}).name,
+                            ar : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id : itemId}).name
+                        }
+                    };
+                }
             }
         },
 
@@ -185,8 +221,22 @@ define([
                 contentType : CONTENT_TYPES.COUNTRY
             });
 
+            this.displayTypeCollection = new filterCollection();
+
+            this.displayTypeDropDownView = new DropDownView({
+                translation : this.translation,
+                dropDownList: this.displayTypeCollection,
+                displayText : this.translation.displayType,
+                contentType : CONTENT_TYPES.DISPLAYTYPE
+            });
+
+            this.displayTypeCollection.reset(OTHER_CONSTANTS.DISPLAY_TYPE_DD[App.currentUser.currentLanguage]);
+
             this.countryDropDownView.on('changeItem', this.selectItem, this);
             $formString.find('#countrySelect').append(this.countryDropDownView.el);
+
+            this.displayTypeDropDownView.on('changeItem', this.selectItem, this);
+            $formString.find('#displayTypeSelect').append(this.displayTypeDropDownView.el);
 
             this.retailSegmentDropDownView = new DropDownView({
                 translation : this.translation,

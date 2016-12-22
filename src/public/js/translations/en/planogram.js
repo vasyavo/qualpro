@@ -18,6 +18,7 @@ define([
         okBtn               : 'Ok',
         goToBtn             : 'Go to',
         editBtn             : 'Edit',
+        displayType         : 'Display Type',
 
         // list
         created: 'Created',

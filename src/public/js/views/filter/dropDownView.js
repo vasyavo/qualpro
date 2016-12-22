@@ -15,14 +15,14 @@ define([
         contentTemplate: _.template(dropDownContentTemplate),
 
         events: {
-            'click .dropDownInput>input' : 'inputClick',
-            'input .dropDownInput>input' : 'inputChange',
-            'blur .dropDownInput>input'  : 'inputBlur',
-            'click .downArrow'           : 'toggleDropDownContent',
-            'click .dropDownItem'        : 'itemClick',
-            'click .dropDownPagination a': 'paginationChange',
-            'click .counter'             : 'stopPropagation',
-            'click #select-all'          : 'selectAllValues'
+            'click .dropDownInput>input'                 : 'inputClick',
+            'input .dropDownInput>input:not(.createOwn)' : 'inputChange',
+            'blur .dropDownInput>input'                  : 'inputBlur',
+            'click .downArrow'                           : 'toggleDropDownContent',
+            'click .dropDownItem'                        : 'itemClick',
+            'click .dropDownPagination a'                : 'paginationChange',
+            'click .counter'                             : 'stopPropagation',
+            'click #select-all'                          : 'selectAllValues'
         },
 
         searchText       : '',
@@ -192,6 +192,9 @@ define([
                 $input.attr('data-auto', true);
             }
             $input.attr('data-id', selectedValuesIds.join(','));
+            if (selectedValuesIds[0] === 'other' && this.contentType === 'displayType'){
+                $input.addClass('createOwn');
+            }
         },
 
         setSelectedByIds: function (options) {
