@@ -23,11 +23,12 @@ define([
     'models/file',
     'helpers/implementShowHideArabicInputIn',
     'constants/otherConstants',
+    'constants/errorMessages',
     'moment',
     'dataService'
 ], function (Backbone, $, _, FileTemplate, FileDialogView, CONTENT_TYPES, CreateTemplate, BaseView, DropDownView, CountryModel, RegionModel,
              SubRegionModel, RetailSegmentModel, OutletModel, BranchModel, ParentModel, PersonnelModel, Model, populate,
-             notificationsCollection, FileCollection, FileModel, implementShowHideArabicInputIn, CONSTANTS, moment, dataService) {
+             notificationsCollection, FileCollection, FileModel, implementShowHideArabicInputIn, CONSTANTS, ERROR_MESSAGES, moment, dataService) {
     'use strict';
 
     var CreateView = BaseView.extend({
