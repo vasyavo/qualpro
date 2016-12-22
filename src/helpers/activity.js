@@ -588,7 +588,7 @@ var ActivityHelper = function (db, redis, app) {
                 addProjection    : ['archived']
             }));
 
-            pipeLine.push({
+           /* pipeLine.push({
                 $project: aggregateHelper.getProjection({
                     configuration: {
                         $filter: {
@@ -613,7 +613,7 @@ var ActivityHelper = function (db, redis, app) {
                         name: '$configuration.configuration'
                     }
                 })
-            });
+            });*/ //fixed bug with empty planogram activity name
         }
 
         if (options.itemType !== CONTENT_TYPES.PERSONNEL) {

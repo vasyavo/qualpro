@@ -192,7 +192,7 @@ define([
             } else if (itemName === 'configuration') {
                 this.selectedConfigurationId = itemId;
             } else if (itemName === 'displayType') {
-                if (itemId === 'other'){
+                if (itemId === 'otherId'){
                     input.addClass('createOwn');
                     this.displayTypeDropDownView.selectedValues = [];
                     input.focus();

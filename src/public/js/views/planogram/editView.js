@@ -188,7 +188,7 @@ define([
             this.displayTypeCollection = new filterCollection();
 
             if (modelJSON.displayType && !modelJSON.displayType._id){
-                modelJSON.displayType._id = 'other';
+                modelJSON.displayType._id = 'otherId';
             }
 
             this.displayTypeDropDownView = new dropDownView({
@@ -204,7 +204,7 @@ define([
                 var modelId = data.model._id;
                 var input = data.$selector;
 
-                if (modelId === 'other'){
+                if (modelId === 'otherId'){
                     input.addClass('createOwn');
                     self.displayTypeDropDownView.selectedValues = [];
                     input.focus();
