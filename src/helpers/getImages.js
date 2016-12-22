@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
 const async = require('async');
 const _ = require('lodash');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const mongo = require('./../utils/mongo');
 
-var GetImagesHelper = function() {
-    this.getImages = (options, cb) => {
+class ImageHelper {
+
+    getImages(options, cb) {
         const data = options.data;
         const modelNames = Object.keys(data);
         const models = {};
@@ -45,9 +45,9 @@ var GetImagesHelper = function() {
         }
 
         async.parallel(parallelTasks, cb);
-    };
+    }
 
-    this.setIntoResult = function (options, cb) {
+    setIntoResult(options, cb) {
         var response = options.response || [];
         var fields = options.fields;
         var result = options.imgsObject;
@@ -191,7 +191,24 @@ var GetImagesHelper = function() {
 
         // fixme incorrect error callback format, should be: return cb(null, data);
         return cb(resultToSend);
-    };
+    }
+
+    getImagesPromise(options) {
+        return new Promise((resolve) => {
+            this.getImages(options, (result) => {
+                resolve(result);
+            });
+        });
+    }
+
+    setIntoResultPromise(options) {
+        return new Promise((resolve) => {
+            this.setIntoResult(options, (result) => {
+                resolve(result);
+            });
+        });
+    }
+
 };
 
-module.exports = GetImagesHelper;
+module.exports = ImageHelper;
