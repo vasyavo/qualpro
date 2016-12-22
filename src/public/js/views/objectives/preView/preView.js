@@ -393,7 +393,7 @@ define([
                     translation: this.translation
                 });
             } else {
-                if ((modelJSON.assignedTo[0]._id === App.currentUser._id ||
+                if (App.currentUser.workAccess && (modelJSON.assignedTo[0]._id === App.currentUser._id ||
                     App.currentUser.covered && App.currentUser.covered[modelJSON.assignedTo[0]._id])
                     && (modelJSON.objectiveType === 'individual') && (modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.COMPLETED)) {
                     this.visibilityForm = new VisibilityEditView({

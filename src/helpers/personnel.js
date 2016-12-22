@@ -23,11 +23,14 @@ var PersonnelHelper = function (db, redis, app) {
         function createMySocket(sockets, callback) {
             var socketArray = [];
             var localSocketArray = [];
-            /*pushes.sendPushes(options.coveredUserId, 'newActivity', {}, function (err, respond) {
-                if (err) {
-                    logWriter.log('personnel on leave', err);
-                }
-            });*/
+
+            if (options.userOnLeave){
+                pushes.sendPushes(options.userOnLeave, 'on leave', {}, function (err, respond) {
+                    if (err) {
+                        logWriter.log('personnel on leave', err);
+                    }
+                });
+            } // notifications for mobile
 
             sockets.forEach(function (socket) {
                 localSocketArray.push({

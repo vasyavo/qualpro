@@ -64,6 +64,13 @@ const access = () => {
             });
         }
 
+        function isVacationAccessCMS (personnel) {
+            const vacation = personnel.vacation && personnel.vacation.onLeave;
+            const noMainAdmin = personnel.accessRole.level > 2;
+
+            return noMainAdmin && vacation && accessType !== 'read' && !isMobile;
+        }
+
         async.waterfall([
             findPersonnel,
             checkRole
@@ -82,7 +89,14 @@ const access = () => {
                     return callback(null, true, personnel);
                 }
 
-                if (!access[accessType] || (personnel.accessRole && personnel.accessRole.level > 2 && personnel.vacation && personnel.vacation.onLeave  && accessType !== 'read' && !isMobile)) {
+                if (!access[accessType]) {
+                    const err = new Error();
+
+                    err.status = 403;
+                    return callback(err);
+                }
+
+                if (personnel.accessRole && isVacationAccessCMS(personnel)){
                     const err = new Error();
 
                     err.status = 403;
