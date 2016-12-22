@@ -11233,9 +11233,6 @@ span.currency {
 .domainDialog .searchInputWrap input {
   width: 200px;
 }
-.domainDialog .searchInputWrap label:after {
+.domainDialog .searchInputWrap label:after, label[for=brandSearch]:after {
   line-height: 3;
 }
-
-
-
