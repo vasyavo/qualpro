@@ -7,7 +7,7 @@ define([
         // list
         productCategory: 'Product category',
         variant        : 'Variant',
-        packaging      : 'Packaging',
+        packaging      : 'Weight',
         location       : 'Location',
         fromTo         : 'From to',
         // preview
