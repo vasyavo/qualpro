@@ -136,7 +136,7 @@ module.exports = function(app, db, event) {
     app.use('/instoretasks', inStoreeTasksRouter);
     app.use('/planogram', planogramRouter);
     app.use('/questionnary', questionnaryRouter);
-    app.use('/consumer-survey', require('./../stories/consumer-survey/router'));
+    app.use('/consumersSurvey', require('./../stories/consumer-survey/router'));
     app.use('/shelfShares', shelfShareRouter);
     app.use('/docs/db', docsHandler.getDb);
     app.use('/position', positionRouter);

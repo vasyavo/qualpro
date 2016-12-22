@@ -14,7 +14,7 @@ define([
         ],
 
         urlRoot: function () {
-            return CONTENT_TYPES.CONSUMERS_SURVEY;
+            return CONTENT_TYPES.CONSUMER_SURVEY;
         },
 
         validate: function (attrs, cb) {

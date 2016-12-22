@@ -85,7 +85,7 @@ define([
         },
 
         checkBoxClick: function (e) {
-            var $checkbox = this.$el.find('#questionTable input[type="checkbox"]:checked');
+            var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked');
 
             this.showHideButtons({
                 add   : true,
@@ -130,15 +130,13 @@ define([
                 multiSelect : false,
                 notRender   : true
             };
-            var inputView;
-
 
             if (e) {
                 e.preventDefault();
             }
 
             this.someIdForCheckBox++;
-            $curEl.find('#questionTable').append(this.createConsumersSurveyViewTemplate({
+            $curEl.find('#consumersSurveyTable').append(this.createConsumersSurveyViewTemplate({
                 question         : question || {},
                 someIdForCheckBox: this.someIdForCheckBox,
                 translation      : this.translation
@@ -188,7 +186,7 @@ define([
         },
 
         deleteConsumersSurvey: function (e) {
-            var $checkbox = this.$el.find('#questionTable input[type="checkbox"]:checked').closest('.js_question');
+            var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked').closest('.js_question');
 
             $checkbox.remove();
 
@@ -215,7 +213,7 @@ define([
             keys.forEach(function (key) {
                 cssDisplay = inputOptions[key] ? 'inline-block' : 'none';
 
-                $btn = $btnHolder.find('#' + key + 'Question');
+                $btn = $btnHolder.find('#' + key + 'ConsumersSurvey');
                 $btn.css({display: cssDisplay});
             });
         },
@@ -254,8 +252,8 @@ define([
 
         saveQuestionnary: function (options, cb) {
             var $curEl = this.$el;
-            var $questionTable = $curEl.find('#questionTable');
-            var $questionsRows = $questionTable.find('.js_question');
+            var $consumersSurveyTable = $curEl.find('#consumersSurveyTable');
+            var $questionsRows = $consumersSurveyTable.find('.js_question');
             var self = this;
             var newTitle = {
                 en: $curEl.find('#questionnaryTitleEn').val() || '',

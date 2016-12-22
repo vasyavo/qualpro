@@ -23,7 +23,7 @@ define([
              Model, QuestionModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
              BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG) {
     var preView = BaseView.extend({
-        contentType: CONTENT_TYPES.CONSUMERS_SURVEY,
+        contentType: CONTENT_TYPES.CONSUMER_SURVEY,
 
         template                    : _.template(PreViewTemplate),
         questionListTemplate        : _.template(QuestionListTemplate),
