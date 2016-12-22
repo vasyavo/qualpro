@@ -88,7 +88,7 @@ module.exports = function (db, app, redis, event) {
     router.use('/contractsYearly', contractsYearlyRouter);
     router.use('/contractsSecondary', contractsSecondaryRouter);
     router.use('/questionnary', questionnaryRouter);
-    router.use('/consumer-survey', require('./../stories/consumer-survey/router'));
+    router.use('/consumersSurvey', require('../stories/consumersSurvey/router'));
     router.use('/position', positionRouter);
     router.use('/origin', originRouter);
     router.use('/contactUs', contactUsRouter);

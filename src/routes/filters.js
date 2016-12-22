@@ -54,6 +54,8 @@ module.exports = function(db, app, redis) {
     router.get('/personnelTasks', handler.personnelTasks);
     router.get('/createQuestionnary', handler.createQuestionnary);
     router.get('/questionnary', handler.questionnary);
+    router.get('/consumersSurvey', require('../stories/consumersSurvey/routes/filters'));
+    router.get('/createConsumersSurvey', require('../stories/consumersSurvey/routes/createFilters'));
     router.get('/competitorBranding', handler.competitorBrandingFilters);
     router.get('/competitorPromotion', handler.competitorPromotionFilters);
     router.get('/promotions', handler.promotionFilters);

@@ -96,8 +96,9 @@
         QUESTIONNARIES : 'questionnary',
         QUESTIONNARIES_ANSWER : 'questionnaryAnswer',
         CREATEQUESTIONNARIES : 'createQuestionnary',
+        CREATE_CONSUMER_SURVEY : 'createConsumersSurvey',
         CONSUMER_SURVEY : 'consumersSurvey',
-        CONSUMER_SURVEY_ANSWER : 'consumerSurveyAnswer',
+        CONSUMER_SURVEY_ANSWER : 'consumersSurveyAnswers',
         DISPLAY_NAMES : {
             COUNTRY : 'Country',
             REGION : 'Region',

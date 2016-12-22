@@ -54,7 +54,7 @@ models[CONTENT_TYPES.SHELFSHARES] = require('./shelfShare/model');
 models[CONTENT_TYPES.VARIANT] = require('./variant/model');
 models[CONTENT_TYPES.VISIBILITYFORM] = require('./visibilityForm/model');
 models[CONTENT_TYPES.ACHIEVEMENTFORM] = require('./achievementForm/model');
-models[CONTENT_TYPES.CONSUMER_SURVEY] = require('./../stories/consumer-survey/types/survey/model');
-models[CONTENT_TYPES.CONSUMER_SURVEY_ANSWER] = require('./../stories/consumer-survey/types/answer/model');
+models[CONTENT_TYPES.CONSUMER_SURVEY] = require('./consumersSurvey/model');
+models[CONTENT_TYPES.CONSUMER_SURVEY_ANSWER] = require('./consumersSurveyAnswers/model');
 
 module.exports = models;
