@@ -129,13 +129,46 @@ const access = () => {
         return getAccess(req, mid, 'upload', callback);
     };
 
+    const turnIntoPromise = (args, method) => {
+        const request = args.req;
+        const moduleId = args.mid;
+
+        return new Promise((resolve, reject) => {
+            method(request, moduleId, (err, allowed, personnel) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(personnel);
+            });
+        });
+    };
+
+    const getReadAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getReadAccess);
+    };
+    const getEditAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getEditAccess);
+    };
+    const getWriteAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getWriteAccess);
+    };
+    const getArchiveAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getArchiveAccess);
+    };
+
     return {
         getReadAccess,
         getEditAccess,
         getWriteAccess,
         getArchiveAccess,
         getEvaluateAccess,
-        getUploadAccess
+        getUploadAccess,
+
+        getReadAccessPromise,
+        getEditAccessPromise,
+        getWriteAccessPromise,
+        getArchiveAccessPromise
     };
 };
 

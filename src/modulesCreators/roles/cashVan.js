@@ -583,21 +583,8 @@ module.exports = [
             write: true,
             read: false
         }
-    }, {
-        module: ACL_MODULES.CONSUMER_SURVEY,
-        cms: {
-            archive: false,
-            edit: false,
-            write: false,
-            read: false
-        },
-        mobile: {
-            archive: false,
-            edit: true,
-            write: false,
-            read: true
-        }
     },
+    require('./../../stories/consumer-survey/acl/cashVan'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

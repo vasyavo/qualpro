@@ -6,7 +6,7 @@ define([
     function (Parrent, Model, CONTENT_TYPES) {
         var Collection = Parrent.extend({
             model      : Model,
-            url        : CONTENT_TYPES.CONSUMERS_SURVEY,
+            url        : CONTENT_TYPES.CONSUMER_SURVEY,
             viewType   : null,
             contentType: null,
 

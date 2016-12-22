@@ -475,14 +475,7 @@ const modules = [
         visible : true
     },
 
-    {
-        _id     : 44,
-        name    : {en: 'Consumers Survey', ar: 'Consumers Survey'}, // todo set Arabic translation
-        href    : CONSTANTS.CONSUMERS_SURVEY,
-        sequence: 44,
-        parrent : 16,
-        visible : true
-    },
+    require('./../stories/consumer-survey/acl/module'),
 
     {
         _id     : 45,

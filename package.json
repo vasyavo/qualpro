@@ -12,6 +12,7 @@
     "bower": "1.4.1",
     "bson-objectid": "1.1.4",
     "co": "4.6.0",
+    "co-express": "1.2.2",
     "connect-mongo": "0.8.0",
     "connect-multiparty": "1.2.5",
     "connect-redis": "3.1.0",
@@ -92,7 +93,8 @@
     "supertest-session": "1.0.0"
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test HEROKU_APP_ENV=production mocha --require co-mocha src/server.spec.js",
+    "test": "cross-env NODE_ENV=test HEROKU_APP_ENV=production mocha --require co-mocha src/server.spec.js && npm run test:consumer-survey",
+    "test:consumer-survey": "cross-env NODE_ENV=test mocha --require co-mocha src/stories/consumer-survey/testSetup.spec.js",
     "start": "node src/server.js",
     "dev": "cross-env NODE_ENV=development node src/server.js",
     "debug": "cross-env NODE_ENV=production node-debug --save-live-edit src/server.js",
