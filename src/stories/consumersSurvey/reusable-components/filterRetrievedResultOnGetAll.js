@@ -1,4 +1,5 @@
 const _ = require('underscore');
+const isValidObjectId = require('bson-objectid').isValid;
 
 module.exports = (options, cb) => {
     const personnel = options.personnel;
