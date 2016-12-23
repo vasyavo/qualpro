@@ -4161,6 +4161,7 @@ const Filters = function(db, redis) {
         var beforeFilter = _.pick(filter, 'country', 'region', 'subRegion', 'branch', 'position', 'archived');
         var afterFilter = _.pick(filter, 'retailSegment', 'outlet');
         var pipeLine = [];
+        var translated = translated.length === 1 ? translatedCond(language, translateFields, translated[0]) : {$literal: true};
 
         pipeLine.push({
             $project: {
@@ -4171,7 +4172,7 @@ const Filters = function(db, redis) {
                 archived  : 1,
                 position  : 1,
                 status    : 1,
-                translated: translated.length === 1 ? translatedCond(language, translateFields, translated[0]) : {$literal: true}
+                translated: translated
             }
         });
 
@@ -4473,9 +4474,29 @@ const Filters = function(db, redis) {
                     async.apply(redis.cacheStore.getValuesStorageHash, 'online'),
 
                     (cb)=> {
-                        PersonnelModel.aggregate(pipeLine.slice(0, 2))
+                        PersonnelModel.aggregate([{
+                                $project: {
+                                    country   : 1,
+                                    region    : 1,
+                                    subRegion : 1,
+                                    branch    : 1,
+                                    archived  : 1,
+                                    position  : 1,
+                                    status    : 1,
+                                    translated: translated
+                                }
+                            }, {
+                            $match : beforeFilter && Object.keys(beforeFilter).length ? beforeFilter : {}
+                        }])
                             .allowDiskUse(true)
-                            .exec(cb);
+                            .exec((err, users)=>{
+                                if (err){
+                                    return cb(err);
+                                }
+
+                                let usersIds = users.map(user=>user._id.toString());
+                                cb(null, usersIds);
+                            });
                     }
 
                 ], (err, pairArrays) => {
