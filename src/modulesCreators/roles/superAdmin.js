@@ -199,7 +199,7 @@ module.exports = [
             read: true
         }
     }, {
-        module: 31,
+        module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
         cms: {
             archive: false,
             edit: true,
@@ -635,7 +635,7 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: false
         }

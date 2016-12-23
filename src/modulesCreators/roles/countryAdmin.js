@@ -479,15 +479,15 @@ module.exports = [
         module: ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
         cms: {
             archive: false,
-            edit: false,
-            write: false,
+            edit: true,
+            write: true,
             read: true
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
@@ -530,7 +530,7 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         }
@@ -574,8 +574,8 @@ module.exports = [
             read: true
         },
         mobile: {
-            upload: false,
-            edit: false,
+            upload: true,
+            edit: true,
             write: true,
             read: true
         }
@@ -631,14 +631,14 @@ module.exports = [
         cms: {
             archive: false,
             edit: true,
-            write: false,
+            write: true,
             read: true
         },
         mobile: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
-            read: false
+            read: true
         }
     }
 ];

@@ -385,8 +385,8 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
+            edit: true,
+            write: true,
             read: true
         }
     }, {
@@ -517,7 +517,7 @@ module.exports = [
         },
         mobile: {
             upload: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         }
@@ -668,7 +668,7 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: false
         }
