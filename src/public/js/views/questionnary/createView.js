@@ -364,7 +364,7 @@ define([
         renderModelData: function () {
             var questions = this.questionsCollection.toJSON();
             var self = this;
-debugger;
+
             questions.forEach(function (question) {
                 self.addQuestion(null, question);
             });
