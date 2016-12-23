@@ -66,7 +66,6 @@ module.exports = function(app, db, event) {
     var originRouter = require('./origin')(db, redis, event);
     var priceSurvey = require('./priceSurvey')(db, redis, event);
     var contactUs = require('./contactUs')(db, redis, event);
-    var consumerSurvey = require('./consumerSurvey')(db, redis, event);
 
     var contractsYearlyRouter = require('./contractsYearly')(db, redis, event);
     var contractsSecondaryRouter = require('./contractsSecondary')(db, redis, event);
@@ -137,6 +136,7 @@ module.exports = function(app, db, event) {
     app.use('/instoretasks', inStoreeTasksRouter);
     app.use('/planogram', planogramRouter);
     app.use('/questionnary', questionnaryRouter);
+    app.use('/consumersSurvey', require('../stories/consumersSurvey/router'));
     app.use('/shelfShares', shelfShareRouter);
     app.use('/docs/db', docsHandler.getDb);
     app.use('/position', positionRouter);
@@ -161,8 +161,6 @@ module.exports = function(app, db, event) {
     app.use('/achievementForm', achievementForm);
     app.use('/newProductLaunch', newProductLaunch);
     app.use('/contactUs', contactUs);
-    app.use('/consumerSurvey', consumerSurvey);
-
     app.use('/contractsYearly', contractsYearlyRouter);
     app.use('/contractsSecondary', contractsSecondaryRouter);
     app.use('/documents', documentsRouter);

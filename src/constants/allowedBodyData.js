@@ -1591,4 +1591,47 @@ allowedParams[CONTENT_TYPES.QUESTIONNARIES] = {
     }
 };
 
+allowedParams[CONTENT_TYPES.CONSUMER_SURVEY] = {
+    0: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    1: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    2: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    3: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers']
+    },
+    4: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers']
+    },
+    5: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers']
+    },
+    6: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers']
+    },
+    7: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers']
+    },
+    8: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    9: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    }
+};
+
 module.exports = allowedParams;

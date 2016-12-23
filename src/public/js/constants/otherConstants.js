@@ -9,7 +9,7 @@
             en : [
                 {_id: 'floorDisplayId', name: 'Floor Display', sortKey: 0},
                 {_id: 'gondolaId', name: 'Gondola', sortKey: 1},
-                {_id: 'thematicStandId ', name: 'Thematic Stand', sortKey: 2},
+                {_id: 'thematicStandId', name: 'Thematic Stand', sortKey: 2},
                 {_id: 'shelfId', name: 'Shelf', sortKey: 3},
                 {_id: 'otherId', name: 'Other', sortKey: 4}
             ],
@@ -100,6 +100,48 @@
                 },
 
                 sortKey: 2
+            }
+        ],
+
+        CONSUMER_SURVEY_QUESTION_TYPE : [
+            {
+                _id : 'singleChoice',
+                name: {
+                    en: 'Single Choice',
+                    ar: ' اختيار واحد '
+                },
+
+                sortKey: 0
+            },
+
+            {
+                _id : 'multiChoice',
+                name: {
+                    en: 'Multi Choice',
+                    ar: ' اختيارات متعددة '
+                },
+
+                sortKey: 1
+            },
+
+            {
+                _id : 'fullAnswer',
+                name: {
+                    en: 'Full Answer',
+                    ar: 'إجابة كاملة '
+                },
+
+                sortKey: 2
+            },
+
+            {
+                _id : 'NPS',
+                name: {
+                    en: 'NPS',
+                    ar: '' //todo set ar translation
+                },
+
+                sortKey: 0
             }
         ],
 

@@ -18,7 +18,7 @@ define([
             validate: function (attrs, cb) {
                 var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
                 var errors = [];
-                var optionsRequired = attrs.type !== 'fullAnswer';
+                var optionsRequired = (attrs.type !== 'fullAnswer' && attrs.type !== 'NPS');
 
                 if (this.translatedFields.title) {
                     validation.checkTitleField(errors, true, attrs.title, this.translatedFields.title);

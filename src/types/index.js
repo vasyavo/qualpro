@@ -16,7 +16,6 @@ models[CONTENT_TYPES.COMPETITORBRANDING] = require('./competitorBranding/model')
 models[CONTENT_TYPES.COMPETITORITEM] = require('./competitorItem/model');
 models[CONTENT_TYPES.COMPETITORPROMOTION] = require('./competitorPromotion/model');
 models[CONTENT_TYPES.COMPETITORVARIANT] = require('./competitorVariant/model');
-models[CONTENT_TYPES.CONSUMER_SURVEY] = require('./consumerSurvey/model');
 models[CONTENT_TYPES.CONTACT_US] = require('./contactUs/model');
 models[CONTENT_TYPES.CONTRACTSSECONDARY] = require('./contractSecondary/model');
 models[CONTENT_TYPES.CONTRACTSYEARLY] = require('./contractYearly/model');
@@ -55,5 +54,7 @@ models[CONTENT_TYPES.SHELFSHARES] = require('./shelfShare/model');
 models[CONTENT_TYPES.VARIANT] = require('./variant/model');
 models[CONTENT_TYPES.VISIBILITYFORM] = require('./visibilityForm/model');
 models[CONTENT_TYPES.ACHIEVEMENTFORM] = require('./achievementForm/model');
+models[CONTENT_TYPES.CONSUMER_SURVEY] = require('./consumersSurvey/model');
+models[CONTENT_TYPES.CONSUMER_SURVEY_ANSWER] = require('./consumersSurveyAnswers/model');
 
 module.exports = models;

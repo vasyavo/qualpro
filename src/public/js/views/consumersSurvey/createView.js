@@ -3,6 +3,7 @@ define([
     'underscore',
     'text!templates/consumersSurvey/create.html',
     'text!templates/consumersSurvey/createQuestionView.html',
+    'text!templates/consumersSurvey/circle-radio-buttons.html',
     'text!templates/consumersSurvey/multiselectOptions.html',
     'text!templates/consumersSurvey/singleSelectOptions.html',
     'text!templates/consumersSurvey/listOption.html',
@@ -19,7 +20,7 @@ define([
     'moment',
     'custom',
     'helpers/implementShowHideArabicInputIn'
-], function ($, _, CreateTemplate, CreateConsumersSurveyViewTemplate, MultiSelectOptionsTemplate, SingleSelectOptionsTemplate,
+], function ($, _, CreateTemplate, CreateConsumersSurveyViewTemplate, circleRadioButtonsTemplate,  MultiSelectOptionsTemplate, SingleSelectOptionsTemplate,
              ListOptionTemplate, FullAnswerOptionsTemplate, DropDownView, Model, QuestionModel, FilterCollection,
              QuestionCollection, OTHER_CONSTANTS, CONTENT_TYPES, populate, BaseView, moment, custom, implementShowHideArabicInputIn) {
 
@@ -85,7 +86,7 @@ define([
         },
 
         checkBoxClick: function (e) {
-            var $checkbox = this.$el.find('#questionTable input[type="checkbox"]:checked');
+            var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked');
 
             this.showHideButtons({
                 add   : true,
@@ -130,29 +131,32 @@ define([
                 multiSelect : false,
                 notRender   : true
             };
-            var inputView;
-
 
             if (e) {
                 e.preventDefault();
             }
 
             this.someIdForCheckBox++;
-            $curEl.find('#questionTable').append(this.createConsumersSurveyViewTemplate({
+            $curEl.find('#consumersSurveyTable').append(this.createConsumersSurveyViewTemplate({
                 question         : question || {},
                 someIdForCheckBox: this.someIdForCheckBox,
                 translation      : this.translation
             }));
 
             if (question) {
-                dropDownCreationOptions.selectedValues = [_.findWhere(OTHER_CONSTANTS.QUESTION_TYPE, {_id: question.type._id})];
+                var questionType = (question.type._id) ? question.type._id : question.type;
+                dropDownCreationOptions.selectedValues = [_.findWhere(OTHER_CONSTANTS.CONSUMER_SURVEY_QUESTION_TYPE, {_id: questionType})];
+
+                if (questionType === 'NPS') {
+
+                }
             }
 
             questionTypeDropDownView = new DropDownView(dropDownCreationOptions);
 
             questionTypeDropDownView.on('changeItem', this.selectStatus, this);
             questionTypeDropDownView.render();
-            dropDownCreationOptions.dropDownList.reset(OTHER_CONSTANTS.QUESTION_TYPE);
+            dropDownCreationOptions.dropDownList.reset(OTHER_CONSTANTS.CONSUMER_SURVEY_QUESTION_TYPE);
 
             $questionContainer = $curEl.find('#id' + this.someIdForCheckBox).closest('.js_question');
             $questionContainer.find('.js_questionType').append(questionTypeDropDownView.el);
@@ -164,7 +168,7 @@ define([
 
         renderOptionsForDuplicate: function (question, $questionContainer) {
             var $optionsContainer = $questionContainer.find('.js_options');
-            var questionType = question.type._id;
+            var questionType = (question.type._id) ? question.type._id : question.type;
 
             this.renderOptionsContainer(questionType, $optionsContainer, question.options);
         },
@@ -176,6 +180,8 @@ define([
                 $optionsContainer.html(this.multiSelectOptionsTemplate());
             } else if (questionType === 'singleChoice') {
                 $optionsContainer.html(this.singleSelectOptionsTemplate());
+            } else if (questionType === 'NPS') {
+                $optionsContainer.html(circleRadioButtonsTemplate);
             } else {
                 $optionsContainer.html('');
             }
@@ -188,7 +194,7 @@ define([
         },
 
         deleteConsumersSurvey: function (e) {
-            var $checkbox = this.$el.find('#questionTable input[type="checkbox"]:checked').closest('.js_question');
+            var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked').closest('.js_question');
 
             $checkbox.remove();
 
@@ -215,7 +221,7 @@ define([
             keys.forEach(function (key) {
                 cssDisplay = inputOptions[key] ? 'inline-block' : 'none';
 
-                $btn = $btnHolder.find('#' + key + 'Question');
+                $btn = $btnHolder.find('#' + key + 'ConsumersSurvey');
                 $btn.css({display: cssDisplay});
             });
         },
@@ -254,8 +260,8 @@ define([
 
         saveQuestionnary: function (options, cb) {
             var $curEl = this.$el;
-            var $questionTable = $curEl.find('#questionTable');
-            var $questionsRows = $questionTable.find('.js_question');
+            var $consumersSurveyTable = $curEl.find('#consumersSurveyTable');
+            var $questionsRows = $consumersSurveyTable.find('.js_question');
             var self = this;
             var newTitle = {
                 en: $curEl.find('#questionnaryTitleEn').val() || '',
@@ -366,7 +372,7 @@ define([
             var self = this;
 
             questions.forEach(function (question) {
-                self.addQuestion(null, question);
+                self.addConsumersSurvey(null, question);
             });
         },
 

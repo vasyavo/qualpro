@@ -40,6 +40,7 @@ module.exports = function(db, app, redis) {
     router.get('/personnel', checkAuth, handler.personnelFilters);
     router.get('/planogram', checkAuth, handler.planogramFilters);
     router.get('/activityList', handler.activityListFilters);
+    router.get('/branch', handler.branchFilters);
     router.get('/brandingActivity', handler.brandingActivityFilters);
     router.get('/brandingActivityCreate', handler.promotionLocationFilters);
     // router.get('/brandingAndDisplayCreate', handler.brandingAndDisplayCreateFilters);
@@ -53,6 +54,8 @@ module.exports = function(db, app, redis) {
     router.get('/personnelTasks', handler.personnelTasks);
     router.get('/createQuestionnary', handler.createQuestionnary);
     router.get('/questionnary', handler.questionnary);
+    router.get('/consumersSurvey', require('../stories/consumersSurvey/routes/filters'));
+    router.get('/createConsumersSurvey', require('../stories/consumersSurvey/routes/createFilters'));
     router.get('/competitorBranding', handler.competitorBrandingFilters);
     router.get('/competitorPromotion', handler.competitorPromotionFilters);
     router.get('/promotions', handler.promotionFilters);
