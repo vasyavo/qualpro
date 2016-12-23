@@ -3,6 +3,7 @@ define([
     'underscore',
     'text!templates/consumersSurvey/create.html',
     'text!templates/consumersSurvey/createQuestionView.html',
+    'text!templates/consumersSurvey/circle-radio-buttons.html',
     'text!templates/consumersSurvey/multiselectOptions.html',
     'text!templates/consumersSurvey/singleSelectOptions.html',
     'text!templates/consumersSurvey/listOption.html',
@@ -19,7 +20,7 @@ define([
     'moment',
     'custom',
     'helpers/implementShowHideArabicInputIn'
-], function ($, _, CreateTemplate, CreateConsumersSurveyViewTemplate, MultiSelectOptionsTemplate, SingleSelectOptionsTemplate,
+], function ($, _, CreateTemplate, CreateConsumersSurveyViewTemplate, circleRadioButtonsTemplate,  MultiSelectOptionsTemplate, SingleSelectOptionsTemplate,
              ListOptionTemplate, FullAnswerOptionsTemplate, DropDownView, Model, QuestionModel, FilterCollection,
              QuestionCollection, OTHER_CONSTANTS, CONTENT_TYPES, populate, BaseView, moment, custom, implementShowHideArabicInputIn) {
 
@@ -143,14 +144,19 @@ define([
             }));
 
             if (question) {
-                dropDownCreationOptions.selectedValues = [_.findWhere(OTHER_CONSTANTS.QUESTION_TYPE, {_id: question.type._id})];
+                var questionType = (question.type._id) ? question.type._id : question.type;
+                dropDownCreationOptions.selectedValues = [_.findWhere(OTHER_CONSTANTS.CONSUMER_SURVEY_QUESTION_TYPE, {_id: questionType})];
+
+                if (questionType === 'NPS') {
+
+                }
             }
 
             questionTypeDropDownView = new DropDownView(dropDownCreationOptions);
 
             questionTypeDropDownView.on('changeItem', this.selectStatus, this);
             questionTypeDropDownView.render();
-            dropDownCreationOptions.dropDownList.reset(OTHER_CONSTANTS.QUESTION_TYPE);
+            dropDownCreationOptions.dropDownList.reset(OTHER_CONSTANTS.CONSUMER_SURVEY_QUESTION_TYPE);
 
             $questionContainer = $curEl.find('#id' + this.someIdForCheckBox).closest('.js_question');
             $questionContainer.find('.js_questionType').append(questionTypeDropDownView.el);
@@ -162,7 +168,7 @@ define([
 
         renderOptionsForDuplicate: function (question, $questionContainer) {
             var $optionsContainer = $questionContainer.find('.js_options');
-            var questionType = question.type._id;
+            var questionType = (question.type._id) ? question.type._id : question.type;
 
             this.renderOptionsContainer(questionType, $optionsContainer, question.options);
         },
@@ -174,6 +180,8 @@ define([
                 $optionsContainer.html(this.multiSelectOptionsTemplate());
             } else if (questionType === 'singleChoice') {
                 $optionsContainer.html(this.singleSelectOptionsTemplate());
+            } else if (questionType === 'NPS') {
+                $optionsContainer.html(circleRadioButtonsTemplate);
             } else {
                 $optionsContainer.html('');
             }
@@ -362,7 +370,7 @@ define([
         renderModelData: function () {
             var questions = this.questionsCollection.toJSON();
             var self = this;
-debugger;
+
             questions.forEach(function (question) {
                 self.addConsumersSurvey(null, question);
             });

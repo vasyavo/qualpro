@@ -103,6 +103,48 @@
             }
         ],
 
+        CONSUMER_SURVEY_QUESTION_TYPE : [
+            {
+                _id : 'singleChoice',
+                name: {
+                    en: 'Single Choice',
+                    ar: ' اختيار واحد '
+                },
+
+                sortKey: 0
+            },
+
+            {
+                _id : 'multiChoice',
+                name: {
+                    en: 'Multi Choice',
+                    ar: ' اختيارات متعددة '
+                },
+
+                sortKey: 1
+            },
+
+            {
+                _id : 'fullAnswer',
+                name: {
+                    en: 'Full Answer',
+                    ar: 'إجابة كاملة '
+                },
+
+                sortKey: 2
+            },
+
+            {
+                _id : 'NPS',
+                name: {
+                    en: 'NPS',
+                    ar: '' //todo set ar translation
+                },
+
+                sortKey: 0
+            }
+        ],
+
         CONTRACTS_TYPE: [
             {
                 _id : 'yearly',

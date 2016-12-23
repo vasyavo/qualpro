@@ -51,7 +51,7 @@ const schema = new Schema({
             en: { type: String, default: '' },
             ar: { type: String, default: '' }
         },
-        type: { type: String, enum: ['singleChoice', 'multiChoice', 'fullAnswer'] },
+        type: { type: String, enum: ['singleChoice', 'multiChoice', 'fullAnswer', 'NPS'] },
         options: [{
             en: { type: String },
             ar: { type: String }
