@@ -9,7 +9,7 @@
             en : [
                 {_id: 'floorDisplayId', name: 'Floor Display', sortKey: 0},
                 {_id: 'gondolaId', name: 'Gondola', sortKey: 1},
-                {_id: 'thematicStandId ', name: 'Thematic Stand', sortKey: 2},
+                {_id: 'thematicStandId', name: 'Thematic Stand', sortKey: 2},
                 {_id: 'shelfId', name: 'Shelf', sortKey: 3},
                 {_id: 'otherId', name: 'Other', sortKey: 4}
             ],
