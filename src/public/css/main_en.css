@@ -11195,7 +11195,13 @@ span.currency {
   -webkit-justify-content: center;
   justify-content: center;
 }
-
-
-
-
+.domainDialog .searchInputWrap{
+  float: right;
+  margin-right: 15px;
+}
+.domainDialog .searchInputWrap input {
+  width: 200px;
+}
+.domainDialog .searchInputWrap label:after, label[for=brandSearch]:after {
+  line-height: 3;
+}
