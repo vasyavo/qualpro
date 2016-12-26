@@ -153,6 +153,21 @@ module.exports = [
         }
     },
     {
+        module: ACL_MODULES.VISIBILITY_FORM,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
         module: ACL_MODULES.ITEMS_AND_PRICES,
         cms   : {
             archive: false,

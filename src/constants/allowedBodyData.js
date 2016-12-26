@@ -1139,7 +1139,11 @@ allowedParams[CONTENT_TYPES.PROMOTIONS] = {
     9: {
         create: ['promotionType', 'category', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'displayType', 'barcode', 'packing', 'ppt', 'quantity', 'dateStart', 'dateEnd', 'attachments', 'status', 'savePromotion'],
         update: ['promotionType', 'category', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'displayType', 'barcode', 'packing', 'ppt', 'quantity', 'dateStart', 'dateEnd', 'attachments', 'status', 'savePromotion']
-    }
+    },
+    10 : {
+        create: ['promotionType', 'category', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'displayType', 'barcode', 'packing', 'ppt', 'quantity', 'dateStart', 'dateEnd', 'attachments', 'status', 'savePromotion'],
+        update: ['promotionType', 'category', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'displayType', 'barcode', 'packing', 'ppt', 'quantity', 'dateStart', 'dateEnd', 'attachments', 'status', 'savePromotion']
+}
 };
 
 allowedParams[CONTENT_TYPES.COMPETITORBRANDING] = {
