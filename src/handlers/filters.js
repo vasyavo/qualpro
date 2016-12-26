@@ -6512,22 +6512,28 @@ const Filters = function(db, redis) {
                     outlet : 1
                 };
                 var customQuery = {subRegion : subRegionFromFilter ? subRegionFromFilter : {$in : _.pluck(collection, '_id')}};
-                queryForFunction = personnel.branch.length ? customQuery._id = {$in : personnel.branch} : customQuery;
+
+                if (personnel.branch.length){
+                    customQuery._id = {
+                        $in : personnel.branch
+                    };
+                }
+
                 if (_.indexOf(keys, 'branch') !== -1) {
-                    queryForFunction._id = filter.branch;
+                    customQuery._id = filter.branch;
                 } else {
                     if (_.indexOf(keys, 'retailSegment') !== -1) {
                         delete queryForFunction._id;
-                        queryForFunction.retailSegment = filter.retailSegment;
+                        customQuery.retailSegment = filter.retailSegment;
                     }
                     if (_.indexOf(keys, 'outlet') !== -1) {
                         delete queryForFunction._id;
-                        queryForFunction.outlet = filter.outlet;
+                        customQuery.outlet = filter.outlet;
                     }
                 }
                 self.getLocationIds(BranchModel, {
                     addProjection : addProjection,
-                    query : queryForFunction
+                    query : customQuery
                 }, function(err, collection) {
                     if (err) {
                         return waterfallCb(err);
