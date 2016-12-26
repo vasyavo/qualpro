@@ -569,7 +569,7 @@ define([
             } else if (App.currentUser.accessRole.level > 1) {
                 this.objectiveTypes = [CONSTANTS.OBJECTIVES_TYPE[4]];
             } else {
-                this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE;
+                this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE.slice(0, 5);
             }
 
             populate.inputDropDown({
