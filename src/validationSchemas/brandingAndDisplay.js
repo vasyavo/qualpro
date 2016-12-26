@@ -82,10 +82,12 @@ const getAll = Joi.object().keys({
         startDate : Joi.date().default(startOfYear, 'start of a year date'),
         endDate : Joi.date().default(currentDate, 'current date'),
         globalSearch : Joi.string()
-    }).rename('personnel', 'createdBy').default({
-        startDate : startOfYear(),
-        endDate : currentDate()
-    })
+    }).rename('personnel', 'createdBy').default(() => {
+        return {
+            startDate : startOfYear(),
+            endDate : currentDate()
+        }
+    }, 'default filter')
 });
 const update = Joi.object().keys({
     $push : customMongoJoi.mongoQuering().commentsMongoPush()
