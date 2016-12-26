@@ -100,6 +100,21 @@ module.exports = [
             write  : false,
             read   : true
         }
+    },
+    {
+        module: ACL_MODULES.VISIBILITY_FORM,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        }
     }, {
         module: ACL_MODULES.ITEMS_AND_PRICES,
         cms   : {

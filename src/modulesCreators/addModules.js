@@ -425,6 +425,17 @@ const modules = [
     },
 
     {
+        _id     : 1110,
+        name: {
+            en: 'Visibility Form',
+            ar: ''
+        },
+        href    : CONSTANTS.VISIBILITYFORM,
+        sequence: 1110,
+        parrent : null,
+        visible : false
+    },
+    {
         _id     : 1001,
         name: {
             en: 'Price report',

@@ -94,7 +94,7 @@ var VisibilityForm = function (db, redis, event) {
                 }
 
                 event.emit('activityChange', {
-                    module    : ACL_MODULES.OBJECTIVE,
+                    module    : ACL_MODULES.VISIBILITY_FORM,
                     actionType: ACTIVITY_TYPES.CREATED,
                     createdBy : result.get('createdBy'),
                     itemId    : result._id,
@@ -116,7 +116,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getWriteAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             var body = req.body;
 
             if (err) {
@@ -438,7 +438,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -543,7 +543,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -637,7 +637,7 @@ var VisibilityForm = function (db, redis, event) {
                             return cb(err);
                         }
                         var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
-                            ? ACL_MODULES.OBJECTIVE :
+                            ? ACL_MODULES.VISIBILITY_FORM :
                             ACL_MODULES.IN_STORE_REPORTING;
 
                         event.emit('activityChange', {
@@ -717,7 +717,7 @@ var VisibilityForm = function (db, redis, event) {
             );
         }
 
-        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             var body = req.body;
 
             try {
@@ -779,7 +779,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -807,7 +807,7 @@ var VisibilityForm = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
