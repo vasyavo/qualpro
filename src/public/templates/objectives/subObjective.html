@@ -165,6 +165,7 @@
                                           value=""
                                           maxlength="120"
                                           placeholder="<%= translation.description%>">
+                                    <%= (objective.objectiveType === 'country') && (App.currentUser.accessRole.level === 3) && objective.description && objective.description.currentLanguage || '' %>
                                 </textarea>
                             </div>
                         </div>

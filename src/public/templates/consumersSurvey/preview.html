@@ -14,10 +14,10 @@
                 <li><a href="#questions"><%= translation.questions %></a></li>
                 <li><a href="#respondents"><%= translation.respondents %></a></li>
             </ul>
-            <% if(!activityList){%>
-
-            <% if(model && model.status && model.status._id !== 'expired'){ %>
-            <button id="edit" class="greenBtn floatRight"><%= translation.editBtn %></button>
+            <% if (!activityList) { %>
+                <button id="duplicate" class="greyBtn floatRight"><%= translation.duplicateBtn %></button>
+            <% if (model && model.status && model.status._id !== 'expired') { %>
+                <button id="edit" class="greenBtn floatRight"><%= translation.editBtn %></button>
             <%}%>
             <%}%>
             <div id="respondents" class="respondentsWrap">

@@ -5,6 +5,6 @@ module.exports = {
     cms: {},
     mobile: {
         read: true,
-        edit: true,
+        write: true
     }
 };

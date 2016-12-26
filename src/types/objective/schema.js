@@ -20,7 +20,7 @@ const schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
-    objectiveType: { type: String, enum: ['weekly', 'monthly', 'quarterly', 'yearly', 'individual'] },
+    objectiveType: { type: String, enum: ['weekly', 'monthly', 'quarterly', 'yearly', 'individual', 'country'] },
     priority: { type: String, enum: ['low', 'medium', 'high', 'urgent'], default: 'low' },
     context: {
         type: String,

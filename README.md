@@ -102,6 +102,9 @@ Ask credentials in your administrator.
  - `AWS_ACCESS_KEY_ID`
  - `AWS_SECRET_ACCESS_KEY`
  - `AWS_S3_REGION` by default `eu-central-1`
+ 
+##### Firebase Cloud Messaging
+ - `FCM_API_KEY`
 
 ##### Heroku:
  - `REDIS_URL` Redis url which passed by Heroku Redis addon

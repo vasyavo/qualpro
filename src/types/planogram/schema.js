@@ -7,7 +7,7 @@ const schema = new Schema({
     retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT }],
     product: { type: ObjectId, ref: CONTENT_TYPES.CATEGORY, require: true },
     displayType: {
-        _id : String,
+        _id : { type: String, enum: ['floorDisplayId', 'gondolaId', 'thematicStandId', 'shelfId']},
         name : {
             ar : String,
             en : String
