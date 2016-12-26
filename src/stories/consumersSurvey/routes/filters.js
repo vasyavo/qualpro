@@ -30,10 +30,8 @@ const $defProjectionExtended = {
     location : 1,
     name : 1,
     position : 1,
-    personnels : 1,
     employee : 1,
-    publisher : 1,
-    personnel : 1
+    publisher : 1
 };
 
 module.exports = (req, res, next) => {
@@ -72,13 +70,6 @@ module.exports = (req, res, next) => {
 
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
         from : 'personnels',
-        key : 'personnels',
-        isArray : true,
-        addProjection : ['firstName', 'lastName', 'position']
-    }));
-
-    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-        from : 'personnels',
         key : 'createdBy.user',
         isArray : false,
         addProjection : ['firstName', 'lastName', 'position'],
@@ -88,13 +79,6 @@ module.exports = (req, res, next) => {
             }
         }
     }));
-
-    pipeLine.push({
-        $unwind : {
-            path : '$personnels',
-            preserveNullAndEmptyArrays : true
-        }
-    });
 
     if (positionFilter) {
         pipeLine.push({
@@ -113,23 +97,8 @@ module.exports = (req, res, next) => {
 
     pipeLine.push({
         $project : aggregateHelper.getProjection({
-            position : {$concatArrays : [['$createdBy.user.position'], ['$personnels.position']]},
-            personnels : {
-                _id : 1,
-                position : 1,
-                name : {
-                    en : {$concat : ['$personnels.firstName.en', ' ', '$personnels.lastName.en']},
-                    ar : {$concat : ['$personnels.firstName.ar', ' ', '$personnels.lastName.ar']}
-                }
-            }
-        })
-    });
+            position : '$createdBy.user.position',
 
-    pipeLine.push({
-        $group : aggregateHelper.getGroupObject({
-            personnels : {
-                $addToSet : '$personnels'
-            }
         })
     });
 
@@ -373,7 +342,6 @@ module.exports = (req, res, next) => {
     pipeLine.push({
         $group : {
             _id : null,
-            personnel : {$addToSet : '$personnels'},
             country : {$addToSet : '$country'},
             region : {$addToSet : '$region'},
             subRegion : {$addToSet : '$subRegion'},
@@ -409,12 +377,11 @@ module.exports = (req, res, next) => {
             branch : result.branch && _.flatten(result.branch) || [],
             publisher : result.publisher || [],
             position : result.position && _.flatten(result.position) || [],
-            personnel : result.personnel && _.flatten(result.personnel) || [],
             status : mapFilterValues(result.status, CONSTANTS.PROMOTION_UI_STATUSES)
         };
 
         Object.keys(result).forEach(function(key) {
-            var condition = ['personnel', 'publisher'].indexOf(key) !== -1 && positionFilter;
+            var condition = ['publisher'].indexOf(key) !== -1 && positionFilter;
             var positions = [];
             if (positionFilter) {
                 positions = positionFilter.$in.fromObjectID();

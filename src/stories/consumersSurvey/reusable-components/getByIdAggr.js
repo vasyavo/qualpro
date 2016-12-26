@@ -12,7 +12,6 @@ const $defProjection = {
     retailSegment: 1,
     outlet: 1,
     branch: 1,
-    countAll: 1,
     countAnswered: 1,
     status: 1,
     questions: 1,
@@ -21,8 +20,7 @@ const $defProjection = {
     createdBy: 1,
     creationDate: 1,
     updateDate: 1,
-    position: 1,
-    personnels: 1
+    position: 1
 };
 
 module.exports = (options, callback) => {

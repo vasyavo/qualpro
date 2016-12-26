@@ -39,12 +39,6 @@ const schema = new Schema({
         type: ObjectId,
         ref: CONTENT_TYPES.BRANCH
     }],
-    personnels: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL
-    }],
-    countAll: { type: Number, default: 0 },
-    countBranches: { type: Number, default: 0 },
     countAnswered: { type: Number, default: 0 },
     questions: [{
         title: {

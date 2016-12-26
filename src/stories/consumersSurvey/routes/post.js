@@ -41,146 +41,6 @@ module.exports = (req, res, next) => {
 
         async.waterfall([
             function (waterfallCb) {
-                var pipeLine = [];
-                var $match = {};
-                var retailSegmentFilter;
-                var outletFilter;
-
-                if (body.country) {
-                    body.country = body.country.length ? body.country : [body.country.length];
-                    $match.country = {$in: body.country.objectID()};
-                }
-
-                if (body.region) {
-                    body.region = body.region.length ? body.region : [body.region.length];
-                    $match.region = {$in: body.region.objectID()};
-                }
-
-                if (body.subRegion) {
-                    body.subRegion = body.subRegion.length ? body.subRegion : [body.subRegion.length];
-                    $match.subRegion = {$in: body.subRegion.objectID()};
-                }
-
-                if (body.retailSegment) {
-                    body.retailSegment = body.retailSegment.length ? body.retailSegment : [body.retailSegment.length];
-                    retailSegmentFilter = {$in: body.retailSegment.objectID()};
-                }
-
-                if (body.outlet) {
-                    body.outlet = body.outlet.length ? body.outlet : [body.outlet.length];
-                    outletFilter = {$in: body.outlet.objectID()};
-                }
-
-                if (body.branch) {
-                    body.branch = body.branch.length ? body.branch : [body.branch.length];
-                    $match.branch = {$in: body.branch.objectID()};
-                }
-
-                if (body.personnel) {
-                    body.personnel = body.personnel.length ? body.personnel : [body.personnel.length];
-                    $match._id = {$in: body.personnel.objectID()};
-                }
-
-                if (body.position) {
-                    body.position = body.position.length ? body.position : [body.position.length];
-                    $match.position = {$in: body.position.objectID()};
-                }
-
-                pipeLine.push({
-                    $match: $match
-                });
-
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from         : 'accessRoles',
-                    key          : 'accessRole',
-                    isArray      : false,
-                    addProjection: ['level']
-                }));
-
-                if (retailSegmentFilter || outletFilter) {
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from         : 'branches',
-                        key          : 'branch',
-                        isArray      : true,
-                        addProjection: ['retailSegment', 'outlet']
-                    }));
-
-                    pipeLine.push({
-                        $unwind: {
-                            path                      : '$branch',
-                            preserveNullAndEmptyArrays: true
-                        }
-                    });
-
-                    if (retailSegmentFilter) {
-                        pipeLine.push({
-                            $match: {
-                                'branch.retailSegment': retailSegmentFilter
-                            }
-                        })
-                    }
-
-                    if (outletFilter) {
-                        pipeLine.push({
-                            $match: {
-                                'branch.outlet': outletFilter
-                            }
-                        })
-                    }
-
-                    pipeLine.push({
-                        $group: aggregateHelper.getGroupObject({
-                            branch: {
-                                $addToSet: '$branch'
-                            }
-                        })
-                    });
-
-                }
-
-                pipeLine.push({
-                    $match: {
-                        'accessRole.level': {
-                            $nin: [
-                                ACL_CONSTANTS.MASTER_ADMIN,
-                                ACL_CONSTANTS.COUNTRY_ADMIN,
-                                ACL_CONSTANTS.MASTER_UPLOADER,
-                                ACL_CONSTANTS.COUNTRY_UPLOADER
-                            ]
-                        }
-                    }
-                });
-
-                pipeLine.push({
-                    $group: {
-                        _id            : null,
-                        personnelsIds  : {$addToSet: '$_id'},
-                        personnelsCount: {
-                            $sum: 1
-                        },
-
-                        branchesCount: {
-                            $sum: {
-                                $size: '$branch'
-                            }
-                        }
-                    }
-                });
-
-                PersonnelModel.aggregate(pipeLine, function (err, result) {
-                    if (err) {
-                        return waterfallCb(err);
-                    }
-
-                    result = result && result.length ? result[0] : {};
-
-                    waterfallCb(null, result);
-                });
-            },
-            function (resultObject, waterfallCb) {
-                var personnelIds = resultObject.personnelsIds;
-                var personnelCount = resultObject.personnelsCount;
-                var branchCount = resultObject.branchesCount;
                 var createdBy = {
                     user: req.session.uId,
                     date: new Date()
@@ -215,11 +75,8 @@ module.exports = (req, res, next) => {
                     });
                 }
 
-                body.countAll = personnelCount;
-                body.countBranches = branchCount;
                 body.status = 'draft';
                 body.dueDate = new Date(body.dueDate);
-                body.personnels = personnelIds;
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
 
@@ -233,11 +90,11 @@ module.exports = (req, res, next) => {
                     }
 
                     event.emit('activityChange', {
-                        module    : 31,
+                        module    : ACL_MODULES.CONSUMER_SURVEY,
                         actionType: ACTIVITY_TYPES.CREATED,
                         createdBy : body.createdBy,
                         itemId    : result._id,
-                        itemType  : CONTENT_TYPES.QUESTIONNARIES
+                        itemType  : CONTENT_TYPES.CONSUMER_SURVEY
                     });
 
                     waterfallCb(null, result._id);

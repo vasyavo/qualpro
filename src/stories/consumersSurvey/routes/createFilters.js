@@ -194,22 +194,11 @@ module.exports = (req, res, next) => {
         isArray : false
     }));
 
-    pipeLine.push({
-        $project : aggregationHelper.getProjection({
-            personnel : {
-                _id : '$_id',
-                name : {
-                    en : {$concat : ['$firstName.en', ' ', '$lastName.en']},
-                    ar : {$concat : ['$firstName.ar', ' ', '$lastName.ar']}
-                }
-            }
-        })
-    });
+    //todo add personnells filter
 
     pipeLine.push({
         $group : {
             _id : null,
-            personnel : {$addToSet : '$$ROOT.personnel'},
             country : {$addToSet : '$country'},
             region : {$addToSet : '$region'},
             subRegion : {$addToSet : '$subRegion'},
@@ -219,6 +208,7 @@ module.exports = (req, res, next) => {
             outlet : {$addToSet : '$outlet'}
         }
     });
+
     aggregation = PersonnelModel.aggregate(pipeLine);
 
     aggregation.options = {
@@ -226,15 +216,13 @@ module.exports = (req, res, next) => {
     };
 
     aggregation.exec(function(err, result) {
-        var response;
-
         if (err) {
             return next(err);
         }
 
         result = result[0] || {};
 
-        response = {
+        const response = {
             country : result.country && _.uniq(_.flatten(result.country)) || [],
             region : result.region || [],
             subRegion : result.subRegion || [],

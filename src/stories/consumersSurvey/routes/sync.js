@@ -2,7 +2,7 @@ const async = require('async');
 const FilterMapper = require('../../../helpers/filterMapper');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const CONSTANTS = require('../../../constants/mainConstants');
-const ACL_MODULES = require('../constants/aclModulesNames');
+const ACL_MODULES = require('../../../constants/aclModulesNames');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
 const filterRetrievedResultOnGetAll = require('../reusable-components/filterRetrievedResultOnGetAll');
@@ -27,8 +27,7 @@ const $defProjection = {
     createdBy: 1,
     creationDate: 1,
     updateDate: 1,
-    position: 1,
-    personnels: 1
+    position: 1
 };
 
 module.exports = (req, res, next) => {

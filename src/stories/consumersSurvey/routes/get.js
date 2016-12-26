@@ -18,7 +18,6 @@ const $defProjection = {
     retailSegment: 1,
     outlet: 1,
     branch: 1,
-    countAll: 1,
     countAnswered: 1,
     status: 1,
     questions: 1,
@@ -27,8 +26,7 @@ const $defProjection = {
     createdBy: 1,
     creationDate: 1,
     updateDate: 1,
-    position: 1,
-    personnels: 1
+    position: 1
 };
 
 module.exports = (req, res, next) => {
@@ -117,13 +115,6 @@ module.exports = (req, res, next) => {
                     isArray: false,
                     addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
                     includeSiblings: { createdBy: { date: 1 } }
-                }));
-
-                pipeline.push(...aggregateHelper.aggregationPartMaker({
-                    from: 'personnels',
-                    key: 'personnels',
-                    addMainProjection: ['position'],
-                    isArray: true
                 }));
 
                 if (positionFilter) {
@@ -220,27 +211,6 @@ module.exports = (req, res, next) => {
                         }
                     }));
                 }
-
-                pipeline.push({
-                    $unwind: {
-                        path: '$personnels',
-                        preserveNullAndEmptyArrays: true
-                    }
-                });
-
-                pipeline.push({
-                    $project: aggregateHelper.getProjection({
-                        personnel: '$personnels._id'
-                    })
-                });
-
-                pipeline.push({
-                    $group: aggregateHelper.getGroupObject({
-                        personnels: {
-                            $addToSet: '$personnel'
-                        }
-                    })
-                });
 
                 pipeline.push(...aggregateHelper.endOfPipeLine({
                     isMobile,

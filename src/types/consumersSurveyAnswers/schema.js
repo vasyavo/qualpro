@@ -5,7 +5,20 @@ const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    personnelId: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, require: true },
+    customer : {
+        name : {
+            type : String,
+            default : null
+        },
+        nationality : {
+            type : String,
+            default : null
+        },
+        gender: {
+            type : String,
+            default : null
+        }
+    },
     questionnaryId: { type: ObjectId, ref: CONTENT_TYPES.CONSUMER_SURVEY, require: true },
     questionId: { type: ObjectId, ref: CONTENT_TYPES.CONSUMER_SURVEY, require: true },
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, default: null },

@@ -1,5 +1,7 @@
 const async = require('async');
 const _ = require('underscore');
+const mongoose = require('mongoose');
+const event = require('../../../utils/eventEmitter');
 const ConsumersSurveyAnswersModel = require('../../../types/consumersSurveyAnswers/model');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
@@ -7,22 +9,24 @@ const ACTIVITY_TYPES = require('../../../constants/activityTypes');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const access = require('../../../helpers/access')();
 const bodyValidator = require('../../../helpers/bodyValidator');
+const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     function queryRun(body) {
-        var personnelId = ObjectId(req.session.uId);
-        var update;
-        var updater = {};
-        var personnelAnswerExists = true;
+        const personnelId = ObjectId(req.session.uId);
+        let update;
+        const updater = {};
+
         async.waterfall([
             function (waterfallCB) {
                 if (body && !body.answers) {
                     body.answers = [];
                 }
+
                 async.each(body.answers, function (answer, eachCallback) {
                     var newAnswer = {
-                        personnelId   : personnelId,
-                        questionnaryId: body.questionnaryId,
+                        customer : body.customer,
+                        questionnaryId: body.consumerSurveyId,
                         questionId    : answer.questionId,
                         country       : body.country,
                         region        : body.region,
@@ -31,9 +35,11 @@ module.exports = (req, res, next) => {
                         outlet        : body.outlet,
                         branch        : body.branch
                     };
+
                     if (answer.optionIndex && answer.optionIndex.length) {
                         newAnswer.optionIndex = answer.optionIndex;
                     }
+
                     if (answer.text && Object.keys(answer.text).length) {
                         newAnswer.text = {
                             en: _.escape(answer.text.en),
@@ -44,33 +50,20 @@ module.exports = (req, res, next) => {
                     async.waterfall([
                         function (waterfallCb) {
                             var query = {
-                                personnelId   : personnelId,
-                                questionnaryId: newAnswer.questionnaryId
-                            };
-                            ConsumersSurveyAnswersModel.findOne(query, function (err, result) {
-                                if (err) {
-                                    return waterfallCb(err);
-                                }
-                                if (!result) {
-                                    personnelAnswerExists = false;
-                                }
-                                waterfallCb(null);
-                            });
-                        },
-                        function (waterfallCb) {
-                            var query = {
-                                personnelId   : personnelId,
-                                questionnaryId: newAnswer.questionnaryId,
+                                questionnaryId: newAnswer.consumerSurveyId,
                                 questionId    : newAnswer.questionId,
                                 branch        : newAnswer.branch
                             };
+
                             ConsumersSurveyAnswersModel.findOne(query, function (err, result) {
                                 if (err) {
                                     return waterfallCb(err);
                                 }
+
                                 if (!result) {
                                     return waterfallCb(null, false);
                                 }
+
                                 waterfallCb(null, result._id.toString());
                             });
                         },
@@ -79,6 +72,7 @@ module.exports = (req, res, next) => {
                                 user: personnelId,
                                 date: new Date()
                             };
+
                             if (questionAnswerIdToUpdate) {
                                 newAnswer.editedBy = createdBy;
 
@@ -86,7 +80,9 @@ module.exports = (req, res, next) => {
                                     if (err) {
                                         return waterfallCb(err);
                                     }
+
                                     update = true;
+
                                     waterfallCb(null);
                                 });
                             } else {
@@ -97,33 +93,34 @@ module.exports = (req, res, next) => {
                                     if (err) {
                                         return waterfallCb(err);
                                     }
+
                                     waterfallCb(null);
                                 });
                             }
                         }
-                    ], function (err, result) {
+                    ], function (err) {
                         if (err) {
                             return eachCallback(err);
                         }
+
                         eachCallback(null);
                     });
                 }, function (err) {
                     if (err) {
                         return waterfallCB(err);
                     }
+
                     waterfallCB(null);
                 });
             },
             function (waterfallCB) {
-                ConsumersSurveyModel.findById(body.questionnaryId, function (err, questionnary) {
-                    var error;
-
+                ConsumersSurveyModel.findById(body.consumerSurveyId, function (err, questionnary) {
                     if (err) {
                         return waterfallCB(err);
                     }
 
                     if (!questionnary) {
-                        error = new Error('Questionnary not found');
+                        const error = new Error('Questionnary not found');
                         error.status = 404;
 
                         return waterfallCB(error);
@@ -137,24 +134,22 @@ module.exports = (req, res, next) => {
                     return waterfallCB(null);
                 }
 
-                updater.$inc = personnelAnswerExists ? {countBranches: -1} : {countAnswered: 1, countBranches: -1};
-
-                if (questionnary.countBranches * 1 - 1 <= 0) {
-                    updater.status = 'completed';
-                }
+                updater.$inc = {countAnswered: 1};
 
                 updater.editedBy = {
                     user: personnelId,
                     date: new Date()
                 };
-                ConsumersSurveyModel.findByIdAndUpdate(body.questionnaryId, updater, function (err) {
+
+                ConsumersSurveyModel.findByIdAndUpdate(body.consumerSurveyId, updater, function (err) {
                     if (err) {
                         return waterfallCB(err);
                     }
+
                     waterfallCB(null);
                 });
             }
-        ], function (err, result) {
+        ], function (err) {
             if (err) {
                 return next(err);
             }
@@ -163,7 +158,7 @@ module.exports = (req, res, next) => {
                 module    : ACL_MODULES.CONSUMER_SURVEY,
                 actionType: ACTIVITY_TYPES.UPDATED,
                 createdBy : updater.editedBy,
-                itemId    : body.questionnaryId,
+                itemId    : body.consumerSurveyId,
                 itemType  : CONTENT_TYPES.CONSUMER_SURVEY
             });
 
@@ -171,18 +166,12 @@ module.exports = (req, res, next) => {
         });
     }
 
-    access.getEditAccess(req, ACL_MODULES.CONSUMER_SURVEY, function (err, allowed) {
-        var updateObject;
-
+    access.getEditAccess(req, ACL_MODULES.CONSUMER_SURVEY, function (err) {
         if (err) {
             return next(err);
         }
-        if (!allowed) {
-            err = new Error();
-            err.status = 403;
 
-            return next(err);
-        }
+        let updateObject;
 
         try {
             if (req.body.data) {
