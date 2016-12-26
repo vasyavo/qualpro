@@ -1,6 +1,8 @@
 const access = require('../../../helpers/access')();
+const mongoose = require('mongoose');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
 const getByIdAggr = require('../reusable-components/getByIdAggr');
+const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     function queryRun() {

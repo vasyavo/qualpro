@@ -9,5 +9,6 @@ module.exports = {
     },
     mobile: {
         read: true,
+        write: true
     }
 };

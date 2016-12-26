@@ -85,5 +85,7 @@ config.uploaderType = 'AmazonS3';
 config.isCI = process.env.CI;
 config.pullDbOnCI = process.env.PULL_DB_ON_CI || true;
 
+config.fcmApiKey = process.env.FCM_API_KEY;
+
 // import this file at begin of server.js
 module.exports = config;

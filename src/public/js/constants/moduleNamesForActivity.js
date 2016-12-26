@@ -357,6 +357,15 @@
                 href: CONSTANTS.CONTACT_US
             },
 
+            44: {
+                _id : 44,
+                name : {
+                    en: 'Consumer Survey',
+                    ar: '' //todo ar translation
+                },
+                href: CONSTANTS.CONSUMER_SURVEY
+            },
+
             103: {
                 _id : 103,
                 name: {
