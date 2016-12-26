@@ -68,6 +68,14 @@
                     ar: 'هدف فردى'
                 },
                 sortKey: 4
+            },
+            {
+                _id    : 'country',
+                name   : {
+                    en: 'Country Objective',
+                    ar: 'هدف فردى'
+                },
+                sortKey: 5
             }
         ],
 

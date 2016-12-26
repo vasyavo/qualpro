@@ -564,7 +564,9 @@ define([
 
             implementShowHideArabicInputIn(this);
 
-            if (App.currentUser.accessRole.level > 1) {
+            if (App.currentUser.accessRole.level === 2) {
+                this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE.slice(-2);
+            } else if (App.currentUser.accessRole.level > 1) {
                 this.objectiveTypes = [CONSTANTS.OBJECTIVES_TYPE[4]];
             } else {
                 this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE;

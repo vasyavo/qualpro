@@ -795,6 +795,7 @@ define([
             var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
             var configForTemplate = $.extend([], levelConfig[this.contentType][App.currentUser.accessRole.level].preview);
             var onfigForActivityList = levelConfig[this.contentType].activityList.preview;
+            var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
             if (!this.dontShowDialog) {
                 formString = this.template({
@@ -867,7 +868,7 @@ define([
                     configForTemplate.forEach(function (config) {
                         var canDisplay = config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy);
                         var assignInIndividual = jsonModel.objectiveType === 'individual' && config.elementId === 'assign';
-                        if (App.currentUser.accessRole.level === 2 && jsonModel.objectiveType === 'individual' && config.selector === '#subObjective' || jsonModel.status._id === 'completed') {
+                        if (App.currentUser.accessRole.level === 2 && jsonModel.objectiveType === 'individual' && config.selector === '#subObjective' || jsonModel.status._id === 'completed' || isCountryObjective) {
                             return;
                         }
 
