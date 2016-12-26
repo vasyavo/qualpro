@@ -218,7 +218,7 @@ define([
                 return branch.name.currentLanguage;
             });
 
-            if (modelJSON.assignedTo[0]._id === App.currentUser._id && modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED) {
+            if (modelJSON.assignedTo[0]._id === App.currentUser._id && modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
 
                 this.visibilityForm = new VisibilityEditView({
                     id                  : id,
