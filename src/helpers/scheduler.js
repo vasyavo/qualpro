@@ -300,8 +300,8 @@ module.exports = function(db, event) {
         CompetitorPromotionModel.aggregate(getPipeLine(query), schedulerCallBack('competitorPromotion', 'Expired', updateEachGenerator(updateCompetitorPromotion)));
     }
 
-    function brandingAndDisplayExpired() {
-        const BrandingAndDisplayModel = require('../types/brandingAndDisplay/model');
+    function brandingActivityExpired() {
+        const BrandingActivityModel = require('../types/brandingActivity/model');
         var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
         var query = {
@@ -314,8 +314,8 @@ module.exports = function(db, event) {
             }
         };
 
-        function updateBrandingAndDisplay(id, cb) {
-            BrandingAndDisplayModel.findByIdAndUpdate(id, {
+        function updateBrandingActivity(id, cb) {
+            BrandingActivityModel.findByIdAndUpdate(id, {
                 $set : {
                     status : PROMOTION_STATUSES.EXPIRED
                 }
@@ -325,14 +325,14 @@ module.exports = function(db, event) {
                 }
 
                 if (model) {
-                    triggerEvent(38, id, CONTENT_TYPES.BRANDINGANDDISPLAY);
+                    triggerEvent(38, id, CONTENT_TYPES.BRANDING_ACTIVITY);
                 }
 
                 cb(null);
             });
         }
 
-        BrandingAndDisplayModel.aggregate(getPipeLine(query), schedulerCallBack('brandingAndDisplay', 'Expired', updateEachGenerator(updateBrandingAndDisplay)));
+        BrandingActivityModel.aggregate(getPipeLine(query), schedulerCallBack('brandingActivity', 'Expired', updateEachGenerator(updateBrandingActivity)));
     }
 
     function competitorBrandingAndDisplayExpired() {
@@ -495,7 +495,7 @@ module.exports = function(db, event) {
             contractsSecondaryExpired,
             promotionExpired,
             promotionItemExpired,
-            brandingAndDisplayExpired,
+            brandingActivityExpired,
             competitorBrandingAndDisplayExpired,
             competitorPromotionExpired,
             personnelInactive,

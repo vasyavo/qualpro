@@ -214,9 +214,9 @@ var ContactUs = function(db, redis, event) {
                     'country.name' : 1,
                     'country._id' : 1
                 })
+                .sort({[query.sortBy]: -1})
                 .skip(skip)
                 .limit(count)
-                .sort(query.sortBy)
                 .allowDiskUse(true);
 
             function getCount(cb) {
