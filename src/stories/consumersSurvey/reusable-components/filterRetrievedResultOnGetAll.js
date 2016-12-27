@@ -51,11 +51,8 @@ module.exports = (options, cb) => {
     const body = result && result[0] ?
         result[0] : { data: [], total: 0 };
 
-    if (accessRoleLevel !== 1) {
+    /*if (accessRoleLevel !== 1) {
         body.data = body.data.filter((question) => {
-            const personnelArray = question.personnels.fromObjectID();
-            const isEnoughMembers = question.personnels && personnelArray.length;
-            const isMember = personnelArray.indexOf(personnelId) !== -1;
             const creator = question.createdBy.user;
 
             let isCreator = null;
@@ -68,11 +65,11 @@ module.exports = (options, cb) => {
                 isCreator = creator && creator._id.toString() === personnelId;
             }
 
-            return isCreator || (isEnoughMembers && isMember);
+            return isCreator;
         });
 
         body.total = body.data.length;
-    }
+    }*/
 
     cb(null, body);
 };

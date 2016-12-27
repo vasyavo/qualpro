@@ -8,6 +8,7 @@ module.exports = {
     },
     mobile: {
         read: true,
-        write: true
+        write: true,
+        edit : true
     }
 };

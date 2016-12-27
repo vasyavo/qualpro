@@ -14,8 +14,6 @@ const getImagesHelper = new GetImageHelper();
 
 const $defProjection = {
     _id: 1,
-    personnel: 1,
-    personnelId: 1,
     questionnaryId: 1,
     questionId: 1,
     optionIndex: 1,
@@ -53,15 +51,6 @@ module.exports = (req, res, next) => {
         pipeLine.push({
             $match: saveObj
         });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from             : 'personnels',
-            key              : 'personnelId',
-            as               : 'personnel',
-            isArray          : false,
-            addProjection    : ['firstName', 'lastName'],
-            addMainProjection: ['position']
-        }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from   : 'positions',
@@ -106,49 +95,11 @@ module.exports = (req, res, next) => {
         };
 
         aggregation.exec(function (err, response) {
-            var personnelIds = [];
-            var options = {
-                data: {}
-            };
-
             if (!response.length) {
                 return next({status: 200, body: []});
             }
 
-            _.map(response, function (answer) {
-                if (answer.text) {
-                    answer.text = {
-                        en: _.unescape(answer.text.en),
-                        ar: _.unescape(answer.text.ar)
-                    }
-                }
-                personnelIds.push(answer.personnel._id);
-
-                return answer;
-            });
-
-            personnelIds = lodash.uniqBy(personnelIds, 'id');
-
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return next(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['personnel'];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    next({status: 200, body: response});
-                })
-            });
+            next({status: 200, body: response});
         });
     }
 
@@ -156,6 +107,7 @@ module.exports = (req, res, next) => {
         if (err) {
             return next(err);
         }
+
         if (!allowed) {
             err = new Error();
             err.status = 403;
