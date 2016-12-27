@@ -690,7 +690,7 @@ define([
                 });
             }
 
-            if ([CONSTANTS.OBJECTIVE_STATUSES.CLOSED, CONSTANTS.OBJECTIVE_STATUSES.COMPLETED].indexOf(jsonModel.status._id) === -1 && App.currentUser.workAccess) {
+            if ([CONSTANTS.OBJECTIVE_STATUSES.CLOSED, CONSTANTS.OBJECTIVE_STATUSES.COMPLETED, CONSTANTS.OBJECTIVE_STATUSES.OVER_DUE, CONSTANTS.OBJECTIVE_STATUSES.FAIL].indexOf(jsonModel.status._id) === -1 && App.currentUser.workAccess) {
                 if (!this.activityList) {
                     configForTemplate.forEach(function (config) {
                         var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id;
