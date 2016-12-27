@@ -107,8 +107,7 @@ define([
             if (this.selectedConfigurationId && this.selectedConfigurationId !== model.configuration._id) {
                 this.body.configuration = this.selectedConfigurationId;
             }
-
-            if (this.selectedDisplayType && this.selectedDisplayType.length) {
+            if (this.selectedDisplayType && this.selectedDisplayType._id) {
                 this.body.displayType = this.selectedDisplayType;
             }
             if (!Object.keys(this.body).length && !this.imgChange) {
@@ -130,18 +129,19 @@ define([
             var $target = $(e.target);
             var type = $target.attr('data-property');
             var value = $target.val();
+            var self = this;
 
             e.preventDefault();
             e.stopPropagation();
 
             if (type === 'displayType' && value) {
-                this.selectedDisplayType = [{
+                this.selectedDisplayType = {
                     _id : 'otherId',
                     name : {
                         ar: value,
                         en: value
-                    }}];
-                this.displayTypeDropDownView.selectedValues = [this.selectedDisplayType[0].name];
+                    }};
+                self.displayTypeDropDownView.selectedValues = [this.selectedDisplayType.name];
             }
         },
 
@@ -176,7 +176,7 @@ define([
             self.selectedRetailSegmentId = modelJSON.retailSegment || null;
             self.selectedProductId = modelJSON.product && modelJSON.product._id || null;
             self.selectedConfigurationId = modelJSON.configuration || null;
-            self.selectedDisplayType =  modelJSON.displayType && modelJSON.displayType.length ? modelJSON.displayType :[];
+            self.selectedDisplayType = modelJSON.displayType || null;
 
             this.countryDropDownView = new dropDownView({
                 translation   : this.translation,
@@ -188,38 +188,35 @@ define([
 
             this.displayTypeCollection = new filterCollection();
 
+            if (modelJSON.displayType && !modelJSON.displayType._id){
+                modelJSON.displayType._id = 'otherId';
+            }
+
             this.displayTypeDropDownView = new dropDownView({
                 translation : this.translation,
                 dropDownList: this.displayTypeCollection,
-                selectedValues : modelJSON.displayType,
+                selectedValues : [modelJSON.displayType],
                 displayText : this.translation.displayType,
-                contentType : CONTENT_TYPES.DISPLAYTYPE,
-                multiSelect : true,
-                noSingleSelectEvent : true,
-                noAutoSelectOne : true
+                contentType : CONTENT_TYPES.DISPLAYTYPE
             });
 
             this.displayTypeCollection.reset(OTHER_CONSTANTS.DISPLAY_TYPE_DD[App.currentUser.currentLanguage]);
             this.displayTypeDropDownView.on('changeItem', function (data) {
-                var modelId =  data.$item.attr('id');
+                var modelId = data.model._id;
                 var input = data.$selector;
 
                 if (modelId === 'otherId'){
                     input.addClass('createOwn');
-                    self.selectedDisplayType = [];
                     self.displayTypeDropDownView.selectedValues = [];
                     input.focus();
                 } else {
-                    if (self.selectedDisplayType.length && self.selectedDisplayType[0]._id === 'otherId'){
-                        self.selectedDisplayType = [];
-                    }
-                    self.selectedDisplayType.push({
+                    self.selectedDisplayType = {
                         _id : modelId,
                         name : {
                             en : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id : modelId}).name,
                             ar : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id : modelId}).name
                         }
-                    });
+                    };
                 }
             });
             $formString.find('#displayTypeSelect').append(this.displayTypeDropDownView.el);

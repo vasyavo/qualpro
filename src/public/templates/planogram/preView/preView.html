@@ -74,7 +74,7 @@
                         </div>
 
                         <div class="cell">
-                            <span id="displayType" class="textEllipsis hoverFullText descriptionViewContent"><%= model.displayTypeString || '' %></span>
+                            <span id="displayType" class="textEllipsis hoverFullText descriptionViewContent"><%= model.displayType && model.displayType.name && model.displayType.name.currentLanguage || '' %></span>
                         </div>
                     </div>
                 </div>

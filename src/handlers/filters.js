@@ -3821,12 +3821,6 @@ const Filters = function(db, redis) {
         });
 
         pipeLine.push({
-            $unwind : {
-                path : '$displayType'
-            }
-        });
-
-        pipeLine.push({
             $project : {
                 country : 1,
                 retailSegment : 1,
@@ -3835,10 +3829,7 @@ const Filters = function(db, redis) {
                     name : {en : '$configuration.name'},
                     _id  : 1
                 },
-                displayType : {
-                    _id : {$ifNull: ['$displayType._id', '']},
-                    name: '$displayType.name'
-                }
+                displayType : 1
             }
         });
 

@@ -24,7 +24,6 @@ define([
     var manageView = BaseView.extend({
         contentType: CONSTANTS.PLANOGRAM,
         files      : {},
-        selectedDisplayType : [],
         template   : _.template(CreateTemplate),
         attachCount: 0,
 
@@ -66,13 +65,13 @@ define([
             e.stopPropagation();
 
             if (type === 'displayType' && value) {
-                this.selectedDisplayType = [{
+                this.selectedDisplayType = {
                     _id : 'otherId',
                     name : {
                         ar: value,
                         en: value
-                    }}];
-                this.displayTypeDropDownView.selectedValues = [this.selectedDisplayType[0].name];
+                    }};
+                this.displayTypeDropDownView.selectedValues = [this.selectedDisplayType.name];
             }
         },
 
@@ -194,21 +193,18 @@ define([
             } else if (itemName === 'configuration') {
                 this.selectedConfigurationId = itemId;
             } else if (itemName === 'displayType') {
-                itemId = data.$item.attr('id');
-
                 if (itemId === 'otherId'){
                     input.addClass('createOwn');
-                    this.selectedDisplayType = [];
                     this.displayTypeDropDownView.selectedValues = [];
                     input.focus();
                 } else {
-                    this.selectedDisplayType.push({
+                    this.selectedDisplayType = {
                         _id : itemId,
                         name : {
                             en : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id : itemId}).name,
                             ar : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id : itemId}).name
                         }
-                    });
+                    };
                 }
             }
         },
@@ -232,9 +228,6 @@ define([
                 translation : this.translation,
                 dropDownList: this.displayTypeCollection,
                 displayText : this.translation.displayType,
-                multiSelect : true,
-                noSingleSelectEvent : true,
-                noAutoSelectOne : true,
                 contentType : CONTENT_TYPES.DISPLAYTYPE
             });
 
