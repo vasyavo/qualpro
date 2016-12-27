@@ -1,0 +1,14 @@
+<div class="respondentsItemWrap borderBottom">
+    <div class="respondentsItem">
+        <div class="itemTitle"><%= translation.type %>: <%- question.type && question.type.name ? question.type.name.currentLanguage : question.type %></div>
+        <div><%= question.title.currentLanguage %></div>
+    </div>
+    <div class="respondentsItem">
+        <div class="itemTitle"><%= translation.options %></div>
+        <ol class="respondentsList">
+            <% question.options.forEach(function(option, index){ %>
+                <li class="<%= answerIndexes.indexOf(++index) !== -1 ? 'active' : '' %>"><%= option.currentLanguage %></li>
+            <% }); %>
+        </ol>
+    </div>
+</div>

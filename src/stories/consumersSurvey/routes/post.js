@@ -61,6 +61,20 @@ module.exports = (req, res, next) => {
                                 ar: _.escape(question.title.ar)
                             };
                         }
+
+                        if (question.type === 'NPS') {
+                            const options = [];
+
+                            for (let i = 1; i <= 10; i++) {
+                                options.push({
+                                    en : i,
+                                    ar : i
+                                });
+                            }
+
+                            question.options = options;
+                        }
+
                         if (question.options && question.options.length) {
                             question.options = _.map(question.options, function (option) {
                                 if (option) {
