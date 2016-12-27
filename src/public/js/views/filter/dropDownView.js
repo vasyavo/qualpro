@@ -313,6 +313,7 @@ define([
             var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ||
                 Cookies.get('currentLanguage') || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            var $dropDownListSelected =  $el.closest('.dropDownItems').find('.selected');
 
             modelName = modelName[currentLanguage] || modelName[anotherLanguage] || modelName;
 
@@ -321,8 +322,14 @@ define([
             modelIndex = this.selectedValuesIds.indexOf(itemId);
             selected = modelIndex === -1;
 
-            if (this.multiSelect) {
+            if (this.multiSelect && itemId !=='otherId') {
                 if (selected) {
+                    if (~this.selectedValuesIds.indexOf('otherId')){
+                        this.selectedValues = [];
+                        this.selectedValuesIds = [];
+                        $dropDownListSelected.removeClass('selected');
+                    }
+
                     this.selectedValuesIds.push(itemId);
                     this.selectedValues.push(modelName);
 
@@ -355,7 +362,7 @@ define([
                     if (prevModel) {
                         prevModel.set('selected', false);
                     }
-                    $el.closest('.dropDownItems').find('.selected').removeClass('selected');
+                    $dropDownListSelected.removeClass('selected');
                 }
 
                 if (this.singleUnselect) {

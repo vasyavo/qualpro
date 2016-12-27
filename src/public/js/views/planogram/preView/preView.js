@@ -64,6 +64,9 @@ define([
                 jsonModel.retailSegmentString = jsonModel.retailSegment.map((item) => {
                     return item.name.currentLanguage;
                 }).join(', ');
+                jsonModel.displayTypeString = jsonModel.displayType.map((item) => {
+                    return item.name.currentLanguage;
+                }).join(', ');
 
                 self.$el.html(self.template({
                     translation: self.translation,
@@ -80,8 +83,7 @@ define([
             modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
                 return item.name.currentLanguage;
             }).join(', ');
-
-            modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
+            modelJSON.displayTypeString = modelJSON.displayType.map((item) => {
                 return item.name.currentLanguage;
             }).join(', ');
 

@@ -3821,6 +3821,12 @@ const Filters = function(db, redis) {
         });
 
         pipeLine.push({
+            $unwind : {
+                path : '$displayType'
+            }
+        });
+
+        pipeLine.push({
             $project : {
                 country : 1,
                 retailSegment : 1,
@@ -3870,11 +3876,15 @@ const Filters = function(db, redis) {
         };
 
         aggregation.exec(function(err, result) {
+            var otherDisplayType;
+
             if (err) {
                 return next(err);
             }
 
             result = result[0] || {};
+
+            otherDisplayType = _.findWhere(result.displayType, {_id : 'otherId'});
 
             result = {
                 country : result.country || [],
@@ -3884,13 +3894,12 @@ const Filters = function(db, redis) {
                 displayType : result.displayType || []
             };
 
-            result.displayType.push({
-                _id : 'otherId',
-                name: {
+            if (otherDisplayType){
+                otherDisplayType.name = {
                     en : 'Other',
                     ar : ' '//todo add translation
-                }
-            });
+                };
+            }
 
             redisFilters({
                 currentSelected : currentSelected,

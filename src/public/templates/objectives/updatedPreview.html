@@ -174,7 +174,7 @@
             </select>
         </div>
 
-        <% if (jsonModel.status._id !== 'closed' && App.currentUser.workAccess && !(jsonModel.objectiveType === 'country' && App.currentUser.accessRole.level === 1)) { %>
+        <% if (jsonModel.status._id !== 'closed' && App.currentUser.workAccess) { %>
 
         <div class="objectivesBtnBlock">
             <span class="greyBtn" id="attachFiles"><%= translation.attach %></span>

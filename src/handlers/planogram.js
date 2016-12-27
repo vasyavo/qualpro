@@ -719,10 +719,6 @@ var planogramsHandler = function(db, redis, event) {
                 queryObject.archived = false;
             }
 
-            if (queryObject['displayType._id'] && queryObject['displayType._id'].$in && ~queryObject['displayType._id'].$in.indexOf('otherId')) {
-                queryObject['displayType._id'].$in.push(null);
-            }
-
             function contentFinder(parallelCb) {
                 var aggregation;
 
