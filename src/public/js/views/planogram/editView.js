@@ -107,7 +107,7 @@ define([
             if (this.selectedConfigurationId && this.selectedConfigurationId !== model.configuration._id) {
                 this.body.configuration = this.selectedConfigurationId;
             }
-            if (this.selectedDisplayType && this.selectedDisplayType._id !== (model.displayType && model.displayType._id)) {
+            if (this.selectedDisplayType && this.selectedDisplayType._id) {
                 this.body.displayType = this.selectedDisplayType;
             }
             if (!Object.keys(this.body).length && !this.imgChange) {
@@ -136,6 +136,7 @@ define([
 
             if (type === 'displayType' && value) {
                 this.selectedDisplayType = {
+                    _id : 'otherId',
                     name : {
                         ar: value,
                         en: value
@@ -175,7 +176,7 @@ define([
             self.selectedRetailSegmentId = modelJSON.retailSegment || null;
             self.selectedProductId = modelJSON.product && modelJSON.product._id || null;
             self.selectedConfigurationId = modelJSON.configuration || null;
-            self.selectedDisplayType = modelJSON.displayType && modelJSON.displayType || null;
+            self.selectedDisplayType = modelJSON.displayType || null;
 
             this.countryDropDownView = new dropDownView({
                 translation   : this.translation,

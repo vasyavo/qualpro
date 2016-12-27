@@ -18,7 +18,7 @@
                 {_id: 'gondolaId', name: 'جندولة', sortKey: 1},
                 {_id: 'thematicStandId', name:  'استاند خاص بحملة ترويج معينة', sortKey: 2},
                 {_id: 'shelfId', name: 'رف', sortKey: 3},
-                {_id: 'otherId', name: ' ', sortKey: 4}
+                {_id: 'otherId', name: 'آخر', sortKey: 4}
             ]
         },
 

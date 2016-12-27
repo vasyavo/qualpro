@@ -3829,10 +3829,7 @@ const Filters = function(db, redis) {
                     name : {en : '$configuration.name'},
                     _id  : 1
                 },
-                displayType : {
-                    _id : {$ifNull: ['$displayType._id', '']},
-                    name: '$displayType.name'
-                }
+                displayType : 1
             }
         });
 
@@ -3870,11 +3867,15 @@ const Filters = function(db, redis) {
         };
 
         aggregation.exec(function(err, result) {
+            var otherDisplayType;
+
             if (err) {
                 return next(err);
             }
 
             result = result[0] || {};
+
+            otherDisplayType = _.findWhere(result.displayType, {_id : 'otherId'});
 
             result = {
                 country : result.country || [],
@@ -3884,13 +3885,12 @@ const Filters = function(db, redis) {
                 displayType : result.displayType || []
             };
 
-            result.displayType.push({
-                _id : 'otherId',
-                name: {
+            if (otherDisplayType){
+                otherDisplayType.name = {
                     en : 'Other',
-                    ar : ' '//todo add translation
-                }
-            });
+                    ar : 'آخر'
+                };
+            }
 
             redisFilters({
                 currentSelected : currentSelected,

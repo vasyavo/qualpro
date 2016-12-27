@@ -81,10 +81,6 @@ define([
                 return item.name.currentLanguage;
             }).join(', ');
 
-            modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
-                return item.name.currentLanguage;
-            }).join(', ');
-
             this.$el.html(this.template({
                 translation : this.translation,
                 model       : modelJSON,

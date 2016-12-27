@@ -66,6 +66,7 @@ define([
 
             if (type === 'displayType' && value) {
                 this.selectedDisplayType = {
+                    _id : 'otherId',
                     name : {
                         ar: value,
                         en: value
