@@ -3888,7 +3888,7 @@ const Filters = function(db, redis) {
             if (otherDisplayType){
                 otherDisplayType.name = {
                     en : 'Other',
-                    ar : ' '//todo add translation
+                    ar : 'آخر'
                 };
             }
 
