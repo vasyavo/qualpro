@@ -15,7 +15,7 @@ module.exports = function (db, redis, event) {
 
     router.post('/', handler.create);
 
-    router.patch('/:id', handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     /**
      * __Type__ 'POST'
@@ -74,7 +74,7 @@ module.exports = function (db, redis, event) {
 
     router.get('/', handler.getAll);
     router.get('/answer', handler.getAnswers);
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
 
     return router;

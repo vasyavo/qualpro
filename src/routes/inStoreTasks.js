@@ -519,7 +519,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.put('/:id', multipartMiddleware, onLeaveMiddleware, handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, onLeaveMiddleware, handler.update);
 
     /**
      * __Type__ `GET`
@@ -703,9 +703,9 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.get('/taskFlow/:id', handler.getByIdTaskFlow);
+    router.get('/taskFlow/:id([0-9a-fA-F]{24})', handler.getByIdTaskFlow);
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ `GET`

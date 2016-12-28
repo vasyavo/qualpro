@@ -149,7 +149,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ 'PUT'
@@ -223,7 +223,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.put('/:id', handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', handler.update);
 
     /**
      * __Type__ 'PATCH'
@@ -267,7 +267,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.patch('/:id', handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     return router;
 };

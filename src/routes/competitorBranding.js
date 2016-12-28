@@ -16,7 +16,7 @@ module.exports = function (db, redis, event) {
             err ? next(err) : next();
         })
     }, handler.getAll);
-    router.get('/:id', function(req, res, next) {
+    router.get('/:id([0-9a-fA-F]{24})', function(req, res, next) {
         access.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err) {
             err ? next(err) : next();
         })
