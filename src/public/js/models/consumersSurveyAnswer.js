@@ -17,7 +17,7 @@ define([
         modelParse: function (model) {
             var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
 
-            if (model.optionIndex && model.optionIndex.length) {
+            if (model.optionIndex && model.optionIndex.length && model.type !== 'NPS') {
                 model.optionIndex.forEach(function (option, iterator) {
                     model.optionIndex[iterator] = ++option;
                 });

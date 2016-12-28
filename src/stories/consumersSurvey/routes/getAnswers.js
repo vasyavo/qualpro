@@ -27,7 +27,8 @@ const $defProjection = {
     country: 1,
     text: 1,
     position: 1,
-    customer : 1
+    customer : 1,
+    type : 1
 };
 
 module.exports = (req, res, next) => {
