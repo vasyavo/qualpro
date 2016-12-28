@@ -27,7 +27,8 @@ const $defProjection = {
     country: 1,
     text: 1,
     position: 1,
-    customer : 1
+    customer : 1,
+    type : 1
 };
 
 module.exports = (req, res, next) => {
@@ -43,7 +44,6 @@ module.exports = (req, res, next) => {
         var saveObj = {
             questionnaryId: ObjectId(query.questionnaryId)
         };
-        var aggregation;
 
         if (query.questionId) {
             saveObj.questionId = ObjectId(query.questionId);
@@ -89,7 +89,7 @@ module.exports = (req, res, next) => {
             key : 'branch'
         }));
 
-        aggregation = ConsumersSurveyAnswersModel.aggregate(pipeLine);
+        const aggregation = ConsumersSurveyAnswersModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true

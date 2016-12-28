@@ -9,7 +9,8 @@ const schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
-    dueDate: { type: Date, default: new Date() },
+    dueDate: { type: Date, default: Date.now },
+    startDate: { type: Date, default: null },
     status: { type: String, enum: ['draft', 'active', 'completed'] },
     location: {
         en: { type: String, default: '' },
@@ -53,11 +54,11 @@ const schema = new Schema({
     }],
     createdBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() }
+        date: { type: Date, default: Date.now }
     },
     editedBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() }
+        date: { type: Date, default: Date.now }
     }
 }, { collection: CONTENT_TYPES.CONSUMER_SURVEY });
 
