@@ -350,7 +350,7 @@ define([
                 });
 
             } else {
-                if (this.selectedValues.length) {
+                if (this.selectedValuesIds.length) {
                     prevModel = this.collection.get(this.selectedValuesIds[0]);
                     if (prevModel) {
                         prevModel.set('selected', false);
