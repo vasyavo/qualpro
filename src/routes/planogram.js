@@ -150,7 +150,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ 'POST'
@@ -367,7 +367,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.put('/:id', multipartMiddleware, handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
 
     /**
      * __Type__ 'PATCH'
@@ -436,7 +436,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.patch('/:id', multipartMiddleware, handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
 
     return router;
 };

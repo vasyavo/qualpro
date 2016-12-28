@@ -340,7 +340,7 @@ module.exports = function (db, app, event, redis) {
      * @instance
      */
 
-    router.get('/:id', checkAuth, handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', checkAuth, handler.getById);
     router.post('/passwordChange/:forgotToken', csrfProtection, handler.changePassword);
 
     /**
@@ -521,7 +521,7 @@ module.exports = function (db, app, event, redis) {
      * @instance
      */
 
-    router.put('/:id', checkAuth, handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', checkAuth, handler.update);
 
     /**
      * __Type__ 'PATCH'
@@ -545,9 +545,9 @@ module.exports = function (db, app, event, redis) {
      * @instance
      */
 
-    router.patch('/:id', checkAuth, handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', checkAuth, handler.update);
 
-    router.delete('/:id', checkAuth, handler.remove);
+    router.delete('/:id([0-9a-fA-F]{24})', checkAuth, handler.remove);
 
     return router;
 };

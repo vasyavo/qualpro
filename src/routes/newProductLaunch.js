@@ -24,7 +24,7 @@ module.exports = function (db, redis, event) {
             next();
         })
     }, handler.getAll);
-    router.get('/:id', function(req, res, next) {
+    router.get('/:id([0-9a-fA-F]{24})', function(req, res, next) {
         access.getReadAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function(err) {
             err ? next(err) : next();
         })
