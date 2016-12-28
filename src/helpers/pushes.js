@@ -47,13 +47,14 @@ module.exports = function (db) {
                 }
 
                 async.each(devices, function (device, eachCb) {
+                    const deviceId = device.deviceId;
                     const payloadOptions = options.payload || {};
                     const pushData = Object.assign({}, payloadOptions, alert);
 
-                    logger.info('Firebase message payload:', pushData);
+                    logger.info(`Firebase device ${deviceId} message payload:`, pushData);
 
                     fcmClient.send({
-                        to: device.deviceId,
+                        to: deviceId,
                         data: pushData
                     }, (err, data) => {
                         if (err) {

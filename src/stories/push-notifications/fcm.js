@@ -67,7 +67,7 @@ class FirebaseCloudMessagingClient {
             callback(error);
         });
 
-        req.write(postData, 'utf-8');
+        req.write(postData);
         req.end();
     };
 
