@@ -11,10 +11,10 @@ module.exports = function(db, redis, event) {
 
     router.post('/', handler.create);
     router.get('/', handler.getAll);
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
     router.put('/remove', handler.archive);
-    router.put('/:id', handler.update);
-    router.patch('/:id', handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
     // router.delete('/:id', handler.remove);
 
     return router;

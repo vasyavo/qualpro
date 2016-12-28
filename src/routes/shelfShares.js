@@ -15,7 +15,7 @@ module.exports = function (db, redis, event) {
 
     router.get('/brands', handler.getBrands);
     router.get('/', handler.getAll);
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     return router;
 };

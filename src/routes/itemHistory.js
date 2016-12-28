@@ -167,7 +167,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     return router;
 };

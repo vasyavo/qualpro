@@ -157,7 +157,7 @@ module.exports = function (db, redis, event) {
      */
 
     router.post('/', multipartMiddleware, handler.create);
-    router.put('/:id', multipartMiddleware, handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
 
     /**
      * __Type__ 'PUT'
@@ -309,7 +309,7 @@ module.exports = function (db, redis, event) {
      */
 
 
-    router.patch('/:id', multipartMiddleware, handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
 
     /**
      * __Type__ `GET`
@@ -457,7 +457,7 @@ module.exports = function (db, redis, event) {
 
     router.get('/', handler.getAll);
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
     router.delete('/file', handler.removeFileFromBrandingActivity);
 
     return router;
