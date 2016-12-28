@@ -1,15 +1,16 @@
 var mongoose = require('mongoose');
 var async = require('async');
-var CONSTANTS = require('../constants/mainConstants');
-var key = CONSTANTS.GSM_API_KEY;
-var googlePusher = require('../helpers/gcm')(key);
+const config = require('./../config');
+const FCM = require('./../stories/push-notifications/fcm');
 const SessionModel = require('./../types/session/model');
+const logger = require('./../utils/logger');
+
+const fcmClient = new FCM(config.fcmApiKey);
 
 module.exports = function (db) {
     'use strict';
 
     function sendPushesToUser(userId, alert, options, callback) {
-        var sendPushToProvider = googlePusher;
         async.waterfall([
             function (waterfallCb) {
                 var regExpArray = [];
@@ -48,8 +49,20 @@ module.exports = function (db) {
                 }
 
                 async.each(devices, function (device, eachCb) {
+                    const payloadOptions = options.payload || {};
+                    const fcmOptions = {
+                        icon: payloadOptions.badge,
+                        sound: payloadOptions.sound,
+                        title: payloadOptions.title,
+                    };
 
-                    sendPushToProvider.sendPush(device.deviceId, alert, options);
+                    fcmClient.send({
+                        registration_ids: [device.deviceId],
+                        data: alert,
+                        notification: fcmOptions,
+                    }, (err, data) => {
+                        logger.info(`Push messaging client, error: ${err}, data: ${data}`);
+                    });
                     eachCb(null);
                 }, function (err) {
                     if (err) {
