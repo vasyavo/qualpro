@@ -33,6 +33,7 @@ define([
         },
         title             : 'Title',
         dueDate           : 'Due date',
+        startDate         : 'Start Date',
         create            : 'Create',
         questionType      : 'Consumer Survey Type',
         //preview

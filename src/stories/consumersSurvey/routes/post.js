@@ -91,6 +91,7 @@ module.exports = (req, res, next) => {
 
                 body.status = 'draft';
                 body.dueDate = new Date(body.dueDate);
+                body.startDate = new Date(body.startDate);
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
 

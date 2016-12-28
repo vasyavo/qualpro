@@ -10,6 +10,7 @@ define([
         fieldsToTranslate: [
             'title',
             'dueDate',
+            'startDate',
             'questions',
             'location'
         ],
@@ -27,6 +28,9 @@ define([
             }
             if (this.translatedFields.dueDate) {
                 validation.checkForValuePresence(errors, true, attrs.dueDate, this.translatedFields.dueDate);
+            }
+            if (this.translatedFields.startDate) {
+                validation.checkForValuePresence(errors, true, attrs.startDate, this.translatedFields.startDate);
             }
             if (this.translatedFields.questions) {
                 validation.checkForValuePresence(errors, true, attrs.questions, this.translatedFields.questions);
