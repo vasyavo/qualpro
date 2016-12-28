@@ -83,6 +83,12 @@ module.exports = (req, res, next) => {
             };
         }
 
+        if (isMobile) {
+            queryObject.status = {
+                $nin : ['draft']
+            }
+        }
+
         const aggregateHelper = new AggregationHelper($defProjection);
         const pipeline = [];
 
