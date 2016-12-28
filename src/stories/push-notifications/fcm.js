@@ -36,7 +36,7 @@ class FirebaseCloudMessagingClient {
                 if (statusCode === 200 && rawData.indexOf('multicast_id')) {
                     const responseBody = JSON.parse(rawData);
 
-                    callback(null, responseBody);
+                    return callback(null, responseBody);
                 }
 
                 // Implement exponential back-off in your retry mechanism

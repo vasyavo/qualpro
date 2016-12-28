@@ -61,7 +61,12 @@ module.exports = function (db) {
                         data: fcmOptions,
                         notification: alert,
                     }, (err, data) => {
-                        logger.info(`Push messaging client, error: ${err}, data: ${data}`);
+                        if (err) {
+                            logger.error('Firebase returns', err);
+                            return null;
+                        }
+
+                        logger.info('Firebase response data:', data);
                     });
                     eachCb(null);
                 }, function (err) {
