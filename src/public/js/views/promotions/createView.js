@@ -334,6 +334,7 @@ define([
                     var id = opts.model._id;
 
                     if (id) {
+                        self.locationFilter = {};
                         self.locationFilter.country = {type: 'ObjectId', values: [id]};
                     } else {
                         delete self.locationFilter.country;
@@ -347,6 +348,11 @@ define([
 
                     if (ids.length) {
                         self.locationFilter.region = {type: 'ObjectId', values: ids};
+
+                        delete self.locationFilter.subRegion;
+                        delete self.locationFilter.outlet;
+                        delete self.locationFilter.retailSegment;
+                        delete self.locationFilter.branch;
                     } else {
                         delete self.locationFilter.region;
                     }
@@ -362,6 +368,10 @@ define([
 
                     if (ids.length) {
                         self.locationFilter.subRegion = {type: 'ObjectId', values: ids};
+
+                        delete self.locationFilter.outlet;
+                        delete self.locationFilter.retailSegment;
+                        delete self.locationFilter.branch;
                     } else {
                         delete self.locationFilter.subRegion;
                     }
@@ -378,6 +388,9 @@ define([
 
                     if (ids.length) {
                         self.locationFilter.retailSegment = {type: 'ObjectId', values: ids};
+
+                        delete self.locationFilter.outlet;
+                        delete self.locationFilter.branch;
                     } else {
                         delete self.locationFilter.retailSegment;
                     }
@@ -395,6 +408,8 @@ define([
 
                     if (ids.length) {
                         self.locationFilter.outlet = {type: 'ObjectId', values: ids};
+
+                        delete self.locationFilter.branch;
                     } else {
                         delete self.locationFilter.outlet;
                     }
