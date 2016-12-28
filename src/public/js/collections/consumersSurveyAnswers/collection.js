@@ -27,8 +27,10 @@ define([
             var personnelsIds = [];
 
             collection.forEach(function (answer) {
-                if (personnelsIds.indexOf(answer.personnel._id) === -1 && answer.selectedForPersonnel) {
+                if (answer.personnel && personnelsIds.indexOf(answer.personnel._id) === -1 && answer.selectedForPersonnel) {
                     personnelsIds.push(answer.personnel._id);
+                    answers.push(answer);
+                } else if (answer.customer) {
                     answers.push(answer);
                 }
             });
@@ -41,8 +43,12 @@ define([
 
             return _.filter(this.toJSON(), function (model) {
 
-                if ((model.questionId === self.questionId && options.modelKey === 'selected') || (model.personnel._id === self.personnelId && options.modelKey === 'selectedForPersonnel')) {
+                if (model.questionId === self.questionId && options.modelKey === 'selected') {
                     return model[options.modelKey];
+                }
+
+                if (model.customer.name === self.customerName && options.modelKey === 'selectedForPersonnel') {
+                    return true;
                 }
 
                 return false;

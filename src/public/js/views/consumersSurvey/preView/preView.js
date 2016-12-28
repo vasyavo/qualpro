@@ -2,7 +2,9 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
+    'lodash',
     'text!templates/consumersSurvey/preview.html',
+    'text!templates/consumersSurvey/npmQuestion.html',
     'text!templates/consumersSurvey/questionList.html',
     'text!templates/consumersSurvey/respondentsList.html',
     'text!templates/consumersSurvey/respondentsFullList.html',
@@ -18,7 +20,7 @@ define([
     'constants/contentType',
     'd3',
     'constants/levelConfig'
-], function (Backbone, _, $, PreViewTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
+], function (Backbone, _, $, lodash, PreViewTemplate, npsQuestionTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
              QuestionFullAnswerTemplate, QuestionSingleSelectTemplate, QuestionMultiselectTemplate,
              Model, QuestionModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
              BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG) {
@@ -32,6 +34,7 @@ define([
         questionFullAnswerTemplate  : _.template(QuestionFullAnswerTemplate),
         questionSingleSelectTemplate: _.template(QuestionSingleSelectTemplate),
         questionMultiselectTemplate : _.template(QuestionMultiselectTemplate),
+        npsQuestionTemplate         : _.template(npsQuestionTemplate),
 
         events: {
             'click #questionList .questionsContainerItem': 'questionClick',
@@ -44,7 +47,6 @@ define([
         },
 
         initialize: function (options) {
-
             this.model = options.model;
             this.translation = options.translation;
             this.activityList = options.activityList;
@@ -208,8 +210,8 @@ define([
                     "font-size"  : '12px',
                     "fill"       : "#fff"
                 }).text(function (d, i) {
-                return i + 1;
-            });
+                    return i + 1;
+                });
 
             arcs
                 .append('text')
@@ -229,8 +231,8 @@ define([
                     "font-size"  : '12px',
                     "font-weight": 'bold'
                 }).text(function (d, i) {
-                return percentArray[i] + '%';
-            });
+                    return percentArray[i] + '%';
+                });
 
             arcs
                 .append('text')
@@ -249,8 +251,8 @@ define([
                     "text-anchor": 'middle',
                     "font-size"  : '12px'
                 }).text(function (d, i) {
-                return ' ( ' + optionsCountArray[i] + ' )';
-            });
+                    return ' ( ' + optionsCountArray[i] + ' )';
+                });
 
             arcs
                 .append('text')
@@ -280,6 +282,8 @@ define([
 
             $respondentsFullList.html('');
 
+            answers = lodash.uniqBy(answers, 'customer.name');
+            
             answers.forEach(function (answer) {
                 answer.location = self.setLocation(answer);
 
@@ -296,11 +300,10 @@ define([
         respondentClick: function (e, $questionContainer) {
             var $el = $(e.target);
             var $curEl = this.$el;
-            var personnelId;
             var self = this;
 
             $questionContainer = $questionContainer || $el.closest('.questionsList');
-            personnelId = $questionContainer.attr('data-id');
+            var customerName = $questionContainer.attr('data-id');
 
             if (e && e.preventDefault) {
                 e.preventDefault();
@@ -310,15 +313,16 @@ define([
             $curEl.find('#respondentsFullList .questionsList').removeClass('questionsListActive');
             $questionContainer.addClass('questionsListActive');
 
-            self.answersCollection.personnelId = personnelId;
+            self.answersCollection.customerName = customerName;
             self.renderRespondentsQuestions();
         },
 
         renderRespondentsQuestions: function () {
             var self = this;
             var $respondentsList = this.$el.find('#questionFullList');
-            var personnelId = self.answersCollection.personnelId;
-            var answers = this.answersCollection.getSelected({modelKey: 'selectedForPersonnel'});
+            var answers = this.answersCollection.getSelected({
+                modelKey: 'selectedForPersonnel'
+            });
             var respondentQuestionsIds = _.pluck(answers, 'questionId');
             var respondentQuestions = _.filter(this.model.get('questions'), function (question) {
                 return respondentQuestionsIds.indexOf(question._id) !== -1;
@@ -327,9 +331,8 @@ define([
             $respondentsList.html('');
 
             respondentQuestions.forEach(function (respondentQuestion) {
-                var respondentAnswer = _.findWhere(self.answersCollection.toJSON(), {
-                    questionId : respondentQuestion._id,
-                    personnelId: personnelId
+                var respondentAnswer = lodash.find(self.answersCollection.toJSON(), function (item) {
+                    return item.questionId === respondentQuestion._id && item.customer.name === self.answersCollection.customerName;
                 });
                 var respondentAnswerOptionsIndexes = respondentAnswer.optionIndex;
                 var respondentAnswerText = respondentAnswer.text;
@@ -353,6 +356,12 @@ define([
                         question   : respondentQuestion,
                         answerText : respondentAnswerText,
                         translation: self.translation
+                    }));
+                } else if (respondentQuestion.type === 'NPS') {
+                    $respondentsList.append(self.npsQuestionTemplate({
+                        question     : respondentQuestion,
+                        answerIndexes: respondentAnswerOptionsIndexes,
+                        translation  : self.translation
                     }));
                 }
             });

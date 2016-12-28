@@ -1,9 +1,10 @@
 define([
+    'underscore',
     'models/parrent',
     'validation',
     'constants/contentType',
     'constants/otherConstants'
-], function (parent, validation, CONTENT_TYPES, CONSTANTS) {
+], function (_, parent, validation, CONTENT_TYPES, CONSTANTS) {
     var Model = parent.extend({
 
         fieldsToTranslate: [
