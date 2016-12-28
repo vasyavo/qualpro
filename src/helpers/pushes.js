@@ -58,8 +58,8 @@ module.exports = function (db) {
 
                     fcmClient.send({
                         registration_ids: [device.deviceId],
-                        data: alert,
-                        notification: fcmOptions,
+                        data: fcmOptions,
+                        notification: alert,
                     }, (err, data) => {
                         logger.info(`Push messaging client, error: ${err}, data: ${data}`);
                     });

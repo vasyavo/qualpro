@@ -1,5 +1,4 @@
-const http = require('http');
-const querystring = require('querystring');
+const https = require('https');
 
 class FirebaseCloudMessagingClient {
 
@@ -8,11 +7,11 @@ class FirebaseCloudMessagingClient {
     }
 
     send(payload, callback) {
-        const postData = querystring.stringify(payload);
+        const postData = JSON.stringify(payload);
 
         const options = {
             hostname: 'fcm.googleapis.com',
-            port: 443,
+            port: '443',
             path: '/fcm/send',
             method: 'POST',
             headers: {
@@ -23,7 +22,7 @@ class FirebaseCloudMessagingClient {
             }
         };
 
-        const req = http.request(options, (res) => {
+        const req = https.request(options, (res) => {
             const statusCode = res.statusCode;
             const rawDowstreamChunks = [];
 
@@ -68,7 +67,7 @@ class FirebaseCloudMessagingClient {
             callback(error);
         });
 
-        req.write(postData);
+        req.write(postData, 'utf-8');
         req.end();
     };
 
