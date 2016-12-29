@@ -1629,6 +1629,7 @@ var Personnel = function(db, redis, event) {
                     switch (accessLevel) {
                         case ACL_CONSTANTS.MASTER_ADMIN:
                         case ACL_CONSTANTS.SUPER_ADMIN:
+                        case ACL_CONSTANTS.TRADE_MARKETER:
                             adminMappingTasks = [
                                 function(cb) {
                                     CountryModel.find({type : 'country'}, {
