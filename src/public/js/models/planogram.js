@@ -49,6 +49,10 @@ define([
                     validation.checkForValuePresence(errors, true, attrs.photo, this.translatedFields.photo);
                 }
 
+                if (this.translatedFields.displayType) {
+                    validation.checkForValuePresence(errors, true, attrs.displayType, this.translatedFields.displayType);
+                }
+
                 if (errors.length > 0) {
                     return cb(errors);
                 }

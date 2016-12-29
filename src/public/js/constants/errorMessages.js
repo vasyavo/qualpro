@@ -110,7 +110,7 @@
         },
         ajaxPostError: {
             en: 'Ajax post error',
-            ar: 'Ar Ajax post error'
+            ar: 'Ar Ajax post error' // todo translation
         },
         onlyOneDocumentAttach: {
             en: 'Only one document can be attached',
@@ -246,11 +246,11 @@
         },
         statusNotChanged : {
             en: 'Status not changed',
-            ar: '' //todo
+            ar: '' //todo translation
         },
         commentNotAdded : {
             en: 'Comment not added',
-            ar: '' //todo
+            ar: '' //todo translation
         }
     };
 

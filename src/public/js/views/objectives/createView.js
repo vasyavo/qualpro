@@ -132,7 +132,7 @@ define([
             var description;
             var self = this;
 
-            if (this.objectiveType !== 'individual') {
+            if (this.objectiveType !== 'individual' && this.objectiveType !== 'country') {
                 return;
             }
 
