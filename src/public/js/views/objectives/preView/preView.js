@@ -743,6 +743,7 @@ define([
             var coveredIds = App.currentUser.covered ? Object.keys(App.currentUser.covered) : [];
             var assignToIds = _.pluck(jsonModel.assignedTo, '_id');
             var isUserAssignedToAndCover = this.tabName === 'myCover' ? _.intersection(assignToIds, coveredIds) : [];
+            var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
             var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
             var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
@@ -752,7 +753,8 @@ define([
                 || (statusId === STATUSES.OVER_DUE && !createdByMe)
                 || this.activityList
                 || jsonModel.myCC
-                || !App.currentUser.workAccess;
+                || !App.currentUser.workAccess
+                || isCountryObjective;
 
             var objectiveStatuses = objectivesStatusHelper(jsonModel);
             var statusDisplayModel = _.findWhere(objectiveStatuses, {_id: statusId});
