@@ -14,12 +14,12 @@ module.exports = function (db, redis, event) {
     router.use(checkAuth);
 
     router.post('/', multipartMiddleware, handler.create);
-    router.put('/:id', multipartMiddleware, handler.update);
-    router.patch('/:id', handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     //router.put('/remove', handler.archive);
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     router.get('/', handler.getAll);
 

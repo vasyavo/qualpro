@@ -549,7 +549,6 @@ define([
                 }
             });
 
-
             $endDate.datepicker({
                 changeMonth: true,
                 changeYear : true,

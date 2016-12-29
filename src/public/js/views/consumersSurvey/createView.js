@@ -58,6 +58,7 @@ define([
                 delete model._id;
                 delete model.title;
                 delete model.dueDate;
+                delete model.startDate;
                 this.model = new Model(model);
                 this.questionsCollection = new QuestionCollection(model.questions);
                 this.renderModel = true;
@@ -72,7 +73,7 @@ define([
                 this.renderModel = false;
                 this.create = true;
             }
-
+debugger;
             options.dialog = true;
             options.contentType = this.contentType;
 
@@ -81,11 +82,11 @@ define([
             this.render();
         },
 
-        changeValue: function (e) {
+        changeValue: function () {
             this.valueWasChanged = true;
         },
 
-        checkBoxClick: function (e) {
+        checkBoxClick: function () {
             var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked');
 
             this.showHideButtons({
@@ -269,9 +270,11 @@ define([
             };
             var title = $curEl.find('#questionnaryTitleEn').val() || $curEl.find('#questionnaryTitleAr').val() ? newTitle : this.model.get('title');
             var dueDate = $curEl.find('#dueDate').val();
+            var startDate = $curEl.find('#startDate').val();
             var questionModel = new QuestionModel();
             var model;
             var editDate;
+            var editStartDate;
             var optionsForModelSave = {
                 validate: false,
                 wait    : true,
@@ -289,6 +292,7 @@ define([
             this.body = {};
             this.body.title = title;
             this.body.dueDate = dueDate ? moment(dueDate, 'DD.MM.YYYY').toISOString() : null;
+            this.body.startDate = startDate ? moment(startDate, 'DD.MM.YYYY').toISOString() : null;
             this.body.questions = $questionsRows.length;
             this.setLocations();
             if (this.edit && this.model) {
@@ -344,12 +348,16 @@ define([
                     optionsForModelSave.patch = true;
                     model = self.model.toJSON();
                     editDate = custom.dateFormater('DD.MM.YYYY', self.body.dueDate);
+                    editStartDate = custom.dateFormater('DD.MM.YYYY', self.body.startDate);
 
                     if (!self.valueWasChanged) {
                         delete self.body.questions;
                     }
                     if (editDate === model.dueDate) {
                         delete self.body.dueDate;
+                    }
+                    if (editStartDate === model.startDate) {
+                        delete self.body.startDate;
                     }
                     if (self.body.title === model.title) {
                         delete self.body.title;
@@ -394,7 +402,6 @@ define([
             var questionnarieTableTitle;
             var idToSearch = '#' + this.currentLanguage;
             var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
-            var $endDate;
             var dateStart = new Date();
             var dateEnd;
             var idToFind;
@@ -439,7 +446,20 @@ define([
                 this.renderModelData();
             }
 
-            $endDate = $curEl.find('#dueDate');
+            var $startDate = $curEl.find('#startDate');
+            var $endDate = $curEl.find('#dueDate');
+
+            $startDate.datepicker({
+                changeMonth: true,
+                changeYear : true,
+                yearRange  : '-20y:c+10y',
+                minDate    : new Date(dateStart),
+                maxDate    : new Date(dateEnd),
+                defaultDate: new Date(dateEnd),
+                onClose    : function (selectedDate) {
+                    $endDate.datepicker('option', 'minDate', selectedDate);
+                }
+            });
 
             $endDate.datepicker({
                 changeMonth: true,
@@ -447,7 +467,10 @@ define([
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
-                defaultDate: new Date(dateEnd)
+                defaultDate: new Date(dateEnd),
+                onClose    : function (selectedDate) {
+                    $startDate.datepicker('option', 'maxDate', selectedDate);
+                }
             });
 
             implementShowHideArabicInputIn(this);

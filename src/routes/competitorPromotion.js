@@ -14,7 +14,7 @@ module.exports = function (db, redis, event) {
     router.use(checkAuth);
 
     router.get('/', handler.getAll);
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     return router;
 };

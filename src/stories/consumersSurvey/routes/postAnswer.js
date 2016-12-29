@@ -33,7 +33,8 @@ module.exports = (req, res, next) => {
                         subRegion     : body.subRegion,
                         retailSegment : body.retailSegment,
                         outlet        : body.outlet,
-                        branch        : body.branch
+                        branch        : body.branch,
+                        type          : answer.type
                     };
 
                     if (answer.optionIndex && answer.optionIndex.length) {

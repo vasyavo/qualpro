@@ -9495,14 +9495,14 @@ table.fancytree-ext-table {
   display: inline-block;
 }
 .questionsList .questionsUserImage {
-  margin: 20px 15px 20px 25px;
+  margin: 20px 0 20px 25px;
   border-radius: 50%;
   width: 60px;
   height: 60px;
 }
 .questionsList .questionsDescription {
   min-width: 0;
-  padding: 20px 0;
+  padding: 20px 0 20px 20px;
 }
 .questionsList .questionsStatus.question {
   width: 100px;

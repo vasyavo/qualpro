@@ -12,6 +12,7 @@ const $defProjection = {
     _id: 1,
     title: 1,
     dueDate: 1,
+    startDate: 1,
     country: 1,
     region: 1,
     subRegion: 1,
@@ -81,6 +82,12 @@ module.exports = (req, res, next) => {
             queryObject.dueDate = {
                 $gt: currentDate
             };
+        }
+
+        if (isMobile) {
+            queryObject.status = {
+                $nin : ['draft']
+            }
         }
 
         const aggregateHelper = new AggregationHelper($defProjection);

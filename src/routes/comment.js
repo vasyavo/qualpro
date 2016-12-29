@@ -18,7 +18,7 @@ module.exports = function (db, redis, event) {
 
     router.get('/withAttachments', handler.getAllWithAttachments);
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ `GET`

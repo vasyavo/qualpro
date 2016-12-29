@@ -110,7 +110,7 @@ define([
             var value = options.attr ? el.attr('data-id') : el.val();
 
             var condition;
-            if (['region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'country'].indexOf(key) !== -1) {
+            if (['region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'country', 'displayType'].indexOf(key) !== -1) {
                 condition = true;
 
                 if (!model[key] || !value || self.duplicate) {

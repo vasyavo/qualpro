@@ -157,7 +157,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ 'POST'
@@ -254,8 +254,8 @@ module.exports = function (db, redis, event) {
     router.delete('/deleteConfiguration', handler.deleteConfigurations);
     router.post('/configuration', handler.addConfiguration);
     router.put('/configuration', handler.updateConfiguration);
-    router.put('/:id', handler.update);
-    router.patch('/:id', handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     return router;
 };

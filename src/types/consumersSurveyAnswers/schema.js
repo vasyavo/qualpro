@@ -28,6 +28,11 @@ const schema = new Schema({
     outlet: { type: ObjectId, ref: CONTENT_TYPES.OUTLET, default: null },
     branch: { type: ObjectId, ref: CONTENT_TYPES.BRANCH, default: null },
     optionIndex: [{ type: Number }],
+    type : {
+        type : String,
+        default : null,
+        enum: ['singleChoice', 'multiChoice', 'fullAnswer', 'NPS']
+    },
     text: {
         en: { type: String },
         ar: { type: String }
