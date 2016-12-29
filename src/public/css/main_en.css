@@ -11245,3 +11245,6 @@ label[for=searchInputnoCT]::after {
   position: relative;
   height: calc(100% - 295px);
 }
+.createConsumersSurvey .searchInputWrap{
+  display: none;
+}
