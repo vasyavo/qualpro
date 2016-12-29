@@ -423,12 +423,14 @@ define([
                 types.forEach(function (contentType) {
                     var dataEl;
                     var value;
+                    var $row =  self.view.$el.find('#' + contentType + 'Row');
+                    var $branch = $row.find('.branchField');
 
                     if (PERSONNEL_LOCATION_FLOW[level].indexOf(contentType) === -1) {
-                        self.view.$el.find('#' + contentType + 'Row').addClass('hidden');
+                        $row.addClass('hidden');
                         self.clearAndHideDomainFields(contentType);
                     } else {
-                        self.view.$el.find('#' + contentType + 'Row').removeClass('hidden');
+                        $row.removeClass('hidden');
 
                         if (setFirstActive) {
                             dataEl = self['$' + contentType];
@@ -439,6 +441,8 @@ define([
                                 setFirstActive = false;
                             }
                         }
+
+                        level === 4 && contentType === 'branch' ? $branch.removeClass('required mandatory') : $branch.addClass('required mandatory');
                     }
                 });
             },
