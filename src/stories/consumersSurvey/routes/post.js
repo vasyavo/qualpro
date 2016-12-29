@@ -107,7 +107,9 @@ module.exports = (req, res, next) => {
 
                     requestService.post({
                         url: `${config.schedulerHost}/tasks`,
-                        date: body.startDate
+                        json : {
+                            date: body.startDate
+                        }
                     }, (err, response) => { //todo set real scheduler url
                         if (!err) {
                             const taskSchedulerModel = new TaskSchedulerModel();
@@ -123,7 +125,9 @@ module.exports = (req, res, next) => {
 
                     requestService.post({
                         url: `${config.schedulerHost}/tasks`,
-                        date: body.dueDate
+                        json : {
+                            date: body.dueDate
+                        }
                     }, (err, response) => { //todo set real scheduler url
                         if (!err) {
                             const taskSchedulerModel = new TaskSchedulerModel();
