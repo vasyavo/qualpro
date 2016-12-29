@@ -352,7 +352,7 @@
                 _id : 43,
                 name : {
                     en: 'Contact Us',
-                    ar: '' //todo ar translation
+                    ar: '' //todo translation
                 },
                 href: CONSTANTS.CONTACT_US
             },
@@ -361,7 +361,7 @@
                 _id : 44,
                 name : {
                     en: 'Consumer Survey',
-                    ar: '' //todo ar translation
+                    ar: '' //todo translation
                 },
                 href: CONSTANTS.CONSUMER_SURVEY
             },

@@ -45,7 +45,7 @@ const modules = [
 
     {
         _id     : 104,
-        name    : {en: 'subRegions', ar: 'AR_ subRegions'}, //CA & CU subRegions
+        name    : {en: 'subRegions', ar: 'AR_ subRegions'}, //CA & CU subRegions // todo translation
         href    : '',
         sequence: 104,
         parrent : null,
@@ -300,7 +300,7 @@ const modules = [
 
     {
         _id     : 29,
-        name    : {en: 'Grant and revoke access', ar: 'AR_ Grant and revoke access'},
+        name    : {en: 'Grant and revoke access', ar: 'AR_ Grant and revoke access'}, // todo translation
         href    : 'grantrevokeaccess',
         sequence: 29,
         parrent : 27,
@@ -309,7 +309,7 @@ const modules = [
 
     {
         _id     : 30,
-        name    : {en: 'Delegate and recall rights', ar: 'AR_ Delegate and recall rights'},
+        name    : {en: 'Delegate and recall rights', ar: 'AR_ Delegate and recall rights'}, // todo translation
         href    : 'delegateAndRecallRights',
         sequence: 30,
         parrent : 27,
@@ -393,7 +393,7 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'Al Alali Branding Activity', ar: ''},
+        name    : {en: 'Al Alali Marketing Campaigns', ar: ''}, // todo translation
         href    : CONSTANTS.BRANDING_ACTIVITY,
         sequence: 38,
         parrent : 16,
@@ -404,7 +404,7 @@ const modules = [
         _id     : 40,
         name: {
             en: 'Al Alali Branding Activity items',
-            ar: '' /*'العلامات التجارية وتقارير العرض للسلع'*/
+            ar: '' /*'العلامات التجارية وتقارير العرض للسلع'*/ // todo translation
         },
         href    : CONSTANTS.BRANDING_ACTIVITY_ITEMS,
         sequence: 40,
@@ -428,7 +428,7 @@ const modules = [
         _id     : 1110,
         name: {
             en: 'Visibility Form',
-            ar: ''
+            ar: '' // todo translation
         },
         href    : CONSTANTS.VISIBILITYFORM,
         sequence: 1110,
@@ -479,7 +479,7 @@ const modules = [
 
     {
         _id     : 43,
-        name    : {en: 'Contact Us', ar: 'Contact Us'}, // todo set Arabic translation
+        name    : {en: 'Contact Us', ar: 'Contact Us'}, // todo translation
         href    : CONSTANTS.CONTACT_US,
         sequence: 43,
         parrent : null,
