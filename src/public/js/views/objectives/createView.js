@@ -132,7 +132,7 @@ define([
             var description;
             var self = this;
 
-            if (this.objectiveType !== 'individual') {
+            if (this.objectiveType !== 'individual' && this.objectiveType !== 'country') {
                 return;
             }
 
@@ -548,7 +548,6 @@ define([
                     $endDate.datepicker('option', 'minDate', selectedDate);
                 }
             });
-
 
             $endDate.datepicker({
                 changeMonth: true,

@@ -13,26 +13,24 @@ module.exports = function (db) {
     function sendPushesToUser(userId, alert, options, callback) {
         async.waterfall([
             function (waterfallCb) {
-                var regExpArray = [];
-                var search;
-
-                regExpArray.push({session: {$regex: userId}});
-                regExpArray.push({session: {$regex: 'deviceId'}});
-
-                search = {
-                    $and: regExpArray
+                const userIdAsString = userId.toString();
+                const search = {
+                    $and: [{
+                        session: {$regex: userIdAsString},
+                    }, {
+                        session: {$regex: 'deviceId'},
+                    }]
                 };
-                SessionModel.find(search, function (err, sessions) {
-                    var i;
-                    var devices = [];
-                    var sessionObject;
 
+                SessionModel.find(search, function (err, sessions) {
                     if (err) {
                         return waterfallCb(err);
                     }
+                    const devices = [];
 
-                    for (i = sessions.length - 1; i >= 0; i--) {
-                        sessionObject = JSON.parse(sessions[i].session);
+                    for (let i = sessions.length - 1; i >= 0; i--) {
+                        const sessionObject = JSON.parse(sessions[i].session);
+
                         if (sessionObject.deviceId) {
                             devices.push({deviceId: sessionObject.deviceId});
                         }
@@ -49,17 +47,15 @@ module.exports = function (db) {
                 }
 
                 async.each(devices, function (device, eachCb) {
+                    const deviceId = device.deviceId;
                     const payloadOptions = options.payload || {};
-                    const fcmOptions = {
-                        icon: payloadOptions.badge,
-                        sound: payloadOptions.sound,
-                        title: payloadOptions.title,
-                    };
+                    const pushData = Object.assign({}, payloadOptions, alert);
+
+                    logger.info(`Firebase device ${deviceId} message payload:`, pushData);
 
                     fcmClient.send({
-                        registration_ids: [device.deviceId],
-                        data: fcmOptions,
-                        notification: alert,
+                        to: deviceId,
+                        data: pushData
                     }, (err, data) => {
                         if (err) {
                             logger.error('Firebase returns', err);

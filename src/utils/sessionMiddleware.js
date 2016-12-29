@@ -13,7 +13,7 @@ module.exports = session({
         httpOnly: true,
         secure: false,
     },
-    resave: false,
+    resave: true,
     rolling: true,
     saveUninitialized: true,
     store: new RedisStore({

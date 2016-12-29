@@ -49,6 +49,10 @@
                 </div>
                 <% } %>
                 <div class="questionnarieDatapickerWrap">
+                    <input type="text" data-property="startDate" id="startDate" placeholder="<%= translation.startDate %>"
+                           class="questionnarieDatapicker" value="<%= model.startDate || '' %>" readonly="">
+                </div>
+                <div class="questionnarieDatapickerWrap">
                     <input type="text" data-property="dueDate" id="dueDate" placeholder="<%= translation.dueDate %>"
                            class="questionnarieDatapicker" value="<%= model.dueDate || '' %>" readonly="">
                 </div>

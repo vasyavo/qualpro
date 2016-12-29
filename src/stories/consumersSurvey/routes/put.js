@@ -52,6 +52,10 @@ module.exports = (req, res, next) => {
                     body.dueDate = new Date(body.dueDate);
                 }
 
+                if (body.startDate) {
+                    body.startDate = new Date(body.startDate);
+                }
+
                 body.editedBy = {
                     user: req.session.uId,
                     date: new Date()
