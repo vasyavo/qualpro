@@ -87,7 +87,8 @@ Ask credentials in your administrator.
 ##### General settings of instance:
  - `HOST`
  - `PORT`
- - `UPLOADER_TYPE` Currently available only with AmazonS3.
+ - `UPLOADER_TYPE` - Currently available only with AmazonS3.
+ - `SCHEDULER_HOST`
 
 ##### Twilio credentials are:
  - `SMS_ACCOUNT_SID`
