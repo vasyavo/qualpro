@@ -12,7 +12,7 @@ define([
         contentType       : 'activityList',
         template          : _.template(topBarTemplate),
         paginationTemplate: _.template(pagination)
-
     });
+
     return TopBarView;
 });

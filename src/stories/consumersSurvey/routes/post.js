@@ -2,15 +2,16 @@ const async = require('async');
 const _ = require('underscore');
 const event = require('../../../utils/eventEmitter');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
-const PersonnelModel = require('../../../types/personnel/model');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
 const bodyValidator = require('../../../helpers/bodyValidator');
 const access = require('../../../helpers/access')();
 const ACL_MODULES = require('../../../constants/aclModulesNames');
 const getByIdAggr = require('../reusable-components/getByIdAggr');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
-const ACL_CONSTANTS = require('../../../constants/aclRolesNames');
 const ACTIVITY_TYPES = require('../../../constants/activityTypes');
+const TaskSchedulerModel = require('../../../types/taskScheduler/model');
+const requestService = require('../../../services/request');
+const config = require('../../../config');
 
 const $defProjection = {
     _id: 1,
@@ -103,6 +104,44 @@ module.exports = (req, res, next) => {
                     if (err) {
                         return waterfallCb(err);
                     }
+
+                    if (body.status !== 'active') {
+                        requestService.post({
+                            url: `${config.schedulerHost}/tasks`,
+                            json : {
+                                date: body.startDate
+                            }
+                        }, (err, response) => {
+                            if (!err) {
+                                const taskSchedulerModel = new TaskSchedulerModel();
+                                taskSchedulerModel.set({
+                                    scheduleId: response.id,
+                                    documentId: result._id,
+                                    functionName: 'changeStatusOfConsumerSurvey',
+                                    args : ['active']
+                                });
+                                taskSchedulerModel.save();
+                            }
+                        });
+                    }
+
+                    requestService.post({
+                        url: `${config.schedulerHost}/tasks`,
+                        json : {
+                            date: body.dueDate
+                        }
+                    }, (err, response) => {
+                        if (!err) {
+                            const taskSchedulerModel = new TaskSchedulerModel();
+                            taskSchedulerModel.set({
+                                scheduleId: response.id,
+                                documentId: result._id,
+                                functionName: 'changeStatusOfConsumerSurvey',
+                                args : ['completed']
+                            });
+                            taskSchedulerModel.save();
+                        }
+                    });
 
                     event.emit('activityChange', {
                         module    : ACL_MODULES.CONSUMER_SURVEY,
