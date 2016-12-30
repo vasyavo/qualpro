@@ -1,12 +1,41 @@
 const async = require('async');
-const CONTENT_TYPES = require('../../public/js/constants/contentType');
 const TaskSchedulerModel = require('../../types/taskScheduler/model');
-const models = require('../../types/index');
+const ConsumerSurveyModel = require('../../types/consumersSurvey/model');
 
 const actions = {
-    changeStatusOfConsumerSurvey : (args, docId, callback) => {
-        const ConsumerSurveyModel = models[CONTENT_TYPES.CONSUMER_SURVEY];
-        const status = args.slice(0).pop();
+    setConsumerSurveyStatusCompleted : (args, docId, callback) => {
+        const status = 'completed';
+
+        async.waterfall([
+
+            (cb) => {
+                ConsumerSurveyModel.findById(docId, (err, model) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!model) {
+                        return cb(true);
+                    }
+
+                    cb(null, model);
+                });
+            },
+
+            (model, cb) => {
+                model.status = status;
+
+                model.save((err, model, numAffected) => {
+                    //tip: do not remove numAffected
+                    cb(err, model);
+                });
+            }
+
+        ], callback);
+    },
+
+    setConsumerSurveyStatusActive : (args, docId, callback) => {
+        const status = 'active';
 
         async.waterfall([
 
