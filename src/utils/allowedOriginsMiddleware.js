@@ -1,9 +1,11 @@
+const url = require('url');
 const config = require('../config');
 
 module.exports = (req, res, next) => {
+    const parsedUrl = url.parse(config.schedulerHost);
     const requestHost = req.hostname;
 
-    if (config.schedulerHost === requestHost) {
+    if (parsedUrl.hostname === requestHost) {
         return next();
     }
 
