@@ -1,7 +1,7 @@
 const config = require('../config');
 
 module.exports = (req, res, next) => {
-    const requestHost = req.headers.host;
+    const requestHost = req.hostname;
 
     if (config.schedulerHost === requestHost) {
         return next();
