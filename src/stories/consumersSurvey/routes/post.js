@@ -106,11 +106,11 @@ module.exports = (req, res, next) => {
                     }
 
                     requestService.post({
-                        url: `${config.schedulerHost}/tasks`,
+                        url: config.schedulerHost,
                         json : {
                             date: body.startDate
                         }
-                    }, (err, response) => { //todo set real scheduler url
+                    }, (err, response) => {
                         if (!err) {
                             const taskSchedulerModel = new TaskSchedulerModel();
                             taskSchedulerModel.set({
@@ -119,16 +119,16 @@ module.exports = (req, res, next) => {
                                 functionName: 'changeStatusOfConsumerSurvey',
                                 args : ['active']
                             });
-                            taskSchedulerModel.create();
+                            taskSchedulerModel.save();
                         }
                     });
 
                     requestService.post({
-                        url: `${config.schedulerHost}/tasks`,
+                        url: config.schedulerHost,
                         json : {
                             date: body.dueDate
                         }
-                    }, (err, response) => { //todo set real scheduler url
+                    }, (err, response) => {
                         if (!err) {
                             const taskSchedulerModel = new TaskSchedulerModel();
                             taskSchedulerModel.set({
@@ -137,7 +137,7 @@ module.exports = (req, res, next) => {
                                 functionName: 'changeStatusOfConsumerSurvey',
                                 args : ['draft']
                             });
-                            taskSchedulerModel.create();
+                            taskSchedulerModel.save();
                         }
                     });
 
