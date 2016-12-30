@@ -5,6 +5,8 @@ module.exports = (req, res, next) => {
     const parsedUrl = url.parse(config.schedulerHost);
     const requestHost = req.headers.host;
 
+    console.log(requestHost, '|', parsedUrl);
+
     if (parsedUrl.hostname === requestHost) {
         return next();
     }
