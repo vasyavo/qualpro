@@ -40,28 +40,11 @@ var AchievementForm = function (db, redis, event) {
             var files = req.files;
             var session = req.session;
             var userId = session.uId;
-            var isMobile = req.isMobile;
             var model;
             var achievementForm;
 
             async.waterfall([
-
                 function (cb) {
-                    if (!files) {
-                        return cb(null, []);
-                    }
-
-                    //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'achievementForm', function (err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, filesIds);
-                    });
-                },
-
-                function (filesIds, cb) {
                     var createdBy = {
                         user: userId,
                         date: new Date()
@@ -89,17 +72,17 @@ var AchievementForm = function (db, redis, event) {
                         outlet           : body.outlet,
                         branch           : body.branch,
                         location         : body.location,
-                        attachments      : filesIds,
                         date             : body.date,
                         createdBy        : createdBy,
                         editedBy         : createdBy
                     };
 
-                    model = new AchievementFormModel(achievementForm);
-                    model.save(function (err, model) {
+                    AchievementFormModel.create(achievementForm, function (err, model) {
                         if (err) {
                             return cb(err);
                         }
+
+                        res.status(201).send(model);
 
                         event.emit('activityChange', {
                             module    : 37,
@@ -113,20 +96,31 @@ var AchievementForm = function (db, redis, event) {
                     });
                 },
 
-                function (achievementFormModel, cb) {
-                    var id = achievementFormModel.get('_id');
+                function (model, cb) {
+                    if (!files) {
+                        return cb(null, model, []);
+                    }
 
-                    self.getByIdAggr({id: id, isMobile: isMobile}, cb);
+                    //TODO: change bucket from constants
+                    fileHandler.uploadFile(userId, files, 'achievementForm', function (err, filesIds) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model, filesIds);
+                    });
+                },
+
+                function (model, filesIds, cb) {
+                    model.set('attachments', filesIds);
+                    model.save(cb);
                 }
 
-            ], function (err, result) {
+            ], function (err) {
                 if (err) {
                     return next(err);
                 }
-
-                res.status(201).send(result);
             });
-
         }
 
         access.getWriteAccess(req, 37, function (err) {
