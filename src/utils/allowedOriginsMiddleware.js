@@ -3,9 +3,11 @@ const config = require('../config');
 
 module.exports = (req, res, next) => {
     const parsedUrl = url.parse(config.schedulerHost);
-    const requestHost = req.headers.referer;
+    const requestHost = req.get('Referrer');
 
-    console.log(requestHost, '|', parsedUrl);
+    console.log(requestHost);
+
+    console.log(req.headers, '|', parsedUrl);
 
     if (parsedUrl.hostname === requestHost) {
         return next();
