@@ -2,11 +2,11 @@ const async = require('async');
 const CONTENT_TYPES = require('../../public/js/constants/contentType');
 const TaskSchedulerModel = require('../../types/taskScheduler/model');
 const models = require('../../types/index');
-const logger = require('../../utils/logger');
 
 const actions = {
-    changeStatusOfConsumerSurvey : (status, docId) => {
+    changeStatusOfConsumerSurvey : (args, docId, callback) => {
         const ConsumerSurveyModel = models[CONTENT_TYPES.CONSUMER_SURVEY];
+        const status = args.slice(0).pop();
 
         async.waterfall([
 
@@ -27,18 +27,13 @@ const actions = {
             (model, cb) => {
                 model.status = status;
 
-                model.save(cb);
+                model.save((err, model, numAffected) => {
+                    //tip: do not remove numAffected
+                    cb(err, model);
+                });
             }
 
-        ], (err) => {
-            if (err) {
-                logger.error(err);
-
-                return false;
-            }
-
-            return true;
-        });
+        ], callback);
     }
 };
 
@@ -46,10 +41,8 @@ module.exports = (req, res, next) => {
     const schedulesId = req.body;
 
     if (!schedulesId || !schedulesId.length) {
-        res.status(200).send({});
+        res.status(200).send([]);
     }
-
-    const processedSchedules = [];
 
     async.waterfall([
 
@@ -62,31 +55,40 @@ module.exports = (req, res, next) => {
         },
 
         (docs, callback) => {
-            if (!docs) {
-                return res.status(200).send(processedSchedules);
-            }
-
-            async.each(docs, (doc, cb) => {
+            async.map(docs, (doc, cb) => {
                 const action = actions[doc.functionName];
 
-                const processed = action(...doc.args, doc.documentId);
+                action(doc.args, doc.documentId, (err) => {
+                    if (err) {
+                        return cb(err);
+                    }
 
-                if (!processed) {
-                    return cb(true);
-                }
+                    cb(null, doc.scheduleId);
+                });
 
-                processedSchedules.push(doc.scheduleId);
-
-                cb(null);
             }, callback);
         }
 
-    ], (err) => {
+    ], (err, processedSchedules) => {
         if (err) {
-            logger.error(err);
+            return next(err);
         }
 
-        res.status(200).send(processedSchedules);
+        if (!processedSchedules.length) {
+            return res.status(200).send([]);
+        }
+
+        TaskSchedulerModel.remove({
+            scheduleId : {
+                $in : processedSchedules
+            }
+        }, (err) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(processedSchedules);
+        });
     });
 };
 
