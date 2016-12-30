@@ -105,26 +105,28 @@ module.exports = (req, res, next) => {
                         return waterfallCb(err);
                     }
 
-                    requestService.post({
-                        url: config.schedulerHost,
-                        json : {
-                            date: body.startDate
-                        }
-                    }, (err, response) => {
-                        if (!err) {
-                            const taskSchedulerModel = new TaskSchedulerModel();
-                            taskSchedulerModel.set({
-                                scheduleId: response.id,
-                                documentId: result._id,
-                                functionName: 'changeStatusOfConsumerSurvey',
-                                args : ['active']
-                            });
-                            taskSchedulerModel.save();
-                        }
-                    });
+                    if (body.status !== 'active') {
+                        requestService.post({
+                            url: `${config.schedulerHost}/tasks`,
+                            json : {
+                                date: body.startDate
+                            }
+                        }, (err, response) => {
+                            if (!err) {
+                                const taskSchedulerModel = new TaskSchedulerModel();
+                                taskSchedulerModel.set({
+                                    scheduleId: response.id,
+                                    documentId: result._id,
+                                    functionName: 'changeStatusOfConsumerSurvey',
+                                    args : ['active']
+                                });
+                                taskSchedulerModel.save();
+                            }
+                        });
+                    }
 
                     requestService.post({
-                        url: config.schedulerHost,
+                        url: `${config.schedulerHost}/tasks`,
                         json : {
                             date: body.dueDate
                         }
@@ -135,7 +137,7 @@ module.exports = (req, res, next) => {
                                 scheduleId: response.id,
                                 documentId: result._id,
                                 functionName: 'changeStatusOfConsumerSurvey',
-                                args : ['draft']
+                                args : ['completed']
                             });
                             taskSchedulerModel.save();
                         }
