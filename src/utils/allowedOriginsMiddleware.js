@@ -3,7 +3,7 @@ const config = require('../config');
 
 module.exports = (req, res, next) => {
     const parsedUrl = url.parse(config.schedulerHost);
-    const requestHost = req.hostname;
+    const requestHost = req.headers.host;
 
     if (parsedUrl.hostname === requestHost) {
         return next();
