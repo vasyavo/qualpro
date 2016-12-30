@@ -100,6 +100,7 @@
         CREATE_CONSUMER_SURVEY : 'createConsumersSurvey',
         CONSUMER_SURVEY : 'consumersSurvey',
         CONSUMER_SURVEY_ANSWER : 'consumersSurveyAnswers',
+        TASK_SCHEDULER : 'taskScheduler',
         DISPLAY_NAMES : {
             COUNTRY : 'Country',
             REGION : 'Region',

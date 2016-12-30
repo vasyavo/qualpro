@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const _ = require('underscore');
+const lodash = require('lodash');
 const PersonnelModel = require('./../types/personnel/model');
 const BrandingActivityModel = require('../types/brandingActivity/model');
 const ObjectiveModel = require('./../types/objective/model');
@@ -1295,7 +1296,11 @@ const Filters = function(db, redis) {
                 res.status(200).send(response);
             });
         });
-    };
+    }
+
+    function unionById (arr){
+       return lodash.unionBy(...arr, elem => elem._id.toString())
+    }
 
     this.brandingActivityFilters = function(req, res, next) {
         var CONSTANTS = require('../public/js/constants/otherConstants');
@@ -2808,38 +2813,8 @@ const Filters = function(db, redis) {
         });
         // outlet pipelines END
 
-        // $unwind and $addToSet to get unique values
+        //  group all values
         pipeLine.push({
-            $unwind: {
-                path                      : '$country',
-                preserveNullAndEmptyArrays: true
-            }
-        }, {
-            $unwind: {
-                path                      : '$region',
-                preserveNullAndEmptyArrays: true
-            }
-        }, {
-            $unwind: {
-                path                      : '$subRegion',
-                preserveNullAndEmptyArrays: true
-            }
-        }, {
-            $unwind: {
-                path                      : '$retailSegment',
-                preserveNullAndEmptyArrays: true
-            }
-        }, {
-            $unwind: {
-                path                      : '$outlet',
-                preserveNullAndEmptyArrays: true
-            }
-        }, {
-            $unwind: {
-                path                      : '$branch',
-                preserveNullAndEmptyArrays: true
-            }
-        }, {
             $group: {
                 _id          : null,
                 country      : {$addToSet: '$country'},
@@ -2859,26 +2834,28 @@ const Filters = function(db, redis) {
                 return next(err);
             }
 
-            result = result[0] || {};
-
-            if (result.module) {
-                result.module.forEach(function (item) {
-                    if (item) {
-                        item._id = item._id.toString();
-                    }
-                })
-            }
+            result = result[0] || {
+                    country      : [],
+                    region       : [],
+                    subRegion    : [],
+                    branch       : [],
+                    retailSegment: [],
+                    outlet       : [],
+                    position     : [],
+                    actionType   : [],
+                    module       : []
+                };
 
             result = {
-                country      : result.country || [],
-                region       : result.region || [],
-                subRegion    : result.subRegion || [],
-                branch       : result.branch || [],
-                retailSegment: result.retailSegment || [],
-                outlet       : result.outlet || [],
-                position     : result.position || [],
+                country      : unionById(result.country),
+                region       : unionById(result.region),
+                subRegion    : unionById(result.subRegion),
+                branch       : unionById(result.branch),
+                retailSegment: unionById(result.retailSegment),
+                outlet       : unionById(result.outlet),
+                position     : result.position,
                 actionType   : mapFiltersValues(result.actionType, CONSTANTS),
-                module       : result.module || []
+                module       : result.module
             };
 
             redisFilters({

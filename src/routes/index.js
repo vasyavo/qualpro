@@ -5,7 +5,6 @@ const multipartMiddleware = multipart();
 const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
-const IncomingRequestPayloadLogger = require('../utils/IncomingRequestPayloadLogger');
 const notFoundHandler = require('./../utils/notFound');
 const csrfProtection = require('./../utils/csrfProtection');
 const checkAuth = require('./../utils/isAuth');
@@ -82,7 +81,7 @@ module.exports = function(app, db, event) {
     var displayTypeRouter = require('./displayType')(db, redis, event);
 
     app.use(addRequestId);
-    app.use(IncomingRequestPayloadLogger);
+    app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
     app.get('/', csrfProtection, function(req, res, next) {
@@ -113,6 +112,8 @@ module.exports = function(app, db, event) {
             res.status(201).send({success : 'file(\'s) uploaded success'});
         });
     });
+
+    app.post('/scheduler', /*require('../utils/allowedOriginsMiddleware'),*/ require('../stories/taskScheduler/trigger'));
 
     app.use(require('./../stories/user-registration'));
 

@@ -146,7 +146,7 @@
                 _id : 'NPS',
                 name: {
                     en: 'NPS',
-                    ar: '' //todo set ar translation
+                    ar: '' //todo translation
                 },
 
                 sortKey: 0
@@ -158,7 +158,7 @@
                 _id : 'yearly',
                 name: {
                     en: 'Yearly',
-                    ar: 'Ar Yearly'
+                    ar: 'Ar Yearly' //todo translation
                 },
 
                 sortKey: 0
@@ -167,7 +167,7 @@
                 _id : 'visibility',
                 name: {
                     en: 'Visibility',
-                    ar: 'Ar Visibility'
+                    ar: 'Ar Visibility' //todo translation
                 },
 
                 sortKey: 1

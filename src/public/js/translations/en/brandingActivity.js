@@ -6,8 +6,8 @@ define([
 ], function (_, paginationTranslation, filtersTranslation, brandingAndDisplayItems) {
     var brandingAndDisplayTranslation = {
         // top bar
-        all                : ' Al Alali Branding Activity report',
-        newBranding        : 'New Branding Activity',
+        all                : ' Al Alali Marketing Campaigns',
+        newBranding        : 'New Marketing Campaign',
         // list
         startDate          : 'Start date',
         endDate            : 'Due date',

@@ -2,13 +2,14 @@ define([
     'Backbone',
     'jQuery',
     'Underscore',
+    'moment',
     'views/paginator',
     'views/consumersSurvey/createView',
     'views/consumersSurvey/preView/preView',
     'text!templates/consumersSurvey/list/list.html',
     'text!templates/consumersSurvey/list/newRow.html',
     'constants/contentType'
-], function (Backbone, $, _, paginator, CreateView, PreView, template, NewRowTemplate, CONTENT_TYPES) {
+], function (Backbone, $, _, moment, paginator, CreateView, PreView, template, NewRowTemplate, CONTENT_TYPES) {
     'use strict';
 
     var View = paginator.extend({
@@ -70,6 +71,11 @@ define([
         render: function () {
             var $currentEl = this.$el;
             var jsonCollection = this.collection.toJSON();
+
+            jsonCollection = jsonCollection.map(function(item) {
+                item.startDate = moment(item.startDate).format('DD.MM.YYYY');
+                return item;
+            });
 
             $currentEl.html(this.template({
                 collection : jsonCollection,

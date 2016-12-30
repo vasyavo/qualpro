@@ -298,8 +298,15 @@ const QuestionnaryHandler = function (db, redis, event) {
             const accessRoleLevel = req.session.level;
             const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
             const skip = (page - 1) * limit;
+            const filter = query.filter || {};
+            const filterSearch = filter.globalSearch || '';
             const filterMapper = new FilterMapper();
             const queryFilter = query.filter || {};
+
+            const searchFieldsArray = [
+                'title.en',
+                'title.ar',
+            ];
 
             const sort = query.sort || {
                 lastDate: -1
@@ -503,6 +510,8 @@ const QuestionnaryHandler = function (db, redis, event) {
 
                     pipeline.push(...aggregateHelper.endOfPipeLine({
                         isMobile,
+                        filterSearch,
+                        searchFieldsArray,
                         skip,
                         limit,
                         sort
