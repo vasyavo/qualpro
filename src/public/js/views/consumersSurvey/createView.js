@@ -42,7 +42,8 @@ define([
             'click #consumersSurveyTable .js_question .js_options .js_addNewOption': 'addNewOption',
             'click #consumersSurveyTable .js_question .js_options .removeOption'   : 'removeOption',
             'click #consumersSurveyTable .js_question input[type="checkbox"]'      : 'checkBoxClick',
-            'input #consumersSurveyTable .js_question input'                       : 'changeValue'
+            'input #consumersSurveyTable .js_question input'                       : 'changeValue',
+            'click .filterHeader'                      : 'toggleFilterHolder'
         },
 
         initialize: function (options) {
@@ -73,7 +74,7 @@ define([
                 this.renderModel = false;
                 this.create = true;
             }
-debugger;
+
             options.dialog = true;
             options.contentType = this.contentType;
 
@@ -84,6 +85,22 @@ debugger;
 
         changeValue: function () {
             this.valueWasChanged = true;
+        },
+
+        toggleFilterHolder: function (e) {
+            var $target = $(e.target);
+            var $filterBar = $target.closest('.filterBar');
+            var $filterBarName = $filterBar.find('.filterHeader');
+
+            if ($target.closest('.searchInputWrap').length) {
+                return false;
+            }
+
+            $filterBarName.toggleClass('downArrow');
+            $filterBarName.toggleClass('upArrow');
+
+            $filterBar.toggleClass('filterBarCollapse');
+            this.$el.find('.scrollable').mCustomScrollbar('update');
         },
 
         checkBoxClick: function () {

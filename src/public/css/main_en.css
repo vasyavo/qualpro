@@ -2219,6 +2219,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   display: none;
 }
 .circleRadioButton input[type="radio"] + label {
+  cursor: pointer;
   display: inline-block;
   width: 37px;
   height: 37px;
@@ -2228,6 +2229,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   line-height: 34px;
 }
 .circleRadioButton input[type="radio"]:checked + label {
+  cursor: pointer;
   background-color: #f44336;
   color: white;
 }
@@ -9495,14 +9497,14 @@ table.fancytree-ext-table {
   display: inline-block;
 }
 .questionsList .questionsUserImage {
-  margin: 20px 0 20px 25px;
+  margin: 20px 15px 20px 25px;
   border-radius: 50%;
   width: 60px;
   height: 60px;
 }
 .questionsList .questionsDescription {
   min-width: 0;
-  padding: 20px 0 20px 20px;
+  padding: 20px 0 20px 15px;
 }
 .questionsList .questionsStatus.question {
   width: 100px;
@@ -9645,6 +9647,7 @@ table.fancytree-ext-table {
 }
 .optionsList {
   padding-left: 20px;
+  padding-right: 7px;
 }
 .optionsList li {
   position: relative;
@@ -11233,6 +11236,15 @@ span.currency {
 .domainDialog .searchInputWrap input {
   width: 200px;
 }
-.domainDialog .searchInputWrap label:after, label[for=brandSearch]:after {
-  line-height: 3;
+.domainDialog .searchInputWrap label::after,
+label[for=brandSearch]::after,
+label[for=searchInputnoCT]::after {
+  line-height: 3!important;
+}
+.consumersSurveyTableWrap {
+  position: relative;
+  height: calc(100% - 295px);
+}
+.createConsumersSurvey .searchInputWrap{
+  display: none;
 }

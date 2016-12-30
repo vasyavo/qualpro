@@ -1629,6 +1629,7 @@ var Personnel = function(db, redis, event) {
                     switch (accessLevel) {
                         case ACL_CONSTANTS.MASTER_ADMIN:
                         case ACL_CONSTANTS.SUPER_ADMIN:
+                        case ACL_CONSTANTS.TRADE_MARKETER:
                             adminMappingTasks = [
                                 function(cb) {
                                     CountryModel.find({type : 'country'}, {
@@ -1946,11 +1947,12 @@ var Personnel = function(db, redis, event) {
             };
         }
 
-        if (isMobile) {
-            if (!queryObject['accessRole.level']) {
-                queryObject['accessRole.level'] = {$lt : ACL_CONSTANTS.MASTER_UPLOADER};
-            }
-        }
+        // commented according to QP-175 ticket in youTrack
+        // if (isMobile) {
+        //     if (!queryObject['accessRole.level']) {
+        //         queryObject['accessRole.level'] = {$lt : ACL_CONSTANTS.MASTER_UPLOADER};
+        //     }
+        // }
 
         if (options.level > 1 && !isMobile) {
             queryObject._id = queryObject._id || {};

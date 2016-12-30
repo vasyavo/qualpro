@@ -21,15 +21,15 @@ define([
         //create Question
         enterQuestion     : {
             en: 'Ar Enter Question in English',
-            ar: 'Ar Enter Question in Arabic'
+            ar: 'Ar Enter Question in Arabic' // todo translation
         },
         enterTitle     : {
             en: 'Ar Enter Title in English',
-            ar: 'Ar Enter Title in Arabic'
+            ar: 'Ar Enter Title in Arabic' // todo translation
         },
         enterOption     : {
             en: 'Ar Enter Option to choose in English',
-            ar: 'Ar Enter Option to choose in Arabic'
+            ar: 'Ar Enter Option to choose in Arabic' // todo translation
         },
         title        : 'العنوان',
         dueDate      : 'تاريخ الاستحقاق',
