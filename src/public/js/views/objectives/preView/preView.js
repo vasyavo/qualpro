@@ -393,7 +393,7 @@ define([
                     translation: this.translation
                 });
             } else {
-                if ((modelJSON.assignedTo[0]._id === App.currentUser._id ||
+                if (App.currentUser.workAccess && (modelJSON.assignedTo[0]._id === App.currentUser._id ||
                     App.currentUser.covered && App.currentUser.covered[modelJSON.assignedTo[0]._id])
                     && (modelJSON.objectiveType === 'individual') && (modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.COMPLETED)) {
                     this.visibilityForm = new VisibilityEditView({
@@ -743,19 +743,25 @@ define([
             var coveredIds = App.currentUser.covered ? Object.keys(App.currentUser.covered) : [];
             var assignToIds = _.pluck(jsonModel.assignedTo, '_id');
             var isUserAssignedToAndCover = this.tabName === 'myCover' ? _.intersection(assignToIds, coveredIds) : [];
+            var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
             var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
             var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
                 || (statusId === STATUSES.COMPLETED && !createdByMe)
                 || (statusId === STATUSES.CLOSED)
-                || (statusId === STATUSES.OVER_DUE && !createdByMe);
+                || (statusId === STATUSES.FAIL)
+                || (statusId === STATUSES.OVER_DUE && !createdByMe)
+                || this.activityList
+                || jsonModel.myCC
+                || !App.currentUser.workAccess
+                || isCountryObjective;
 
             var objectiveStatuses = objectivesStatusHelper(jsonModel);
             var statusDisplayModel = _.findWhere(objectiveStatuses, {_id: statusId});
 
             var statusToRemove;
 
-            if (condition || jsonModel.myCC) {
+            if (condition) {
                 this.$el.find(selector).html(statusDisplayModel.name.currentLanguage);
             } else {
                 if (statusId === STATUSES.TO_BE_DISCUSSED) {
@@ -763,7 +769,6 @@ define([
                         statusToRemove = STATUSES.COMPLETED;
                     } else {
                         statusToRemove = STATUSES.FAIL;
-
                     }
 
                     objectiveStatuses = _.filter(objectiveStatuses, function (element) {
@@ -792,6 +797,7 @@ define([
             var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
             var configForTemplate = $.extend([], levelConfig[this.contentType][App.currentUser.accessRole.level].preview);
             var onfigForActivityList = levelConfig[this.contentType].activityList.preview;
+            var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
             if (!this.dontShowDialog) {
                 formString = this.template({
@@ -864,7 +870,7 @@ define([
                     configForTemplate.forEach(function (config) {
                         var canDisplay = config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy);
                         var assignInIndividual = jsonModel.objectiveType === 'individual' && config.elementId === 'assign';
-                        if (App.currentUser.accessRole.level === 2 && jsonModel.objectiveType === 'individual' && config.selector === '#subObjective' || jsonModel.status._id === 'completed') {
+                        if (App.currentUser.accessRole.level === 2 && jsonModel.objectiveType === 'individual' && config.selector === '#subObjective' || jsonModel.status._id === 'completed' || isCountryObjective) {
                             return;
                         }
 

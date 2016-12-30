@@ -38,8 +38,8 @@ require.config({
         'jquery-masked-field': './libs/jquery.inputmask/dist/jquery.inputmask.bundle',
         sprintf              : './libs/sprintf/dist/sprintf.min',
         minigrid             : './libs/minigrid/dist/minigrid.min',
-        socketio             : '/socket.io/socket.io.js'
-
+        socketio             : '/socket.io/socket.io.js',
+        lodash               : './libs/lodash/lodash'
     },
     shim : {
         jqueryui : ['jQuery'],

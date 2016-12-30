@@ -18,6 +18,7 @@ define([
         okBtn               : 'موافق',
         goToBtn             : 'الذهاب الى',
         editBtn             : 'تعديل',
+        displayType         : 'نوع العرض',
 
         // list
         // create

@@ -233,6 +233,7 @@ function BrandingAndDisplay(db, redis, event) {
                     displayType : 1,
                     'attachments._id' : 1,
                     'attachments.name' : 1,
+                    'attachments.preview' : 1,
                     'attachments.originalName' : 1,
                     'categories._id' : 1,
                     'categories.name' : 1,

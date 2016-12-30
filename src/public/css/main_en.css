@@ -582,8 +582,60 @@ a {
 .plusIcon:before,
 .sortArrows:before,
 .question:before,
-.logOut:after {
+.logOut:after,
+.filetype-csv:after,
+.filetype-xlsx:after,
+.filetype-doc:after,
+.filetype-docx:after,
+.filetype-pdf:after,
+.filetype-mp3:after,
+.filetype-mp4:after,
+.filetype-ppt:after,
+.filetype-xml:after,
+.filetype-xls:after,
+.filetype-m4v:after,
+.filetype-m4a:after,
+.filetype-pptx:after {
   font-family: 'icomoon';
+}
+.filetype-csv:after {
+  content: '\e94b';
+}
+.filetype-xlsx:after {
+  content: '\e941'
+}
+.filetype-doc:after {
+  content: '\e940'
+}
+.filetype-docx:after {
+  content: '\e94a'
+}
+.filetype-pdf:after {
+  content: '\e942'
+}
+.filetype-mp3:after {
+  content: '\e949'
+}
+.filetype-mp4:after {
+  content: '\e94c'
+}
+.filetype-ppt:after {
+  content: '\e946'
+}
+.filetype-pptx:after {
+  content: '\e94f'
+}
+.filetype-xml:after {
+  content: '\e94e'
+}
+.filetype-xls:after {
+  content: '\e94d'
+}
+.filetype-m4v:after {
+  content: '\e947'
+}
+.filetype-m4a:after {
+  content: '\e948'
 }
 .bubbleMassage:after {
   content: '\e900';
@@ -799,10 +851,10 @@ a {
   content: '\e945';
 }
 .question:after {
-  content: '\ea09';
+  content: '\e951';
 }
 .logOut:after {
-  content: '\e946';
+  content: '\e950';
 }
 .contactUs:after {
   display: block;
@@ -2170,7 +2222,8 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .circleRadioButton input[type="radio"] {
   display: none;
 }
-.circleRadioButton input[type="radio"] + label {
+.circleRadioButton span + label {
+  cursor: pointer;
   display: inline-block;
   width: 37px;
   height: 37px;
@@ -2178,10 +2231,6 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   border: 1px solid #cfd8dc;
   text-align: center;
   line-height: 34px;
-}
-.circleRadioButton input[type="radio"]:checked + label {
-  background-color: #f44336;
-  color: white;
 }
 .redBtn,
 .greenBtn,
@@ -4004,6 +4053,28 @@ a.disabled {
 .createPlanogramForm .table {
   margin-left: 15px;
 }
+.configurations-input {
+  text-align: left;
+}
+.configurations-input input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.configurations-input input{
+  text-align: center;
+  margin-right: 5px;
+  margin-top: 0!important;
+  width: 28px!important;
+  padding:0 3px!important;
+  clear: none!important;
+  display: inline!important;
+  float: none!important;
+}
+.configurations-input input:read-only {
+  padding: 0;
+  margin: 0;
+}
 .thumbnailsHolder {
   position: absolute;
 }
@@ -4066,6 +4137,7 @@ a.disabled {
 .forPosition {
   position: fixed;
   width: 100px;
+  z-index: 1;
 }
 .forPosition .dropDownContent {
   position: absolute !important;
@@ -9432,7 +9504,7 @@ table.fancytree-ext-table {
 }
 .questionsList .questionsDescription {
   min-width: 0;
-  padding: 20px 0;
+  padding: 20px 0 20px 15px;
 }
 .questionsList .questionsStatus.question {
   width: 100px;
@@ -9575,6 +9647,7 @@ table.fancytree-ext-table {
 }
 .optionsList {
   padding-left: 20px;
+  padding-right: 7px;
 }
 .optionsList li {
   position: relative;
@@ -10850,9 +10923,26 @@ canvas::selection,
 .video_icon,
 .word_icon,
 .excel_icon,
-.pdf_icon {
+.pdf_icon,
+.filetype-csv,
+.filetype-xlsx,
+.filetype-doc,
+.filetype-docx,
+.filetype-pdf,
+.filetype-mp3,
+.filetype-mp4,
+.filetype-ppt,
+.filetype-xml,
+.filetype-xls,
+.filetype-ppt,
+.filetype-m4v,
+.filetype-m4a,
+.filetype-pptx {
   font-size: 48px;
   text-align: center;
+}
+.filetype-png, .filetype-jpg {
+  margin: 0 5px;
 }
 .topBarHolder .viewBar .createBtn:active,
 .ui-dialog-buttonpane .ui-dialog-buttonset .acceptBtn:active,
@@ -11139,7 +11229,22 @@ span.currency {
   -webkit-justify-content: center;
   justify-content: center;
 }
-
-
-
-
+.domainDialog .searchInputWrap{
+  float: right;
+  margin-right: 15px;
+}
+.domainDialog .searchInputWrap input {
+  width: 200px;
+}
+.domainDialog .searchInputWrap label::after,
+label[for=brandSearch]::after,
+label[for=searchInputnoCT]::after {
+  line-height: 3!important;
+}
+.consumersSurveyTableWrap {
+  position: relative;
+  height: calc(100% - 295px);
+}
+.createConsumersSurvey .searchInputWrap{
+  display: none;
+}

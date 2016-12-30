@@ -9,14 +9,14 @@ define([
         endDate : 'Due date',
 
         // create
-        titleQuestionary : 'Questionnaire',
+        titleQuestionary : 'Consumer Survey',
         aboutSKUFormat   : 'About SKU format',
         addNewBtn        : 'Add new Item',
         deleteBtn        : 'Delete Item',
-        questions        : 'Questions',
+        questions        : 'Surveys',
         type             : 'Type',
         options          : 'Options',
-        createQuestionary: 'Create Questionnaire',
+        createQuestionary: 'Create Consumer Survey',
 
         //create Question
         enterQuestion     : {
@@ -33,10 +33,11 @@ define([
         },
         title             : 'Title',
         dueDate           : 'Due date',
+        startDate         : 'Start Date',
         create            : 'Create',
-        questionType      : 'Question Type',
+        questionType      : 'Consumer Survey Type',
         //preview
-        titlePreview      : 'New Questionnaire',
+        titlePreview      : 'New Consumer Survey',
         respondents       : 'Respondents',
         duplicateBtn      : 'Duplicate',
         editBtn           : 'Edit',
@@ -45,12 +46,12 @@ define([
         saveBtn           : 'Save',
         sendBtn           : 'Send',
         goToBtn           : 'Go to',
-        questionaryPreview: 'Questionnaire Preview',
+        questionaryPreview: 'Consumer Survey Preview',
         okBtn             : 'Ok',
 
         // top Bar
-        all   : 'Al Alali Questionnaire',
-        newBtn: 'New Questionnaire',
+        all   : 'Al Alali Consumer Survey',
+        newBtn: 'New Consumer Survey',
         of    : 'of'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);

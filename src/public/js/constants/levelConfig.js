@@ -620,7 +620,7 @@ define([
     config[CONTENT_TYPES.QUESTIONNARIES] = questionaryConfig;
     config[CONTENT_TYPES.BRANDING_ACTIVITY] = brandingAndDisplayConfig;
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
-    config[CONTENT_TYPES.CONSUMERS_SURVEY] = consumersSurveyConfig;
+    config[CONTENT_TYPES.CONSUMER_SURVEY] = consumersSurveyConfig;
 
     return config;
 });

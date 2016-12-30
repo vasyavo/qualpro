@@ -5,11 +5,22 @@
         CANVAS_SIZE     : 135,
         DEFAULT_PER_PAGE: 25,
 
-        DISPLAY_TYPE_DD: [
-            {_id: 'gondola', name: 'Gondola', sortKey: 0},
-            {_id: 'floorStand', name: 'Floor stand', sortKey: 1},
-            {_id: 'metalStand', name: 'Metal stand', sortKey: 2}
-        ],
+        DISPLAY_TYPE_DD: {
+            en : [
+                {_id: 'floorDisplayId', name: 'Floor Display', sortKey: 0},
+                {_id: 'gondolaId', name: 'Gondola', sortKey: 1},
+                {_id: 'thematicStandId', name: 'Thematic Stand', sortKey: 2},
+                {_id: 'shelfId', name: 'Shelf', sortKey: 3},
+                {_id: 'otherId', name: 'Other', sortKey: 4}
+            ],
+            ar : [
+                {_id: 'floorDisplayId', name: 'ساحة عرض أرضية', sortKey: 0},
+                {_id: 'gondolaId', name: 'جندولة', sortKey: 1},
+                {_id: 'thematicStandId', name:  'استاند خاص بحملة ترويج معينة', sortKey: 2},
+                {_id: 'shelfId', name: 'رف', sortKey: 3},
+                {_id: 'otherId', name: 'آخر', sortKey: 4}
+            ]
+        },
 
         DISPLAY_TYPE: {
             GONDOLA   : 'gondola',
@@ -57,6 +68,14 @@
                     ar: 'هدف فردى'
                 },
                 sortKey: 4
+            },
+            {
+                _id    : 'country',
+                name   : {
+                    en: 'Country Objective',
+                    ar: 'هدف فردى'
+                },
+                sortKey: 5
             }
         ],
 
@@ -92,12 +111,54 @@
             }
         ],
 
+        CONSUMER_SURVEY_QUESTION_TYPE : [
+            {
+                _id : 'singleChoice',
+                name: {
+                    en: 'Single Choice',
+                    ar: ' اختيار واحد '
+                },
+
+                sortKey: 0
+            },
+
+            {
+                _id : 'multiChoice',
+                name: {
+                    en: 'Multi Choice',
+                    ar: ' اختيارات متعددة '
+                },
+
+                sortKey: 1
+            },
+
+            {
+                _id : 'fullAnswer',
+                name: {
+                    en: 'Full Answer',
+                    ar: 'إجابة كاملة '
+                },
+
+                sortKey: 2
+            },
+
+            {
+                _id : 'NPS',
+                name: {
+                    en: 'NPS',
+                    ar: '' //todo translation
+                },
+
+                sortKey: 0
+            }
+        ],
+
         CONTRACTS_TYPE: [
             {
                 _id : 'yearly',
                 name: {
                     en: 'Yearly',
-                    ar: 'Ar Yearly'
+                    ar: 'Ar Yearly' //todo translation
                 },
 
                 sortKey: 0
@@ -106,7 +167,7 @@
                 _id : 'visibility',
                 name: {
                     en: 'Visibility',
-                    ar: 'Ar Visibility'
+                    ar: 'Ar Visibility' //todo translation
                 },
 
                 sortKey: 1
@@ -429,7 +490,7 @@
 
         IMAGE_CONTENT_TYPES   : ['image/jpeg', 'image/png'],
         VIDEO_CONTENT_TYPES   : ['video/mpeg', 'video/mp4', 'video/x-msvideo', 'video/x-sgi-movie', 'audio/mpeg', 'audio/mp4'],
-        MS_WORD_CONTENT_TYPES : ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint', /*, 'application/octet-stream'*/ /*'application/vnd.openxmlformats-officedocument.wordprocessingml.template',*/ /*'application/vnd.ms-word.document.macroEnabled.12'*/],
+        MS_WORD_CONTENT_TYPES : ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint', 'application/vnd.ms-excel' /*, 'application/octet-stream'*/ /*'application/vnd.openxmlformats-officedocument.wordprocessingml.template',*/ /*'application/vnd.ms-word.document.macroEnabled.12'*/],
         MS_EXCEL_CONTENT_TYPES: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', /* 'application/vnd.openxmlformats-officedocument.spreadsheetml.template', 'application/vnd.ms-excel.sheet.macroEnabled.12', 'application/vnd.ms-excel.template.macroEnabled.12', 'application/vnd.ms-excel.addin.macroEnabled.12', 'application/vnd.ms-excel.sheet.binary.macroEnabled.12'*/],
         OTHER_FORMATS         : ['application/pdf', 'application/mp4']
     };
@@ -524,7 +585,7 @@
 
         overDue: [
             overDue,
-            completed,
+            fail,
             toBeDiscussed
         ],
 

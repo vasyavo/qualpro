@@ -1,7 +1,7 @@
 <% var level = App.currentUser.accessRole.level; %>
 <% items.forEach(function(group, index){ %>
 <tr data-id="<%=group._id%>" class="listRow">
-    <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
+    <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && group.topArchived) { %>
         <td class="checkboxArea alignCenter">
             <input type="checkbox" id="<%=group._id%>" value="<%=group._id%>" class="customCheckbox" data-contentType="brand"/>
@@ -17,7 +17,7 @@
 <% if (group.categories) { %>
 <% group.categories.forEach(function(category, index){ %>
 <tr data-id="<%=category._id%>" class="listRow">
-    <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
+    <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && category.topArchived) { %>
     <td class="checkboxArea alignCenter">
         <input type="checkbox" id="<%=category._id%>" value="<%=category._id%>" class="customCheckbox" data-contentType="category"/>
@@ -33,7 +33,7 @@
 <% if (category.variants) { %>
 <% category.variants.forEach(function(variant, index){ %>
 <tr data-id="<%=variant._id%>" class="listRow">
-    <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
+    <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && variant.topArchived) { %>
     <td class="checkboxArea alignCenter">
         <input type="checkbox" id="<%=variant._id%>" value="<%=variant._id%>" class="customCheckbox" data-contentType="competitorVariant"/>
@@ -49,7 +49,7 @@
 <% if (variant.items) { %>
 <% variant.items.forEach(function(item, index){ %>
 <tr data-id="<%=item._id%>" class="listRow">
-    <% if ((level <=2) || (level >= 8) && App.currentUser.workAccess) { %>
+    <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && item.topArchived) { %>
         <td class="checkboxArea alignCenter">
             <input type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox" data-contentType="competitorItem"/>

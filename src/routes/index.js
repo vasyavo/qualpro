@@ -5,7 +5,6 @@ const multipartMiddleware = multipart();
 const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
-const IncomingRequestPayloadLogger = require('../utils/IncomingRequestPayloadLogger');
 const notFoundHandler = require('./../utils/notFound');
 const csrfProtection = require('./../utils/csrfProtection');
 const checkAuth = require('./../utils/isAuth');
@@ -66,7 +65,6 @@ module.exports = function(app, db, event) {
     var originRouter = require('./origin')(db, redis, event);
     var priceSurvey = require('./priceSurvey')(db, redis, event);
     var contactUs = require('./contactUs')(db, redis, event);
-    var consumerSurvey = require('./consumerSurvey')(db, redis, event);
 
     var contractsYearlyRouter = require('./contractsYearly')(db, redis, event);
     var contractsSecondaryRouter = require('./contractsSecondary')(db, redis, event);
@@ -83,7 +81,7 @@ module.exports = function(app, db, event) {
     var displayTypeRouter = require('./displayType')(db, redis, event);
 
     app.use(addRequestId);
-    app.use(IncomingRequestPayloadLogger);
+    app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
     app.get('/', csrfProtection, function(req, res, next) {
@@ -115,6 +113,8 @@ module.exports = function(app, db, event) {
         });
     });
 
+    app.post('/scheduler', /*require('../utils/allowedOriginsMiddleware'),*/ require('../stories/taskScheduler/trigger'));
+
     app.use(require('./../stories/user-registration'));
 
     app.use('/activityList', activityList);
@@ -137,6 +137,7 @@ module.exports = function(app, db, event) {
     app.use('/instoretasks', inStoreeTasksRouter);
     app.use('/planogram', planogramRouter);
     app.use('/questionnary', questionnaryRouter);
+    app.use('/consumersSurvey', require('../stories/consumersSurvey/router'));
     app.use('/shelfShares', shelfShareRouter);
     app.use('/docs/db', docsHandler.getDb);
     app.use('/position', positionRouter);
@@ -161,8 +162,6 @@ module.exports = function(app, db, event) {
     app.use('/achievementForm', achievementForm);
     app.use('/newProductLaunch', newProductLaunch);
     app.use('/contactUs', contactUs);
-    app.use('/consumerSurvey', consumerSurvey);
-
     app.use('/contractsYearly', contractsYearlyRouter);
     app.use('/contractsSecondary', contractsSecondaryRouter);
     app.use('/documents', documentsRouter);

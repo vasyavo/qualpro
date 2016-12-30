@@ -20,63 +20,95 @@ var ActivityHelper = function (db, redis, app) {
     const PersonnelModel = require('./../types/personnel/model');
     var access = require('../helpers/access')(db);
 
-    var levelsByLevel = {
+    const levelsByLevel = {
         1: [
             ACL_CONSTANTS.MASTER_ADMIN,
             ACL_CONSTANTS.MASTER_UPLOADER,
-            ACL_CONSTANTS.VIRTUAL
+            ACL_CONSTANTS.VIRTUAL,
         ],
         2: [
             ACL_CONSTANTS.MASTER_ADMIN,
             ACL_CONSTANTS.MASTER_UPLOADER,
-            ACL_CONSTANTS.VIRTUAL
+            ACL_CONSTANTS.VIRTUAL,
         ],
-        3: _(ACL_CONSTANTS).pick([
-            'MASTER_ADMIN',
-            'COUNTRY_ADMIN',
-            'COUNTRY_UPLOADER',
-            'MASTER_UPLOADER',
-            'VIRTUAL'
-        ]).values().value(), // [2, 9, 1, 8, 11],
-        4: _(ACL_CONSTANTS).pick([
-            'MASTER_ADMIN',
-            'COUNTRY_ADMIN',
-            'AREA_MANAGER',
-            'MASTER_UPLOADER',
-            'COUNTRY_UPLOADER',
-            'VIRTUAL'
-        ]).values().value(),// [2, 9, 1, 8, 3, 11],
-        5: _(ACL_CONSTANTS).omit([
-            'SUPER_ADMIN',
-            'SALES_MAN',
-            'MERCHANDISER',
-            'CASH_VAN'
-        ]).values().value(), // [2, 9, 1, 8, 3, 4, 11],
-        6: _(ACL_CONSTANTS).omit([
-            'SUPER_ADMIN',
-            'MERCHANDISER',
-            'CASH_VAN'
-        ]).values().value(), // [2, 9, 1, 8, 3, 4, 5, 11],
-        7: _(ACL_CONSTANTS).omit([
-            'SUPER_ADMIN',
-            'MERCHANDISER',
-            'CASH_VAN'
-        ]).values().value(), // [2, 9, 1, 8, 3, 4, 5, 11],
+        3: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
+        4: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
+        5: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.AREA_IN_CHARGE,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
+        6: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.AREA_IN_CHARGE,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.SALES_MAN,
+            ACL_CONSTANTS.TRADE_MARKETER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
+        7: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.AREA_IN_CHARGE,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.SALES_MAN,
+            ACL_CONSTANTS.TRADE_MARKETER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
         8: [
             ACL_CONSTANTS.MASTER_ADMIN,
             ACL_CONSTANTS.MASTER_UPLOADER,
-            ACL_CONSTANTS.VIRTUAL
+            ACL_CONSTANTS.VIRTUAL,
         ],
         9: [
             ACL_CONSTANTS.MASTER_ADMIN,
             ACL_CONSTANTS.MASTER_UPLOADER,
-            ACL_CONSTANTS.VIRTUAL
+            ACL_CONSTANTS.VIRTUAL,
         ],
-
-        11: _(ACL_CONSTANTS).omit([
-            'SUPER_ADMIN',
-            'VIRTUAL'
-        ]).values().value() // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        10: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.AREA_IN_CHARGE,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
+        11: [
+            ACL_CONSTANTS.MASTER_ADMIN,
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.AREA_IN_CHARGE,
+            ACL_CONSTANTS.MASTER_UPLOADER,
+            ACL_CONSTANTS.COUNTRY_UPLOADER,
+            ACL_CONSTANTS.SALES_MAN,
+            ACL_CONSTANTS.MERCHANDISER,
+            ACL_CONSTANTS.CASH_VAN,
+            ACL_CONSTANTS.TRADE_MARKETER,
+            ACL_CONSTANTS.VIRTUAL,
+        ],
     };
 
     var $defProjections = {};
@@ -239,42 +271,41 @@ var ActivityHelper = function (db, redis, app) {
 
     };
 
-    function getPersonnelsByLocation(options, cb) {
+    const getArrayOfPersonnelByCountryAndAccessRoleLevel = (options, callback) => {
         if (!options || !Object.keys(options).length) {
-            return cb(null, null);
+            return callback(null, null);
         }
-        var pipeLine = [];
-        var defProjectionPersonnel = {
-            _id       : 1,
+
+        const pipeLine = [];
+        // lightweight projection
+        const defProjectionPersonnel = {
+            _id: 1,
             accessRole: 1
         };
-        var aggregateHelper = new AggregationHelper(defProjectionPersonnel);
-        var aggregation;
 
         if (options.country) {
             pipeLine.push({
                 $match: {
                     $or: [
-                        {
-                            country: {
-                                $in: options.country
-                            }
-                        },
-                        {
-                            country: {
-                                $size: 0
-                            }
-                        }
+                        { country: { $size: 0 } }, // Person which haven't assigned to him country is Master Admin.
+                        { country: { $in: options.country } },
                     ]
                 }
             });
         }
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'accessRoles',
-            key          : 'accessRole',
-            isArray      : false,
-            addProjection: ['level']
-        }));
+
+        pipeLine.push(...[
+            { $lookup: {
+                from: 'accessRoles',
+                localField: 'accessRole',
+                foreignField: '_id',
+                as: 'accessRole'
+            }},
+            { $unwind: '$accessRole' },
+            { $project: Object.assign({}, defProjectionPersonnel, {
+                level: '$accessRole.level'
+            }) }
+        ]);
 
         if (options.level) {
             pipeLine.push({
@@ -288,28 +319,23 @@ var ActivityHelper = function (db, redis, app) {
 
         pipeLine.push({
             $group: {
-                _id       : null,
-                personnels: {$addToSet: '$_id'}
+                _id: null,
+                personnels: { $addToSet: '$_id' }
             }
         });
 
-        aggregation = PersonnelModel.aggregate(pipeLine);
+        PersonnelModel.aggregate(pipeLine)
+            .allowDiskUse(true)
+            .exec((err, result) => {
+                if (err) {
+                    return callback(err);
+                }
 
-        aggregation.options = {
-            allowDiskUse: true
-        };
+                const arrayOfPersonnel = result && result[0] ?
+                    result[0].personnels : null;
 
-        aggregation.exec(function (err, result) {
-            if (err) {
-                return cb(err);
-            }
-
-            result = result && result[0] ? result[0].personnels : null;
-
-            cb(null, result);
-        })
-
-
+                callback(null, arrayOfPersonnel);
+            });
     }
 
     function getLocationValue(aggregationResult, locationFields) {
@@ -588,7 +614,7 @@ var ActivityHelper = function (db, redis, app) {
                 addProjection    : ['archived']
             }));
 
-            pipeLine.push({
+           /* pipeLine.push({
                 $project: aggregateHelper.getProjection({
                     configuration: {
                         $filter: {
@@ -613,7 +639,7 @@ var ActivityHelper = function (db, redis, app) {
                         name: '$configuration.configuration'
                     }
                 })
-            });
+            });*/ //fixed bug with empty planogram activity name
         }
 
         if (options.itemType !== CONTENT_TYPES.PERSONNEL) {
@@ -671,7 +697,7 @@ var ActivityHelper = function (db, redis, app) {
                 searchOptions.level = level;
             }
 
-            getPersonnelsByLocation(searchOptions, function (err, personnelsResult) {
+            getArrayOfPersonnelByCountryAndAccessRoleLevel(searchOptions, function (err, personnelsResult) {
                 if (err) {
                     return waterFallCB(err);
                 }
@@ -891,21 +917,19 @@ var ActivityHelper = function (db, redis, app) {
         });
     }
 
-    function getCoverEmployee(id, cb) {
+    const getCoverEmployee = (id, cb) => {
         PersonnelModel
-            .findById(ObjectId(id), {vacation: 1})
+            .findById(ObjectId(id), { vacation: 1 })
             .lean()
-            .exec(function (err, model) {
-                var error;
-
+            .exec((err, model) => {
                 if (err) {
                     return cb(err);
                 }
 
                 if (!model) {
-                    error = new Error('Personnel not found');
-                    error.status = 400;
+                    const error = new Error('Personnel not found');
 
+                    error.status = 400;
                     return cb(error);
                 }
 
@@ -915,75 +939,77 @@ var ActivityHelper = function (db, redis, app) {
 
                 return cb(null, null);
             });
-
     }
 
-    function getUsersByLocationAndLevel(activityObject, forPushes, cb) {
-        var regionsMathArray = {};
-        var aggregation;
-        var pipeLine = [];
-        var orArray = [];
-        var coverParallelTasks = [];
-        var waterFallTasks = [];
-        var locationName;
-
-        var levelQuery = {
+    function getArrayOfPersonnelByAccessRoleLevelAndLocation(options, callback) {
+        const activityObject = options.activityObject;
+        const isPush = options.isPush;
+        const levelQuery = {
             accessRoleLevel: {
-                $in: levelsByLevel[activityObject.accessRoleLevel] || []
+                $in: levelsByLevel[activityObject.accessRoleLevel] || [],
             }
         };
 
+        let regionsMathArray = {};
+
         if (levelsByLevel[7].indexOf(activityObject.accessRoleLevel) > -1) {
-            regionsMathArray = {branch: {$in: activityObject.branch}};
+            regionsMathArray = { branch: { $in: activityObject.branch } };
         }
         if (levelsByLevel[6].indexOf(activityObject.accessRoleLevel) > -1) {
-            regionsMathArray = {subRegion: {$in: activityObject.subRegion}};
+            regionsMathArray = { subRegion: { $in: activityObject.subRegion } };
         }
         if (levelsByLevel[5].indexOf(activityObject.accessRoleLevel) > -1) {
-            regionsMathArray = {region: {$in: activityObject.region}};
+            regionsMathArray = { region: { $in: activityObject.region } };
         }
         if (levelsByLevel[4].indexOf(activityObject.accessRoleLevel) > -1) {
-            regionsMathArray = {country: {$in: activityObject.country}};
+            regionsMathArray = { country: { $in: activityObject.country } };
         }
 
-        pipeLine.push({
+        const pipeline = [];
+
+        pipeline.push({
             $project: {
-                country   : 1,
-                region    : 1,
-                subRegion : 1,
-                branch    : 1,
-                accessRole: 1
-            }
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
+                accessRole: 1,
+            },
         });
 
-        pipeLine.push({
+        pipeline.push({
             $lookup: {
-                from        : 'accessRoles',
-                localField  : 'accessRole',
+                from: 'accessRoles',
+                localField: 'accessRole',
                 foreignField: '_id',
-                as          : 'accessRole'
-            }
+                as: 'accessRole',
+            },
         });
 
-        pipeLine.push({
+        pipeline.push({
             $project: {
-                country        : 1,
-                region         : 1,
-                subRegion      : 1,
-                branch         : 1,
-                accessRoleLevel: {$arrayElemAt: ['$accessRole.level', 0]}
-            }
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
+                accessRoleLevel: { $arrayElemAt: ['$accessRole.level', 0] },
+            },
         });
 
-        if (activityObject.itemType === CONTENT_TYPES.NOTIFICATIONS
-            || activityObject.itemType === CONTENT_TYPES.CONTRACTSYEARLY
-            || activityObject.itemType === CONTENT_TYPES.PROMOTIONS
-            || activityObject.itemType === CONTENT_TYPES.BRANDINGANDDISPLAY
-            || activityObject.itemType === CONTENT_TYPES.QUESTIONNARIES) {
-            levelQuery = {};
+        if ([
+                CONTENT_TYPES.NOTIFICATIONS,
+                CONTENT_TYPES.CONTRACTSYEARLY,
+                CONTENT_TYPES.PROMOTIONS,
+                CONTENT_TYPES.BRANDINGANDDISPLAY,
+                CONTENT_TYPES.QUESTIONNARIES,
+            ].indexOf(activityObject.itemType) > -1) {
+            delete levelQuery.accessRoleLevel;
         }
 
+        // todo: is consumer survey needs it the same glitch?
         if (activityObject.itemType === CONTENT_TYPES.QUESTIONNARIES) {
+            let locationName = null;
+
             if (activityObject.branch && activityObject.branch.length) {
                 locationName = 'branch';
             } else if (activityObject.outlet && activityObject.outlet.length) {
@@ -1000,123 +1026,107 @@ var ActivityHelper = function (db, redis, app) {
 
             regionsMathArray = {};
             if (locationName) {
-                regionsMathArray[locationName] = {$in: activityObject[locationName]};
+                regionsMathArray[locationName] = { $in: activityObject[locationName] };
             }
         }
 
-        if (forPushes && typeof forPushes !== 'function') {
-            levelQuery = {};
-            regionsMathArray = {country: {$in: activityObject.country}};
-        } else {
-            cb = forPushes;
+        if (isPush) {
+            delete levelQuery.accessRoleLevel;
+
+            regionsMathArray = { country: { $in: activityObject.country } };
         }
 
-        orArray.push({
+        const $or = [];
+
+        $or.push({
             accessRoleLevel: {
-                $in: levelsByLevel[1]
+                $in: levelsByLevel[ACL_CONSTANTS.MASTER_ADMIN]
             }
         });
 
-        function firstPartWaterFall(waterFallCb) {
-            for (var i = 0; i < activityObject.assignedTo.length; i++) {
-                coverParallelTasks.push(
-                    async.apply(getCoverEmployee, activityObject.assignedTo[i])
-                );
-            }
+        async.waterfall([
 
-            async.parallel(coverParallelTasks, function (err, results) {
-                if (err) {
-                    return waterFallCb(err);
-                }
-                if (results && results.length) {
-                    results = _.compact(results);
-                    activityObject.assignedTo = activityObject.assignedTo.concat(results);
+            (cb) => {
+                if (_.isEmpty(activityObject.assignedTo)) {
+                    return cb(null);
                 }
 
-                waterFallCb(null, {
-                    _id: {
-                        $in: activityObject.assignedTo
+                async.map(activityObject.assignedTo, getCoverEmployee, (err, results) => {
+                    if (err) {
+                        return cb(err);
                     }
-                });
-            });
-        }
 
-        function secondPartWaterFall(orPart, waterFallCb) {
-            if (orPart) {
-                if (typeof orPart !== 'function') {
-                    orArray.push(orPart);
-                } else {
-                    waterFallCb = orPart;
-                }
-            }
+                    const copyOfAssignedToArray = [...activityObject.assignedTo];
 
-            if (activityObject.personnels && activityObject.personnels.length) {
-                pipeLine.push({
-                    $match: {
+                    if (results && results.length) {
+                        copyOfAssignedToArray.push(..._.compact(results));
+                    }
+
+                    $or.push({
                         _id: {
-                            $in: activityObject.personnels
+                            $in: copyOfAssignedToArray
                         }
-                    }
+                    });
+
+                    cb(null);
                 });
-            } else {
-                orArray.push({
-                    $and: [
-                        levelQuery,
-                        regionsMathArray
-                    ]
-                });
+            },
 
-                pipeLine.push({
-                    $match: {
-                        $or: orArray
-                    }
-                });
-            }
+            (cb) => {
+                if (activityObject.personnels && activityObject.personnels.length) {
+                    pipeline.push({
+                        $match: {
+                            _id: {
+                                $in: activityObject.personnels
+                            },
+                        },
+                    });
+                } else {
+                    $or.push({
+                        $and: [
+                            levelQuery,
+                            regionsMathArray,
+                        ],
+                    });
 
-            pipeLine.push({
-                $group: {
-                    _id: null,
-                    ids: {$push: '$_id'}
-                }
-            });
-
-            aggregation = PersonnelModel.aggregate(pipeLine);
-
-            aggregation.exec(function (err, result) {
-                var error;
-
-                if (err) {
-                    return waterFallCb(err);
+                    pipeline.push({
+                        $match: {
+                            $or,
+                        },
+                    });
                 }
 
-                if (!result[0]) {
-                    error = new Error();
+                pipeline.push({
+                    $group: {
+                        _id: null,
+                        ids: { $push: '$_id' }
+                    }
+                });
+
+                PersonnelModel.aggregate(pipeline).exec(cb);
+            },
+
+            (result, cb) => {
+                const groups = result[0];
+
+                if (!groups) {
+                    const error = new Error();
+
                     error.message = 'users not found';
-
-                    return waterFallCb(error);
+                    return cb(error);
                 }
 
-                if (activityObject.itemType === CONTENT_TYPES.PERSONNEL || activityObject.itemType === CONTENT_TYPES.PLANOGRAM) {
-                    result[0].ids.push(activityObject.itemId);
+                if ([
+                    CONTENT_TYPES.PERSONNEL,
+                    CONTENT_TYPES.PLANOGRAM,
+                ].indexOf(activityObject.itemType) > -1) {
+                    groups.ids.push(activityObject.itemId);
                 }
 
-                waterFallCb(null, result[0].ids);
-            });
-        }
-
-        if (activityObject.assignedTo && activityObject.assignedTo.length) {
-            waterFallTasks.push(firstPartWaterFall);
-        }
-
-        waterFallTasks.push(secondPartWaterFall);
-
-        async.waterfall(waterFallTasks, function (err, result) {
-            if (err) {
-                return cb(err);
+                cb(null, groups.ids);
             }
 
-            cb(null, result);
-        });
+        ], callback);
     }
 
     function addAction(userId, cb) {
@@ -1151,7 +1161,11 @@ var ActivityHelper = function (db, redis, app) {
 
         function getUsersByLocationAndLevelW(options, respondObject, wCb) {
             var parallelTasks = {
-                userIdsSocket: async.apply(getUsersByLocationAndLevel, options)
+                userIdsSocket: (cb) => {
+                    getArrayOfPersonnelByAccessRoleLevelAndLocation({
+                        activityObject: options
+                    }, cb);
+                }
             };
 
             if ([CONTENT_TYPES.ITEM, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.PLANOGRAM,
@@ -1159,7 +1173,12 @@ var ActivityHelper = function (db, redis, app) {
                     CONTENT_TYPES.PRICESURVEY, CONTENT_TYPES.SHELFSHARES,
                     CONTENT_TYPES.NEWPRODUCTLAUNCH].indexOf(options.itemType) !== -1) {
 
-                parallelTasks.userIdsPush = async.apply(getUsersByLocationAndLevel, options, true);
+                parallelTasks.userIdsPush = (cb) => {
+                    getArrayOfPersonnelByAccessRoleLevelAndLocation({
+                        activityObject: options,
+                        isPush: true,
+                    }, cb);
+                };
             }
 
             async.parallel(parallelTasks, function (err, results) {

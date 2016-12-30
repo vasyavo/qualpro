@@ -3,7 +3,7 @@
 <% var level = App.currentUser.accessRole.level; %>
 <div class="absoluteContent clickableTable">
     <table>
-        <% if ((level <=2 || ( level >= 8 && level <= 9 )) || showCheckboxes  && App.currentUser.workAccess) { %>
+        <% if (((level <=2 || ( level >= 8 && level <= 9 )) || showCheckboxes)  && App.currentUser.workAccess) { %>
         <col width="42px">
         <% } %>
         <col width="10%">
@@ -16,7 +16,7 @@
         <col width="10%">
         <thead>
         <tr>
-            <% if ((level <=2 || ( level >= 8 && level <= 9 )) || showCheckboxes  && App.currentUser.workAccess) { %>
+            <% if (((level <=2 || ( level >= 8 && level <= 9 )) || showCheckboxes)  && App.currentUser.workAccess) { %>
             <th class="checkboxArea alignCenter">
                 <% if (!notCheckAll) { %>
                     <input type="checkbox" id="checkAll" class="customCheckbox"/>
@@ -52,14 +52,14 @@
         </thead>
         <tbody>
         <tr>
-            <% if ((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes  && App.currentUser.workAccess) { %>
+            <% if (((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes ) && App.currentUser.workAccess) { %>
                 <td colspan="9" class="colspanFix">
             <% } else { %>
                 <td colspan="8" class="colspanFix">
             <% } %>
                 <div class="scrollable">
                     <table class="list alignBaseline">
-                        <% if ((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes  && App.currentUser.workAccess) { %>
+                        <% if (((level <= 2 || ( level >= 8 && level <= 9 )) || showCheckboxes ) && App.currentUser.workAccess) { %>
                         <col width="42px">
                         <% } %>
                         <col width="10%">

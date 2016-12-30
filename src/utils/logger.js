@@ -12,9 +12,10 @@ const logger = new (winston.Logger)({
             handleExceptions: true,
             humanReadableUnhandledException: true,
         }),
-        new (winston.transports.MongoDB)({
-            db: config.mongodbUri,
-        }),
+        // fixme change from MongodDB to S3
+        // new (winston.transports.MongoDB)({
+        //     db: config.mongodbUri,
+        // }),
     ],
 });
 

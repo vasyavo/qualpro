@@ -133,7 +133,7 @@ define([
             var description;
             var self = this;
 
-            if (this.objectiveType !== 'individual') {
+            if (this.objectiveType !== 'individual' && this.objectiveType !== 'country') {
                 return;
             }
 
@@ -576,7 +576,6 @@ define([
                 }
             });
 
-
             $endDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
@@ -591,10 +590,12 @@ define([
 
             implementShowHideArabicInputIn(this);
 
-            if (App.currentUser.accessRole.level > 1) {
+            if (App.currentUser.accessRole.level === 2) {
+                this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE.slice(-2);
+            } else if (App.currentUser.accessRole.level > 1) {
                 this.objectiveTypes = [CONSTANTS.OBJECTIVES_TYPE[4]];
             } else {
-                this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE;
+                this.objectiveTypes = CONSTANTS.OBJECTIVES_TYPE.slice(0, 5);
             }
 
             populate.inputDropDown({

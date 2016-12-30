@@ -22,7 +22,7 @@ define([
         action         : 'Action',
         disable        : 'Disable',
         unDisable      : 'Un Disable',
-        packing        : 'Packing',
+        packing        : 'Weight',
         product        : 'Product',
         archive        : 'Archive',
         retailSegment  : 'Trade channel',

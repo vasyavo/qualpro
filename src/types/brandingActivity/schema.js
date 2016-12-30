@@ -13,11 +13,11 @@ const schema = new Schema({
     retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT }],
     outlet: [{ type: ObjectId, ref: CONTENT_TYPES.OUTLET }],
     branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH }],
-    displayType: {
+    displayType: [{
         type: ObjectId,
         ref: CONTENT_TYPES.DISPLAYTYPE,
         default: null
-    },
+    }],
     dateStart: { type: Date },
     dateEnd: { type: Date },
     attachments: { type: Array, default: [] },

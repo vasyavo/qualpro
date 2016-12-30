@@ -1,10 +1,8 @@
-<div class="questionsList flexRowStretch noShrink borderBottom" data-id="<%= answer.personnel._id %>">
-    <div class="questionsUser">
-        <img src="<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
-    </div>
+<div class="questionsList flexRowStretch noShrink borderBottom" data-id="<%- answer.customer.name %>">
+    <div class="questionsUser"></div>
     <div class="questionsDescription flexGrow">
-        <div class="fontBold"><%= answer.personnel.firstName[App.currentUser.currentLanguage] + ' ' + answer.personnel.lastName[App.currentUser.currentLanguage] %></div>
-        <div class="fontGray fontSmall"><%= answer.position.name[App.currentUser.currentLanguage] %></div>
+        <div class="fontBold"><%- answer.customer.name %></div>
+        <div class="fontGray fontSmall">`Gender: <%- answer.customer.gender %></div>
         <div class="fontGray textEllipsis hoverFullText"><%= translation.location %>: <%= answer.location %>
         </div>
     </div>

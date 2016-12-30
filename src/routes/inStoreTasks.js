@@ -8,6 +8,7 @@ var objectivesHandler = require('../handlers/inStoreTasks');
 var access = require('../helpers/access');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
+const onLeaveMiddleware = require('../utils/onLeaveMiddleware');
 
 module.exports = function (db, redis, event) {
     var handler = new objectivesHandler(db, redis, event);
@@ -121,7 +122,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.get('/personnelFroSelection', handler.getPersonnelFroSelection);
+    router.get('/personnelFroSelection', onLeaveMiddleware, handler.getPersonnelFroSelection);
 
     /**
      * __Type__ 'POST'
@@ -199,7 +200,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.post('/duplicate', handler.duplicateInStoreTask);
+    router.post('/duplicate', onLeaveMiddleware, handler.duplicateInStoreTask);
 
     /**
      * __Type__ 'POST'
@@ -361,7 +362,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.post('/', multipartMiddleware, handler.create);
+    router.post('/', multipartMiddleware, onLeaveMiddleware, handler.create);
 
     /**
      * __Type__ 'PUT'
@@ -518,7 +519,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.put('/:id', multipartMiddleware, handler.update);
+    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, onLeaveMiddleware, handler.update);
 
     /**
      * __Type__ `GET`
@@ -702,9 +703,9 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.get('/taskFlow/:id', handler.getByIdTaskFlow);
+    router.get('/taskFlow/:id([0-9a-fA-F]{24})', handler.getByIdTaskFlow);
 
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ `GET`
@@ -892,7 +893,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.delete('/file', handler.removeFileFromInStoreTask);
+    router.delete('/file', onLeaveMiddleware, handler.removeFileFromInStoreTask);
 
     return router;
 };

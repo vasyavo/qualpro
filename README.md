@@ -54,6 +54,21 @@ ls -al - check right
 chmod 755 ./API_documentation/update_docs.sh - full access
 ```
 
+## Database migrations
+
+To create migration file:
+```
+$ node ./node_modules/mongodb-migrate -runmm create "optional-name-of-migration"
+```
+
+To run migration:
+```
+$ node ./node_modules/mongodb-migrate -runmm up
+```
+
+All parameters you can check [here](https://github.com/afloyd/mongo-migrate)
+
+
 #### Node Inspector
 Debugging with `node-inspector` do not works with node version higher than *6.3.1*
 https://github.com/node-inspector/node-inspector/issues/907
@@ -72,7 +87,8 @@ Ask credentials in your administrator.
 ##### General settings of instance:
  - `HOST`
  - `PORT`
- - `UPLOADER_TYPE` Currently available only with AmazonS3.
+ - `UPLOADER_TYPE` - Currently available only with AmazonS3.
+ - `SCHEDULER_HOST`
 
 ##### Twilio credentials are:
  - `SMS_ACCOUNT_SID`
@@ -87,6 +103,9 @@ Ask credentials in your administrator.
  - `AWS_ACCESS_KEY_ID`
  - `AWS_SECRET_ACCESS_KEY`
  - `AWS_S3_REGION` by default `eu-central-1`
+ 
+##### Firebase Cloud Messaging
+ - `FCM_API_KEY`
 
 ##### Heroku:
  - `REDIS_URL` Redis url which passed by Heroku Redis addon

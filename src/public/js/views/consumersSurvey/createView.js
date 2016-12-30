@@ -3,6 +3,7 @@ define([
     'underscore',
     'text!templates/consumersSurvey/create.html',
     'text!templates/consumersSurvey/createQuestionView.html',
+    'text!templates/consumersSurvey/circle-radio-buttons.html',
     'text!templates/consumersSurvey/multiselectOptions.html',
     'text!templates/consumersSurvey/singleSelectOptions.html',
     'text!templates/consumersSurvey/listOption.html',
@@ -19,7 +20,7 @@ define([
     'moment',
     'custom',
     'helpers/implementShowHideArabicInputIn'
-], function ($, _, CreateTemplate, CreateConsumersSurveyViewTemplate, MultiSelectOptionsTemplate, SingleSelectOptionsTemplate,
+], function ($, _, CreateTemplate, CreateConsumersSurveyViewTemplate, circleRadioButtonsTemplate,  MultiSelectOptionsTemplate, SingleSelectOptionsTemplate,
              ListOptionTemplate, FullAnswerOptionsTemplate, DropDownView, Model, QuestionModel, FilterCollection,
              QuestionCollection, OTHER_CONSTANTS, CONTENT_TYPES, populate, BaseView, moment, custom, implementShowHideArabicInputIn) {
 
@@ -41,7 +42,8 @@ define([
             'click #consumersSurveyTable .js_question .js_options .js_addNewOption': 'addNewOption',
             'click #consumersSurveyTable .js_question .js_options .removeOption'   : 'removeOption',
             'click #consumersSurveyTable .js_question input[type="checkbox"]'      : 'checkBoxClick',
-            'input #consumersSurveyTable .js_question input'                       : 'changeValue'
+            'input #consumersSurveyTable .js_question input'                       : 'changeValue',
+            'click .filterHeader'                      : 'toggleFilterHolder'
         },
 
         initialize: function (options) {
@@ -57,6 +59,7 @@ define([
                 delete model._id;
                 delete model.title;
                 delete model.dueDate;
+                delete model.startDate;
                 this.model = new Model(model);
                 this.questionsCollection = new QuestionCollection(model.questions);
                 this.renderModel = true;
@@ -80,12 +83,28 @@ define([
             this.render();
         },
 
-        changeValue: function (e) {
+        changeValue: function () {
             this.valueWasChanged = true;
         },
 
-        checkBoxClick: function (e) {
-            var $checkbox = this.$el.find('#questionTable input[type="checkbox"]:checked');
+        toggleFilterHolder: function (e) {
+            var $target = $(e.target);
+            var $filterBar = $target.closest('.filterBar');
+            var $filterBarName = $filterBar.find('.filterHeader');
+
+            if ($target.closest('.searchInputWrap').length) {
+                return false;
+            }
+
+            $filterBarName.toggleClass('downArrow');
+            $filterBarName.toggleClass('upArrow');
+
+            $filterBar.toggleClass('filterBarCollapse');
+            this.$el.find('.scrollable').mCustomScrollbar('update');
+        },
+
+        checkBoxClick: function () {
+            var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked');
 
             this.showHideButtons({
                 add   : true,
@@ -130,29 +149,32 @@ define([
                 multiSelect : false,
                 notRender   : true
             };
-            var inputView;
-
 
             if (e) {
                 e.preventDefault();
             }
 
             this.someIdForCheckBox++;
-            $curEl.find('#questionTable').append(this.createConsumersSurveyViewTemplate({
+            $curEl.find('#consumersSurveyTable').append(this.createConsumersSurveyViewTemplate({
                 question         : question || {},
                 someIdForCheckBox: this.someIdForCheckBox,
                 translation      : this.translation
             }));
 
             if (question) {
-                dropDownCreationOptions.selectedValues = [_.findWhere(OTHER_CONSTANTS.QUESTION_TYPE, {_id: question.type._id})];
+                var questionType = (question.type._id) ? question.type._id : question.type;
+                dropDownCreationOptions.selectedValues = [_.findWhere(OTHER_CONSTANTS.CONSUMER_SURVEY_QUESTION_TYPE, {_id: questionType})];
+
+                if (questionType === 'NPS') {
+
+                }
             }
 
             questionTypeDropDownView = new DropDownView(dropDownCreationOptions);
 
             questionTypeDropDownView.on('changeItem', this.selectStatus, this);
             questionTypeDropDownView.render();
-            dropDownCreationOptions.dropDownList.reset(OTHER_CONSTANTS.QUESTION_TYPE);
+            dropDownCreationOptions.dropDownList.reset(OTHER_CONSTANTS.CONSUMER_SURVEY_QUESTION_TYPE);
 
             $questionContainer = $curEl.find('#id' + this.someIdForCheckBox).closest('.js_question');
             $questionContainer.find('.js_questionType').append(questionTypeDropDownView.el);
@@ -164,7 +186,7 @@ define([
 
         renderOptionsForDuplicate: function (question, $questionContainer) {
             var $optionsContainer = $questionContainer.find('.js_options');
-            var questionType = question.type._id;
+            var questionType = (question.type._id) ? question.type._id : question.type;
 
             this.renderOptionsContainer(questionType, $optionsContainer, question.options);
         },
@@ -176,6 +198,8 @@ define([
                 $optionsContainer.html(this.multiSelectOptionsTemplate());
             } else if (questionType === 'singleChoice') {
                 $optionsContainer.html(this.singleSelectOptionsTemplate());
+            } else if (questionType === 'NPS') {
+                $optionsContainer.html(circleRadioButtonsTemplate);
             } else {
                 $optionsContainer.html('');
             }
@@ -188,7 +212,7 @@ define([
         },
 
         deleteConsumersSurvey: function (e) {
-            var $checkbox = this.$el.find('#questionTable input[type="checkbox"]:checked').closest('.js_question');
+            var $checkbox = this.$el.find('#consumersSurveyTable input[type="checkbox"]:checked').closest('.js_question');
 
             $checkbox.remove();
 
@@ -215,7 +239,7 @@ define([
             keys.forEach(function (key) {
                 cssDisplay = inputOptions[key] ? 'inline-block' : 'none';
 
-                $btn = $btnHolder.find('#' + key + 'Question');
+                $btn = $btnHolder.find('#' + key + 'ConsumersSurvey');
                 $btn.css({display: cssDisplay});
             });
         },
@@ -254,8 +278,8 @@ define([
 
         saveQuestionnary: function (options, cb) {
             var $curEl = this.$el;
-            var $questionTable = $curEl.find('#questionTable');
-            var $questionsRows = $questionTable.find('.js_question');
+            var $consumersSurveyTable = $curEl.find('#consumersSurveyTable');
+            var $questionsRows = $consumersSurveyTable.find('.js_question');
             var self = this;
             var newTitle = {
                 en: $curEl.find('#questionnaryTitleEn').val() || '',
@@ -263,9 +287,11 @@ define([
             };
             var title = $curEl.find('#questionnaryTitleEn').val() || $curEl.find('#questionnaryTitleAr').val() ? newTitle : this.model.get('title');
             var dueDate = $curEl.find('#dueDate').val();
+            var startDate = $curEl.find('#startDate').val();
             var questionModel = new QuestionModel();
             var model;
             var editDate;
+            var editStartDate;
             var optionsForModelSave = {
                 validate: false,
                 wait    : true,
@@ -283,6 +309,7 @@ define([
             this.body = {};
             this.body.title = title;
             this.body.dueDate = dueDate ? moment(dueDate, 'DD.MM.YYYY').toISOString() : null;
+            this.body.startDate = startDate ? moment(startDate, 'DD.MM.YYYY').toISOString() : null;
             this.body.questions = $questionsRows.length;
             this.setLocations();
             if (this.edit && this.model) {
@@ -338,12 +365,16 @@ define([
                     optionsForModelSave.patch = true;
                     model = self.model.toJSON();
                     editDate = custom.dateFormater('DD.MM.YYYY', self.body.dueDate);
+                    editStartDate = custom.dateFormater('DD.MM.YYYY', self.body.startDate);
 
                     if (!self.valueWasChanged) {
                         delete self.body.questions;
                     }
                     if (editDate === model.dueDate) {
                         delete self.body.dueDate;
+                    }
+                    if (editStartDate === model.startDate) {
+                        delete self.body.startDate;
                     }
                     if (self.body.title === model.title) {
                         delete self.body.title;
@@ -366,7 +397,7 @@ define([
             var self = this;
 
             questions.forEach(function (question) {
-                self.addQuestion(null, question);
+                self.addConsumersSurvey(null, question);
             });
         },
 
@@ -377,6 +408,11 @@ define([
             if (this.create) {
                 title = this.translation.create;
             }
+
+            if (jsonModel.startDate) {
+                jsonModel.startDate = moment(jsonModel.startDate).format('DD.MM.YYYY');
+            }
+
             var formString = this.template({
                 model      : jsonModel,
                 title      : title,
@@ -388,7 +424,6 @@ define([
             var questionnarieTableTitle;
             var idToSearch = '#' + this.currentLanguage;
             var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
-            var $endDate;
             var dateStart = new Date();
             var dateEnd;
             var idToFind;
@@ -433,7 +468,20 @@ define([
                 this.renderModelData();
             }
 
-            $endDate = $curEl.find('#dueDate');
+            var $startDate = $curEl.find('#startDate');
+            var $endDate = $curEl.find('#dueDate');
+
+            $startDate.datepicker({
+                changeMonth: true,
+                changeYear : true,
+                yearRange  : '-20y:c+10y',
+                minDate    : new Date(dateStart),
+                maxDate    : new Date(dateEnd),
+                defaultDate: new Date(dateEnd),
+                onClose    : function (selectedDate) {
+                    $endDate.datepicker('option', 'minDate', selectedDate);
+                }
+            });
 
             $endDate.datepicker({
                 changeMonth: true,
@@ -441,7 +489,10 @@ define([
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
-                defaultDate: new Date(dateEnd)
+                defaultDate: new Date(dateEnd),
+                onClose    : function (selectedDate) {
+                    $startDate.datepicker('option', 'maxDate', selectedDate);
+                }
             });
 
             implementShowHideArabicInputIn(this);

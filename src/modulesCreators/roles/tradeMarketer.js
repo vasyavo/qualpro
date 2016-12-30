@@ -146,10 +146,25 @@ module.exports = [
             read   : false
         },
         mobile: {
-            archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        }
+    },
+    {
+        module: ACL_MODULES.VISIBILITY_FORM,
+        cms   : {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
+        },
+        mobile: {
+            archive: true,
+            edit   : true,
+            write  : true,
+            read   : true
         }
     },
     {
@@ -472,7 +487,7 @@ module.exports = [
         mobile: {
             archive: false,
             edit   : false,
-            write  : false,
+            write  : true,
             read   : false
         }
     },
@@ -491,6 +506,7 @@ module.exports = [
             read   : false
         }
     },
+    require('./../../stories/consumer-survey/acl/tradeMarketer'),
     {
         module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
         cms   : {
@@ -532,7 +548,7 @@ module.exports = [
         mobile: {
             archive: false,
             edit   : false,
-            write  : false,
+            write  : true,
             read   : true
         }
     },

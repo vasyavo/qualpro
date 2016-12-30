@@ -7,7 +7,7 @@ define([
         // list
         productCategory: 'Product category',
         variant        : 'Variant',
-        packaging      : 'Packaging',
+        packaging      : 'Weight',
         location       : 'Location',
         fromTo         : 'From to',
         // preview
@@ -26,7 +26,7 @@ define([
         attachments  : 'Attachments',
         comment      : 'Comment',
         origin       : 'Origin',
-        packing      : 'Packing',
+        packing      : 'Weight',
         price        : 'RSP',
         displayType  : 'Display type',
         distributor  : 'Distributor',

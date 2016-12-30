@@ -7,6 +7,8 @@ const config = {};
 config.env = process.env.NODE_ENV;
 config.isTest = process.env.NODE_ENV === 'test';
 
+config.schedulerHost = process.env.SCHEDULER_HOST || null;
+
 // at this moment environment variables will be imported from .env.development
 // if NODE_ENV not provided then dotenv will import variables from .env
 require('dotenv').config({
@@ -84,6 +86,8 @@ config.uploaderType = 'AmazonS3';
 
 config.isCI = process.env.CI;
 config.pullDbOnCI = process.env.PULL_DB_ON_CI || true;
+
+config.fcmApiKey = process.env.FCM_API_KEY;
 
 // import this file at begin of server.js
 module.exports = config;

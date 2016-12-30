@@ -2,7 +2,7 @@
 
 const PasswordManager = require('./../helpers/passwordManager');
 
-var Personnel = function (db, redis, event) {
+var Personnel = function(db, redis, event) {
     var mongoose = require('mongoose');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var ACL_MODULES = require('../constants/aclModulesNames');
@@ -25,6 +25,10 @@ var Personnel = function (db, redis, event) {
     var getImagesHelper = new GetImagesHelper(db);
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
+    const CountryModel = require('./../types/domain/model');
+    const OutletModel = require('./../types/outlet/model');
+    const BranchModel = require('./../types/branch/model');
+    const retailSegmentModel = require('./../types/retailSegment/model');
     const SessionModel = require('./../types/session/model');
     var xssFilters = require('xss-filters');
     var ObjectId = mongoose.Types.ObjectId;
@@ -40,40 +44,40 @@ var Personnel = function (db, redis, event) {
     const redisClient = require('../helpers/redisClient');
 
     var $defProjection = {
-        _id             : 1,
-        position        : 1,
-        avgRating       : 1,
-        manager         : 1,
-        lastAccess      : 1,
-        firstName       : 1,
-        lastName        : 1,
-        email           : 1,
-        phoneNumber     : 1,
-        accessRole      : 1,
-        createdBy       : 1,
-        editedBy        : 1,
-        vacation        : 1,
-        status          : 1,
-        region          : 1,
-        subRegion       : 1,
-        retailSegment   : 1,
-        outlet          : 1,
-        branch          : 1,
-        country         : 1,
+        _id : 1,
+        position : 1,
+        avgRating : 1,
+        manager : 1,
+        lastAccess : 1,
+        firstName : 1,
+        lastName : 1,
+        email : 1,
+        phoneNumber : 1,
+        accessRole : 1,
+        createdBy : 1,
+        editedBy : 1,
+        vacation : 1,
+        status : 1,
+        region : 1,
+        subRegion : 1,
+        retailSegment : 1,
+        outlet : 1,
+        branch : 1,
+        country : 1,
         currentLanguage : 1,
-        super           : 1,
-        archived        : 1,
-        temp            : 1,
-        confirmed       : 1,
-        translated      : 1,
-        dateJoined      : 1,
-        beforeAccess    : 1,
-        lasMonthEvaluate: 1,
-        covered         : 1,
-        token           : 1
+        super : 1,
+        archived : 1,
+        temp : 1,
+        confirmed : 1,
+        translated : 1,
+        dateJoined : 1,
+        beforeAccess : 1,
+        lasMonthEvaluate : 1,
+        covered : 1,
+        token : 1
     };
 
-    var convertDomainsToObjectIdArray = function (body) {
+    var convertDomainsToObjectIdArray = function(body) {
         if (body.country) {
             body.country = body.country.objectID();
         }
@@ -99,18 +103,18 @@ var Personnel = function (db, redis, event) {
         }
     };
 
-    var unselectable = function (currentLevel, context, instoreObjective) {
+    var unselectable = function(currentLevel, context, instoreObjective) {
         var obj = {
-            1: [],
-            2: ['country'],
-            3: ['country', 'region'],
-            4: ['country', 'region', 'subRegion']
+            1 : [],
+            2 : ['country'],
+            3 : ['country', 'region'],
+            4 : ['country', 'region', 'subRegion']
         };
         var index;
         var value;
 
         if (instoreObjective) {
-            return {$literal: false};
+            return {$literal : false};
         }
 
         if (obj[currentLevel]) {
@@ -120,245 +124,245 @@ var Personnel = function (db, redis, event) {
             if (index !== -1) {
                 value = true;
             }
-            return {$literal: value};
+            return {$literal : value};
         }
 
-        return {$literal: false};
+        return {$literal : false};
     };
 
-    var pushCurrentUserCovered = function (pipeLine) {
+    var pushCurrentUserCovered = function(pipeLine) {
 
         pipeLine.push({
-            $lookup: {
-                from        : 'personnels',
-                localField  : '_id',
-                foreignField: 'vacation.cover',
-                as          : 'covered'
+            $lookup : {
+                from : 'personnels',
+                localField : '_id',
+                foreignField : 'vacation.cover',
+                as : 'covered'
             }
         });
 
         pipeLine.push({
-            $unwind: {
-                path                      : '$covered',
-                preserveNullAndEmptyArrays: true
+            $unwind : {
+                path : '$covered',
+                preserveNullAndEmptyArrays : true
             }
         });
 
         pipeLine.push({
-            $project: {
-                _id            : 1,
-                position       : 1,
-                avgRating      : 1,
-                manager        : 1,
-                lastAccess     : 1,
-                beforeAccess   : 1,
-                firstName      : 1,
-                lastName       : 1,
-                email          : 1,
-                phoneNumber    : 1,
-                accessRole     : 1,
-                dateJoined     : 1,
-                createdBy      : 1,
-                covered        : {
-                    accessRole: 1,
-                    onLeave   : '$covered.vacation.onLeave',
-                    _id       : 1
+            $project : {
+                _id : 1,
+                position : 1,
+                avgRating : 1,
+                manager : 1,
+                lastAccess : 1,
+                beforeAccess : 1,
+                firstName : 1,
+                lastName : 1,
+                email : 1,
+                phoneNumber : 1,
+                accessRole : 1,
+                dateJoined : 1,
+                createdBy : 1,
+                covered : {
+                    accessRole : 1,
+                    onLeave : '$covered.vacation.onLeave',
+                    _id : 1
                 },
-                vacation       : 1,
-                status         : 1,
-                region         : 1,
-                subRegion      : 1,
-                retailSegment  : 1,
-                outlet         : 1,
-                branch         : 1,
-                country        : 1,
-                currentLanguage: 1,
-                super          : 1,
-                archived       : 1,
-                temp           : 1,
-                confirmed      : 1,
-                translated     : 1
+                vacation : 1,
+                status : 1,
+                region : 1,
+                subRegion : 1,
+                retailSegment : 1,
+                outlet : 1,
+                branch : 1,
+                country : 1,
+                currentLanguage : 1,
+                super : 1,
+                archived : 1,
+                temp : 1,
+                confirmed : 1,
+                translated : 1
             }
         });
 
         pipeLine.push({
-            $lookup: {
-                from        : 'accessRoles',
-                localField  : 'covered.accessRole',
-                foreignField: '_id',
-                as          : 'covered.accessRole'
+            $lookup : {
+                from : 'accessRoles',
+                localField : 'covered.accessRole',
+                foreignField : '_id',
+                as : 'covered.accessRole'
             }
         });
 
         pipeLine.push({
-            $project: {
-                _id            : 1,
-                position       : 1,
-                avgRating      : 1,
-                manager        : 1,
-                lastAccess     : 1,
-                beforeAccess   : 1,
-                firstName      : 1,
-                lastName       : 1,
-                email          : 1,
-                phoneNumber    : 1,
-                accessRole     : 1,
-                dateJoined     : 1,
-                createdBy      : 1,
-                covered        : {
-                    _id        : 1,
-                    accessRoles: {
-                        $arrayElemAt: [
+            $project : {
+                _id : 1,
+                position : 1,
+                avgRating : 1,
+                manager : 1,
+                lastAccess : 1,
+                beforeAccess : 1,
+                firstName : 1,
+                lastName : 1,
+                email : 1,
+                phoneNumber : 1,
+                accessRole : 1,
+                dateJoined : 1,
+                createdBy : 1,
+                covered : {
+                    _id : 1,
+                    accessRoles : {
+                        $arrayElemAt : [
                             '$covered.accessRole',
                             0
                         ]
                     },
-                    onLeave    : 1
+                    onLeave : 1
                 },
-                status         : 1,
-                vacation       : 1,
-                region         : 1,
-                subRegion      : 1,
-                retailSegment  : 1,
-                outlet         : 1,
-                branch         : 1,
-                country        : 1,
-                currentLanguage: 1,
-                super          : 1,
-                archived       : 1,
-                temp           : 1,
-                confirmed      : 1,
-                translated     : 1
+                status : 1,
+                vacation : 1,
+                region : 1,
+                subRegion : 1,
+                retailSegment : 1,
+                outlet : 1,
+                branch : 1,
+                country : 1,
+                currentLanguage : 1,
+                super : 1,
+                archived : 1,
+                temp : 1,
+                confirmed : 1,
+                translated : 1
             }
         });
 
         pipeLine.push({
-            $project: {
-                _id            : 1,
-                position       : 1,
-                avgRating      : 1,
-                manager        : 1,
-                lastAccess     : 1,
-                beforeAccess   : 1,
-                firstName      : 1,
-                lastName       : 1,
-                dateJoined     : 1,
-                email          : 1,
-                phoneNumber    : 1,
-                accessRole     : 1,
-                createdBy      : 1,
-                covered        : {
-                    _id        : 1,
-                    accessRoles: {
-                        _id      : 1,
+            $project : {
+                _id : 1,
+                position : 1,
+                avgRating : 1,
+                manager : 1,
+                lastAccess : 1,
+                beforeAccess : 1,
+                firstName : 1,
+                lastName : 1,
+                dateJoined : 1,
+                email : 1,
+                phoneNumber : 1,
+                accessRole : 1,
+                createdBy : 1,
+                covered : {
+                    _id : 1,
+                    accessRoles : {
+                        _id : 1,
                         editedBy : 1,
-                        createdBy: 1,
-                        name     : 1,
-                        __v      : 1,
-                        level    : 1
+                        createdBy : 1,
+                        name : 1,
+                        __v : 1,
+                        level : 1
                     },
-                    onLeave    : 1
+                    onLeave : 1
                 },
-                status         : 1,
-                vacation       : 1,
-                region         : 1,
-                subRegion      : 1,
-                retailSegment  : 1,
-                outlet         : 1,
-                branch         : 1,
-                country        : 1,
-                currentLanguage: 1,
-                super          : 1,
-                archived       : 1,
-                temp           : 1,
-                confirmed      : 1,
-                translated     : 1
+                status : 1,
+                vacation : 1,
+                region : 1,
+                subRegion : 1,
+                retailSegment : 1,
+                outlet : 1,
+                branch : 1,
+                country : 1,
+                currentLanguage : 1,
+                super : 1,
+                archived : 1,
+                temp : 1,
+                confirmed : 1,
+                translated : 1
             }
         });
 
         pipeLine.push({
-            $group: {
-                _id            : '$_id',
-                position       : {
-                    $first: '$position'
+            $group : {
+                _id : '$_id',
+                position : {
+                    $first : '$position'
                 },
-                avgRating      : {
-                    $first: '$avgRating'
+                avgRating : {
+                    $first : '$avgRating'
                 },
-                manager        : {
-                    $first: '$manager'
+                manager : {
+                    $first : '$manager'
                 },
-                lastAccess     : {
-                    $first: '$lastAccess'
+                lastAccess : {
+                    $first : '$lastAccess'
                 },
-                beforeAccess   : {
-                    $first: '$beforeAccess'
+                beforeAccess : {
+                    $first : '$beforeAccess'
                 },
-                firstName      : {
-                    $first: '$firstName'
+                firstName : {
+                    $first : '$firstName'
                 },
-                lastName       : {
-                    $first: '$lastName'
+                lastName : {
+                    $first : '$lastName'
                 },
-                email          : {
-                    $first: '$email'
+                email : {
+                    $first : '$email'
                 },
-                phoneNumber    : {
-                    $first: '$phoneNumber'
+                phoneNumber : {
+                    $first : '$phoneNumber'
                 },
-                accessRole     : {
-                    $first: '$accessRole'
+                accessRole : {
+                    $first : '$accessRole'
                 },
-                dateJoined     : {
-                    $first: '$dateJoined'
+                dateJoined : {
+                    $first : '$dateJoined'
                 },
-                createdBy      : {
-                    $first: '$createdBy'
+                createdBy : {
+                    $first : '$createdBy'
                 },
-                vacation       : {
-                    $first: '$vacation'
+                vacation : {
+                    $first : '$vacation'
                 },
-                status         : {
-                    $first: '$status'
+                status : {
+                    $first : '$status'
                 },
-                region         : {
-                    $first: '$region'
+                region : {
+                    $first : '$region'
                 },
-                subRegion      : {
-                    $first: '$subRegion'
+                subRegion : {
+                    $first : '$subRegion'
                 },
-                retailSegment  : {
-                    $first: '$retailSegment'
+                retailSegment : {
+                    $first : '$retailSegment'
                 },
-                outlet         : {
-                    $first: '$outlet'
+                outlet : {
+                    $first : '$outlet'
                 },
-                branch         : {
-                    $first: '$branch'
+                branch : {
+                    $first : '$branch'
                 },
-                country        : {
-                    $first: '$country'
+                country : {
+                    $first : '$country'
                 },
-                currentLanguage: {
-                    $first: '$currentLanguage'
+                currentLanguage : {
+                    $first : '$currentLanguage'
                 },
-                super          : {
-                    $first: '$super'
+                super : {
+                    $first : '$super'
                 },
-                archived       : {
-                    $first: '$archived'
+                archived : {
+                    $first : '$archived'
                 },
-                temp           : {
-                    $first: '$temp'
+                temp : {
+                    $first : '$temp'
                 },
-                confirmed      : {
-                    $first: '$confirmed'
+                confirmed : {
+                    $first : '$confirmed'
                 },
-                translated     : {
-                    $first: '$translated'
+                translated : {
+                    $first : '$translated'
                 },
-                covered        : {
-                    $addToSet: '$covered'
+                covered : {
+                    $addToSet : '$covered'
                 }
             }
         });
@@ -366,10 +370,10 @@ var Personnel = function (db, redis, event) {
         return pipeLine;
     };
 
-    var personnelFindByIdAndPopulate = function (options, callback) {
+    var personnelFindByIdAndPopulate = function(options, callback) {
         var id = options.id || '';
         var isCurrent = options.isCurrent || false;
-        var queryObject = {_id: ObjectId(id)};
+        var queryObject = {_id : ObjectId(id)};
         var isMobile = options.isMobile || false;
 
         var aggregateHelper = new AggregationHelper($defProjection);
@@ -379,66 +383,66 @@ var Personnel = function (db, redis, event) {
         var domainsArray = ['country', 'region', 'subRegion'];
 
         pipeLine.push({
-            $match: queryObject
+            $match : queryObject
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'positions',
-            key    : 'position',
-            isArray: false
+            from : 'positions',
+            key : 'position',
+            isArray : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'accessRoles',
-            key          : 'accessRole',
-            isArray      : false,
-            addProjection: 'level'
+            from : 'accessRoles',
+            key : 'accessRole',
+            isArray : false,
+            addProjection : 'level'
         }));
 
-        domainsArray.forEach(function (element) {
+        domainsArray.forEach(function(element) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from: 'domains',
+                from : 'domains',
                 key : element
             }));
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from             : 'branches',
-            key              : 'branch',
-            addMainProjection: ['retailSegment', 'outlet']
+            from : 'branches',
+            key : 'branch',
+            addMainProjection : ['retailSegment', 'outlet']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'retailSegments',
+            from : 'retailSegments',
             key : 'retailSegment'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
+            from : 'outlets',
             key : 'outlet'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            nameFields     : ['firstName', 'lastName'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            nameFields : ['firstName', 'lastName'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'personnels',
-            key          : 'manager',
-            isArray      : false,
-            addProjection: ['firstName', 'lastName']
+            from : 'personnels',
+            key : 'manager',
+            isArray : false,
+            addProjection : ['firstName', 'lastName']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'vacation.cover',
-            isArray        : false,
-            addProjection  : ['firstName', 'lastName', 'accessRole', 'vacation'],
-            includeSiblings: {vacation: {onLeave: 1}}
+            from : 'personnels',
+            key : 'vacation.cover',
+            isArray : false,
+            addProjection : ['firstName', 'lastName', 'accessRole', 'vacation'],
+            includeSiblings : {vacation : {onLeave : 1}}
         }));
 
         if (isCurrent) {
@@ -448,10 +452,10 @@ var Personnel = function (db, redis, event) {
         aggregation = PersonnelModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse: true
+            allowDiskUse : true
         };
 
-        aggregation.exec(function (err, result) {
+        aggregation.exec(function(err, result) {
             if (err) {
                 return callback(err);
             }
@@ -462,7 +466,7 @@ var Personnel = function (db, redis, event) {
             var personnel;
             var ids = [result[0]._id];
             var options = {
-                data: {}
+                data : {}
             };
             if (isMobile) {
                 coveredObject = [];
@@ -471,18 +475,18 @@ var Personnel = function (db, redis, event) {
 
             if (personnel.firstName) {
                 personnel.firstName = {
-                    en: _.unescape(personnel.firstName.en),
-                    ar: _.unescape(personnel.firstName.ar)
+                    en : _.unescape(personnel.firstName.en),
+                    ar : _.unescape(personnel.firstName.ar)
                 }
             }
             if (personnel.lastName) {
                 personnel.lastName = {
-                    en: _.unescape(personnel.lastName.en),
-                    ar: _.unescape(personnel.lastName.ar)
+                    en : _.unescape(personnel.lastName.en),
+                    ar : _.unescape(personnel.lastName.ar)
                 }
             }
             if (personnel && personnel.covered && !isMobile) {
-                personnel.covered.forEach(function (value) {
+                personnel.covered.forEach(function(value) {
                     if (value.onLeave) {
                         coveredObject[value._id] = value.accessRoles;
                     }
@@ -493,22 +497,22 @@ var Personnel = function (db, redis, event) {
 
             options.data[CONTENT_TYPES.PERSONNEL] = ids;
 
-            getImagesHelper.getImages(options, function (err, result) {
+            getImagesHelper.getImages(options, function(err, result) {
                 var optionsForImplement = {
-                    response  : personnel,
-                    imgsObject: result,
-                    fields    : {
-                        personnel: []
+                    response : personnel,
+                    imgsObject : result,
+                    fields : {
+                        personnel : []
                     }
                 };
-                getImagesHelper.setIntoResult(optionsForImplement, function (response) {
+                getImagesHelper.setIntoResult(optionsForImplement, function(response) {
                     callback(null, response);
                 });
             });
         });
     };
 
-    this.getForDD = function (req, res, next) {
+    this.getForDD = function(req, res, next) {
         function queryRun() {
             var query = req.query;
             var queryObject = query || {};
@@ -517,7 +521,7 @@ var Personnel = function (db, redis, event) {
                 queryObject.outlet = ObjectId(queryObject.outlet);
             }
 
-            PersonnelModel.find(queryObject, '_id firstName lastName fullName phoneNumber email').exec(function (err, result) {
+            PersonnelModel.find(queryObject, '_id firstName lastName fullName phoneNumber email').exec(function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -525,7 +529,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
             var customErr;
 
             if (err) {
@@ -542,7 +546,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.getForTree = function (req, res, next) {
+    this.getForTree = function(req, res, next) {
         function queryRun() {
             var query = req.query;
             var currentLevel = req.session.level;
@@ -567,11 +571,14 @@ var Personnel = function (db, redis, event) {
 
             async.waterfall([
 
-                function (cb) {
+                function(cb) {
                     PersonnelModel
                         .findById(queryObject.ids[0])
-                        .populate([{path: 'accessRole', select: 'level'}])
-                        .exec(function (err, personnelModel) {
+                        .populate([{
+                            path : 'accessRole',
+                            select : 'level'
+                        }])
+                        .exec(function(err, personnelModel) {
                             if (err) {
                                 return cb(err, null);
                             }
@@ -596,7 +603,7 @@ var Personnel = function (db, redis, event) {
                         });
                 },
 
-                function (level, cb) {
+                function(level, cb) {
                     if (level === ACL_CONSTANTS.MASTER_ADMIN) {
                         return cb(null, []);
                     }
@@ -608,322 +615,322 @@ var Personnel = function (db, redis, event) {
 
                     queryObject.ids = queryObject.ids.objectID();
 
-                    $matchObject._id = {$in: queryObject.ids};
+                    $matchObject._id = {$in : queryObject.ids};
 
                     pipeLine.push({
-                        $match: $matchObject
+                        $match : $matchObject
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$country',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$country',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$region',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$region',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$subRegion',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$subRegion',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$branch',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$branch',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $lookup: {
-                            from        : 'domains',
-                            localField  : 'country',
-                            foreignField: '_id',
-                            as          : 'country'
+                        $lookup : {
+                            from : 'domains',
+                            localField : 'country',
+                            foreignField : '_id',
+                            as : 'country'
                         }
                     });
 
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            country: {
-                                _id         : {$arrayElemAt: ['$country._id', 0]},
-                                title       : {$arrayElemAt: ['$country.name.' + currentLanguage, 0]},
-                                expanded    : {$literal: true},
-                                selected    : {$literal: false},
-                                unselectable: unselectable(currentLevel, 'country', instoreObjective),
-                                contentType : {$literal: 'country'},
-                                key         : {$arrayElemAt: ['$country._id', 0]}
+                        $project : aggregateHelper.getProjection({
+                            country : {
+                                _id : {$arrayElemAt : ['$country._id', 0]},
+                                title : {$arrayElemAt : ['$country.name.' + currentLanguage, 0]},
+                                expanded : {$literal : true},
+                                selected : {$literal : false},
+                                unselectable : unselectable(currentLevel, 'country', instoreObjective),
+                                contentType : {$literal : 'country'},
+                                key : {$arrayElemAt : ['$country._id', 0]}
                             }
                         })
                     });
 
                     pipeLine.push({
-                        $lookup: {
-                            from        : 'domains',
-                            localField  : 'region',
-                            foreignField: '_id',
-                            as          : 'region'
+                        $lookup : {
+                            from : 'domains',
+                            localField : 'region',
+                            foreignField : '_id',
+                            as : 'region'
                         }
                     });
 
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            region: {
-                                _id         : {$arrayElemAt: ['$region._id', 0]},
-                                title       : {$arrayElemAt: ['$region.name.' + currentLanguage, 0]},
-                                expanded    : {$literal: true},
-                                selected    : {$literal: false},
-                                unselectable: unselectable(currentLevel, 'region', instoreObjective),
-                                contentType : {$literal: 'region'},
-                                key         : {$arrayElemAt: ['$region._id', 0]}
+                        $project : aggregateHelper.getProjection({
+                            region : {
+                                _id : {$arrayElemAt : ['$region._id', 0]},
+                                title : {$arrayElemAt : ['$region.name.' + currentLanguage, 0]},
+                                expanded : {$literal : true},
+                                selected : {$literal : false},
+                                unselectable : unselectable(currentLevel, 'region', instoreObjective),
+                                contentType : {$literal : 'region'},
+                                key : {$arrayElemAt : ['$region._id', 0]}
                             }
                         })
                     });
 
                     pipeLine.push({
-                        $lookup: {
-                            from        : 'domains',
-                            localField  : 'subRegion',
-                            foreignField: '_id',
-                            as          : 'subRegion'
+                        $lookup : {
+                            from : 'domains',
+                            localField : 'subRegion',
+                            foreignField : '_id',
+                            as : 'subRegion'
                         }
                     });
 
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            subRegion: {
-                                _id         : {$arrayElemAt: ['$subRegion._id', 0]},
-                                title       : {$arrayElemAt: ['$subRegion.name.' + currentLanguage, 0]},
-                                expanded    : {$literal: true},
-                                selected    : {$literal: false},
-                                unselectable: unselectable(currentLevel, 'subRegion', instoreObjective),
-                                contentType : {$literal: 'subRegion'},
-                                key         : {$arrayElemAt: ['$subRegion._id', 0]}
+                        $project : aggregateHelper.getProjection({
+                            subRegion : {
+                                _id : {$arrayElemAt : ['$subRegion._id', 0]},
+                                title : {$arrayElemAt : ['$subRegion.name.' + currentLanguage, 0]},
+                                expanded : {$literal : true},
+                                selected : {$literal : false},
+                                unselectable : unselectable(currentLevel, 'subRegion', instoreObjective),
+                                contentType : {$literal : 'subRegion'},
+                                key : {$arrayElemAt : ['$subRegion._id', 0]}
                             }
                         })
                     });
 
                     pipeLine.push({
-                        $lookup: {
-                            from        : 'branches',
-                            localField  : 'branch',
-                            foreignField: '_id',
-                            as          : 'branch'
+                        $lookup : {
+                            from : 'branches',
+                            localField : 'branch',
+                            foreignField : '_id',
+                            as : 'branch'
                         }
                     });
 
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            branch       : {
-                                _id        : {$arrayElemAt: ['$branch._id', 0]},
-                                title      : {$arrayElemAt: ['$branch.name.' + currentLanguage, 0]},
-                                expanded   : {$literal: true},
-                                selected   : {$literal: false},
-                                contentType: {$literal: 'branch'},
-                                key        : {$arrayElemAt: ['$branch._id', 0]}
+                        $project : aggregateHelper.getProjection({
+                            branch : {
+                                _id : {$arrayElemAt : ['$branch._id', 0]},
+                                title : {$arrayElemAt : ['$branch.name.' + currentLanguage, 0]},
+                                expanded : {$literal : true},
+                                selected : {$literal : false},
+                                contentType : {$literal : 'branch'},
+                                key : {$arrayElemAt : ['$branch._id', 0]}
                             },
-                            retailSegment: {$arrayElemAt: ['$branch.retailSegment', 0]},
-                            outlet       : {$arrayElemAt: ['$branch.outlet', 0]}
+                            retailSegment : {$arrayElemAt : ['$branch.retailSegment', 0]},
+                            outlet : {$arrayElemAt : ['$branch.outlet', 0]}
                         })
                     });
 
                     pipeLine.push({
-                        $lookup: {
-                            from        : 'retailSegments',
-                            localField  : 'retailSegment',
-                            foreignField: '_id',
-                            as          : 'retailSegment'
+                        $lookup : {
+                            from : 'retailSegments',
+                            localField : 'retailSegment',
+                            foreignField : '_id',
+                            as : 'retailSegment'
                         }
                     });
 
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            retailSegment: {
-                                _id        : {$arrayElemAt: ['$retailSegment._id', 0]},
-                                title      : {$arrayElemAt: ['$retailSegment.name.' + currentLanguage, 0]},
-                                expanded   : {$literal: true},
-                                selected   : {$literal: false},
-                                contentType: {$literal: 'retailSegment'},
-                                key        : {$arrayElemAt: ['$retailSegment._id', 0]}
+                        $project : aggregateHelper.getProjection({
+                            retailSegment : {
+                                _id : {$arrayElemAt : ['$retailSegment._id', 0]},
+                                title : {$arrayElemAt : ['$retailSegment.name.' + currentLanguage, 0]},
+                                expanded : {$literal : true},
+                                selected : {$literal : false},
+                                contentType : {$literal : 'retailSegment'},
+                                key : {$arrayElemAt : ['$retailSegment._id', 0]}
                             }
                         })
                     });
 
                     pipeLine.push({
-                        $lookup: {
-                            from        : 'outlets',
-                            localField  : 'outlet',
-                            foreignField: '_id',
-                            as          : 'outlet'
+                        $lookup : {
+                            from : 'outlets',
+                            localField : 'outlet',
+                            foreignField : '_id',
+                            as : 'outlet'
                         }
                     });
 
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            outlet: {
-                                _id        : {$arrayElemAt: ['$outlet._id', 0]},
-                                title      : {$arrayElemAt: ['$outlet.name.' + currentLanguage, 0]},
-                                expanded   : {$literal: true},
-                                selected   : {$literal: false},
-                                contentType: {$literal: 'outlet'},
-                                key        : {$arrayElemAt: ['$outlet._id', 0]}
+                        $project : aggregateHelper.getProjection({
+                            outlet : {
+                                _id : {$arrayElemAt : ['$outlet._id', 0]},
+                                title : {$arrayElemAt : ['$outlet.name.' + currentLanguage, 0]},
+                                expanded : {$literal : true},
+                                selected : {$literal : false},
+                                contentType : {$literal : 'outlet'},
+                                key : {$arrayElemAt : ['$outlet._id', 0]}
                             }
                         })
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$country',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$country',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$region',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$region',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$subRegion',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$subRegion',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$retailSegment',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$retailSegment',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$outlet',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$outlet',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     pipeLine.push({
-                        $unwind: {
-                            path                      : '$branch',
-                            preserveNullAndEmptyArrays: true
+                        $unwind : {
+                            path : '$branch',
+                            preserveNullAndEmptyArrays : true
                         }
                     });
 
                     //=============add some conditions for tree===========
 
                     pipeArray.push({
-                        $group: {
-                            _id         : '$country._id',
-                            title       : {$first: '$country.title'},
-                            expanded    : {$first: '$country.expanded'},
-                            selected    : {$first: '$country.selected'},
-                            unselectable: {$first: '$country.unselectable'},
-                            contentType : {$first: '$country.contentType'},
-                            key         : {$first: '$country.key'},
-                            children    : {
-                                $addToSet: {
-                                    _id         : '$region._id',
-                                    title       : '$region.title',
-                                    expanded    : '$region.expanded',
-                                    selected    : '$region.selected',
-                                    unselectable: '$region.unselectable',
-                                    contentType : '$region.contentType',
-                                    key         : '$region.key',
-                                    children    : '$children'
-                                }
-                            }
-                        }
-                    });
-
-                    pipeArray.push({
-                        $group: {
-                            _id     : '$region._id',
-                            region  : {$first: '$region'},
-                            country : {$first: '$country'},
-                            children: {
-                                $addToSet: {
-                                    _id         : '$subRegion._id',
-                                    title       : '$subRegion.title',
-                                    expanded    : '$subRegion.expanded',
-                                    selected    : '$subRegion.selected',
-                                    unselectable: '$subRegion.unselectable',
-                                    contentType : '$subRegion.contentType',
-                                    key         : '$subRegion.key',
-                                    children    : '$children'
-                                }
-                            }
-                        }
-                    });
-
-                    pipeArray.push({
-                        $group: {
-                            _id      : '$subRegion._id',
-                            subRegion: {$first: '$subRegion'},
-                            country  : {$first: '$country'},
-                            region   : {$first: '$region'},
+                        $group : {
+                            _id : '$country._id',
+                            title : {$first : '$country.title'},
+                            expanded : {$first : '$country.expanded'},
+                            selected : {$first : '$country.selected'},
+                            unselectable : {$first : '$country.unselectable'},
+                            contentType : {$first : '$country.contentType'},
+                            key : {$first : '$country.key'},
                             children : {
-                                $addToSet: {
-                                    _id        : '$retailSegment._id',
-                                    title      : '$retailSegment.title',
-                                    expanded   : '$retailSegment.expanded',
-                                    selected   : '$retailSegment.selected',
-                                    contentType: '$retailSegment.contentType',
-                                    key        : '$retailSegment.key',
-                                    children   : '$children'
+                                $addToSet : {
+                                    _id : '$region._id',
+                                    title : '$region.title',
+                                    expanded : '$region.expanded',
+                                    selected : '$region.selected',
+                                    unselectable : '$region.unselectable',
+                                    contentType : '$region.contentType',
+                                    key : '$region.key',
+                                    children : '$children'
                                 }
                             }
                         }
                     });
 
                     pipeArray.push({
-                        $group: {
-                            _id          : '$retailSegment._id',
-                            retailSegment: {$first: '$retailSegment'},
-                            country      : {$first: '$country'},
-                            region       : {$first: '$region'},
-                            subRegion    : {$first: '$subRegion'},
-                            children     : {
-                                $addToSet: {
-                                    _id        : '$outlet._id',
-                                    title      : '$outlet.title',
-                                    expanded   : '$outlet.expanded',
-                                    selected   : '$outlet.selected',
-                                    contentType: '$outlet.contentType',
-                                    key        : '$outlet.key',
-                                    children   : '$children'
+                        $group : {
+                            _id : '$region._id',
+                            region : {$first : '$region'},
+                            country : {$first : '$country'},
+                            children : {
+                                $addToSet : {
+                                    _id : '$subRegion._id',
+                                    title : '$subRegion.title',
+                                    expanded : '$subRegion.expanded',
+                                    selected : '$subRegion.selected',
+                                    unselectable : '$subRegion.unselectable',
+                                    contentType : '$subRegion.contentType',
+                                    key : '$subRegion.key',
+                                    children : '$children'
                                 }
                             }
                         }
                     });
 
                     pipeArray.push({
-                        $group: {
-                            _id          : '$outlet._id',
-                            outlet       : {$first: '$outlet'},
-                            country      : {$first: '$country'},
-                            region       : {$first: '$region'},
-                            subRegion    : {$first: '$subRegion'},
-                            retailSegment: {$first: '$retailSegment'},
-                            children     : {
-                                $addToSet: {
-                                    _id        : '$branch._id',
-                                    title      : '$branch.title',
-                                    expanded   : '$branch.expanded',
-                                    selected   : '$branch.selected',
-                                    contentType: '$branch.contentType',
-                                    key        : '$branch.key'
+                        $group : {
+                            _id : '$subRegion._id',
+                            subRegion : {$first : '$subRegion'},
+                            country : {$first : '$country'},
+                            region : {$first : '$region'},
+                            children : {
+                                $addToSet : {
+                                    _id : '$retailSegment._id',
+                                    title : '$retailSegment.title',
+                                    expanded : '$retailSegment.expanded',
+                                    selected : '$retailSegment.selected',
+                                    contentType : '$retailSegment.contentType',
+                                    key : '$retailSegment.key',
+                                    children : '$children'
+                                }
+                            }
+                        }
+                    });
+
+                    pipeArray.push({
+                        $group : {
+                            _id : '$retailSegment._id',
+                            retailSegment : {$first : '$retailSegment'},
+                            country : {$first : '$country'},
+                            region : {$first : '$region'},
+                            subRegion : {$first : '$subRegion'},
+                            children : {
+                                $addToSet : {
+                                    _id : '$outlet._id',
+                                    title : '$outlet.title',
+                                    expanded : '$outlet.expanded',
+                                    selected : '$outlet.selected',
+                                    contentType : '$outlet.contentType',
+                                    key : '$outlet.key',
+                                    children : '$children'
+                                }
+                            }
+                        }
+                    });
+
+                    pipeArray.push({
+                        $group : {
+                            _id : '$outlet._id',
+                            outlet : {$first : '$outlet'},
+                            country : {$first : '$country'},
+                            region : {$first : '$region'},
+                            subRegion : {$first : '$subRegion'},
+                            retailSegment : {$first : '$retailSegment'},
+                            children : {
+                                $addToSet : {
+                                    _id : '$branch._id',
+                                    title : '$branch.title',
+                                    expanded : '$branch.expanded',
+                                    selected : '$branch.selected',
+                                    contentType : '$branch.contentType',
+                                    key : '$branch.key'
                                 }
                             }
                         }
@@ -952,10 +959,10 @@ var Personnel = function (db, redis, event) {
                     aggregation = PersonnelModel.aggregate(pipeLine);
 
                     aggregation.options = {
-                        allowDiskUse: true
+                        allowDiskUse : true
                     };
 
-                    aggregation.exec(function (err, result) {
+                    aggregation.exec(function(err, result) {
                         if (err) {
                             return cb(err);
                         }
@@ -964,7 +971,7 @@ var Personnel = function (db, redis, event) {
                     });
                 }
 
-            ], function (err, result) {
+            ], function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -973,7 +980,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -988,9 +995,9 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.getStatusForDD = function (req, res, next) {
+    this.getStatusForDD = function(req, res, next) {
         function queryRun() {
-            PersonnelModel.distinct('status', '_id firstName lastName fullName phoneNumber email').exec(function (err, result) {
+            PersonnelModel.distinct('status', '_id firstName lastName fullName phoneNumber email').exec(function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -998,7 +1005,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1013,7 +1020,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.createSuper = function (req, res, next) {
+    this.createSuper = function(req, res, next) {
         const body = req.body;
         const password = body.pass;
 
@@ -1035,23 +1042,23 @@ var Personnel = function (db, redis, event) {
         email = xssFilters.inHTMLData(email);
 
         const createdBy = {
-            user: req.session.uId,
-            date: new Date()
+            user : req.session.uId,
+            date : new Date()
         };
         const salt = bcrypt.genSaltSync(10);
         const su = {
-            firstName: { en: 'Super' },
-            lastName: { en: 'Admin' },
-            email: email.toLowerCase(),
-            super: true,
+            firstName : {en : 'Super'},
+            lastName : {en : 'Admin'},
+            email : email.toLowerCase(),
+            super : true,
             createdBy,
-            editedBy: createdBy,
-            token: generator.generate(),
-            status: PERSONNEL_STATUSES.INACTIVE._id,
-            pass: bcrypt.hashSync(password, salt)
+            editedBy : createdBy,
+            token : generator.generate(),
+            status : PERSONNEL_STATUSES.INACTIVE._id,
+            pass : bcrypt.hashSync(password, salt)
         };
 
-        PersonnelModel.findOne({ super: true }, (err, result) => {
+        PersonnelModel.findOne({super : true}, (err, result) => {
             if (err) {
                 return res.status(400).send('Query is invalid');
             }
@@ -1064,7 +1071,7 @@ var Personnel = function (db, redis, event) {
 
                 (cb) => {
                     AccessRoleModel.findOne({
-                        level: 0
+                        level : 0
                     }, cb)
                 },
 
@@ -1087,10 +1094,10 @@ var Personnel = function (db, redis, event) {
                 (personnelModel, cb) => {
                     const personnel = personnelModel.toJSON();
                     const options = {
-                        firstName: personnel.firstName,
-                        lastName: personnel.lastName,
-                        password: password,
-                        email: personnel.email
+                        firstName : personnel.firstName,
+                        lastName : personnel.lastName,
+                        password : password,
+                        email : personnel.email
                     };
                     const personnelId = personnel._id;
 
@@ -1113,7 +1120,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
+    this.create = function(req, res, next) {
         const body = req.body;
         const accessLevel = req.session.level;
 
@@ -1121,8 +1128,8 @@ var Personnel = function (db, redis, event) {
             var phone = body.phoneNumber;
             var isPhoneValid = phone === '' || false;
             var createdBy = {
-                user: req.session.uId,
-                date: new Date()
+                user : req.session.uId,
+                date : new Date()
             };
             var email;
             var isEmailValid;
@@ -1167,14 +1174,14 @@ var Personnel = function (db, redis, event) {
 
             if (body.firstName) {
                 body.firstName = {
-                    en: _.escape(body.firstName.en),
-                    ar: _.escape(body.firstName.ar)
+                    en : _.escape(body.firstName.en),
+                    ar : _.escape(body.firstName.ar)
                 };
             }
             if (body.lastName) {
                 body.lastName = {
-                    en: _.escape(body.lastName.en),
-                    ar: _.escape(body.lastName.ar)
+                    en : _.escape(body.lastName.en),
+                    ar : _.escape(body.lastName.ar)
                 };
             }
 
@@ -1189,15 +1196,15 @@ var Personnel = function (db, redis, event) {
 
                 (cb) => {
                     const query = {
-                        $or: []
+                        $or : []
                     };
 
                     if (body.email) {
-                        query.$or.push({ email: body.email });
+                        query.$or.push({email : body.email});
                     }
 
                     if (body.phoneNumber) {
-                        query.$or.push({ phoneNumber: body.phoneNumber });
+                        query.$or.push({phoneNumber : body.phoneNumber});
                     }
 
                     PersonnelModel.findOne(query, cb);
@@ -1220,14 +1227,14 @@ var Personnel = function (db, redis, event) {
                     const personnelId = personnel._id;
 
                     event.emit('activityChange', {
-                        module: ACL_MODULES.PERSONNEL,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy: body.createdBy,
-                        itemId: personnelId,
-                        itemType: CONTENT_TYPES.PERSONNEL
+                        module : ACL_MODULES.PERSONNEL,
+                        actionType : ACTIVITY_TYPES.CREATED,
+                        createdBy : body.createdBy,
+                        itemId : personnelId,
+                        itemType : CONTENT_TYPES.PERSONNEL
                     });
 
-                    cb(null, { id: personnelId });
+                    cb(null, {id : personnelId});
                 },
 
                 (options, cb) => {
@@ -1256,7 +1263,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.login = function (req, res, next) {
+    this.login = function(req, res, next) {
         var session = req.session;
         var body = req.body;
         var login = body.login;
@@ -1280,13 +1287,13 @@ var Personnel = function (db, redis, event) {
         ];
 
         var locationsByLevel = {
-            2: 'country',
-            3: 'region',
-            4: 'subRegion',
-            5: 'branch',
-            6: 'branch',
-            7: 'branch',
-            9: 'country'
+            2 : 'country',
+            3 : 'region',
+            4 : 'subRegion',
+            5 : 'branch',
+            6 : 'branch',
+            7 : 'branch',
+            9 : 'country'
         };
 
         if (login && login.charAt(0) === '+') {
@@ -1311,11 +1318,17 @@ var Personnel = function (db, redis, event) {
 
         query = PersonnelModel
             .findOne({
-                $or: [{email: login}, {phoneNumber: login}]
+                $or : [{email : login}, {phoneNumber : login}]
             })
-            .populate([{path: 'accessRole', select: 'level name'}, {path: 'position', select: 'name'}]);
+            .populate([{
+                path : 'accessRole',
+                select : 'level name'
+            }, {
+                path : 'position',
+                select : 'name'
+            }]);
 
-        query.exec(function (err, personnel) {
+        query.exec(function(err, personnel) {
             var level;
             var locationField;
             var $setObject;
@@ -1338,12 +1351,12 @@ var Personnel = function (db, redis, event) {
                 return next(error);
             }
 
-           /* if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
-                error = new Error('You cannot access the app while being on leave');
-                error.status = 400;
+            /* if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
+             error = new Error('You cannot access the app while being on leave');
+             error.status = 400;
 
-                return next(error);
-            }*/
+             return next(error);
+             }*/
 
             if (personnel.archived) {
                 error = new Error('Your account is blocked. Please contact with administration.');
@@ -1375,8 +1388,11 @@ var Personnel = function (db, redis, event) {
                 return next(error);
             }
 
+            let onLeave = personnel.vacation.onLeave;
+
             session.loggedIn = true;
             session.uId = personnel._id;
+            session.onLeave = onLeave;
 
             if (personnel.accessRole) {
                 session.level = personnel.accessRole.level;
@@ -1399,8 +1415,8 @@ var Personnel = function (db, redis, event) {
             res.cookie('currentLanguage', currentLanguage);
 
             $setObject = {
-                beforeAccess: personnel.lastAccess,
-                lastAccess  : lastAccess
+                beforeAccess : personnel.lastAccess,
+                lastAccess : lastAccess
             };
 
             if (personnel.status !== PERSONNEL_STATUSES.ONLEAVE._id) {
@@ -1408,18 +1424,18 @@ var Personnel = function (db, redis, event) {
             }
 
             PersonnelModel.findByIdAndUpdate(personnel._id, {
-                $set: $setObject
+                $set : $setObject
             }, {
-                select: {
-                    _id         : 1,
-                    accessRole  : 1,
-                    position    : 1,
-                    firstName   : 1,
-                    lastName    : 1,
-                    lastAccess  : 1,
-                    beforeAccess: 1
+                select : {
+                    _id : 1,
+                    accessRole : 1,
+                    position : 1,
+                    firstName : 1,
+                    lastName : 1,
+                    lastAccess : 1,
+                    beforeAccess : 1
                 }
-            }, function (err, result) {
+            }, function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -1433,7 +1449,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.remove = function (req, res, next) {
+    this.remove = function(req, res, next) {
         var id = req.params.id;
         var error;
         var query;
@@ -1453,8 +1469,8 @@ var Personnel = function (db, redis, event) {
          return next(error);
          }*/
 
-        query = PersonnelModel.remove({_id: id});
-        query.exec(function (err) {
+        query = PersonnelModel.remove({_id : id});
+        query.exec(function(err) {
             if (err) {
                 return next(err);
             }
@@ -1464,7 +1480,7 @@ var Personnel = function (db, redis, event) {
         /*});*/
     };
 
-    this.deviceId = function (req, res, next) {
+    this.deviceId = function(req, res, next) {
         var body = req.body;
         var error;
 
@@ -1489,25 +1505,25 @@ var Personnel = function (db, redis, event) {
 
         req.session.deviceId = body.deviceId;
 
-        res.status(200).send({message: 'OK Set'});
+        res.status(200).send({message : 'OK Set'});
     };
 
-    this.archive = function (req, res, next) {
+    this.archive = function(req, res, next) {
         function queryRun() {
             var idsToArchive = req.body.ids.objectID();
             var archived = req.body.archived === 'false' ? false : !!req.body.archived;
             var uId = req.session.uId;
             var options = [
                 {
-                    idsToArchive   : idsToArchive,
-                    keyForCondition: '_id',
-                    archived       : archived,
-                    topArchived    : archived,
-                    model          : PersonnelModel
+                    idsToArchive : idsToArchive,
+                    keyForCondition : '_id',
+                    archived : archived,
+                    topArchived : archived,
+                    model : PersonnelModel
                 }
             ];
 
-            archiver.archive(uId, options, function (err) {
+            archiver.archive(uId, options, function(err) {
                 var type = ACTIVITY_TYPES.ARCHIVED;
 
                 if (err) {
@@ -1518,21 +1534,21 @@ var Personnel = function (db, redis, event) {
                 }
 
                 req.body.editedBy = {
-                    user: req.session.uId,
-                    date: Date.now()
+                    user : req.session.uId,
+                    date : Date.now()
                 };
 
-                async.eachSeries(idsToArchive, function (item, callback) {
+                async.eachSeries(idsToArchive, function(item, callback) {
                     event.emit('activityChange', {
-                        module    : 6,
-                        actionType: type,
+                        module : 6,
+                        actionType : type,
                         createdBy : req.body.editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.PERSONNEL
+                        itemId : item,
+                        itemType : CONTENT_TYPES.PERSONNEL
                     });
                     callback();
 
-                }, function (err) {
+                }, function(err) {
                     if (err) {
                         logWriter.log('personnel archived', err);
                     }
@@ -1540,8 +1556,8 @@ var Personnel = function (db, redis, event) {
 
                 if (archived) {
                     someEvents.personnelArchived({
-                        ids    : idsToArchive,
-                        Session: SessionModel
+                        ids : idsToArchive,
+                        Session : SessionModel
                     });
                 }
 
@@ -1549,7 +1565,7 @@ var Personnel = function (db, redis, event) {
             });
         }
 
-        access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1564,12 +1580,12 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.getById = function (req, res, next) {
+    this.getById = function(req, res, next) {
         var options = {};
 
         function queryRun() {
             var id = req.params.id || req.session.uId;
-            options = {id: id};
+            options = {id : id};
 
             options.isMobile = req.isMobile;
 
@@ -1577,9 +1593,15 @@ var Personnel = function (db, redis, event) {
                 options.isCurrent = true;
             }
 
-            personnelFindByIdAndPopulate(options, function (err, response) {
+            personnelFindByIdAndPopulate(options, function(err, response) {
                 if (err) {
                     return next(err);
+                }
+
+                const onLeave = req.session.onLeave;
+
+                if (response.vacation.onLeave != onLeave) {
+                    req.session.onLeave = !onLeave;
                 }
 
                 if (!Object.keys(response).length) {
@@ -1591,7 +1613,7 @@ var Personnel = function (db, redis, event) {
 
                 response.workAccess = (response.accessRole.level < 3) || !response.vacation.onLeave;
 
-                redis.cacheStore.readFromStorage(key, function (err, value) {
+                redis.cacheStore.readFromStorage(key, function(err, value) {
                     var valueJSON;
                     if (err) {
                         return next(err);
@@ -1601,12 +1623,288 @@ var Personnel = function (db, redis, event) {
 
                     response.notificationCount = valueJSON;
 
-                    next({status: 200, body: response});
+                    const accessLevel = _.get(response, 'accessRole.level');
+                    let adminMappingTasks = [];
+
+                    switch (accessLevel) {
+                        case ACL_CONSTANTS.MASTER_ADMIN:
+                        case ACL_CONSTANTS.SUPER_ADMIN:
+                        case ACL_CONSTANTS.TRADE_MARKETER:
+                            adminMappingTasks = [
+                                function(cb) {
+                                    CountryModel.find({type : 'country'}, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(countries) {
+                                        response.country = countries;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    CountryModel.find({type : 'region'}, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(regions) {
+                                        response.region = regions;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    CountryModel.find({type : 'subRegion'}, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(subRegions) {
+                                        response.subRegion = subRegions;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    OutletModel.find({}, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(outlets) {
+                                        response.outlet = outlets;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    BranchModel.find({}, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(branches) {
+                                        response.branch = branches;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    retailSegmentModel.find({}, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(retailSegments) {
+                                        response.retailSegment = retailSegments;
+                                        cb();
+                                    })
+                                }
+                            ];
+                            break;
+                        case ACL_CONSTANTS.COUNTRY_ADMIN:
+                            const countryId = _.get(response, 'country[0]._id');
+                            adminMappingTasks = [
+                                function(cb) {
+                                    CountryModel.find({
+                                        type : 'region',
+                                        parent : countryId
+
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(regions) {
+                                        response.region = regions;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    CountryModel.find({
+                                        type : 'subRegion',
+                                        parent : {
+                                            $in : _.map(response.region, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(subRegions) {
+                                        response.subRegion = subRegions;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    retailSegmentModel.find({
+                                        subRegions : {
+                                            $in : _.map(response.subRegion, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(retailSegments) {
+                                        response.retailSegment = retailSegments;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    OutletModel.find({
+                                        subRegions : {
+                                            $in : _.map(response.subRegion, o => o._id)
+                                        },
+                                        retailSegments : {
+                                            $in : _.map(response.retailSegment, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(outlets) {
+                                        response.outlet = outlets;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    BranchModel.find({
+                                        subRegion : {
+                                            $in : _.map(response.subRegion, o => o._id)
+                                        },
+                                        retailSegment : {
+                                            $in : _.map(response.retailSegment, o => o._id)
+                                        },
+                                        outlet : {
+                                            $in : _.map(response.outlet, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(branches) {
+                                        response.branch = branches;
+                                        cb();
+                                    })
+                                }
+                            ];
+                            break;
+                        case ACL_CONSTANTS.AREA_MANAGER:
+                            const regionId = _.get(response, 'region[0]._id');
+
+                            adminMappingTasks = [
+                                function(cb) {
+                                    CountryModel.find({
+                                        type : 'subRegion',
+                                        parent : regionId
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(subRegions) {
+                                        response.subRegion = subRegions;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    retailSegmentModel.find({
+                                        subRegions : {
+                                            $in : _.map(response.subRegion, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(retailSegments) {
+                                        response.retailSegment = retailSegments;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    OutletModel.find({
+                                        subRegions : {
+                                            $in : _.map(response.subRegion, o => o._id)
+                                        },
+                                        retailSegments : {
+                                            $in : _.map(response.retailSegment, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(outlets) {
+                                        response.outlet = outlets;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    BranchModel.find({
+                                        subRegion : {
+                                            $in : _.map(response.subRegion, o => o._id)
+                                        },
+                                        retailSegment : {
+                                            $in : _.map(response.retailSegment, o => o._id)
+                                        },
+                                        outlet : {
+                                            $in : _.map(response.outlet, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(branches) {
+                                        response.branch = branches;
+                                        cb();
+                                    })
+                                }
+                            ];
+                            break;
+                        case ACL_CONSTANTS.AREA_IN_CHARGE:
+                            const subRegionIds = _.map(response.subRegion, o => o._id);
+
+                            adminMappingTasks = [
+                                function(cb) {
+                                    retailSegmentModel.find({
+                                        subRegions : {
+                                            $in : subRegionIds
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(retailSegments) {
+                                        response.retailSegment = retailSegments;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    OutletModel.find({
+                                        subRegions : {
+                                            $in : subRegionIds
+                                        },
+                                        retailSegments : {
+                                            $in : _.map(response.retailSegment, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(outlets) {
+                                        response.outlet = outlets;
+                                        cb();
+                                    })
+                                },
+                                function(cb) {
+                                    BranchModel.find({
+                                        subRegion : {
+                                            $in : subRegionIds
+                                        },
+                                        retailSegment : {
+                                            $in : _.map(response.retailSegment, o => o._id)
+                                        },
+                                        outlet : {
+                                            $in : _.map(response.outlet, o => o._id)
+                                        }
+                                    }, {
+                                        ID : 1,
+                                        name : 1
+                                    }).then(function(branches) {
+                                        response.branch = branches;
+                                        cb();
+                                    })
+                                }
+                            ];
+                            break;
+                        default:
+                            break;
+                    }
+
+                    async.series(adminMappingTasks, function(err) {
+                        if (err) {
+                            return next(err)
+                        }
+                        next({
+                            status : 200,
+                            body : response
+                        });
+                    });
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -1645,15 +1943,16 @@ var Personnel = function (db, redis, event) {
 
         if (options.level !== 0) {
             queryObject.super = {
-                $ne: true
+                $ne : true
             };
         }
 
-        if (isMobile) {
-            if (!queryObject['accessRole.level']) {
-                queryObject['accessRole.level'] = {$lt: ACL_CONSTANTS.MASTER_UPLOADER};
-            }
-        }
+        // commented according to QP-175 ticket in youTrack
+        // if (isMobile) {
+        //     if (!queryObject['accessRole.level']) {
+        //         queryObject['accessRole.level'] = {$lt : ACL_CONSTANTS.MASTER_UPLOADER};
+        //     }
+        // }
 
         if (options.level > 1 && !isMobile) {
             queryObject._id = queryObject._id || {};
@@ -1662,25 +1961,25 @@ var Personnel = function (db, redis, event) {
 
         if (onLeaveId) {
             pipeLine.push({
-                $match: {
-                    _id: {
-                        $ne: ObjectId(onLeaveId)
+                $match : {
+                    _id : {
+                        $ne : ObjectId(onLeaveId)
                     }
                 }
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'accessRoles',
-            key          : 'accessRole',
-            isArray      : false,
-            addProjection: 'level'
+            from : 'accessRoles',
+            key : 'accessRole',
+            isArray : false,
+            addProjection : 'level'
         }));
 
         if (!isMobile) {
             if (queryObject.lasMonthEvaluate) {
                 queryObject['accessRole.level'] = {
-                    $nin: [
+                    $nin : [
                         ACL_CONSTANTS.MASTER_UPLOADER,
                         ACL_CONSTANTS.COUNTRY_UPLOADER,
                         ACL_CONSTANTS.MASTER_ADMIN,
@@ -1692,32 +1991,32 @@ var Personnel = function (db, redis, event) {
             if (queryObject.hasOwnProperty('archived') && (!queryObject.archived || !queryObject.archived.$in[0])) {
                 queryObjectTemp = _.omit(queryObject, '_id', 'status', 'lasMonthEvaluate');
                 queryObject = _.pick(queryObject, '_id', 'status', 'lasMonthEvaluate');
-                queryObject.$or = [queryObjectTemp, {temp: true}];
+                queryObject.$or = [queryObjectTemp, {temp : true}];
             }
 
             pipeLine.push({
-                $match: queryObject
+                $match : queryObject
             });
         } else {
             pipeLine.push({
-                $match: _.pick(queryObject, '$or', 'super', 'accessRole.level')
+                $match : _.pick(queryObject, '$or', 'super', 'accessRole.level')
             });
         }
 
         if (isMobile) {
             if (queryObject.country) {
                 mobileMatch = {
-                    $match: {
-                        $or: [
+                    $match : {
+                        $or : [
                             {
-                                country: queryObject.country
+                                country : queryObject.country
                             },
                             {
-                                country           : {$eq: []},
-                                'accessRole.level': ACL_CONSTANTS.MASTER_ADMIN
+                                country : {$eq : []},
+                                'accessRole.level' : ACL_CONSTANTS.MASTER_ADMIN
                             },
                             {
-                                temp: true //TODO, limit by country for mobile
+                                temp : true //TODO, limit by country for mobile
                             }
                         ]
 
@@ -1730,22 +2029,22 @@ var Personnel = function (db, redis, event) {
 
         if (translated && translated.length === 1) {
             pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    translated: aggregateHelper.translatedCond(language, translateFields, translated[0])
+                $project : aggregateHelper.getProjection({
+                    translated : aggregateHelper.translatedCond(language, translateFields, translated[0])
                 })
             });
 
             pipeLine.push({
-                $match: {
-                    translated: true
+                $match : {
+                    translated : true
                 }
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'positions',
-            key    : 'position',
-            isArray: false
+            from : 'positions',
+            key : 'position',
+            isArray : false
         }));
 
         if (supervisorFilter) {
@@ -1791,69 +2090,69 @@ var Personnel = function (db, redis, event) {
             }
 
             pipeLine.push({
-                $match: {
-                    'accessRole.level': {$in: accessLevels}
+                $match : {
+                    'accessRole.level' : {$in : accessLevels}
                 }
             });
         }
 
-        domainsArray.forEach(function (element) {
+        domainsArray.forEach(function(element) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from: 'domains',
+                from : 'domains',
                 key : element
             }));
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from             : 'branches',
-            key              : 'branch',
-            addMainProjection: ['retailSegment', 'outlet']
+            from : 'branches',
+            key : 'branch',
+            addMainProjection : ['retailSegment', 'outlet']
         }));
 
         if (!forSync) {
             pipeLine.push({
-                $match: queryObjectAfterLookup
+                $match : queryObjectAfterLookup
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'retailSegments',
+            from : 'retailSegments',
             key : 'retailSegment'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
+            from : 'outlets',
             key : 'outlet'
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from : 'personnels',
+            key : 'createdBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {createdBy : {date : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'editedBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {editedBy: {date: 1}}
+            from : 'personnels',
+            key : 'editedBy.user',
+            isArray : false,
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings : {editedBy : {date : 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
+            from : 'accessRoles',
+            key : 'createdBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
                         position : 1,
-                        firstName: 1,
+                        firstName : 1,
                         lastName : 1
                     }
                 }
@@ -1861,34 +2160,16 @@ var Personnel = function (db, redis, event) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
                         firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'editedBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                editedBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
                         lastName : 1
                     }
                 }
@@ -1896,37 +2177,55 @@ var Personnel = function (db, redis, event) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'editedBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                editedBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
+            from : 'accessRoles',
+            key : 'editedBy.user.accessRole',
+            isArray : false,
+            addProjection : ['_id', 'name', 'level'],
+            includeSiblings : {
+                editedBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        position : 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName : 1
+                    }
+                }
+            }
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'positions',
+            key : 'editedBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                editedBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        accessRole : 1,
+                        firstName : 1,
+                        lastName : 1
                     }
                 }
             }
         }));
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                avgRating: {
-                    monthly: {
-                        $let: {
-                            vars: {
-                                valAdjusted: {
-                                    $add: [
+            $project : aggregateHelper.getProjection({
+                avgRating : {
+                    monthly : {
+                        $let : {
+                            vars : {
+                                valAdjusted : {
+                                    $add : [
                                         '$avgRating.monthly',
-                                        {$cond: [{$gte: ['$avgRating.monthly', 0]}, 0.5, -0.5]}
+                                        {$cond : [{$gte : ['$avgRating.monthly', 0]}, 0.5, -0.5]}
                                     ]
                                 }
                             },
-                            in  : {
-                                $subtract: ['$$valAdjusted', {$mod: ['$$valAdjusted', 1]}]
+                            in : {
+                                $subtract : ['$$valAdjusted', {$mod : ['$$valAdjusted', 1]}]
                             }
                         }
                     }
@@ -1935,60 +2234,60 @@ var Personnel = function (db, redis, event) {
         });
 
         pipeLine.push({
-            $lookup: {
-                from        : 'personnels',
-                localField  : 'manager',
-                foreignField: '_id',
-                as          : 'manager'
+            $lookup : {
+                from : 'personnels',
+                localField : 'manager',
+                foreignField : '_id',
+                as : 'manager'
             }
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                manager: {$arrayElemAt: ['$manager', 0]}
+            $project : aggregateHelper.getProjection({
+                manager : {$arrayElemAt : ['$manager', 0]}
             })
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                manager: {
-                    _id      : '$manager._id',
-                    firstName: '$manager.firstName',
+            $project : aggregateHelper.getProjection({
+                manager : {
+                    _id : '$manager._id',
+                    firstName : '$manager.firstName',
                     lastName : '$manager.lastName'
                 }
             })
         });
 
         pipeLine.push({
-            $lookup: {
-                from        : 'personnels',
-                localField  : 'vacation.cover',
-                foreignField: '_id',
-                as          : 'vacation.cover'
+            $lookup : {
+                from : 'personnels',
+                localField : 'vacation.cover',
+                foreignField : '_id',
+                as : 'vacation.cover'
             }
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                vacation: {
-                    cover  : {$arrayElemAt: ['$vacation.cover', 0]},
-                    onLeave: 1
+            $project : aggregateHelper.getProjection({
+                vacation : {
+                    cover : {$arrayElemAt : ['$vacation.cover', 0]},
+                    onLeave : 1
                 }
             })
         });
 
         pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                vacation: {
-                    cover  : {
-                        _id      : '$vacation.cover._id',
-                        firstName: '$vacation.cover.firstName',
+            $project : aggregateHelper.getProjection({
+                vacation : {
+                    cover : {
+                        _id : '$vacation.cover._id',
+                        firstName : '$vacation.cover.firstName',
                         lastName : '$vacation.cover.lastName'
                     },
-                    onLeave: 1
+                    onLeave : 1
                 },
-                lastDate: {
-                    $ifNull: [
+                lastDate : {
+                    $ifNull : [
                         '$editedBy.date',
                         '$createdBy.date'
                     ]
@@ -1997,55 +2296,55 @@ var Personnel = function (db, redis, event) {
         });
 
         pipeLine.push({
-            $unwind: {
-                path                      : '$country',
-                preserveNullAndEmptyArrays: true
+            $unwind : {
+                path : '$country',
+                preserveNullAndEmptyArrays : true
             }
         });
 
         pipeLine.push({
-            $group: {
-                _id            : '$_id',
-                position       : {$first: '$position'},
-                avgRating      : {$first: '$avgRating'},
-                manager        : {$first: '$manager'},
-                lastAccess     : {$first: '$lastAccess'},
-                beforeAccess   : {$first: '$beforeAccess'},
-                firstName      : {$first: '$firstName'},
-                lastName       : {$first: '$lastName'},
-                email          : {$first: '$email'},
-                phoneNumber    : {$first: '$phoneNumber'},
-                accessRole     : {$first: '$accessRole'},
-                dateJoined     : {$first: '$dateJoined'},
-                createdBy      : {$first: '$createdBy'},
-                editedBy       : {$first: '$editedBy'},
-                vacation       : {$first: '$vacation'},
-                status         : {$first: '$status'},
-                region         : {$first: '$region'},
-                subRegion      : {$first: '$subRegion'},
-                retailSegment  : {$first: '$retailSegment'},
-                outlet         : {$first: '$outlet'},
-                branch         : {$first: '$branch'},
-                country        : {$addToSet: '$country'},
-                currentLanguage: {$first: '$currentLanguage'},
-                super          : {$first: '$super'},
-                archived       : {$first: '$archived'},
-                temp           : {$first: '$temp'},
-                confirmed      : {$first: '$confirmed'},
-                translated     : {$first: '$translated'},
-                covered        : {$first: '$covered'}
+            $group : {
+                _id : '$_id',
+                position : {$first : '$position'},
+                avgRating : {$first : '$avgRating'},
+                manager : {$first : '$manager'},
+                lastAccess : {$first : '$lastAccess'},
+                beforeAccess : {$first : '$beforeAccess'},
+                firstName : {$first : '$firstName'},
+                lastName : {$first : '$lastName'},
+                email : {$first : '$email'},
+                phoneNumber : {$first : '$phoneNumber'},
+                accessRole : {$first : '$accessRole'},
+                dateJoined : {$first : '$dateJoined'},
+                createdBy : {$first : '$createdBy'},
+                editedBy : {$first : '$editedBy'},
+                vacation : {$first : '$vacation'},
+                status : {$first : '$status'},
+                region : {$first : '$region'},
+                subRegion : {$first : '$subRegion'},
+                retailSegment : {$first : '$retailSegment'},
+                outlet : {$first : '$outlet'},
+                branch : {$first : '$branch'},
+                country : {$addToSet : '$country'},
+                currentLanguage : {$first : '$currentLanguage'},
+                super : {$first : '$super'},
+                archived : {$first : '$archived'},
+                temp : {$first : '$temp'},
+                confirmed : {$first : '$confirmed'},
+                translated : {$first : '$translated'},
+                covered : {$first : '$covered'}
             }
         });
 
         if (sort['firstNameUpper.en'] || sort['firstNameUpper.ar']) {
             pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    firstNameUpper: {
-                        en: {
-                            $toUpper: '$firstName.en'
+                $project : aggregateHelper.getProjection({
+                    firstNameUpper : {
+                        en : {
+                            $toUpper : '$firstName.en'
                         },
-                        ar: {
-                            $toUpper: '$firstName.ar'
+                        ar : {
+                            $toUpper : '$firstName.ar'
                         }
                     }
                 })
@@ -2054,13 +2353,13 @@ var Personnel = function (db, redis, event) {
 
         if (sort['lastNameUpper.en'] || sort['lastNameUpper.ar']) {
             pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    lastNameUpper: {
-                        en: {
-                            $toUpper: '$lastName.en'
+                $project : aggregateHelper.getProjection({
+                    lastNameUpper : {
+                        en : {
+                            $toUpper : '$lastName.en'
                         },
-                        ar: {
-                            $toUpper: '$lastName.ar'
+                        ar : {
+                            $toUpper : '$lastName.ar'
                         }
                     }
                 })
@@ -2092,12 +2391,12 @@ var Personnel = function (db, redis, event) {
          pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit,
-            sort             : sort
+            isMobile : isMobile,
+            searchFieldsArray : searchFieldsArray,
+            filterSearch : filterSearch,
+            skip : skip,
+            limit : limit,
+            sort : sort
         }));
 
         return pipeLine;
@@ -2117,11 +2416,14 @@ var Personnel = function (db, redis, event) {
 
             (result, cb) => {
                 const response = result && result[0] ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {
+                    data : [],
+                    total : 0
+                };
                 const ids = response.data.map((item) => (item._id));
                 const options = {
-                    data: {
-                        [CONTENT_TYPES.PERSONNEL]: ids
+                    data : {
+                        [CONTENT_TYPES.PERSONNEL] : ids
                     }
 
                 };
@@ -2135,7 +2437,7 @@ var Personnel = function (db, redis, event) {
             (data, cb) => {
                 getImagesHelper.getImages(data.options, (err, result) => {
                     cb(err, {
-                        response: data.response,
+                        response : data.response,
                         result
                     })
                 });
@@ -2143,10 +2445,10 @@ var Personnel = function (db, redis, event) {
 
             (data, cb) => {
                 const optionsForImplement = {
-                    response: data.response,
-                    imgsObject: data.result,
-                    fields: {
-                        personnel: []
+                    response : data.response,
+                    imgsObject : data.result,
+                    fields : {
+                        personnel : []
                     }
                 };
 
@@ -2159,15 +2461,15 @@ var Personnel = function (db, redis, event) {
                 response.data = response.data.map((element) => {
                     if (element.firstName) {
                         element.firstName = {
-                            ar: _.unescape(element.firstName.ar),
-                            en: _.unescape(element.firstName.en)
+                            ar : _.unescape(element.firstName.ar),
+                            en : _.unescape(element.firstName.en)
                         };
                     }
 
                     if (element.lastName) {
                         element.lastName = {
-                            ar: _.unescape(element.lastName.ar),
-                            en: _.unescape(element.lastName.en)
+                            ar : _.unescape(element.lastName.ar),
+                            en : _.unescape(element.lastName.en)
                         };
                     }
 
@@ -2222,7 +2524,7 @@ var Personnel = function (db, redis, event) {
         ], callback);
     }
 
-    this.getAllForSync = function (req, res, next) {
+    this.getAllForSync = function(req, res, next) {
         function queryRun(personnel, callback) {
             const query = req.query;
             const isMobile = req.isMobile;
@@ -2231,8 +2533,8 @@ var Personnel = function (db, redis, event) {
             const supervisorFilter = query.supervisorFilter;
             const personnelLevel = personnel.accessRole.level;
             const sort = query.sort || {
-                lastDate: -1
-            };
+                    lastDate : -1
+                };
             const domainsArray = ['country', 'region', 'subRegion'];
 
             for (let key in sort) {
@@ -2247,7 +2549,7 @@ var Personnel = function (db, redis, event) {
 
             const filterMapper = new FilterMapper();
             const queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.PERSONNEL,
+                contentType : CONTENT_TYPES.PERSONNEL,
                 filter,
                 personnel
             });
@@ -2259,7 +2561,7 @@ var Personnel = function (db, redis, event) {
                     });
 
                 queryObject._id = {
-                    $in: ids
+                    $in : ids
                 };
             }
 
@@ -2271,10 +2573,10 @@ var Personnel = function (db, redis, event) {
                 aggregateHelper,
                 domainsArray,
                 queryObject,
-                forSync: true,
+                forSync : true,
                 isMobile,
                 sort,
-                level: req.session.level,
+                level : req.session.level,
                 supervisorFilter
             });
 
@@ -2300,13 +2602,13 @@ var Personnel = function (db, redis, event) {
             }
 
             return next({
-                status: 200,
+                status : 200,
                 body
             });
         });
     };
 
-    this.getAll = function (req, res, next) {
+    this.getAll = function(req, res, next) {
         function queryRun(personnel, onlineUsers, callback) {
             const query = req.query;
             const isMobile = req.isMobile;
@@ -2322,8 +2624,8 @@ var Personnel = function (db, redis, event) {
             const onLeaveId = filter.onLeaveId;
             const queryObjectAfterLookup = {};
             const sort = query.sort || {
-                lastDate: -1
-            };
+                    lastDate : -1
+                };
             const domainsArray = ['country', 'region', 'subRegion'];
             const searchFieldsArray = [
                 'firstName.en',
@@ -2364,7 +2666,7 @@ var Personnel = function (db, redis, event) {
 
             const filterMapper = new FilterMapper();
             const queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.PERSONNEL,
+                contentType : CONTENT_TYPES.PERSONNEL,
                 filter,
                 personnel
             });
@@ -2393,7 +2695,7 @@ var Personnel = function (db, redis, event) {
 
             if (queryObject.status) {
                 let onlineUserIds = onlineUsers.map(el => ObjectId(el));
-                if (queryObject.status.$in && queryObject.status.$in.length === 1 && ~queryObject.status.$in.indexOf('online')){
+                if (queryObject.status.$in && queryObject.status.$in.length === 1 && ~queryObject.status.$in.indexOf('online')) {
                     delete queryObject.status;
                     queryObject._id = {
                         $in : onlineUserIds
@@ -2424,8 +2726,8 @@ var Personnel = function (db, redis, event) {
                 limit,
                 skip,
                 sort,
-                level: req.session.level,
-                uId: req.session.uId,
+                level : req.session.level,
+                uId : req.session.uId,
                 isMobile,
                 supervisorFilter
             });
@@ -2435,19 +2737,19 @@ var Personnel = function (db, redis, event) {
                 personnelLevel,
                 isMobile,
                 personnel
-            }, (err, body) =>{
+            }, (err, body) => {
                 if (err) {
                     return callback(err);
                 }
 
-                body.data.forEach((el)=>{
-                    if (~onlineUsers.indexOf(el._id.toString())){
+                body.data.forEach((el)=> {
+                    if (~onlineUsers.indexOf(el._id.toString())) {
                         el.status = 'online';
                     }
                 });
 
-                if (sort && sort.status){
-                    body.data.sort(function (a, b) {
+                if (sort && sort.status) {
+                    body.data.sort(function(a, b) {
                         function compareField(elA, elB) {
                             if (elA.status > elB.status) {
                                 return 1;
@@ -2491,13 +2793,13 @@ var Personnel = function (db, redis, event) {
             }
 
             return next({
-                status: 200,
+                status : 200,
                 body
             });
         });
     };
 
-    this.getPersonnelTasks = function (req, res, next) {
+    this.getPersonnelTasks = function(req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
             var filter = query.filter || {};
@@ -2506,39 +2808,39 @@ var Personnel = function (db, redis, event) {
             var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
             var $defProjection = {
-                _id              : 1,
-                title            : 1,
+                _id : 1,
+                title : 1,
                 companyObjective : 1,
-                description      : 1,
-                objectiveType    : 1,
-                priority         : 1,
-                status           : 1,
-                assignedTo       : 1,
-                complete         : 1,
-                parent           : 1,
-                level            : 1,
-                countSubTasks    : 1,
-                completedSubTasks: 1,
-                dateStart        : 1,
-                dateEnd          : 1,
-                dateClosed       : 1,
-                comments         : 1,
-                attachments      : 1,
-                editedBy         : 1,
-                createdBy        : 1,
-                country          : 1,
-                region           : 1,
-                subRegion        : 1,
-                retailSegment    : 1,
-                outlet           : 1,
-                branch           : 1,
-                location         : 1,
-                form             : 1,
-                history          : 1,
-                efforts          : 1,
-                context          : 1,
-                creationDate     : 1,
-                updateDate       : 1
+                description : 1,
+                objectiveType : 1,
+                priority : 1,
+                status : 1,
+                assignedTo : 1,
+                complete : 1,
+                parent : 1,
+                level : 1,
+                countSubTasks : 1,
+                completedSubTasks : 1,
+                dateStart : 1,
+                dateEnd : 1,
+                dateClosed : 1,
+                comments : 1,
+                attachments : 1,
+                editedBy : 1,
+                createdBy : 1,
+                country : 1,
+                region : 1,
+                subRegion : 1,
+                retailSegment : 1,
+                outlet : 1,
+                branch : 1,
+                location : 1,
+                form : 1,
+                history : 1,
+                efforts : 1,
+                context : 1,
+                creationDate : 1,
+                updateDate : 1
             };
 
             var page = query.page || 1;
@@ -2605,18 +2907,18 @@ var Personnel = function (db, redis, event) {
                 var pipeLine = [];
 
                 pipeLine.push({
-                    $match: queryObject
+                    $match : queryObject
                 });
 
                 pipeLine.push({
-                    $match: {
-                        $or: [
+                    $match : {
+                        $or : [
                             {
-                                assignedTo: {$nin: [id]}
+                                assignedTo : {$nin : [id]}
                             },
                             {
-                                assignedTo: {$in: [id]},
-                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                                assignedTo : {$in : [id]},
+                                status : {$nin : [OBJECTIVE_STATUSES.DRAFT]}
                             }
                         ]
                     }
@@ -2624,14 +2926,14 @@ var Personnel = function (db, redis, event) {
 
                 if (typeFilter) {
                     pipeLine.push({
-                        $match: {
-                            $and: [
+                        $match : {
+                            $and : [
                                 {
-                                    objectiveType: typeFilter
+                                    objectiveType : typeFilter
                                 },
                                 {
-                                    context: {
-                                        $in: [CONTENT_TYPES.OBJECTIVES]
+                                    context : {
+                                        $in : [CONTENT_TYPES.OBJECTIVES]
                                     }
                                 }
                             ]
@@ -2640,118 +2942,118 @@ var Personnel = function (db, redis, event) {
                 }
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from         : 'personnels',
-                    key          : 'assignedTo',
-                    addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole'])
+                    from : 'personnels',
+                    key : 'assignedTo',
+                    addProjection : ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole'])
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from         : 'files',
-                    key          : 'attachments',
-                    addProjection: ['contentType', 'originalName', 'createdBy']
+                    from : 'files',
+                    key : 'attachments',
+                    addProjection : ['contentType', 'originalName', 'createdBy']
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'domains',
+                    from : 'domains',
                     key : 'country'
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'domains',
+                    from : 'domains',
                     key : 'region'
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'domains',
+                    from : 'domains',
                     key : 'subRegion'
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'retailSegments',
+                    from : 'retailSegments',
                     key : 'retailSegment'
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'outlets',
+                    from : 'outlets',
                     key : 'outlet'
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'branches',
+                    from : 'branches',
                     key : 'branch'
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'personnels',
-                    key            : 'createdBy.user',
-                    isArray        : false,
-                    addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-                    includeSiblings: {createdBy: {date: 1}}
+                    from : 'personnels',
+                    key : 'createdBy.user',
+                    isArray : false,
+                    addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+                    includeSiblings : {createdBy : {date : 1}}
                 }));
 
                 pipeLine.push({
-                    $unwind: {
-                        path                      : '$assignedTo',
-                        preserveNullAndEmptyArrays: true
+                    $unwind : {
+                        path : '$assignedTo',
+                        preserveNullAndEmptyArrays : true
                     }
                 });
 
                 if (positionFilter) {
                     pipeLine.push({
-                        $match: positionFilter
+                        $match : positionFilter
                     });
                 }
 
                 if (!isMobile) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'accessRoles',
-                        key            : 'assignedTo.accessRole',
-                        isArray        : false,
-                        addProjection  : ['_id', 'name', 'level'],
-                        includeSiblings: {
-                            assignedTo: {
-                                _id      : 1,
+                        from : 'accessRoles',
+                        key : 'assignedTo.accessRole',
+                        isArray : false,
+                        addProjection : ['_id', 'name', 'level'],
+                        includeSiblings : {
+                            assignedTo : {
+                                _id : 1,
                                 position : 1,
-                                firstName: 1,
+                                firstName : 1,
                                 lastName : 1
                             }
                         }
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'positions',
-                        key            : 'assignedTo.position',
-                        isArray        : false,
-                        includeSiblings: {
-                            assignedTo: {
-                                _id       : 1,
-                                accessRole: 1,
+                        from : 'positions',
+                        key : 'assignedTo.position',
+                        isArray : false,
+                        includeSiblings : {
+                            assignedTo : {
+                                _id : 1,
+                                accessRole : 1,
                                 firstName : 1,
-                                lastName  : 1
+                                lastName : 1
                             }
                         }
                     }));
                 }
 
                 pipeLine.push({
-                    $group: aggregateHelper.getGroupObject({
-                        assignedTo: {$addToSet: '$assignedTo'}
+                    $group : aggregateHelper.getGroupObject({
+                        assignedTo : {$addToSet : '$assignedTo'}
                     })
                 });
 
                 if (!isMobile) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'accessRoles',
-                        key            : 'createdBy.user.accessRole',
-                        isArray        : false,
-                        addProjection  : ['_id', 'name', 'level'],
-                        includeSiblings: {
-                            createdBy: {
-                                date: 1,
-                                user: {
-                                    _id      : 1,
+                        from : 'accessRoles',
+                        key : 'createdBy.user.accessRole',
+                        isArray : false,
+                        addProjection : ['_id', 'name', 'level'],
+                        includeSiblings : {
+                            createdBy : {
+                                date : 1,
+                                user : {
+                                    _id : 1,
                                     position : 1,
-                                    firstName: 1,
+                                    firstName : 1,
                                     lastName : 1
                                 }
                             }
@@ -2759,17 +3061,17 @@ var Personnel = function (db, redis, event) {
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'positions',
-                        key            : 'createdBy.user.position',
-                        isArray        : false,
-                        includeSiblings: {
-                            createdBy: {
-                                date: 1,
-                                user: {
-                                    _id       : 1,
-                                    accessRole: 1,
+                        from : 'positions',
+                        key : 'createdBy.user.position',
+                        isArray : false,
+                        includeSiblings : {
+                            createdBy : {
+                                date : 1,
+                                user : {
+                                    _id : 1,
+                                    accessRole : 1,
                                     firstName : 1,
-                                    lastName  : 1
+                                    lastName : 1
                                 }
                             }
                         }
@@ -2777,9 +3079,9 @@ var Personnel = function (db, redis, event) {
                 }
 
                 pipeLine.push({
-                    $project: aggregateHelper.getProjection({
-                        lastDate: {
-                            $ifNull: [
+                    $project : aggregateHelper.getProjection({
+                        lastDate : {
+                            $ifNull : [
                                 '$editedBy.date',
                                 '$createdBy.date'
                             ]
@@ -2788,23 +3090,23 @@ var Personnel = function (db, redis, event) {
                 });
 
                 pipeLine.push({
-                    $sort: {
-                        lastDate: -1
+                    $sort : {
+                        lastDate : -1
                     }
                 });
 
                 if (isMobile) {
                     pipeLine.push({
-                        $project: aggregateHelper.getProjection({
-                            creationDate: '$createdBy.date',
-                            updateDate  : '$editedBy.date'
+                        $project : aggregateHelper.getProjection({
+                            creationDate : '$createdBy.date',
+                            updateDate : '$editedBy.date'
                         })
                     });
                 }
 
                 if (!forSync) {
                     pipeLine.push({
-                        $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
+                        $match : aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
                     });
                 }
 
@@ -2812,10 +3114,10 @@ var Personnel = function (db, redis, event) {
 
                 if (limit && limit !== -1) {
                     pipeLine.push({
-                        $skip: skip
+                        $skip : skip
                     });
                     pipeLine.push({
-                        $limit: limit
+                        $limit : limit
                     });
                 }
 
@@ -2825,28 +3127,28 @@ var Personnel = function (db, redis, event) {
             }
 
             queryObject = filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.INSTORETASKS,
-                filter     : query.filter || {}
+                contentType : CONTENT_TYPES.INSTORETASKS,
+                filter : query.filter || {}
             });
 
             if (query._ids) {
                 ids = query._ids.split(',');
-                ids = _.map(ids, function (id) {
+                ids = _.map(ids, function(id) {
                     return ObjectId(id);
                 });
                 queryObject._id = {
-                    $in: ids
+                    $in : ids
                 };
             }
 
             if (queryObject.position && queryObject.position.$in) {
                 positionFilter = {
-                    $or: [
+                    $or : [
                         {
-                            'assignedTo.position': queryObject.position
+                            'assignedTo.position' : queryObject.position
                         },
                         {
-                            'createdBy.user.position': queryObject.position
+                            'createdBy.user.position' : queryObject.position
                         }
                     ]
                 };
@@ -2862,50 +3164,56 @@ var Personnel = function (db, redis, event) {
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             pipeLine = getAllPipeLine({
-                aggregateHelper  : aggregateHelper,
-                queryObject      : queryObject,
-                positionFilter   : positionFilter,
-                isMobile         : isMobile,
-                searchFieldsArray: searchFieldsArray,
-                filterSearch     : filterSearch,
-                skip             : skip,
-                limit            : limit,
-                id               : ObjectId(uId)
+                aggregateHelper : aggregateHelper,
+                queryObject : queryObject,
+                positionFilter : positionFilter,
+                isMobile : isMobile,
+                searchFieldsArray : searchFieldsArray,
+                filterSearch : filterSearch,
+                skip : skip,
+                limit : limit,
+                id : ObjectId(uId)
             });
 
-            db.collection('objectives').aggregate(pipeLine, function (err, response) {
+            db.collection('objectives').aggregate(pipeLine, function(err, response) {
                 var idsPersonnel = [];
                 var idsFile = [];
                 var options = {
-                    data: {}
+                    data : {}
                 };
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                response = response && response[0] ? response[0] : {
+                    data : [],
+                    total : 0
+                };
 
                 if (!response.data.length) {
-                    return next({status: 200, body: response});
+                    return next({
+                        status : 200,
+                        body : response
+                    });
                 }
 
-                response.data = _.map(response.data, function (model) {
+                response.data = _.map(response.data, function(model) {
                     if (model.title) {
                         model.title = {
-                            en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : ''
+                            en : model.title.en ? _.unescape(model.title.en) : '',
+                            ar : model.title.ar ? _.unescape(model.title.ar) : ''
                         };
                     }
                     if (model.description) {
                         model.description = {
-                            en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : ''
+                            en : model.description.en ? _.unescape(model.description.en) : '',
+                            ar : model.description.ar ? _.unescape(model.description.ar) : ''
                         };
                     }
                     if (model.companyObjective) {
                         model.companyObjective = {
-                            en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
+                            en : model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                            ar : model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
                         };
                     }
 
@@ -2920,7 +3228,7 @@ var Personnel = function (db, redis, event) {
                 options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
                 options.data[CONTENT_TYPES.FILES] = idsFile;
 
-                getImagesHelper.getImages(options, function (err, result) {
+                getImagesHelper.getImages(options, function(err, result) {
                     var fieldNames = {};
                     var setOptions;
                     if (err) {
@@ -2928,21 +3236,24 @@ var Personnel = function (db, redis, event) {
                     }
 
                     setOptions = {
-                        response  : response,
-                        imgsObject: result
+                        response : response,
+                        imgsObject : result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
+                    getImagesHelper.setIntoResult(setOptions, function(response) {
+                        next({
+                            status : 200,
+                            body : response
+                        });
                     })
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -2957,7 +3268,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.update = function (req, res, next) {
+    this.update = function(req, res, next) {
         const personnelId = req.params.id;
         const body = req.body;
         const accessLevel = req.session.level;
@@ -2972,14 +3283,14 @@ var Personnel = function (db, redis, event) {
 
             if (body.firstName) {
                 body.firstName = {
-                    en: _.escape(body.firstName.en),
-                    ar: _.escape(body.firstName.ar)
+                    en : _.escape(body.firstName.en),
+                    ar : _.escape(body.firstName.ar)
                 }
             }
             if (body.lastName) {
                 body.lastName = {
-                    en: _.escape(body.lastName.en),
-                    ar: _.escape(body.lastName.ar)
+                    en : _.escape(body.lastName.en),
+                    ar : _.escape(body.lastName.ar)
                 }
             }
 
@@ -3010,11 +3321,17 @@ var Personnel = function (db, redis, event) {
                 if (body.vacation.onLeave) {
                     body.status = PERSONNEL_STATUSES.ONLEAVE._id;
 
+                    req.session.onLeave = true;
+
                     if (!body.vacation.cover) {
                         body.vacation.cover = null;
+
+                        req.session.onLeave = false;
                     }
                 } else {
                     body.vacation.cover = null;
+
+                    req.session.onLeave = false;
 
                     if (body.lastAccess) {
                         body.status = PERSONNEL_STATUSES.LOGIN._id;
@@ -3067,18 +3384,18 @@ var Personnel = function (db, redis, event) {
             }
 
             body.editedBy = {
-                user: req.session.uId,
-                date: new Date()
+                user : req.session.uId,
+                date : new Date()
             };
 
             function updateCover(model, cb) {
                 var id = model._id;
                 var data = {
                     position : model.position || null,
-                    country  : model.country || null,
-                    region   : model.region || null,
-                    subRegion: model.subRegion || null,
-                    branch   : model.branch || null
+                    country : model.country || null,
+                    region : model.region || null,
+                    subRegion : model.subRegion || null,
+                    branch : model.branch || null
                 };
 
                 PersonnelModel.findByIdAndUpdate(id, data, cb);
@@ -3090,7 +3407,7 @@ var Personnel = function (db, redis, event) {
                 var coverBeforeUserId;
 
                 var parallelTasks = {
-                    currentUser: (parallelCb) => {
+                    currentUser : (parallelCb) => {
                         if (body.newPass && body.oldPass) {
                             if (bcrypt.compareSync(body.oldPass, model.pass)) {
                                 const hash = PasswordManager.encryptPasswordSync(body.newPass);
@@ -3104,7 +3421,7 @@ var Personnel = function (db, redis, event) {
                             }
                         }
 
-                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, parallelCb);
+                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, {new : true}, parallelCb);
                     }
                 };
 
@@ -3123,14 +3440,14 @@ var Personnel = function (db, redis, event) {
 
                                 if (!personnel.temp) {
                                     event.emit('notOnLeave', {
-                                        coveredUserId: coverBeforeUserId.toString()
+                                        coveredUserId : coverBeforeUserId.toString()
                                     });
 
                                     return parallelCb(null, {});
                                 }
 
                                 updateCover({
-                                    _id: coverBeforeUserId
+                                    _id : coverBeforeUserId
                                 }, (err, model) => {
                                     if (err) {
                                         return parallelCb(err);
@@ -3160,18 +3477,18 @@ var Personnel = function (db, redis, event) {
 
                                 if (!personnel.temp) {
                                     event.emit('notOnLeave', {
-                                        coveredUserId: coverUserId.toString()
+                                        coveredUserId : coverUserId.toString()
                                     });
 
                                     return parallelCb(null, {});
                                 }
 
                                 updateCover({
-                                    _id      : coverUserId,
-                                    country  : model.country,
-                                    region   : model.region,
-                                    subRegion: model.subRegion,
-                                    branch   : model.branch,
+                                    _id : coverUserId,
+                                    country : model.country,
+                                    region : model.region,
+                                    subRegion : model.subRegion,
+                                    branch : model.branch,
                                     position : model.position
                                 }, (err, personnel) => {
                                     if (err) {
@@ -3181,7 +3498,7 @@ var Personnel = function (db, redis, event) {
                                     coveredUserId = personnel._id;
 
                                     event.emit('notOnLeave', {
-                                        coveredUserId: coveredUserId
+                                        coveredUserId : coveredUserId
                                     });
 
                                     parallelCb(null, personnel);
@@ -3202,7 +3519,7 @@ var Personnel = function (db, redis, event) {
 
             function getUserForUi(model, cb) {
                 var options = {
-                    id: model._id
+                    id : model._id
                 };
 
                 personnelFindByIdAndPopulate(options, (err, personnel) => {
@@ -3212,7 +3529,7 @@ var Personnel = function (db, redis, event) {
 
                     if (body.vacation) {
                         event.emit('notOnLeave', {
-                            userOnLeave: personnelId
+                            userOnLeave : personnelId
                         });
                     }
 
@@ -3247,8 +3564,8 @@ var Personnel = function (db, redis, event) {
 
                     if ((body.accessRole && oldAccessRole !== body.accessRole) || body.archived) {
                         someEvents.personnelArchived({
-                            ids    : personnelId,
-                            Session: SessionModel
+                            ids : personnelId,
+                            Session : SessionModel
                         });
                     }
 
@@ -3287,11 +3604,11 @@ var Personnel = function (db, redis, event) {
 
             if (!body.currentLanguage && !body.newPass) {
                 event.emit('activityChange', {
-                    module    : ACL_MODULES.PERSONNEL,
-                    actionType: ACTIVITY_TYPES.UPDATED,
+                    module : ACL_MODULES.PERSONNEL,
+                    actionType : ACTIVITY_TYPES.UPDATED,
                     createdBy : body.editedBy,
-                    itemId    : personnelId,
-                    itemType  : CONTENT_TYPES.PERSONNEL
+                    itemId : personnelId,
+                    itemType : CONTENT_TYPES.PERSONNEL
                 });
             }
 
@@ -3301,13 +3618,13 @@ var Personnel = function (db, redis, event) {
             }
 
             const messageOptions = {
-                firstName  : personnel.firstName,
-                lastName   : personnel.lastName,
-                email      : personnel.email,
-                phoneNumber: `+${personnel.phoneNumber}`,
-                password   : generatedPassword,
-                token      : personnel.token,
-                language   : currentLanguage
+                firstName : personnel.firstName,
+                lastName : personnel.lastName,
+                email : personnel.email,
+                phoneNumber : `+${personnel.phoneNumber}`,
+                password : generatedPassword,
+                token : personnel.token,
+                language : currentLanguage
             };
 
             if (body.type === 'email') {
@@ -3318,7 +3635,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.forgotPassword = function (req, res, next) {
+    this.forgotPassword = function(req, res, next) {
         var body = req.body;
         var login = body.login;
         var option = body.ifPhone;
@@ -3347,10 +3664,10 @@ var Personnel = function (db, redis, event) {
 
         PersonnelModel
             .findOne({
-                $or: [{email: login}, {phoneNumber: login}]
+                $or : [{email : login}, {phoneNumber : login}]
             })
             .lean()
-            .exec(function (err, result) {
+            .exec(function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -3364,15 +3681,15 @@ var Personnel = function (db, redis, event) {
 
                 PersonnelModel.findOneAndUpdate(
                     {
-                        $or: [{email: login}, {phoneNumber: login}]
+                        $or : [{email : login}, {phoneNumber : login}]
                     },
                     {
-                        $set: {forgotToken: forgotToken}
+                        $set : {forgotToken : forgotToken}
                     },
                     {
-                        new: true
+                        new : true
                     },
-                    function (err, result) {
+                    function(err, result) {
                         if (err) {
                             return next(err);
                         }
@@ -3384,11 +3701,11 @@ var Personnel = function (db, redis, event) {
                             if (option === 'true') {
                                 resultJSON = result.toJSON();
                                 smsOptions = {
-                                    phoneNumber: '+' + resultJSON.phoneNumber,
-                                    resetCode  : resultJSON.forgotToken
+                                    phoneNumber : '+' + resultJSON.phoneNumber,
+                                    resetCode : resultJSON.forgotToken
                                 };
 
-                                smsSender.forgotPassword(smsOptions, res, function (err, message) {
+                                smsSender.forgotPassword(smsOptions, res, function(err, message) {
                                     if (err) {
                                         return next(err);
                                     }
@@ -3402,18 +3719,18 @@ var Personnel = function (db, redis, event) {
             });
     };
 
-    this.confirm = function (req, res, next) {
+    this.confirm = function(req, res, next) {
         var token = req.params.token;
 
         var query = PersonnelModel.findOneAndUpdate({
-            token: token
+            token : token
         }, {
-            token    : '',
-            status   : PERSONNEL_STATUSES.NEVERLOGIN._id,
-            confirmed: new Date()
+            token : '',
+            status : PERSONNEL_STATUSES.NEVERLOGIN._id,
+            confirmed : new Date()
         });
 
-        query.exec(function (err) {
+        query.exec(function(err) {
             if (err) {
                 return next(err);
             }
@@ -3421,7 +3738,7 @@ var Personnel = function (db, redis, event) {
         });
     };
 
-    this.checkVerifCode = function (req, res, next) {
+    this.checkVerifCode = function(req, res, next) {
         var body = req.body;
         var phoneNumber = body.phone;
         var code = body.code;
@@ -3431,9 +3748,9 @@ var Personnel = function (db, redis, event) {
 
         PersonnelModel.findOne(
             {
-                phoneNumber: phoneNumber
+                phoneNumber : phoneNumber
             },
-            function (err, result) {
+            function(err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -3456,7 +3773,7 @@ var Personnel = function (db, redis, event) {
 
     };
 
-    this.changePassword = function (req, res, next) {
+    this.changePassword = function(req, res, next) {
         var forgotToken = req.params.forgotToken;
         var currentLanguage;
         var body = req.body;
@@ -3469,7 +3786,7 @@ var Personnel = function (db, redis, event) {
 
         pass = bcrypt.hashSync(pass, salt);
 
-        async.waterfall([updatePass, deleteToken], function (err, result) {
+        async.waterfall([updatePass, deleteToken], function(err, result) {
             if (err) {
                 return next(err);
             }
@@ -3481,8 +3798,8 @@ var Personnel = function (db, redis, event) {
             message = RESPONSES_CONSTANTS.PASSWORD_CHANGE_SUCCESS[currentLanguage];
             title = RESPONSES_CONSTANTS.PASSWORD_CHANGE_TITLE[currentLanguage];
             objToSend = {
-                message: message,
-                title  : title
+                message : message,
+                title : title
             };
             url = process.env.HOST + '/passwordChangeNotification/' + JSON.stringify(objToSend);
 
@@ -3493,15 +3810,15 @@ var Personnel = function (db, redis, event) {
 
             PersonnelModel.findOneAndUpdate(
                 {
-                    forgotToken: forgotToken
+                    forgotToken : forgotToken
                 },
                 {
-                    $set: {pass: pass}
+                    $set : {pass : pass}
                 },
                 {
-                    new: true
+                    new : true
                 },
-                function (err, result) {
+                function(err, result) {
                     if (err) {
                         return callback(err);
                     }
@@ -3522,15 +3839,15 @@ var Personnel = function (db, redis, event) {
 
             PersonnelModel.findOneAndUpdate(
                 {
-                    forgotToken: forgotToken
+                    forgotToken : forgotToken
                 },
                 {
-                    $set: {forgotToken: ''}
+                    $set : {forgotToken : ''}
                 },
                 {
-                    new: true
+                    new : true
                 },
-                function (err, result) {
+                function(err, result) {
                     if (err) {
                         return callback(err);
                     }
@@ -3540,8 +3857,8 @@ var Personnel = function (db, redis, event) {
         }
     };
 
-    this.existSuperAdmin = function (req, res, next) {
-        PersonnelModel.findOne({super: true}, function (err, user) {
+    this.existSuperAdmin = function(req, res, next) {
+        PersonnelModel.findOne({super : true}, function(err, user) {
             if (err) {
                 return next(err);
             }

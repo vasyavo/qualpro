@@ -527,7 +527,7 @@ module.exports = function (db, redis, event) {
 
     router.get('/', handler.getAll);
     
-    router.get('/:id', handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     /**
      * __Type__ 'PUT'
@@ -684,7 +684,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.patch('/:id', multipartMiddleware, handler.update);
+    router.patch('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
 
     /**
      * __Type__ 'POST'

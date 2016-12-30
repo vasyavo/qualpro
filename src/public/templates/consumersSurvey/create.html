@@ -49,6 +49,10 @@
                 </div>
                 <% } %>
                 <div class="questionnarieDatapickerWrap">
+                    <input type="text" data-property="startDate" id="startDate" placeholder="<%= translation.startDate %>"
+                           class="questionnarieDatapicker" value="<%= model.startDate || '' %>" readonly="">
+                </div>
+                <div class="questionnarieDatapickerWrap">
                     <input type="text" data-property="dueDate" id="dueDate" placeholder="<%= translation.dueDate %>"
                            class="questionnarieDatapicker" value="<%= model.dueDate || '' %>" readonly="">
                 </div>
@@ -57,17 +61,17 @@
             <div class="overlay
             <%= model && model.status && model.status._id === 'active' && edit ? 'active' : ''%>
             "></div>
-            <div class="filterBar">
+            <div class="filterBar createConsumersSurvey">
             </div>
-            <div class="questionnarieTableWrap">
+            <div class="consumersSurveyTableWrap">
                 <div class="questionnarieTable absoluteContent">
                     <div class="questionnarieTableTitle">
                         <span id="en"></span>
                         <span id="ar"></span>
                         <div id="buttonContainer" class="floatRight">
-                            <a href="javascript:;" class="plusIcon" id="addQuestion"
+                            <a href="javascript:;" class="plusIcon" id="addConsumersSurvey"
                                title="<%= translation.addNewBtn %>"></a>
-                            <a href="javascript:;" class="trash" id="deleteQuestion"
+                            <a href="javascript:;" class="trash" id="deleteConsumersSurvey"
                                title="<%= translation.deleteBtn %>"></a>
                         </div>
                     </div>
@@ -79,7 +83,7 @@
                                 <col width="20%">
                                 <col width="45%">
                             </colgroup>
-                            <tbody id="questionTable">
+                            <tbody id="consumersSurveyTable">
                             <tr>
                                 <td class="checkboxArea alignCenter"></td>
                                 <td><span><%= translation.title %></span></td>

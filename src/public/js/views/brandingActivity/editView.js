@@ -110,7 +110,7 @@ define([
             var value = options.attr ? el.attr('data-id') : el.val();
 
             var condition;
-            if (['region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'country'].indexOf(key) !== -1) {
+            if (['region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'country', 'displayType'].indexOf(key) !== -1) {
                 condition = true;
 
                 if (!model[key] || !value || self.duplicate) {
@@ -676,8 +676,6 @@ define([
             var $dueDate;
             var startDateObj;
             var endDateObj;
-            var defaultCategory;
-            var defaultDisplayType;
             var $curEl;
 
             var buttons = {
@@ -783,15 +781,20 @@ define([
 
             this.displayTypeCollection = new DisplayTypeCollection();
             this.displayTypeCollection.on('reset', function () {
-                defaultDisplayType = this.displayTypeCollection.findWhere({_id: jsonModel.displayType._id});
+                const defaultDisplayTypes = jsonModel.displayType.map(function (item) {
+                    return self.displayTypeCollection.findWhere({_id : item._id}).toJSON();
+                });
+
                 populate.inputDropDown({
                     selector    : '#displayTypeDd',
                     context     : this,
                     contentType : CONTENT_TYPES.DISPLAYTYPE,
                     displayText : this.translation.displayType,
-                    displayModel: defaultDisplayType.toJSON(),
+                    displayModel: defaultDisplayTypes,
                     collection  : this.displayTypeCollection.toJSON(),
-                    forPosition : true
+                    forPosition : true,
+                    multiSelect : true,
+                    showSelectAll : true
                 });
             }, this);
 

@@ -933,15 +933,25 @@ var Objectives = function (db, redis, event) {
                     if (err) {
                         return waterFallCb(err);
                     }
+
                     if (lodash.includes([
                             OBJECTIVE_STATUSES.FAIL,
                             OBJECTIVE_STATUSES.CLOSED
                         ], model.status)) {
-                        let error = new Error(`You could not update task with status: "${model.status}"`);
+
+                        const error = new Error(`You could not update task with status: "${model.status}"`);
                         error.status = 400;
 
                         return waterFallCb(error);
                     }
+
+                    if (model.status === OBJECTIVE_STATUSES.OVER_DUE && model.createdBy.user.toString() !== userId) {
+                        const error = new Error(`You could not update task with status: "${model.status}"`);
+                        error.status = 400;
+
+                        return waterFallCb(error);
+                    }
+
                     ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
                         if (err) {
                             return waterFallCb(err);
@@ -1528,22 +1538,10 @@ var Objectives = function (db, redis, event) {
                                 {
                                     assignedTo: {$in: subordinates},
                                     status: {$nin: [OBJECTIVE_STATUSES.DRAFT]}
-                                },
-                                {
-                                    'createdBy.user': {$in: coveredIds}
-                                }
-                            ]
-                        }
-                    });
-                } else {
-                    pipeLine.push({
-                        $match: {
-                            $or: [
-                                {
+                                }, {
                                     assignedTo: {$in: coveredIds},
-                                    status: {$nin: [OBJECTIVE_STATUSES.DRAFT]}
-                                },
-                                {
+                                    status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
+                                }, {
                                     'createdBy.user': {$in: coveredIds}
                                 }
                             ]
@@ -1773,41 +1771,9 @@ var Objectives = function (db, redis, event) {
                         as   : 'oneItem',
                         cond : {$ne: ['$$oneItem', null]}
                     }
-                },
-                /*lastDate  : {
-                 $ifNull: [
-                 '$editedBy.date',
-                 '$createdBy.date'
-                 ]
-                 }*/
+                }
             })
         });
-
-        /*if (!forSync) {
-         pipeLine.push({
-         $sort: {
-         lastDate: -1
-         }
-         });
-
-         pipeLine.push({
-         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
@@ -1823,25 +1789,13 @@ var Objectives = function (db, redis, event) {
 
     this.getAllForSync = function (req, res, next) {
         function queryRun() {
-            var query = req.query;
-            var aggregateHelper;
-            var lastLogOut = new Date(query.lastLogOut);
-            var queryObject = {};
-            var pipeLine;
-            var aggregation;
-            var ids;
-            var currentUserLevel = req.session.level;
+            const query = req.query;
+            const lastLogOut = new Date(query.lastLogOut);
+            const currentUserLevel = req.session.level;
             let arrayOfSubordinateUsersId = [];
-
-            if (query._ids) {
-                ids = query._ids.split(',');
-                ids = _.map(ids, function (id) {
-                    return ObjectId(id);
-                });
-                queryObject._id = {
-                    $in: ids
-                };
-            }
+            let queryObject = {};
+            let aggregateHelper;
+            let pipeLine;
 
             queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
@@ -1851,87 +1805,69 @@ var Objectives = function (db, redis, event) {
 
             async.waterfall([
                 (cb) => {
-                    PersonnelModel.find({manager: req.session.uId})
-                        .select('_id')
-                        .lean()
-                        .exec(cb);
+                    PersonnelModel.distinct('_id', {manager: req.session.uId})
+                        .exec((err, subordinateIds) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            arrayOfSubordinateUsersId = subordinateIds;
+
+                            cb(null)
+                        });
                 },
 
-                function (arrayOfUserId, cb) {
-                    arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
-                        return model._id
-                    });
+                (cb) => {
                     coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
                 },
 
-                function (coveredIds, cb) {
+                (coveredIds, cb) => {
                     pipeLine = getAllPipeline({
                         aggregateHelper : aggregateHelper,
                         queryObject     : queryObject,
-                        isMobile        : req.isMobile,
+                        isMobile        : true,
                         forSync         : true,
                         coveredIds      : coveredIds,
                         currentUserLevel: currentUserLevel,
-                        subordinates : arrayOfSubordinateUsersId
+                        subordinates    : arrayOfSubordinateUsersId
                     });
 
-                    aggregation = ObjectiveModel.aggregate(pipeLine);
-
-                    aggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    aggregation.exec(function (err, response) {
+                    ObjectiveModel.aggregate(pipeLine).allowDiskUse(true).exec((err, response) => {
                         if (err) {
                             return next(err);
                         }
 
                         response = response && response[0] ? response[0] : {data: [], total: 0};
 
-                        response.data = _.map(response.data, function (objective) {
-                            if (objective.title) {
-                                objective.title = {
-                                    ar: _.unescape(objective.title.ar),
-                                    en: _.unescape(objective.title.en)
-                                };
-                            }
-
-                            if (objective.description) {
-                                objective.description = {
-                                    ar: _.unescape(objective.description.ar),
-                                    en: _.unescape(objective.description.en)
-                                };
-                            }
-
-                            return objective;
-                        });
-
                         cb(null, response);
                     });
                 }
-            ], function (err, response) {
+            ], (err, response) => {
                 var idsPersonnel = [];
                 var idsFile = [];
                 var options = {
                     data: {}
                 };
+
                 if (err) {
                     return next(err);
                 }
 
-                response.data = _.map(response.data, function (model) {
+                response.data = _.map(response.data, (model) => {
                     if (model.title) {
                         model.title = {
                             en: model.title.en ? _.unescape(model.title.en) : '',
                             ar: model.title.ar ? _.unescape(model.title.ar) : ''
                         };
                     }
+
                     if (model.description) {
                         model.description = {
                             en: model.description.en ? _.unescape(model.description.en) : '',
                             ar: model.description.ar ? _.unescape(model.description.ar) : ''
                         };
                     }
+
                     if (model.companyObjective) {
                         model.companyObjective = {
                             en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
@@ -1946,11 +1882,10 @@ var Objectives = function (db, redis, event) {
                     return model;
                 });
 
-                idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
                 options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
                 options.data[CONTENT_TYPES.FILES] = idsFile;
 
-                getImagesHelper.getImages(options, function (err, result) {
+                getImagesHelper.getImages(options, (err, result) => {
                     var fieldNames = {};
                     var setOptions;
                     if (err) {
@@ -1961,14 +1896,16 @@ var Objectives = function (db, redis, event) {
                         response  : response,
                         imgsObject: result
                     };
+
                     fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
+                    getImagesHelper.setIntoResult(setOptions, (response) => {
                         const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
                             return ObjectId.toString();
                         });
+
                         const currentUserId = req.session.uId;
                         const dataMyCC = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
 
@@ -1979,7 +1916,7 @@ var Objectives = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1999,7 +1936,6 @@ var Objectives = function (db, redis, event) {
             var query = req.query;
             var filter = query.filter || {};
             var page = query.page || 1;
-            // var contentType = query.contentType;
             var limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
             var skip = (page - 1) * limit;
             var aggregateHelper;
@@ -2091,31 +2027,29 @@ var Objectives = function (db, redis, event) {
                 // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
                 (cb) => {
                     if (myCC || isMobile) {
-                        PersonnelModel.find({manager: req.session.uId})
-                            .select('_id')
-                            .lean()
-                            .exec(cb);
+                        PersonnelModel.distinct('_id', {manager: req.session.uId}).exec((err, subordinateIds) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            arrayOfSubordinateUsersId = subordinateIds;
+
+                            cb(null)
+                        });
                     } else {
-                        cb(null, true);
+                        cb(null);
                     }
                 },
-                function (arrayOfUserId, cb) {
-                    if (myCC || isMobile) {
-                        //array of subordinate users id, to send on android app
-                        arrayOfSubordinateUsersId = arrayOfUserId.map((model) => {
-                            return model._id
-                        });
-                    }
+                function (cb) {
                     if (myCC) {
                         queryObject.$and[0]['assignedTo'].$in = arrayOfSubordinateUsersId;
-                        //arrayOfSubordinateUsersId = arrayOfUserId;
                     }
-                    coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
+
+                    coveredByMe(PersonnelModel, ObjectId(uId), cb);
                 },
+
                 function (coveredIds, cb) {
                     var pipeLine;
-                    var aggregation;
-                    const coveredPlusSubordinates = coveredIds.concat(arrayOfSubordinateUsersId);
 
                     pipeLine = getAllPipeline({
                         aggregateHelper  : aggregateHelper,
@@ -2127,43 +2061,23 @@ var Objectives = function (db, redis, event) {
                         skip             : skip,
                         limit            : limit,
                         coveredIds       : coveredIds,
-                        subordinates : arrayOfSubordinateUsersId,
+                        subordinates     : arrayOfSubordinateUsersId,
                         currentUserLevel : currentUserLevel
                     });
 
-                    aggregation = ObjectiveModel.aggregate(pipeLine);
-
-                    aggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    aggregation.exec(function (err, response) {
+                    ObjectiveModel.aggregate(pipeLine).allowDiskUse(true).exec(function (err, response) {
                         if (err) {
                             return cb(err, null);
                         }
 
                         response = response && response[0] ? response[0] : {data: [], total: 0};
 
-                        response.data = _.map(response.data, function (objective) {
-                            objective.description = {
-                                ar: _.unescape(objective.description.ar),
-                                en: _.unescape(objective.description.en)
-                            };
-
-                            objective.companyObjective = {
-                                ar: _.unescape(objective.companyObjective.ar),
-                                en: _.unescape(objective.companyObjective.en)
-                            };
-
-                            return objective;
-                        });
-
-                        cb(null, response, coveredIds);
+                        cb(null, response);
                     });
                 },
-                function (response, coveredIds, cb) {
+
+                function (response, cb) {
                     var mobilePipeLine;
-                    var mobileAggregation;
 
                     if (!isMobile) {
                         return cb(null, response);
@@ -2178,46 +2092,15 @@ var Objectives = function (db, redis, event) {
                         filterSearch     : filterSearch,
                         skip             : skip,
                         limit            : limit,
-                        coveredIds       : coveredIds,
                         currentUserLevel : currentUserLevel
                     });
 
-                    mobileAggregation = ObjectiveModel.aggregate(mobilePipeLine);
-
-                    mobileAggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    mobileAggregation.exec(function (err, responseMobile) {
+                    ObjectiveModel.aggregate(mobilePipeLine).allowDiskUse(true).exec(function (err, responseMobile) {
                         if (err) {
                             return cb(err, null);
                         }
 
                         responseMobile = responseMobile && responseMobile[0] ? responseMobile[0] : {data: [], total: 0};
-
-                        responseMobile.data = _.map(responseMobile.data, function (objective) {
-                            if (objective.title) {
-                                objective.title = {
-                                    ar: _.unescape(objective.title.ar),
-                                    en: _.unescape(objective.title.en)
-                                };
-                            }
-                            if (objective.description) {
-                                objective.description = {
-                                    ar: _.unescape(objective.description.ar),
-                                    en: _.unescape(objective.description.en)
-                                };
-                            }
-
-                            if (objective.companyObjective) {
-                                objective.companyObjective = {
-                                    ar: _.unescape(objective.companyObjective.ar),
-                                    en: _.unescape(objective.companyObjective.en)
-                                };
-                            }
-
-                            return objective;
-                        });
 
                         response.data = response.data.concat(responseMobile.data);
                         response.total += responseMobile.total;
@@ -2233,6 +2116,7 @@ var Objectives = function (db, redis, event) {
                 var options = {
                     data: {}
                 };
+
                 if (err) {
                     return next(err);
                 }
@@ -2264,7 +2148,6 @@ var Objectives = function (db, redis, event) {
                     return model;
                 });
 
-                idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
                 options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
                 options.data[CONTENT_TYPES.FILES] = idsFile;
 
@@ -2279,6 +2162,7 @@ var Objectives = function (db, redis, event) {
                         response  : response,
                         imgsObject: result
                     };
+
                     fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                     setOptions.fields = fieldNames;
@@ -2287,22 +2171,29 @@ var Objectives = function (db, redis, event) {
                         const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
                             return ObjectId.toString();
                         });
+
                         const dataMyCC = response.data.map((objective) => {
+                            const currentUserId = req.session.uId;
                             let assignedToId;
                             let createdById;
-                            const currentUserId = req.session.uId;
+
                             if (_.isObject(objective.assignedTo[0])) {
                                 assignedToId = objective.assignedTo[0]._id.toString();
                             }
+
                             if (_.isObject(objective.createdBy.user)) {
                                 createdById = objective.createdBy.user._id.toString();
                             }
+
                             if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
                                 objective.myCC = true;
                             }
+
                             return objective;
                         });
+
                         response.data = dataMyCC;
+
                         next({status: 200, body: response});
                     })
                 });

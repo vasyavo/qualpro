@@ -9,6 +9,7 @@
         var personnelFilter = {};
         var shelfSharesFilter = {};
         var createQuestionnary = {};
+        let createConsumersSurvey = {};
         var itemsPricesFilter = {};
         var itemsLocationFilter = {};
         var planogramFilter = {};
@@ -25,6 +26,7 @@
         var personnelTasksFilter = {};
         var domainsFilter = {};
         var questionnaryFilter = {};
+        var consumersSurveyFilter = {};
         var activityListFilter = {};
         var contractsYearlyFilter = {};
         var contractsSecondaryFilter = {};
@@ -571,6 +573,55 @@
             CONSTANTS.PERSONNEL
         ];
 
+        createConsumersSurvey[CONSTANTS.COUNTRY] = getFilterConstant({
+            displayName: {en: 'Country', ar: 'الدولة'},
+            mandatory  : true,
+            filterType : 'singleSelect',
+        });
+        createConsumersSurvey[CONSTANTS.REGION] = getFilterConstant({
+            displayName: {en: 'Region', ar: 'المنطقة'},
+            filterType : 'multiSelect',
+            showSelectAll : true
+        });
+        createConsumersSurvey[CONSTANTS.SUBREGION] = getFilterConstant({
+            displayName: {en: 'Sub-Region', ar: 'المنطقة الفرعية:'},
+            filterType : 'multiSelect',
+            showSelectAll : true
+        });
+        createConsumersSurvey[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
+            displayName: {en: 'Trade Channel', ar: 'الفئة التجارية:'},
+            filterType : 'multiSelect',
+            showSelectAll : true
+        });
+        createConsumersSurvey[CONSTANTS.OUTLET] = getFilterConstant({
+            displayName: {en: 'Customer', ar: 'العميل'},
+            filterType : 'multiSelect',
+            showSelectAll : true
+        });
+        createConsumersSurvey[CONSTANTS.BRANCH] = getFilterConstant({
+            displayName: {en: 'Branch', ar: 'الفرع'},
+            filterType : 'multiSelect',
+            showSelectAll : true
+        });
+        createConsumersSurvey[CONSTANTS.POSITION] = getFilterConstant({
+            displayName: {en: 'Position', ar: 'المركز الوظيفي'},
+            filterType : 'multiSelect'
+        });
+        createConsumersSurvey[CONSTANTS.PERSONNEL] = getFilterConstant({
+            displayName: {en: 'Employee', ar: 'الموظف'},
+            filterType : 'multiSelect'
+        });
+        createConsumersSurvey.array = [
+            CONSTANTS.COUNTRY,
+            CONSTANTS.REGION,
+            CONSTANTS.SUBREGION,
+            CONSTANTS.RETAILSEGMENT,
+            CONSTANTS.OUTLET,
+            CONSTANTS.BRANCH,
+            CONSTANTS.POSITION,
+            CONSTANTS.PERSONNEL
+        ];
+
         questionnaryFilter[CONSTANTS.COUNTRY] = getFilterConstant({
             displayName: {en: 'Country', ar: 'الدولة'},
             mandatory  : true,
@@ -628,6 +679,76 @@
             }
         ];
         questionnaryFilter.array = [
+            CONSTANTS.COUNTRY,
+            CONSTANTS.REGION,
+            CONSTANTS.SUBREGION,
+            CONSTANTS.RETAILSEGMENT,
+            CONSTANTS.OUTLET,
+            CONSTANTS.BRANCH,
+            'publisher',
+            CONSTANTS.POSITION,
+            CONSTANTS.PERSONNEL,
+            CONSTANTS.STATUS,
+            'time'
+        ];
+
+        consumersSurveyFilter[CONSTANTS.COUNTRY] = getFilterConstant({
+            displayName: {en: 'Country', ar: 'الدولة'},
+            mandatory  : true,
+            filterType : 'singleSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.REGION] = getFilterConstant({
+            displayName: {en: 'Region', ar: 'المنطقة'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.SUBREGION] = getFilterConstant({
+            displayName: {en: 'Sub-Region', ar: 'المنطقة الفرعية:'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
+            displayName: {en: 'Trade Channel', ar: 'الفئة التجارية:'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.OUTLET] = getFilterConstant({
+            displayName: {en: 'Customer', ar: 'العميل'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.BRANCH] = getFilterConstant({
+            displayName: {en: 'Branch', ar: 'الفرع'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter.publisher = getFilterConstant({
+            displayName: {en: 'Publisher', ar: 'الناشر'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.POSITION] = getFilterConstant({
+            displayName: {en: 'Position', ar: 'المركز الوظيفي'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.PERSONNEL] = getFilterConstant({
+            displayName: {en: 'Employee', ar: 'الموظف'},
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter[CONSTANTS.STATUS] = getFilterConstant({
+            displayName: {en: 'Status', ar: 'الحالة'},
+            type       : 'string',
+            filterType : 'multiSelect'
+        });
+        consumersSurveyFilter.time = getFilterConstant({
+            displayName: {en: 'Time', ar: 'الوقت'},
+            filterType : 'time'
+        });
+        consumersSurveyFilter.time.backendKeys = [
+            {
+                key     : 'createdBy.date',
+                operator: ['$gte', '$lte']
+            },
+            {
+                key     : 'editedBy.date',
+                operator: ['$gte', '$lte']
+            }
+        ];
+        consumersSurveyFilter.array = [
             CONSTANTS.COUNTRY,
             CONSTANTS.REGION,
             CONSTANTS.SUBREGION,
@@ -1334,11 +1455,16 @@
             displayName: {en: 'Configuration', ar: 'أبعاد واحجام التكوين'},
             filterType : 'multiSelect'
         });
+        planogramFilter[CONSTANTS.DISPLAY_TYPE] = getFilterConstant({
+            displayName: {en: 'Display Type', ar: 'نوع العرض'},
+            filterType : 'multiSelect'
+        });
         planogramFilter.array = [
             CONSTANTS.COUNTRY,
             CONSTANTS.RETAILSEGMENT,
             'product',
-            CONSTANTS.CONFIGURATIONS
+            CONSTANTS.CONFIGURATIONS,
+            CONSTANTS.DISPLAY_TYPE
         ];
 
         itemsPricesFilter[CONSTANTS.CATEGORY] = getFilterConstant({
@@ -1618,7 +1744,9 @@
         filters[CONSTANTS.COMPETITORBRANDING] = competitorBrandingFilter;
         filters[CONSTANTS.COMPETITORPROMOTION] = competitorPromotionFilter;
         filters[CONSTANTS.CREATEQUESTIONNARIES] = createQuestionnary;
+        filters[CONSTANTS.CREATE_CONSUMER_SURVEY] = createConsumersSurvey;
         filters[CONSTANTS.QUESTIONNARIES] = questionnaryFilter;
+        filters[CONSTANTS.CONSUMER_SURVEY] = consumersSurveyFilter;
         filters[CONSTANTS.PROMOTIONS] = promotionFilter;
         filters[CONSTANTS.ITEMSPRICES] = itemsPricesFilter;
         filters[CONSTANTS.ITEMSLOCATION] = itemsLocationFilter;

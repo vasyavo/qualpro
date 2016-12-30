@@ -101,6 +101,20 @@ module.exports = [
             read: true
         }
     }, {
+        module: ACL_MODULES.VISIBILITY_FORM,
+        cms   : {
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : true
+        },
+        mobile: {
+            archive: false,
+            edit   : true,
+            write  : false,
+            read   : true
+        }
+    }, {
         module: ACL_MODULES.ITEMS_AND_PRICES,
         cms: {
             archive: false,
@@ -583,21 +597,8 @@ module.exports = [
             write: true,
             read: false
         }
-    }, {
-        module: ACL_MODULES.CONSUMER_SURVEY,
-        cms: {
-            archive: false,
-            edit: false,
-            write: false,
-            read: false
-        },
-        mobile: {
-            archive: false,
-            edit: true,
-            write: false,
-            read: true
-        }
     },
+    require('./../../stories/consumer-survey/acl/cashVan'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

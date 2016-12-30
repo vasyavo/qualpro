@@ -64,6 +64,13 @@ const access = () => {
             });
         }
 
+        function isVacationAccessCMS (personnel) {
+            const vacation = personnel.vacation && personnel.vacation.onLeave;
+            const noMainAdmin = personnel.accessRole.level > 2;
+
+            return noMainAdmin && vacation && accessType !== 'read' && !isMobile;
+        }
+
         async.waterfall([
             findPersonnel,
             checkRole
@@ -82,7 +89,14 @@ const access = () => {
                     return callback(null, true, personnel);
                 }
 
-                if (!access[accessType] || (personnel.accessRole && personnel.accessRole.level > 2 && personnel.vacation && personnel.vacation.onLeave  && accessType !== 'read')) {
+                if (!access[accessType]) {
+                    const err = new Error();
+
+                    err.status = 403;
+                    return callback(err);
+                }
+
+                if (personnel.accessRole && isVacationAccessCMS(personnel)){
                     const err = new Error();
 
                     err.status = 403;
@@ -115,13 +129,46 @@ const access = () => {
         return getAccess(req, mid, 'upload', callback);
     };
 
+    const turnIntoPromise = (args, method) => {
+        const request = args.req;
+        const moduleId = args.mid;
+
+        return new Promise((resolve, reject) => {
+            method(request, moduleId, (err, allowed, personnel) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(personnel);
+            });
+        });
+    };
+
+    const getReadAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getReadAccess);
+    };
+    const getEditAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getEditAccess);
+    };
+    const getWriteAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getWriteAccess);
+    };
+    const getArchiveAccessPromise = (req, mid) => {
+        return turnIntoPromise({ req, mid }, getArchiveAccess);
+    };
+
     return {
         getReadAccess,
         getEditAccess,
         getWriteAccess,
         getArchiveAccess,
         getEvaluateAccess,
-        getUploadAccess
+        getUploadAccess,
+
+        getReadAccessPromise,
+        getEditAccessPromise,
+        getWriteAccessPromise,
+        getArchiveAccessPromise
     };
 };
 

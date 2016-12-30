@@ -1,4 +1,5 @@
 'use strict';
+
 const Schema = require('mongoose').Schema;
 const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
@@ -8,7 +9,8 @@ const schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
-    dueDate: { type: Date, default: new Date() },
+    dueDate: { type: Date, default: Date.now },
+    startDate: { type: Date, default: null },
     status: { type: String, enum: ['draft', 'active', 'completed'] },
     location: {
         en: { type: String, default: '' },
@@ -38,44 +40,26 @@ const schema = new Schema({
         type: ObjectId,
         ref: CONTENT_TYPES.BRANCH
     }],
-    personnels: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL
-    }],
-    countAll: { type: Number, default: 0 },
-    countBranches: { type: Number, default: 0 },
     countAnswered: { type: Number, default: 0 },
     questions: [{
         title: {
             en: { type: String, default: '' },
             ar: { type: String, default: '' }
         },
-        type: { type: String, enum: ['singleChoice', 'multiChoice', 'fullAnswer'] },
+        type: { type: String, enum: ['singleChoice', 'multiChoice', 'fullAnswer', 'NPS'] },
         options: [{
             en: { type: String },
             ar: { type: String }
         }]
     }],
-    createdBy : {
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL,
-        default: null
+    createdBy: {
+        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+        date: { type: Date, default: Date.now }
     },
-    editedBy : {
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL,
-        default: null
-    },
-    createdAt : {
-        type: Date,
-        default: new Date()
-    },
-    updatedAt : {
-        type: Date,
-        default: new Date()
+    editedBy: {
+        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+        date: { type: Date, default: Date.now }
     }
-}, {
-    collection : CONTENT_TYPES.CONSUMER_SURVEY
-});
+}, { collection: CONTENT_TYPES.CONSUMER_SURVEY });
 
 module.exports = schema;

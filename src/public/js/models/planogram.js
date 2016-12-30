@@ -10,7 +10,8 @@ define([
                 countryId      : null,
                 retailSegmentId: null,
                 productId      : null,
-                configurationId: null
+                configurationId: null,
+                displayType    : null
             },
 
             fieldsToTranslate: [
@@ -18,13 +19,15 @@ define([
                 'retailSegment',
                 'product',
                 'configuration',
-                'photo'
+                'photo',
+                'displayType'
             ],
 
             multilanguageFields: [
                 'country.name',
                 'retailSegment.name',
-                'product.name'
+                'product.name',
+                'displayType.name'
             ],
 
             validate: function (attrs, cb) {
@@ -44,6 +47,10 @@ define([
                 }
                 if (this.translatedFields.photo) {
                     validation.checkForValuePresence(errors, true, attrs.photo, this.translatedFields.photo);
+                }
+
+                if (this.translatedFields.displayType) {
+                    validation.checkForValuePresence(errors, true, attrs.displayType, this.translatedFields.displayType);
                 }
 
                 if (errors.length > 0) {

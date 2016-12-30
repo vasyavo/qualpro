@@ -218,7 +218,7 @@ define([
                 return branch.name.currentLanguage;
             });
 
-            if (modelJSON.assignedTo[0]._id === App.currentUser._id && modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED) {
+            if (modelJSON.assignedTo[0]._id === App.currentUser._id && modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
 
                 this.visibilityForm = new VisibilityEditView({
                     id                  : id,
@@ -574,7 +574,11 @@ define([
             var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
                 || (statusId === STATUSES.COMPLETED && !createdByMe)
                 || (statusId === STATUSES.CLOSED)
-                || (statusId === STATUSES.OVER_DUE && !createdByMe);
+                || (statusId === STATUSES.FAIL)
+                || (statusId === STATUSES.OVER_DUE && !createdByMe)
+                || this.activityList
+                || jsonModel.myCC
+                || !App.currentUser.workAccess;
 
             var objectiveStatuses = objectivesStatusHelper(jsonModel);
             var statusDisplayModel = _.findWhere(objectiveStatuses, {_id: statusId});
@@ -614,6 +618,8 @@ define([
             var buttons = {};
             var configForTemplate = $.extend([], levelConfig[this.contentType][App.currentUser.accessRole.level].preview);
             var configForActivityList = levelConfig[this.contentType].activityList.preview;
+
+            jsonModel.myCC = self.tabName === 'myCC';
 
             buttons.save = {
                 text : this.translation.okBtn,
@@ -684,28 +690,30 @@ define([
                 });
             }
 
-            if ([CONSTANTS.OBJECTIVE_STATUSES.CLOSED, CONSTANTS.OBJECTIVE_STATUSES.COMPLETED].indexOf(jsonModel.status._id) === -1) {
+            if ([CONSTANTS.OBJECTIVE_STATUSES.CLOSED, CONSTANTS.OBJECTIVE_STATUSES.COMPLETED, CONSTANTS.OBJECTIVE_STATUSES.OVER_DUE, CONSTANTS.OBJECTIVE_STATUSES.FAIL].indexOf(jsonModel.status._id) === -1 && App.currentUser.workAccess) {
                 if (!this.activityList) {
                     configForTemplate.forEach(function (config) {
                         var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id;
                         var historyByMe = jsonModel.history;
 
-                        if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
-                            require([
-                                    config.template
-                                ],
-                                function (template) {
-                                    var container = self.$el.find(config.selector);
+                        if (App.currentUser.workAccess) {
+                            if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
+                                require([
+                                        config.template
+                                    ],
+                                    function (template) {
+                                        var container = self.$el.find(config.selector);
 
-                                    template = _.template(template);
+                                        template = _.template(template);
 
-                                    if (!container.find('#' + config.elementId).length) {
-                                        container[config.insertType](template({
-                                            elementId  : config.elementId,
-                                            translation: self.translation
-                                        }));
-                                    }
-                                });
+                                        if (!container.find('#' + config.elementId).length) {
+                                            container[config.insertType](template({
+                                                elementId  : config.elementId,
+                                                translation: self.translation
+                                            }));
+                                        }
+                                    });
+                            }
                         }
                     });
                 } else {

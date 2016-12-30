@@ -33,7 +33,8 @@ var planogramsHandler = function(db, redis, event) {
         configuration : 1,
         editedBy : 1,
         createdBy : 1,
-        archived : 1
+        archived : 1,
+        displayType : 1
     };
 
     this.create = function(req, res, next) {
@@ -657,6 +658,7 @@ var planogramsHandler = function(db, redis, event) {
     };
 
     this.getAll = function(req, res, next) {
+
         function queryRun(personnel) {
             var query = req.query;
             var page = query.page || 1;
@@ -677,7 +679,9 @@ var planogramsHandler = function(db, redis, event) {
                 'retailSegment.name.ar',
                 'category.name.en',
                 'category.name.ar',
-                'configuration'
+                'configuration',
+                'displayType.name.en',
+                'displayType.name.ar'
             ];
 
             var sort = query.sort || {
@@ -685,6 +689,12 @@ var planogramsHandler = function(db, redis, event) {
                 };
 
             delete queryObject.globalSearch;
+
+            if (query.filter && query.filter.displayType) {
+                query.filter.displayType.type = 'string';
+                query.filter['displayType._id'] = query.filter.displayType;
+                delete query.filter.displayType;
+            }
 
             if (query.filter && query.filter.configuration) {
                 query.filter['configuration._id'] = query.filter.configuration;

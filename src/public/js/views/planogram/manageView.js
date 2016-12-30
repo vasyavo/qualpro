@@ -28,8 +28,6 @@ define([
         retailSegmentTemplate    : _.template(RetailSegmentTemplate),
         retailSegmentListTemplate: _.template(RetailSegmentListTemplate),
 
-        configurationMask: '9{1,3} \\m \\* 9{1,2} \\r\\o\\w\\s',
-
         events: {
             'click .retailSegmentRow'               : 'showConfigurations',
             'click .addBtn'                         : 'addNewRow',
@@ -86,12 +84,6 @@ define([
             this.setFloatContainerPosition($contentHolder, $row, $checkboxes.attr('id'));
 
             $editRow = $contentHolder.find('.editable');
-
-            if (!$editRow.inputmask('hasMaskedValue')) {
-                $editRow.inputmask(this.configurationMask);
-                $editRow.attr('data-inputmask-clearmaskonlostfocus', false);
-                $editRow.attr('data-masked', true);
-            }
         },
 
         deleteChecked: function (e) {
@@ -171,18 +163,15 @@ define([
             var self = this;
             var dataObject = {};
             var queryType;
+            var cmInput = $inputs[1].value;
+            var rowInput = $inputs[2].value;
 
-            configuration = $inputs.filter(':not([type="checkbox"])').val();
+            configuration = cmInput + ' cm ' + '* ' + rowInput + ' rows';
 
-            if (!configuration) {
+            if (isNaN(cmInput) ||
+                isNaN(rowInput) ||
+                !configuration) {
                 return App.render({type: 'error', message: ERROR_MESSAGES.configurationEmpty[currentLanguage]});
-            }
-
-            if (!Inputmask.isValid(configuration, {alias: this.configurationMask})) {
-                return App.render({
-                    type   : 'error',
-                    message: ERROR_MESSAGES.configurationIsNotComplited[currentLanguage]
-                });
             }
 
             url = model.urlRoot() + '/configuration';
@@ -253,7 +242,6 @@ define([
                 $checkbox = $row.find('input:checkbox');
                 $inputs = $row.find('input:not([type="checkbox"])');
                 content = $contentHolder.attr('data-content');
-
                 $inputs.each(function (index, element) {
                     var $element = $(element);
                     var prevVal = $element.attr('data-content');
@@ -282,12 +270,11 @@ define([
             var floatPosition;
             var $scrollableContainer = $contentHolder.find('.scrollable');
             var $floatButtonsContainer = $contentHolder.find('.floatButtonsContainer');
-
             rowPosition = $row.position();
             rowHeight = $row.height();
             scrollableContainerPosition = $scrollableContainer.position();
 
-            floatPosition = scrollableContainerPosition.top + rowPosition.top + rowHeight + rowHeight / 2 - $floatButtonsContainer.height() / 2;
+            floatPosition = scrollableContainerPosition.top + rowPosition.top + rowHeight + rowHeight / 4 - $floatButtonsContainer.height() / 2;
 
             $floatButtonsContainer.css({top: floatPosition});
             $floatButtonsContainer.attr('data-id', id);
@@ -308,14 +295,6 @@ define([
             this.setFloatContainerPosition($contentHolder, $newRow, 'false');
             this.showHideButtons($contentHolder, {add: false, delete: false, edit: false});
             $contentHolder.find('input[type="checkbox"]').attr('readonly', 'readonly');
-
-            $newAddedRow = $contentHolder.find('.newRow');
-
-            if (!$newAddedRow.inputmask('hasMaskedValue')) {
-                $newAddedRow.inputmask({mask: this.configurationMask});
-                $newAddedRow.attr('data-inputmask-clearmaskonlostfocus', false);
-                $newAddedRow.attr('data-masked', true);
-            }
         },
 
         showConfigurations: function (e) {

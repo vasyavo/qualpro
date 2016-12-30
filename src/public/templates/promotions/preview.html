@@ -157,6 +157,7 @@
                 </div>
             </div>
         </div>
+        <% if (App.currentUser.workAccess) {%>
         <div class="blockBottom objectivesPaddingBlock">
             <div class="objectivesBtnBlock">
                 <span class="greyBtn" id="attachFiles"><%= translation.attachFiles%></span>
@@ -172,5 +173,6 @@
             </div>
             <form action="" method="post" id="commentForm" style="display: none;"></form>
         </div>
+        <%}%>
     </div>
 </div>

@@ -1,20 +1,22 @@
 define([
+    'underscore',
     'models/parrent',
     'validation',
     'constants/contentType',
     'constants/otherConstants'
-], function (parent, validation, CONTENT_TYPES, CONSTANTS) {
+], function (_, parent, validation, CONTENT_TYPES, CONSTANTS) {
     var Model = parent.extend({
 
         fieldsToTranslate: [
             'title',
             'dueDate',
+            'startDate',
             'questions',
             'location'
         ],
 
         urlRoot: function () {
-            return CONTENT_TYPES.CONSUMERS_SURVEY;
+            return CONTENT_TYPES.CONSUMER_SURVEY;
         },
 
         validate: function (attrs, cb) {
@@ -26,6 +28,9 @@ define([
             }
             if (this.translatedFields.dueDate) {
                 validation.checkForValuePresence(errors, true, attrs.dueDate, this.translatedFields.dueDate);
+            }
+            if (this.translatedFields.startDate) {
+                validation.checkForValuePresence(errors, true, attrs.startDate, this.translatedFields.startDate);
             }
             if (this.translatedFields.questions) {
                 validation.checkForValuePresence(errors, true, attrs.questions, this.translatedFields.questions);

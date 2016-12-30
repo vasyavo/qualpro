@@ -20,12 +20,14 @@ var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
                     </div>
                     <div class="questionnarieUserInfoBlock">
                         <span class="user"></span>
-            <span class="score">
-                <span class="black"><%= model.countAnswered %></span>
-                <%= translation.of %>
-                <span><%= model.countAll %></span>
-            </span>
+                        <span class="score">
+                            <span class="black"><%= model.countAnswered %></span>
+                        </span>
                     </div>
+                </div>
+                <div class="rightPart">
+                    <span class="fontGray"><%= translation.startDate %>:</span>
+                    <span class="questionnarieDate"><%= model.startDate %></span>
                 </div>
                 <div class="rightPart">
                     <span class="fontGray"><%= translation.endDate %>:</span>

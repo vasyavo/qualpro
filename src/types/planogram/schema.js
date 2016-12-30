@@ -6,6 +6,13 @@ const schema = new Schema({
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, require: true },
     retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT }],
     product: { type: ObjectId, ref: CONTENT_TYPES.CATEGORY, require: true },
+    displayType: {
+        _id : { type: String, enum: ['floorDisplayId', 'gondolaId', 'thematicStandId', 'shelfId', 'otherId']},
+        name : {
+            ar : String,
+            en : String
+        }
+    },
     configuration: {
         _id: {
             type : ObjectId,

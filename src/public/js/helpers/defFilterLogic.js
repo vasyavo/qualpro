@@ -46,7 +46,7 @@ define([
             all: {}
         };
 
-        this[CONTENT_TYPES.CONSUMERS_SURVEY] = {
+        this[CONTENT_TYPES.CONSUMER_SURVEY] = {
             all: {}
         };
 
