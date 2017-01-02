@@ -23,7 +23,7 @@ function BrandingAndDisplay(db, redis, event) {
             function createBrandingAndDisplay(cb) {
                 BrandingAndDisplayModel.create(body, function (err, model) {
                     if (err) {
-                        return next(err);
+                        return cb(err);
                     }
 
                     // fire and forget
@@ -65,6 +65,9 @@ function BrandingAndDisplay(db, redis, event) {
                 updateAttachment
             ], function (err) {
                 if (err) {
+                    if (!res.headersSent) {
+                        next(err);
+                    }
                     return logger.error(err);
                 }
             });

@@ -104,7 +104,7 @@ var CompetitorBranding = function(db, redis, event) {
 
                     CompetitorPromotionModel.create(competitorPromotion, (err, model) => {
                         if (err) {
-                            return next(err);
+                            return cb(err);
                         }
 
                         // fire and forget
@@ -165,6 +165,10 @@ var CompetitorBranding = function(db, redis, event) {
 
             ], function(err, result) {
                 if (err) {
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+
                     return logger.error(err);
                 }
 
