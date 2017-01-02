@@ -15,10 +15,10 @@ const schema = new Schema({
         type: String,
         required: true
     },
-    args: [{
-        type : String,
-        default : null
-    }]
+    args: {
+        type : Object,
+        default : {}
+    }
 }, {
     collection: CONTENT_TYPES.TASK_SCHEDULER
 });

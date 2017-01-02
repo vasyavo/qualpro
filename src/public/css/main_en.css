@@ -2218,7 +2218,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .circleRadioButton input[type="radio"] {
   display: none;
 }
-.circleRadioButton input[type="radio"] + label {
+.circleRadioButton span + label {
   cursor: pointer;
   display: inline-block;
   width: 37px;
@@ -2227,11 +2227,6 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   border: 1px solid #cfd8dc;
   text-align: center;
   line-height: 34px;
-}
-.circleRadioButton input[type="radio"]:checked + label {
-  cursor: pointer;
-  background-color: #f44336;
-  color: white;
 }
 .redBtn,
 .greenBtn,
@@ -4138,6 +4133,7 @@ input[type=number]::-webkit-outer-spin-button {
 .forPosition {
   position: fixed;
   width: 100px;
+  z-index: 1;
 }
 .forPosition .dropDownContent {
   position: absolute !important;

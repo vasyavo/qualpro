@@ -107,7 +107,6 @@ module.exports = (req, res, next) => {
 
                     if (body.status !== 'active') {
                         requestService.post({
-                            url: `${config.schedulerHost}/tasks`,
                             json : {
                                 date: body.startDate
                             }
@@ -117,8 +116,7 @@ module.exports = (req, res, next) => {
                                 taskSchedulerModel.set({
                                     scheduleId: response.id,
                                     documentId: result._id,
-                                    functionName: 'changeStatusOfConsumerSurvey',
-                                    args : ['active']
+                                    functionName: 'setConsumerSurveyStatusActive'
                                 });
                                 taskSchedulerModel.save();
                             }
@@ -126,7 +124,6 @@ module.exports = (req, res, next) => {
                     }
 
                     requestService.post({
-                        url: `${config.schedulerHost}/tasks`,
                         json : {
                             date: body.dueDate
                         }
@@ -136,8 +133,7 @@ module.exports = (req, res, next) => {
                             taskSchedulerModel.set({
                                 scheduleId: response.id,
                                 documentId: result._id,
-                                functionName: 'changeStatusOfConsumerSurvey',
-                                args : ['completed']
+                                functionName: 'setConsumerSurveyStatusCompleted'
                             });
                             taskSchedulerModel.save();
                         }
