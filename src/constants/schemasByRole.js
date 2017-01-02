@@ -65,10 +65,12 @@ schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.COUNTRY_ADMIN] = {
     update: schemas.brandingAndDisplay.update
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.AREA_MANAGER] = {
-    create: schemas.brandingAndDisplay.create
+    create: schemas.brandingAndDisplay.create,
+    read: schemas.brandingAndDisplay.getAll
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.AREA_IN_CHARGE] = {
-    create: schemas.brandingAndDisplay.create
+    create: schemas.brandingAndDisplay.create,
+    read: schemas.brandingAndDisplay.getAll
 };
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.SALES_MAN] = {
     create: schemas.brandingAndDisplay.create
