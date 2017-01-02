@@ -30,7 +30,7 @@ define([
         attachFiles        : 'Attach Files',
         inputBarcode       : 'Input barcode',
         inputPacking       : 'Input weight',
-        inputPpt           : 'Input ppt',
+        inputPpt           : 'Input ptt',
         inputTotalQuantity : 'Input total quantity',
         description        : 'Description',
         selectCountry      : 'Select country',
