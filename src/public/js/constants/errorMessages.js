@@ -9,7 +9,7 @@
             ar: 'المستند قيد الاستخدام ولا يمكن حفظه فى الارشيف'
         },
         brandingTableIsEmpty: {
-            en: 'Branding and display items table is empty',
+            en: 'Marketing Campaign items table is empty',
             ar: ' جدول العلامات التجارية وتقارير العرض للسلع لا يحتوى على بيانات '
         },
         forbiddenTypeOfFile: {
