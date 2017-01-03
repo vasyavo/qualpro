@@ -306,7 +306,7 @@
             38: {
                 _id : 38,
                 name: {
-                    en: 'Al Alali Marketing campaigns & Display report',
+                    en: 'Al Alali Marketing Campaigns & Display report',
                     ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'
                 },
                 href: CONSTANTS.BRANDING_ACTIVITY
@@ -324,7 +324,7 @@
             40: {
                 _id : 40,
                 name: {
-                    en: 'Al Alali Marketing campaigns & Display items',
+                    en: 'Al Alali Marketing Campaigns & Display items',
                     ar: 'العلامات التجارية وتقارير العرض للسلع'
                 },
                 href: CONSTANTS.BRANDING_ACTIVITY_ITEMS
