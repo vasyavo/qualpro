@@ -1,6 +1,7 @@
 var AchievementForm = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
+    var logger = require('../utils/logger');
     var mongoose = require('mongoose');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
@@ -118,7 +119,11 @@ var AchievementForm = function (db, redis, event) {
 
             ], function (err) {
                 if (err) {
-                    return next(err);
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+
+                    return logger.error(err);
                 }
             });
         }

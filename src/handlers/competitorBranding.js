@@ -126,6 +126,10 @@ var CompetitorBranding = function(db, redis, event) {
                 }
             ], function(err) {
                 if (err) {
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+
                     return logger.error(err);
                 }
             });
