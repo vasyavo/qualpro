@@ -665,7 +665,6 @@ const QuestionnaryHandler = function (db, redis, event) {
                             'accessRole.level': {
                                 $nin: [
                                     ACL_CONSTANTS.MASTER_ADMIN,
-                                    ACL_CONSTANTS.COUNTRY_ADMIN,
                                     ACL_CONSTANTS.MASTER_UPLOADER,
                                     ACL_CONSTANTS.COUNTRY_UPLOADER
                                     ]
