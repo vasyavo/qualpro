@@ -102,9 +102,10 @@ define([
             options = question.options;
             options.forEach(function (option, index) {
                 var answerCount = self.answersCollection.getAnswerCount(questionId, index);
-
-                optionsCountArray.push(answerCount);
-                sum += answerCount;
+                if (answerCount != 0) {
+                    optionsCountArray.push(answerCount);
+                    sum += answerCount;
+                }
             });
 
             if (sum === 0) {
