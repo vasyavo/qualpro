@@ -1,4 +1,5 @@
 var CompetitorBranding = function(db, redis, event) {
+    const logger = require('../utils/logger');
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -57,17 +58,7 @@ var CompetitorBranding = function(db, redis, event) {
             var userId = session.uId;
 
             async.waterfall([
-
                 function(cb) {
-                    if (!files) {
-                        return cb(null, []);
-                    }
-
-                    // TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'competitorPromotion', cb);
-                },
-
-                function(filesIds, cb) {
                     let createdBy = {
                         user : req.session.uId,
                         date : new Date()
@@ -104,7 +95,6 @@ var CompetitorBranding = function(db, redis, event) {
                         packing : body.packing,
                         packingType : body.packingType,
                         expiry : body.expiry,
-                        attachments : filesIds,
                         displayType : body.displayType,
                         dateStart : body.dateStart,
                         dateEnd : body.dateEnd,
@@ -112,7 +102,42 @@ var CompetitorBranding = function(db, redis, event) {
                         editedBy : createdBy
                     };
 
-                    CompetitorPromotionModel.create(competitorPromotion, cb);
+                    CompetitorPromotionModel.create(competitorPromotion, (err, model) => {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        // fire and forget
+                        res.status(201).send(model);
+
+                        cb(null, model);
+                    });
+                },
+
+                function (model, cb) {
+                    if (!files) {
+                        return cb(null, model, []);
+                    }
+
+                    // TODO: change bucket from constants
+                    fileHandler.uploadFile(userId, files, 'competitorPromotion', (err, fileIds) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model, fileIds);
+                    });
+                },
+
+                function (model, fileIds, cb) {
+                    model.set('attachments', fileIds);
+                    model.save((err, model) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model);
+                    });
                 },
 
                 function(model, cb) {
@@ -140,7 +165,7 @@ var CompetitorBranding = function(db, redis, event) {
 
             ], function(err, result) {
                 if (err) {
-                    return next(err);
+                    return logger.error(err);
                 }
 
                 event.emit('activityChange', {
@@ -150,10 +175,7 @@ var CompetitorBranding = function(db, redis, event) {
                     itemId : result._id,
                     itemType : CONTENT_TYPES.COMPETITORPROMOTION
                 });
-
-                res.status(201).send(result);
             });
-
         }
 
         access.getWriteAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err, allowed) {

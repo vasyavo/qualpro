@@ -61,8 +61,13 @@
         </ul>
     </td>
     <td>
-        <%- branches.displayType && branches.displayType.name &&
-        branches.displayType.name.currentLanguage || '' %>
+        <ul class="promotionList markedList">
+            <% branches.displayType.forEach(function(elem, index) { %>
+
+            <li><%- elem && elem.name && elem.name.currentLanguage %></li>
+
+            <% }) %>
+        </ul>
     </td>
     <td>
         <% if (branches.comment) { %>

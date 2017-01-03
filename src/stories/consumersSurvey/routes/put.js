@@ -70,10 +70,6 @@ module.exports = (req, res, next) => {
             },
 
             (updateModel, cb) => {
-                if (err) {
-                    return cb(err);
-                }
-
                 event.emit('activityChange', {
                     module    : ACL_MODULES.CONSUMER_SURVEY,
                     actionType: ACTIVITY_TYPES.UPDATED,

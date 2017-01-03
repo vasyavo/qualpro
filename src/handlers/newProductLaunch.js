@@ -1,4 +1,5 @@
 var NewProductLaunch = function(db, redis, event) {
+    const logger = require('../utils/logger');
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -49,30 +50,12 @@ var NewProductLaunch = function(db, redis, event) {
     this.create = function(req, res, next) {
         function queryRun(body) {
             var files = req.files;
-            var isMobile = req.isMobile;
             var session = req.session;
             var userId = session.uId;
-            var model;
             var newProductLaunch;
 
             async.waterfall([
-
                 function(cb) {
-                    if (!files) {
-                        return cb(null, []);
-                    }
-
-                    //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'newProductLaunch', function(err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, filesIds);
-                    });
-                },
-
-                function(filesIds, cb) {
                     var createdBy = {
                         user : userId,
                         date : new Date()
@@ -134,7 +117,6 @@ var NewProductLaunch = function(db, redis, event) {
                         packing : body.packing,
                         packingType : body.packingType,
                         location : body.location,
-                        attachments : filesIds,
                         displayType : body.displayType,
                         distributor : body.distributor,
                         shelfLifeStart : body.shelfLifeStart,
@@ -143,11 +125,12 @@ var NewProductLaunch = function(db, redis, event) {
                         editedBy : createdBy,
                     };
 
-                    model = new NewProductLaunchModel(newProductLaunch);
-                    model.save(function(err, model) {
+                    NewProductLaunchModel.create(newProductLaunch, function (err, model) {
                         if (err) {
                             return cb(err);
                         }
+
+                        res.status(201).send(model);
 
                         event.emit('activityChange', {
                             module : ACL_MODULES.NEW_PRODUCT_LAUNCH,
@@ -161,21 +144,29 @@ var NewProductLaunch = function(db, redis, event) {
                     });
                 },
 
-                function(newProductLaunchModel, cb) {
-                    var id = newProductLaunchModel.get('_id');
+                function (model, cb) {
+                    if (!files) {
+                        return cb(null, model, []);
+                    }
 
-                    self.getByIdAggr({
-                        id : id,
-                        isMobile : isMobile
-                    }, cb);
+                    //TODO: change bucket from constants
+                    fileHandler.uploadFile(userId, files, 'newProductLaunch', function (err, filesIds) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model, filesIds);
+                    });
+                },
+
+                function(model, filesIds, cb) {
+                    model.set('attachments', filesIds);
+                    model.save(cb);
                 }
-
-            ], function(err, result) {
+            ], function(err) {
                 if (err) {
-                    return next(err);
+                    return logger.error(err);
                 }
-
-                res.status(201).send(result);
             });
 
         }
