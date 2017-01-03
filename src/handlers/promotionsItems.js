@@ -1,6 +1,7 @@
 var Promotions = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
+    var logger = require('../utils/logger');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -512,8 +513,17 @@ var Promotions = function (db, redis, event) {
 
             async.waterfall([
                 function (callback) {
-                    PromotionItemModel.create(body, callback);
+                    PromotionItemModel.create(body, (error, model) => {
+                        if (error) {
+                            return callback(error);
+                        }
+
+                        res.status(200).send(model);
+
+                        callback(null, model);
+                    });
                 },
+
                 function (model, callback) {
                     var saveObj = {
                         text       : body.commentText,
@@ -530,12 +540,18 @@ var Promotions = function (db, redis, event) {
                         callback(null, model, comment);
                     });
                 },
+
                 function (model, comment, callback) {
                     PromotionItemModel.findByIdAndUpdate(model._id, {$set: {comment: comment._id}}, {new: true}, callback);
                 }
+
             ], function (err, result) {
                 if (err) {
-                    return next(err);
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+
+                    return logger.error(err);
                 }
 
                 event.emit('activityChange', {
@@ -545,8 +561,6 @@ var Promotions = function (db, redis, event) {
                     itemId    : result.promotion,
                     itemType  : CONTENT_TYPES.PROMOTIONS
                 });
-
-                res.status(200).send(result);
             });
         }
 

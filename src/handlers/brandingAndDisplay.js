@@ -6,6 +6,7 @@ function BrandingAndDisplay(db, redis, event) {
     const mongoose = require('mongoose');
     const CONTENT_TYPES = require('../public/js/constants/contentType.js');
     const FileHandler = require('../handlers/file');
+    const logger = require('../utils/logger');
     const fileHandler = new FileHandler(db);
     const BrandingAndDisplayModel = require('../types/brandingAndDisplay/model');
     const DomainModel = require('./../types/domain/model');
@@ -19,9 +20,22 @@ function BrandingAndDisplay(db, redis, event) {
             const files = req.files;
             const userId = req.session.uId;
 
-            function uploadFiles(files, body, userId, cb) {
+            function createBrandingAndDisplay(cb) {
+                BrandingAndDisplayModel.create(body, function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    // fire and forget
+                    res.status(201).send(model);
+
+                    cb(null, model);
+                });
+            }
+
+            function uploadFiles(model, cb) {
                 if (!files) {
-                    return cb(null, [], body, userId);
+                    return cb(null, [], model);
                 }
 
                 fileHandler.uploadFile(userId, files, 'brandingAndDisplay', function(err, filesIds) {
@@ -29,32 +43,33 @@ function BrandingAndDisplay(db, redis, event) {
                         return cb(err);
                     }
 
-                    cb(null, filesIds, body, userId);
+                    cb(null, filesIds, model);
                 });
             }
 
-            function createBrandingAndDisplay(filesIds, body, userId, cb) {
-                body.attachments = filesIds;
+            function updateAttachment(filesIds, model, cb) {
+                model.set('attachments', filesIds);
 
-                const model = new BrandingAndDisplayModel(body);
-                model.save(function(err, model) {
+                model.save(function (err) {
                     if (err) {
                         return cb(err);
                     }
 
-                    cb(null, model);
+                    cb(null);
                 });
             }
 
             async.waterfall([
-                async.apply(uploadFiles, files, body, userId),
-                createBrandingAndDisplay
-            ], function(err, result) {
+                createBrandingAndDisplay,
+                uploadFiles,
+                updateAttachment
+            ], function (err) {
                 if (err) {
-                    return next(err);
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+                    return logger.error(err);
                 }
-
-                res.status(201).send(result);
             });
         }
 

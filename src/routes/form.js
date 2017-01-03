@@ -248,7 +248,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.get('/distribution/:id([0-9a-fA-F]{24})', distributionFormHandler.getById);
+    router.get('/distribution/:id', distributionFormHandler.getById);
 
     /**
      * __Type__ 'PUT'
@@ -336,7 +336,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.put('/distribution/:id([0-9a-fA-F]{24})', distributionFormHandler.update);
+    router.put('/distribution/:id', distributionFormHandler.update);
 
     /**
      * __Type__ 'PATCH'
@@ -424,7 +424,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.patch('/distribution/:id([0-9a-fA-F]{24})', distributionFormHandler.update);
+    router.patch('/distribution/:id', distributionFormHandler.update);
 
     /**
      * __Type__ 'POST'
@@ -596,7 +596,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.get('/visibility/:id([0-9a-fA-F]{24})', visibilityFormHandler.getById);
+    router.get('/visibility/:id', visibilityFormHandler.getById);
 
     /**
      * __Type__ 'PUT'
@@ -627,7 +627,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.put('/visibility/:id([0-9a-fA-F]{24})', multipartMiddleware, visibilityFormHandler.update);
+    router.put('/visibility/:id', multipartMiddleware, visibilityFormHandler.update);
 
 
     /**
@@ -658,7 +658,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.patch('/visibility/:id([0-9a-fA-F]{24})', multipartMiddleware, visibilityFormHandler.update);
+    router.patch('/visibility/:id', multipartMiddleware, visibilityFormHandler.update);
 
 
     // router.delete('/visibility/:id', visibilityFormHandler.deleteById);

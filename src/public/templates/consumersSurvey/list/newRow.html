@@ -22,6 +22,10 @@ var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
         </div>
     </div>
     <div class="rightPart">
+        <span class="fontGray"><%= translation.startDate %>:</span>
+        <span class="questionnarieDate"><%= model.startDate %></span>
+    </div>
+    <div class="rightPart">
         <span class="fontGray"><%= translation.endDate %>:</span>
         <span class="questionnarieDate"><%= model.dueDate %></span>
     </div>

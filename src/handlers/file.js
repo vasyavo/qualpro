@@ -356,4 +356,56 @@ module.exports = function() {
             callback(null, filesId);
         });
     };
+
+    this.uploadFileFromBase64 = function(userId, base64, folder, callback) {
+        let error;
+
+        if (!userId || !base64 || !folder) {
+            error = new Error('Not enough params');
+            error.status = 400;
+
+            return callback(error);
+        }
+
+        const name = createFileName();
+
+        function uploadFromBase64(cb) {
+            fileUploader.uploadFromBase64(base64, `${folder}-${name}`, function (err, imageNameWithExt) {
+                if (err) {
+                    return cb(err);
+                }
+
+                cb(null, imageNameWithExt);
+            });
+        }
+        function saveFileToDB(imageName, cb) {
+            const saveData = {
+                name        : imageName,
+                originalName: imageName.split('.')[0],
+                extension   : imageName.split('.')[1],
+                createdBy   : {
+                    user: userId
+                }
+            };
+
+            new FileModel(saveData).save(function (err, model) {
+                if (err) {
+                    return cb(err);
+                }
+
+                cb(null, model.id);
+            });
+        }
+
+        async.waterfall([
+            uploadFromBase64,
+            saveFileToDB
+        ], function(err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            callback(null, result);
+        })
+    };
 };
