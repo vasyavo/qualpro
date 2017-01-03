@@ -1,7 +1,6 @@
 const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+const MongoStore = require('connect-mongo')(session);
 const config = require('./../config');
-const logger = require('./logger');
 const mongo = require('./mongo');
 
 module.exports = session({
@@ -16,8 +15,9 @@ module.exports = session({
     resave: true,
     rolling: true,
     saveUninitialized: true,
-    store: new RedisStore({
-        url: config.redisUrl,
-        db: config.redisSessionDb
+    store: new MongoStore({
+        url: config.mongodbUri,
+        autoRemove: 'interval',
+        autoRemoveInterval: 10
     })
 });
