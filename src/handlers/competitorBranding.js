@@ -1,4 +1,5 @@
 var CompetitorBranding = function(db, redis, event) {
+    const logger = require('../utils/logger');
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -46,26 +47,10 @@ var CompetitorBranding = function(db, redis, event) {
             var files = req.files;
             var session = req.session;
             var userId = session.uId;
-            var model;
             var competitorBrand;
 
             async.waterfall([
-
                 function(cb) {
-                    if (!files) {
-                        return cb(null, []);
-                    }
-
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.COMPETITORS, function(err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, filesIds);
-                    });
-                },
-
-                function(filesIds, cb) {
                     var createdBy = {
                         user : userId,
                         date : new Date()
@@ -94,44 +79,59 @@ var CompetitorBranding = function(db, redis, event) {
                         outlet : body.outlet,
                         branch : body.branch,
                         location : body.location,
-                        attachments : filesIds,
                         displayType : body.displayType,
                         dateStart : body.dateStart,
                         dateEnd : body.dateEnd,
-                        createdBy : createdBy,
+                        createdBy: createdBy,
                         editedBy : createdBy
                     };
 
-                    model = new CompetitorBrandingModel(competitorBrand);
-                    model.save(function(err, model) {
+                    CompetitorBrandingModel.create(competitorBrand, function (err, model) {
                         if (err) {
                             return cb(err);
                         }
 
+                        // fire and forget
+                        res.status(201).send(model);
+
                         event.emit('activityChange', {
-                            module : ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
-                            actionType : ACTIVITY_TYPES.CREATED,
+                            module    : ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
+                            actionType: ACTIVITY_TYPES.CREATED,
                             createdBy : competitorBrand.createdBy,
-                            itemId : model._id,
-                            itemType : CONTENT_TYPES.COMPETITORBRANDING
+                            itemId    : model._id,
+                            itemType  : CONTENT_TYPES.COMPETITORBRANDING
                         });
 
                         cb(null, model);
                     });
                 },
 
-                function(competitorBrandModel, cb) {
-                    var id = competitorBrandModel.get('_id');
+                function(model, cb) {
+                    if (!files) {
+                        return cb(null, model, []);
+                    }
 
-                    self.getByIdAggr({id : id}, cb);
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.COMPETITORS, function(err, filesIds) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model, filesIds);
+                    });
+                },
+
+                function(model, filesIds, cb) {
+                    model.set('attachments', filesIds);
+                    model.save(cb);
                 }
-
-            ], function(err, result) {
+            ], function(err) {
                 if (err) {
-                    return next(err);
-                }
+                    if (!res.headersSent) {
+                        next(err);
+                    }
 
-                res.status(201).send(result);
+                    return logger.error(err);
+                }
             });
 
         }

@@ -100,6 +100,7 @@ define([
 
         addPlanogram: function () {
             var self = this;
+            debugger;
             this.body = {
                 country      : this.selectedCountryId,
                 retailSegment: this.selectedRetailSegmentId,
@@ -167,6 +168,7 @@ define([
                 });
 
             } else if (itemName === 'retailSegment') {
+                debugger;
 
                 const arrayOfSelectedRetailSegmentsId = data.selectedValuesIds || [];
 
@@ -191,6 +193,7 @@ define([
             } else if (itemName === 'product') {
                 this.selectedProductId = itemId;
             } else if (itemName === 'configuration') {
+                debugger;
                 this.selectedConfigurationId = itemId;
             } else if (itemName === 'displayType') {
                 if (itemId === 'otherId'){

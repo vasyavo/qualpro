@@ -2453,7 +2453,8 @@ var Objectives = function (db, redis, event) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                         from             : 'branches',
                         key              : 'branch',
-                        addMainProjection: ['retailSegment', 'outlet']
+                        addMainProjection: ['retailSegment', 'outlet'],
+                        addProjection: ['outlet']
                     }));
 
                     if (objectiveType !== 'individual') {
