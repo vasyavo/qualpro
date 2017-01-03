@@ -27,10 +27,8 @@ define([
             var personnelsIds = [];
 
             collection.forEach(function (answer) {
-                if (answer.personnel && personnelsIds.indexOf(answer.personnel._id) === -1 && answer.selectedForPersonnel) {
-                    personnelsIds.push(answer.personnel._id);
-                    answers.push(answer);
-                } else if (answer.customer) {
+                if (answer.customer && personnelsIds.indexOf(answer.customer.name) === -1 && answer.selectedForPersonnel) {
+                    personnelsIds.push(answer.customer.name);
                     answers.push(answer);
                 }
             });
@@ -59,33 +57,12 @@ define([
             var text = options.text || '';
             var regex = new RegExp(text, 'i');
             var modelKey = options.modelKey;
-            var domainsContentTypes = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-                CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH];
 
             this.models.forEach(function (elem) {
                 var match = false;
                 var searchFields = [
-                    elem.get('personnel').firstName.en || '',
-                    elem.get('personnel').firstName.ar || '',
-                    elem.get('personnel').lastName.en || '',
-                    elem.get('personnel').lastName.ar || '',
-                    elem.get('position').name.en || '',
-                    elem.get('position').name.ar || ''
+                    elem.get('customer').name || ''
                 ];
-
-                domainsContentTypes.forEach(function (contentType) {
-                    var domains = elem.get(contentType);
-
-                    domains.forEach(function (domain) {
-                        if (domain.name && domain.name.en) {
-                            searchFields.push(domain.name.en);
-                        }
-
-                        if (domain.name && domain.name.ar) {
-                            searchFields.push(domain.name.ar);
-                        }
-                    });
-                });
 
                 searchFields.forEach(function (filed) {
                     match = match || filed.match(regex);
