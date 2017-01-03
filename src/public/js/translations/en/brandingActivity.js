@@ -15,7 +15,7 @@ define([
         item               : 'Item:',
         promotionType      : 'Promotion Type: ',
         // create
-        createTitle        : 'Create Marketing campaign',
+        createTitle        : 'Create Marketing Campaign',
         publishBtn         : 'Publish',
         cancelBtn          : 'Cancel',
         attachments        : 'Attachments',
@@ -58,7 +58,7 @@ define([
             ar: 'Add english translation'
         },
 
-        dialogTitle     : 'Marketing campaign files',
+        dialogTitle     : 'Marketing Campaign files',
         attachButtonName: 'Attach',
         viewDetails     : 'View details',
         commentText     : 'Comment Text',
