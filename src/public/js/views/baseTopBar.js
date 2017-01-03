@@ -31,7 +31,6 @@ define([
         },
 
         toggleFilterHolder: function (e) {
-            debugger;
             var $target = $(e.target);
             var $filterBar = $target.closest('.filterBar');
             var $filterBarName = $filterBar.find('.filterHeader');
