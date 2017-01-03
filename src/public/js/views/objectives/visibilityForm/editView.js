@@ -174,7 +174,6 @@ define([
                 }
 
             } else {
-                debugger;
                 data.append('before', 'true');
                 ajaxObj = {
                     model      : context.model,
