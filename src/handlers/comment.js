@@ -817,7 +817,7 @@ var Comment = function (db, redis, event) {
                     pipeLine.push({
                         $match: {
                             _id: {
-                                $in: objective.comments
+                                $in: objective.comments || []
                             }
                         }
                     });

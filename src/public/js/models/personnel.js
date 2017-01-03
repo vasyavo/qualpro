@@ -58,7 +58,7 @@ define([
             var errors = [];
             var tempEmployee = attrs.temp;
             var level = attrs.accessRoleLevel;
-            var countryMandatory = level > 1 && level !== 8;
+            var countryMandatory = level > 1 && level < 10 && level !== 8;
             var regionMandatory = level > 2 && level < 8;
             var subRegionMandatory = level > 3 && level < 8;
             var branchMandatory = level > 4 && level < 8;

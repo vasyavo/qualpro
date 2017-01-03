@@ -2,7 +2,9 @@ const ACL_MODULES = require('./../../../constants/aclModulesNames');
 
 module.exports = {
     module: ACL_MODULES.CONSUMER_SURVEY,
-    cms: {},
+    cms: {
+        read : true
+    },
     mobile: {
         read: true,
         write: true,
