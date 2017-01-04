@@ -19,11 +19,13 @@ var imageUploader = function (config) {
     }
 
     return {
-        uploadFile    : imageUploadImpl.uploadFile,
-        uploadImage   : imageUploadImpl.uploadImage,
-        duplicateImage: imageUploadImpl.duplicateImage,
-        removeImage   : imageUploadImpl.removeImage,
-        getImageUrl   : imageUploadImpl.getImageUrl
+        uploadFromFile  : imageUploadImpl.uploadFromFile,
+        uploadFromBuffer: imageUploadImpl.uploadFile,
+        uploadFile      : imageUploadImpl.uploadFile,
+        uploadImage     : imageUploadImpl.uploadImage,
+        duplicateImage  : imageUploadImpl.duplicateImage,
+        removeImage     : imageUploadImpl.removeImage,
+        getImageUrl     : imageUploadImpl.getImageUrl
     };
 };
 
