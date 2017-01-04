@@ -897,6 +897,10 @@ a {
   font-family: 'icomoon';
   color: #c4c4c4;
 }
+label[for=searchInputcountry]:after {
+  top: 0!important;
+  line-height: 2.4!important;
+}
 .filterBar .searchInputWrap label:after {
   line-height: 3.4;
 }
@@ -6008,7 +6012,7 @@ input[type=number]::-webkit-outer-spin-button {
   border-bottom: 1px solid #cfd8dc;
   outline: 0;
   line-height: 10px;
-  text-align: left;
+  text-align: center;
   font-size: 12px;
   font-size: 0.75rem;
 }

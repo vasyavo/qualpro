@@ -11,8 +11,16 @@ const schema = new Schema({
             default : null
         },
         nationality : {
-            type : String,
-            default : null
+            name : {
+                en : {
+                    type : String,
+                    default : ''
+                },
+                ar : {
+                    type : String,
+                    default : ''
+                }
+            }
         },
         gender: {
             type : String,

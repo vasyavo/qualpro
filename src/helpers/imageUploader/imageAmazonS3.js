@@ -67,6 +67,24 @@ var imageUploader = function (awsConfig) {
         });
     };
 
+    function uploadFromBase64(imageData, imageName, callback) {
+        encodeFromBase64(imageData, function (err, imageData) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+            const imageNameWithExt = `${imageName}.${imageData.extension}`;
+
+            putObjectToAWS(awsConfig.bucketName, imageNameWithExt, imageData.data, imageData.type, function (err, imageUrl) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err, imageNameWithExt);
+                }
+            });
+        });
+    };
+
     function uploadFromFile(fileData, bucket, callback) {
         var imageNameWithExt = `${fileData.name}.${fileData.extension}`;
         bucket = awsConfig.bucketName;
@@ -218,14 +236,14 @@ var imageUploader = function (awsConfig) {
         });
     }
 
-
     return {
         uploadFile    : uploadFile,
         uploadFromFile: uploadFromFile,
         uploadImage   : uploadImage,
         duplicateImage: duplicateImage,
-        removeImage   : removeImage,
-        getImageUrl   : getImageUrl
+        removeImage: removeImage,
+        getImageUrl: getImageUrl,
+        uploadFromBase64 : uploadFromBase64
     };
 };
 

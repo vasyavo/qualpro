@@ -196,7 +196,7 @@ var PriceSurvey = function (db, redis, event) {
                                 'createdBy.user.country': queryObject.country
                             },
                             {
-                                'createdBy.user.country': {$exists: false}
+                                'createdBy.user.country': {$size: 0}
                             }
                         ]
                     }

@@ -21,6 +21,7 @@ var imageUploader = function (config) {
     return {
         uploadFromFile  : imageUploadImpl.uploadFromFile,
         uploadFromBuffer: imageUploadImpl.uploadFile,
+        uploadFromBase64   : imageUploadImpl.uploadFromBase64,
         uploadFile      : imageUploadImpl.uploadFile,
         uploadImage     : imageUploadImpl.uploadImage,
         duplicateImage  : imageUploadImpl.duplicateImage,

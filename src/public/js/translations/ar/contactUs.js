@@ -5,29 +5,29 @@ define([
 ], function (_, paginationTranslation, filtersTranslation) {
     var translation = {
         // list view
-        title: 'Title',
-        type: 'Type',
-        resolved : 'resolved',
+        title: 'العنوان',
+        type: 'متعلق ب',
+        resolved : 'تم حل الطلب',
 
         // preview
-        employeeName : 'Employee Name',
-        country : 'Country',
-        dateCreated  : 'Date Created',
-        status : 'Status',
-        titlePreview : 'Contact Us',
-        description  : 'Description',
-        attachments  : 'Attachments',
-        files        : 'Files',
-        noTranslation: 'no Translation',
-        resolveBtn : 'Resolve',
-        comments : 'Comments',
-        attachmentsDialogTitle : 'Contact Us files', //todo ar translation
+        employeeName : 'اسم الموظف',
+        country : 'الدولة',
+        dateCreated  : 'تاريخ الإنشاء',
+        status : 'حالة الطلب',
+        titlePreview : 'اتصل بنا',
+        description  : 'الوصف',
+        attachments  : 'المرفقات',
+        files        : 'الملفات',
+        noTranslation: 'لا يوجد ترجمة',
+        resolveBtn : 'حل الطلب',
+        comments : 'التعليقات',
+        attachmentsDialogTitle : 'الملفات الخاصة بخاصية اتصل بنا',
 
         // topBar
-        all        : 'Contact Us',
-        okBtn      : 'Ok',
-        sendBtn    : 'Send',
-        attachBtn    : 'Attach'
+        all        : 'اتصل بنا',
+        okBtn      : 'موافق',
+        sendBtn    : 'ارسال',
+        attachBtn    : 'ارفاق'
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);

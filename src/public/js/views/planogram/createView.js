@@ -100,6 +100,7 @@ define([
 
         addPlanogram: function () {
             var self = this;
+
             this.body = {
                 country      : this.selectedCountryId,
                 retailSegment: this.selectedRetailSegmentId,
@@ -167,7 +168,6 @@ define([
                 });
 
             } else if (itemName === 'retailSegment') {
-
                 const arrayOfSelectedRetailSegmentsId = data.selectedValuesIds || [];
 
                 this.selectedRetailSegmentId = arrayOfSelectedRetailSegmentsId;
@@ -195,8 +195,8 @@ define([
             } else if (itemName === 'displayType') {
                 if (itemId === 'otherId'){
                     input.addClass('createOwn');
+                    input.attr('placeholder', 'Enter display type');
                     this.displayTypeDropDownView.selectedValues = [];
-                    input.focus();
                 } else {
                     this.selectedDisplayType = {
                         _id : itemId,

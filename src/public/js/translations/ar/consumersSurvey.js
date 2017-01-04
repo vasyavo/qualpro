@@ -5,54 +5,54 @@ define([
 ], function (_, paginationTranslation, filtersTranslation) {
     var translation = {
         // list
-        location: 'Location',
-        endDate : 'Due date',
+        location: 'الموقع',
+        endDate : 'تاريخ الاستحقاق',
 
         // create
-        titleQuestionary : 'Consumer Survey',
-        aboutSKUFormat   : 'About SKU format',
+        titleQuestionary : 'استطلاع العملاء',
+        aboutSKUFormat   : 'SKU حول',
         addNewBtn        : 'أضف سلعة جديدة',
         deleteBtn        : 'حذف السلعة',
-        questions        : 'Surveys',
-        type             : 'Type',
-        options          : 'Options',
-        createQuestionary: 'Create Consumer Survey',
+        questions        : ' استطلاعات',
+        type             : ' نوع السؤال',
+        options          : 'الخيارات',
+        createQuestionary: 'إنشاء استطلاع جديد',
 
         //create Question
         enterQuestion     : {
-            en: 'Enter Question in English',
-            ar: 'Enter Question in Arabic'
+            en: 'أدخل السؤال باللغة الإنجليزية',
+            ar: 'أدخل السؤال باللغة العربية'
         },
         enterTitle     : {
-            en: 'Enter Title in English',
-            ar: 'Enter Title in Arabic'
+            en: 'أدخل عنوان الاستطلاع باللغة الانجليزية',
+            ar: 'أدخل عنوان الاستطلاع باللغة العربية'
         },
         enterOption     : {
-            en: 'Enter Option to choose in English',
-            ar: 'Enter Option to choose in Arabic'
+            en: 'أدخل الاجابة باللغة الانجليزية',
+            ar: 'أدخل الاجابة باللغة العربية'
         },
-        title             : 'Title',
-        dueDate           : 'Due date',
-        startDate         : 'Start Date',
-        create            : 'Create',
-        questionType      : 'Consumer Survey Type',
+        title             : 'العنوان',
+        dueDate           : 'تاريخ الاستحقاق',
+        startDate         : 'تاريخ البدء',
+        create            : 'إنشاء',
+        questionType      : 'نوع السؤال',
         //preview
-        titlePreview      : 'New Consumer Survey',
-        respondents       : 'Respondents',
-        duplicateBtn      : 'Duplicate',
-        editBtn           : 'Edit',
-        respondent        : 'Respondent',
-        answer            : 'Answer',
-        saveBtn           : 'Save',
-        sendBtn           : 'Send',
-        goToBtn           : 'Go to',
-        questionaryPreview: 'Consumer Survey Preview',
-        okBtn             : 'Ok',
+        titlePreview      : 'استطلاع عملاء جديد',
+        respondents       : 'المستجيبين',
+        duplicateBtn      : 'تكرار إنشاء',
+        editBtn           : 'تعديل',
+        respondent        : 'المستجيب',
+        answer            : 'اجابة',
+        saveBtn           : 'حفظ',
+        sendBtn           : 'ارسال',
+        goToBtn           : 'الذهاب الى',
+        questionaryPreview: 'معاينة استطلاع العملاء',
+        okBtn             : 'موافق',
 
         // top Bar
-        all   : 'Al Alali Consumer Survey',
-        newBtn: 'New Consumer Survey',
-        of    : 'of'
+        all   : 'استطلاع العملاء الخاص بالعلالي',
+        newBtn: 'استطلاع عملاء جديد',
+        of    : 'من'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });

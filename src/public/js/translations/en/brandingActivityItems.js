@@ -5,7 +5,7 @@ define([
 ], function (_, paginationTranslation, filtersTranslation) {
     var brandingAndDisplayTranslation = {
         // header
-        brandingItemsTable: 'Branding and Display Items Table',
+        brandingItemsTable: 'Marketing Campaign Items Table',
         employee          : 'Employee',
         comment           : 'Comment',
         // body
