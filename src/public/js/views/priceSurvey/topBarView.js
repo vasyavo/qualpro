@@ -35,8 +35,6 @@ define(
                 paginationContainer = $thisEl.find('#paginationHolder');
                 paginationContainer.html(this.paginationTemplate({translation: this.translation}));
 
-                $thisEl.find('.pageListWrap').hide();
-
                 $createBtn = $thisEl.find('#createBtn');
                 $archiveBtn = $thisEl.find('#archiveBtn');
                 $unArchiveBtn = $thisEl.find('#unArchiveBtn');

@@ -298,10 +298,9 @@ const QuestionnaryHandler = function (db, redis, event) {
             const accessRoleLevel = req.session.level;
             const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
             const skip = (page - 1) * limit;
-            const filter = query.filter || {};
-            const filterSearch = filter.globalSearch || '';
             const filterMapper = new FilterMapper();
             const queryFilter = query.filter || {};
+            const filterSearch = queryFilter.globalSearch || "";
 
             const searchFieldsArray = [
                 'title.en',
@@ -316,6 +315,10 @@ const QuestionnaryHandler = function (db, redis, event) {
                 contentType: CONTENT_TYPES.QUESTIONNARIES,
                 filter: queryFilter
             });
+
+            if (queryObject.globalSearch) {
+                delete queryObject.globalSearch;
+            }
 
             for (let key in sort) {
                 sort[key] = parseInt(sort[key], 10);
