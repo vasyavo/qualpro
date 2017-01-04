@@ -195,8 +195,8 @@ define([
             } else if (itemName === 'displayType') {
                 if (itemId === 'otherId'){
                     input.addClass('createOwn');
+                    input.attr('placeholder', 'Enter display type');
                     this.displayTypeDropDownView.selectedValues = [];
-                    input.focus();
                 } else {
                     this.selectedDisplayType = {
                         _id : itemId,
