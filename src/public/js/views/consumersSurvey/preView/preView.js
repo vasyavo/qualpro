@@ -82,6 +82,7 @@ define([
             var question = _.findWhere(this.model.get('questions'), {_id: questionId});
             var options;
             var optionsCountArray = [];
+            var displayText = [];
             var outerRadius = 80;
             var innerRadius = 45;
             var pie = d3.layout.pie();
@@ -104,9 +105,11 @@ define([
             options = question.options;
             options.forEach(function (option, index) {
                 var answerCount = self.answersCollection.getAnswerCount(questionId, index);
-
-                optionsCountArray.push(answerCount);
-                sum += answerCount;
+                if (answerCount != 0) {
+                    optionsCountArray.push(answerCount);
+                    displayText.push(option.currentLanguage);
+                    sum += answerCount;
+                }
             });
 
             if (sum === 0) {
@@ -269,7 +272,7 @@ define([
                     "font-size"  : '12px',
                     'font-style' : 'italic'
                 }).text(function (d, i) {
-                return options[i].currentLanguage.capitalizer('firstCaps');
+                return displayText[i].capitalizer('firstCaps');
             });
         },
 

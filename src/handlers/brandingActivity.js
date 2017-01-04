@@ -293,7 +293,7 @@ var BrandingActivity = function (db, redis, event) {
 
     this.getAll = function (req, res, next) {
         function queryRun(personnel) {
-            var CONSTANTS = require('../constants/mainConstants');
+            const CONSTANTS = require('../constants/mainConstants');
             var query = req.query;
             var isMobile = req.isMobile;
             var filter = query.filter || {};

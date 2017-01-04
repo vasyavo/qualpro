@@ -173,7 +173,7 @@ define([
             var filterKeys = this.getFilterKeys();
             var filterTypes = this.constantsObject.array;
             var self = this;
-
+debugger;
             filterKeys.forEach(function (key) {
                 var $filterElement = self.$el.find('.' + key + 'FilterContainer .filterName');
 

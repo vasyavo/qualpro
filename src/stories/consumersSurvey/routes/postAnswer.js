@@ -28,10 +28,6 @@ module.exports = (req, res, next) => {
                         customer      : body.customer,
                         questionnaryId: body.consumerSurveyId,
                         questionId    : answer.questionId,
-                        country       : body.country,
-                        region        : body.region,
-                        subRegion     : body.subRegion,
-                        retailSegment : body.retailSegment,
                         outlet        : body.outlet,
                         branch        : body.branch,
                         type          : answer.type

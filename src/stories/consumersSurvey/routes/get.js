@@ -40,6 +40,12 @@ module.exports = (req, res, next) => {
         const skip = (page - 1) * limit;
         const filterMapper = new FilterMapper();
         const queryFilter = query.filter || {};
+        const filterSearch = queryFilter.globalSearch || '';
+
+        const searchFieldsArray = [
+            'title.en',
+            'title.ar',
+        ];
 
         const sort = query.sort || {
                 lastDate: -1
@@ -49,6 +55,10 @@ module.exports = (req, res, next) => {
             contentType: CONTENT_TYPES.CONSUMER_SURVEY,
             filter: queryFilter
         });
+
+        if (queryObject.globalSearch) {
+            delete queryObject.globalSearch;
+        }
 
         for (let key in sort) {
             sort[key] = parseInt(sort[key], 10);
@@ -221,6 +231,8 @@ module.exports = (req, res, next) => {
 
                 pipeline.push(...aggregateHelper.endOfPipeLine({
                     isMobile,
+                    filterSearch,
+                    searchFieldsArray,
                     skip,
                     limit,
                     sort
@@ -237,8 +249,9 @@ module.exports = (req, res, next) => {
 
             (result, cb) => {
                 filterRetrievedResultOnGetAll({
+                    isMobile,
                     personnel,
-                    accessRoleLevel,
+                    //accessRoleLevel,
                     result
                 }, cb);
             }

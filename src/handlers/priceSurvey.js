@@ -196,7 +196,7 @@ var PriceSurvey = function (db, redis, event) {
                                 'createdBy.user.country': queryObject.country
                             },
                             {
-                                'createdBy.user.country': {$exists: false}
+                                'createdBy.user.country': {$size: 0}
                             }
                         ]
                     }
@@ -321,8 +321,13 @@ var PriceSurvey = function (db, redis, event) {
             if (queryObject.retailSegment) {
                 pipeLine.push({
                     $match: {
-                        'branch.retailSegment' : queryObject.retailSegment,
-                        'outlet.retailSegments': queryObject.retailSegment
+                        $or: [
+                            {
+                                'branch.retailSegment': queryObject.retailSegment,
+                            }, {
+                                'outlet.retailSegments': queryObject.retailSegment
+                            }
+                        ]
                     }
                 });
             }
