@@ -50,12 +50,19 @@ var VisibilityForm = function (db, redis, event) {
                 });
             },
             function (filesIds, cb) {
+                var files;
 
                 if (!body) {
                     return cb(Error('Request body is empty'));
                 }
+
+                files = filesIds && filesIds.map(function(el){
+                        return {
+                            file : el
+                        }
+                    }) || [];
                 before = {
-                    files: filesIds
+                    files: files
                 };
 
                 visibilityForm = {
@@ -151,13 +158,13 @@ var VisibilityForm = function (db, redis, event) {
 
         var $lookup2 = {
             from        : 'files',
-            localField  : 'before.files',
+            localField  : 'before.files.file',
             foreignField: '_id',
             as          : 'before.files'
         };
         var $lookup3 = {
             from        : 'files',
-            localField  : 'after.files',
+            localField  : 'after.files.file',
             foreignField: '_id',
             as          : 'after.files'
         };
@@ -619,7 +626,11 @@ var VisibilityForm = function (db, redis, event) {
                 visibilityForm.editedBy = editedBy;
 
                 if (typeof filesIds !== 'function' && filesIds) {
-                    visibilityForm[updateType + '.files'] = filesIds;
+                    visibilityForm[updateType + '.files'] = filesIds.map(function(el){
+                        return {
+                            file : el
+                        }
+                    });
                 } else {
                     cb = filesIds;
                 }
