@@ -71,8 +71,8 @@ define([
                 return {models: filtered, ids: ids};
             },
 
-            initialize: function () {
-            }
+            initialize: function () {}
         });
+
         return FilterCollection;
     });
