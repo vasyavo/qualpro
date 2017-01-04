@@ -2209,9 +2209,9 @@ const Filters = function(db, redis) {
             pipeLine.push({
                 $match: {
                     $and: [{
-                        creationDate: {$gte: queryFilter.time.values[0]}
+                        creationDate: {$gte: new Date(queryFilter.time.values[0])}
                     }, {
-                        creationDate: {$lte: queryFilter.time.values[1]}
+                        creationDate: {$lte: new Date(queryFilter.time.values[1])}
                     }]
                 }
             });
