@@ -23,6 +23,10 @@ const schema = new Schema({
         }]
     },
     after: {
+        description: {
+            type: String,
+            default: ''
+        },
         files: [{
             file : {
                 type: ObjectId,
