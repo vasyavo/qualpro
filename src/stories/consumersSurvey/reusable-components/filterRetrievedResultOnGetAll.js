@@ -3,9 +3,7 @@ const moment = require('moment');
 const isValidObjectId = require('bson-objectid').isValid;
 
 module.exports = (options, cb) => {
-    const personnel = options.personnel;
-    const accessRoleLevel = options.accessRoleLevel;
-    const result = options.result;
+    const {isMobile, personnel, result} = options;
     const personnelId = personnel._id.toString();
 
     if (result.length) {
@@ -19,7 +17,7 @@ module.exports = (options, cb) => {
                     };
                 }
 
-                if (model.startDate) {
+                if (!isMobile && model.startDate) {
                     model.startDate = moment(model.startDate).format('DD.MM.YYYY');
                 }
 

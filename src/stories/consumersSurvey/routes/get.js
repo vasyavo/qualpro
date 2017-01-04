@@ -237,8 +237,9 @@ module.exports = (req, res, next) => {
 
             (result, cb) => {
                 filterRetrievedResultOnGetAll({
+                    isMobile,
                     personnel,
-                    accessRoleLevel,
+                    //accessRoleLevel,
                     result
                 }, cb);
             }

@@ -104,7 +104,7 @@ module.exports = (options, callback) => {
             }
         }
 
-        if (model.startDate) {
+        if (!isMobile && model.startDate) {
             model.startDate = moment(model.startDate).format('DD.MM.YYYY');
         }
 
