@@ -1,4 +1,5 @@
 const async = require('async');
+const Bluebird = require('bluebird');
 const config = require('./../../../config');
 const FCM = require('./../../push-notifications/utils/fcm');
 const SessionModel = require('./../../../types/session/model');
@@ -6,84 +7,87 @@ const logger = require('./../../../utils/logger');
 
 const fcmClient = new FCM(config.fcmApiKey);
 
-const sendPush = (options, callback) => {
-    const {
-        userId,
-        data,
-    } = options;
+const sendPush = (groups, callback) => {
+    const itRecipient = (action) => {
+        return (recipient, itCallback) => {
+            async.waterfall([
 
-    async.waterfall([
+                (cb) => {
+                    const userIdAsString = recipient.toString();
+                    const search = {
+                        $and: [{
+                            session: {
+                                $regex: userIdAsString,
+                            },
+                        }, {
+                            session: {
+                                $regex: 'deviceId',
+                            },
+                        }],
+                    };
 
-        (cb) => {
-            const userIdAsString = userId.toString();
-            const search = {
-                $and: [{
-                    session: {
-                        $regex: userIdAsString,
-                    },
-                }, {
-                    session: {
-                        $regex: 'deviceId',
-                    },
-                }],
-            };
+                    SessionModel.find(search, (err, sessions) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        const arrayOfDeviceId = sessions.map((sessionAsString) => {
+                            const sessionAsObject = JSON.parse(sessionAsString.session);
 
-            SessionModel.find(search, (err, sessions) => {
-                if (err) {
-                    return cb(err);
-                }
-                const arrayOfDeviceId = sessions.map((sessionAsString) => {
-                    const sessionAsObject = JSON.parse(sessionAsString.session);
+                            if (sessionAsObject.deviceId) {
+                                return sessionAsObject.deviceId;
+                            }
 
-                    if (sessionAsObject.deviceId) {
-                        return sessionAsObject.deviceId;
-                    }
+                        }).filter(item => item);
 
-                }).filter(item => item);
+                        cb(null, arrayOfDeviceId);
+                    });
 
-                cb(null, arrayOfDeviceId);
-            });
+                },
 
-        },
+                (arrayOfDeviceId, cb) => {
+                    async.each(arrayOfDeviceId, (deviceId, eachCb) => {
+                        const readyPayload = Object.assign({}, action.payload, {
+                            title: action.subject,
+                        });
 
-        (arrayOfDeviceId, cb) => {
-            async.each(arrayOfDeviceId, (deviceId, eachCb) => {
-                const readyData = Object.assign({}, data, {
-                    title: 'New activity',
-                });
+                        logger.info(`Firebase device ${deviceId} message payload:`, readyPayload);
 
-                logger.info(`Firebase device ${deviceId} message payload:`, readyData);
+                        fcmClient.send({
+                            registration_ids: [deviceId],
+                            data: readyPayload,
+                            priority: 'high',
+                            notification: {
+                                title: action.subject,
+                            },
+                        }, (err, data) => {
+                            if (err) {
+                                logger.error('Firebase returns', err);
+                                return null;
+                            }
 
-                fcmClient.send({
-                    registration_ids: [deviceId],
-                    data: readyData,
-                    priority: 'high',
-                    notification: {
-                        title: readyData.title,
-                    },
-                }, (err, data) => {
-                    if (err) {
-                        logger.error('Firebase returns', err);
-                        return null;
-                    }
+                            logger.info('Firebase response data:', data);
+                        });
+                        eachCb(null);
+                    }, cb);
+                },
 
-                    logger.info('Firebase response data:', data);
-                });
-                eachCb(null);
-            }, cb);
-        },
+            ], itCallback);
+        }
+    };
+    const itGroup = (group, itCallback) => {
+        const {
+            recipients,
+            payload,
+        } = group;
+        const action = {
+            subject: group.subject || 'New activity',
+            payload,
+        };
 
-    ], callback);
+        async.each(recipients, itRecipient(action), itCallback);
+    };
+
+    async.each(groups, itGroup, callback);
 };
 
-module.exports = (options) => {
-    return new Promise((resolve, reject) => {
-        sendPush(options, (err, data) => {
-            if (err) {
-                return reject(err);
-            }
-
-            resolve(data);
-        })
-    });
-};
+module.exports = Bluebird.promisify(sendPush);;

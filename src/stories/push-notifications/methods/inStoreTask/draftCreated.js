@@ -1,6 +1,6 @@
 const co = require('co');
 const getPersonnelById = require('./../../utils/getPersonnelById');
-const dispatchAction = require('./../../utils/dispatch');
+const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
@@ -49,11 +49,13 @@ module.exports = (options) => {
         });
 
         const savedObjective = yield newActivity.save();
-        const action = {
-            userId: originatorId,
-            data: savedObjective.toJSON(),
-        };
+        const objectiveAsJson = savedObjective.toJSON();
+        const groups = [{
+            recipients: [originatorId],
+            subject: 'New objective draft created',
+            payload: objectiveAsJson,
+        }];
 
-        yield dispatchAction(action);
+        yield dispatch(groups);
     });
 };
