@@ -114,7 +114,7 @@ var imagesUploader = function (dirConfig) {
         });
     }
 
-    function uploadFile(data, folderName, callback) {
+    function uploadFromFile(data, folderName, callback) {
         var slash = osPathData.slash;
         var dir = osPathData.dir + defaultUploadsDir + slash;
 
@@ -207,7 +207,7 @@ var imagesUploader = function (dirConfig) {
 
     return {
         uploadImage   : uploadImage,
-        uploadFile    : uploadFile,
+        uploadFromFile: uploadFromFile,
         duplicateImage: duplicateImage,
         removeImage   : removeImage,
         getImageUrl   : getImagePath
