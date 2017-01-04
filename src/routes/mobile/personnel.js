@@ -441,7 +441,7 @@ module.exports = function (db, app, event, redis) {
      * @instance
      */
 
-    router.get('/:id', checkAuth, handler.getById);
+    router.get('/:id([0-9a-fA-F]{24})', checkAuth, handler.getById);
 
     /**
      * __Type__ 'POST'
