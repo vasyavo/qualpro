@@ -352,10 +352,10 @@ var VisibilityForm = function (db, redis, event) {
             }
 
             result = _.map(result, function (element) {
-                var nameBefore;
-                var urlBefore;
-                var nameAfter;
-                var urlAfter;
+                let nameBefore;
+                let urlBefore;
+                let nameAfter;
+                let urlAfter;
 
                 if (element.before.files && element.before.files.fileName) {
                     nameBefore = element.before.files.fileName;
@@ -750,18 +750,16 @@ var VisibilityForm = function (db, redis, event) {
 
     this.getById = function (req, res, next) {
         function queryRun() {
-            var id = req.params.id;
-            var aggregateHelper = new AggregationHelper($defProjection);
-            var error;
+            const id = req.params.id;
 
             if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
+                const error = new Error('Invalid parameter id');
                 error.status = 400;
                 return next(error);
             }
 
             getAllAggregate({
-                aggregateHelper: aggregateHelper,
+                aggregateHelper: new AggregationHelper($defProjection),
                 queryObject    : {_id: objectId(id)}
             }, function (err, result) {
                 if (err) {
@@ -775,18 +773,12 @@ var VisibilityForm = function (db, redis, event) {
                     return element;
                 });
 
-                res.status(200).send(result[0])
+                res.status(200).send(result[0]);
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err) {
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 

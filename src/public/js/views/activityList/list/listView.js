@@ -59,6 +59,7 @@ define([
             if (!activityid) {
                 return false;
             }
+            debugger;
             var model = this.collection.get(activityid);
             var modelJSON = model.toJSON();
             var moduleObject = modelJSON.module;

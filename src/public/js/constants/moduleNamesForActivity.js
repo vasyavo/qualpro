@@ -391,6 +391,15 @@
                     ar: 'الفرع'
                 },
                 href: CONSTANTS.BRANCH
+            },
+
+            1110: {
+                _id : 105,
+                name: {
+                    en: 'Visibility Form',
+                    ar: '' //todo set ar translation
+                },
+                href: CONSTANTS.VISIBILITYFORM
             }
 
             /*1000: {
