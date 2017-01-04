@@ -1,4 +1,4 @@
-const ConsumerSurveyModel = require('../../types/consumersSurvey/model');
+const ConsumerSurveyModel = require('../../../types/consumersSurvey/model');
 
 module.exports = (args, docId, callback) => {
     const status = 'active';
