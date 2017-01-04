@@ -1145,8 +1145,6 @@ var ActivityHelper = function (db, redis, app) {
     }
 
     this.addObject = function (options, cb) {
-        var waterfallFunctionsArray;
-
         function saveObject(wCb) {
             var activityModel = new ActivityModel(options);
 
@@ -1213,39 +1211,37 @@ var ActivityHelper = function (db, redis, app) {
         }
 
         function getSocketByUserIdsAndAddActions(results, respondObject, wCb) {
-            var socketArray = [];
+            const socketArray = [];
+            const userIds = results.userIdsPush || results.userIdsSocket;
+            const arrayOfStrings = results.userIdsSocket.fromObjectID();
 
-            var userIds = results.userIdsPush || results.userIdsSocket;
-
-            var arrayOfStrings = results.userIdsSocket.fromObjectID();
-
-            async.each(userIds, function (userId, eachCb) {
-                var copyObject;
-                copyObject = _.clone(respondObject);
-
+            async.each(userIds, (userId, eachCb) => {
                 if (arrayOfStrings.indexOf(userId.toString()) !== -1) {
-                    addAction(userId, function (err, number) {
-
+                    return addAction(userId, (err, number) => {
                         if (err) {
                             return eachCb(err);
                         }
-                        copyObject.badge = number;
-                        getSocketsByUserId(userId, function (err, sockets) {
-                            var localSocketArray = [];
 
+                        const respondObjectWithBadge = Object.assign({}, respondObject, {
+                            badge: number
+                        });
+
+                        getSocketsByUserId(userId, (err, sockets) => {
                             if (err) {
                                 return eachCb(err);
                             }
 
-                            sockets.forEach(function (socket) {
+                            const localSocketArray = [];
+
+                            sockets.forEach((socket) => {
                                 localSocketArray.push({
                                     socketId: socket,
-                                    object  : copyObject
+                                    object: respondObjectWithBadge
                                 });
                             });
-                            socketArray = _.concat(socketArray, localSocketArray);
+                            socketArray.push(...localSocketArray);
 
-                            pushes.sendPushes(userId, 'newActivity', copyObject, function (err, respond) {
+                            pushes.sendPushes(userId, 'newActivity', respondObjectWithBadge, (err) => {
                                 if (err) {
                                     logWriter.log('activity', err);
                                 }
@@ -1254,16 +1250,16 @@ var ActivityHelper = function (db, redis, app) {
                             eachCb(null);
                         });
                     });
-                } else {
-                    pushes.sendPushes(userId, 'newActivity', copyObject, function (err, respond) {
-                        if (err) {
-                            logWriter.log('activity', err);
-                        }
-
-                        eachCb(null);
-                    });
                 }
-            }, function (err) {
+
+                pushes.sendPushes(userId, 'newActivity', respondObject, (err) => {
+                    if (err) {
+                        logWriter.log('activity', err);
+                    }
+
+                    eachCb(null);
+                });
+            }, (err) => {
                 if (err) {
                     return wCb(err);
                 }
@@ -1285,19 +1281,21 @@ var ActivityHelper = function (db, redis, app) {
             });
         }
 
-        waterfallFunctionsArray = [
+        const waterfallFunctionsArray = [];
+
+        if ([CONTENT_TYPES.DOMAIN, CONTENT_TYPES.OUTLET, CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH].indexOf(options.itemType) === -1) {
+            waterfallFunctionsArray.push(async.apply(getActivityInfo, options));
+        } else {
+            waterfallFunctionsArray.push(async.apply(getDomainActivityInfo, options));
+        }
+
+        waterfallFunctionsArray.push(
             saveObject,
             getResultSendObject,
             getUsersByLocationAndLevelW,
             getSocketByUserIdsAndAddActions,
             emitMessageToSocket
-        ];
-
-        if ([CONTENT_TYPES.DOMAIN, CONTENT_TYPES.OUTLET, CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH].indexOf(options.itemType) === -1) {
-            waterfallFunctionsArray.unshift(async.apply(getActivityInfo, options));
-        } else {
-            waterfallFunctionsArray.unshift(async.apply(getDomainActivityInfo, options));
-        }
+        );
 
         async.waterfall(waterfallFunctionsArray, function (err, result) {
             if (err) {
