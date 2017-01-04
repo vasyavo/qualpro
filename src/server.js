@@ -6,6 +6,7 @@ const eventEmitter = require('./utils/eventEmitter');
 const config = require('./config');
 const mongo = require('./utils/mongo');
 const logger = require('./utils/logger');
+const MessageDispatcher = require('./stories/push-notifications/utils/messageDispatcher');
 
 require('mongoose').Schemas = {};
 
@@ -21,6 +22,8 @@ const server = http.createServer(app);
 const io = require('./helpers/socket')(server);
 
 app.set('io', io);
+
+MessageDispatcher.setIo(io);
 
 mongo.on('connected', () => {
     require('./types');

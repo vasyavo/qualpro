@@ -21,11 +21,11 @@ const schema = new Schema({
     accessRoleLevel: { type: Number },
     module: { type: Number },
     actionType: { type: String, default: '' },
-    creationDate: { type: Date, default: new Date() },
+    creationDate: { type: Date, default: Date.now },
     personnels: [{ type: ObjectId, ref: CONTENT_TYPES.PERSONNEL }],
     createdBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() }
+        date: { type: Date, default: Date.now }
     }
 
 }, { collection: 'activityLists' });

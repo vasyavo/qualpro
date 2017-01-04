@@ -1,6 +1,7 @@
 'use strict';
 
 const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 var Objectives = function (db, redis, event) {
     var async = require('async');
@@ -610,8 +611,6 @@ var Objectives = function (db, redis, event) {
     this.create = function (req, res, next) {
         function queryRun(body) {
             var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
             var model;
             var saveObjective;
             var objective;
@@ -686,13 +685,20 @@ var Objectives = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.OBJECTIVE,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : createdBy,
-                            itemId    : model._id,
-                            itemType  : CONTENT_TYPES.OBJECTIVES
-                        });
+                        if (model.status === 'draft') {
+                            ActivityLog.emit('objective:draft-created', {
+                                originatorId: userId,
+                                draftObjective: model.toJSON(),
+                            });
+                        } else {
+                            event.emit('activityChange', {
+                                module    : ACL_MODULES.OBJECTIVE,
+                                actionType: ACTIVITY_TYPES.CREATED,
+                                createdBy : createdBy,
+                                itemId    : model._id,
+                                itemType  : CONTENT_TYPES.OBJECTIVES
+                            });
+                        }
 
                         if (model) {
                             if (model.title) {
