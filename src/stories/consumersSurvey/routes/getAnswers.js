@@ -40,7 +40,7 @@ module.exports = (req, res, next) => {
             contentType: CONTENT_TYPES.CONSUMER_SURVEY_ANSWER,
             personnel  : personnel
         });
-        var aggregateHelper = new AggregationHelper($defProjection, filter);
+        var aggregateHelper = new AggregationHelper($defProjection);
         var saveObj = {
             questionnaryId: ObjectId(query.questionnaryId)
         };

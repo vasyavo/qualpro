@@ -17,7 +17,7 @@ define([
         App.setMenuCount(1, App.badge);
     });
 
-    socket.on('onLeave', function (data) {
+    socket.on('onLeave', function () {
         var url = window.location.hash;
         var splitedUrl = url.split('/', 3);
         var currentUser = new PersonnelModel();
@@ -39,10 +39,12 @@ define([
             }
         });
     });
+
     socket.on('notificationCountChange', function (data) {
         App.setMenuNotificationCount(data.count);
     });
-    socket.on('logOut', function (data) {
+
+    socket.on('logOut', function () {
         $.get('/logout', function () {
             delete App.currentUser;
             App.render({

@@ -1,4 +1,5 @@
 <div class="form-holder questionnarie-form">
+    <% var isNotAMorAinM = App.currentUser && App.currentUser.accessRole && App.currentUser.accessRole.level !==3 && App.currentUser.accessRole.level !== 4;%>
     <div class="title">
         <span class="titleDescription"><%= translation.questionaryPreview %></span>
     </div>
@@ -14,9 +15,9 @@
                 <li><a href="#questions"><%= translation.questions %></a></li>
                 <li><a href="#respondents"><%= translation.respondents %></a></li>
             </ul>
-            <% if (!activityList) { %>
+            <% if (!activityList && isNotAMorAinM) { %>
                 <button id="duplicate" class="greyBtn floatRight"><%= translation.duplicateBtn %></button>
-            <% if (model && model.status && model.status._id !== 'expired') { %>
+            <% if (model && model.status && model.status._id !== 'expired' && isNotAMorAinM) { %>
                 <button id="edit" class="greenBtn floatRight"><%= translation.editBtn %></button>
             <%}%>
             <%}%>

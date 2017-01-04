@@ -2,6 +2,7 @@ const async = require('async');
 const fs = require('fs');
 const _ = require('lodash');
 const path = require('path');
+const logger = require('../utils/logger');
 const ffmpeg = require('fluent-ffmpeg');
 const im = require('imagemagick');
 const mongoose = require('mongoose');
@@ -27,6 +28,18 @@ module.exports = function() {
 
     function createFileName() {
         return (new ObjectId()).toString();
+    }
+
+    function deleteFile(path) {
+        try {
+            fs.unlink(path, (err) => {
+                if (err) {
+                    logger.error(err);
+                }
+            });
+        } catch (e) {
+            logger.error(e);
+        }
     }
 
     this.getByIds = function (array, userId, callback) {
@@ -117,8 +130,8 @@ module.exports = function() {
     };
 
     this.uploadFile = function (userId, files, bucket, callback) {
-        const series = [];
         const filesId = [];
+        let series = [];
 
         if (!userId || !files || !bucket) {
             const error = new Error('Not enough params');
@@ -127,94 +140,85 @@ module.exports = function() {
             return callback(error);
         }
 
+        function uploadFile(fileOptions) {
+            fileUploader.uploadFromFile(fileOptions, bucket, (err) => {
+                if (err) {
+                    logger.error(err);
+                }
+
+                fs.unlink(fileOptions.tempPath, (err) => {
+                    if (err) {
+                        logger.error(err);
+                    }
+                });
+            });
+        }
+
+        function processVideo(fileOptions) {
+            const fileName = fileOptions.name;
+            const inputPath = fileOptions.tempPath;
+            const outputPath = `/tmp/${fileName}dec.mp4`;
+
+            ffmpeg(inputPath)
+                .videoCodec('libx264')
+                .renice(10)
+                .duration(45)
+                .toFormat('mp4')
+                .outputOptions('-s 640x480')
+                .outputOptions('-movflags frag_keyframe+empty_moov')
+                .output(outputPath)
+                .on('start', (command) => {
+                    logger.info(command);
+                })
+                .on('end', () => {
+                    fileOptions.tempPath = outputPath;
+
+                    uploadFile(fileOptions);
+                    deleteFile(inputPath);
+                })
+                .on('error', (err) => {
+                    deleteFile(inputPath);
+                    deleteFile(outputPath);
+
+                    logger.error(err);
+                }).exec();
+        }
+
+
         // if files contains 1 file it will be an object
         // if files contains 2 files it will be an array of object which are files
         if (Array.isArray(files.files)) {
             files.files.forEach((item) => {
                 series.push(item);
             });
+        } else if (files.attachments) {
+            series = files.attachments;
         } else {
             for (let key in files) {
                 series.push(files[key]);
             }
         }
 
-        async.eachSeries(series, (file, eachCb) => {
+        async.each(series, (file, eachCb) => {
             const fileOptions = {
-                type: file.type,
-                extension: file.originalFilename.substr(file.originalFilename.lastIndexOf('.') + 1),
+                type            : file.type,
+                extension       : file.originalFilename.substr(file.originalFilename.lastIndexOf('.') + 1),
                 originalFilename: file.originalFilename,
-                tempPath: file.path
+                tempPath        : file.path,
+                name            : createFileName()
             };
 
             fileOptions.fileNameWithoutExtension = fileOptions.originalFilename.substr(0, fileOptions.originalFilename.length - fileOptions.extension.length - 1);
 
             async.waterfall([
-                (cb) => {
-                    fs.readFile(fileOptions.tempPath, (err, buffer) => {
-                        if (err) {
-                            return eachCb(err);
-                        }
-
-                        fileOptions.data = buffer;
-                        fileOptions.name = createFileName();
-                        cb(null);
-                    });
-                },
-
+                // if video file
                 (cb) => {
                     if (!_.includes(OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, fileOptions.type)) {
                         return cb(null);
                     }
 
-                    const videoFormat = 'mp4';
                     const fileName = fileOptions.name;
                     const thumbnailPath = `/tmp/${fileName}.png`;
-                    const videoDecPatch = `/tmp/${fileName}dec.mp4`;
-
-                    function deleteFiles(cb) {
-                        fs.unlink(thumbnailPath, (err) => {
-                            if (err && cb) {
-                                cb(err);
-                            }
-                        });
-
-                        fs.unlink(videoDecPatch, (err) => {
-                            if (err && cb) {
-                                cb(err);
-                            }
-                        });
-                    }
-
-                    const getFiles = (cb) => {
-                        const readFile = (path, parallelCb) => {
-                            fs.readFile(path, (err, result) => {
-                                if (err) {
-                                    return parallelCb(err);
-                                }
-
-                                parallelCb(null, result);
-                            });
-                        };
-
-                        async.parallel({
-                            bitmap: async.apply(readFile, thumbnailPath),
-                            video: async.apply(readFile, videoDecPatch)
-                        }, (err, results) => {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            deleteFiles(cb);
-
-                            const result = {
-                                bitmapBase64: new Buffer(results.bitmap).toString('base64'),
-                                videoBuffer: new Buffer(results.video)
-                            };
-
-                            cb(null, result);
-                        });
-                    };
 
                     ffmpeg(fileOptions.tempPath)
                         .screenshot({
@@ -223,48 +227,40 @@ module.exports = function() {
                             folder: '/tmp',
                             filename  : `${fileName}.png`
                         })
-                        .videoCodec('libx264')
-                        .renice(10)
-                        .duration(45)
-                        .toFormat(videoFormat)
-                        .outputOptions('-s 640x480')
-                        .outputOptions('-movflags frag_keyframe+empty_moov')
-                        .output(`/tmp/${fileName}dec.mp4`)
                         .on('start', (command) => {
-                            console.log(command);
+                            logger.info(command);
                         })
                         .on('end', () => {
-                            getFiles((err, results) => {
-                                if (err) {
-                                    return cb(err);
-                                }
+                            const convertedFile = fs.readFileSync(thumbnailPath, 'binary');
+                            const base64Image = new Buffer(convertedFile, 'binary').toString('base64');
+                            fileOptions.preview = `data:image/png;base64,${base64Image}`;
+                            deleteFile(thumbnailPath);
 
-                                fileOptions.extension = videoFormat;
-                                fileOptions.originalFilename = `${fileName}.${videoFormat}`;
+                            // update file options
+                            fileOptions.extension = 'mp4';
+                            fileOptions.originalFilename = `${fileName}.mp4`;
+                            fileOptions.type = 'video/mp4';
 
-                                fileOptions.data = results.videoBuffer;
-                                fileOptions.type = 'video/mp4';
-                                fileOptions.preview = `data:image/png;base64,${results.bitmapBase64}`;
+                            // async video processing
+                            processVideo(fileOptions);
 
-                                cb(null);
-                            });
+                            cb(null);
+                        }).on('error', (err) => {
 
-                        })
-                        .on('error', (err) => {
-                            deleteFiles();
-
+                        deleteFile(thumbnailPath);
                             err.status = 415;
                             cb(err);
                         });
                 },
 
+                // if image file
                 (cb) => {
                     if (OTHER_CONSTANTS.IMAGE_CONTENT_TYPES.indexOf(fileOptions.type) === -1) {
                         return cb(null);
                     }
 
                     const convertOptions = {
-                        srcData: fileOptions.data,
+                        srcData: fs.readFileSync(fileOptions.tempPath, 'binary'),
                         width  : 150,
                         quality: 1,
                         format : fileOptions.extension
@@ -275,14 +271,16 @@ module.exports = function() {
                             return cb(err);
                         }
 
-                        const prefix = `data:${fileOptions.type};base64,`;
                         const base64Image = new Buffer(stdout, 'binary').toString('base64');
-                        fileOptions.preview = prefix + base64Image;
+                        fileOptions.preview = `data:${fileOptions.type};base64,${base64Image}`;
+
+                        uploadFile(fileOptions);
 
                         cb(null);
                     });
                 },
 
+                // if other type
                 (cb) => {
                     if (!_.includes(OTHER_CONSTANTS.OTHER_FORMATS, fileOptions.type)) {
                         return cb(null);
@@ -296,19 +294,11 @@ module.exports = function() {
                             return cb(err);
                         }
 
-                        const prefix = 'data:image/png;base64,';
                         const convertedFile = fs.readFileSync(outputFile, 'binary');
                         const base64Image = new Buffer(convertedFile, 'binary').toString('base64');
-                        fileOptions.preview = prefix + base64Image;
-                        cb(null);
-                    });
-                },
+                        fileOptions.preview = `data:image/png;base64,${base64Image}`;
 
-                (cb) => {
-                    fileUploader.uploadFile(fileOptions, bucket, (err) => {
-                        if (err) {
-                            return cb(err);
-                        }
+                        uploadFile(fileOptions);
 
                         cb(null);
                     });
@@ -326,23 +316,12 @@ module.exports = function() {
                         preview: fileOptions.preview
                     };
 
-                    const model = new FileModel(saveData);
-
-                    model.set(saveData);
-                    model.save((err) => {
+                    FileModel.create(saveData, (err, model) => {
                         if (err) {
                             return cb(err);
                         }
 
                         filesId.push(model.get('_id'));
-
-                        // todo: release execution
-                        fs.unlink(fileOptions.tempPath, (err) => {
-                            if (err) {
-                                console.log(err);
-                            }
-                        });
-
                         cb(null);
                     });
                 }

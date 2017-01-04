@@ -2,38 +2,14 @@ var express = require('express');
 var router = express.Router();
 var filterHandler = require('../handlers/filters');
 var access = require('../helpers/access');
-const PersonnelModel = require('./../types/personnel/model');
+const storePersonnelInMiddleware = require('../reusableComponents/storePersonnelInMiddleware');
 
 module.exports = function(db, app, redis) {
     var handler = new filterHandler(db, redis);
     var csrfProtection = app.get('csrfProtection');
     var checkAuth = access.checkAuth;
 
-    const storePersonnelBeforeInMiddleware = (req, res, next) => {
-        const uid = req.session.uId;
-        const selection = {
-            country : 1,
-            region : 1,
-            subRegion : 1,
-            branch : 1
-        };
-
-        PersonnelModel.findById(uid, selection)
-            .lean()
-            .exec((err, personnel) => {
-                if (err) {
-                    return next(err);
-                }
-
-                if (personnel) {
-                    req.personnelModel = personnel;
-                }
-
-                next();
-            });
-    };
-
-    router.use(storePersonnelBeforeInMiddleware); // fixme why this middleware mounted before auth check?
+    router.use(storePersonnelInMiddleware);
 
     router.get('/priceSurvey', checkAuth, handler.priceSurveyFilters);
     router.get('/shelfShares', checkAuth, handler.shelfSharesFilters);

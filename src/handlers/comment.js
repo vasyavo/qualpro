@@ -788,6 +788,9 @@ var Comment = function (db, redis, event) {
                 case CONTENT_TYPES.COMPETITORPROMOTION:
                     ContextModel = CompetitorPromotionModel;
                     break;
+                case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
+                    ContextModel = CompetitorBrandingItemModel;
+                    break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:
                     ContextModel = PromotionsItemsModel;
                     break;

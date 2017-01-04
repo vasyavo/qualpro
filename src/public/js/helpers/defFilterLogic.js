@@ -26,8 +26,25 @@ define([
             return result;
         };
 
+        var currentUserCountry = App.currentUser.country;
+        var priceSurveyAllFilter = {};
+
+        if (currentUserCountry && currentUserCountry.length) {
+            priceSurveyAllFilter = {
+                country : {
+                    type : 'ObjectId',
+                    values : currentUserCountry.map(function (country) {
+                        return country._id;
+                    }),
+                    names : currentUserCountry.map(function (country) {
+                        return country.name[App.currentUser.currentLanguage];
+                    })
+                }
+            };
+        }
+
         this[CONTENT_TYPES.PRICESURVEY] = {
-            all: {}
+            all: priceSurveyAllFilter
         };
 
         this[CONTENT_TYPES.BRANDING_AND_DISPLAY] = {
