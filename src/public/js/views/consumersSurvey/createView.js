@@ -409,10 +409,6 @@ define([
                 title = this.translation.create;
             }
 
-            if (jsonModel.startDate) {
-                jsonModel.startDate = moment(jsonModel.startDate).format('DD.MM.YYYY');
-            }
-
             var formString = this.template({
                 model      : jsonModel,
                 title      : title,

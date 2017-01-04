@@ -1,4 +1,5 @@
 const _ = require('underscore');
+const moment = require('moment');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
 
@@ -101,6 +102,10 @@ module.exports = (options, callback) => {
                     return question;
                 });
             }
+        }
+
+        if (model.startDate) {
+            model.startDate = moment(model.startDate).format('DD.MM.YYYY');
         }
 
         return callback(null, model);

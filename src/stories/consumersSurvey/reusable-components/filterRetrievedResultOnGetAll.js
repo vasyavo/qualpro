@@ -1,4 +1,5 @@
 const _ = require('underscore');
+const moment = require('moment');
 const isValidObjectId = require('bson-objectid').isValid;
 
 module.exports = (options, cb) => {
@@ -16,6 +17,10 @@ module.exports = (options, cb) => {
                         en: _.unescape(model.title.en),
                         ar: _.unescape(model.title.ar)
                     };
+                }
+
+                if (model.startDate) {
+                    model.startDate = moment(model.startDate).format('DD.MM.YYYY');
                 }
 
                 if (model.questions && model.questions.length) {
