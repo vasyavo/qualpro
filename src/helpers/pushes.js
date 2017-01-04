@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var async = require('async');
 const config = require('./../config');
-const FCM = require('./../stories/push-notifications/fcm');
+const FCM = require('./../stories/push-notifications/utils/fcm');
 const SessionModel = require('./../types/session/model');
 const logger = require('./../utils/logger');
 
