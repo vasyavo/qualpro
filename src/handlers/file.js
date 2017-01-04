@@ -130,8 +130,8 @@ module.exports = function() {
     };
 
     this.uploadFile = function (userId, files, bucket, callback) {
-        const series = [];
         const filesId = [];
+        let series = [];
 
         if (!userId || !files || !bucket) {
             const error = new Error('Not enough params');
@@ -191,6 +191,8 @@ module.exports = function() {
             files.files.forEach((item) => {
                 series.push(item);
             });
+        } else if (files.attachments) {
+            series = files.attachments;
         } else {
             for (let key in files) {
                 series.push(files[key]);
