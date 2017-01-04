@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const config = require('./../config');
 const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
 const FileModel = require('./../types/file/model');
-
+const NEED_PROCESSING_TYPES = _.union(OTHER_CONSTANTS.IMAGE_CONTENT_TYPES, OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, OTHER_CONSTANTS.OTHER_FORMATS);
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = function() {
@@ -280,7 +280,7 @@ module.exports = function() {
                     });
                 },
 
-                // if other type
+                // if pdf type
                 (cb) => {
                     if (!_.includes(OTHER_CONSTANTS.OTHER_FORMATS, fileOptions.type)) {
                         return cb(null);
@@ -302,6 +302,18 @@ module.exports = function() {
 
                         cb(null);
                     });
+                },
+
+                // if other type
+                (cb) => {
+                // ToDo: check is file type is valid (doc|docx|oxt|odp|ods|xls|xlsx|pptx|ppt)
+                    if (_.includes(NEED_PROCESSING_TYPES, fileOptions.type)) {
+                        return cb(null);
+                    }
+
+                    uploadFile(fileOptions);
+
+                    cb(null);
                 },
 
                 (cb) => {
