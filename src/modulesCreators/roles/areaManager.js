@@ -417,13 +417,13 @@ module.exports = [
         cms: {
             archive: false,
             edit: true,
-            write: false,
+            write: true,
             read: true
         },
         mobile: {
             archive: false,
             edit: true,
-            write: false,
+            write: true,
             read: true
         }
     },
