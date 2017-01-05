@@ -41,6 +41,7 @@ module.exports = (req, res, next) => {
         const filterMapper = new FilterMapper();
         const queryFilter = query.filter || {};
         const filterSearch = queryFilter.globalSearch || '';
+        const pipeline = [];
 
         const searchFieldsArray = [
             'title.en',
@@ -98,10 +99,22 @@ module.exports = (req, res, next) => {
             queryObject.status = {
                 $nin : ['draft']
             }
+        } else{
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'createdBy.user': personnel._id,
+                            status          : {$in: ['draft', 'expired']}
+                        }, {
+                            status: {$nin: ['draft', 'expired']}
+                        }
+                    ]
+                }
+            });
         }
 
         const aggregateHelper = new AggregationHelper($defProjection);
-        const pipeline = [];
 
         pipeline.push({
             $match: queryObject

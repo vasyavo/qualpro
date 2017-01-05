@@ -45,6 +45,7 @@ var BrandingActivity = function (db, redis, event) {
     };
 
     function getAllPipeLine(options) {
+        var personnel = options.personnel;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject || {};
         var pipeLine = [];
@@ -59,6 +60,32 @@ var BrandingActivity = function (db, redis, event) {
         var mainFilter = {};
 
         var isMatch = false;
+
+        // fix do not show draft to other users
+        if (isMobile) {
+            if (forSync) {
+                mainFilter.status = {
+                    $ne: 'draft'
+                };
+            } else {
+                mainFilter.status = {
+                    $nin: ['draft', 'expired']
+                };
+            }
+        } else {
+            pipeLine.push({
+                $match: {
+                    $or: [
+                        {
+                            'createdBy.user': personnel._id,
+                            status          : {$in: ['draft', 'expired']}
+                        }, {
+                            status: {$nin: ['draft', 'expired']}
+                        }
+                    ]
+                }
+            });
+        }
 
         if (queryObject.position) {
             positionFilter = {position: queryObject.position};
@@ -84,7 +111,7 @@ var BrandingActivity = function (db, redis, event) {
             isMatch = true;
         }
 
-        if (options.forSync) {
+        if (forSync) {
             pipeLine.push({
                 $match: queryObject
             });
@@ -103,16 +130,6 @@ var BrandingActivity = function (db, redis, event) {
         if (queryObject._id) {
             pipeLine.push({
                 $match: queryObject
-            });
-
-            isMatch = true;
-        }
-
-        if (!forSync && isMobile) {
-            pipeLine.push({
-                $match: {
-                    status: {$ne: 'expired'}
-                }
             });
 
             isMatch = true;
@@ -344,6 +361,7 @@ var BrandingActivity = function (db, redis, event) {
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             pipeLine = getAllPipeLine({
+                personnel        : personnel,
                 aggregateHelper  : aggregateHelper,
                 searchFieldsArray: searchFieldsArray,
                 queryObject      : queryObject,
@@ -483,6 +501,7 @@ var BrandingActivity = function (db, redis, event) {
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             pipeLine = getAllPipeLine({
+                personnel      : personnel,
                 aggregateHelper: aggregateHelper,
                 queryObject    : queryObject,
                 positionFilter : positionFilter,
