@@ -439,7 +439,7 @@ define([
             var filterInputText = this.currentFilter && !this.currentFilter.options && this.currentFilter.names.join(', ') || '';
             var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ||
                 Cookies.get('currentLanguage') || 'en';
-
+debugger;
             $currentEl.append(this.template({
                 filterDisplayName: this.filterDisplayName[currentLanguage] || this.filterDisplayName,
                 filterName       : this.filterName,

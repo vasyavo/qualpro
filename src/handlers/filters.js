@@ -4114,7 +4114,7 @@ const Filters = function(db, redis) {
     };
 
     this.personnelFilters = function (req, res, next) {
-        var STATUSES = require('../public/js/constants/personnelStatuses');
+        const STATUSES = require('../public/js/constants/personnelStatuses');
 
         var query = req.query;
         var filterMapper = new FilterMapper();
@@ -4128,6 +4128,7 @@ const Filters = function(db, redis) {
         delete queryFilter.translated;
 
         var filter = filterMapper.mapFilter({
+            contentType : CONTENT_TYPES.PERSONNEL,
             filter   : queryFilter,
             personnel: req.personnelModel
         });
@@ -4414,7 +4415,6 @@ const Filters = function(db, redis) {
                     _id : 1,
                     name : 1
                 },
-
                 status    : 1,
                 translated: 1
             }
