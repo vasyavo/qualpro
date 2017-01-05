@@ -3,7 +3,7 @@ const ObjectId = Schema.Types.ObjectId;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    title       : {type: String, unique: true, require: true},
+    title       : {type: String, require: true},
     archived    : {type: Boolean, default: false},
     attachments : {type: ObjectId, ref: CONTENT_TYPES.FILES, default: null},
     createdBy   : {
