@@ -424,6 +424,7 @@ var Notifications = function (db, redis, event) {
                 queryObject    : queryObject,
                 filterSearch   : filterSearch,
                 isMobile       : isMobile,
+                withAttachments: true,
                 forSync        : true
             });
 
