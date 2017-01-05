@@ -70,7 +70,9 @@ define([
         titleAssign     : 'Assign Objective',
         titleCreateSub  : 'Create Sub Objective',
         companyObjective: 'Company Objective',
-        dontShow        : "Don't show company objective in sub-objectives",
+        countryObjective: 'Country Objective',
+        dontShowCompany : "Don't show company objective in sub-objectives",
+        dontShowCountry : "Don't show country objective in sub-objectives",
 
         // updatePreview
         assignBy: 'Assign By',

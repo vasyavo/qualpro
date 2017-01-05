@@ -457,15 +457,26 @@ define([
 
         assignObjectivesToACM: function () {
             var defFilter = this.defFilterLogic.getDefFilter('personnel', 'assignToACM');
+            var modelJSON = this.model.toJSON();
 
-            this.trigger('showAssignObjectiveDialog', this.model, false, defFilter);
+            if (modelJSON.objectiveType === 'country'){
+                this.trigger('showSubObjectiveDialog', this.model, false, defFilter);
+            } else {
+                this.trigger('showAssignObjectiveDialog', this.model, false, defFilter);
+            }
             this.assignObjective();
         },
 
         assignObjectivesToElse: function () {
             var defFilter = this.defFilterLogic.getDefFilter('personnel', 'assignToElse');
+            var modelJSON = this.model.toJSON();
 
-            this.trigger('showAssignObjectiveDialog', this.model, true, defFilter);
+            if (modelJSON.objectiveType === 'country'){
+                this.trigger('showSubObjectiveDialog', this.model, true, defFilter);
+            } else {
+                this.trigger('showAssignObjectiveDialog', this.model, true, defFilter);
+
+            }
             this.assignObjective();
         },
 

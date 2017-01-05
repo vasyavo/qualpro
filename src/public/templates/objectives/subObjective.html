@@ -128,13 +128,13 @@
                     <% if(!assign || (assign && (objective.companyObjective.en || objective.companyObjective.ar))) { %>
                     <div class="objectivesPaddingBlock borderBottom">
                         <div class="descriptionBlock floatBlock">
-                            <span><%= translation.companyObjective %></span>
+                            <span><%= objective.objectiveType === 'country' ?  translation.countryObjective : translation.companyObjective %></span>
                         </div>
                             <span id="companyObjectiveEn" class="descriptionValue fontBold fontMedium hoverFullText">
-                                <% if (App.currentUser.accessRole.level > 2) { %>
-                                <%= _.unescape(objective.companyObjective[curLang]) || _.unescape(objective.companyObjective[anotherLang]) %>
+                                <% if (App.currentUser.accessRole.level < 3 || (App.currentUser.accessRole.level === 3 && objective.objectiveType === 'country') ) { %>
+                                  <%= objective.description[curLang] || objective.description[anotherLang]%>
                                 <% } else { %>
-                                <%= objective.description[curLang] || objective.description[anotherLang]%>
+                                  <%= _.unescape(objective.companyObjective[curLang]) || _.unescape(objective.companyObjective[anotherLang]) %>
                                 <% } %>
                             </span>
                     </div>
@@ -144,7 +144,7 @@
                     <div class="objectivesPaddingBlock borderBottom objectivesCheckbox">
                         <input type="checkbox" id="showCompanyObjective" class="customCheckbox">
                         <label for="showCompanyObjective" class="checkboxLabel"></label>
-                        <span><%= translation.dontShow %></span>
+                        <span><%= objective.objectiveType === 'country' ?  translation.dontShowCountry : translation.dontShowCompany %></span>
                     </div>
                     <% } %>
 
@@ -165,7 +165,6 @@
                                           value=""
                                           maxlength="120"
                                           placeholder="<%= translation.description%>">
-                                    <%= (objective.objectiveType === 'country') && (App.currentUser.accessRole.level === 3) && objective.description && objective.description.currentLanguage || '' %>
                                 </textarea>
                             </div>
                         </div>

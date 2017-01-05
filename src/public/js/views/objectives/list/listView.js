@@ -111,10 +111,12 @@ define([
             });
         },
 
-        showSubObjectiveDialog: function (model) {
+        showSubObjectiveDialog: function (model, multiselect, defFilter) {
             var self = this;
             this.createSubObjectivesView = new CreateSubObjectivesView({
                 model      : model,
+                multiselect    : multiselect,
+                assignDefFilter: defFilter,
                 translation: this.translation
             });
             this.createSubObjectivesView.on('modelSaved', function (newCollection) {
