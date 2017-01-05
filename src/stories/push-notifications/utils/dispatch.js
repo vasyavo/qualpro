@@ -1,7 +1,7 @@
-const sendActionViaPushNotification = require('./../utils/sendPush');
+const sendPush = require('./../utils/sendPush');
 const MessageDispatcher = require('./../utils/messageDispatcher');
 
-module.exports  = function * (action) {
-    yield MessageDispatcher.sendMessage(action);
-    yield sendActionViaPushNotification(action);
+module.exports  = function * (groups) {
+    yield MessageDispatcher.sendMessage(groups);
+    yield sendPush(groups);
 };

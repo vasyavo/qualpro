@@ -118,14 +118,14 @@ module.exports = [
         module: ACL_MODULES.ITEMS_AND_PRICES,
         cms: {
             archive: false,
-            edit: false,
-            write: false,
+            edit: true,
+            write: true,
             read: true
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
+            edit: true,
+            write: true,
             read: true
         }
     }, {
@@ -452,9 +452,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {

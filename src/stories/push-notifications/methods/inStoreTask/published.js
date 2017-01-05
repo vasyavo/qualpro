@@ -1,5 +1,6 @@
 const co = require('co');
 const getOriginatorById = require('./../../utils/getOriginatorById');
+const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -8,8 +9,8 @@ const ActivityModel = require('./../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.IN_STORE_REPORTING;
-        const contentType = contentTypes.INSTORETASKS;
+        const moduleId = aclModules.OBJECTIVE;
+        const contentType = contentTypes.OBJECTIVES;
         const actionType = activityTypes.CREATED;
 
         const {
@@ -19,6 +20,10 @@ module.exports = (options) => {
 
         const originator = yield getOriginatorById({
             id: originatorId,
+        });
+        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
+            assignedTo: draftInStoreTask.assignedTo,
+            originator: originatorId,
         });
 
         const newActivity = new ActivityModel();
@@ -38,6 +43,8 @@ module.exports = (options) => {
             accessRoleLevel: originator.accessRole.level,
             personnels: [
                 originatorId,
+                draftInStoreTask.assignedTo,
+                arrayOfSupervisor,
             ],
             assignedTo: draftInStoreTask.assignedTo,
             country: draftInStoreTask.country,
@@ -50,9 +57,18 @@ module.exports = (options) => {
 
         const savedInStoreTask = yield newActivity.save();
         const inStoreTaskAsJson = savedInStoreTask.toJSON();
+
         const groups = [{
             recipients: [originatorId],
-            subject: 'New draft in-store task created',
+            subject: 'New in-store task published',
+            payload: inStoreTaskAsJson,
+        }, {
+            recipients: draftInStoreTask.assignedTo,
+            subject: 'You assigned to new in-store task',
+            payload: inStoreTaskAsJson,
+        }, {
+            recipients: arrayOfSupervisor,
+            subject: 'Your subordinate received new in-store task',
             payload: inStoreTaskAsJson,
         }];
 

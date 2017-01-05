@@ -1,9 +1,9 @@
 define([
     'Underscore',
     'constants/contentType',
-    'constants/otherConstants'
-
-], function (_, CONTENT_TYPES, OTHER_CONSTANTS) {
+    'constants/otherConstants',
+    'constants/aclRoleIndexes'
+], function (_, CONTENT_TYPES, OTHER_CONSTANTS, ACL_INDEXES) {
     'use strict';
 
     var defFilters = function (currentUserId) {
@@ -26,22 +26,87 @@ define([
             return result;
         };
 
-        var currentUserCountry = App.currentUser.country;
         var priceSurveyAllFilter = {};
+        var currentUser = App.currentUser;
+        var currentUserCountry = currentUser.country;
 
-        if (currentUserCountry && currentUserCountry.length) {
-            priceSurveyAllFilter = {
-                country : {
-                    type : 'ObjectId',
-                    values : currentUserCountry.map(function (country) {
-                        return country._id;
-                    }),
-                    names : currentUserCountry.map(function (country) {
-                        return country.name[App.currentUser.currentLanguage];
-                    })
-                }
-            };
-        }
+        switch (currentUser.accessRole.level) {
+
+            case ACL_INDEXES.COUNTRY_ADMIN :
+                priceSurveyAllFilter = {
+                    country : {
+                        type : 'ObjectId',
+                        values : currentUserCountry.map(function (country) {
+                            return country._id;
+                        }),
+                        names : currentUserCountry.map(function (country) {
+                            return country.name[App.currentUser.currentLanguage];
+                        })
+                    }
+                };
+                break;
+
+            case ACL_INDEXES.AREA_MANAGER :
+                var currentUserRegion = currentUser.region;
+
+                priceSurveyAllFilter = {
+                    country : {
+                        type : 'ObjectId',
+                        values : currentUserCountry.map(function (country) {
+                            return country._id;
+                        }),
+                        names : currentUserCountry.map(function (country) {
+                            return country.name[App.currentUser.currentLanguage];
+                        })
+                    },
+                    region : {
+                        type : 'ObjectId',
+                        values : currentUserRegion.map(function (region) {
+                            return region._id;
+                        }),
+                        names : currentUserRegion.map(function (region) {
+                            return region.name[App.currentUser.currentLanguage];
+                        })
+                    }
+                };
+                break;
+
+            case ACL_INDEXES.AREA_IN_CHARGE :
+                var currentUserRegion = currentUser.region;
+                var currentUserSubRegion = currentUser.subRegion;
+
+                priceSurveyAllFilter = {
+                    country : {
+                        type : 'ObjectId',
+                        values : currentUserCountry.map(function (country) {
+                            return country._id;
+                        }),
+                        names : currentUserCountry.map(function (country) {
+                            return country.name[App.currentUser.currentLanguage];
+                        })
+                    },
+                    region : {
+                        type : 'ObjectId',
+                        values : currentUserRegion.map(function (region) {
+                            return region._id;
+                        }),
+                        names : currentUserRegion.map(function (region) {
+                            return region.name[App.currentUser.currentLanguage];
+                        })
+                    },
+                    subRegion : {
+                        type : 'ObjectId',
+                        values : currentUserSubRegion.map(function (subRegion) {
+                            return subRegion._id;
+                        }),
+                        names : currentUserSubRegion.map(function (subRegion) {
+                            return subRegion.name[App.currentUser.currentLanguage];
+                        })
+                    }
+                };
+                break;
+        };
+
 
         this[CONTENT_TYPES.PRICESURVEY] = {
             all: priceSurveyAllFilter

@@ -1,4 +1,5 @@
 const async = require('async');
+const Bluebird = require('bluebird');
 const redis = require('./../../../helpers/redisClient');
 
 const getSocketIdByUserId = (userId, callback) => {
@@ -13,43 +14,47 @@ class MessageDispatcher {
         this.io = io;
     }
 
-    static sendMessage(options) {
-        const {
-            userId,
-            data,
-        } = options;
+    static sendMessage(groups, callback) {
+        const itRecipient = (action) => {
+            return (recipient, itCallback) => {
+                async.waterfall([
 
-        return new Promise((resolve, reject) => {
-            async.waterfall([
+                    async.apply(getSocketIdByUserId, recipient),
 
-                async.apply(getSocketIdByUserId, userId),
+                    (arrayOfRedisKeys, cb) => {
+                        const arrayOfSocketId = arrayOfRedisKeys.map((redisKey) => {
+                            const socketId = redisKey.split(':')[2];
 
-                (arrayOfRedisKeys, cb) => {
-                    const arrayOfPayload = arrayOfRedisKeys.map((redisKey) => {
-                        const socketId = redisKey.split(':').pop();
+                            return socketId
+                        });
 
-                        return {
-                            socketId,
-                            data
-                        }
-                    });
+                        async.each(arrayOfSocketId, (socketId, eachCb) => {
+                            this.io.to(socketId).emit('message', action.payload);
+                            eachCb(null);
+                        }, cb.bind(null, null, arrayOfSocketId));
+                    },
 
-                    async.each(arrayOfPayload, (payload, eachCb) => {
-                        this.io.to(payload.socketId).emit('message', payload.data);
-                        eachCb(null);
-                    }, cb.bind(null, null, arrayOfPayload));
-                }
+                ], itCallback);
+            };
+        };
 
-            ], (err, data) => {
-                if (err) {
-                    return reject(err);
-                }
+        const itGroup = (group, itCallback) => {
+            const {
+                recipients,
+                payload,
+            } = group;
+            const action = {
+                payload
+            };
 
-                resolve(data);
-            });
-        });
+            async.each(recipients, itRecipient(action), itCallback);
+        };
+
+        async.each(groups, itGroup, callback);
     }
 
 }
+
+MessageDispatcher.sendMessage = Bluebird.promisify(MessageDispatcher.sendMessage);
 
 module.exports = MessageDispatcher;
