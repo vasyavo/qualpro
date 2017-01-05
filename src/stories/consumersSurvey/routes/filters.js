@@ -35,6 +35,7 @@ const $defProjectionExtended = {
 };
 
 module.exports = (req, res, next) => {
+    var personnelId = req.personnelModel._id;
     var query = req.query;
     var queryFilter = query.filter || {};
     var currentSelected = query.current;
@@ -59,6 +60,19 @@ module.exports = (req, res, next) => {
     }
 
     const aggregateHelper = new AggregationHelper($defProjectionExtended, filter);
+
+    pipeLine.push({
+        $match: {
+            $or: [
+                {
+                    'createdBy.user': personnelId,
+                    status          : {$in: ['draft', 'expired']}
+                }, {
+                    status: {$nin: ['draft', 'expired']}
+                }
+            ]
+        }
+    });
 
     if (publisherFilter) {
         pipeLine.push({
