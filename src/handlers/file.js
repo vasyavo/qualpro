@@ -192,7 +192,8 @@ module.exports = function() {
                 series.push(item);
             });
         } else if (files.attachments) {
-            series = files.attachments;
+            // fix for mobile upload
+            series = Array.isArray(files.attachments) ? files.attachments : [files.attachments]
         } else {
             for (let key in files) {
                 series.push(files[key]);
