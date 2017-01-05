@@ -21,11 +21,11 @@ module.exports = function * (options) {
         },
     }, {
         $project: {
-            _id: null,
             manager: 1,
         },
     }, {
         $group: {
+            _id: null,
             manager: { $addToSet: '$manager', },
         }
     }];
