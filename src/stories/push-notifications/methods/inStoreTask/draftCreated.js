@@ -1,5 +1,5 @@
 const co = require('co');
-const getPersonnelById = require('./../../utils/getPersonnelById');
+const getOriginatorById = require('./../../utils/getOriginatorById');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -17,7 +17,7 @@ module.exports = (options) => {
             draftObjective,
         } = options;
 
-        const originator = yield getPersonnelById({
+        const originator = yield getOriginatorById({
             id: originatorId,
         });
 

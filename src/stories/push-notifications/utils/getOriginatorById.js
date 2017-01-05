@@ -1,7 +1,7 @@
 const ObjectId = require('mongoose').Types.ObjectId;
 const PersonnelModel = require('./../../../types/personnel/model');
 
-module.exports = function *getPersonnelById(options) {
+module.exports = function * (options) {
     const { id } = options;
     const pipeline = [{
         $match: {
@@ -35,7 +35,6 @@ module.exports = function *getPersonnelById(options) {
     }];
 
     const result = yield PersonnelModel.aggregate(pipeline).exec();
-    const personnel = result.pop() || null;
 
-    return personnel;
+    return result.pop();
 };
