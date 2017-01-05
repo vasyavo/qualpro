@@ -47,6 +47,7 @@ var Promotions = function (db, redis, event) {
     };
 
     function getAllPipeline(options) {
+        var personnel = options.personnel;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var positionFilter = options.positionFilter;
@@ -58,19 +59,37 @@ var Promotions = function (db, redis, event) {
         var forSync = options.forSync;
         var pipeLine = [];
 
+        // fix do not show draft to other users
         if (isMobile) {
-            queryObject.status = {
-                $nin: ['draft', 'expired']
-            };
+            if (forSync) {
+                queryObject.status = {
+                    $ne: 'draft'
+                };
+            } else {
+                queryObject.status = {
+                    $nin: ['draft', 'expired']
+                };
+            }
         } else {
-            queryObject.status = {
-                $ne: 'expired'
-            };
+            pipeLine.push({
+                $match: {
+                    $or: [
+                        {
+                            'createdBy.user': personnel._id,
+                            status: {$in: ['draft', 'expired']}
+                        }, {
+                            status: {$nin: ['draft', 'expired']}
+                        }
+                    ]
+                }
+            });
         }
 
-        pipeLine.push({
-            $match: queryObject
-        });
+        if (Object.keys(queryObject).length) {
+            pipeLine.push({
+                $match: queryObject
+            });
+        }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'files',
@@ -429,6 +448,7 @@ var Promotions = function (db, redis, event) {
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             pipeLine = getAllPipeline({
+                personnel      : personnel,
                 aggregateHelper: aggregateHelper,
                 queryObject    : queryObject,
                 positionFilter : positionFilter,
@@ -590,6 +610,7 @@ var Promotions = function (db, redis, event) {
             }
 
             pipeLine = getAllPipeline({
+                personnel        : personnel,
                 aggregateHelper  : aggregateHelper,
                 queryObject      : queryObject,
                 positionFilter   : positionFilter,
