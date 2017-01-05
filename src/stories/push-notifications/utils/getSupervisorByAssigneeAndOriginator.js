@@ -21,6 +21,7 @@ module.exports = function * (options) {
         },
     }, {
         $project: {
+            _id: null,
             manager: 1,
         },
     }, {
