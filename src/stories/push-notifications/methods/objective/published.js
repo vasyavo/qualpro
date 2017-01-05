@@ -53,7 +53,7 @@ module.exports = (options) => {
         const objectiveAsJson = savedObjective.toJSON();
 
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignees: draftObjective.assignedTo,
+            assignedTo: draftObjective.assignedTo,
             originator: originatorId,
         });
 
