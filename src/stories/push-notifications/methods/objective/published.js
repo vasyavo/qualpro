@@ -1,5 +1,6 @@
 const co = require('co');
 const getOriginatorById = require('./../../utils/getOriginatorById');
+const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -20,6 +21,10 @@ module.exports = (options) => {
         const originator = yield getOriginatorById({
             id: originatorId,
         });
+        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
+            assignedTo: draftObjective.assignedTo,
+            originator: originatorId,
+        });
 
         const newActivity = new ActivityModel();
 
@@ -38,6 +43,8 @@ module.exports = (options) => {
             accessRoleLevel: originator.accessRole.level,
             personnels: [
                 originatorId,
+                draftObjective.assignedTo,
+                arrayOfSupervisor,
             ],
             assignedTo: draftObjective.assignedTo,
             country: draftObjective.country,
@@ -50,9 +57,18 @@ module.exports = (options) => {
 
         const savedObjective = yield newActivity.save();
         const objectiveAsJson = savedObjective.toJSON();
+
         const groups = [{
             recipients: [originatorId],
-            subject: 'New draft objective created',
+            subject: 'New objective published',
+            payload: objectiveAsJson,
+        }, {
+            recipients: draftObjective.assignedTo,
+            subject: 'You assigned to new objective',
+            payload: objectiveAsJson,
+        }, {
+            recipients: arrayOfSupervisor,
+            subject: 'Your subordinate received new objective',
             payload: objectiveAsJson,
         }];
 

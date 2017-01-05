@@ -28,12 +28,13 @@ define([
     'validation',
     'views/fileDialog/fileDialog',
     'constants/contentType',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'async'
 ], function (Backbone, _, $, EditTemplate, FileTemplate, BaseView, FileDialogView, PersonnelListForSelectionView,
              Model, populate, FileCollection, FileModel, CategoryCollection, DisplayTypeCollection,
              CountryModel, RegionModel, SubRegionModel, RetailSegmentModel, OutletModel, BranchModel,
              implementShowHideArabicInputIn, DropDownView, CONSTANTS, moment, dataService, validation,
-             FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES) {
+             FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES, async) {
 
     var CreateView = BaseView.extend({
         el                   : '#contentHolder',
@@ -414,12 +415,16 @@ define([
             var retailSegmentIds = _.pluck(jsonModel.retailSegment, '_id');
             var outletIds = _.pluck(jsonModel.outlet, '_id');
             var branchIds = _.pluck(jsonModel.branch, '_id');
+            var parallelTasks = [];
+            var functionForPush;
+            var result = {};
 
             var comparator = function (model) {
                 return model.get('name').currentLanguage;
             };
 
             var $curEl = this.$el;
+            var el;
 
             this.locationFilter = {};
             this.locationFilter.country = {type: 'ObjectId', values: [countryId]};
@@ -429,10 +434,29 @@ define([
             this.locationFilter.outlet = {type: 'ObjectId', values: outletIds};
             this.locationFilter.branch = {type: 'ObjectId', values: branchIds};
 
-            dataService.getData('/filters/promotions/location', {
-                edit  : true,
-                filter: this.locationFilter
-            }, function (err, result) {
+            for (el in this.locationFilter) {
+                functionForPush = function thisFunction(pCb) {
+                    var el = thisFunction.el;
+                    var objectFilter = {};
+                    objectFilter[el] = self.locationFilter[el];
+
+                    dataService.getData('/filters/promotions/location', {
+                        edit  : true,
+                        filter: objectFilter[el]
+                    }, function (err, response) {
+                        if (err) {
+                            pCb(err);
+                        }
+                        result[el] = response[el];
+
+                        pCb();
+                    })
+                };
+                functionForPush.el = el;
+                parallelTasks.push(functionForPush);
+            }
+
+            async.parallel(parallelTasks, function (err) {
                 if (err) {
                     App.render(err);
                 }
