@@ -24,6 +24,7 @@ const extractBody = require('./../utils/extractBody');
 const event = require('./../utils/eventEmitter');
 const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
+const TestUtils = require('./../stories/push-notifications/utils/TestUtils');
 
 const ObjectId = mongoose.Types.ObjectId;
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
@@ -239,18 +240,17 @@ var InStoreReports = function() {
                 },
 
                 (inStoreTaskModel, cb) => {
-                    if (inStoreTaskModel.status === 'draft') {
+                    if (TestUtils.isObjectiveDraft(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:draft-created', {
                             originatorId: userId,
-                            draftObjective: inStoreTaskModel.toJSON(),
+                            draftInStoreTask: inStoreTaskModel.toJSON(),
                         });
-                    } else {
-                        event.emit('activityChange', {
-                            module: ACL_MODULES.IN_STORE_REPORTING,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy: inStoreTaskModel.createdBy,
-                            itemId: inStoreTaskModel._id,
-                            itemType  : CONTENT_TYPES.INSTORETASKS
+                    }
+
+                    if (TestUtils.isObjectiveInProgress(inStoreTaskModel)) {
+                        ActivityLog.emit('in-store-task:published', {
+                            originatorId: userId,
+                            draftInStoreTask: inStoreTaskModel.toJSON(),
                         });
                     }
 

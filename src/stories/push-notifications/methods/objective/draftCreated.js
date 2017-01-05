@@ -52,7 +52,7 @@ module.exports = (options) => {
         const objectiveAsJson = savedObjective.toJSON();
         const groups = [{
             recipients: [originatorId],
-            subject: 'New objective draft created',
+            subject: 'New draft objective created',
             payload: objectiveAsJson,
         }];
 

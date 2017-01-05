@@ -21,6 +21,10 @@ module.exports = (options) => {
         const originator = yield getOriginatorById({
             id: originatorId,
         });
+        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
+            assignedTo: draftObjective.assignedTo,
+            originator: originatorId,
+        });
 
         const newActivity = new ActivityModel();
 
@@ -39,6 +43,8 @@ module.exports = (options) => {
             accessRoleLevel: originator.accessRole.level,
             personnels: [
                 originatorId,
+                draftObjective.assignedTo,
+                arrayOfSupervisor,
             ],
             assignedTo: draftObjective.assignedTo,
             country: draftObjective.country,
@@ -51,11 +57,6 @@ module.exports = (options) => {
 
         const savedObjective = yield newActivity.save();
         const objectiveAsJson = savedObjective.toJSON();
-
-        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignedTo: draftObjective.assignedTo,
-            originator: originatorId,
-        });
 
         const groups = [{
             recipients: [originatorId],
