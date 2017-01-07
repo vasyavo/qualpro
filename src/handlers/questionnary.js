@@ -142,16 +142,13 @@ const QuestionnaryHandler = function (db, redis, event) {
     this.getAllForSync = function (req, res, next) {
         function queryRun(personnel, callback) {
             const query = req.query;
-            const page = query.page || 1;
             const isMobile = req.isMobile;
             const accessRoleLevel = req.session.level;
             const lastLogOut = new Date(query.lastLogOut);
-            const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
-            const skip = (page - 1) * limit;
             const filterMapper = new FilterMapper();
             const queryFilter = query.filter || {};
 
-            const sort = query.sort || {
+            const sort = {
                 lastDate: -1
             };
 
@@ -180,29 +177,8 @@ const QuestionnaryHandler = function (db, redis, event) {
                     }
                 }]
             }, {
-                // user should see questionnaire which are related to him, probably which are active
-                $or: [{
-                    'createdBy.user': personnel._id
-                }, {
-                    'createdBy.user': {
-                        $ne: personnel._id
-                    },
-                    status: {
-                        $eq: 'active'
-                    }
-                }]
+                status: {$ne: 'draft'}
             }];
-
-            if (isMobile) {
-                // user sees only ongoing questionnaire via mobile app
-                const currentDate = new Date();
-
-                queryObject.$and.push({
-                    dueDate: {
-                        $gt: currentDate
-                    }
-                });
-            }
 
             const pipeline = [];
 
@@ -238,14 +214,6 @@ const QuestionnaryHandler = function (db, redis, event) {
                     });
 
                     pipeline.push(...aggregateHelper.setTotal());
-
-                    pipeline.push({
-                        $skip: skip
-                    });
-
-                    pipeline.push({
-                        $limit: limit
-                    });
 
                     pipeline.push(...aggregateHelper.groupForUi());
 
@@ -301,6 +269,7 @@ const QuestionnaryHandler = function (db, redis, event) {
             const filterMapper = new FilterMapper();
             const queryFilter = query.filter || {};
             const filterSearch = queryFilter.globalSearch || "";
+            const pipeline = [];
 
             const searchFieldsArray = [
                 'title.en',
@@ -352,10 +321,26 @@ const QuestionnaryHandler = function (db, redis, event) {
                 queryObject.dueDate = {
                     $gt: currentDate
                 };
+
+                queryObject.status = {
+                    $nin: ['draft', 'expired']
+                };
+            } else{
+                pipeline.push({
+                    $match: {
+                        $or: [
+                            {
+                                'createdBy.user': personnel._id,
+                                status          : {$in: ['draft', 'expired']}
+                            }, {
+                                status: {$nin: ['draft', 'expired']}
+                            }
+                        ]
+                    }
+                });
             }
 
             const aggregateHelper = new AggregationHelper($defProjection);
-            const pipeline = [];
 
             pipeline.push({
                 $match: queryObject

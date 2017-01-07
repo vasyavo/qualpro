@@ -1,12 +1,13 @@
 'use strict';
 
-var _ = require('lodash');
-var moment = require('moment');
-var FILTERS_CONSTANTS = require('../public/js/constants/filters');
-var filterTypes = {
+const _ = require('lodash');
+const moment = require('moment');
+const FILTERS_CONSTANTS = require('../public/js/constants/filters');
+const CONTENT_TYPES = require('../public/js/constants/contentType');
+const filterTypes = {
     ObjectId: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
 };
-var allowedFilters = {
+const allowedFilters = {
     country         : ['archived', 'parent', 'translated', '_id'],
     region          : ['archived', 'parent', 'translated', '_id'],
     subRegion       : ['archived', 'parent', 'translated', '_id'],
@@ -21,15 +22,15 @@ var allowedFilters = {
  * @constructor
  */
 
-var FilterMapper = function () {
-    var self = this;
+const FilterMapper = function () {
+    const self = this;
 
     function ConvertType(array, type, options) {
-        var result = {};
-        var operator;
-        var date = new Date();
-        var startDate;
-        var endDate;
+        const date = new Date();
+        let result = {};
+        let operator;
+        let startDate;
+        let endDate;
 
         if (options && !Array.isArray(options)) {
             if (options.$nin === 'true') {
@@ -95,7 +96,7 @@ var FilterMapper = function () {
     };
 
     function getType(name) {
-        for (var key in filterTypes) {
+        for (let key in filterTypes) {
             if (filterTypes[key].indexOf(name) !== -1) {
                 return key;
             }
@@ -150,8 +151,10 @@ var FilterMapper = function () {
 
         if (personnel) {
             this.setFilterLocation(filter, personnel, 'country', context);
-            this.setFilterLocation(filter, personnel, 'region', context);
-            this.setFilterLocation(filter, personnel, 'subRegion', context);
+            if (contentType !== CONTENT_TYPES.PERSONNEL) {
+                this.setFilterLocation(filter, personnel, 'region', context);
+                this.setFilterLocation(filter, personnel, 'subRegion', context);
+            }
         }
 
         if (context && allowedFilters[context]) {
@@ -199,7 +202,7 @@ var FilterMapper = function () {
     /*
     * Store intersection between set of possible location ID provided in query and assigned to personnel
     * */
-    this.setFilterLocation = (filter, personnel, location, context) => {
+    this.setFilterLocation = (filter, personnel, location, context, contentType) => {
         let filterKey = location;
 
         if (location === context) {

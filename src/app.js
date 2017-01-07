@@ -31,11 +31,11 @@ app.set('views', __dirname + '/views');
 app.use(morgan('dev'));
 app.use(bodyParser.json({
     strict: false,
-    limit: 1024 * 1024 * 200
+    limit: 1024 * 1024 * 250
 }));
 app.use(bodyParser.urlencoded({
     extended: false,
-    limit: 1024 * 1024 * 200
+    limit: 1024 * 1024 * 250
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
