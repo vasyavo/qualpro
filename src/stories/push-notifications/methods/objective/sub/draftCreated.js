@@ -1,9 +1,9 @@
 const co = require('co');
-const dispatch = require('./../../utils/dispatch');
-const aclModules = require('./../../../../constants/aclModulesNames');
-const activityTypes = require('./../../../../constants/activityTypes');
-const contentTypes = require('./../../../../public/js/constants/contentType');
-const ActivityModel = require('./../../../../types/activityList/model');
+const dispatch = require('./../../../utils/dispatch');
+const aclModules = require('./../../../../../constants/aclModulesNames');
+const activityTypes = require('./../../../../../constants/activityTypes');
+const contentTypes = require('./../../../../../public/js/constants/contentType');
+const ActivityModel = require('./../../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {

@@ -1,5 +1,4 @@
 const co = require('co');
-const getOriginatorById = require('./../../utils/getOriginatorById');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -14,12 +13,9 @@ module.exports = (options) => {
 
         const {
             originatorId,
-            draftInStoreTask,
+            accessRoleLevel,
+            inStoreTask,
         } = options;
-
-        const originator = yield getOriginatorById({
-            id: originatorId,
-        });
 
         const newActivity = new ActivityModel();
 
@@ -27,33 +23,33 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: draftInStoreTask._id,
+            itemId: inStoreTask._id,
             itemName: {
-                en: draftInStoreTask.title.en,
-                ar: draftInStoreTask.title.ar,
+                en: inStoreTask.title.en,
+                ar: inStoreTask.title.ar,
             },
             createdBy: {
                 user: originatorId,
             },
-            accessRoleLevel: originator.accessRole.level,
+            accessRoleLevel,
             personnels: [
                 originatorId,
             ],
-            assignedTo: draftInStoreTask.assignedTo,
-            country: draftInStoreTask.country,
-            region: draftInStoreTask.region,
-            subRegion: draftInStoreTask.subRegion,
-            retailSegment: draftInStoreTask.retailSegment,
-            outlet: draftInStoreTask.outlet,
-            branch: draftInStoreTask.branch,
+            assignedTo: inStoreTask.assignedTo,
+            country: inStoreTask.country,
+            region: inStoreTask.region,
+            subRegion: inStoreTask.subRegion,
+            retailSegment: inStoreTask.retailSegment,
+            outlet: inStoreTask.outlet,
+            branch: inStoreTask.branch,
         });
 
-        const savedInStoreTask = yield newActivity.save();
-        const inStoreTaskAsJson = savedInStoreTask.toJSON();
+        const savedActivity = yield newActivity.save();
+        const activityAsJson = savedActivity.toJSON();
         const groups = [{
             recipients: [originatorId],
-            subject: 'New draft in-store task created',
-            payload: inStoreTaskAsJson,
+            subject: 'Draft in-store task saved',
+            payload: activityAsJson,
         }];
 
         yield dispatch(groups);

@@ -3,7 +3,7 @@ const PersonnelModel = require('./../../../types/personnel/model');
 
 module.exports = function * (options) {
     const assignedTo = options.assignedTo.map(id => ObjectId(id));
-    const originator = options.originator;
+    const originator = ObjectId(options.originator);
 
     const pipeline = [{
         $match: {
@@ -21,6 +21,7 @@ module.exports = function * (options) {
         },
     }, {
         $project: {
+            _id: 0,
             manager: 1,
         },
     }, {
@@ -31,7 +32,11 @@ module.exports = function * (options) {
     }];
 
     const result = yield PersonnelModel.aggregate(pipeline).exec();
-    const arrayOfSupervisor = result.pop().manager;
+    const groups = result.length ? result : [{ manager: [] }];
+    const arrayOfSupervisor = groups.slice()
+        .pop()
+        .manager
+        .map((objectId) => objectId.toString());
 
     return arrayOfSupervisor;
 };

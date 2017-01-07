@@ -1,12 +1,13 @@
 const co = require('co');
 const _ = require('lodash');
-const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
-const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
-const dispatch = require('./../../utils/dispatch');
-const aclModules = require('./../../../../constants/aclModulesNames');
-const activityTypes = require('./../../../../constants/activityTypes');
-const contentTypes = require('./../../../../public/js/constants/contentType');
-const ActivityModel = require('./../../../../types/activityList/model');
+const getSupervisorByAssigneeAndOriginator = require('./../../../utils/getSupervisorByAssigneeAndOriginator');
+const getOriginatorByParentObjective = require('./../../../utils/getOriginatorByParentObjective');
+const arrayOfObjectIdToArrayOfString = require('./../../../utils/arrayOfObjectIdToArrayOfString');
+const dispatch = require('./../../../utils/dispatch');
+const aclModules = require('./../../../../../constants/aclModulesNames');
+const activityTypes = require('./../../../../../constants/activityTypes');
+const contentTypes = require('./../../../../../public/js/constants/contentType');
+const ActivityModel = require('./../../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {
@@ -20,15 +21,24 @@ module.exports = (options) => {
             objective,
         } = options;
 
+        const arrayOfParentObjectiveId = _.values(objective.parent);
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(
             objective.assignedTo
         );
-        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignedTo,
-            originator: originatorId,
-        });
+        const [
+            arrayOfSupervisor,
+            arrayOfOriginator,
+        ] = yield [
+            getSupervisorByAssigneeAndOriginator({
+                assignedTo,
+                originator: originatorId,
+            }),
+            getOriginatorByParentObjective({
+                objectives: arrayOfParentObjectiveId,
+            })
+        ];
 
         const newActivity = new ActivityModel();
 
@@ -45,10 +55,12 @@ module.exports = (options) => {
                 user: originatorId,
             },
             accessRoleLevel,
+            // we should store unique values in personnels
             personnels: _.uniq([
                 originatorId,
                 ...assignedTo,
                 ...arrayOfSupervisor,
+                ...arrayOfOriginator,
             ]),
             assignedTo,
             country: objective.country,
@@ -67,10 +79,20 @@ module.exports = (options) => {
             subject: 'Objective published',
             payload: activityAsJson,
         }, {
+            recipients: arrayOfOriginator,
+            subject: 'Sub-objective published',
+            payload: activityAsJson,
+        }, {
             recipients: assignedTo,
             subject: 'Received new objective',
             payload: activityAsJson,
         }, {
+            /*
+            * if CA assign to AM
+            * then CA is an originator
+            * and supervisor at the same time
+            * then save difference
+            * */
             recipients: arrayOfSupervisor,
             subject: 'Subordinate received new objective',
             payload: activityAsJson,

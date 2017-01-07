@@ -13,11 +13,29 @@ const isObjectiveDraft = (state) => {
 * @param state {Object} Objective
 * @returns {Boolean}
 * */
-const isObjectiveInProgress = (state) => {
+const isObjectivePublished = (state) => {
     return state.status === OBJECTIVE_STATUSES.IN_PROGRESS;
+};
+
+/*
+* @param state {Object} In-store task
+* @returns {Boolean}
+* */
+const isInStoreTaskDraft = (state) => {
+    return isObjectiveDraft(state);
+};
+
+/*
+* @param state {Object} In-store task
+* @returns {Boolean}
+* */
+const isInStoreTaskPublished = (state) => {
+    return isObjectivePublished(state);
 };
 
 module.exports = {
     isObjectiveDraft,
-    isObjectiveInProgress,
+    isObjectivePublished,
+    isInStoreTaskDraft,
+    isInStoreTaskPublished,
 };
