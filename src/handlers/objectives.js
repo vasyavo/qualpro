@@ -101,6 +101,7 @@ var Objectives = function (db, redis, event) {
         var error;
         var formType = options.formType;
         var newObjectiveId;
+        const accessRoleLevel = options.level;
 
         if (!parentId || !createdById) {
             error = new Error('Not enough params');
@@ -211,8 +212,18 @@ var Objectives = function (db, redis, event) {
                         3: parent['3'] || null,
                         4: parent['4'] || null
                     };
+                    /*
+                    * less then or equals to Area in Charge manager without Trade Marketer
+                    * */
+                    const everyAdmin = [
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
+                        ACL_CONSTANTS.AREA_MANAGER,
+                        ACL_CONSTANTS.AREA_IN_CHARGE,
+                        ACL_CONSTANTS.SALES_MAN,
+                    ];
 
-                    if (parentObjectiveModel.level && parentObjectiveModel.level <= ACL_CONSTANTS.AREA_IN_CHARGE) {
+                    if (parentObjectiveModel.level && everyAdmin.indexOf(parentObjectiveModel.level) > -1) {
                         subObjective.parent[parentObjectiveModel.get('level')] = parentObjectiveModel.get('_id');
                     }
                 }
@@ -234,28 +245,24 @@ var Objectives = function (db, redis, event) {
                         return cb(err);
                     }
                     newObjectiveId = objective._id;
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.OBJECTIVE,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : createdBy,
-                        itemId    : newObjectiveId,
-                        itemType  : CONTENT_TYPES.OBJECTIVES
-                    });
 
-                    parentObjectiveModel.save(function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.OBJECTIVE,
-                            actionType: ACTIVITY_TYPES.UPDATED,
-                            createdBy : createdBy,
-                            itemId    : parentObjectiveModel._id,
-                            itemType  : CONTENT_TYPES.OBJECTIVES
+                    if (TestUtils.isObjectiveDraft(model)) {
+                        ActivityLog.emit('sub-objective:draft-created', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: model.toJSON(),
                         });
+                    }
 
-                        cb(null, objective);
-                    });
+                    if (TestUtils.isObjectivePublished(model)) {
+                        ActivityLog.emit('sub-objective:published', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: model.toJSON(),
+                        });
+                    }
+
+                    cb(null, objective);
                 });
             },
 
@@ -693,14 +700,16 @@ var Objectives = function (db, redis, event) {
                         if (TestUtils.isObjectiveDraft(model)) {
                             ActivityLog.emit('objective:draft-created', {
                                 originatorId: userId,
-                                draftObjective: model.toJSON(),
+                                accessRoleLevel,
+                                objective: model.toJSON(),
                             });
                         }
 
-                        if (TestUtils.isObjectiveInProgress(model)) {
+                        if (TestUtils.isObjectivePublished(model)) {
                             ActivityLog.emit('objective:published', {
                                 originatorId: userId,
-                                draftObjective: model.toJSON(),
+                                accessRoleLevel,
+                                objective: model.toJSON(),
                             });
                         }
 
@@ -1404,6 +1413,9 @@ var Objectives = function (db, redis, event) {
     };
 
     this.createSubObjective = function (req, res, next) {
+        const session = req.session;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files;
             var userId = req.session.uId;

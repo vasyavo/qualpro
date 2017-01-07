@@ -240,17 +240,19 @@ var InStoreReports = function() {
                 },
 
                 (inStoreTaskModel, cb) => {
-                    if (TestUtils.isObjectiveDraft(inStoreTaskModel)) {
+                    if (TestUtils.isInStoreTaskDraft(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:draft-created', {
                             originatorId: userId,
-                            draftInStoreTask: inStoreTaskModel.toJSON(),
+                            accessRoleLevel,
+                            inStoreTask: inStoreTaskModel.toJSON(),
                         });
                     }
 
-                    if (TestUtils.isObjectiveInProgress(inStoreTaskModel)) {
+                    if (TestUtils.isInStoreTaskPublished(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:published', {
                             originatorId: userId,
-                            draftInStoreTask: inStoreTaskModel.toJSON(),
+                            accessRoleLevel,
+                            inStoreTask: inStoreTaskModel.toJSON(),
                         });
                     }
 

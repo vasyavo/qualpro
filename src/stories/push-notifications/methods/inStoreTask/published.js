@@ -1,6 +1,7 @@
 const co = require('co');
-const getOriginatorById = require('./../../utils/getOriginatorById');
+const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
+const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -15,14 +16,17 @@ module.exports = (options) => {
 
         const {
             originatorId,
-            draftInStoreTask,
+            accessRoleLevel,
+            inStoreTask,
         } = options;
 
-        const originator = yield getOriginatorById({
-            id: originatorId,
-        });
+        const [
+            assignedTo,
+        ] = arrayOfObjectIdToArrayOfString(
+            inStoreTask.assignedTo
+        );
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignedTo: draftInStoreTask.assignedTo,
+            assignedTo,
             originator: originatorId,
         });
 
@@ -32,44 +36,44 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: draftInStoreTask._id,
+            itemId: inStoreTask._id,
             itemName: {
-                en: draftInStoreTask.title.en,
-                ar: draftInStoreTask.title.ar,
+                en: inStoreTask.title.en,
+                ar: inStoreTask.title.ar,
             },
             createdBy: {
                 user: originatorId,
             },
-            accessRoleLevel: originator.accessRole.level,
-            personnels: [
+            accessRoleLevel,
+            personnels: _.uniq([
                 originatorId,
-                draftInStoreTask.assignedTo,
-                arrayOfSupervisor,
-            ],
-            assignedTo: draftInStoreTask.assignedTo,
-            country: draftInStoreTask.country,
-            region: draftInStoreTask.region,
-            subRegion: draftInStoreTask.subRegion,
-            retailSegment: draftInStoreTask.retailSegment,
-            outlet: draftInStoreTask.outlet,
-            branch: draftInStoreTask.branch,
+                ...assignedTo,
+                ...arrayOfSupervisor,
+            ]),
+            assignedTo,
+            country: inStoreTask.country,
+            region: inStoreTask.region,
+            subRegion: inStoreTask.subRegion,
+            retailSegment: inStoreTask.retailSegment,
+            outlet: inStoreTask.outlet,
+            branch: inStoreTask.branch,
         });
 
-        const savedInStoreTask = yield newActivity.save();
-        const inStoreTaskAsJson = savedInStoreTask.toJSON();
+        const savedActivity = yield newActivity.save();
+        const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
             recipients: [originatorId],
-            subject: 'New in-store task published',
-            payload: inStoreTaskAsJson,
+            subject: 'In-store task published',
+            payload: activityAsJson,
         }, {
-            recipients: draftInStoreTask.assignedTo,
-            subject: 'You assigned to new in-store task',
-            payload: inStoreTaskAsJson,
+            recipients: assignedTo,
+            subject: 'Received new in-store task',
+            payload: activityAsJson,
         }, {
             recipients: arrayOfSupervisor,
-            subject: 'Your subordinate received new in-store task',
-            payload: inStoreTaskAsJson,
+            subject: 'Subordinate received new in-store task',
+            payload: activityAsJson,
         }];
 
         yield dispatch(groups);
