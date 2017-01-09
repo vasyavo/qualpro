@@ -41,7 +41,7 @@
             </div>
             <div class="flexRow bannerBlock">
                 <% for(var i=0; i
-                <previewCount
+                < previewCount
                         ; i++){ %>
                     <div class="bannerMin">
                         <% if (model.attachments[i].preview) { %>
@@ -52,15 +52,19 @@
                     </div>
                     <% } %>
             </div>
-            <span class="fontGray noShrink"><%= translation.date + ':' %></span>
+            <span class="fontGray noShrink"><%= translation.startDate %>:</span>
         </div>
         <div class="locationBottom flexRowStart">
             <span class="location flexGrow textEllipsis fontGray hoverFullText"><%= translation.location + ': '%> <%= model.location%> </span>
+            <span class="fontGray noShrink"><%= translation.endDate %>:</span>
         </div>
     </div>
     <div class="dateBlock flexColumn">
         <div class="dateWrap flexRow">
-            <span class="name dates"><%= model.createdBy.date %></span>
+            <span class="name dates"><%= model.dateStart %></span>
+        </div>
+        <div class="dateWrap flexRow">
+            <span class="name dates"><%= model.dateEnd %></span>
         </div>
     </div>
 </div>

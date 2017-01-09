@@ -9555,6 +9555,7 @@ table.fancytree-ext-table {
 }
 .questionsList .questionsStatusBlock {
   position: relative;
+  padding: 20px 0;
   min-width: 100px;
 }
 .respondentsWrap {
