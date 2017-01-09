@@ -17,13 +17,13 @@ module.exports = (options) => {
         const {
             originatorId,
             accessRoleLevel,
-            objective,
+            body,
         } = options;
 
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(
-            objective.assignedTo
+            body.assignedTo
         );
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
             assignedTo,
@@ -36,10 +36,10 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: objective._id,
+            itemId: body._id,
             itemName: {
-                en: objective.title.en,
-                ar: objective.title.ar,
+                en: body.title.en,
+                ar: body.title.ar,
             },
             createdBy: {
                 user: originatorId,
@@ -51,12 +51,12 @@ module.exports = (options) => {
                 ...arrayOfSupervisor,
             ]),
             assignedTo,
-            country: objective.country,
-            region: objective.region,
-            subRegion: objective.subRegion,
-            retailSegment: objective.retailSegment,
-            outlet: objective.outlet,
-            branch: objective.branch,
+            country: body.country,
+            region: body.region,
+            subRegion: body.subRegion,
+            retailSegment: body.retailSegment,
+            outlet: body.outlet,
+            branch: body.branch,
         });
 
         const savedActivity = yield newActivity.save();

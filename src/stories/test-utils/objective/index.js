@@ -73,7 +73,7 @@ class ObjectiveUtils {
         const eventPayload = {
             originatorId: userId,
             accessRoleLevel,
-            objective: nextState,
+            body: nextState,
         };
 
         if (state.status && state.reassigned) {

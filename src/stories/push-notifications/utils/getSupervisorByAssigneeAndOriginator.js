@@ -36,7 +36,9 @@ module.exports = function * (options) {
     const arrayOfSupervisor = groups.slice()
         .pop()
         .manager
-        .map((objectId) => objectId.toString());
+        // personnel possibly haven't assigned to him manager
+        .filter(objectId => objectId)
+        .map(objectId => objectId.toString());
 
     return arrayOfSupervisor;
 };
