@@ -4,6 +4,10 @@ const activityLog = new events.EventEmitter();
 activityLog.on('objective:draft-created', require('./methods/objective/draftCreated'));
 activityLog.on('objective:published', require('./methods/objective/published'));
 
+activityLog.on('objective:updated', require('./methods/objective/updated'));
+activityLog.on('objective:status-updated', require('./methods/objective/updated')); // todo: change event handler
+activityLog.on('objective:reassigned', require('./methods/objective/updated')); // todo: change event handler
+
 activityLog.on('sub-objective:draft-created', require('./methods/objective/sub/draftCreated'));
 activityLog.on('sub-objective:published', require('./methods/objective/sub/published'));
 
