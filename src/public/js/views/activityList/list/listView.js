@@ -159,6 +159,7 @@ define([
                     branchIds.push(branchObj._id);
                     branchNames.push(branchObj.name[self.currentLanguage]);
                 });
+
                 personnelName.push(modelJSON.createdBy.user.firstName.currentLanguage + ' ' + modelJSON.createdBy.user.lastName.currentLanguage);
 
                 filter = {
@@ -186,8 +187,30 @@ define([
                         names : ['Fixed Period']
                     }
                 };
-                url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
-                Backbone.history.navigate(url, true);
+
+                if (modelType === 'priceSurvey'){
+                    dataService.getData('priceSurvey/' + model.get('itemId'), {}, function (err, response) {
+                        if (err) {
+                            return App.render({type: 'error', message: err.message});
+                        }
+
+                        if (response && response.category ){
+                            filter.category = response && response.category && {
+                                    type  : 'ObjectId',
+                                    values: [response.category._id],
+                                    names : [response.category.name[self.currentLanguage]]
+                                };
+                        }
+
+                        url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
+                        Backbone.history.navigate(url, true);
+                    });
+                } else {
+                    url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
+                    Backbone.history.navigate(url, true);
+                }
+
+
             }
         },
 
