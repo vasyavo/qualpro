@@ -4,7 +4,8 @@ module.exports = (err, req, res, next) => {
     const status = err.status || 500;
     const requestId = req.id;
     const stackTrace = err.stack;
-    const userId = req.session.uId || null;
+    const session = req.session;
+    const userId = session ? session.uId : null;
 
     logger.error({
         userId,
