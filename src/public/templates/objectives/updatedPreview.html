@@ -100,7 +100,7 @@
                     <% if(jsonModel.level > 1 && (jsonModel.companyObjective.en || jsonModel.companyObjective.ar )) { %>
                     <div class="objectivesPaddingBlock borderBottom">
                         <div class="descriptionBlock floatBlock">
-                            <span><%= translation.companyObjective %></span>
+                            <span><%= jsonModel.objectiveType === 'country' ?  translation.countryObjective : translation.companyObjective %></span>
                         </div>
                         <span id="companyObjective" class="descriptionValue fontBold fontMedium hoverFullText">
                                 <%= _.unescape(jsonModel.companyObjective[curLang] || jsonModel.companyObjective[anotherLang]) %>
