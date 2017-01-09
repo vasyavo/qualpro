@@ -11,6 +11,7 @@ var PriceSurvey = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var bodyValidator = require('../helpers/bodyValidator');
     var self = this;
+    var ObjectId = require('mongoose').Types.ObjectId;
 
     var $defProjection = {
         category      : 1,
@@ -899,11 +900,7 @@ var PriceSurvey = function (db, redis, event) {
         aggregateHelper = new AggregationHelper($defProjection);
 
         pipeLine.push({
-            $match: queryObject
-        });
-
-        pipeLine.push({
-            $match: employeeFilter
+            $match: {_id : id}
         });
 
         pipeLine.push({
@@ -973,10 +970,6 @@ var PriceSurvey = function (db, redis, event) {
                 maxPrice: 1,
                 avgPrice: 1
             }
-        });
-
-        pipeLine.push({
-            $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
         });
 
         pipeLine.push({
