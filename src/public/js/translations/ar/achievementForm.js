@@ -9,6 +9,8 @@ define([
         comment      : 'التعليق',
         location     : 'الموقع',
         date         : 'التاريخ',
+        startDate   : 'تاريخ البدء',
+        endDate     : 'تاريخ الانتهاء',
         // preview
         title        : 'عرض استمارة الإنجازات',
         saveBtn      : 'موافق',
