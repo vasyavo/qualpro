@@ -3,7 +3,7 @@ const arrayOfObjectIdToArrayOfString = require('./../../push-notifications/utils
 const ActivityLog = require('./../../push-notifications/activityLog');
 const ObjectiveUtilsPrototype = require('./../ObjectiveUtilsPrototype');
 
-class ObjectiveUtils extends ObjectiveUtilsPrototype {
+class InStoreTaskUtils extends ObjectiveUtilsPrototype {
 
     constructor(props) {
         super(props);
@@ -26,16 +26,16 @@ class ObjectiveUtils extends ObjectiveUtilsPrototype {
         };
 
         if (state.status && state.reassigned) {
-            ActivityLog.emit('objective:updated', eventPayload);
+            ActivityLog.emit('in-store-task:updated', eventPayload);
         } else if (state.status) {
-            ActivityLog.emit('objective:status-updated', eventPayload);
+            ActivityLog.emit('in-store-task:status-updated', eventPayload);
         } else if (state.reassigned) {
-            ActivityLog.emit('objective:reassigned', eventPayload);
+            ActivityLog.emit('in-store-task:reassigned', eventPayload);
         } else {
-            ActivityLog.emit('objective:updated', eventPayload);
+            ActivityLog.emit('in-store-task:updated', eventPayload);
         }
     }
 
 }
 
-module.exports = ObjectiveUtils;
+module.exports = InStoreTaskUtils;

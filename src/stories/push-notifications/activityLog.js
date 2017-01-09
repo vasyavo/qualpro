@@ -14,4 +14,8 @@ activityLog.on('sub-objective:published', require('./methods/objective/sub/publi
 activityLog.on('in-store-task:draft-created', require('./methods/inStoreTask/draftCreated'));
 activityLog.on('in-store-task:published', require('./methods/inStoreTask/published'));
 
+activityLog.on('in-store-task:updated', require('./methods/inStoreTask/updated'));
+activityLog.on('in-store-task:status-updated', require('./methods/inStoreTask/updated')); // todo: change event handler
+activityLog.on('in-store-task:reassigned', require('./methods/inStoreTask/updated')); // todo: change event handler
+
 module.exports = activityLog;
