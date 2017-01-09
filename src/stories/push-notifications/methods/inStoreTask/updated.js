@@ -15,11 +15,12 @@ module.exports = (options) => {
         const actionType = activityTypes.UPDATED;
 
         const {
-            originatorId,
+            actionOriginator,
             accessRoleLevel,
             body,
         } = options;
 
+        const contentAuthor = _.get(body, 'createdBy.user');
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(
@@ -27,7 +28,7 @@ module.exports = (options) => {
         );
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
             assignedTo,
-            originator: originatorId,
+            originator: actionOriginator,
         });
 
         const newActivity = new ActivityModel();
@@ -42,11 +43,12 @@ module.exports = (options) => {
                 ar: body.title.ar,
             },
             createdBy: {
-                user: originatorId,
+                user: actionOriginator,
             },
             accessRoleLevel,
             personnels: _.uniq([
-                originatorId,
+                actionOriginator,
+                ...contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
             ]),
@@ -63,16 +65,15 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: [originatorId],
+            recipients: _.uniq([actionOriginator, contentAuthor]),
             subject: 'In-store task updated',
             payload: activityAsJson,
         }, {
-            // if AM reassign task created by CA to SM
-            recipients: _.difference(assignedTo, [originatorId]),
+            recipients: _.difference([assignedTo], [actionOriginator]),
             subject: 'Received updated in-store task',
             payload: activityAsJson,
         }, {
-            recipients: arrayOfSupervisor,
+            recipients: _.difference([arrayOfSupervisor], [actionOriginator]),
             subject: `Subordinate's in-store task updated`,
             payload: activityAsJson,
         }];

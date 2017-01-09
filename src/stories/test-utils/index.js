@@ -1,5 +1,5 @@
-const ObjectiveUtils = require('./objective');
-const InStoreTaskUtils = require('./in-store-task');
+const ObjectiveUtils = require('./ObjectiveUtils');
+const InStoreTaskUtils = require('./InStoreTaskUtils');
 
 module.exports = {
     ObjectiveUtils,

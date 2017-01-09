@@ -845,7 +845,7 @@ var Objectives = function (db, redis, event) {
         const userId = session.uId;
         const accessRoleLevel = session.level;
         const store = new ObjectiveUtils({
-            userId,
+            actionOriginator: userId,
             accessRoleLevel,
         });
 
@@ -962,7 +962,7 @@ var Objectives = function (db, redis, event) {
                         return waterFallCb(err);
                     }
 
-                    store.setPreviousState(model);
+                    store.setPreviousState(model.toJSON());
 
                     if (lodash.includes([
                             OBJECTIVE_STATUSES.FAIL,
@@ -1010,7 +1010,7 @@ var Objectives = function (db, redis, event) {
                                 });
                         }
 
-                        store.setNextState(objectiveModel);
+                        store.setNextState(objectiveModel.toJSON());
                         store.difference();
                         store.publish();
 

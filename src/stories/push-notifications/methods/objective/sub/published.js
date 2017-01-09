@@ -21,7 +21,11 @@ module.exports = (options) => {
             objective,
         } = options;
 
-        const arrayOfParentObjectiveId = _.values(objective.parent);
+        const arrayOfParentObjectiveId = _(objective.parent)
+            .values()
+            .compact()
+            .value();
+
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(

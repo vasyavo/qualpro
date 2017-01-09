@@ -1,7 +1,7 @@
 const _ = require('lodash');
-const arrayOfObjectIdToArrayOfString = require('./../../push-notifications/utils/arrayOfObjectIdToArrayOfString');
-const ActivityLog = require('./../../push-notifications/activityLog');
-const ObjectiveUtilsPrototype = require('./../ObjectiveUtilsPrototype');
+const arrayOfObjectIdToArrayOfString = require('./../push-notifications/utils/arrayOfObjectIdToArrayOfString');
+const ActivityLog = require('./../push-notifications/activityLog');
+const ObjectiveUtilsPrototype = require('./ObjectiveUtilsPrototype');
 
 class ObjectiveUtils extends ObjectiveUtilsPrototype {
 
@@ -15,12 +15,12 @@ class ObjectiveUtils extends ObjectiveUtilsPrototype {
             nextState,
         } = this;
         const {
-            userId,
+            actionOriginator,
             accessRoleLevel,
         } = state;
 
         const eventPayload = {
-            originatorId: userId,
+            actionOriginator,
             accessRoleLevel,
             body: nextState,
         };

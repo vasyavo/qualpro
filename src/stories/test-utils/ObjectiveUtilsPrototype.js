@@ -5,12 +5,12 @@ class ObjectiveUtilsPrototype {
 
     constructor(props) {
         const {
-            userId,
+            actionOriginator,
             accessRoleLevel,
         } = props;
 
         this.state = {
-            userId,
+            actionOriginator,
             accessRoleLevel,
         };
     }

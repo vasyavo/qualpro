@@ -319,7 +319,7 @@ var InStoreReports = function() {
         const userId = session.uId;
         const accessRoleLevel = session.level;
         const store = new InStoreTaskUtils({
-            userId,
+            actionOriginator: userId,
             accessRoleLevel,
         });
 

@@ -1,6 +1,7 @@
 const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
+const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
 const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
@@ -15,20 +16,34 @@ module.exports = (options) => {
         const actionType = activityTypes.UPDATED;
 
         const {
-            originatorId,
+            actionOriginator,
             accessRoleLevel,
             body,
         } = options;
+
+        const contentAuthor = _.get(body, 'createdBy.user');
+        const arrayOfParentObjectiveId = _(body.parent)
+            .values()
+            .compact()
+            .value();
 
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(
             body.assignedTo
         );
-        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignedTo,
-            originator: originatorId,
-        });
+        const [
+            arrayOfSupervisor,
+            arrayOfOriginator,
+        ] = yield [
+            getSupervisorByAssigneeAndOriginator({
+                assignedTo,
+                originator: contentAuthor,
+            }),
+            getOriginatorByParentObjective({
+                objectives: arrayOfParentObjectiveId,
+            })
+        ];
 
         const newActivity = new ActivityModel();
 
@@ -42,13 +57,15 @@ module.exports = (options) => {
                 ar: body.title.ar,
             },
             createdBy: {
-                user: originatorId,
+                user: actionOriginator,
             },
             accessRoleLevel,
             personnels: _.uniq([
-                originatorId,
+                actionOriginator,
+                contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
+                ...arrayOfOriginator,
             ]),
             assignedTo,
             country: body.country,
@@ -63,15 +80,19 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: [originatorId],
+            recipients: [actionOriginator],
             subject: 'Objective updated',
             payload: activityAsJson,
         }, {
-            recipients: assignedTo,
+            recipients: _.difference([arrayOfOriginator], [actionOriginator]),
+            subject: 'Sub-objective updated',
+            payload: activityAsJson,
+        }, {
+            recipients: _.difference([assignedTo], [actionOriginator]),
             subject: 'Received updated objective',
             payload: activityAsJson,
         }, {
-            recipients: arrayOfSupervisor,
+            recipients: _.difference([arrayOfSupervisor], [actionOriginator]),
             subject: `Subordinate's objective updated`,
             payload: activityAsJson,
         }];
