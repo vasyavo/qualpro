@@ -71,29 +71,8 @@ module.exports = (req, res, next) => {
                 }
             }]
         }, {
-            // user should see questionnaire which are related to him, probably which are active
-            $or: [{
-                'createdBy.user': personnel._id
-            }, {
-                'createdBy.user': {
-                    $ne: personnel._id
-                },
-                status: {
-                    $eq: 'active'
-                }
-            }]
+            status: {$ne: 'draft'}
         }];
-
-        if (isMobile) {
-            // user sees only ongoing questionnaire via mobile app
-            const currentDate = new Date();
-
-            queryObject.$and.push({
-                dueDate: {
-                    $gt: currentDate
-                }
-            });
-        }
 
         const pipeline = [];
 

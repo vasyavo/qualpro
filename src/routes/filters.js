@@ -3,6 +3,7 @@ var router = express.Router();
 var filterHandler = require('../handlers/filters');
 var access = require('../helpers/access');
 const storePersonnelInMiddleware = require('../reusableComponents/storePersonnelInMiddleware');
+const qs = require('qs')
 
 module.exports = function(db, app, redis) {
     var handler = new filterHandler(db, redis);
@@ -10,6 +11,8 @@ module.exports = function(db, app, redis) {
     var checkAuth = access.checkAuth;
 
     router.use(storePersonnelInMiddleware);
+
+    router.use(require('../utils/redirectFilterMiddleware'));
 
     router.get('/priceSurvey', checkAuth, handler.priceSurveyFilters);
     router.get('/shelfShares', checkAuth, handler.shelfSharesFilters);

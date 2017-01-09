@@ -104,6 +104,10 @@ var Comment = function (db, redis, event) {
                     ContextModel = CompetitorBrandingItemModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_ITEMS;
                     break;
+                case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
+                    ContextModel = CompetitorBrandingItemModel;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
+                    break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
                     ContextModel = CompetitorBrandingModel;
                     mid = ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT;
@@ -787,6 +791,9 @@ var Comment = function (db, redis, event) {
                     break;
                 case CONTENT_TYPES.COMPETITORPROMOTION:
                     ContextModel = CompetitorPromotionModel;
+                    break;
+                case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
+                    ContextModel = CompetitorBrandingItemModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:
                     ContextModel = PromotionsItemsModel;

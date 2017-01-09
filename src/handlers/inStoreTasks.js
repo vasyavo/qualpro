@@ -23,6 +23,9 @@ const bodyValidator = require('./../helpers/bodyValidator');
 const extractBody = require('./../utils/extractBody');
 const event = require('./../utils/eventEmitter');
 const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const TestUtils = require('./../stories/push-notifications/utils/TestUtils');
+const InStoreTaskUtils = require('./../stories/test-utils').InStoreTaskUtils;
 
 const ObjectId = mongoose.Types.ObjectId;
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
@@ -238,13 +241,21 @@ var InStoreReports = function() {
                 },
 
                 (inStoreTaskModel, cb) => {
-                    event.emit('activityChange', {
-                        module: ACL_MODULES.IN_STORE_REPORTING,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy: inStoreTaskModel.createdBy,
-                        itemId: inStoreTaskModel._id,
-                        itemType  : CONTENT_TYPES.INSTORETASKS
-                    });
+                    if (TestUtils.isInStoreTaskDraft(inStoreTaskModel)) {
+                        ActivityLog.emit('in-store-task:draft-created', {
+                            originatorId: userId,
+                            accessRoleLevel,
+                            inStoreTask: inStoreTaskModel.toJSON(),
+                        });
+                    }
+
+                    if (TestUtils.isInStoreTaskPublished(inStoreTaskModel)) {
+                        ActivityLog.emit('in-store-task:published', {
+                            originatorId: userId,
+                            accessRoleLevel,
+                            inStoreTask: inStoreTaskModel.toJSON(),
+                        });
+                    }
 
                     const data = {
                         objective: inStoreTaskModel.get('_id'),
@@ -304,11 +315,17 @@ var InStoreReports = function() {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const store = new InStoreTaskUtils({
+            userId,
+            accessRoleLevel,
+        });
+
         function queryRun(updateObject, body) {
             var files = req.files;
             var attachments;
-            var session = req.session;
-            var userId = session.uId;
             var inStoreTaskId = req.params.id;
             var index;
             var fullUpdate = {
@@ -366,6 +383,8 @@ var InStoreReports = function() {
                             return cb(error);
                         }
 
+                        store.setPreviousState(inStoreTaskModel.toJSON());
+
                         if (lodash.includes([
                                 OBJECTIVE_STATUSES.FAIL,
                                 OBJECTIVE_STATUSES.CLOSED
@@ -415,21 +434,22 @@ var InStoreReports = function() {
                             };
                         }
 
-                        inStoreTaskModel
-                            .update(fullUpdate, function (err) {
-                                if (err) {
-                                    return cb(err);
-                                }
-                                event.emit('activityChange', {
-                                    module    : ACL_MODULES.IN_STORE_REPORTING,
-                                    actionType: ACTIVITY_TYPES.UPDATED,
-                                    createdBy : updateObject.editedBy,
-                                    itemId    : inStoreTaskId,
-                                    itemType  : CONTENT_TYPES.INSTORETASKS
-                                });
+                        ObjectiveModel.findOneAndUpdate({
+                            _id: inStoreTaskId,
+                        }, fullUpdate, {
+                            new: true,
+                            runValidators: true,
+                        }, (err, updatedModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
 
-                                cb(null, inStoreTaskModel.get('_id'));
-                            });
+                            store.setNextState(updatedModel.toJSON());
+                            store.difference();
+                            store.publish();
+
+                            cb(null, inStoreTaskModel.get('_id'));
+                        });
                     });
                 },
 

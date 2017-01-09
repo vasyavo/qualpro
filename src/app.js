@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const consolidate = require('consolidate');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const compress = require('compression');
 
 const app = express();
 
@@ -23,6 +24,8 @@ const allowCrossDomain = (req, res, next) => {
     next();
 };
 
+app.use(compress());
+
 app.engine('html', consolidate.swig);
 
 app.set('view engine', 'html');
@@ -31,11 +34,10 @@ app.set('views', __dirname + '/views');
 app.use(morgan('dev'));
 app.use(bodyParser.json({
     strict: false,
-    limit: 1024 * 1024 * 200
+    limit: '10mb',
 }));
 app.use(bodyParser.urlencoded({
-    extended: false,
-    limit: 1024 * 1024 * 200
+    extended: false
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 

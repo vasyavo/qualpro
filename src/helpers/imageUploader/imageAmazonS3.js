@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 var imageUploader = function (awsConfig) {
     "use strict";
 
@@ -83,12 +85,33 @@ var imageUploader = function (awsConfig) {
         });
     };
 
-    function uploadFile(fileData, folder, callback) {
-        var imageNameWithExt = fileData.name + '.' + fileData.extension;
+    function uploadFromFile(fileData, bucket, callback) {
+        var imageNameWithExt = `${fileData.name}.${fileData.extension}`;
+        bucket = awsConfig.bucketName;
 
-        folder = awsConfig.bucketName;
+        var readStream = fs.createReadStream(fileData.tempPath);
 
-        putObjectToAWS(folder, imageNameWithExt, fileData.data, fileData.type, function (err, imageUrl) {
+        readStream.on('error', function (err) {
+            if (err) {
+                callback(err);
+            }
+        });
+
+        readStream.on('open', function () {
+            putObjectToAWS(bucket, imageNameWithExt, readStream, fileData.type, function (err, imageUrl) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err, imageNameWithExt);
+                }
+            });
+        });
+    };
+
+    function uploadFile(fileData, bucket, callback) {
+        var imageNameWithExt = `${fileData.name}.${fileData.extension}`;
+
+        bucket = awsConfig.bucketName;
+
+        putObjectToAWS(bucket, imageNameWithExt, fileData.data, fileData.type, function (err, imageUrl) {
             if (callback && (typeof callback === 'function')) {
                 callback(err, imageNameWithExt);
             }
@@ -214,8 +237,9 @@ var imageUploader = function (awsConfig) {
     }
 
     return {
-        uploadFile: uploadFile,
-        uploadImage: uploadImage,
+        uploadFile    : uploadFile,
+        uploadFromFile: uploadFromFile,
+        uploadImage   : uploadImage,
         duplicateImage: duplicateImage,
         removeImage: removeImage,
         getImageUrl: getImageUrl,

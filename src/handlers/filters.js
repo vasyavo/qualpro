@@ -1305,6 +1305,7 @@ const Filters = function(db, redis) {
     this.brandingActivityFilters = function(req, res, next) {
         var CONSTANTS = require('../public/js/constants/otherConstants');
         var STATUSES = CONSTANTS.PROMOTION_UI_STATUSES;
+        var personnelId = req.personnelModel._id;
         var query = req.query;
         var filter = query.filter || {};
         var currentSelected = query.current;
@@ -1353,6 +1354,19 @@ const Filters = function(db, redis) {
         }
 
         aggregateHelper = new AggregationHelper($defProjection, filter);
+
+        pipeLine.push({
+            $match: {
+                $or: [
+                    {
+                        'createdBy.user': personnelId,
+                        status          : {$in: ['draft', 'expired']}
+                    }, {
+                        status: {$nin: ['draft', 'expired']}
+                    }
+                ]
+            }
+        });
 
         pipeLine.push({
             $match : {
@@ -2209,9 +2223,9 @@ const Filters = function(db, redis) {
             pipeLine.push({
                 $match: {
                     $and: [{
-                        creationDate: {$gte: queryFilter.time.values[0]}
+                        creationDate: {$gte: new Date(queryFilter.time.values[0])}
                     }, {
-                        creationDate: {$lte: queryFilter.time.values[1]}
+                        creationDate: {$lte: new Date(queryFilter.time.values[1])}
                     }]
                 }
             });
@@ -3076,6 +3090,7 @@ const Filters = function(db, redis) {
     };
 
     this.questionnary = function(req, res, next) {
+        var personnelId = req.personnelModel._id;
         var CONSTANTS = require('../public/js/constants/otherConstants');
         var query = req.query;
         var queryFilter = query.filter || {};
@@ -3109,6 +3124,19 @@ const Filters = function(db, redis) {
         }
 
         aggregateHelper = new AggregationHelper($defProjectionExtended, filter);
+
+        pipeLine.push({
+            $match: {
+                $or: [
+                    {
+                        'createdBy.user': personnelId,
+                        status          : {$in: ['draft', 'expired']}
+                    }, {
+                        status: {$nin: ['draft', 'expired']}
+                    }
+                ]
+            }
+        });
 
         if (publisherFilter) {
             pipeLine.push({
@@ -4114,7 +4142,7 @@ const Filters = function(db, redis) {
     };
 
     this.personnelFilters = function (req, res, next) {
-        var STATUSES = require('../public/js/constants/personnelStatuses');
+        const STATUSES = require('../public/js/constants/personnelStatuses');
 
         var query = req.query;
         var filterMapper = new FilterMapper();
@@ -4128,6 +4156,7 @@ const Filters = function(db, redis) {
         delete queryFilter.translated;
 
         var filter = filterMapper.mapFilter({
+            contentType : CONTENT_TYPES.PERSONNEL,
             filter   : queryFilter,
             personnel: req.personnelModel
         });
@@ -4414,7 +4443,6 @@ const Filters = function(db, redis) {
                     _id : 1,
                     name : 1
                 },
-
                 status    : 1,
                 translated: 1
             }
@@ -5961,6 +5989,7 @@ const Filters = function(db, redis) {
     };
 
     this.promotionFilters = function(req, res, next) {
+        var personnelId = req.personnelModel._id;
         var query = req.query;
         var queryFilter = query.filter || {};
         var filterMapper = new FilterMapper();
@@ -6060,6 +6089,19 @@ const Filters = function(db, redis) {
 
                     pipeLine.push({
                         $match : beforeFilter
+                    });
+
+                    pipeLine.push({
+                        $match: {
+                            $or: [
+                                {
+                                    'createdBy.user': personnelId,
+                                    status          : {$in: ['draft', 'expired']}
+                                }, {
+                                    status: {$nin: ['draft', 'expired']}
+                                }
+                            ]
+                        }
                     });
 
                     pipeLine.push({

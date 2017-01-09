@@ -1,6 +1,9 @@
 'use strict';
 
 const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
+const TestUtils = require('./../stories/push-notifications/utils/TestUtils');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
 
 var Objectives = function (db, redis, event) {
     var async = require('async');
@@ -99,6 +102,7 @@ var Objectives = function (db, redis, event) {
         var error;
         var formType = options.formType;
         var newObjectiveId;
+        const accessRoleLevel = options.level;
 
         if (!parentId || !createdById) {
             error = new Error('Not enough params');
@@ -209,8 +213,18 @@ var Objectives = function (db, redis, event) {
                         3: parent['3'] || null,
                         4: parent['4'] || null
                     };
+                    /*
+                    * less then or equals to Area in Charge manager without Trade Marketer
+                    * */
+                    const everyAdmin = [
+                        ACL_CONSTANTS.MASTER_ADMIN,
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
+                        ACL_CONSTANTS.AREA_MANAGER,
+                        ACL_CONSTANTS.AREA_IN_CHARGE,
+                        ACL_CONSTANTS.SALES_MAN,
+                    ];
 
-                    if (parentObjectiveModel.level && parentObjectiveModel.level <= ACL_CONSTANTS.AREA_IN_CHARGE) {
+                    if (parentObjectiveModel.level && everyAdmin.indexOf(parentObjectiveModel.level) > -1) {
                         subObjective.parent[parentObjectiveModel.get('level')] = parentObjectiveModel.get('_id');
                     }
                 }
@@ -232,28 +246,24 @@ var Objectives = function (db, redis, event) {
                         return cb(err);
                     }
                     newObjectiveId = objective._id;
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.OBJECTIVE,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : createdBy,
-                        itemId    : newObjectiveId,
-                        itemType  : CONTENT_TYPES.OBJECTIVES
-                    });
 
-                    parentObjectiveModel.save(function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.OBJECTIVE,
-                            actionType: ACTIVITY_TYPES.UPDATED,
-                            createdBy : createdBy,
-                            itemId    : parentObjectiveModel._id,
-                            itemType  : CONTENT_TYPES.OBJECTIVES
+                    if (TestUtils.isObjectiveDraft(model)) {
+                        ActivityLog.emit('sub-objective:draft-created', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: model.toJSON(),
                         });
+                    }
 
-                        cb(null, objective);
-                    });
+                    if (TestUtils.isObjectivePublished(model)) {
+                        ActivityLog.emit('sub-objective:published', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: model.toJSON(),
+                        });
+                    }
+
+                    cb(null, objective);
                 });
             },
 
@@ -608,10 +618,12 @@ var Objectives = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
             var model;
             var saveObjective;
             var objective;
@@ -686,13 +698,21 @@ var Objectives = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.OBJECTIVE,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : createdBy,
-                            itemId    : model._id,
-                            itemType  : CONTENT_TYPES.OBJECTIVES
-                        });
+                        if (TestUtils.isObjectiveDraft(model)) {
+                            ActivityLog.emit('objective:draft-created', {
+                                originatorId: userId,
+                                accessRoleLevel,
+                                objective: model.toJSON(),
+                            });
+                        }
+
+                        if (TestUtils.isObjectivePublished(model)) {
+                            ActivityLog.emit('objective:published', {
+                                originatorId: userId,
+                                accessRoleLevel,
+                                objective: model.toJSON(),
+                            });
+                        }
 
                         if (model) {
                             if (model.title) {
@@ -821,6 +841,14 @@ var Objectives = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const store = new ObjectiveUtils({
+            userId,
+            accessRoleLevel,
+        });
+
         function queryRun(updateObject, body) {
             var files = req.files;
             var attachments = body.attachments;
@@ -934,6 +962,8 @@ var Objectives = function (db, redis, event) {
                         return waterFallCb(err);
                     }
 
+                    store.setPreviousState(model);
+
                     if (lodash.includes([
                             OBJECTIVE_STATUSES.FAIL,
                             OBJECTIVE_STATUSES.CLOSED
@@ -980,13 +1010,9 @@ var Objectives = function (db, redis, event) {
                                 });
                         }
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.OBJECTIVE,
-                            actionType: ACTIVITY_TYPES.UPDATED,
-                            createdBy : updateObject.editedBy,
-                            itemId    : objectiveId,
-                            itemType  : CONTENT_TYPES.OBJECTIVES
-                        });
+                        store.setNextState(objectiveModel);
+                        store.difference();
+                        store.publish();
 
                         waterFallCb(null, objectiveModel);
                     });
@@ -1071,66 +1097,38 @@ var Objectives = function (db, redis, event) {
                             });
                         },
 
-                        function (parentModel, waterFallCB) {
-                            var query = {
-                                level: parseInt(parentModel.level, 10) + 1
+                        (parentObjective, cb) => {
+                            const parentModelLevel = parseInt(parentObjective.level, 10);
+                            const query = {
+                                level: parentModelLevel + 1,
+                                [`parent.${parentModelLevel}`]: parentObjective._id,
                             };
 
-                            query['parent.' + parentModel.level] = parentModel._id;
+                            ObjectiveModel.find(query, (err, childModels) => {
+                                const currentStatusOfParentObjective = parentObjective.status;
 
-                            ObjectiveModel.find(query, function (err, childModels) {
-                                parentModel.countSubTasks = _.filter(childModels, function (model) {
-                                    return model.status !== 'draft';
-                                }).length;
-                                parentModel.completedSubTasks = _.filter(childModels, function (model) {
-                                    return model.status === 'completed';
-                                }).length;
+                                const countSubTasks = childModels.filter((model) => (model.status !== 'draft')).length;
+                                const completedSubTasks = childModels.filter((model) => (model.status === 'completed')).length;
+                                const complete = Math.floor(completedSubTasks * 100 / countSubTasks);
+                                const changes = {
+                                    countSubTasks,
+                                    completedSubTasks,
+                                    complete,
+                                };
 
-                                //if (childComplete >= 100) {
-                                parentModel.complete = Math.floor(parentModel.completedSubTasks * 100 / parentModel.countSubTasks);
-                                //} else {
-                                //parentModel.complete = Math.floor((parentModel.completedSubTasks + (childComplete / 100)) * 100 / parentModel.countSubTasks);
-                                //}
-
-                                if (parentModel.complete >= 100 && parentModel.status === OBJECTIVE_STATUSES.RE_OPENED) {
-                                    parentModel.status = OBJECTIVE_STATUSES.CLOSED;
+                                if (complete >= 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.RE_OPENED) {
+                                    changes.status = OBJECTIVE_STATUSES.CLOSED;
                                 }
 
-                                if (parentModel.complete < 100 && parentModel.status === OBJECTIVE_STATUSES.CLOSED) {
-                                    parentModel.status = OBJECTIVE_STATUSES.RE_OPENED;
+                                if (complete < 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.CLOSED) {
+                                    changes.status = OBJECTIVE_STATUSES.RE_OPENED;
                                 }
 
-                                waterFallCB(null, parentModel);
+                                parentObjective.set(changes);
+
+                                cb(null, parentObjective);
                             });
-                        }/*,
-
-                         function (parentModel, cb) {
-                         parentModel
-                         .save(function (err) {
-                         var nextParent;
-                         var i;
-
-                         if (err) {
-                         return cb(err);
-                         }
-
-                         // nextParent = parentModel.parent[parentModel.level - 1];
-
-                         for (i = 1; i < 4; i++) {
-                         if (parentModel.level - i < 1) {
-                         break;
-                         }
-
-                         nextParent = parentModel.parent[parentModel.level - i];
-
-                         if (nextParent) {
-                         break;
-                         }
-                         }
-
-                         cb(null, parentModel.get('complete'), nextParent);
-                         });
-                         }*/
+                        }
 
                     ], function (err, parentModel) {
                         if (err) {
@@ -1394,6 +1392,9 @@ var Objectives = function (db, redis, event) {
     };
 
     this.createSubObjective = function (req, res, next) {
+        const session = req.session;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files;
             var userId = req.session.uId;

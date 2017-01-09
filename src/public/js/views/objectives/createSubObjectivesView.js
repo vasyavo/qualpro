@@ -177,14 +177,14 @@ define([
         },
 
         openForm: function () {
-            var modelJSON;
+            var modelJSON = this.model.toJSON();;
             var form;
             var contentType;
             var id;
             var description;
             var self = this;
 
-            if (!this.assign || this.assignOnAreaInchargeManager) {
+            if (modelJSON.objectiveType !== 'country' && (!this.assign || this.assignOnAreaInchargeManager) ) {
                 return;
             }
 
@@ -192,7 +192,7 @@ define([
                 return App.render({type: 'error', message: ERROR_MESSAGES.selectAssignee[self.currentLanguage]});
             }
 
-            modelJSON = this.model.toJSON();
+
             form = modelJSON.form;
             contentType = form.contentType;
             id = form._id;

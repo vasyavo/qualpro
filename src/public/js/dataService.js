@@ -7,6 +7,31 @@ define(function () {
      * @param {cb} callback function.
      */
     var getData = function (url, data, callback) {
+        var regexp = new RegExp('/filters/', 'i');
+
+        try {
+            var dataAsString = JSON.stringify(data);
+        } catch (ex) {
+            return callback(ex);
+        }
+
+        if (regexp.test(url)) {
+            return $.ajax({
+                method: 'POST',
+                url: url,
+                data: {
+                    query: dataAsString
+                },
+                dataType: 'json',
+                success: function (response) {
+                    callback(null, response);
+                },
+                error: function (jxhr) {
+                    callback(jxhr);
+                }
+            });
+        }
+
         $.get(url, data, function (response) {
             callback(null, response);
         }).fail(function (jxhr) {

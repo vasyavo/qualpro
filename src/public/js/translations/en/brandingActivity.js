@@ -20,7 +20,7 @@ define([
         cancelBtn          : 'Cancel',
         attachments        : 'Attachments',
         attachFiles        : 'Attach Files',
-        attachTitle        : 'Branding Activity Items comment files',
+        attachTitle        : 'Marketing Campaign Items comment files',
         attach             : 'Attach',
         description        : 'Description',
         selectTitle        : 'Select Title',
@@ -33,11 +33,11 @@ define([
         selectBranch       : 'Select branch',
         // edit
         saveBtn            : 'Save',
-        duplicateBranding  : 'Duplicate branding activity activity',
-        editBranding       : 'Edit branding activity activity',
+        duplicateBranding  : 'Duplicate Marketing Campaign',
+        editBranding       : 'Edit Marketing Campaign',
         // preview
         okBtn              : 'Ok',
-        preViewTitle       : 'View Branding Activity',
+        preViewTitle       : 'View Marketing Campaign',
         table              : 'Table',
         edit               : 'Edit',
         duplicate          : 'Duplicate',
