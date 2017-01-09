@@ -33,7 +33,8 @@ app.set('views', __dirname + '/views');
 
 app.use(morgan('dev'));
 app.use(bodyParser.json({
-    strict: false
+    strict: false,
+    limit: '10mb',
 }));
 app.use(bodyParser.urlencoded({
     extended: false
