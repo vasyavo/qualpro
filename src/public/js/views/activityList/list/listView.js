@@ -188,30 +188,24 @@ define([
                     }
                 };
 
-                if (modelType === 'priceSurvey'){
-                    dataService.getData('priceSurvey/' + model.get('itemId'), {}, function (err, response) {
-                        if (err) {
-                            return App.render({type: 'error', message: err.message});
-                        }
+                dataService.getData(modelType + '/' + model.get('itemId'), {}, function (err, response) {
+                    if (err) {
+                        return App.render({type: 'error', message: err.message});
+                    }
 
-                        if (response && response.category ){
-                            filter.category = response && response.category && {
-                                    type  : 'ObjectId',
-                                    values: [response.category._id],
-                                    names : [response.category.name[self.currentLanguage]]
-                                };
-                        }
+                    if (response && response.category) {
+                        filter.category = response && response.category && {
+                                type  : 'ObjectId',
+                                values: [response.category._id],
+                                names : [response.category.name[self.currentLanguage]]
+                            };
+                    }
 
-                        url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
-                        Backbone.history.navigate(url, true);
-                    });
-                } else {
                     url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
                     Backbone.history.navigate(url, true);
-                }
-
-
+                });
             }
+
         },
 
         personnelClick: function (e) {

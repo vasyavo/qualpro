@@ -827,7 +827,7 @@ ShelfShareHandler = function (db, redis, event) {
 
     this.getById = function (req, res, next) {
         function queryRun() {
-            var id = ObjectId(req.params.id);
+            var id = objectId(req.params.id);
 
             self.getByIdAggr({id: id}, function (err, result) {
                 if (err) {
@@ -869,10 +869,6 @@ ShelfShareHandler = function (db, redis, event) {
 
         pipeLine.push({
             $match: {_id: id}
-        });
-
-        pipeLine.push({
-            $match: queryObject
         });
 
         pipeLine.push({
@@ -999,10 +995,6 @@ ShelfShareHandler = function (db, redis, event) {
                 totalBrandsLength   : 1,
                 totalBrandsLengthStr: 1
             }
-        });
-
-        pipeLine.push({
-            $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
         });
 
         pipeLine.push({
