@@ -8,7 +8,7 @@ var ActivityHelper = function (db, redis, app) {
     var _ = require('lodash');
     var Pushes = require('../helpers/pushes');
     var logWriter = require('../helpers/logWriter.js');
-    var pushes = new Pushes(db);
+    var pushes = new Pushes();
     var ObjectId = mongoose.Types.ObjectId;
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
@@ -1222,10 +1222,6 @@ var ActivityHelper = function (db, redis, app) {
                             return eachCb(err);
                         }
 
-                        const respondObjectWithBadge = Object.assign({}, respondObject, {
-                            badge: number
-                        });
-
                         getSocketsByUserId(userId, (err, sockets) => {
                             if (err) {
                                 return eachCb(err);
@@ -1235,13 +1231,14 @@ var ActivityHelper = function (db, redis, app) {
 
                             sockets.forEach((socket) => {
                                 localSocketArray.push({
-                                    socketId: socket,
-                                    object: respondObjectWithBadge
+                                    socketId: socket
                                 });
                             });
                             socketArray.push(...localSocketArray);
 
-                            pushes.sendPushes(userId, 'newActivity', respondObjectWithBadge, (err) => {
+                            pushes.sendPushes(userId, {
+                                badge: number,
+                            }, (err) => {
                                 if (err) {
                                     logWriter.log('activity', err);
                                 }
@@ -1252,7 +1249,7 @@ var ActivityHelper = function (db, redis, app) {
                     });
                 }
 
-                pushes.sendPushes(userId, 'newActivity', respondObject, (err) => {
+                pushes.sendPushes(userId, {}, (err) => {
                     if (err) {
                         logWriter.log('activity', err);
                     }

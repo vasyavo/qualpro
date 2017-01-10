@@ -13,7 +13,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.OBJECTIVE;
         const contentType = contentTypes.OBJECTIVES;
-        const actionType = activityTypes.UPDATED;
+        const actionType = activityTypes.COMMENTED;
 
         const {
             actionOriginator,
@@ -21,7 +21,6 @@ module.exports = (options) => {
             body,
         } = options;
 
-        const contentAuthor = _.get(body, 'createdBy.user');
         const arrayOfParentObjectiveId = _(body.parent)
             .values()
             .compact()
@@ -38,7 +37,6 @@ module.exports = (options) => {
         ] = yield [
             getSupervisorByAssigneeAndOriginator({
                 assignedTo,
-                originator: contentAuthor,
             }),
             getOriginatorByParentObjective({
                 objectives: arrayOfParentObjectiveId,
@@ -62,7 +60,6 @@ module.exports = (options) => {
             accessRoleLevel,
             personnels: _.uniq([
                 actionOriginator,
-                contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
                 ...arrayOfOriginator,
@@ -80,9 +77,9 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: _.uniq([actionOriginator, contentAuthor]),
+            recipients: [actionOriginator],
             subject: {
-                en: 'Objective updated',
+                en: 'Comment sent',
                 ar: '',
             },
             payload: activityAsJson,
@@ -91,7 +88,7 @@ module.exports = (options) => {
                 return id === actionOriginator
             }),
             subject: {
-                en: 'Sub-objective updated',
+                en: 'Sub-objective commented',
                 ar: '',
             },
             payload: activityAsJson,
@@ -100,7 +97,7 @@ module.exports = (options) => {
                 return id === actionOriginator
             }),
             subject: {
-                en: 'Received updated objective',
+                en: 'Objective commented',
                 ar: '',
             },
             payload: activityAsJson,
@@ -109,7 +106,7 @@ module.exports = (options) => {
                 return id === actionOriginator
             }),
             subject: {
-                en: `Subordinate's objective updated`,
+                en: `Subordinate's objective commented`,
                 ar: '',
             },
             payload: activityAsJson,

@@ -1,3 +1,7 @@
+const mongoose = require('mongoose');
+
+mongoose.Schemas = {}; // important thing
+
 const mongo = require('./utils/mongo');
 const eventEmitter = require('./utils/eventEmitter');
 

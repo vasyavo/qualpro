@@ -66,15 +66,28 @@ module.exports = (options) => {
 
         const groups = [{
             recipients: _.uniq([actionOriginator, contentAuthor]),
-            subject: 'In-store task updated',
+            subject: {
+                en: 'In-store task updated',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([assignedTo], [actionOriginator]),
-            subject: 'Received updated in-store task',
+            recipients: _.remove([assignedTo], (id) => {
+                return id === actionOriginator
+            }),
+            subject: {
+                en: 'Received updated in-store task',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([arrayOfSupervisor], [actionOriginator]),
-            subject: `Subordinate's in-store task updated`,
+            recipients: _.remove([arrayOfSupervisor], (id) => {
+                return id === actionOriginator
+            }),
+            subject: {
+                en: `Subordinate's in-store task updated`,
+                ar: ''
+            },
             payload: activityAsJson,
         }];
 
