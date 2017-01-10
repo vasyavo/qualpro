@@ -243,7 +243,7 @@
             31: {
                 _id : 31,
                 name: {
-                    en: 'Al Alali Questionnaire',
+                    en: 'al alali Questionnaire',
                     ar: 'استطلاع العلالي'
                 },
                 href: CONSTANTS.QUESTIONNARIES
@@ -261,7 +261,7 @@
             33: {
                 _id : 33,
                 name: {
-                    en: 'Al Alali promo evaluation',
+                    en: 'al alali promo evaluation',
                     ar: 'تقييم ترويج العلالي '
                 },
                 href: CONSTANTS.PROMOTIONS
@@ -279,7 +279,7 @@
             35: {
                 _id : 35,
                 name: {
-                    en: 'Al Alali promotions items',
+                    en: 'al alali promotions items',
                     ar: 'ترويج السلع'
                 },
                 href: CONSTANTS.PROMOTIONSITEMS
@@ -306,7 +306,7 @@
             38: {
                 _id : 38,
                 name: {
-                    en: 'Al Alali Marketing Campaigns & Display report',
+                    en: 'al alali Marketing Campaigns & Display report',
                     ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'
                 },
                 href: CONSTANTS.BRANDING_ACTIVITY
@@ -324,7 +324,7 @@
             40: {
                 _id : 40,
                 name: {
-                    en: 'Al Alali Marketing Campaigns & Display items',
+                    en: 'al alali Marketing Campaigns & Display items',
                     ar: 'العلامات التجارية وتقارير العرض للسلع'
                 },
                 href: CONSTANTS.BRANDING_ACTIVITY_ITEMS

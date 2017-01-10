@@ -240,17 +240,17 @@ allowedParams[CONTENT_TYPES.OBJECTIVES] = {
     },
     7: {
         create            : ['title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
-        update            : ['complete', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update            : ['complete', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'status'],
         createSubObjective: ['companyObjective', 'parentId', 'level', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     8: {
         create            : ['title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
-        update            : ['complete', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update            : ['complete', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'status'],
         createSubObjective: ['companyObjective', 'parentId', 'level', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     },
     9: {
         create            : ['title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
-        update            : ['complete', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'],
+        update            : ['complete', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'status'],
         createSubObjective: ['companyObjective', 'parentId', 'level', 'title', 'attachments', 'formType', 'objectiveType', 'assignedTo', 'saveObjective', 'priority', 'dateStart', 'dateEnd', 'location', 'description', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch']
     }
 };

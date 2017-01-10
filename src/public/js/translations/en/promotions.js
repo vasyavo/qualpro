@@ -5,7 +5,7 @@ define([
 ], function (_, paginationTranslation, filtersTranslation) {
     var promotionsTranslation = {
         // top bar
-        all                : 'Al Alali promo evaluation',
+        all                : 'al alali promo evaluation',
         newPromotion       : 'New Promotion',
         // list
         startDate          : 'Start date',
