@@ -5,6 +5,7 @@ module.exports = (callback) => {
 
         require('./addModules').generate,
 
+
         require('./addModulesToAccessRoles').generate
 
     ], callback);
