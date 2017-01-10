@@ -3606,7 +3606,7 @@ var Personnel = function(db, redis, event) {
                 event.emit('activityChange', {
                     module : ACL_MODULES.PERSONNEL,
                     actionType : ACTIVITY_TYPES.UPDATED,
-                    createdBy : body.editedBy,
+                    createdBy : personnel.editedBy,
                     itemId : personnelId,
                     itemType : CONTENT_TYPES.PERSONNEL
                 });

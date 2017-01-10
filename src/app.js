@@ -74,10 +74,4 @@ mongo.on('connected', () => {
     ])
 });
 
-if (config.isMaster) {
-    const Scheduler = require('./helpers/scheduler')(mongo, eventEmitter);
-    const scheduler = new Scheduler();
-    scheduler.initEveryHourScheduler();
-}
-
 module.exports = app;
