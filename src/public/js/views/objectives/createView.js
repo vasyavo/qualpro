@@ -272,14 +272,14 @@ define([
                         return cb(null, model);
                     }
 
-                    var modelFiles = visibilityFormAjax.model.get('files');
+                    var modelFiles = context.visibilityFormAjax.model.get('files');
                     var formId = model.get('form')._id;
                     context.visibilityFormAjax.url = 'form/visibility/' + formId;
 
-                    var data;
+                    var requestPayload;
 
                     if (model.get('applyFileToAll')) {
-                        data = {
+                        requestPayload = {
                             before : {
                                 files : files.map(function(item) {
                                     return item._id;
@@ -292,7 +292,7 @@ define([
                             branches : []
                         };
                     } else {
-                        data = {
+                        requestPayload = {
                             before : {
                                 files : []
                             },
@@ -323,7 +323,7 @@ define([
                         url : `form/visibility/${formId}`,
                         method : 'PATCH',
                         dataType : 'json',
-                        data : data,
+                        data : requestPayload,
                         success : function () {
                             cb(null, model);
                         },

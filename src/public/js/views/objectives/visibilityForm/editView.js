@@ -136,7 +136,6 @@ define([
 
         formSend: function (e) {
             var context = e.data.context;
-            debugger;
             var data = new FormData(this);
             var $curEl = context.$el;
             var errorsLength = Object.keys(context.errors).length;

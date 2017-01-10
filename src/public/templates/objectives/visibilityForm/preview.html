@@ -1,0 +1,69 @@
+<div class="dialogCategotyWrap visibilityContainer">
+    <%
+    var container='';
+    var containerAfter='';
+    var fileType;
+    var fileTypeAfter;
+
+    if (model.before.files && model.before.files.contentType){
+    fileType = model.before.files.contentType.substr(0, 5);
+    if(fileType==='video'){
+    container = model.before.files.url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files.url+'"></video>' : '';
+    } else {
+    container = model.before.files.url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files.url+'">' : '';
+    }
+    }
+
+    if (model.after.files && model.after.files.contentType){
+    fileTypeAfter = model.after.files.contentType.substr(0, 5);
+
+    if(fileTypeAfter==='video'){
+    containerAfter = model.after.files.url ? '<video class="showPreview after" width="400" controls><source src="'+model.after.files.url+'"></video>' : '';
+    } else {
+    containerAfter = model.after.files.url ? '<img class="imgResponsive showPreview after" src="' + model.after.files.url + '">' : '';
+    }
+    }
+    %>
+    <div class="title">
+        <span class="titleDescription"><%= translation.titlePreviewVisibility %></span>
+    </div>
+    <form id="mainVisForm" class="visibilityContainer flexRow">
+        <div class="banner_inner bannerFullWidth">
+            <div class="beforeTitle fontBold fontDefault"><%= translation.before %></div>
+            <div class="scrollable">
+                <div class="banner_inner_top borderBottom">
+                    <span class="fontDefault"><%= branchName %></span>
+                </div>
+                <div class="bannerBig">
+                    <div id="imageMy" class="bannerImage"><%= container %></div>
+                    <div class="bannerDescription picSquare bannerIcon">
+                        <span class="fontMedium"><%= (model.before.files) ? model.before.files.originalName : '' %></span>
+                    </div>
+                </div>
+                <div class="banner_textBlock">
+                    <p class="uploadDescription fontDefault"><%= translation.description %></p>
+                    <div id="beforeText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= model.before.description %></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="banner_inner bannerFullWidth">
+            <div class="afterTitle fontBold fontDefault"><%= translation.after %></div>
+            <div class="scrollable">
+                <div class="banner_inner_top borderBottom">
+                    <span class="branchName"><%= branchName %></span>
+                </div>
+                <div class="bannerBig">
+                    <div id="imageAfter"><%= containerAfter %></div>
+                    <div class="bannerDescription picSquare bannerIcon">
+                        <span class="fontMedium"><%= (model.after.files) ? model.after.files.originalName : '' %></span>
+                    </div>
+                </div>
+                <div class="banner_textBlock afterTextBlock">
+                    <p class="uploadDescription fontDefault"><%= translation.description %></p>
+                    <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= model.after.description %></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
