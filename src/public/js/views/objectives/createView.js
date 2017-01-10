@@ -247,19 +247,24 @@ define([
                 },
 
                 function (model, cb) {
-                    $.ajax({
-                        url : '/file',
-                        method : 'POST',
-                        data : context.visibilityFormAjax.data,
-                        contentType: false,
-                        processData: false,
-                        success : function (response) {
-                            cb(null, model, response);
-                        },
-                        error : function () {
-                            cb(true);
-                        }
-                    });
+                debugger;
+                    if (context.visibilityFormAjax.model.get('files').length) {
+                        $.ajax({
+                            url : '/file',
+                            method : 'POST',
+                            data : context.visibilityFormAjax.data,
+                            contentType: false,
+                            processData: false,
+                            success : function (response) {
+                                cb(null, model, response);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model, []);
+                    }
                 },
 
                 function (model, files, cb) {
@@ -267,7 +272,7 @@ define([
                         return cb(null, model);
                     }
 
-                    var modelFiles = model.get('files');
+                    var modelFiles = visibilityFormAjax.model.get('files');
                     var formId = model.get('form')._id;
                     context.visibilityFormAjax.url = 'form/visibility/' + formId;
 
