@@ -3,7 +3,7 @@ const os = require('os');
 const config = require('./config');
 
 if (cluster.isMaster) {
-    for (let i = 0; i < config.numCPUs; i++) {
+    for (let i = 0; i < config.webConcurrency; i++) {
         cluster.fork();
     }
     cluster.on('exit', (deadWorker, code, signal) => {
