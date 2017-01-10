@@ -50,9 +50,9 @@ module.exports = (options) => {
             },
             accessRoleLevel,
             personnels: _.uniq([
+                actionOriginator,
                 ...assignedTo,
                 ...arrayOfSupervisor,
-                ...arrayOfOriginator,
             ]),
             assignedTo,
             country: body.country,
