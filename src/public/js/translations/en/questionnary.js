@@ -49,7 +49,7 @@ define([
         okBtn             : 'Ok',
 
         // top Bar
-        all   : 'Al Alali Questionnaire',
+        all   : 'al alali Questionnaire',
         newBtn: 'New Questionnaire',
         of    : 'of'
     };

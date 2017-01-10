@@ -171,7 +171,7 @@ const modules = [
 
     {
         _id     : 16,
-        name    : {en: 'Al Alali Marketing', ar: 'تسويق العلالي'},
+        name    : {en: 'al alali Marketing', ar: 'تسويق العلالي'},
         href    : 'alalalimarketing',
         sequence: 16,
         parrent : null,
@@ -318,7 +318,7 @@ const modules = [
 
     {
         _id     : 31,
-        name    : {en: 'Al Alali Questionnaire', ar: 'استطلاع العلالي'},
+        name    : {en: 'al alali Questionnaire', ar: 'استطلاع العلالي'},
         href    : 'questionnary',
         sequence: 31,
         parrent : 16,
@@ -336,7 +336,7 @@ const modules = [
 
     {
         _id     : 33,
-        name    : {en: 'Al Alali promo evaluation', ar: 'تقييم ترويج العلالي '},
+        name    : {en: 'al alali promo evaluation', ar: 'تقييم ترويج العلالي '},
         href    : CONSTANTS.PROMOTIONS,
         sequence: 33,
         parrent : 15,
@@ -355,7 +355,7 @@ const modules = [
     {
         _id     : 35,
         name: {
-            en: 'Al Alali promotions items',
+            en: 'al alali promotions items',
             ar: 'ترويج السلع'
         },
         href    : CONSTANTS.PROMOTIONSITEMS,
@@ -393,7 +393,7 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'Al Alali Marketing Campaigns', ar: ''}, // todo translation
+        name    : {en: 'al alali Marketing Campaigns', ar: ''}, // todo translation
         href    : CONSTANTS.BRANDING_ACTIVITY,
         sequence: 38,
         parrent : 16,
@@ -403,7 +403,7 @@ const modules = [
     {
         _id     : 40,
         name: {
-            en: 'Al Alali Branding Activity items',
+            en: 'al alali Branding Activity items',
             ar: '' /*'العلامات التجارية وتقارير العرض للسلع'*/ // todo translation
         },
         href    : CONSTANTS.BRANDING_ACTIVITY_ITEMS,
@@ -490,7 +490,7 @@ const modules = [
 
     {
         _id     : 45,
-        name    : {en: 'Al Alali Branding & Display report', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
+        name    : {en: 'al alali Branding & Display report', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
         href    : CONSTANTS.BRANDING_AND_DISPLAY,
         sequence: 45,
         parrent : 16,
