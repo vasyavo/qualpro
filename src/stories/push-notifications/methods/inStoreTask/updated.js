@@ -48,7 +48,7 @@ module.exports = (options) => {
             accessRoleLevel,
             personnels: _.uniq([
                 actionOriginator,
-                ...contentAuthor,
+                contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
             ]),
