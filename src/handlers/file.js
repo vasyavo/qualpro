@@ -353,6 +353,13 @@ module.exports = function() {
         const userId = req.session.uId;
         const files = req.files;
 
+        if (!Object.keys(files).length) {
+            let error = new Error('Not enough params');
+            error.status = 400;
+
+            return next(error);
+        }
+
         async.waterfall([
             (waterfallCb) => {
                 self.uploadFile(userId, files, 'file', (err, filesIds) => {

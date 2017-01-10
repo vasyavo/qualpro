@@ -23,79 +23,45 @@ var VisibilityForm = function (db, redis, event) {
         editedBy   : 1,
         objective  : 1,
         before     : 1,
+        branches   : 1,
         files      : 1,
         after      : 1,
         description: 1
     };
 
-    this.createForm = function (userId, body, files, callback) {
-        var createdBy = {
+    this.createForm = function (userId, body, callback) {
+        const createdBy = {
             user: userId,
             date: new Date()
         };
-        var model;
-        var before;
-        var visibilityForm;
 
-        async.waterfall([
-            function (cb) {
-                if (!files) {
-                    return cb(null, []);
-                }
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.VISIBILITYFORM, function (err, filesIds) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, filesIds);
-                });
-            },
-            function (filesIds, cb) {
-                var files;
+        if (!body) {
+            return callback(Error('Request body is empty'));
+        }
 
-                if (!body) {
-                    return cb(Error('Request body is empty'));
-                }
+        const visibilityForm = {
+            objective: body.objective,
+            createdBy: createdBy,
+            editedBy : createdBy,
+            before   : body.before
+        };
 
-                files = filesIds && filesIds.map(function(el){
-                        return {
-                            file : el
-                        }
-                    }) || [];
-                before = {
-                    files: files
-                };
+        visibilityForm.branches = body.branches || [];
 
-                visibilityForm = {
-                    objective: body.objective,
-                    createdBy: createdBy,
-                    editedBy : createdBy,
-                    before   : before
-                };
-
-                model = new VisibilityFormModel(visibilityForm);
-                model.save(function (err, model) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null, model);
-                });
-            }
-        ], function (err, result) {
+        VisibilityFormModel.create(visibilityForm, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
-            callback(null, result);
+            callback(null, model);
         });
     };
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var files = req.files;
             var userId = req.session.uId;
 
-            self.createForm(userId, body, files, function (err, result) {
+            self.createForm(userId, body, function (err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -162,6 +128,7 @@ var VisibilityForm = function (db, redis, event) {
             foreignField: '_id',
             as          : 'before.files'
         };
+
         var $lookup3 = {
             from        : 'files',
             localField  : 'after.files.file',
@@ -173,11 +140,22 @@ var VisibilityForm = function (db, redis, event) {
             $match: queryObject
         });
 
+        if (limit && limit !== -1) {
+            pipeline.push({
+                $skip: skip
+            });
+
+            pipeline.push({
+                $limit: limit
+            });
+        }
+
         pipeline.push({
             $project: {
                 _id      : 1,
                 objective: 1,
                 editedBy : 1,
+                branches : 1,
                 before   : 1,
                 after    : 1,
                 createdBy: 1
@@ -295,9 +273,9 @@ var VisibilityForm = function (db, redis, event) {
                 _id      : 1,
                 objective: 1,
                 editedBy : 1,
+                branches : 1,
                 before   : {
                     files      : {$arrayElemAt: ['$before.files', 0]},
-                    description: 1
                 },
 
                 after: {
@@ -314,6 +292,7 @@ var VisibilityForm = function (db, redis, event) {
                 _id      : 1,
                 objective: 1,
                 editedBy : 1,
+                branches : 1,
                 before   : {
                     files: {
                         _id         : '$before.files._id',
@@ -341,47 +320,217 @@ var VisibilityForm = function (db, redis, event) {
             }
         });
 
-        if (limit && limit !== -1) {
-            pipeline.push({
-                $skip: skip
-            });
+        // update branches
+        pipeline.push({
+            $unwind: {
+                path                      : '$branches',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $unwind: {
+                path                      : '$branches.before.files',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $unwind: {
+                path                      : '$branches.after.files',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'files',
+                localField  : 'branches.before.files',
+                foreignField: '_id',
+                as          : 'branches.before.files'
+            }
+        }, {
+            $lookup: {
+                from        : 'files',
+                localField  : 'branches.after.files',
+                foreignField: '_id',
+                as          : 'branches.after.files'
+            }
+        }, {
+            $project: {
+                _id      : 1,
+                objective: 1,
+                editedBy : 1,
+                before   : 1,
+                after    : 1,
+                createdBy: 1,
+                branches : {
+                    branchId: 1,
+                    before  : {
+                        files: {
+                            $cond: {
+                                if  : {$eq: ['$branches.before', []]},
+                                then: null,
+                                else: {$arrayElemAt: ['$branches.before.files', 0]}
+                            }
+                        },
+                        description: 1
+                    },
 
-            pipeline.push({
-                $limit: limit
-            });
-        }
+                    after: {
+                        files      : {
+                            $cond: {
+                                if  : {$eq: ['$branches.after', []]},
+                                then: null,
+                                else: {$arrayElemAt: ['$branches.after.files', 0]}
+                            }
+                        },
+                        description: 1
+                    },
+                }
+            }
+        },{
+            $project: {
+                _id      : 1,
+                objective: 1,
+                editedBy : 1,
+                before   : 1,
+                after    : 1,
+                createdBy: 1,
+                branches : {
+                    branchId: 1,
+                    before  : {
+                        files: '$branches.before.files',
+                        description: 1
+                    },
 
-        aggregation = VisibilityFormModel.aggregate(pipeline);
+                    after: {
+                        files      : {
+                            $cond: {
+                                if  : {$eq: ['$branches.after', []]},
+                                then: null,
+                                else: {$arrayElemAt: ['$branches.after.files', 0]}
+                            }
+                        },
+                        description: 1
+                    },
+                }
+            }
+        }, {
+            $group: {
+                _id: {
+                    _id        : '$_id',
+                    objective  : '$objective',
+                    editedBy   : '$editedBy',
+                    before     : '$before',
+                    after      : '$after',
+                    createdBy  : '$createdBy',
+                    branchId   : '$branches.branchId',
+                    description: '$branches.after.description'
+                },
 
-        aggregation.exec(function (err, result) {
+                branchesBeforeFiles: {
+                    $push: {
+                        _id         : '$branches.before.files._id',
+                        fileName    : '$branches.before.files.name',
+                        contentType : '$branches.before.files.contentType',
+                        originalName: '$branches.before.files.originalName',
+                        extension   : '$branches.before.files.extension'
+                    }
+                },
+
+                branchesAfterFiles: {
+                    $push: {
+                        _id         : '$branches.after.files._id',
+                        fileName    : '$branches.after.files.name',
+                        contentType : '$branches.after.files.contentType',
+                        originalName: '$branches.after.files.originalName',
+                        extension   : '$branches.after.files.extension'
+                    }
+                }
+            }
+        }, {
+            $project: {
+                _id        : '$_id._id',
+                objective  : '$_id.objective',
+                editedBy   : '$_id.editedBy',
+                before     : '$_id.before',
+                after      : '$_id.after',
+                createdBy  : '$_id.createdBy',
+                branchId   : '$_id.branchId',
+                description: '$_id.description',
+                branchesBeforeFiles   : 1,
+                branchesAfterFiles   : 1,
+            }
+        }, {
+            $group: {
+                _id: {
+                    _id      : '$_id',
+                    objective: '$objective',
+                    editedBy : '$editedBy',
+                    before   : '$before',
+                    after    : '$after',
+                    createdBy: '$createdBy',
+                },
+
+                branches: {
+                    $push: {
+                        before  : {
+                            files: {$setDifference: ['$branchesBeforeFiles', [{}]]},
+                        },
+                        branchId: '$branchId',
+                        after   : {
+                            files      : {$setDifference: ['$branchesAfterFiles', [{}]]},
+                            description: '$description'
+                        }
+                    }
+                }
+            }
+        }, {
+            $project: {
+                _id      : '$_id._id',
+                objective: '$_id.objective',
+                editedBy : '$_id.editedBy',
+                before   : '$_id.before',
+                after    : '$_id.after',
+                createdBy: '$_id.createdBy',
+                branches : 1
+            }
+        });
+        
+        VisibilityFormModel.aggregate(pipeline).allowDiskUse(true).exec(function (err, result) {
             if (err) {
                 return callback(err);
             }
+            
+            function setUrl(file) {
+                file.url = fileHandler.computeUrl(file.fileName, 'visibilityForm');
+                return file;
+            }
 
             result = _.map(result, function (element) {
-                let nameBefore;
-                let urlBefore;
-                let nameAfter;
-                let urlAfter;
-
-                if (element.before.files && element.before.files.fileName) {
-                    nameBefore = element.before.files.fileName;
-                    urlBefore = fileHandler.computeUrl(nameBefore, 'visibilityForm');
-                    element.before.files.url = urlBefore;
+                if (element.before.files && element.before.files.length) {
+                    element.before.files = element.before.files.map(setUrl);
                 }
 
-                if (element.after.files && element.after.files.fileName) {
-                    nameAfter = element.after.files.fileName;
-                    urlAfter = fileHandler.computeUrl(nameAfter, 'visibilityForm');
-                    element.after.files.url = urlAfter;
-                }
-
-                if (element.before.description) {
-                    element.before.description = _.unescape(element.before.description);
+                if (element.after.files && element.after.files.length) {
+                    element.after.files = element.before.after.map(setUrl);
                 }
 
                 if (element.after.description) {
                     element.after.description = _.unescape(element.after.description);
+                }
+
+                if(element.branches){
+                    element.branches = element.branches.map(item => {
+                        if (item.before.files && item.before.files.length) {
+                            item.before.files = item.before.files.map(setUrl);
+                        }
+
+                        if (item.after.files && item.after.files.length) {
+                            item.after.files = item.before.after.map(setUrl);
+                        }
+
+                        if (item.after.description) {
+                            item.after.description = _.unescape(item.after.description);
+                        }
+
+                        return item;
+                    });
                 }
 
                 return element;
@@ -536,6 +685,7 @@ var VisibilityForm = function (db, redis, event) {
                             if (element.after && element.after.description) {
                                 element.after.description = _.unescape(element.after.description);
                             }
+
                             return element;
                         });
 
@@ -567,19 +717,15 @@ var VisibilityForm = function (db, redis, event) {
 
     this.update = function (req, res, next) {
         function queryRun(body) {
-            var id = req.params.id;
-            var userId = req.session.uId;
-            var files = req.files;
-            var filePresence = Object.keys(files).length;
-            var fileDeleted = body && body.isNewFile && !body.isNewFile.length;
-            var aggregateHelper = new AggregationHelper($defProjection);
-            var editedBy = {
+            const id = req.params.id;
+            const userId = req.session.uId;
+            const aggregateHelper = new AggregationHelper($defProjection);
+            const editedBy = {
                 user: objectId(userId),
                 date: new Date()
             };
-            var visibilityForm = {};
-            var waterfallTasks = [];
-            var error;
+            const waterfallTasks = [];
+            let error;
 
             if (!VALIDATION.OBJECT_ID.test(id)) {
                 error = new Error('Invalid parameter id');
@@ -587,55 +733,10 @@ var VisibilityForm = function (db, redis, event) {
                 return next(error);
             }
 
-            function uploadFile(cb) {
-                if (!filePresence) {
-                    return cb(null, []);
-                }
+            function updateFn(cb) {
+                body.editedBy = editedBy;
 
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.VISIBILITYFORM, function (err, filesIds) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null, filesIds);
-                });
-            }
-
-            function deleteFile(filesBackend, cb) {
-                fileHandler.deleteFew(filesBackend, function (err, filesIds) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, []);
-                });
-            }
-
-            function updateFn(filesIds, cb) {
-                var updateType = 'after';
-
-                if (body.description) {
-                    body.description = _.escape(body.description);
-                }
-
-                if (body.before && body.before !== 'false') {
-                    updateType = 'before';
-                } else {
-                    visibilityForm[updateType + '.description'] = body.description;
-                }
-
-                visibilityForm.editedBy = editedBy;
-
-                if (typeof filesIds !== 'function' && filesIds) {
-                    visibilityForm[updateType + '.files'] = filesIds.map(function(el){
-                        return {
-                            file : el
-                        }
-                    });
-                } else {
-                    cb = filesIds;
-                }
-
-                VisibilityFormModel.findByIdAndUpdate({_id: id}, {$set: visibilityForm}, function (err, model) {
+                VisibilityFormModel.findByIdAndUpdate(id, body, function (err, model) {
                     if (err) {
                         return cb(err);
                     }
@@ -654,7 +755,7 @@ var VisibilityForm = function (db, redis, event) {
                         event.emit('activityChange', {
                             module     : module,
                             actionType : ACTIVITY_TYPES.UPDATED,
-                            createdBy  : visibilityForm.editedBy,
+                            createdBy  : editedBy,
                             itemId     : model.objective._id,
                             itemType   : model.objective.context,
                             itemDetails: CONTENT_TYPES.VISIBILITYFORM
@@ -682,40 +783,7 @@ var VisibilityForm = function (db, redis, event) {
                 });
             }
 
-            function getVisibility(cb) {
-                getAllAggregate({
-                    aggregateHelper: aggregateHelper,
-                    queryObject    : {_id: objectId(id)}
-                }, function (err, result) {
-                    var filesBackend;
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    result = _.map(result, function (element) {
-                        if (element.after && element.after.description) {
-                            element.after.description = _.unescape(element.after.description);
-                        }
-                        return element;
-                    });
-
-                    if (result[0].before.files._id) {
-                        filesBackend = [result[0].before.files._id];
-                        waterfallTasks.splice(1, 0, deleteFile);
-                    } else {
-                        filesBackend = [];
-                    }
-
-                    cb(null, filesBackend);
-                });
-            }
-
             waterfallTasks.push(updateFn);
-            if (filePresence) {
-                waterfallTasks.unshift(uploadFile);
-            } else if (fileDeleted) {
-                waterfallTasks.unshift(getVisibility);
-            }
 
             async.waterfall(waterfallTasks,
                 function (err, result) {
@@ -730,14 +798,6 @@ var VisibilityForm = function (db, redis, event) {
 
         access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
             var body = req.body;
-
-            try {
-                if (body.data) {
-                    body = JSON.parse(body.data);
-                }
-            } catch (err) {
-                return next(err);
-            }
 
             if (err) {
                 return next(err);

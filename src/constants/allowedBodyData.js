@@ -732,48 +732,48 @@ allowedParams[CONTENT_TYPES.INSTORETASKS] = {
 
 allowedParams[CONTENT_TYPES.VISIBILITYFORM] = {
     0: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     1: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     2: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     3: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     4: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     5: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     6: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     7: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     8: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     9: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     },
     10: {
-        create: ['objective', 'description'],
-        update: ['description', 'before', 'isNewFile']
+        create: ['before', 'branches', 'after'],
+        update: ['before', 'branches', 'after']
     }
 };
 
