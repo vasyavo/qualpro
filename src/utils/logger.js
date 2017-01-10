@@ -11,11 +11,7 @@ const logger = new (winston.Logger)({
             json: false,
             handleExceptions: true,
             humanReadableUnhandledException: true,
-        }),
-        // fixme change from MongodDB to S3
-        // new (winston.transports.MongoDB)({
-        //     db: config.mongodbUri,
-        // }),
+        })
     ],
 });
 

@@ -1,6 +1,7 @@
-const event = require('./utils/eventEmitter');
-const db = require('./utils/mongo');
+require('./utils/polyfills');
 
+const http = require('http');
+const async = require('async');
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -10,27 +11,28 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const compress = require('compression');
 
+mongoose.Schemas = {}; // important thing
+
+const config = require('./config');
+const mongo = require('./utils/mongo');
+const logger = require('./utils/logger');
+const eventEmitter = require('./utils/eventEmitter');
+const MessageDispatcher = require('./stories/push-notifications/utils/messageDispatcher');
+
+process.on('unhandledRejection', (reason, p) => {
+    logger.error(p, reason);
+});
+
+process.on('uncaughtException', (error) => {
+    logger.error(error);
+});
+
 const app = express();
 
-const allowCrossDomain = (req, res, next) => {
-    const browser = req.headers['user-agent'];
-
-    if (/Trident/.test(browser) || /Edge/.test(browser)) {
-        res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-    }
-
-    req.isMobile = /mobile/i.test(browser);
-
-    next();
-};
-
 app.use(compress());
-
 app.engine('html', consolidate.swig);
-
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
-
 app.use(morgan('dev'));
 app.use(bodyParser.json({
     strict: false,
@@ -41,14 +43,41 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(allowCrossDomain);
 app.use(require('./utils/sessionMiddleware'));
 app.use(cookieParser('CRMkey'));
-
-require('./utils/polyfills');
-
 app.get('/info', require('./utils/isApiAvailable'));
+require('./routes/index')(app, mongo, eventEmitter);
 
-require('./routes/index')(app, db, event);
+const node = http.createServer(app);
+const io = require('./helpers/socket')(node);
+
+app.set('io', io);
+MessageDispatcher.setIo(io);
+
+node.listen(config.port, () => {
+    logger.info(`Server started at port ${config.port} in ${config.env} environment:`, config);
+});
+
+mongo.on('connected', () => {
+    async.series([
+
+        (cb) => {
+            require('./types');
+
+            if (config.isMaster) {
+                return require('./modulesCreators')(cb);
+            }
+
+            cb(null);
+        },
+
+    ])
+});
+
+if (config.isMaster) {
+    const Scheduler = require('./helpers/scheduler')(mongo, eventEmitter);
+    const scheduler = new Scheduler();
+    scheduler.initEveryHourScheduler();
+}
 
 module.exports = app;

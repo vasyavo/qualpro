@@ -2,7 +2,7 @@ const config = require('./../../config');
 const expect = require('chai').expect;
 const async = require('async');
 const request = require('supertest-as-promised');
-const server = require('./../../server');
+const server = require('./../../app');
 const faker = require('faker');
 
 if (!config.isCI && config.pullDbOnCI) {

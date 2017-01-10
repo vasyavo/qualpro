@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var Comment = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
@@ -100,9 +102,10 @@ var Comment = function (db, redis, event) {
             }
 
             switch (context) {
+                // fixme: should be double checked
                 case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
                     ContextModel = CompetitorBrandingItemModel;
-                    mid = ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_ITEMS;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
                     ContextModel = CompetitorBrandingItemModel;
@@ -297,7 +300,7 @@ var Comment = function (db, redis, event) {
                 });
             } else {
                 error = new Error();
-                error.status = 404;
+                error.status = 400;
                 error.message = 'Model for comments not found';
 
                 next(error);

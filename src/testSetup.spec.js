@@ -1,5 +1,4 @@
 const chai = require('chai');
-const async = require('async');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 const mongo = require('./utils/mongo');
