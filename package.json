@@ -55,6 +55,7 @@
     "socket.io-redis": "1.1.1",
     "supertest-as-promised": "4.0.1",
     "swig": "1.4.2",
+    "throng": "4.0.0",
     "twilio": "2.5.1",
     "underscore": "1.8.3",
     "validator": "4.0.5",
