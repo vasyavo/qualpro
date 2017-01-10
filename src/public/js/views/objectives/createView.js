@@ -301,12 +301,12 @@ define([
                                 files : []
                             },
                             branches : modelFiles.map(function(item) {
-                                var fileFromServer = _.findWhere(files, {
+                                var fileFromServer = _.findWhere(files.files, {
                                     originalName : item.fileName
                                 });
 
                                 return {
-                                    branchId : item.branchId,
+                                    branchId : item.branch,
                                     before : {
                                         files : [fileFromServer._id]
                                     },
@@ -320,10 +320,11 @@ define([
                     }
 
                     $.ajax({
-                        url : `form/visibility/${formId}`,
-                        method : 'PATCH',
+                        url : 'form/visibility/' + formId,
+                        method : 'PUT',
+                        contentType : 'application/json',
                         dataType : 'json',
-                        data : requestPayload,
+                        data : JSON.stringify(requestPayload),
                         success : function () {
                             cb(null, model);
                         },
