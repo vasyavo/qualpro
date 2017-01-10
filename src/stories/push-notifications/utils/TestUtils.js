@@ -33,9 +33,27 @@ const isInStoreTaskPublished = (state) => {
     return isObjectivePublished(state);
 };
 
+/*
+ * @param state {Object} Objective
+ * @returns {Boolean}
+ * */
+const isObjectiveStatusChanged = (state) => {
+    return state.hasOwnProperty('status');
+};
+
+/*
+ * @param state {Object} Objective
+ * @returns {Boolean}
+ * */
+const isObjectiveAssigneeChanged = (state) => {
+    return state.hasOwnProperty('assignedTo');
+};
+
 module.exports = {
     isObjectiveDraft,
     isObjectivePublished,
+    isObjectiveStatusChanged,
+    isObjectiveAssigneeChanged,
     isInStoreTaskDraft,
     isInStoreTaskPublished,
 };

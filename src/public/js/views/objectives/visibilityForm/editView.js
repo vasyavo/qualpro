@@ -69,13 +69,18 @@ define([
 
         applyFileToAllBranches : function (event) {
             let checkbox = event.target;
-            let files = this.model.get('files');
+            let files = this.model.get('files') || [];
             let container;
 
-            if (!files && !files.length) {
-                return App.renderErrors([
-                    ERROR_MESSAGES.fileNotSelected[App.currentUser.currentLanguage]
-                ]);
+            if (!files || !files.length) {
+                if (checkbox.checked) {
+                    checkbox.checked = false;
+                    return App.renderErrors([
+                        ERROR_MESSAGES.fileNotSelected[App.currentUser.currentLanguage]
+                    ]);
+                } else {
+                    return;
+                }
             }
 
             if (files.length > 1) {
@@ -86,7 +91,7 @@ define([
 
             const file = files[0];
 
-            if (file.contentType === 'data:video') {
+            if (file.contentType === 'video') {
                 container = '<video width="400" controls><source src="' + file.url + '"></video>';
             } else {
                 container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';

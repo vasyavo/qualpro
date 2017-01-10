@@ -13,9 +13,7 @@ module.exports = function (db, redis, event) {
     
     router.get('/:bucket/:id', handler.getById);
 
-    router.post('/', handler.uploadFile);
-
-    router.delete('/', handler.deleteFile);
+    router.post('/', multipartMiddleware, handler.uploadFileHandler);
 
     return router;
 };

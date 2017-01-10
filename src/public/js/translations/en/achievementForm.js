@@ -9,6 +9,8 @@ define([
         comment      : 'Comment',
         location     : 'Location',
         date         : 'Date',
+        startDate   : 'Start Date',
+        endDate     : 'End Date',
         // preview
         title        : 'Achievement form view',
         saveBtn      : 'Ok',

@@ -12,22 +12,23 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.IN_STORE_REPORTING;
         const contentType = contentTypes.INSTORETASKS;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.UPDATED;
 
         const {
-            originatorId,
+            actionOriginator,
             accessRoleLevel,
-            inStoreTask,
+            body,
         } = options;
 
+        const contentAuthor = _.get(body, 'createdBy.user');
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(
-            inStoreTask.assignedTo
+            body.assignedTo
         );
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
             assignedTo,
-            originator: originatorId,
+            originator: actionOriginator,
         });
 
         const newActivity = new ActivityModel();
@@ -36,43 +37,44 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: inStoreTask._id,
+            itemId: body._id,
             itemName: {
-                en: inStoreTask.title.en,
-                ar: inStoreTask.title.ar,
+                en: body.title.en,
+                ar: body.title.ar,
             },
             createdBy: {
-                user: originatorId,
+                user: actionOriginator,
             },
             accessRoleLevel,
             personnels: _.uniq([
-                originatorId,
+                actionOriginator,
+                ...contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
             ]),
             assignedTo,
-            country: inStoreTask.country,
-            region: inStoreTask.region,
-            subRegion: inStoreTask.subRegion,
-            retailSegment: inStoreTask.retailSegment,
-            outlet: inStoreTask.outlet,
-            branch: inStoreTask.branch,
+            country: body.country,
+            region: body.region,
+            subRegion: body.subRegion,
+            retailSegment: body.retailSegment,
+            outlet: body.outlet,
+            branch: body.branch,
         });
 
         const savedActivity = yield newActivity.save();
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: [originatorId],
-            subject: 'In-store task published',
+            recipients: _.uniq([actionOriginator, contentAuthor]),
+            subject: 'In-store task updated',
             payload: activityAsJson,
         }, {
-            recipients: assignedTo,
-            subject: 'Received new in-store task',
+            recipients: _.difference([assignedTo], [actionOriginator]),
+            subject: 'Received updated in-store task',
             payload: activityAsJson,
         }, {
-            recipients: arrayOfSupervisor,
-            subject: 'Subordinate received new in-store task',
+            recipients: _.difference([arrayOfSupervisor], [actionOriginator]),
+            subject: `Subordinate's in-store task updated`,
             payload: activityAsJson,
         }];
 

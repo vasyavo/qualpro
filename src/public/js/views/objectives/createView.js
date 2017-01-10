@@ -59,7 +59,6 @@ define([
         },
 
         initialize: function (options) {
-
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
             this.translation = options.translation;
             this.files = new FileCollection();
@@ -139,7 +138,7 @@ define([
 
             form = self.linkedForm;
 
-            if (form._id !== 'visibility') {
+            if (form._id !== 'visibility' || !self.branchesForVisibility.length) {
                 return;
             }
 

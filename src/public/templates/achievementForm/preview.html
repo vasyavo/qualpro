@@ -67,13 +67,20 @@
                         </div>
                         <div class="row borderTop">
                             <div class="cell">
-                                <span><%= translation.date %></span>
+                                <span><%= translation.startDate %></span>
                             </div>
                             <div class="cell">
-                                <span><%= model.createdBy.date %></span>
+                                <span><%= model.dateStart %></span>
                             </div>
                         </div>
-
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.endDate %></span>
+                            </div>
+                            <div class="cell">
+                                <span><%= model.dateEnd %></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
