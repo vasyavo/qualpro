@@ -55,10 +55,7 @@ const sendPush = (groups, callback) => {
                         fcmClient.send({
                             registration_ids: [deviceId],
                             data: readyPayload,
-                            priority: 'high',
-                            notification: {
-                                title: action.subject,
-                            },
+                            priority: 'high'
                         }, (err, data) => {
                             if (err) {
                                 logger.error('Firebase returns', err);
