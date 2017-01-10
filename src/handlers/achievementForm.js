@@ -33,7 +33,9 @@ var AchievementForm = function (db, redis, event) {
         archived         : 1,
         createdBy        : 1,
         editedBy         : 1,
-        attachments      : 1
+        attachments      : 1,
+        startDate        : 1,
+        endDate          : 1
     };
 
     this.create = function (req, res, next) {
@@ -75,7 +77,9 @@ var AchievementForm = function (db, redis, event) {
                         location         : body.location,
                         date             : body.date,
                         createdBy        : createdBy,
-                        editedBy         : createdBy
+                        editedBy         : createdBy,
+                        startDate        : body.startDate,
+                        endDate          : body.endDate
                     };
 
                     AchievementFormModel.create(achievementForm, function (err, model) {

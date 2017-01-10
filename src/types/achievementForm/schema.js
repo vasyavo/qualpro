@@ -12,6 +12,8 @@ const schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
+    startDate : Date,
+    endDate : Date,
     personnel: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL },
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
     region: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
