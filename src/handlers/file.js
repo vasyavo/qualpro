@@ -349,6 +349,39 @@ module.exports = function() {
         });
     };
 
+    this.uploadFileHandler = function (req, res, next) {
+        const userId = req.session.uId;
+        const files = req.files;
+
+        async.waterfall([
+            (waterfallCb) => {
+                self.uploadFile(userId, files, 'file', (err, filesIds) => {
+                    if (err) {
+                        return waterfallCb(err);
+                    }
+
+                    waterfallCb(null, filesIds);
+                });
+            },
+
+            (fileIds, waterfallCb) => {
+                FileModel.find({_id: {$in: fileIds}}, '_id originalName').lean().exec((err, docs) => {
+                    if (err) {
+                        return waterfallCb(err);
+                    }
+
+                    waterfallCb(null, docs);
+                });
+            }
+        ], (err, result) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(201).send({files: result});
+        });
+    };
+
     this.uploadFileFromBase64 = function(userId, base64, folder, callback) {
         let error;
 

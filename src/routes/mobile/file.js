@@ -46,6 +46,8 @@ module.exports = function (db) {
 
     router.get('/:bucket/:id', handler.getById);
 
+    router.post('/', multipartMiddleware, handler.uploadFileHandler);
+
     return router;
 };
 
