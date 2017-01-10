@@ -91,7 +91,7 @@ config.pullDbOnCI = process.env.PULL_DB_ON_CI || true;
 
 config.fcmApiKey = process.env.FCM_API_KEY;
 config.numCPUs = config.env === 'test' ?
-    0 : (process.env.NUM_CPUS || os.cpus().length);
+    0 : (process.env.NUM_CPUS - 1 || os.cpus().length);
 config.isMaster = cluster.isMaster;
 
 // import this file at begin of server.js
