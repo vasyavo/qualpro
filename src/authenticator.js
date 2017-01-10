@@ -1,5 +1,5 @@
 const request = require('supertest-as-promised');
-const server = require('./server');
+const server = require('./app');
 
 const agentSu = request.agent(server);
 const agentMaster = request.agent(server);

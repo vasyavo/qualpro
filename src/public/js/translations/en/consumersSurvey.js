@@ -50,7 +50,7 @@ define([
         okBtn             : 'Ok',
 
         // top Bar
-        all   : 'Al Alali Consumer Survey',
+        all   : 'al alali Consumer Survey',
         newBtn: 'New Consumer Survey',
         of    : 'of'
     };

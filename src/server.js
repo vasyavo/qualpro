@@ -1,52 +1,20 @@
-'use strict';
-
-const http = require('http');
-const async = require('async');
-const eventEmitter = require('./utils/eventEmitter');
+const cluster = require('cluster');
+const os = require('os');
 const config = require('./config');
-const mongo = require('./utils/mongo');
-const logger = require('./utils/logger');
-const MessageDispatcher = require('./stories/push-notifications/utils/messageDispatcher');
 
-require('mongoose').Schemas = {};
+if (cluster.isMaster) {
+    for (let i = 0; i < config.numCPUs; i++) {
+        cluster.fork();
+    }
+    cluster.on('exit', (deadWorker, code, signal) => {
+        const worker = cluster.fork();
 
-process.on('unhandledRejection', (reason, p) => {
-    logger.error(p, reason);
-});
+        const newPID = worker.process.pid;
+        const oldPID = deadWorker.process.pid;
 
-const Scheduler = require('./helpers/scheduler')(mongo, eventEmitter);
-
-const app = require('./app');
-const server = http.createServer(app);
-
-const io = require('./helpers/socket')(server);
-
-app.set('io', io);
-
-MessageDispatcher.setIo(io);
-
-mongo.on('connected', () => {
-    require('./types');
-
-    async.waterfall([
-
-        (cb) => {
-            require('./modulesCreators')(cb);
-        },
-
-        (creators, cb) => {
-            server.listen(config.port, cb);
-        }
-
-    ], (err) => {
-        logger.info(`Server started at port ${config.port} in ${config.env} environment:`, config);
-    })
-});
-
-const scheduler = new Scheduler();
-
-scheduler.initEveryHourScheduler();
-
-require('./modulesCreators');
-
-module.exports = server;
+        console.log(`Worker ${oldPID} died.`);
+        console.log(`Worker ${newPID} born.`);
+    });
+} else {
+    require('./app');
+}

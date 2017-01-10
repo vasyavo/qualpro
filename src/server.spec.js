@@ -1,7 +1,7 @@
 require('./testSetup.spec');
 const expect = require('chai').expect;
 const request = require('supertest-as-promised');
-const server = require('./server');
+const server = require('./app');
 
 describe('how server works', () => {
 

@@ -392,7 +392,7 @@
             {
                 _id : 'promotionsItems',
                 name: {
-                    en: 'Al Alali promo evaluation',
+                    en: 'al alali promo evaluation',
                     ar: 'تقييم ترويج العلالي'
                 }
             },
