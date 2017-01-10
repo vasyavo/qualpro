@@ -396,12 +396,6 @@ var BrandingActivity = function (db, redis, event) {
                         en: _.unescape(element.description.en)
                     };
 
-                    if (isMobile) {
-                        if (element.displayType && element.displayType.length) {
-                            element.displayType = element.displayType[0];
-                        }
-                    }
-
                     personnelIds.push(element.createdBy.user._id);
                     fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
 
@@ -534,11 +528,7 @@ var BrandingActivity = function (db, redis, event) {
                         ar: _.unescape(element.description.ar),
                         en: _.unescape(element.description.en)
                     };
-                    if (isMobile) {
-                        if (element.displayType && element.displayType.length) {
-                            element.displayType = element.displayType[0];
-                        }
-                    }
+
                     personnelIds.push(element.createdBy.user._id);
                     fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
 
