@@ -136,6 +136,7 @@ define([
 
         formSend: function (e) {
             var context = e.data.context;
+            debugger;
             var data = new FormData(this);
             var $curEl = context.$el;
             var errorsLength = Object.keys(context.errors).length;
@@ -179,14 +180,9 @@ define([
                 }
 
             } else {
-                data.append('before', 'true');
                 ajaxObj = {
                     model      : context.model,
-                    url        : 'form/visibility/' + context.model.get('_id'),
-                    type       : 'PATCH',
-                    data       : data,
-                    contentType: false,
-                    processData: false
+                    data       : data
                 };
             }
 
@@ -200,11 +196,11 @@ define([
 
         },
 
-        imageIsLoaded: function (branchId, e) {
+        imageIsLoaded: function (branchId, fileName, e) {
             var res = e.target.result;
             var container;
             var type = res.substr(0, 10);
-
+debugger;
             if (type === 'data:video') {
                 container = '<video width="400" controls><source src="' + res + '"></video>';
             } else {
@@ -222,13 +218,15 @@ define([
                     this.model.set('files', [{
                         url        : res,
                         contentType: type.substr(5, 5),
-                        branch : branchId
+                        branch : branchId,
+                        fileName : fileName
                     }]);
                 } else {
                     addedFiles.push({
                         url        : res,
                         contentType: type.substr(5, 5),
-                        branch : branchId
+                        branch : branchId,
+                        fileName : fileName
                     });
                     this.model.set('files', addedFiles);
                 }
@@ -248,7 +246,8 @@ define([
             var reader;
             var file;
             var error;
-            let currentBranchId = '';
+            var currentBranchId;
+            var fileName;
 
             if (input.files && input.files[0]) {
                 file = input.files[0];
@@ -258,13 +257,14 @@ define([
                     this.errors = {file: error};
                 } else {
                     currentBranchId = input.id.substring(input.id.lastIndexOf('-') + 1, input.id.length);
+                    fileName = file.name;
                     delete this.errors.file;
                 }
 
                 reader = new FileReader();
 
                 reader.readAsDataURL(input.files[0]);
-                reader.onload = _.bind(self.imageIsLoaded, self, currentBranchId);
+                reader.onload = _.bind(self.imageIsLoaded, self, currentBranchId, fileName);
                 this.newFileUploaded = true;
             }
             this.files = input.files;
