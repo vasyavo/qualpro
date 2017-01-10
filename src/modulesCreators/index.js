@@ -6,8 +6,7 @@ module.exports = (callback) => {
         require('./addModules').generate,
 
 
-        require('./addModulesToAccessRoles').generate,
-        require('./setTradeMarketer')
+        require('./addModulesToAccessRoles').generate
 
     ], callback);
 };
