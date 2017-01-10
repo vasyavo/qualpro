@@ -64,15 +64,24 @@ module.exports = (options) => {
 
         const groups = [{
             recipients: [originatorId],
-            subject: 'Objective published',
+            subject: {
+                en: 'Objective published',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
             recipients: assignedTo,
-            subject: 'Received new objective',
+            subject: {
+                en: 'Received new objective',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
             recipients: arrayOfSupervisor,
-            subject: 'Subordinate received new objective',
+            subject: {
+                en: 'Subordinate received new objective',
+                ar: '',
+            },
             payload: activityAsJson,
         }];
 

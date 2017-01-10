@@ -1,6 +1,7 @@
 const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
+const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
 const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
@@ -10,9 +11,9 @@ const ActivityModel = require('./../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.IN_STORE_REPORTING;
-        const contentType = contentTypes.INSTORETASKS;
-        const actionType = activityTypes.UPDATED;
+        const moduleId = aclModules.OBJECTIVE;
+        const contentType = contentTypes.OBJECTIVES;
+        const actionType = activityTypes.COMMENTED;
 
         const {
             actionOriginator,
@@ -20,16 +21,27 @@ module.exports = (options) => {
             body,
         } = options;
 
-        const contentAuthor = _.get(body, 'createdBy.user');
+        const arrayOfParentObjectiveId = _(body.parent)
+            .values()
+            .compact()
+            .value();
+
         const [
             assignedTo,
         ] = arrayOfObjectIdToArrayOfString(
             body.assignedTo
         );
-        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignedTo,
-            originator: actionOriginator,
-        });
+        const [
+            arrayOfSupervisor,
+            arrayOfOriginator,
+        ] = yield [
+            getSupervisorByAssigneeAndOriginator({
+                assignedTo,
+            }),
+            getOriginatorByParentObjective({
+                objectives: arrayOfParentObjectiveId,
+            })
+        ];
 
         const newActivity = new ActivityModel();
 
@@ -48,9 +60,9 @@ module.exports = (options) => {
             accessRoleLevel,
             personnels: _.uniq([
                 actionOriginator,
-                contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
+                ...arrayOfOriginator,
             ]),
             assignedTo,
             country: body.country,
@@ -65,9 +77,18 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: _.uniq([actionOriginator, contentAuthor]),
+            recipients: [actionOriginator],
             subject: {
-                en: 'In-store task updated',
+                en: 'Comment sent',
+                ar: '',
+            },
+            payload: activityAsJson,
+        }, {
+            recipients: _.remove([arrayOfOriginator], (id) => {
+                return id === actionOriginator
+            }),
+            subject: {
+                en: 'Sub-objective commented',
                 ar: '',
             },
             payload: activityAsJson,
@@ -76,7 +97,7 @@ module.exports = (options) => {
                 return id === actionOriginator
             }),
             subject: {
-                en: 'Received updated in-store task',
+                en: 'Objective commented',
                 ar: '',
             },
             payload: activityAsJson,
@@ -85,8 +106,8 @@ module.exports = (options) => {
                 return id === actionOriginator
             }),
             subject: {
-                en: `Subordinate's in-store task updated`,
-                ar: ''
+                en: `Subordinate's objective commented`,
+                ar: '',
             },
             payload: activityAsJson,
         }];

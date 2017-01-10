@@ -13,6 +13,7 @@ const LocationSchema = new Schema({
 });
 
 const schema = new Schema({
+    ID: { type: String },
     name: {
         en: { type: String, default: '' },
         ar: { type: String, default: '' }

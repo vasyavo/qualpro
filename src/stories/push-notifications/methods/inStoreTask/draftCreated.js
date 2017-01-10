@@ -48,7 +48,10 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
         const groups = [{
             recipients: [originatorId],
-            subject: 'Draft in-store task saved',
+            subject: {
+                en: 'Draft in-store task saved',
+                ar: 'Draft in-store task saved',
+            },
             payload: activityAsJson,
         }];
 

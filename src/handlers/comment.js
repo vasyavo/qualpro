@@ -1,3 +1,5 @@
+const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
+const InStoreTaskUtils = require('./../stories/test-utils').InStoreTaskUtils;
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 var Comment = function (db, redis, event) {
@@ -37,69 +39,82 @@ var Comment = function (db, redis, event) {
         editedBy   : 1
     };
 
-    this.commentCreator = function (saveObj, ContextModel, callback) {
+    this.commentCreator = (saveObj, callback) => {
         async.waterfall([
-            function (waterfallCb) {
+
+            (cb) => {
                 if (!saveObj.files) {
-                    return waterfallCb(null, []);
+                    return cb(null, []);
                 }
 
-                fileHandler.uploadFile(saveObj.userId, saveObj.files, CONTENT_TYPES.COMMENT, function (err, filesIds) {
+                fileHandler.uploadFile(saveObj.userId, saveObj.files, CONTENT_TYPES.COMMENT, (err, filesIds) => {
                     if (err) {
-                        return waterfallCb(err);
+                        return cb(err);
                     }
 
-                    waterfallCb(null, filesIds);
+                    cb(null, filesIds);
                 });
             },
-            function (filesIds, waterfallCb) {
-                var createdBy = {
-                    date: new Date(),
-                    user: saveObj.userId
-                };
-                CommentModel.create({
-                    body       : saveObj.text,
-                    taskId     : saveObj.objectiveId,
+
+            (filesIds, cb) => {
+                const newComment = new CommentModel();
+
+                newComment.set({
+                    body: saveObj.text,
+                    taskId: saveObj.objectiveId,
                     attachments: filesIds,
-                    createdBy  : createdBy,
-                    editedBy   : createdBy
-                }, function (err, comment) {
+                    createdBy: saveObj.createdBy,
+                    editedBy: saveObj.createdBy
+                });
+
+                newComment.save((err, comment) => {
                     if (err) {
-                        return waterfallCb(err);
+                        return cb(err);
                     }
 
-                    waterfallCb(null, comment);
+                    cb(null, comment);
                 });
             }
+
         ], callback);
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const isMobile = req.isMobile;
+
         function queryRun(body) {
-            var ACTIVITY_TYPES = require('../constants/activityTypes');
-            var context = body.context;
-            var isMobile = req.isMobile;
-            var userId = req.session.uId;
-            var ContextModel;
-            var saveObj = {
-                text       : body.commentText,
-                objectiveId: body.objectiveId,
-                userId     : req.session.uId,
-                files      : req.files
+            const createdBy = {
+                date: new Date(),
+                user: userId
             };
-            var mid;
-            var error;
+            const saveObj = {
+                text: body.commentText,
+                objectiveId: body.objectiveId,
+                userId,
+                files: req.files,
+                createdBy,
+                updatedBy: createdBy,
+            };
+
             if (saveObj.commentText) {
                 saveObj.commentText = _.escape(saveObj.commentText);
             }
 
+            const context = body.context;
+
             if (!context) {
-                error = new Error();
+                const error = new Error();
+
                 error.status = 400;
                 error.message = 'No context';
-
                 return next(error);
             }
+
+            let ContextModel;
+            let mid;
 
             switch (context) {
                 // fixme: should be double checked
@@ -141,170 +156,184 @@ var Comment = function (db, redis, event) {
                     break;
             }
 
-            if (ContextModel) {
-                async.waterfall([
-                    function (waterfallCb) {
-                        self.commentCreator(saveObj, ContextModel, waterfallCb);
-                    },
-                    function (comment, waterfallCb) {
-                        var pipeLine = [];
-                        var aggregateHelper;
-                        var aggregation;
-
-                        aggregateHelper = new AggregationHelper($defProjection);
-
-                        pipeLine.push({
-                            $match: {
-                                _id: comment._id
-                            }
-                        });
-
-                        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                            from         : 'files',
-                            key          : 'attachments',
-                            addProjection: ['contentType', 'originalName']
-                        }));
-
-                        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                            from           : 'personnels',
-                            key            : 'createdBy.user',
-                            isArray        : false,
-                            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['accessRole']),
-                            includeSiblings: {createdBy: {date: 1}}
-                        }));
-
-                        if (!isMobile) {
-                            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                                from           : 'accessRoles',
-                                key            : 'createdBy.user.accessRole',
-                                isArray        : false,
-                                addProjection  : ['_id', 'name', 'level'],
-                                includeSiblings: {
-                                    createdBy: {
-                                        date: 1,
-                                        user: {
-                                            _id      : 1,
-                                            position : 1,
-                                            firstName: 1,
-                                            lastName : 1
-                                        }
-                                    }
-                                }
-                            }));
-                        }
-
-                        pipeLine.push({
-                            $project: aggregateHelper.getProjection({
-                                createdBy: {
-                                    user    : 1,
-                                    date    : 1,
-                                    diffDate: {
-                                        $let: {
-                                            vars: {
-                                                dateNow   : new Date(),
-                                                createDate: '$createdBy.date'
-                                            },
-                                            in  : {$subtract: ['$$dateNow', '$$createDate']}
-                                        }
-                                    }
-                                }
-                            })
-                        });
-
-                        aggregation = CommentModel.aggregate(pipeLine);
-
-                        aggregation.options = {
-                            'allowDiskUse': true
-                        };
-
-                        aggregation.exec(function (err, response) {
-                            var options = {
-                                data: {}
-                            };
-                            var personnelIds = [];
-                            var fileIds;
-                            var keys;
-                            if (err) {
-                                return waterfallCb(err);
-                            }
-
-                            response = response[0] ? response[0] : {};
-                            keys = Object.keys(response);
-
-                            if (!keys.length) {
-                                return waterfallCb(null, response);
-                            }
-
-                            personnelIds.push(response.createdBy.user._id);
-                            fileIds = _.map(response.attachments, '_id');
-                            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                            options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                            getImagesHelper.getImages(options, function (err, result) {
-                                var fieldNames = {};
-                                var setOptions;
-                                if (err) {
-                                    return waterfallCb(err);
-                                }
-
-                                setOptions = {
-                                    response  : response,
-                                    imgsObject: result
-                                };
-                                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                                setOptions.fields = fieldNames;
-
-                                getImagesHelper.setIntoResult(setOptions, function (response) {
-                                    waterfallCb(null, response);
-                                })
-                            });
-                        });
-                    },
-                    function (comment, waterfallCb) {
-                        ContextModel.findByIdAndUpdate(saveObj.objectiveId, {
-                            $push: {comments: comment._id},
-                            $set : {
-                                editedBy: {
-                                    user: ObjectId(userId),
-                                    date: new Date()
-                                }
-                            }
-                        }, function (err) {
-                            if (err) {
-                                return waterfallCb(err);
-                            }
-
-                            event.emit('activityChange', {
-                                module     : mid,
-                                actionType : ACTIVITY_TYPES.COMMENTED,
-                                createdBy  : comment.createdBy,
-                                itemId     : saveObj.objectiveId,
-                                itemType   : context,
-                                itemDetails: CONTENT_TYPES.COMMENT
-                            });
-
-                            waterfallCb(null, comment);
-                        });
-                    }
-                ], function (err, comment) {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    if (comment.body) {
-                        comment.body = _.unescape(comment.body);
-                    }
-
-                    res.status(201).send(comment);
-                });
-            } else {
-                error = new Error();
+            if (!ContextModel) {
+                const error = new Error();
                 error.status = 400;
                 error.message = 'Model for comments not found';
 
-                next(error);
+                return next(error);
             }
+
+            async.waterfall([
+
+                (waterfallCb) => {
+                    self.commentCreator(saveObj, waterfallCb);
+                },
+
+                (comment, waterfallCb) => {
+                    var pipeLine = [];
+                    var aggregateHelper;
+                    var aggregation;
+
+                    aggregateHelper = new AggregationHelper($defProjection);
+
+                    pipeLine.push({
+                        $match: {
+                            _id: comment._id
+                        }
+                    });
+
+                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+                        from         : 'files',
+                        key          : 'attachments',
+                        addProjection: ['contentType', 'originalName']
+                    }));
+
+                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+                        from           : 'personnels',
+                        key            : 'createdBy.user',
+                        isArray        : false,
+                        addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['accessRole']),
+                        includeSiblings: {createdBy: {date: 1}}
+                    }));
+
+                    if (!isMobile) {
+                        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+                            from           : 'accessRoles',
+                            key            : 'createdBy.user.accessRole',
+                            isArray        : false,
+                            addProjection  : ['_id', 'name', 'level'],
+                            includeSiblings: {
+                                createdBy: {
+                                    date: 1,
+                                    user: {
+                                        _id      : 1,
+                                        position : 1,
+                                        firstName: 1,
+                                        lastName : 1
+                                    }
+                                }
+                            }
+                        }));
+                    }
+
+                    pipeLine.push({
+                        $project: aggregateHelper.getProjection({
+                            createdBy: {
+                                user    : 1,
+                                date    : 1,
+                                diffDate: {
+                                    $let: {
+                                        vars: {
+                                            dateNow   : new Date(),
+                                            createDate: '$createdBy.date'
+                                        },
+                                        in  : {$subtract: ['$$dateNow', '$$createDate']}
+                                    }
+                                }
+                            }
+                        })
+                    });
+
+                    aggregation = CommentModel.aggregate(pipeLine);
+
+                    aggregation.options = {
+                        'allowDiskUse': true
+                    };
+
+                    aggregation.exec(function (err, response) {
+                        var options = {
+                            data: {}
+                        };
+                        var personnelIds = [];
+                        var fileIds;
+                        var keys;
+                        if (err) {
+                            return waterfallCb(err);
+                        }
+
+                        response = response[0] ? response[0] : {};
+                        keys = Object.keys(response);
+
+                        if (!keys.length) {
+                            return waterfallCb(null, response);
+                        }
+
+                        personnelIds.push(response.createdBy.user._id);
+                        fileIds = _.map(response.attachments, '_id');
+                        options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
+                        options.data[CONTENT_TYPES.FILES] = fileIds;
+
+                        getImagesHelper.getImages(options, function (err, result) {
+                            var fieldNames = {};
+                            var setOptions;
+                            if (err) {
+                                return waterfallCb(err);
+                            }
+
+                            setOptions = {
+                                response  : response,
+                                imgsObject: result
+                            };
+                            fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
+                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
+                            setOptions.fields = fieldNames;
+
+                            getImagesHelper.setIntoResult(setOptions, function (response) {
+                                waterfallCb(null, response);
+                            })
+                        });
+                    });
+                },
+
+                (comment, waterfallCb) => {
+                    ContextModel.findByIdAndUpdate(saveObj.objectiveId, {
+                        $push: {comments: comment._id},
+                        $set : {
+                            editedBy: {
+                                user: ObjectId(userId),
+                                date: new Date()
+                            }
+                        }
+                    }, {
+                        new: true,
+                        runValidators: true,
+                    }, (err, updatedContextModel) => {
+                        if (err) {
+                            return waterfallCb(err);
+                        }
+
+                        if (context === CONTENT_TYPES.OBJECTIVES) {
+                            ActivityLog.emit('objective:comment-added', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: updatedContextModel.toJSON(),
+                            })
+                        }
+
+                        if (context === CONTENT_TYPES.INSTORETASKS) {
+                            ActivityLog.emit('in-store-task:comment-added', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: updatedContextModel.toJSON(),
+                            })
+                        }
+
+                        waterfallCb(null, comment);
+                    });
+                },
+
+            ], (err, comment) => {
+                if (err) {
+                    return next(err);
+                }
+
+                if (comment.body) {
+                    comment.body = _.unescape(comment.body);
+                }
+
+                res.status(201).send(comment);
+            });
         }
 
         access.getWriteAccess(req, ACL_MODULES.COMMENT, function (err, allowed) {

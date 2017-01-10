@@ -89,6 +89,7 @@ Ask credentials in your administrator.
  - `PORT`
  - `UPLOADER_TYPE` - Currently available only with AmazonS3.
  - `SCHEDULER_HOST`
+ - `WEB_CONCURRENCY` - defaults to `1`.
 
 ##### Twilio credentials are:
  - `SMS_ACCOUNT_SID`

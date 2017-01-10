@@ -80,20 +80,38 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: [actionOriginator],
-            subject: 'Objective updated',
+            recipients: _.uniq([actionOriginator, contentAuthor]),
+            subject: {
+                en: 'Objective updated',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([arrayOfOriginator], [actionOriginator]),
-            subject: 'Sub-objective updated',
+            recipients: _.remove([arrayOfOriginator], (id) => {
+                return id === actionOriginator
+            }),
+            subject: {
+                en: 'Sub-objective updated',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([assignedTo], [actionOriginator]),
-            subject: 'Received updated objective',
+            recipients: _.remove([assignedTo], (id) => {
+                return id === actionOriginator
+            }),
+            subject: {
+                en: 'Received updated objective',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([arrayOfSupervisor], [actionOriginator]),
-            subject: `Subordinate's objective updated`,
+            recipients: _.remove([arrayOfSupervisor], (id) => {
+                return id === actionOriginator
+            }),
+            subject: {
+                en: `Subordinate's objective updated`,
+                ar: '',
+            },
             payload: activityAsJson,
         }];
 

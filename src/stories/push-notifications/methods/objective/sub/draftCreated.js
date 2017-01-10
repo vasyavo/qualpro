@@ -49,7 +49,10 @@ module.exports = (options) => {
 
         const groups = [{
             recipients: [originatorId],
-            subject: 'Draft objective saved',
+            subject: {
+                en: 'Draft objective saved',
+                ar: '',
+            },
             payload: activityAsJson,
         }];
 
