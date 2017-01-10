@@ -1,20 +1,11 @@
-const cluster = require('cluster');
-const os = require('os');
-const config = require('./config');
+const throng = require('throng');
+const WORKERS = process.env.WEB_CONCURRENCY || 1;
 
-if (cluster.isMaster) {
-    for (let i = 0; i < config.webConcurrency; i++) {
-        cluster.fork();
-    }
-    cluster.on('exit', (deadWorker, code, signal) => {
-        const worker = cluster.fork();
-
-        const newPID = worker.process.pid;
-        const oldPID = deadWorker.process.pid;
-
-        console.log(`Worker ${oldPID} died.`);
-        console.log(`Worker ${newPID} born.`);
-    });
-} else {
+function start() {
     require('./app');
 }
+
+throng(start, {
+    workers: WORKERS,
+    lifetime: Infinity
+});

@@ -10,6 +10,7 @@ const consolidate = require('consolidate');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const compress = require('compression');
+const forky = require('forky');
 
 mongoose.Schemas = {}; // important thing
 
@@ -25,6 +26,7 @@ process.on('unhandledRejection', (reason, p) => {
 
 process.on('uncaughtException', (error) => {
     logger.error(error);
+    forky.disconnect();
 });
 
 const app = express();

@@ -89,7 +89,7 @@ config.isCI = process.env.CI;
 config.pullDbOnCI = process.env.PULL_DB_ON_CI || true;
 
 config.fcmApiKey = process.env.FCM_API_KEY;
-config.webConcurrency = process.env.WEB_CONCURRENCY;
+config.webConcurrency = process.env.WEB_CONCURRENCY || 1;
 config.isMaster = cluster.isMaster;
 
 // import this file at begin of server.js
