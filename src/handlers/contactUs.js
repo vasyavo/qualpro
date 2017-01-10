@@ -13,6 +13,7 @@ var ContactUs = function(db, redis, event) {
     var FileModel = require('./../types/file/model');
     var access = require('../helpers/access')(db);
     var joiValidate = require('../helpers/joiValidate');
+    var AggregationHelper = require('../helpers/aggregationCreater');
 
     this.create = function(req, res, next) {
         function queryRun(body) {
@@ -93,13 +94,24 @@ var ContactUs = function(db, redis, event) {
                 'position',
                 'country'
             ];
+            const aggregateHelper = new AggregationHelper({});
             var match = {
                 createdAt : {
                     $gte : new Date(query.startDate),
                     $lte : new Date(query.endDate)
                 },
             };
-            var fMatch = {};
+            const filterSearch = query.globalSearch && aggregateHelper.getSearchMatch([
+                    'type',
+                    'description',
+                    'status',
+                    'createdBy.user.lastName.en',
+                    'createdBy.user.firstName.en',
+                    'createdBy.user.lastName.ar',
+                    'createdBy.user.firstName.ar'
+                ], query.globalSearch);
+
+            var fMatch = filterSearch || {};
             var formCondition = [];
             var foreignCondition = [];
 
@@ -123,6 +135,7 @@ var ContactUs = function(db, redis, event) {
             foreignCondition.push({
                 $match : fMatch
             });
+            console.dir(fMatch);
 
             return {
                 formCondition : formCondition,
