@@ -2,7 +2,7 @@ define([
     'jQuery',
     'Underscore',
     'common',
-    'text!templates/visibilityForm/preview.html',
+    'text!templates/objectives/visibilityForm/preview.html',
     'models/visibilityForm',
     'views/baseDialog',
     'views/fileDialog/fileDialog',
@@ -26,7 +26,7 @@ define([
             options = options || {};
 
             this.translation = options.translation;
-            this.branchName = options.branchName || '';
+            this.branches = options.branches || [];
             this.description = options.description[this.currentLanguage];
 
             this.model = new Model({_id: options.id || ''});
@@ -67,19 +67,57 @@ define([
         render: function () {
             var self = this;
             var $formString;
-            var before = self.model.get('before') || {};
+            var before = self.model.get('before');
+            var branches = self.model.get('branches');
 
             self.model.set({
                 before: {
-                    description: this.description,
-                    files      : before.files
+                    description: this.description
                 }
             });
 
+            if (before.files.length) {
+                var container;
+                var file = before.files[0];
+                var fileType = file.contentType.substr(0, 5);
+
+                if (fileType === 'video') {
+                    container = '<video class="showPreview before" width="400" controls><source src="' + file.url + '"></video>';
+                } else {
+                    container = '<img class="imgResponsive showPreview before" src="' + file.url + '">';
+                }
+
+                self.branches.map(function (item) {
+                    item.fileContainer = container;
+                    item.fileName = file.originalName;
+                    return item;
+                });
+            } else if (branches.length) {
+                branches.map(function (item) {
+                    var branchModel = _.find(self.branches, function (branch) {
+                        return branch._id === item.branchId;
+                    });
+
+                    var file = item.before.files[0];
+                    var fileType = file.contentType.substr(0, 5);
+
+                    if (fileType === 'video') {
+                        container = '<video class="showPreview before" width="400" controls><source src="' + file.url + '"></video>';
+                    } else {
+                        container = '<img class="imgResponsive showPreview before" src="' + file.url + '">';
+                    }
+
+                    branchModel.fileContainer = container;
+                    branchModel.fileName = file.originalName;
+
+                    return item;
+                });
+            }
+
             $formString = $(self.template({
-                model      : self.model.toJSON(),
-                branchName : self.branchName,
-                translation: self.translation
+                model : self.model.toJSON(),
+                branches : self.branches,
+                translation : self.translation
             }));
 
             this.$el = $formString.dialog({
