@@ -1003,6 +1003,7 @@ var VisibilityForm = function (db, redis, event) {
 
     this.getById = function (req, res, next) {
         function queryRun() {
+            const isMobile = req.isMobile;
             const id = req.params.id;
 
             if (!VALIDATION.OBJECT_ID.test(id)) {
@@ -1013,7 +1014,8 @@ var VisibilityForm = function (db, redis, event) {
 
             getAllAggregate({
                 aggregateHelper: new AggregationHelper($defProjection),
-                queryObject    : {_id: objectId(id)}
+                queryObject    : {_id: objectId(id)},
+                isMobile       : isMobile
             }, function (err, result) {
                 if (err) {
                     return next(err);
