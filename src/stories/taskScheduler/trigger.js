@@ -1,58 +1,96 @@
 const async = require('async');
+const _ = require('lodash');
+const logger = require('./../../utils/logger');
+const releaseSchedulerTask = require('./../../services/request').del;
 const TaskSchedulerModel = require('../../types/taskScheduler/model');
 const actions = require('./actions');
 
 module.exports = (req, res, next) => {
-    const schedulesId = req.body;
+    const arrayOfDelayedId = req.body;
 
-    if (!schedulesId || !schedulesId.length) {
-        res.status(200).send([]);
+    if (!arrayOfDelayedId || !arrayOfDelayedId.length) {
+        return res.status(200).send([]);
     }
 
     async.waterfall([
 
+        // find available tasks
         (cb) => {
             TaskSchedulerModel.find({
                 scheduleId : {
-                    $in : schedulesId
+                    $in : arrayOfDelayedId
                 }
-            }, cb);
+            }).lean().exec(cb);
         },
 
-        (docs, callback) => {
-            async.map(docs, (doc, cb) => {
-                const action = actions[doc.functionName];
+        // execute action per task
+        // and diff not existed
+        (arrayOfRegistered, cb) => {
+            async.waterfall([
 
-                action(doc.args, doc.documentId, (err) => {
-                    if (err) {
-                        return cb(err);
-                    }
+                (cb) => {
+                    async.map(arrayOfRegistered, (task, cb) => {
+                        const action = actions[task.functionName];
 
-                    cb(null, doc.scheduleId);
-                });
+                        action(task.args, task.documentId, (err) => {
+                            if (err) {
+                                return cb(err);
+                            }
 
-            }, callback);
+                            cb(null, task.scheduleId);
+                        });
+
+                    }, cb);
+                },
+
+                // registered array contains lean documents
+                // processed array contains ObjectId
+                (arrayOfProcessedId, cb) => {
+                    const arrayOfIgnoredId = _.difference(arrayOfDelayedId, arrayOfProcessedId);
+                    const arrayOfToBeReleasedId = _.union(arrayOfIgnoredId, arrayOfProcessedId);
+
+                    cb(null, {
+                        processed: arrayOfProcessedId,
+                        ignored: arrayOfIgnoredId,
+                        released: arrayOfToBeReleasedId,
+                    });
+                }
+
+            ], cb);
         }
 
-    ], (err, processedSchedules) => {
+    ], (err, conclusion) => {
         if (err) {
             return next(err);
         }
 
-        if (!processedSchedules.length) {
-            return res.status(200).send([]);
-        }
+        async.parallel({
 
-        TaskSchedulerModel.remove({
-            scheduleId : {
-                $in : processedSchedules
-            }
-        }, (err) => {
-            if (err) {
-                return next(err);
-            }
+            // send processed tasks
+            processedRequest: (cb) => {
+                res.status(200).send(conclusion.processed);
+                cb();
+            },
 
-            res.status(200).send(processedSchedules);
+            // remove ignored and processed tasks from store
+            cleanupStore: (cb) => {
+                TaskSchedulerModel.remove({
+                    scheduleId: {
+                        $in: conclusion.released,
+                    },
+                }, cb);
+
+            },
+
+            // unregister task in scheduler
+            unregisterRequest: (cb) => {
+                releaseSchedulerTask({
+                    json: {
+                        data: conclusion.ignored,
+                    },
+                }, cb);
+            },
+
         });
     });
 };
