@@ -120,18 +120,17 @@ var VisibilityForm = function (db, redis, event) {
         var limit = options.limit;
         var queryObject = options.queryObject;
         var pipeline = [];
-        var aggregation;
 
         var $lookup2 = {
             from        : 'files',
-            localField  : 'before.files.file',
+            localField  : 'before.files',
             foreignField: '_id',
             as          : 'before.files'
         };
 
         var $lookup3 = {
             from        : 'files',
-            localField  : 'after.files.file',
+            localField  : 'after.files',
             foreignField: '_id',
             as          : 'after.files'
         };
@@ -288,35 +287,52 @@ var VisibilityForm = function (db, redis, event) {
         });
 
         pipeline.push({
-            $project: {
-                _id      : 1,
-                objective: 1,
-                editedBy : 1,
-                branches : 1,
-                before   : {
-                    files: {
-                        _id         : '$before.files._id',
-                        fileName    : '$before.files.name',
-                        contentType : '$before.files.contentType',
-                        originalName: '$before.files.originalName',
-                        extension   : '$before.files.extension'
-                    },
-
-                    description: 1
+            $group: {
+                _id: {
+                    _id        : '$_id',
+                    objective  : '$objective',
+                    editedBy   : '$editedBy',
+                    createdBy  : '$createdBy',
+                    branches: '$branches',
+                    description: '$after.description'
                 },
 
-                after    : {
-                    files: {
+                beforeFiles: {
+                        $push: {
+                            _id         : '$before.files._id',
+                            fileName    : '$before.files.name',
+                            contentType : '$before.files.contentType',
+                            originalName: '$before.files.originalName',
+                            extension   : '$before.files.extension'
+                        }
+                    },
+
+                afterFiles: {
+                    $push: {
                         _id         : '$after.files._id',
                         fileName    : '$after.files.name',
                         contentType : '$after.files.contentType',
                         originalName: '$after.files.originalName',
                         extension   : '$after.files.extension'
-                    },
+                    }
+                }
+            }
+        },{
+            $project: {
+                _id      : '$_id._id',
+                objective: '$_id.objective',
+                editedBy : '$_id.editedBy',
+                branches : '$_id.branches',
+                createdBy: '$_id.createdBy',
 
-                    description: 1
+                before   : {
+                    files: {$setDifference: ['$beforeFiles', [{}]]}
                 },
-                createdBy: 1
+                after    : {
+                    files: {$setDifference: ['$afterFiles', [{}]]},
+
+                    description: '$_id.description'
+                }
             }
         });
 
@@ -367,8 +383,7 @@ var VisibilityForm = function (db, redis, event) {
                                 then: null,
                                 else: {$arrayElemAt: ['$branches.before.files', 0]}
                             }
-                        },
-                        description: 1
+                        }
                     },
 
                     after: {
@@ -394,8 +409,7 @@ var VisibilityForm = function (db, redis, event) {
                 branches : {
                     branchId: 1,
                     before  : {
-                        files: '$branches.before.files',
-                        description: 1
+                        files: '$branches.before.files'
                     },
 
                     after: {
@@ -488,7 +502,21 @@ var VisibilityForm = function (db, redis, event) {
                 before   : '$_id.before',
                 after    : '$_id.after',
                 createdBy: '$_id.createdBy',
-                branches : 1
+                branches :  {$filter: {
+                    input: '$branches',
+                    as   : 'item',
+                    cond : {
+                        $or: [
+                            {
+                                $gt: [{$size: {$ifNull: ['$$item.before.files', []]}}, 0]
+                            }, {
+                                $gt: [{$size: {$ifNull: ['$$item.aster.files', []]}}, 0]
+                            }, {
+                                $gt: [{$ifNull: ['$$item.aster.description', '']}, '']
+                            }
+                        ]
+                    }
+                }},
             }
         });
         
@@ -515,7 +543,7 @@ var VisibilityForm = function (db, redis, event) {
                     element.after.description = _.unescape(element.after.description);
                 }
 
-                if(element.branches){
+                if(element.branches && element.branches.length){
                     element.branches = element.branches.map(item => {
                         if (item.before.files && item.before.files.length) {
                             item.before.files = item.before.files.map(setUrl);
@@ -736,7 +764,7 @@ var VisibilityForm = function (db, redis, event) {
             function updateFn(cb) {
                 body.editedBy = editedBy;
 
-                VisibilityFormModel.findByIdAndUpdate(id, body, function (err, model) {
+                VisibilityFormModel.findByIdAndUpdate(id, body, {new: true}, function (err, model) {
                     if (err) {
                         return cb(err);
                     }
