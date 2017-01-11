@@ -2,7 +2,7 @@ module.exports = (req, res, next) => {
     const serverDate = new Date();
 
     if (!req.headers.hasOwnProperty('clientdate')) {
-        next();
+        return next();
     }
 
     const clientDate = new Date(req.headers.clientdate);
