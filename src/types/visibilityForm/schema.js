@@ -78,7 +78,7 @@ const schema = new Schema({
     editedBy: {
         user: {
             type   : ObjectId,
-            ef     : CONTENT_TYPES.PERSONNEL,
+            ref     : CONTENT_TYPES.PERSONNEL,
             default: null
         },
         date: {
