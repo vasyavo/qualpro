@@ -495,7 +495,7 @@ define([
                 const file = savedFiles[0];
                 let container;
 
-                if (file.contentType === 'data:video') {
+                if (file.contentType === 'video') {
                     container = '<video width="400" controls><source src="' + file.url + '"></video>';
                 } else {
                     container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';
