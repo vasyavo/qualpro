@@ -247,7 +247,6 @@ define([
                 },
 
                 function (model, cb) {
-                debugger;
                     if (context.visibilityFormAjax.model.get('files').length) {
                         $.ajax({
                             url : '/file',
@@ -278,10 +277,10 @@ define([
 
                     var requestPayload;
 
-                    if (model.get('applyFileToAll')) {
+                    if (context.visibilityFormAjax.model.get('applyFileToAll')) {
                         requestPayload = {
                             before : {
-                                files : files.map(function(item) {
+                                files : files.files.map(function(item) {
                                     return item._id;
                                 })
                             },
