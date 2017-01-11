@@ -41,7 +41,7 @@
         </div>
         <div class="notRated bottomLine floatBlock">
             <span><%= translation.current %> <%= contentType === 'monthly' ? translation.month : translation.rating %></span>
-            <a href="javascript:;" class="rateEmployee"><%= translation.timeToRateGone %></a>
+            <a href="javascript:;" class="rateEmployee"><%= (new Date).getDate() > 10 && App.currentUser.accessRole.level > 2 ? translation.timeToRateGone : translation.rateEmployee  %></a>
         </div>
     </div>
     <div class="previousRating">

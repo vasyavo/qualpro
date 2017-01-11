@@ -7306,6 +7306,7 @@ tr.clicked {
 }
 .shelfShareRightPeace .scrollable-yx .mCSB_container_wrapper > .mCSB_container {
     padding-left: 0;
+    padding-right: 0;
     padding-bottom: 0;
 }
 .shelfShareRightPeace .scrollable-yx .mCSB_scrollTools_horizontal {
