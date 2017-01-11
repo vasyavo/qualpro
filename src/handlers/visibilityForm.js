@@ -274,11 +274,11 @@ var VisibilityForm = function (db, redis, event) {
                 editedBy : 1,
                 branches : 1,
                 before   : {
-                    files      : {$arrayElemAt: ['$before.files', 0]},
+                    files      : {$arrayElemAt: [{$ifNull: ['$before.files', []]}, 0]},
                 },
 
                 after: {
-                    files      : {$arrayElemAt: ['$after.files', 0]},
+                    files      : {$arrayElemAt: [{$ifNull: ['$after.files', []]}, 0]},
                     description: 1
                 },
 
@@ -381,7 +381,7 @@ var VisibilityForm = function (db, redis, event) {
                             $cond: {
                                 if  : {$eq: ['$branches.before', []]},
                                 then: null,
-                                else: {$arrayElemAt: ['$branches.before.files', 0]}
+                                else: {$arrayElemAt: [{$ifNull: ['$branches.before.files', []]}, 0]}
                             }
                         }
                     },
@@ -391,7 +391,7 @@ var VisibilityForm = function (db, redis, event) {
                             $cond: {
                                 if  : {$eq: ['$branches.after', []]},
                                 then: null,
-                                else: {$arrayElemAt: ['$branches.after.files', 0]}
+                                else: {$arrayElemAt: [{$ifNull: ['$branches.after.files', []]}, 0]}
                             }
                         },
                         description: 1
@@ -413,13 +413,7 @@ var VisibilityForm = function (db, redis, event) {
                     },
 
                     after: {
-                        files      : {
-                            $cond: {
-                                if  : {$eq: ['$branches.after', []]},
-                                then: null,
-                                else: {$arrayElemAt: ['$branches.after.files', 0]}
-                            }
-                        },
+                        files: '$branches.after.files',
                         description: 1
                     },
                 }
@@ -510,9 +504,9 @@ var VisibilityForm = function (db, redis, event) {
                             {
                                 $gt: [{$size: {$ifNull: ['$$item.before.files', []]}}, 0]
                             }, {
-                                $gt: [{$size: {$ifNull: ['$$item.aster.files', []]}}, 0]
+                                $gt: [{$size: {$ifNull: ['$$item.after.files', []]}}, 0]
                             }, {
-                                $gt: [{$ifNull: ['$$item.aster.description', '']}, '']
+                                $gt: [{$ifNull: ['$$item.after.description', '']}, '']
                             }
                         ]
                     }
@@ -536,7 +530,7 @@ var VisibilityForm = function (db, redis, event) {
                 }
 
                 if (element.after.files && element.after.files.length) {
-                    element.after.files = element.before.after.map(setUrl);
+                    element.after.files = element.after.files.map(setUrl);
                 }
 
                 if (element.after.description) {
@@ -550,7 +544,7 @@ var VisibilityForm = function (db, redis, event) {
                         }
 
                         if (item.after.files && item.after.files.length) {
-                            item.after.files = item.before.after.map(setUrl);
+                            item.after.files = item.after.files.map(setUrl);
                         }
 
                         if (item.after.description) {
@@ -743,7 +737,7 @@ var VisibilityForm = function (db, redis, event) {
         });
     };
 
-    this.update = function (req, res, next) {
+    this.updateBefore = function (req, res, next) {
         function queryRun(body) {
             const id = req.params.id;
             const userId = req.session.uId;
@@ -752,7 +746,6 @@ var VisibilityForm = function (db, redis, event) {
                 user: objectId(userId),
                 date: new Date()
             };
-            const waterfallTasks = [];
             let error;
 
             if (!VALIDATION.OBJECT_ID.test(id)) {
@@ -761,60 +754,221 @@ var VisibilityForm = function (db, redis, event) {
                 return next(error);
             }
 
-            function updateFn(cb) {
-                body.editedBy = editedBy;
-
-                VisibilityFormModel.findByIdAndUpdate(id, body, {new: true}, function (err, model) {
+            function updateVisibilityForm(cb) {
+                VisibilityFormModel.findById(id, function (err, model) {
                     if (err) {
                         return cb(err);
                     }
 
-                    VisibilityFormModel.populate(model, {
-                        path  : 'objective',
-                        select: 'context'
-                    }, function (err, model) {
+                    model.editedBy = editedBy;
+
+                    if (body.before) {
+                        model.before = body.before;
+                    }
+
+                    if (body.branches && body.branches.length) {
+                        _.each(body.branches, function (elem) {
+                            let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
+
+                            if (existingBranch) {
+                                existingBranch.before = elem.before;
+                            } else {
+                                model.branches.push({
+                                    branchId: elem.branchId,
+                                    before   : elem.before
+                                });
+                            }
+                        });
+                    }
+
+                    model.save(function (err, model) {
                         if (err) {
                             return cb(err);
                         }
-                        var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
-                            ? ACL_MODULES.VISIBILITY_FORM :
-                            ACL_MODULES.IN_STORE_REPORTING;
 
-                        event.emit('activityChange', {
-                            module     : module,
-                            actionType : ACTIVITY_TYPES.UPDATED,
-                            createdBy  : editedBy,
-                            itemId     : model.objective._id,
-                            itemType   : model.objective.context,
-                            itemDetails: CONTENT_TYPES.VISIBILITYFORM
-                        });
-
-                        getAllAggregate({
-                            aggregateHelper: aggregateHelper,
-                            queryObject    : {_id: objectId(id)},
-                            isMobile       : req.isMobile
-                        }, function (err, result) {
-                            if (err) {
-                                return next(err);
-                            }
-
-                            result = _.map(result, function (element) {
-                                if (element.after && element.after.description) {
-                                    element.after.description = _.unescape(element.after.description);
-                                }
-                                return element;
-                            });
-
-                            res.status(200).send(result[0]);
-                        });
+                        cb(null, model);
                     });
                 });
             }
 
-            waterfallTasks.push(updateFn);
+            function populateVisibilityForm(model, cb) {
+                VisibilityFormModel.populate(model, {
+                    path  : 'objective',
+                    select: 'context'
+                }, function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
 
-            async.waterfall(waterfallTasks,
-                function (err, result) {
+                    var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
+                        ? ACL_MODULES.VISIBILITY_FORM :
+                        ACL_MODULES.IN_STORE_REPORTING;
+
+                    event.emit('activityChange', {
+                        module     : module,
+                        actionType : ACTIVITY_TYPES.UPDATED,
+                        createdBy  : editedBy,
+                        itemId     : model.objective._id,
+                        itemType   : model.objective.context,
+                        itemDetails: CONTENT_TYPES.VISIBILITYFORM
+                    });
+
+                    cb(null);
+                });
+            }
+
+            function getVisibilityForm(cb) {
+                getAllAggregate({
+                    aggregateHelper: aggregateHelper,
+                    queryObject    : {_id: objectId(id)},
+                    isMobile       : req.isMobile
+                }, function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, result[0]);
+                });
+            }
+
+            async.waterfall([
+                    updateVisibilityForm,
+                    populateVisibilityForm,
+                    getVisibilityForm
+                ], function (err, result) {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    res.status(200).send(result);
+                }
+            );
+        }
+
+        access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
+            var body = req.body;
+
+            if (err) {
+                return next(err);
+            }
+            if (!allowed) {
+                err = new Error();
+                err.status = 403;
+
+                return next(err);
+            }
+
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function (err, saveData) {
+                if (err) {
+                    return next(err);
+                }
+
+                queryRun(saveData);
+            });
+        });
+    };
+
+    this.updateAfter = function (req, res, next) {
+        function queryRun(body) {
+            const id = req.params.id;
+            const userId = req.session.uId;
+            const aggregateHelper = new AggregationHelper($defProjection);
+            const editedBy = {
+                user: objectId(userId),
+                date: new Date()
+            };
+            let error;
+
+            if (!VALIDATION.OBJECT_ID.test(id)) {
+                error = new Error('Invalid parameter id');
+                error.status = 400;
+                return next(error);
+            }
+
+            function updateVisibilityForm(cb) {
+                body.editedBy = editedBy;
+
+                VisibilityFormModel.findById(id, function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    model.editedBy = editedBy;
+
+                    if (body.after) {
+                        model.after = body.after;
+                    }
+
+                    if (body.branches && body.branches.length) {
+                        _.each(body.branches, function (elem) {
+                            let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
+
+                            if (existingBranch) {
+                                existingBranch.after = elem.after;
+                            } else {
+                                model.branches.push({
+                                    branchId: elem.branchId,
+                                    after   : elem.after
+                                });
+                            }
+                        });
+                    }
+
+                    model.save(function (err, model) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, model);
+                    });
+                });
+            }
+
+            function populateVisibilityForm(model, cb) {
+                VisibilityFormModel.populate(model, {
+                    path  : 'objective',
+                    select: 'context'
+                }, function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
+                        ? ACL_MODULES.VISIBILITY_FORM :
+                        ACL_MODULES.IN_STORE_REPORTING;
+
+                    event.emit('activityChange', {
+                        module     : module,
+                        actionType : ACTIVITY_TYPES.UPDATED,
+                        createdBy  : editedBy,
+                        itemId     : model.objective._id,
+                        itemType   : model.objective.context,
+                        itemDetails: CONTENT_TYPES.VISIBILITYFORM
+                    });
+
+                    cb(null);
+                });
+            }
+
+            function getVisibilityForm(cb) {
+                getAllAggregate({
+                    aggregateHelper: aggregateHelper,
+                    queryObject    : {_id: objectId(id)},
+                    isMobile       : req.isMobile
+                }, function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, result[0]);
+                });
+            }
+
+            async.waterfall([
+                    updateVisibilityForm,
+                    populateVisibilityForm,
+                    getVisibilityForm
+                ], function (err, result) {
                     if (err) {
                         return next(err);
                     }
