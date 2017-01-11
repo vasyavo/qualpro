@@ -287,18 +287,15 @@ var VisibilityForm = function (db, redis, event) {
         });
 
         pipeline.push({
-            $group: {
-                _id: {
-                    _id        : '$_id',
-                    objective  : '$objective',
-                    editedBy   : '$editedBy',
-                    createdBy  : '$createdBy',
-                    branches: '$branches',
-                    description: '$after.description'
-                },
+            $project: {
+                _id      : 1,
+                objective: 1,
+                editedBy : 1,
+                branches : 1,
+                createdBy: 1,
 
-                beforeFiles: {
-                    $push: {
+                before   : {
+                    files: {
                         _id         : '$before.files._id',
                         fileName    : '$before.files.name',
                         contentType : '$before.files.contentType',
@@ -306,32 +303,16 @@ var VisibilityForm = function (db, redis, event) {
                         extension   : '$before.files.extension'
                     }
                 },
-
-                afterFiles: {
-                    $push: {
+                after    : {
+                    files: {
                         _id         : '$after.files._id',
                         fileName    : '$after.files.name',
                         contentType : '$after.files.contentType',
                         originalName: '$after.files.originalName',
                         extension   : '$after.files.extension'
-                    }
-                }
-            }
-        },{
-            $project: {
-                _id      : '$_id._id',
-                objective: '$_id.objective',
-                editedBy : '$_id.editedBy',
-                branches : '$_id.branches',
-                createdBy: '$_id.createdBy',
+                    },
 
-                before   : {
-                    files: {$setDifference: ['$beforeFiles', [{}]]}
-                },
-                after    : {
-                    files: {$setDifference: ['$afterFiles', [{}]]},
-
-                    description: '$_id.description'
+                    description: '$after.description'
                 }
             }
         });
