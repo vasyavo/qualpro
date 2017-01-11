@@ -439,7 +439,7 @@ define([
                     var el = thisFunction.el;
                     var objectFilter = {};
                     objectFilter[el] = self.locationFilter[el];
-debugger;
+
                     dataService.getData('/filters/promotions/location', {
                         edit  : true,
                         filter: objectFilter[el]

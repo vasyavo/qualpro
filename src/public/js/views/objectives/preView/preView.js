@@ -21,7 +21,7 @@ define([
     'helpers/objectivesStatusHelper',
     'dataService',
     'views/objectives/distributionFormView',
-    'views/visibilityForm/preView/preView',
+    'views/objectives/visibilityForm/preView',
     'text!templates/objectives/updatedPreview.html',
     'text!templates/objectives/taskFlowTemplate.html',
     'models/objectives',

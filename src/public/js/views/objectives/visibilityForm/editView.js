@@ -18,6 +18,8 @@ define([
 
         errors: {},
 
+        realFiles : [],
+
         events: {
             'change #inputAfter' : 'imageTest',
             'change #apply-to-all' : 'applyFileToAllBranches'
@@ -136,8 +138,6 @@ define([
 
         formSend: function (e) {
             var context = e.data.context;
-            debugger;
-            var data = new FormData(this);
             var $curEl = context.$el;
             var errorsLength = Object.keys(context.errors).length;
             var ajaxObj;
@@ -180,6 +180,11 @@ define([
                 }
 
             } else {
+                var data = new FormData();
+                $.each(context.realFiles, function (key, value) {
+                    data.append(key, value);
+                });
+
                 ajaxObj = {
                     model      : context.model,
                     data       : data
@@ -200,7 +205,7 @@ define([
             var res = e.target.result;
             var container;
             var type = res.substr(0, 10);
-debugger;
+
             if (type === 'data:video') {
                 container = '<video width="400" controls><source src="' + res + '"></video>';
             } else {
@@ -251,6 +256,7 @@ debugger;
 
             if (input.files && input.files[0]) {
                 file = input.files[0];
+                self.realFiles.push(file);
                 if (file.size > fileSizeMax) {
                     App.render({type: 'alert', message: ERROR_MESSAGES.fileSizeLimitReached[currentLanguage]});
 

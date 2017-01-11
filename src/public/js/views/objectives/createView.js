@@ -247,7 +247,6 @@ define([
                 },
 
                 function (model, cb) {
-                debugger;
                     if (context.visibilityFormAjax.model.get('files').length) {
                         $.ajax({
                             url : '/file',
@@ -272,16 +271,16 @@ define([
                         return cb(null, model);
                     }
 
-                    var modelFiles = visibilityFormAjax.model.get('files');
+                    var modelFiles = context.visibilityFormAjax.model.get('files');
                     var formId = model.get('form')._id;
                     context.visibilityFormAjax.url = 'form/visibility/' + formId;
 
-                    var data;
+                    var requestPayload;
 
-                    if (model.get('applyFileToAll')) {
-                        data = {
+                    if (context.visibilityFormAjax.model.get('applyFileToAll')) {
+                        requestPayload = {
                             before : {
-                                files : files.map(function(item) {
+                                files : files.files.map(function(item) {
                                     return item._id;
                                 })
                             },
@@ -292,7 +291,7 @@ define([
                             branches : []
                         };
                     } else {
-                        data = {
+                        requestPayload = {
                             before : {
                                 files : []
                             },
@@ -301,12 +300,12 @@ define([
                                 files : []
                             },
                             branches : modelFiles.map(function(item) {
-                                var fileFromServer = _.findWhere(files, {
+                                var fileFromServer = _.findWhere(files.files, {
                                     originalName : item.fileName
                                 });
 
                                 return {
-                                    branchId : item.branchId,
+                                    branchId : item.branch,
                                     before : {
                                         files : [fileFromServer._id]
                                     },
@@ -320,10 +319,11 @@ define([
                     }
 
                     $.ajax({
-                        url : `form/visibility/${formId}`,
-                        method : 'PATCH',
+                        url : 'form/visibility/' + formId,
+                        method : 'PUT',
+                        contentType : 'application/json',
                         dataType : 'json',
-                        data : data,
+                        data : JSON.stringify(requestPayload),
                         success : function () {
                             cb(null, model);
                         },

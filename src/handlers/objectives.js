@@ -296,7 +296,7 @@ var Objectives = function (db, redis, event) {
                         objective  : objectiveModel.get('_id'),
                         description: ''
                     };
-                    visibilityFormHandler.createForm(createdById, data, null, function (err, formModel) {
+                    visibilityFormHandler.createForm(createdById, data, function (err, formModel) {
                         if (err) {
                             return cb(err);
                         }
@@ -760,9 +760,9 @@ var Objectives = function (db, redis, event) {
                     } else {
                         data = {
                             objective  : objectiveModel.get('_id'),
-                            description: ''
                         };
-                        visibilityFormHandler.createForm(userId, data, null, function (err, formModel) {
+
+                        visibilityFormHandler.createForm(userId, data, function (err, formModel) {
                             if (err) {
                                 return cb(err);
                             }
@@ -813,6 +813,7 @@ var Objectives = function (db, redis, event) {
             if (err) {
                 return next(err);
             }
+
             if (!allowed) {
                 err = new Error();
                 err.status = 403;
@@ -1049,7 +1050,7 @@ var Objectives = function (db, redis, event) {
                         description: ''
                     };
 
-                    visibilityFormHandler.createForm(userId, data, null, callBack);
+                    visibilityFormHandler.createForm(userId, data, callBack);
                 }
             }
 
