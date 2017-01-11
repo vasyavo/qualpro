@@ -4,7 +4,7 @@ module.exports = {
     _id: 44,
     name: {
         en: 'Consumer Survey',
-        ar: 'Consumer Survey'
+        ar: 'استطلاع العملاء'
     },
     href: CONSTANTS.CONSUMER_SURVEY,
     sequence: 44,

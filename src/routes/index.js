@@ -116,7 +116,7 @@ module.exports = function(app, db, event) {
         });
     });
 
-    app.post('/scheduler', /*require('../utils/allowedOriginsMiddleware'),*/ require('../stories/taskScheduler/trigger'));
+    app.post('/scheduler', require('../stories/taskScheduler/trigger'));
 
     app.use(require('./../stories/user-registration'));
 
