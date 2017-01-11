@@ -627,7 +627,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.put('/visibility/:id', multipartMiddleware, visibilityFormHandler.update);
+    router.put('/visibility/:id', visibilityFormHandler.update);
 
 
     /**
@@ -658,7 +658,7 @@ module.exports = function(db, redis, event) {
      * @instance
      */
 
-    router.patch('/visibility/:id', multipartMiddleware, visibilityFormHandler.update);
+    router.patch('/visibility/:id', visibilityFormHandler.update);
 
 
     // router.delete('/visibility/:id', visibilityFormHandler.deleteById);

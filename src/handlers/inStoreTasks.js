@@ -265,7 +265,7 @@ var InStoreReports = function() {
                     async.waterfall([
 
                         (cb) => {
-                            visibilityFormHandler.createForm(userId, data, null, cb);
+                            visibilityFormHandler.createForm(userId, data, cb);
                         },
 
                         (formModel, cb) => {
