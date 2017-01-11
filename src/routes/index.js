@@ -84,11 +84,14 @@ module.exports = function(app, db, event) {
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
+
     app.get('/', csrfProtection, function(req, res, next) {
         //ToDo remove (res.cookie) this one after test sms
         //res.cookie('lang', 'ae');
         res.render('index.html', {csrfToken : req.csrfToken()});
     });
+
+    app.use(require('./../utils/validTimeZone'));
 
     // endpoint for handling api documents
     app.get('/docs', function(req, res, next) {
