@@ -298,14 +298,14 @@ var VisibilityForm = function (db, redis, event) {
                 },
 
                 beforeFiles: {
-                        $push: {
-                            _id         : '$before.files._id',
-                            fileName    : '$before.files.name',
-                            contentType : '$before.files.contentType',
-                            originalName: '$before.files.originalName',
-                            extension   : '$before.files.extension'
-                        }
-                    },
+                    $push: {
+                        _id         : '$before.files._id',
+                        fileName    : '$before.files.name',
+                        contentType : '$before.files.contentType',
+                        originalName: '$before.files.originalName',
+                        extension   : '$before.files.extension'
+                    }
+                },
 
                 afterFiles: {
                     $push: {
@@ -379,7 +379,7 @@ var VisibilityForm = function (db, redis, event) {
                     before  : {
                         files: {
                             $cond: {
-                                if  : {$eq: ['$branches.before', []]},
+                                if  : {$eq: ['$branches.before.files', []]},
                                 then: null,
                                 else: {$arrayElemAt: ['$branches.before.files', 0]}
                             }
@@ -389,7 +389,7 @@ var VisibilityForm = function (db, redis, event) {
                     after: {
                         files      : {
                             $cond: {
-                                if  : {$eq: ['$branches.after', []]},
+                                if  : {$eq: ['$branches.after.files', []]},
                                 then: null,
                                 else: {$arrayElemAt: ['$branches.after.files', 0]}
                             }
@@ -413,13 +413,7 @@ var VisibilityForm = function (db, redis, event) {
                     },
 
                     after: {
-                        files      : {
-                            $cond: {
-                                if  : {$eq: ['$branches.after', []]},
-                                then: null,
-                                else: {$arrayElemAt: ['$branches.after.files', 0]}
-                            }
-                        },
+                        files      : '$branches.after.files',
                         description: 1
                     },
                 }
@@ -510,21 +504,21 @@ var VisibilityForm = function (db, redis, event) {
                             {
                                 $gt: [{$size: {$ifNull: ['$$item.before.files', []]}}, 0]
                             }, {
-                                $gt: [{$size: {$ifNull: ['$$item.aster.files', []]}}, 0]
+                                $gt: [{$size: {$ifNull: ['$$item.after.files', []]}}, 0]
                             }, {
-                                $gt: [{$ifNull: ['$$item.aster.description', '']}, '']
+                                $gt: [{$ifNull: ['$$item.after.description', '']}, '']
                             }
                         ]
                     }
                 }},
             }
         });
-        
+
         VisibilityFormModel.aggregate(pipeline).allowDiskUse(true).exec(function (err, result) {
             if (err) {
                 return callback(err);
             }
-            
+
             function setUrl(file) {
                 file.url = fileHandler.computeUrl(file.fileName, 'visibilityForm');
                 return file;
@@ -536,7 +530,7 @@ var VisibilityForm = function (db, redis, event) {
                 }
 
                 if (element.after.files && element.after.files.length) {
-                    element.after.files = element.before.after.map(setUrl);
+                    element.after.files = element.after.files.map(setUrl);
                 }
 
                 if (element.after.description) {
@@ -550,7 +544,7 @@ var VisibilityForm = function (db, redis, event) {
                         }
 
                         if (item.after.files && item.after.files.length) {
-                            item.after.files = item.before.after.map(setUrl);
+                            item.after.files = item.after.files.map(setUrl);
                         }
 
                         if (item.after.description) {
