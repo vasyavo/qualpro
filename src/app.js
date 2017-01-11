@@ -36,12 +36,6 @@ const setAdditionalHeader = (req, res, next) => {
 
     next();
 };
-const isMobile = (req, res, next) => {
-    const browser = req.headers['user-agent'];
-
-    req.isMobile = /mobile/i.test(browser);
-    next();
-};
 
 app.use(compress());
 app.engine('html', consolidate.swig);
@@ -60,7 +54,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('./utils/sessionMiddleware'));
 app.use(cookieParser('CRMkey'));
 app.use(setAdditionalHeader);
-app.use(isMobile);
 app.get('/info', require('./utils/isApiAvailable'));
 
 require('./routes/index')(app, mongo, eventEmitter);
