@@ -58,20 +58,4 @@ node.listen(config.port, () => {
     logger.info(`Server started at port ${config.port} in ${config.env} environment:`, config);
 });
 
-mongo.on('connected', () => {
-    async.series([
-
-        (cb) => {
-            require('./types');
-
-            if (config.isMaster) {
-                return require('./modulesCreators')(cb);
-            }
-
-            cb(null);
-        },
-
-    ])
-});
-
 module.exports = app;
