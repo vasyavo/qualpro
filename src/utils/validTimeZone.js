@@ -10,10 +10,12 @@ module.exports = (req, res, next) => {
     const allowedDifference = 60 * 5 * 1000; // 5 minutes
     const isClientDateValid = !clientDate || Math.abs(clientDate - serverDate) > allowedDifference;
 
-    if (!isMobile && isClientDateValid) {
+    if (!isMobile && !isClientDateValid) {
         const error = new Error('Your system time is incorrect');
 
         error.status = 400;
         return next(error);
     }
+
+    next();
 };
