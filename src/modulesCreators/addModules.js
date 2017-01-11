@@ -479,7 +479,7 @@ const modules = [
 
     {
         _id     : 43,
-        name    : {en: 'Contact Us', ar: 'Contact Us'}, // todo translation
+        name    : {en: 'Contact Us', ar: 'اتصل بنا'},
         href    : CONSTANTS.CONTACT_US,
         sequence: 43,
         parrent : null,
