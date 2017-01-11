@@ -5,10 +5,11 @@ module.exports = (req, res, next) => {
         return next();
     }
 
-    const clientDate = new Date(req.headers.clientdate);
+    const clientDateAsHeader = req.headers.clientdate;
+    const clientDate = new Date(clientDateAsHeader);
     const isMobile = req.isMobile;
     const allowedDifference = 60 * 5 * 1000; // 5 minutes
-    const isClientDateValid = !clientDate || Math.abs(clientDate - serverDate) > allowedDifference;
+    const isClientDateValid = clientDateAsHeader && clientDate && Math.abs(clientDate - serverDate) < allowedDifference;
 
     if (!isMobile && !isClientDateValid) {
         const error = new Error('Your system time is incorrect');
