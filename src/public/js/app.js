@@ -242,7 +242,10 @@ define(['jQuery',
         };
 
         $.ajaxSetup({
-            headers: {'X-CSRF-Token': CSRF_TOKEN}
+            headers: {
+                'X-CSRF-Token': CSRF_TOKEN,
+                'clientdate'  : new Date()
+            }
         });
 
     };

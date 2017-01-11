@@ -21,7 +21,7 @@ define([
         noTranslation: 'no Translation',
         resolveBtn : 'Resolve',
         comments : 'Comments',
-        attachmentsDialogTitle : 'Contact Us files', //todo ar translation
+        attachmentsDialogTitle : 'Contact Us files',
 
         // topBar
         all        : 'Contact Us',
