@@ -4,10 +4,6 @@ const async = require('async');
 mongoose.Schemas = {}; // important thing
 require('./types');
 
-const mongoose = require('mongoose');
-
-mongoose.Schemas = mongoose.Schemas || {};
-
 const mongo = require('./utils/mongo');
 const eventEmitter = require('./utils/eventEmitter');
 

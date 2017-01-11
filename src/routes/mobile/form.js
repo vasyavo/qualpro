@@ -838,7 +838,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.put('/visibility/before/:id', visibilityFormHandler.updateBefore);
+    router.put('/visibility/:id', visibilityFormHandler.update);
 
 
     /**
@@ -869,9 +869,7 @@ module.exports = function (db, redis, event) {
      * @instance
      */
 
-    router.patch('/visibility/after/:id', visibilityFormHandler.updateAfter);
-
-    router.patch('/visibility/before/:id', visibilityFormHandler.updateBefore);
+    router.patch('/visibility/:id', visibilityFormHandler.update);
 
     return router;
 };
