@@ -29,7 +29,9 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 
-const setAdditionalHeader = (req, res, next) => {
+const setCacheControl = (req, res, next) => {
+    const browser = req.headers['user-agent'];
+
     if (/Trident/.test(browser) || /Edge/.test(browser)) {
         res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
     }
@@ -53,7 +55,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(require('./utils/sessionMiddleware'));
 app.use(cookieParser('CRMkey'));
-app.use(setAdditionalHeader);
+app.use(setCacheControl);
 app.get('/info', require('./utils/isApiAvailable'));
 
 require('./routes/index')(app, mongo, eventEmitter);

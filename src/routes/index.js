@@ -91,8 +91,6 @@ module.exports = function(app, db, event) {
         res.render('index.html', {csrfToken : req.csrfToken()});
     });
 
-    app.use(require('./../utils/validTimeZone'));
-
     // endpoint for handling api documents
     app.get('/docs', function(req, res, next) {
         res.render(process.cwd() + '/API_documentation/qualPro_API.html');
@@ -100,23 +98,8 @@ module.exports = function(app, db, event) {
 
     app.get('/modules', checkAuth, modulesHandler.getAll);
 
-    app.post('/upload', multipartMiddleware, function(req, res, next) {
-        var localFs = new LocalFs();
-        var id = req.session.uId;
-        var content = req.headers.contenttype;
-        var folderName = path.join(content, id);
-        var fileData = req.files.attachfile;
-
-        localFs.postFile(folderName, fileData, function(err) {
-            if (err) {
-                return next(err);
-            }
-
-            res.status(201).send({success : 'file(\'s) uploaded success'});
-        });
-    });
-
     app.post('/scheduler', require('../stories/taskScheduler/trigger'));
+    app.use(require('./../utils/validTimeZone'));
 
     app.use(require('./../stories/user-registration'));
 

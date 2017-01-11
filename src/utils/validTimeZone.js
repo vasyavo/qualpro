@@ -1,18 +1,19 @@
 module.exports = (req, res, next) => {
     const serverDate = new Date();
 
-    const clientDate = req.headers.clientdate;
+    if (!req.headers.hasOwnProperty('clientdate')) {
+        next();
+    }
 
-    const isMobile = req.isMobile; // dont work on mobile app
+    const clientDate = new Date(req.headers.clientdate);
+    const isMobile = req.isMobile;
+    const allowedDifference = 60 * 5 * 1000; // 5 minutes
+    const isClientDateValid = !clientDate || Math.abs(clientDate - serverDate) > allowedDifference;
 
-    const allowedDifference = 5 * 1000 * 60;
-
-    if (!isMobile && (!clientDate || Math.abs(new Date(clientDate) - serverDate) > allowedDifference)){
+    if (!isMobile && isClientDateValid) {
         const error = new Error('Your system time is incorrect');
+
         error.status = 400;
         return next(error);
     }
-
-
-    next();
 };
