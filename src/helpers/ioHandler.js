@@ -23,7 +23,16 @@ module.exports = function(io, unreadCache) {
 
             _this.uId = data.uId;
             unreadCache.setUserSocketId(data.uId, _this.id);
-            redis.cacheStore.writeToStorageHash(onlineKey, _this.id, data.uId);
+            redis.cacheStore.getValuesStorageHash(onlineKey, function(err, online) {
+                if (err) {
+                    return logger.error(err);
+                }
+
+                if(!~online.indexOf(data.uId)) {
+                    redis.cacheStore.writeToStorageHash(onlineKey, _this.id, data.uId);
+
+                }
+            });
 
             socket.broadcast.to('online_status').emit('goOnline', {
                 uid : _this.uId

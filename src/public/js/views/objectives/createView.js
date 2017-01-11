@@ -224,7 +224,6 @@ define([
             var data = new FormData(this);
             var currentLanguage = App.currentUser.currentLanguage;
 
-
             e.preventDefault();
             data.append('data', JSON.stringify(context.body));
 
@@ -248,26 +247,90 @@ define([
                 },
 
                 function (model, cb) {
-                    var formId;
+                debugger;
+                    if (context.visibilityFormAjax.model.get('files').length) {
+                        $.ajax({
+                            url : '/file',
+                            method : 'POST',
+                            data : context.visibilityFormAjax.data,
+                            contentType: false,
+                            processData: false,
+                            success : function (response) {
+                                cb(null, model, response);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model, []);
+                    }
+                },
 
+                function (model, files, cb) {
                     if (!context.visibilityFormAjax) {
                         return cb(null, model);
                     }
 
-                    context.visibilityFormAjax.success = function () {
-                        cb(null, model);
-                    };
-
-                    context.visibilityFormAjax.error = function () {
-                        cb(true);
-                    };
-
-                    formId = model.get('form')._id;
+                    var modelFiles = visibilityFormAjax.model.get('files');
+                    var formId = model.get('form')._id;
                     context.visibilityFormAjax.url = 'form/visibility/' + formId;
 
-                    delete context.visibilityFormAjax.model;
+                    var data;
 
-                    $.ajax(context.visibilityFormAjax);
+                    if (model.get('applyFileToAll')) {
+                        data = {
+                            before : {
+                                files : files.map(function(item) {
+                                    return item._id;
+                                })
+                            },
+                            after : {
+                                description : '',
+                                files : []
+                            },
+                            branches : []
+                        };
+                    } else {
+                        data = {
+                            before : {
+                                files : []
+                            },
+                            after : {
+                                description : '',
+                                files : []
+                            },
+                            branches : modelFiles.map(function(item) {
+                                var fileFromServer = _.findWhere(files, {
+                                    originalName : item.fileName
+                                });
+
+                                return {
+                                    branchId : item.branchId,
+                                    before : {
+                                        files : [fileFromServer._id]
+                                    },
+                                    after : {
+                                        files : [],
+                                        description : ''
+                                    }
+                                };
+                            })
+                        };
+                    }
+
+                    $.ajax({
+                        url : `form/visibility/${formId}`,
+                        method : 'PATCH',
+                        dataType : 'json',
+                        data : data,
+                        success : function () {
+                            cb(null, model);
+                        },
+                        error : function () {
+                            cb(true);
+                        }
+                    });
                 }
 
             ], function (err, model) {

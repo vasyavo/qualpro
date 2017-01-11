@@ -7,6 +7,7 @@ activityLog.on('objective:published', require('./methods/objective/published'));
 activityLog.on('objective:updated', require('./methods/objective/updated'));
 activityLog.on('objective:status-updated', require('./methods/objective/updated')); // todo: change event handler
 activityLog.on('objective:reassigned', require('./methods/objective/updated')); // todo: change event handler
+activityLog.on('objective:comment-added', require('./methods/objective/commentAdded'));
 
 activityLog.on('sub-objective:draft-created', require('./methods/objective/sub/draftCreated'));
 activityLog.on('sub-objective:published', require('./methods/objective/sub/published'));
@@ -17,5 +18,6 @@ activityLog.on('in-store-task:published', require('./methods/inStoreTask/publish
 activityLog.on('in-store-task:updated', require('./methods/inStoreTask/updated'));
 activityLog.on('in-store-task:status-updated', require('./methods/inStoreTask/updated')); // todo: change event handler
 activityLog.on('in-store-task:reassigned', require('./methods/inStoreTask/updated')); // todo: change event handler
+activityLog.on('in-store-task:comment-added', require('./methods/inStoreTask/commentAdded'));
 
 module.exports = activityLog;

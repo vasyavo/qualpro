@@ -7,10 +7,8 @@ const logger = require('./../utils/logger');
 
 const fcmClient = new FCM(config.fcmApiKey);
 
-module.exports = function (db) {
-    'use strict';
-
-    function sendPushesToUser(userId, alert, options, callback) {
+module.exports = function() {
+    function sendPushesToUser(userId, payload, callback) {
         async.waterfall([
             function (waterfallCb) {
                 const userIdAsString = userId.toString();
@@ -48,14 +46,12 @@ module.exports = function (db) {
 
                 async.each(devices, function (device, eachCb) {
                     const deviceId = device.deviceId;
-                    const payloadOptions = options.payload || {};
-                    const pushData = Object.assign({}, payloadOptions, alert);
 
-                    logger.info(`Firebase device ${deviceId} message payload:`, pushData);
+                    logger.info(`Firebase device ${deviceId} message payload:`, payload);
 
                     fcmClient.send({
                         to: deviceId,
-                        data: pushData
+                        data: payload
                     }, (err, data) => {
                         if (err) {
                             logger.error('Firebase returns', err);
@@ -84,24 +80,14 @@ module.exports = function (db) {
         });
     }
 
+    this.sendPushes = (userId, payload, callback) => {
+        const payloadWithTitle = Object.assign({}, payload, {
+            title: {
+                en: 'New activity',
+                ar: '',
+            },
+        });
 
-    this.sendPushes = function (userId, type, options, callback) {
-        var alert;
-        switch (type) {
-            case 'newActivity':
-                alert = {
-                    title: 'New activity'
-                };
-                sendPushesToUser(userId, alert, {payload: options}, callback);
-                break;
-            default:
-                alert = {
-                    title: 'New activity'
-                };
-                sendPushesToUser(userId, alert, {payload: options}, callback);
-                break;
-        }
-
+        sendPushesToUser(userId, payloadWithTitle, callback);
     };
-
 };

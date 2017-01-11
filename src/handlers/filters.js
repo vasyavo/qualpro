@@ -1827,8 +1827,6 @@ const Filters = function(db, redis) {
         var query = req.query;
         var queryFilter = query.filter || {};
         var filterMapper = new FilterMapper();
-        var currentSelected = query.current;
-        var filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
         var filter = filterMapper.mapFilter({
             filter : queryFilter,
             personnel : req.personnelModel
@@ -1994,19 +1992,7 @@ const Filters = function(db, redis) {
                 personnel : result.personnel || []
             };
 
-            redisFilters({
-                currentSelected : currentSelected,
-                filterExists : filterExists,
-                filtersObject : result,
-                personnelId : req.personnelModel._id,
-                contentType : CONTENT_TYPES.PRICESURVEY
-            }, function(err, response) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.status(200).send(response);
-            });
+            res.status(200).send(result);
         });
     };
 
@@ -6567,19 +6553,8 @@ const Filters = function(db, redis) {
             if (err) {
                 return next(err);
             }
-            redisFilters({
-                currentSelected : currentSelected,
-                filterExists : filterExists,
-                filtersObject : result,
-                personnelId : req.personnelModel._id,
-                contentType : 'createEditPromotions'
-            }, function(err, response) {
-                if (err) {
-                    return next(err);
-                }
 
-                res.status(200).send(response);
-            });
+            res.status(200).send(result);
         });
     };
 
