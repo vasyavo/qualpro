@@ -1,6 +1,7 @@
 const async = require('async');
 const Bluebird = require('bluebird');
 const redis = require('./../../../helpers/redisClient');
+const addAction = require('./../utils/addAction');
 
 const getSocketIdByUserId = (userId, callback) => {
     const route = `socket_Uid:${userId}:*`;
@@ -14,28 +15,48 @@ class MessageDispatcher {
         this.io = io;
     }
 
+    /*
+     * @param {Object[]} groups
+     * @param {String[]} groups.recipient set of user ID
+     * @param {Object} groups.subject
+     * @param {String} groups.subject.en
+     * @param {String} groups.subject.ar
+     * @param {Object} groups.payload
+     * */
     static sendMessage(groups, callback) {
+        /*
+         * @param {Object} action
+         * @param {Object} action.payload
+         * */
         const itRecipient = (action) => {
             return (recipient, itCallback) => {
-                async.waterfall([
+                async.parallel({
 
-                    async.apply(getSocketIdByUserId, recipient),
+                    numberOfNewActivities: async.apply(addAction, recipient),
 
-                    (arrayOfRedisKeys, cb) => {
-                        const arrayOfSocketId = arrayOfRedisKeys.map((redisKey) => {
-                            const socketId = redisKey.split(':')[2];
+                    setRedisKeys: async.apply(getSocketIdByUserId, recipient),
 
-                            return socketId
+                }, (err, values) => {
+                    if (err) {
+                        return itCallback(err);
+                    }
+
+                    const {
+                        numberOfNewActivities,
+                        setRedisKeys
+                    } = values;
+
+                    async.each(setRedisKeys, (redisKey, eachCb) => {
+                        const socketId = redisKey.split(':')[2];
+                        const payload = Object.assign({}, action.paylaod, {
+                            badge: numberOfNewActivities,
                         });
 
-                        async.each(arrayOfSocketId, (socketId, eachCb) => {
-                            this.io.to(socketId).emit('message', action.payload);
-                            eachCb(null);
-                        }, cb.bind(null, null, arrayOfSocketId));
-                    },
-
-                ], itCallback);
-            };
+                        this.io.to(socketId).emit('message', payload);
+                        eachCb(null);
+                    }, itCallback);
+                });
+            }
         };
 
         const itGroup = (group, itCallback) => {
