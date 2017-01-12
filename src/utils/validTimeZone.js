@@ -8,10 +8,10 @@ module.exports = (req, res, next) => {
     const clientDateAsHeader = req.headers.clientdate;
     const clientDate = new Date(clientDateAsHeader);
     const isMobile = req.isMobile;
-    const allowedDifference = 60 * 5 * 1000; // 5 minutes
-    const isClientDateValid = clientDateAsHeader && clientDate && Math.abs(clientDate - serverDate) > allowedDifference;
+    const allowedDifference = 60 * 60 * 24 * 1000; //24 hours
+    const isClientDateValid = clientDateAsHeader && clientDate && Math.abs(clientDate - serverDate) < allowedDifference;
 
-    if (!isMobile && clientDateAsHeader && !isClientDateValid) {
+    if (!isMobile && !isClientDateValid) {
         const error = new Error('Your system time is incorrect');
 
         error.status = 400;
