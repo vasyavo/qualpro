@@ -3,6 +3,7 @@ const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../../utils/getSupervisorByAssigneeAndOriginator');
 const getOriginatorByParentObjective = require('./../../../utils/getOriginatorByParentObjective');
 const arrayOfObjectIdToArrayOfString = require('./../../../utils/arrayOfObjectIdToArrayOfString');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../../utils/dispatch');
 const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
@@ -16,28 +17,27 @@ module.exports = (options) => {
         const actionType = activityTypes.CREATED;
 
         const {
-            originatorId,
             accessRoleLevel,
             objective,
         } = options;
+        const actionOriginator = options.originatorId;
 
         const arrayOfParentObjectiveId = _(objective.parent)
             .values()
             .compact()
             .value();
 
-        const [
-            assignedTo,
-        ] = arrayOfObjectIdToArrayOfString(
-            objective.assignedTo
-        );
+        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
+            assignedTo: objective.assignedTo,
+            actionOriginator,
+        });
         const [
             arrayOfSupervisor,
             arrayOfOriginator,
         ] = yield [
             getSupervisorByAssigneeAndOriginator({
                 assignedTo,
-                originator: originatorId,
+                originator: actionOriginator,
             }),
             getOriginatorByParentObjective({
                 objectives: arrayOfParentObjectiveId,
@@ -56,12 +56,12 @@ module.exports = (options) => {
                 ar: objective.title.ar,
             },
             createdBy: {
-                user: originatorId,
+                user: actionOriginator,
             },
             accessRoleLevel,
             // we should store unique values in personnels
             personnels: _.uniq([
-                originatorId,
+                actionOriginator,
                 ...assignedTo,
                 ...arrayOfSupervisor,
                 ...arrayOfOriginator,
@@ -79,21 +79,21 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: [originatorId],
+            recipients: [actionOriginator],
             subject: {
                 en: 'Objective published',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
-            recipients: arrayOfOriginator,
+            recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
             subject: {
                 en: 'Sub-objective published',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
-            recipients: assignedTo,
+            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received new objective',
                 ar: '',
@@ -106,7 +106,7 @@ module.exports = (options) => {
             * and supervisor at the same time
             * then save difference
             * */
-            recipients: arrayOfSupervisor,
+            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: 'Subordinate received new objective',
                 ar: '',

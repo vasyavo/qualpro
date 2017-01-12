@@ -1598,15 +1598,15 @@ allowedParams[CONTENT_TYPES.QUESTIONNARIES] = {
 allowedParams[CONTENT_TYPES.CONSUMER_SURVEY] = {
     0: {
         create: ['title', 'dueDate', 'startDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
-        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
     },
     1: {
         create: ['title', 'dueDate', 'startDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
-        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
     },
     2: {
         create: ['title', 'dueDate', 'startDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
-        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
     },
     3: {
         create: ['title', 'dueDate', 'startDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
