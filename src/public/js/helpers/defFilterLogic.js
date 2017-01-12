@@ -300,7 +300,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         },
                         $nor  : {
                             type  : 'collection',
@@ -308,7 +308,7 @@ define([
                                 'createdBy.user': {
                                     type   : 'ObjectId',
                                     values : [currentUserId],
-                                    options: {$nin: true}
+                                    options: {$nin: 'true'}
                                 },
                                 status          : {
                                     type  : 'string',
@@ -329,7 +329,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         },
                         $or   : {
                             type  : 'collection',
@@ -343,7 +343,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 },
                                 {
@@ -370,7 +370,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT, OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Draft', 'Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 }
@@ -388,7 +388,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 }
@@ -402,7 +402,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         },
                         $or   : {
                             type  : 'collection',
@@ -416,7 +416,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 },
                                 {
@@ -487,14 +487,14 @@ define([
                             type: 'ObjectId',
                             values: [currentUserId],
                             options: {
-                                $nin: true
+                                $nin: 'true'
                             }
                         },
                         'status': {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED, OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                             names  : ['Closed', 'Draft'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 },
@@ -511,7 +511,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         },
                         $nor  : {
                             type  : 'collection',
@@ -520,7 +520,7 @@ define([
                                     'createdBy.user': {
                                         type   : 'ObjectId',
                                         values : [currentUserId],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     },
                                     status          : {
                                         type  : 'string',
@@ -542,7 +542,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         },
                         $or   : {
                             type  : 'collection',
@@ -556,7 +556,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 },
                                 {
@@ -568,7 +568,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 },
                                 {
@@ -599,7 +599,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 },
                                 {
@@ -611,7 +611,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 }
                             ]
@@ -620,7 +620,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 }
@@ -638,7 +638,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 }
@@ -652,7 +652,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         },
                         $or   : {
                             type  : 'collection',
@@ -666,7 +666,7 @@ define([
                                         type   : 'string',
                                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                                         names  : ['Draft'],
-                                        options: {$nin: true}
+                                        options: {$nin: 'true'}
                                     }
                                 }, {
                                     'createdBy.user': {
@@ -692,7 +692,7 @@ define([
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 }
@@ -740,14 +740,14 @@ define([
                             type: 'ObjectId',
                             values: [currentUserId],
                             options: {
-                                $nin: true
+                                $nin: 'true'
                             }
                         },
                         'status'        : {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED, OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                             names  : ['Closed', 'Draft'],
-                            options: {$nin: true}
+                            options: {$nin: 'true'}
                         }
                     }]
                 },
