@@ -37,6 +37,7 @@ module.exports = (options) => {
         ] = yield [
             getSupervisorByAssigneeAndOriginator({
                 assignedTo,
+                originator: actionOriginator,
             }),
             getOriginatorByParentObjective({
                 objectives: arrayOfParentObjectiveId,

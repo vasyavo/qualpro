@@ -23,7 +23,7 @@ module.exports = (options) => {
 
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
             assignedTo: objective.assignedTo,
-            actionOriginator: actionOriginator,
+            actionOriginator,
         });
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
             assignedTo,
