@@ -78,37 +78,87 @@ define([
 
             if (before.files.length) {
                 var container;
-                var file = before.files[0];
-                var fileType = file.contentType.substr(0, 5);
+                var beforeFile = before.files[0];
+                var fileType = beforeFile.contentType.substr(0, 5);
 
                 if (fileType === 'video') {
-                    container = '<video class="showPreview before" width="400" controls><source src="' + file.url + '"></video>';
+                    container = '<video class="showPreview before" width="400" controls><source src="' + beforeFile.url + '"></video>';
                 } else {
-                    container = '<img class="imgResponsive showPreview before" src="' + file.url + '">';
+                    container = '<img class="imgResponsive showPreview before" src="' + beforeFile.url + '">';
                 }
 
                 self.branches.map(function (item) {
-                    item.fileContainer = container;
-                    item.fileName = file.originalName;
+                    item.beforeFileContainer = container;
+                    item.beforeFileName = beforeFile.originalName;
+
+                    item.afterFileContainer = '';
+                    item.afterFileName = 'No File';
+                    item.afterDescription = '';
+
+                    if (branches.length) {
+                        var branch = _.find(branches, function (element) {
+                            return element.branchId === item._id;
+                        });
+
+                        if (branch) {
+                            var afterFile = branch.after.files[0];
+                            if (afterFile) {
+                                var afterFileContainer;
+                                var afterFileType = afterFile.contentType.substr(0, 5);
+
+                                if (afterFileType === 'video') {
+                                    afterFileContainer = '<video class="showPreview before" width="400" controls><source src="' + afterFile.url + '"></video>';
+                                } else {
+                                    afterFileContainer = '<img class="imgResponsive showPreview before" src="' + afterFile.url + '">';
+                                }
+
+                                item.afterFileContainer = afterFileContainer;
+                                item.afterFileName = afterFile.originalName;
+                                item.afterDescription = branch.after.description;
+                            }
+                        }
+                    }
+
                     return item;
                 });
             } else if (branches.length) {
                 branches.map(function (item) {
+                    var beforeFileContainer;
+                    var afterFileContainer;
                     var branchModel = _.find(self.branches, function (branch) {
                         return branch._id === item.branchId;
                     });
 
-                    var file = item.before.files[0];
-                    var fileType = file.contentType.substr(0, 5);
+                    var beforeFile = item.before.files[0];
+                    var beforeFileType = beforeFile.contentType.substr(0, 5);
 
-                    if (fileType === 'video') {
-                        container = '<video class="showPreview before" width="400" controls><source src="' + file.url + '"></video>';
+                    if (beforeFileType === 'video') {
+                        beforeFileContainer = '<video class="showPreview before" width="400" controls><source src="' + beforeFile.url + '"></video>';
                     } else {
-                        container = '<img class="imgResponsive showPreview before" src="' + file.url + '">';
+                        beforeFileContainer = '<img class="imgResponsive showPreview before" src="' + beforeFile.url + '">';
                     }
 
-                    branchModel.fileContainer = container;
-                    branchModel.fileName = file.originalName;
+                    branchModel.beforeFileContainer = beforeFileContainer;
+                    branchModel.beforeFileName = beforeFile.originalName;
+
+                    branchModel.afterFileContainer = '';
+                    branchModel.afterFileName = 'No File';
+                    branchModel.afterDescription = '';
+
+                    var afterFile = item.after.files[0];
+                    if (afterFile) {
+                        var afterFileType = afterFile.contentType.substr(0, 5);
+
+                        if (afterFileType === 'video') {
+                            afterFileContainer = '<video class="showPreview before" width="400" controls><source src="' + afterFile.url + '"></video>';
+                        } else {
+                            afterFileContainer = '<img class="imgResponsive showPreview before" src="' + afterFile.url + '">';
+                        }
+
+                        branchModel.afterFileContainer = afterFileContainer;
+                        branchModel.afterFileName = afterFile.originalName;
+                        branchModel.afterDescription = item.after.description;
+                    }
 
                     return item;
                 });
