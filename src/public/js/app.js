@@ -247,9 +247,9 @@ define(['jQuery',
             }
         });
 
-        $.ajaxPrefilter(function(req){
+       /* $.ajaxPrefilter(function(req){
             req.headers.clientdate = new Date;
-        });
+        });*/
 
     };
 

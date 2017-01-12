@@ -99,7 +99,7 @@ module.exports = function(app, db, event) {
     app.get('/modules', checkAuth, modulesHandler.getAll);
 
     app.post('/scheduler', require('../stories/taskScheduler/trigger'));
-    app.use(require('./../utils/validTimeZone'));
+    /*app.use(require('./../utils/validTimeZone'));*/
 
     app.use(require('./../stories/user-registration'));
 
