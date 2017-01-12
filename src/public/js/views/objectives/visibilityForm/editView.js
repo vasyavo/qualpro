@@ -97,6 +97,7 @@ define([
             }
 
             if (files.length > 1) {
+                checkbox.checked = false;
                 return App.renderErrors([
                     ERROR_MESSAGES.selectOneFile[App.currentUser.currentLanguage]
                 ]);

@@ -55,9 +55,7 @@ var PersonnelHelper = function (db, redis, app) {
         if (options.userOnLeave) {
             message = 'logOut';
 
-            pushes.sendPushes(options.userOnLeave, 'newActivity', {
-                status : 403
-            }, function (err) {
+            pushes.sendPushes(options.userOnLeave, 'newActivity', function (err) {
                 if (err) {
                     logWriter.log('personnel on leave', err);
                 }

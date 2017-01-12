@@ -1,7 +1,7 @@
 const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
-const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
@@ -21,16 +21,16 @@ module.exports = (options) => {
             body,
         } = options;
 
-        const [
-            assignedTo,
-        ] = arrayOfObjectIdToArrayOfString(
-            body.assignedTo
-        );
+        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
+            assignedTo: body.assignedTo,
+            actionOriginator,
+        });
         const [
             arrayOfSupervisor,
         ] = yield [
             getSupervisorByAssigneeAndOriginator({
                 assignedTo,
+                originator: actionOriginator,
             })
         ];
 
@@ -74,18 +74,14 @@ module.exports = (options) => {
             },
             payload: activityAsJson,
         }, {
-            recipients: _.remove([assignedTo], (id) => {
-                return id === actionOriginator
-            }),
+            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Objective commented',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
-            recipients: _.remove([arrayOfSupervisor], (id) => {
-                return id === actionOriginator
-            }),
+            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: `Subordinate's objective commented`,
                 ar: '',
