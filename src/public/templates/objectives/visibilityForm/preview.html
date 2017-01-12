@@ -10,18 +10,18 @@
             <div class="afterTitle fontBold fontDefault"><%= translation.after %></div>
         </div>
     </form>
+
     <% _.each(branches, function(branch) { %>
     <form id="mainVisForm" class="visibilityContainer flexRow">
-
         <div class="banner_inner bannerFullWidth">
             <div class="scrollable">
                 <div class="banner_inner_top borderBottom">
                     <span class="fontDefault"><%= branch.name %></span>
                 </div>
                 <div class="bannerBig">
-                    <div id="imageMy-<%- branch._id %>" class="bannerImage"><%= branch.fileContainer %></div><!--container here-->
+                    <div id="imageMy-<%- branch._id %>" class="bannerImage"><%= branch.beforeFileContainer %></div><!--container here-->
                     <div class="bannerDescription picSquare bannerIcon">
-                        <span class="fontMedium image-name-<%- branch._id %>"><%- branch.fileName %></span><!--filename here-->
+                        <span class="fontMedium image-name-<%- branch._id %>"><%- branch.beforeFileName %></span><!--filename here-->
                     </div>
                 </div>
                 <div class="banner_textBlock">
@@ -34,17 +34,17 @@
         <div class="banner_inner bannerFullWidth">
             <div class="scrollable">
                 <div class="banner_inner_top borderBottom">
-                    <span class="branchName"></span>
+                    <span class="branchName"><%- branch.name %></span>
                 </div>
                 <div class="bannerBig">
-                    <div id="imageAfter"></div>
+                    <div id="imageAfter"><%= branch.afterFileContainer %></div>
                     <div class="bannerDescription picSquare bannerIcon">
-                        <span class="fontMedium"></span>
+                        <span class="fontMedium"><%- branch.afterFileName %></span>
                     </div>
                 </div>
                 <div class="banner_textBlock afterTextBlock">
                     <p class="uploadDescription fontDefault"><%= translation.description %></p>
-                    <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= model.after.description %></div>
+                    <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= branch.afterDescription %></div>
                 </div>
             </div>
         </div>
