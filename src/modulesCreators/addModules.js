@@ -393,7 +393,7 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'al alali Marketing Campaigns', ar: ''}, // todo translation
+        name    : {en: 'al alali Marketing Campaigns', ar: 'al alali Marketing Campaigns'}, // todo translation
         href    : CONSTANTS.BRANDING_ACTIVITY,
         sequence: 38,
         parrent : 16,

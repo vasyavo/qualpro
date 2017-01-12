@@ -2,12 +2,18 @@
     <div class="title">
         <span class="titleDescription"><%= translation.titlePreviewVisibility %></span>
     </div>
-
-
-    <form id="mainVisForm" class="visibilityContainer flexRow">
-        <% _.each(branches, function(branch) { %>
-        <div class="banner_inner bannerFullWidth">
+    <form class="visibilityContainer flexRow">
+        <div class="banner_inner bannerFullWidth no-padding-bottom">
             <div class="beforeTitle fontBold fontDefault"><%= translation.before %></div>
+        </div>
+        <div class="banner_inner bannerFullWidth no-padding-bottom">
+            <div class="afterTitle fontBold fontDefault"><%= translation.after %></div>
+        </div>
+    </form>
+    <% _.each(branches, function(branch) { %>
+    <form id="mainVisForm" class="visibilityContainer flexRow">
+
+        <div class="banner_inner bannerFullWidth">
             <div class="scrollable">
                 <div class="banner_inner_top borderBottom">
                     <span class="fontDefault"><%= branch.name %></span>
@@ -24,9 +30,8 @@
                 </div>
             </div>
         </div>
-        <% }); %>
-        <!--<div class="banner_inner bannerFullWidth">
-            <div class="afterTitle fontBold fontDefault"><%= translation.after %></div>
+
+        <div class="banner_inner bannerFullWidth">
             <div class="scrollable">
                 <div class="banner_inner_top borderBottom">
                     <span class="branchName"></span>
@@ -42,7 +47,7 @@
                     <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= model.after.description %></div>
                 </div>
             </div>
-        </div>-->
+        </div>
     </form>
-
+    <% }); %>
 </div>
