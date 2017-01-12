@@ -1,34 +1,34 @@
 const co = require('co');
 const _ = require('lodash');
-const getSupervisorByAssigneeAndOriginator = require('./../../../utils/getSupervisorByAssigneeAndOriginator');
-const getOriginatorByParentObjective = require('./../../../utils/getOriginatorByParentObjective');
-const arrayOfObjectIdToArrayOfString = require('./../../../utils/arrayOfObjectIdToArrayOfString');
-const getAssigneeNotOnLeaveAndTheyCover = require('./../../../utils/getAssigneeNotOnLeaveAndTheyCover');
-const dispatch = require('./../../../utils/dispatch');
-const aclModules = require('./../../../../../constants/aclModulesNames');
-const activityTypes = require('./../../../../../constants/activityTypes');
-const contentTypes = require('./../../../../../public/js/constants/contentType');
-const ActivityModel = require('./../../../../../types/activityList/model');
+const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
+const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
+const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
+const dispatch = require('./../../utils/dispatch');
+const aclModules = require('./../../../../constants/aclModulesNames');
+const activityTypes = require('./../../../../constants/activityTypes');
+const contentTypes = require('./../../../../public/js/constants/contentType');
+const ActivityModel = require('./../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.OBJECTIVE;
         const contentType = contentTypes.OBJECTIVES;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.COMMENTED;
 
         const {
+            actionOriginator,
             accessRoleLevel,
-            objective,
+            body,
         } = options;
-        const actionOriginator = options.originatorId;
 
-        const arrayOfParentObjectiveId = _(objective.parent)
+        const arrayOfParentObjectiveId = _(body.parent)
             .values()
             .compact()
             .value();
 
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
-            assignedTo: objective.assignedTo,
+            assignedTo: body.assignedTo,
             actionOriginator,
         });
         const [
@@ -37,7 +37,6 @@ module.exports = (options) => {
         ] = yield [
             getSupervisorByAssigneeAndOriginator({
                 assignedTo,
-                originator: actionOriginator,
             }),
             getOriginatorByParentObjective({
                 objectives: arrayOfParentObjectiveId,
@@ -50,16 +49,15 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: objective._id,
+            itemId: body._id,
             itemName: {
-                en: objective.title.en,
-                ar: objective.title.ar,
+                en: body.title.en,
+                ar: body.title.ar,
             },
             createdBy: {
                 user: actionOriginator,
             },
             accessRoleLevel,
-            // we should store unique values in personnels
             personnels: _.uniq([
                 actionOriginator,
                 ...assignedTo,
@@ -67,12 +65,12 @@ module.exports = (options) => {
                 ...arrayOfOriginator,
             ]),
             assignedTo,
-            country: objective.country,
-            region: objective.region,
-            subRegion: objective.subRegion,
-            retailSegment: objective.retailSegment,
-            outlet: objective.outlet,
-            branch: objective.branch,
+            country: body.country,
+            region: body.region,
+            subRegion: body.subRegion,
+            retailSegment: body.retailSegment,
+            outlet: body.outlet,
+            branch: body.branch,
         });
 
         const savedActivity = yield newActivity.save();
@@ -81,34 +79,28 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Objective published',
+                en: 'Comment sent',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
             recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
             subject: {
-                en: 'Sub-objective published',
+                en: 'Sub-objective commented',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
             recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
-                en: 'Received new objective',
+                en: 'Objective commented',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
-            /*
-            * if CA assign to AM
-            * then CA is an originator
-            * and supervisor at the same time
-            * then save difference
-            * */
             recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
-                en: 'Subordinate received new objective',
+                en: `Subordinate's objective commented`,
                 ar: '',
             },
             payload: activityAsJson,

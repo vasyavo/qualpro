@@ -17,7 +17,7 @@ module.exports = (err, req, res, next) => {
     const body = {
         status,
         requestId,
-        message: 'Something went wrong...'
+        message: err.message || 'Something went wrong...'
     };
 
     res.status(status).send(body);

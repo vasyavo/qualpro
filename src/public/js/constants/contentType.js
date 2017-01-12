@@ -18,7 +18,7 @@
         COMMENT : 'comment',
         //CONTRACT               : 'contract',
         CONTRACTSYEARLY : 'contractsYearly',
-        CONTRACT_TYPE : 'type',
+        CONTRACT_TYPE : 'contractType',
         CONTRACTSSECONDARY : 'contractsSecondary',
         CONFIGURATIONS : 'configuration',
         COUNTRY : 'country',

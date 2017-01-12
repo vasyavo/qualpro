@@ -837,6 +837,11 @@ var Contract = function (db, redis, event) {
                 delete queryObject.position;
             }
 
+            if (queryObject.contractType) {
+                queryObject.type = queryObject.contractType;
+                delete queryObject.contractType;
+            }
+
             if (queryObject.$or) {
                 queryObject.$and = [
                     {

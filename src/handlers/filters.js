@@ -7347,7 +7347,7 @@ const Filters = function(db, redis) {
                             retailSegment : result.retailSegment && _.uniq(_.flatten(result.retailSegment)) || [],
                             outlet : result.outlet && _.uniq(_.flatten(result.outlet)) || [],
                             branch : result.branch && _.uniq(_.flatten(result.branch)) || [],
-                            type : result.type || [],
+                            contractType : result.type || [],
                             status : result.status || []
                         };
 
@@ -7663,7 +7663,7 @@ const Filters = function(db, redis) {
                         retailSegment : result.retailSegment && _.uniq(_.flatten(result.retailSegment)) || [],
                         outlet : result.outlet && _.uniq(_.flatten(result.outlet)) || [],
                         branch : result.branch && _.uniq(_.flatten(result.branch)) || [],
-                        type : result.type || [],
+                        contractType : result.type || [],
                         status : result.status || []
                     };
 

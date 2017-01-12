@@ -21,7 +21,7 @@ define([
     'helpers/objectivesStatusHelper',
     'dataService',
     'views/objectives/distributionFormView',
-    'views/visibilityForm/preView/preView',
+    'views/objectives/visibilityForm/preView',
     'text!templates/objectives/updatedPreview.html',
     'text!templates/objectives/taskFlowTemplate.html',
     'models/objectives',
@@ -379,7 +379,10 @@ define([
             var self = this;
             var contentType = form.contentType;
             var branchesForVisibility = _.map(modelJSON.branch, function (branch) {
-                return branch.name.currentLanguage;
+                return {
+                    name : branch.name.currentLanguage,
+                    _id : branch._id
+                };
             });
 
             if (modelJSON.status._id === CONSTANTS.OBJECTIVE_STATUSES.CLOSED
@@ -412,7 +415,7 @@ define([
                 } else {
                     this.visibilityForm = new VisibilityForm({
                         id         : id,
-                        branchName : branchesForVisibility.join(', '),
+                        branches : branchesForVisibility,
                         description: modelJSON.description,
                         translation: self.translation
                     });

@@ -239,7 +239,6 @@ module.exports = function() {
 
                             // update file options
                             fileOptions.extension = 'mp4';
-                            fileOptions.originalFilename = `${fileName}.mp4`;
                             fileOptions.type = 'video/mp4';
 
                             // async video processing

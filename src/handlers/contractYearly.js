@@ -771,6 +771,11 @@ var Contract = function (db, redis, event) {
                 delete queryObject.personnel;
             }
 
+            if (queryObject.contractType) {
+                queryObject.type = queryObject.contractType;
+                delete queryObject.contractType;
+            }
+
             const positionFilter = {};
 
             if (queryObject.position && queryObject.position.$in) {

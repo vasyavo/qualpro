@@ -393,7 +393,7 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'al alali Marketing Campaigns', ar: ''}, // todo translation
+        name    : {en: 'al alali Marketing Campaigns', ar: 'al alali Marketing Campaigns'}, // todo translation
         href    : CONSTANTS.BRANDING_ACTIVITY,
         sequence: 38,
         parrent : 16,
@@ -479,7 +479,7 @@ const modules = [
 
     {
         _id     : 43,
-        name    : {en: 'Contact Us', ar: 'Contact Us'}, // todo translation
+        name    : {en: 'Contact Us', ar: 'اتصل بنا'},
         href    : CONSTANTS.CONTACT_US,
         sequence: 43,
         parrent : null,

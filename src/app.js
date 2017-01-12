@@ -29,6 +29,16 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 
+const setCacheControl = (req, res, next) => {
+    const browser = req.headers['user-agent'];
+
+    if (/Trident/.test(browser) || /Edge/.test(browser)) {
+        res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    }
+
+    next();
+};
+
 app.use(compress());
 app.engine('html', consolidate.swig);
 app.set('view engine', 'html');
@@ -45,7 +55,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(require('./utils/sessionMiddleware'));
 app.use(cookieParser('CRMkey'));
+app.use(setCacheControl);
 app.get('/info', require('./utils/isApiAvailable'));
+
 require('./routes/index')(app, mongo, eventEmitter);
 
 const node = http.createServer(app);
@@ -56,22 +68,6 @@ MessageDispatcher.setIo(io);
 
 node.listen(config.port, () => {
     logger.info(`Server started at port ${config.port} in ${config.env} environment:`, config);
-});
-
-mongo.on('connected', () => {
-    async.series([
-
-        (cb) => {
-            require('./types');
-
-            if (config.isMaster) {
-                return require('./modulesCreators')(cb);
-            }
-
-            cb(null);
-        },
-
-    ])
 });
 
 module.exports = app;

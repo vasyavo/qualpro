@@ -84,6 +84,7 @@ module.exports = function(app, db, event) {
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
+
     app.get('/', csrfProtection, function(req, res, next) {
         //ToDo remove (res.cookie) this one after test sms
         //res.cookie('lang', 'ae');
@@ -97,23 +98,8 @@ module.exports = function(app, db, event) {
 
     app.get('/modules', checkAuth, modulesHandler.getAll);
 
-    app.post('/upload', multipartMiddleware, function(req, res, next) {
-        var localFs = new LocalFs();
-        var id = req.session.uId;
-        var content = req.headers.contenttype;
-        var folderName = path.join(content, id);
-        var fileData = req.files.attachfile;
-
-        localFs.postFile(folderName, fileData, function(err) {
-            if (err) {
-                return next(err);
-            }
-
-            res.status(201).send({success : 'file(\'s) uploaded success'});
-        });
-    });
-
-    app.post('/scheduler', /*require('../utils/allowedOriginsMiddleware'),*/ require('../stories/taskScheduler/trigger'));
+    app.post('/scheduler', require('../stories/taskScheduler/trigger'));
+    /*app.use(require('./../utils/validTimeZone'));*/
 
     app.use(require('./../stories/user-registration'));
 

@@ -8,45 +8,40 @@ const circuit = levee.createBreaker(request, {
     resetTimeout : 30000
 });
 
-const post = (opts, cb) => {
+const circuitRequest = (requestOptions, callback) => {
+    circuit.run(requestOptions, (err, response, body) => {
+        if (err) {
+            return callback(err);
+        }
+
+        if (response.statusCode > 100 && response.statusCode < 400) {
+            callback(null, body);
+        }
+
+        callback(body);
+    });
+};
+
+const post = (opts, callback) => {
     const requestOptions = Object.assign({
         method: 'POST',
         url : `${config.schedulerHost}/tasks`
     }, opts);
 
-    circuit.run(requestOptions, (err, response, body) => {
-        if (err) {
-            return cb(err);
-        }
-
-        if (response.statusCode > 100 && response.statusCode < 400) {
-            cb(null, body);
-        }
-
-        cb(body);
-    });
+    circuitRequest(requestOptions, callback);
 };
 
-const del = (opts, cb) => {
+const del = (opts, callback) => {
     const requestOptions = Object.assign({
         method: 'DELETE',
         url : `${config.schedulerHost}/tasks`
     }, opts);
 
-    circuit.run(requestOptions, (err, response, body) => {
-        if (err) {
-            return cb(err);
-        }
-
-        if (response.statusCode > 100 && response.statusCode < 400) {
-            cb(null, body);
-        }
-
-        cb(body);
-    });
+    circuitRequest(requestOptions, callback);
 };
 
 module.exports = {
     post,
-    del
+    del,
+    circuitRequest,
 };

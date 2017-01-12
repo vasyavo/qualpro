@@ -2,6 +2,7 @@ const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -15,19 +16,18 @@ module.exports = (options) => {
         const actionType = activityTypes.CREATED;
 
         const {
-            originatorId,
             accessRoleLevel,
             objective,
         } = options;
+        const actionOriginator = options.originatorId;
 
-        const [
-            assignedTo,
-        ] = arrayOfObjectIdToArrayOfString(
-            objective.assignedTo
-        );
+        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
+            assignedTo: objective.assignedTo,
+            actionOriginator: actionOriginator,
+        });
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
             assignedTo,
-            originator: originatorId,
+            originator: actionOriginator,
         });
 
         const newActivity = new ActivityModel();
@@ -42,11 +42,11 @@ module.exports = (options) => {
                 ar: objective.title.ar,
             },
             createdBy: {
-                user: originatorId,
+                user: actionOriginator,
             },
             accessRoleLevel,
             personnels: _.uniq([
-                originatorId,
+                actionOriginator,
                 ...assignedTo,
                 ...arrayOfSupervisor,
             ]),
@@ -63,16 +63,25 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: [originatorId],
-            subject: 'Objective published',
+            recipients: [actionOriginator],
+            subject: {
+                en: 'Objective published',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: assignedTo,
-            subject: 'Received new objective',
+            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
+            subject: {
+                en: 'Received new objective',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: arrayOfSupervisor,
-            subject: 'Subordinate received new objective',
+            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
+            subject: {
+                en: 'Subordinate received new objective',
+                ar: '',
+            },
             payload: activityAsJson,
         }];
 

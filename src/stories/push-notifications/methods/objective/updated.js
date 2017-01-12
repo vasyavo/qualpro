@@ -3,6 +3,7 @@ const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
 const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -27,11 +28,10 @@ module.exports = (options) => {
             .compact()
             .value();
 
-        const [
-            assignedTo,
-        ] = arrayOfObjectIdToArrayOfString(
-            body.assignedTo
-        );
+        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
+            assignedTo: body.assignedTo,
+            actionOriginator,
+        });
         const [
             arrayOfSupervisor,
             arrayOfOriginator,
@@ -81,19 +81,31 @@ module.exports = (options) => {
 
         const groups = [{
             recipients: [actionOriginator],
-            subject: 'Objective updated',
+            subject: {
+                en: 'Objective updated',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([arrayOfOriginator], [actionOriginator]),
-            subject: 'Sub-objective updated',
+            recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
+            subject: {
+                en: 'Sub-objective updated',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([assignedTo], [actionOriginator]),
-            subject: 'Received updated objective',
+            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
+            subject: {
+                en: 'Received updated objective',
+                ar: '',
+            },
             payload: activityAsJson,
         }, {
-            recipients: _.difference([arrayOfSupervisor], [actionOriginator]),
-            subject: `Subordinate's objective updated`,
+            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
+            subject: {
+                en: `Subordinate's objective updated`,
+                ar: '',
+            },
             payload: activityAsJson,
         }];
 

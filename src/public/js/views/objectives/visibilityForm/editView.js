@@ -2,13 +2,14 @@ define([
     'jQuery',
     'Underscore',
     'common',
+    'async',
     'text!templates/objectives/visibilityForm/edit.html',
     'text!templates/visibilityForm/editAfter.html',
     'models/visibilityForm',
     'views/baseDialog',
     'constants/otherConstants',
     'constants/errorMessages'
-], function ($, _, common, EditTemplate, EditAfterTemplate, Model, BaseView, CONSTANTS, ERROR_MESSAGES) {
+], function ($, _, common, async, EditTemplate, EditAfterTemplate, Model, BaseView, CONSTANTS, ERROR_MESSAGES) {
 
     var manageView = BaseView.extend({
         contentType: 'visibilityForm',
@@ -65,11 +66,23 @@ define([
                     });
                 }
             }
+
+            if (!this.model.get('tempRealFiles')) {
+                this.model.set('tempRealFiles', {});
+            }
+
+            if (!this.model.get('realFiles')) {
+                this.model.set('realFiles', {});
+            }
+
+            this.model.set('originalApplyStatus', this.model.get('applyFileToAll'));
         },
 
         applyFileToAllBranches : function (event) {
             let checkbox = event.target;
             let files = this.model.get('files') || [];
+            let tempFiles = this.model.get('tempFiles') || [];
+            files = files.concat(tempFiles);
             let container;
 
             if (!files || !files.length) {
@@ -121,23 +134,57 @@ define([
 
             $target.addClass('hidden');
 
-            let addedFiles = this.model.get('files');
+            //delete from temp file objects storage
+            var tempAddedFiles = this.model.get('tempFiles');
+            if (tempAddedFiles) {
+                const tempFileToDeleteIndex = tempAddedFiles.map((item) => {
+                    return item.branch;
+                }).indexOf(branchId);
+                if (tempFileToDeleteIndex > -1) {
+                    tempAddedFiles.splice(tempFileToDeleteIndex, 1);
+                }
+            }
 
-            const fileToDeleteIndex = addedFiles.map((item) => {
-                return item.branch;
-            }).indexOf("john");
 
-            //this.filesIdToDeleted.push(fileId);
+            //delete from temp storage of real files
+            var tempRealFiles = this.model.get('tempRealFiles');
+            if (tempRealFiles[branchId]) {
+                delete tempRealFiles[branchId];
+            }
+
+            //delete from file objects storage
+            var addedFiles = this.model.get('files');
             if (addedFiles) {
-                addedFiles.splice(fileToDeleteIndex, 1);
-                this.model.set('files', addedFiles);
+                const fileToDeleteIndex = addedFiles.map((item) => {
+                    return item.branch;
+                }).indexOf(branchId);
+                if (fileToDeleteIndex > -1) {
+                    var fileToTempRemovedFiles = addedFiles.splice(fileToDeleteIndex, 1);
+                    var tempRemovedFiles = this.model.get('tempRemovedFiles');
+                    if (!tempRemovedFiles) {
+                        tempRemovedFiles = fileToTempRemovedFiles;
+                    } else {
+                        tempRemovedFiles = tempRemovedFiles.concat(fileToTempRemovedFiles);
+                    }
+                    this.model.set('tempRemovedFiles', tempRemovedFiles);
+                }
+            }
+
+            //delete from storage of real files
+            var realFiles = this.model.get('realFiles');
+            if (realFiles[branchId]) {
+                var tempRemovedRealFiles = this.model.get('tempRemovedRealFiles');
+                if (!tempRemovedRealFiles) {
+                    tempRemovedRealFiles = {};
+                    this.model.set('tempRemovedRealFiles', tempRemovedRealFiles);
+                }
+                tempRemovedRealFiles[branchId] = realFiles[branchId];
+                delete realFiles[branchId];
             }
         },
 
         formSend: function (e) {
             var context = e.data.context;
-            debugger;
-            var data = new FormData(this);
             var $curEl = context.$el;
             var errorsLength = Object.keys(context.errors).length;
             var ajaxObj;
@@ -180,9 +227,15 @@ define([
                 }
 
             } else {
+                var data = new FormData();
+                var realFiles = context.model.get('realFiles');
+                $.each(realFiles, function (key, value) {
+                    data.append(key, value);
+                });
+
                 ajaxObj = {
-                    model      : context.model,
-                    data       : data
+                    model : context.model,
+                    data : data
                 };
             }
 
@@ -200,7 +253,7 @@ define([
             var res = e.target.result;
             var container;
             var type = res.substr(0, 10);
-debugger;
+
             if (type === 'data:video') {
                 container = '<video width="400" controls><source src="' + res + '"></video>';
             } else {
@@ -213,22 +266,21 @@ debugger;
                     contentType: type.substr(5, 5)
                 });
             } else {
-                const addedFiles = this.model.get('files');
-                if (!addedFiles) {
-                    this.model.set('files', [{
+                const tempAddedFiles = this.model.get('tempFiles');
+                if (!tempAddedFiles) {
+                    this.model.set('tempFiles', [{
                         url        : res,
                         contentType: type.substr(5, 5),
                         branch : branchId,
                         fileName : fileName
                     }]);
                 } else {
-                    addedFiles.push({
+                    tempAddedFiles.push({
                         url        : res,
                         contentType: type.substr(5, 5),
                         branch : branchId,
                         fileName : fileName
                     });
-                    this.model.set('files', addedFiles);
                 }
             }
 
@@ -257,6 +309,8 @@ debugger;
                     this.errors = {file: error};
                 } else {
                     currentBranchId = input.id.substring(input.id.lastIndexOf('-') + 1, input.id.length);
+                    var tempRealFiles = self.model.get('tempRealFiles');
+                    tempRealFiles[currentBranchId] = file;
                     fileName = file.name;
                     delete this.errors.file;
                 }
@@ -351,14 +405,78 @@ debugger;
                     save: {
                         text : self.translation.saveBtn,
                         click: function () {
-                            self.saveData();
+                            async.parallel([
+                                function (cb) {
+                                    //confirm save temp file
+                                    var tempFiles = self.model.get('tempFiles');
+                                    var files = self.model.get('files');
+
+                                    if (!files) {
+                                        files = [];
+                                    }
+
+                                    if (!tempFiles) {
+                                        tempFiles = [];
+                                    }
+
+                                    files = files.concat(tempFiles);
+                                    self.model.set('files', files);
+
+                                    self.model.unset('tempFiles');
+
+                                    cb();
+                                },
+
+                                function (cb) {
+                                    //confirm save temp real files
+                                    var tempRealFiles = self.model.get('tempRealFiles');
+                                    var realFiles = self.model.get('realFiles');
+
+                                    realFiles = Object.assign({}, realFiles, tempRealFiles);
+                                    self.model.set('realFiles', realFiles);
+
+                                    self.model.unset('tempRealFiles');
+
+                                    cb();
+                                },
+
+                                function (cb) {
+                                    //confirm remove files
+                                    self.model.unset('tempRemovedFiles');
+                                    self.model.unset('tempRemovedRealFiles');
+
+                                    cb();
+                                }
+                            ], function () {
+                                //save model
+
+                                self.saveData();
+                            });
                         }
                     },
 
                     cancel: {
                         text : self.translation.cancelBtn,
                         click: function() {
-                            // todo
+                            self.model.unset('tempFiles');
+                            self.model.unset('tempRealFiles');
+
+                            var tempRemovedFiles = self.model.get('tempRemovedFiles');
+                            var tempRemovedRealFiles = self.model.get('tempRemovedRealFiles');
+                            var files = self.model.get('files');
+                            var realFiles = self.model.get('realFiles');
+
+                            if (tempRemovedFiles) {
+                                files = files.concat(tempRemovedFiles);
+                                self.model.set('files', tempRemovedFiles);
+                            }
+
+                            if (tempRemovedRealFiles) {
+                                realFiles = Object.assign({}, realFiles, tempRemovedRealFiles);
+                                self.model.set('realFiles', tempRemovedRealFiles);
+                            }
+
+                            self.model.set('applyFileToAll', self.model.get('originalApplyStatus'));
                         }
                     }
                 }
@@ -377,7 +495,7 @@ debugger;
                 const file = savedFiles[0];
                 let container;
 
-                if (file.contentType === 'data:video') {
+                if (file.contentType === 'video') {
                     container = '<video width="400" controls><source src="' + file.url + '"></video>';
                 } else {
                     container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';

@@ -73,7 +73,7 @@
         <% if (branches.comment) { %>
         <div class="commentDescription" data-id="<%= branches.comment._id %>">
             <div id="commentBody" class="commentEllipsis fontSmall">
-                <div class="fontSmall">Created by: <span class="promoTableUserName"><%= branches.comment.createdBy.user.firstName.currentLanguage + ' ' + outlet[i].branches[j].comment.createdBy.user.lastName.currentLanguage %></span>
+                <div class="fontSmall">Created by: <span class="promoTableUserName"><%= branches.comment && branches.comment.createdBy && branches.comment.createdBy.user && branches.comment.createdBy.user.firstName.currentLanguage || '' + ' ' + outlet[i].branches[j].comment && outlet[i].branches[j].comment.createdBy.user && outlet[i].branches[j].comment.createdBy.user.lastName.currentLanguage || '' %></span>
                 </div>
                 <p class="fontSmall hoverFullText"><%= branches.comment.body %></p>
                 <!--<icon id="showAllDescription" class="showDescription"></icon>-->
