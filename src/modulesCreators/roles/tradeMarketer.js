@@ -562,8 +562,8 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit   : false,
-            write  : false,
+            edit   : true,
+            write  : true,
             read   : true
         }
     },
