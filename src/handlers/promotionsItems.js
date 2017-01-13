@@ -529,10 +529,11 @@ var Promotions = function (db, redis, event) {
                         text       : body.commentText,
                         objectiveId: model._id,
                         userId     : req.session.uId,
-                        files      : req.files
+                        files      : req.files,
+                        createdBy  : createdBy,
                     };
 
-                    commentCreator(saveObj, PromotionItemModel, function (err, comment) {
+                    commentCreator(saveObj, function (err, comment) {
                         if (err) {
                             return callback(err);
                         }

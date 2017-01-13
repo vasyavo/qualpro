@@ -293,6 +293,9 @@ allowedParams[CONTENT_TYPES.PROMOTIONSITEMS] = {
     },
     9: {
         create: []
+    },
+    10: {
+        create:  ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText']
     }
 };
 

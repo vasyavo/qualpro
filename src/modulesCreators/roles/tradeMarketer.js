@@ -532,9 +532,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
+            edit   : true,
+            write  : true,
+            read   : true
         }
     },
     {

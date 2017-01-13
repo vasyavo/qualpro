@@ -30,6 +30,7 @@ module.exports = (options) => {
         ] = yield [
             getSupervisorByAssigneeAndOriginator({
                 assignedTo,
+                originator: actionOriginator,
             })
         ];
 
