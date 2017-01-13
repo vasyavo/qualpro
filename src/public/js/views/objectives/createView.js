@@ -308,7 +308,9 @@ define([
                                 }
                             });
                         } else {
-                            cb(null, model, []);
+                            cb(null, model, {
+                                files : []
+                            });
                         }
                     }
                 },
