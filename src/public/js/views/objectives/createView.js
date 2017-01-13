@@ -269,7 +269,6 @@ define([
                 },
 
                 function (model, cb) {
-                debugger;
                     if (context.assigneWithoutBranches) {
                         var file = context.fileForVFWithoutBranches.file;
 
@@ -315,7 +314,6 @@ define([
                 },
 
                 function (model, files, cb) {
-                debugger;
                     if (!context.visibilityFormAjax && !context.fileForVFWithoutBranches.file) {
                         return cb(null, model);
                     }
@@ -371,7 +369,7 @@ define([
                             };
                         }
                     }
-debugger;
+
                     var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,
