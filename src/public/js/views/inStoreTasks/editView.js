@@ -511,15 +511,23 @@ define([
                 var jsonPersonnels = personnelCollection.toJSON();
                 var personnelsIds = _.pluck(jsonPersonnels, '_id');
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
+                var collectionJSON = personnelCollection.toJSON();
+                var isTradeMarketer = collectionJSON.length === 1 && (collectionJSON[0].accessRole.level === 10 || collectionJSON[0].accessRole.level === 1);
 
-                self.treeView = new TreeView({
-                    ids             : personnelsIds,
-                    instoreObjective: true,
-                    selectedLevel   : jsonPersonnels[0].accessRole.level,
-                    translation     : self.translation
-                });
-                self.treeView.on('locationSelected', self.locationSelected, self);
+                if (!isTradeMarketer){
+                    self.treeView = new TreeView({
+                        ids             : personnelsIds,
+                        instoreObjective: true,
+                        selectedLevel   : jsonPersonnels[0].accessRole.level,
+                        translation     : self.translation
+                    });
+                    self.treeView.on('locationSelected', self.locationSelected, self);
+                } else {
+                    self.$el.find('#personnelLocation').attr('data-location', 'empty');
+                }
+
                 self.$el.find('#assignDd').html(personnelsNames);
+
                 if (self.duplicate) {
                     self.branchesForVisibility = [];
                     jsonPersonnels.forEach(function (personnel) {

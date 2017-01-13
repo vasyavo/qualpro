@@ -63,7 +63,6 @@ module.exports = function(app, db, event) {
     var newProductLaunch = require('./newProductLaunch')(db, redis, event);
     var activityList = require('./activityList')(db, redis, event);
     var originRouter = require('./origin')(db, redis, event);
-    var priceSurvey = require('./priceSurvey')(db, redis, event);
     var contactUs = require('./contactUs')(db, redis, event);
 
     var contractsYearlyRouter = require('./contractsYearly')(db, redis, event);
@@ -142,7 +141,7 @@ module.exports = function(app, db, event) {
     app.use('/competitorList', competitorItemRouter);
     app.use('/origin', originRouter);
     app.use('/file', fileRouter);
-    app.use('/priceSurvey', priceSurvey);
+    app.use('/priceSurvey', require('./../stories/reporting/price-survey/router'));
     app.use('/competitorBranding', competitorBranding);
     app.use('/competitorPromotion', competitorPromotion);
     app.use('/achievementForm', achievementForm);
