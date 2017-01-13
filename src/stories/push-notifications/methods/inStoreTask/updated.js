@@ -2,6 +2,7 @@ const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -21,11 +22,10 @@ module.exports = (options) => {
         } = options;
 
         const contentAuthor = _.get(body, 'createdBy.user');
-        const [
-            assignedTo,
-        ] = arrayOfObjectIdToArrayOfString(
-            body.assignedTo
-        );
+        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
+            assignedTo: body.assignedTo,
+            actionOriginator,
+        });
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
             assignedTo,
             originator: actionOriginator,
@@ -65,25 +65,21 @@ module.exports = (options) => {
         const activityAsJson = savedActivity.toJSON();
 
         const groups = [{
-            recipients: _.uniq([actionOriginator, contentAuthor]),
+            recipients: [actionOriginator],
             subject: {
                 en: 'In-store task updated',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
-            recipients: _.remove([assignedTo], (id) => {
-                return id === actionOriginator
-            }),
+            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received updated in-store task',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
-            recipients: _.remove([arrayOfSupervisor], (id) => {
-                return id === actionOriginator
-            }),
+            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: `Subordinate's in-store task updated`,
                 ar: ''

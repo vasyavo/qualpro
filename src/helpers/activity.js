@@ -12,13 +12,12 @@ var ActivityHelper = function (db, redis, app) {
     var ObjectId = mongoose.Types.ObjectId;
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
-    var MAIN_CONSTANTS = require('../constants/mainConstants.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     const ActivityModel = require('./../types/activityList/model');
     const PersonnelModel = require('./../types/personnel/model');
     var access = require('../helpers/access')(db);
+    const addAction = require('./../stories/push-notifications/utils/addAction');
 
     const levelsByLevel = {
         1: [
@@ -1127,21 +1126,6 @@ var ActivityHelper = function (db, redis, app) {
             }
 
         ], callback);
-    }
-
-    function addAction(userId, cb) {
-        var actionKey = actionKeyTemplate({userId: userId});
-
-        redis.cacheStore.incrementAndGet(actionKey, function (err, number) {
-            if (err) {
-                return cb(err);
-            }
-            if (!number) {
-                number = 0;
-            }
-
-            cb(null, number);
-        });
     }
 
     this.addObject = function (options, cb) {
