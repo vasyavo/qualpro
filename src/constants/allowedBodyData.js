@@ -1638,6 +1638,10 @@ allowedParams[CONTENT_TYPES.CONSUMER_SURVEY] = {
     9: {
         create: ['title', 'dueDate', 'startDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
         update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    10 : {
+        create: ['title', 'dueDate', 'startDate',  'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
     }
 };
 
