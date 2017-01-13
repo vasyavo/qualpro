@@ -10,12 +10,7 @@ const schema = new Schema({
     category: [{ type: ObjectId, ref: CONTENT_TYPES.CATEGORY, require: true }],
     activity: { type: String, default: '' },
     promotion: { type: String, default: '' },
-    displayType: {
-        type: Number,
-        ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: 16,
-        require: true
-    },
+    displayType: {type: ObjectId, ref: CONTENT_TYPES.DISPLAYTYPE, require: true},
     country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, default: null, require: true },
     region: { type: Array, ref: CONTENT_TYPES.DOMAIN, default: [], require: true },
     subRegion: { type: Array, ref: CONTENT_TYPES.DOMAIN, default: [], require: true },
