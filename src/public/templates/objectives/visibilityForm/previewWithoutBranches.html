@@ -10,7 +10,7 @@
                     <span class="fontDefault"><%- location %></span>
                 </div>
                 <div class="bannerBig">
-                    <div id="imageMy" class="bannerImage"><%= beforeFileContainer %></div>
+                    <div class="bannerImage"><%= beforeFileContainer %></div>
                     <div class="bannerDescription picSquare bannerIcon">
                         <span class="fontMedium"><%- beforeFileName %></span>
                     </div>
@@ -29,14 +29,32 @@
                     <span class="branchName"><%- location %></span>
                 </div>
                 <div class="bannerBig">
-                    <div id="imageAfter"></div><!--after file container-->
-                    <div class="bannerDescription picSquare bannerIcon">
-                        <span class="fontMedium"></span><!--after file name-->
-                    </div>
+                    <% if (editAfter) { %>
+                        <div id="remove" class="close left arrowLeft hidden"></div>
+                        <div id="imageMy" class="bannerImage"></div>
+                        <div class="bannerDescription picSquare bannerIcon">
+                            <p class="uploadValue fontMedium"><%= translation.addBeforeMedia %></p>
+                            <input type="file"
+                                   id="photo"
+                                   class="uploadInput"
+                                   name="files"
+                                   accept="<%= allowed %>"
+                            />
+                        </div>
+                    <% } else { %>
+                        <div id="imageAfter"><%= afterFileContainer %></div>
+                        <div class="bannerDescription picSquare bannerIcon">
+                            <span class="fontMedium"><%- afterFileName %></span>
+                        </div>
+                    <% } %>
                 </div>
                 <div class="banner_textBlock afterTextBlock">
                     <p class="uploadDescription fontDefault"><%- translation.description %></p>
-                    <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%- afterDescription %></div>
+                    <% if (editAfter) { %>
+                        <textarea id="new-after-description" rows="3"></textarea>
+                    <% } else { %>
+                        <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%- afterDescription %></div>
+                    <% } %>
                 </div>
             </div>
         </div>

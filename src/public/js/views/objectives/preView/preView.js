@@ -397,7 +397,6 @@ define([
                     translation: this.translation
                 });
             } else {
-                debugger;
                 if (App.currentUser.workAccess && (modelJSON.assignedTo[0]._id === App.currentUser._id ||
                     App.currentUser.covered && App.currentUser.covered[modelJSON.assignedTo[0]._id])
                     && (modelJSON.objectiveType === 'individual') && (modelJSON.status._id === CONSTANTS.OBJECTIVE_STATUSES.DRAFT)) {
@@ -420,6 +419,7 @@ define([
 
                     if (userAccessRolesWithBranches.indexOf(assigneAccessRole) === -1) {
                         this.visibilityForm = new VisibilityFormWithoutBranches({
+                            assigneId : modelJSON.assignedTo[0]._id,
                             formId : id,
                             location : modelJSON.location,
                             translation : self.translation,
