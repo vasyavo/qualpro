@@ -1,11 +1,10 @@
 const async = require('async');
 const _ = require('lodash');
-const event = require('./../../../utils/eventEmitter');
+const ActivityLog = require('./../../push-notifications/activityLog');
 const access = require('../../../helpers/access')();
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const CONSTANTS = require('../../../constants/mainConstants');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
-const ACTIVITY_TYPES = require('../../../constants/activityTypes');
 const FilterMapper = require('../../../helpers/filterMapper');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
 const PriceSurveyModel = require('./../../../types/priceSurvey/model');
@@ -329,13 +328,14 @@ const aggregateById = (options, callback) => {
 };
 
 const create = (req, res, next) => {
-    function queryRun(body) {
-        var session = req.session;
-        var userId = session.uId;
-        var priceSurveyModel;
-        var priceSurvey;
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const requestBody = req.body;
+
+    const queryRun = (body, callback) => {
         if (body.items && body.items.length) {
-            body.items.forEach(function(item) {
+            body.items.forEach((item) => {
                 if (item.size) {
                     item.size = _.escape(item.size);
                 }
@@ -344,7 +344,8 @@ const create = (req, res, next) => {
                 }
             });
         }
-        priceSurvey = {
+
+        const data = {
             category: body.category,
             variant: body.variant,
             country: body.country,
@@ -360,36 +361,39 @@ const create = (req, res, next) => {
             }
         };
 
-        priceSurveyModel = new PriceSurveyModel(priceSurvey);
-        priceSurveyModel.save(function(err, model) {
-            if (err) {
-                return next(err);
-            }
+        const priceSurveyModel = new PriceSurveyModel();
 
-            event.emit('activityChange', {
-                module: ACL_MODULES.PRICE_SURVEY,
-                actionType: ACTIVITY_TYPES.CREATED,
-                createdBy: priceSurvey.createdBy,
-                itemId: model._id,
-                itemType: CONTENT_TYPES.PRICESURVEY
-            });
-
-            if (model) {
-                if (model.items && model.items.length) {
-                    model.items.forEach(function(item) {
-                        if (item.size) {
-                            item.size = _.unescape(item.size);
-                        }
-                        if (item.price) {
-                            item.price = _.unescape(item.price);
-                        }
-                    });
-                }
-            }
-
-            res.status(201).send(model);
+        priceSurveyModel.set(data);
+        priceSurveyModel.save((err, model) => {
+            callback(err, model);
         });
-    }
+    };
+
+    async.waterfall([
+
+        (cb) => {
+            access.getWriteAccess(req, ACL_MODULES.PRICE_SURVEY, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            bodyValidator.validateBody(requestBody, req.session.level, CONTENT_TYPES.PRICESURVEY, 'create', cb);
+        },
+
+        queryRun
+
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+
+        ActivityLog.emit('reporting:price-survey:published', {
+            actionOriginator: userId,
+            accessRoleLevel,
+            body
+        });
+
+        res.status(201).send(body);
+    });
 
     access.getWriteAccess(req, ACL_MODULES.PRICE_SURVEY, function(err, allowed) {
         var body = req.body;
