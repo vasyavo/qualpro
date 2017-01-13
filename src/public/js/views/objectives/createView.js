@@ -18,6 +18,7 @@ define([
     'models/file',
     'helpers/implementShowHideArabicInputIn',
     'views/objectives/visibilityForm/editView',
+    'views/objectives/visibilityForm/editViewWithoutBranches',
     'constants/otherConstants',
     'moment',
     'async',
@@ -26,8 +27,8 @@ define([
 ], function (Backbone, _, $, CreateTemplate, FormTemplate, FileTemplate, BaseView,
              FileDialogView, LinkFormView, PersonnelListForSelectionView, TreeView, Model,
              populate, objectivesCollection, FilterCollection, FileCollection, FileModel,
-             implementShowHideArabicInputIn, VisibilityEditView, CONSTANTS, moment, async,
-             CONTENT_TYPES, ERROR_MESSAGES) {
+             implementShowHideArabicInputIn, VisibilityEditView, VisibilityFormViewWithoutBranches,
+             CONSTANTS, moment, async, CONTENT_TYPES, ERROR_MESSAGES) {
 
     var CreateView = BaseView.extend({
         contentType: CONTENT_TYPES.OBJECTIVES,
@@ -45,6 +46,8 @@ define([
             outlet       : [],
             branch       : []
         },
+
+        fileForVFWithoutBranches : {},
 
         imageSrc: '',
 
@@ -138,7 +141,7 @@ define([
 
             form = self.linkedForm;
 
-            if (form._id !== 'visibility' || !self.branchesForVisibility.length) {
+            if (form._id !== 'visibility') {
                 return;
             }
 
@@ -147,19 +150,38 @@ define([
                 ar: CKEDITOR.instances.editor2.document.getBody().getText()
             };
 
-            this.visibilityForm = new VisibilityEditView({
-                forCreate           : true,
-                savedVisibilityModel: this.savedVisibilityModel,
-                outlets             : this.outletsForVisibility,
-                description         : description,
-                oldAjaxObj          : this.visibilityFormAjax,
-                translation         : self.translation
-            });
+            if (this.assigneWithoutBranches) {
 
-            this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                self.visibilityFormAjax = ajaxObj;
-                self.savedVisibilityModel = ajaxObj.model;
-            });
+
+                this.visibilityForm = new VisibilityFormViewWithoutBranches({
+                    translation : self.translation,
+                    description : description[App.currentUser.currentLanguage],
+                    locationString : self.locations.location,
+                    previewOfSelectedFile : self.fileForVFWithoutBranches.preview
+                });
+
+                this.visibilityForm.on('save', function (fileModel) {
+                    self.fileForVFWithoutBranches = fileModel;
+                });
+
+                this.visibilityForm.on('delete-file', function () {
+                    self.fileForVFWithoutBranches = {};
+                });
+            } else {
+                this.visibilityForm = new VisibilityEditView({
+                    forCreate           : true,
+                    savedVisibilityModel: this.savedVisibilityModel,
+                    outlets             : this.outletsForVisibility,
+                    description         : description,
+                    oldAjaxObj          : this.visibilityFormAjax,
+                    translation         : self.translation
+                });
+
+                this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
+                    self.visibilityFormAjax = ajaxObj;
+                    self.savedVisibilityModel = ajaxObj.model;
+                });
+            }
 
         },
 
@@ -247,77 +269,110 @@ define([
                 },
 
                 function (model, cb) {
-                    if (context.visibilityFormAjax.model.get('files').length) {
-                        $.ajax({
-                            url : '/file',
-                            method : 'POST',
-                            data : context.visibilityFormAjax.data,
-                            contentType: false,
-                            processData: false,
-                            success : function (response) {
-                                cb(null, model, response);
-                            },
-                            error : function () {
-                                cb(true);
-                            }
-                        });
+                debugger;
+                    if (context.assigneWithoutBranches) {
+                        var file = context.fileForVFWithoutBranches.file;
+
+                        if (file) {
+                            var dataWithoutBranches = new FormData();
+                            dataWithoutBranches.append('file', file);
+
+                            $.ajax({
+                                url : '/file',
+                                method : 'POST',
+                                data : dataWithoutBranches,
+                                contentType: false,
+                                processData: false,
+                                success : function (response) {
+                                    cb(null, model, response);
+                                },
+                                error : function () {
+                                    cb(true);
+                                }
+                            });
+                        } else {
+                            cb(null, model, []);
+                        }
                     } else {
-                        cb(null, model, []);
+                        if (context.visibilityFormAjax.model.get('files').length) {
+                            $.ajax({
+                                url : '/file',
+                                method : 'POST',
+                                data : context.visibilityFormAjax.data,
+                                contentType: false,
+                                processData: false,
+                                success : function (response) {
+                                    cb(null, model, response);
+                                },
+                                error : function () {
+                                    cb(true);
+                                }
+                            });
+                        } else {
+                            cb(null, model, []);
+                        }
                     }
                 },
 
                 function (model, files, cb) {
-                    if (!context.visibilityFormAjax) {
+                debugger;
+                    if (!context.visibilityFormAjax && !context.fileForVFWithoutBranches.file) {
                         return cb(null, model);
                     }
 
-                    var modelFiles = context.visibilityFormAjax.model.get('files');
-                    var formId = model.get('form')._id;
-                    context.visibilityFormAjax.url = 'form/visibility/' + formId;
-
                     var requestPayload;
 
-                    if (context.visibilityFormAjax.model.get('applyFileToAll')) {
+                    if (context.assigneWithoutBranches) {
                         requestPayload = {
                             before : {
-                                files : files.files.map(function(item) {
-                                    return item._id;
-                                })
-                            },
-                            after : {
-                                description : '',
-                                files : []
-                            },
-                            branches : []
-                        };
+                                files : [files.files[0]._id]
+                            }
+                        }
                     } else {
-                        requestPayload = {
-                            before : {
-                                files : []
-                            },
-                            after : {
-                                description : '',
-                                files : []
-                            },
-                            branches : modelFiles.map(function(item) {
-                                var fileFromServer = _.findWhere(files.files, {
-                                    originalName : item.fileName
-                                });
+                        var modelFiles = context.visibilityFormAjax.model.get('files');
+                        if (context.visibilityFormAjax.model.get('applyFileToAll')) {
+                            requestPayload = {
+                                before: {
+                                    files: files.files.map(function (item) {
+                                        return item._id;
+                                    })
+                                },
+                                after: {
+                                    description: '',
+                                    files: []
+                                },
+                                branches: []
+                            };
+                        } else {
+                            requestPayload = {
+                                before: {
+                                    files: []
+                                },
+                                after: {
+                                    description: '',
+                                    files: []
+                                },
+                                branches: modelFiles.map(function (item) {
+                                    var fileFromServer = _.findWhere(files.files, {
+                                        originalName: item.fileName
+                                    });
 
-                                return {
-                                    branchId : item.branch,
-                                    before : {
-                                        files : [fileFromServer._id]
-                                    },
-                                    after : {
-                                        files : [],
-                                        description : ''
-                                    }
-                                };
-                            })
-                        };
+                                    return {
+                                        branchId: item.branch,
+                                        before: {
+                                            files: [fileFromServer._id]
+                                        },
+                                        after: {
+                                            files: [],
+                                            description: ''
+                                        }
+                                    };
+                                })
+                            };
+                        }
                     }
-
+debugger;
+                    var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,
                         method : 'PUT',
@@ -462,6 +517,7 @@ define([
             this.locations.retailSegment = data.retailSegment;
             this.locations.outlet = data.outlet;
             this.locations.branch = data.branch;
+            this.locations.location = data.location;
 
             this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
                 return self.locations.branch.indexOf(branch._id) !== -1;
@@ -495,7 +551,6 @@ define([
                 return result;
             });
 
-
             this.$el.find('#personnelLocation').html(data.location);
             this.$el.find('#personnelLocation').attr('data-location', data.location);
         },
@@ -523,6 +578,9 @@ define([
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
                 var smCvMzLevels = [5, 6, 7];
 
+                self.fileForVFWithoutBranches = {};
+                self.visibilityFormAjax = null;
+                self.assigneWithoutBranches = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
                 self.branchesForVisibility = [];
                 self.outletsForVisibility = [];
                 self.dontShowDistributionForm = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
