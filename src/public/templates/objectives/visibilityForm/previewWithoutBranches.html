@@ -1,0 +1,44 @@
+<div class="dialogCategotyWrap visibilityContainer">
+    <div class="title">
+        <span class="titleDescription"><%- translation.titlePreviewVisibility %></span>
+    </div>
+    <form id="mainVisForm" class="visibilityContainer flexRow">
+        <div class="banner_inner bannerFullWidth">
+            <div class="beforeTitle fontBold fontDefault"><%- translation.before %></div>
+            <div class="scrollable">
+                <div class="banner_inner_top borderBottom">
+                    <span class="fontDefault"><%- location %></span>
+                </div>
+                <div class="bannerBig">
+                    <div id="imageMy" class="bannerImage"><%= beforeFileContainer %></div>
+                    <div class="bannerDescription picSquare bannerIcon">
+                        <span class="fontMedium"><%- beforeFileName %></span>
+                    </div>
+                </div>
+                <div class="banner_textBlock">
+                    <p class="uploadDescription fontDefault"><%- translation.description %></p>
+                    <div id="beforeText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= beforeDescription %></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="banner_inner bannerFullWidth">
+            <div class="afterTitle fontBold fontDefault"><%- translation.after %></div>
+            <div class="scrollable">
+                <div class="banner_inner_top borderBottom">
+                    <span class="branchName"><%- location %></span>
+                </div>
+                <div class="bannerBig">
+                    <div id="imageAfter"></div><!--after file container-->
+                    <div class="bannerDescription picSquare bannerIcon">
+                        <span class="fontMedium"></span><!--after file name-->
+                    </div>
+                </div>
+                <div class="banner_textBlock afterTextBlock">
+                    <p class="uploadDescription fontDefault"><%- translation.description %></p>
+                    <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%- afterDescription %></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
