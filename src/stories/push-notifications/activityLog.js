@@ -20,4 +20,6 @@ activityLog.on('in-store-task:status-updated', require('./methods/inStoreTask/up
 activityLog.on('in-store-task:reassigned', require('./methods/inStoreTask/updated')); // todo: change event handler
 activityLog.on('in-store-task:comment-added', require('./methods/inStoreTask/commentAdded'));
 
+activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
+
 module.exports = activityLog;

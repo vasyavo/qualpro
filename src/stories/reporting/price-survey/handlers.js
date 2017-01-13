@@ -376,10 +376,12 @@ const create = (req, res, next) => {
         },
 
         (allowed, personnel, cb) => {
-            bodyValidator.validateBody(requestBody, req.session.level, CONTENT_TYPES.PRICESURVEY, 'create', cb);
+            bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.PRICESURVEY, 'create', cb);
         },
 
-        queryRun
+        (body, cb) => {
+            queryRun(body, cb);
+        },
 
     ], (err, body) => {
         if (err) {
@@ -393,28 +395,6 @@ const create = (req, res, next) => {
         });
 
         res.status(201).send(body);
-    });
-
-    access.getWriteAccess(req, ACL_MODULES.PRICE_SURVEY, function(err, allowed) {
-        var body = req.body;
-
-        if (err) {
-            return next(err);
-        }
-        if (!allowed) {
-            err = new Error();
-            err.status = 403;
-
-            return next(err);
-        }
-
-        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PRICESURVEY, 'create', function(err, saveData) {
-            if (err) {
-                return next(err);
-            }
-
-            queryRun(saveData);
-        });
     });
 };
 
