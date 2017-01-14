@@ -7,10 +7,13 @@ const actions = require('./actions');
 
 module.exports = (req, res, next) => {
     const arrayOfDelayedId = req.body;
+    const requestId = req.id;
 
     if (!arrayOfDelayedId || !arrayOfDelayedId.length) {
         return res.status(200).send([]);
     }
+
+    logger.info(`[abstract-scheduler:${requestId}] Received delayed tasks:`, arrayOfDelayedId);
 
     async.waterfall([
 
@@ -26,6 +29,8 @@ module.exports = (req, res, next) => {
         // execute action per task
         // and diff not existed
         (arrayOfRegistered, cb) => {
+            logger.info(`[abstract-scheduler:${requestId}] Registered tasks:`, arrayOfRegistered);
+
             async.waterfall([
 
                 (cb) => {
@@ -66,17 +71,26 @@ module.exports = (req, res, next) => {
         if (err) {
             return next(err);
         }
+        const {
+            processed,
+            released,
+            ignored,
+        } = conclusion;
 
         async.parallel({
 
             // send processed tasks
             processedRequest: (cb) => {
-                res.status(200).send(conclusion.processed);
+                logger.info(`[abstract-scheduler:${requestId}] Processed:`, processed);
+
+                res.status(200).send(processed);
                 cb();
             },
 
             // remove ignored and processed tasks from store
             cleanupStore: (cb) => {
+                logger.info(`[abstract-scheduler:${requestId}] Processed:`, released);
+
                 TaskSchedulerModel.remove({
                     scheduleId: {
                         $in: conclusion.released,
@@ -87,6 +101,8 @@ module.exports = (req, res, next) => {
 
             // unregister task in scheduler
             unregisterRequest: (cb) => {
+                logger.info(`[abstract-scheduler:${requestId}] Ignored:`, released);
+
                 releaseSchedulerTask({
                     json: {
                         data: conclusion.ignored,
