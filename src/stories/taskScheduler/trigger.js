@@ -48,14 +48,14 @@ module.exports = (req, res, next) => {
 
                 // registered array contains lean documents
                 // processed array contains ObjectId
-                (arrayOfProcessedId, cb) => {
-                    const arrayOfIgnoredId = _.difference(arrayOfDelayedId, arrayOfProcessedId);
-                    const arrayOfToBeReleasedId = _.union(arrayOfIgnoredId, arrayOfProcessedId);
+                (setProcessedId, cb) => {
+                    const setIgnoredId = _.difference(arrayOfDelayedId, setProcessedId);
+                    const setToBeReleasedId = _.union(setIgnoredId, setProcessedId);
 
                     cb(null, {
-                        processed: arrayOfProcessedId,
-                        ignored: arrayOfIgnoredId,
-                        released: arrayOfToBeReleasedId,
+                        processed: setProcessedId,
+                        ignored: setIgnoredId,
+                        released: setToBeReleasedId,
                     });
                 }
 
