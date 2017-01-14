@@ -317,8 +317,43 @@ define([
                     $.ajax(ajaxData);
 
                 },
+
                 function (model, cb) {
-                    var formId;
+                    var visibilityFormAjax = context.visibilityFormAjax;
+                    var VFData = null;
+                    var file = null;
+
+                    if (visibilityFormAjax) {
+                        VFData = context.visibilityFormAjax.data;
+                    }
+
+                    if (VFData) {
+                        file = context.visibilityFormAjax.data.get('inputBefore');
+                    }
+
+                    if (file) {
+                        $.ajax({
+                            url : '/file',
+                            method : 'POST',
+                            data : VFData,
+                            contentType: false,
+                            processData: false,
+                            success : function (response) {
+                                cb(null, model, response);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model, {
+                            files : []
+                        });
+                    }
+                },
+
+                function (model, files, cb) {
+                    var formId = model.get('form')._id;
 
                     if (!context.visibilityFormAjax) {
                         return cb(null, model);
@@ -332,12 +367,19 @@ define([
                         cb(true);
                     };
 
-                    if (context.duplicate) {
-                        formId = model.get('form')._id;
-                        context.visibilityFormAjax.url = 'form/visibility/' + formId;
-                    }
-
                     delete context.visibilityFormAjax.model;
+
+                    context.visibilityFormAjax.url = 'form/visibility/before/' + formId;
+                    context.visibilityFormAjax.contentType = 'application/json';
+                    context.visibilityFormAjax.dataType = 'json';
+
+                    context.visibilityFormAjax.data = JSON.stringify({
+                        before : {
+                            files : files.files.map(function (item) {
+                                return item._id;
+                            })
+                        }
+                    });
 
                     $.ajax(context.visibilityFormAjax);
                 }
@@ -511,15 +553,23 @@ define([
                 var jsonPersonnels = personnelCollection.toJSON();
                 var personnelsIds = _.pluck(jsonPersonnels, '_id');
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
+                var collectionJSON = personnelCollection.toJSON();
+                var isTradeMarketer = collectionJSON.length === 1 && (collectionJSON[0].accessRole.level === 10 || collectionJSON[0].accessRole.level === 1);
 
-                self.treeView = new TreeView({
-                    ids             : personnelsIds,
-                    instoreObjective: true,
-                    selectedLevel   : jsonPersonnels[0].accessRole.level,
-                    translation     : self.translation
-                });
-                self.treeView.on('locationSelected', self.locationSelected, self);
+                if (!isTradeMarketer){
+                    self.treeView = new TreeView({
+                        ids             : personnelsIds,
+                        instoreObjective: true,
+                        selectedLevel   : jsonPersonnels[0].accessRole.level,
+                        translation     : self.translation
+                    });
+                    self.treeView.on('locationSelected', self.locationSelected, self);
+                } else {
+                    self.$el.find('#personnelLocation').attr('data-location', 'empty');
+                }
+
                 self.$el.find('#assignDd').html(personnelsNames);
+
                 if (self.duplicate) {
                     self.branchesForVisibility = [];
                     jsonPersonnels.forEach(function (personnel) {

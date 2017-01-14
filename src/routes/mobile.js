@@ -23,7 +23,6 @@ module.exports = function (db, app, redis, event) {
     var brandRouter = require('./mobile/brand')(db);
     var fileRouter = require('./mobile/file')(db);
     var formRouter = require('./mobile/form')(db, redis, event);
-    var priceSurveyRouter = require('./mobile/priceSurvey')(db, redis, event);
     var objectiveRouter = require('./mobile/objective')(db, redis, event);
     var commentRouter = require('./mobile/comment')(db, redis, event);
     var inStoreTasksRouter = require('./mobile/inStoreTasks')(db, redis, event);
@@ -71,7 +70,7 @@ module.exports = function (db, app, redis, event) {
     router.use('/objectives', objectiveRouter);
     router.use('/comment', commentRouter);
     router.use('/inStoreTasks', inStoreTasksRouter);
-    router.use('/priceSurvey', priceSurveyRouter);
+    router.use('/priceSurvey', require('./../stories/reporting/price-survey/router.mobile'));
     router.use('/competitorBranding', competitorBrandingRouter);
     router.use('/competitorPromotion', competitorPromotionRouter);
     router.use('/achievementForm', achievementFormRouter);

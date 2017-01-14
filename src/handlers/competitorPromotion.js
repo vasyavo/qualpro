@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var CompetitorBranding = function(db, redis, event) {
     const logger = require('../utils/logger');
     var async = require('async');
@@ -52,10 +54,12 @@ var CompetitorBranding = function(db, redis, event) {
     };
 
     this.create = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
 
             async.waterfall([
                 function(cb) {
@@ -136,6 +140,12 @@ var CompetitorBranding = function(db, redis, event) {
                             return cb(err);
                         }
 
+                        ActivityLog.emit('reporting:competitor-promotion-activities:published', {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body
+                        });
+
                         cb(null, model);
                     });
                 },
@@ -171,14 +181,6 @@ var CompetitorBranding = function(db, redis, event) {
 
                     return logger.error(err);
                 }
-
-                event.emit('activityChange', {
-                    module : ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
-                    actionType : ACTIVITY_TYPES.CREATED,
-                    createdBy : result.get('createdBy'),
-                    itemId : result._id,
-                    itemType : CONTENT_TYPES.COMPETITORPROMOTION
-                });
             });
         }
 

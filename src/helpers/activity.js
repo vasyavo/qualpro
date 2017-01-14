@@ -1215,7 +1215,10 @@ var ActivityHelper = function (db, redis, app) {
 
                             sockets.forEach((socket) => {
                                 localSocketArray.push({
-                                    socketId: socket
+                                    socketId: socket,
+                                    payload: {
+                                        badge: number,
+                                    },
                                 });
                             });
                             socketArray.push(...localSocketArray);
@@ -1251,7 +1254,7 @@ var ActivityHelper = function (db, redis, app) {
 
         function emitMessageToSocket(socketIds, wCb) {
             async.each(socketIds, function (socket, eachCb) {
-                app.get('io').to(socket.socketId.split(':')[2]).emit('message', socket.object);
+                app.get('io').to(socket.socketId.split(':')[2]).emit('message', socket.payload);
                 eachCb(null);
             }, function (err) {
                 if (err) {

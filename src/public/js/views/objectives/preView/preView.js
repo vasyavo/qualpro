@@ -22,6 +22,7 @@ define([
     'dataService',
     'views/objectives/distributionFormView',
     'views/objectives/visibilityForm/preView',
+    'views/objectives/visibilityForm/previewWithoutBranches',
     'text!templates/objectives/updatedPreview.html',
     'text!templates/objectives/taskFlowTemplate.html',
     'models/objectives',
@@ -32,13 +33,13 @@ define([
     'moment',
     'views/fileDialog/fileDialog',
     'constants/contentType',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'constants/aclRoleIndexes'
 ], function (Backbone, _, $, PreviewTemplate, FormTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, FileDialogView, EffortsDialog, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, objectivesStatusHelper, dataService, DistributionForm,
-             VisibilityForm, UpdatedPreview, TaskFlowTemplate, ObjectivesModel, ObjectiveCollection,
-             EditObjectiveView, DefFilters, VisibilityEditView, moment, FileDialogPreviewView, CONTENT_TYPES,
-             ERROR_MESSAGES) {
+             VisibilityForm, VisibilityFormWithoutBranches, UpdatedPreview, TaskFlowTemplate, ObjectivesModel, ObjectiveCollection,
+             EditObjectiveView, DefFilters, VisibilityEditView, moment, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.OBJECTIVES,
@@ -398,7 +399,7 @@ define([
             } else {
                 if (App.currentUser.workAccess && (modelJSON.assignedTo[0]._id === App.currentUser._id ||
                     App.currentUser.covered && App.currentUser.covered[modelJSON.assignedTo[0]._id])
-                    && (modelJSON.objectiveType === 'individual') && (modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.COMPLETED)) {
+                    && (modelJSON.objectiveType === 'individual') && (modelJSON.status._id === CONSTANTS.OBJECTIVE_STATUSES.DRAFT)) {
                     this.visibilityForm = new VisibilityEditView({
                         id                  : id,
                         editAfter           : true,
@@ -413,12 +414,25 @@ define([
                         self.savedVisibilityModel = ajaxObj.model;
                     });
                 } else {
-                    this.visibilityForm = new VisibilityForm({
-                        id         : id,
-                        branches : branchesForVisibility,
-                        description: modelJSON.description,
-                        translation: self.translation
-                    });
+                    var assigneAccessRole = modelJSON.assignedTo[0].accessRole.level;
+                    var userAccessRolesWithBranches = [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN];
+
+                    if (userAccessRolesWithBranches.indexOf(assigneAccessRole) === -1) {
+                        this.visibilityForm = new VisibilityFormWithoutBranches({
+                            assigneId : modelJSON.assignedTo[0]._id,
+                            formId : id,
+                            location : modelJSON.location,
+                            translation : self.translation,
+                            beforeDescription : modelJSON.description.currentLanguage
+                        });
+                    } else {
+                        this.visibilityForm = new VisibilityForm({
+                            id : id,
+                            branches : branchesForVisibility,
+                            description : modelJSON.description,
+                            translation : self.translation
+                        });
+                    }
                 }
             }
         },

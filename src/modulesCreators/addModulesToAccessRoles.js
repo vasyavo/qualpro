@@ -95,8 +95,10 @@ const generate = (callback) => {
                     }
 
                     if (model) {
+                        const modelId = model._id;
                         // tip: goal of it that we cat use it in tests.
-                        accessRoles[level].id = model._id.toString();
+                        accessRoles[level]._id = modelId;
+                        accessRoles[level].id = modelId.toString();
                     }
 
                     eachCb(null, model);

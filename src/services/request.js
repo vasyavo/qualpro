@@ -31,17 +31,7 @@ const post = (opts, callback) => {
     circuitRequest(requestOptions, callback);
 };
 
-const del = (opts, callback) => {
-    const requestOptions = Object.assign({
-        method: 'DELETE',
-        url : `${config.schedulerHost}/tasks`
-    }, opts);
-
-    circuitRequest(requestOptions, callback);
-};
-
 module.exports = {
     post,
-    del,
     circuitRequest,
 };

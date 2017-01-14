@@ -151,7 +151,7 @@ define([
 
                     ajaxObj = {
                         model      : context.model,
-                        url        : 'form/visibility/' + context.model.get('_id'),
+                        url        : 'form/visibility/before/' + context.model.get('_id'),
                         type       : 'PATCH',
                         data       : data,
                         contentType: false,
@@ -256,7 +256,7 @@ define([
                 this.model.set({
                     before: {
                         description: this.description,
-                        files      : before.files
+                        files      : before.files[0]
                     }
                 });
 
@@ -267,11 +267,10 @@ define([
                     translation: this.translation
                 }));
             } else {
-
                 this.model.set({
                     before: {
                         description: this.description,
-                        files      : files
+                        files      : files[0]
                     }
                 });
 

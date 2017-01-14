@@ -5,21 +5,17 @@
     <form id="mainVisForm" class="visibilityContainer flexRow inStoreForm">
         <div class="banner_inner bannerFullWidth">
             <div class="beforeTitle fontBold fontDefault borderBottom"><%= translation.before %></div>
-            <input type="checkbox" id="apply-to-all">
-            <span>apply file to all branches</span>
             <div class="scrollable partType beforeEdit">
-                <% _.each(outlets, function(outlet) { %>
                 <div class="banner_inner_top">
-                    <span class="fontDefault"><%= outlet.name %></span>
+                    <span class="fontDefault"><%- locationString %></span>
                 </div>
-                    <% outlet.branches.forEach(function(branch) { %>
                 <div class="bannerBig">
-                    <div class="close left arrowLeft <%- (branch.fileContainer) ? '' : 'hidden' %>" id="removeFile-<%- branch._id %>"></div>
-                    <div id="imageMy-<%- branch._id %>" class="bannerImage"><%= (branch.fileContainer) ? branch.fileContainer : '' %></div>
+                    <div id="remove" class="close left arrowLeft hidden"></div>
+                    <div id="imageMy" class="bannerImage"><%= fileContainer || '' %></div>
                     <div class="bannerDescription picSquare bannerIcon">
                         <p class="uploadValue fontMedium"><%= translation.addBeforeMedia %></p>
                         <input type="file"
-                               id="branch-photo-<%- branch._id %>"
+                               id="photo"
                                class="uploadInput"
                                name="files"
                                accept="<%= allowed %>"
@@ -27,12 +23,9 @@
                     </div>
                 </div>
                 <div class="banner_textBlock">
-                    <p class="uploadDescription fontDefault"><%- branch.name %></p>
                     <p class="uploadDescription fontDefault"><%= translation.description %></p>
                     <div id="beforeForm"><%- description %></div>
                 </div>
-                    <% }); %>
-                <% }); %>
             </div>
         </div>
     </form>
