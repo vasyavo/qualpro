@@ -22,7 +22,7 @@ define([
     'dataService',
     'views/objectives/distributionFormView',
     'views/objectives/visibilityForm/preView',
-    'views/objectives/visibilityForm/preViewWithoutBranches',
+    'views/objectives/visibilityForm/previewWithoutBranches',
     'text!templates/objectives/updatedPreview.html',
     'text!templates/objectives/taskFlowTemplate.html',
     'models/objectives',
