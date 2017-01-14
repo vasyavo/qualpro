@@ -1825,12 +1825,14 @@ const Filters = function(db, redis) {
 
     this.priceSurveyFilters = function(req, res, next) {
         var query = req.query;
+        var currentSelected = query.current;
         var queryFilter = query.filter || {};
         var filterMapper = new FilterMapper();
         var filter = filterMapper.mapFilter({
             filter : queryFilter,
             personnel : req.personnelModel
         });
+        var filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
         var pipeLine = [];
         var aggregation;
         var personnelFilter;
@@ -1992,7 +1994,19 @@ const Filters = function(db, redis) {
                 personnel : result.personnel || []
             };
 
-            res.status(200).send(result);
+            redisFilters({
+                currentSelected : currentSelected,
+                filterExists : filterExists,
+                filtersObject : result,
+                personnelId : req.personnelModel._id,
+                contentType : CONTENT_TYPES.PRICESURVEY
+            }, function(err, response) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send(response);
+            });
         });
     };
 
