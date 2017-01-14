@@ -151,8 +151,6 @@ define([
             };
 
             if (this.assigneWithoutBranches) {
-
-
                 this.visibilityForm = new VisibilityFormViewWithoutBranches({
                     translation : self.translation,
                     description : description[App.currentUser.currentLanguage],
@@ -182,7 +180,6 @@ define([
                     self.savedVisibilityModel = ajaxObj.model;
                 });
             }
-
         },
 
         saveObjective: function (options, cb) {

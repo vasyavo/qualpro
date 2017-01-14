@@ -162,6 +162,10 @@ define([
             var self = this;
             var formOptions;
 
+            if (modelJSON.status._id !== 'draft') {
+                return;
+            }
+
             if (this.duplicate) {
                 form = this.linkedForm;
                 contentType = form._id;
