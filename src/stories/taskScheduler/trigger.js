@@ -101,7 +101,7 @@ module.exports = (req, res, next) => {
 
             // unregister task in scheduler
             unregisterRequest: (cb) => {
-                logger.info(`[abstract-scheduler:${requestId}] Ignored:`, released);
+                logger.info(`[abstract-scheduler:${requestId}] Ignored:`, ignored);
 
                 releaseSchedulerTask({
                     json: {
