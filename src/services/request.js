@@ -15,7 +15,7 @@ const circuitRequest = (requestOptions, callback) => {
         }
 
         if (response.statusCode > 100 && response.statusCode < 400) {
-            callback(null, body);
+            return callback(null, body);
         }
 
         callback(body);
