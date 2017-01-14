@@ -140,6 +140,12 @@ var CompetitorBranding = function(db, redis, event) {
                             return cb(err);
                         }
 
+                        ActivityLog.emit('reporting:competitor-promotion-activities:published', {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body
+                        });
+
                         cb(null, model);
                     });
                 },
@@ -175,12 +181,6 @@ var CompetitorBranding = function(db, redis, event) {
 
                     return logger.error(err);
                 }
-
-                ActivityLog.emit('reporting:competitor-promotion-activities:published', {
-                    actionOriginator: userId,
-                    accessRoleLevel,
-                    body
-                });
             });
         }
 
