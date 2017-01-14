@@ -7,7 +7,7 @@ define(function (require) {
     var VisibilityFormModel = require('models/visibilityForm');
     var ERROR_MESSAGES = require('constants/errorMessages');
     var CONSTANTS = require('constants/otherConstants');
-    var Template = require('text!templates/objectives/visibilityForm/previewWithOutBranches.html');
+    var Template = require('text!templates/objectives/visibilityForm/previewWithoutBranches.html');
 
     return Backbone.View.extend({
 
