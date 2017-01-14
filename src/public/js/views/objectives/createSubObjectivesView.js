@@ -177,7 +177,7 @@ define([
         },
 
         openForm: function () {
-            var modelJSON = this.model.toJSON();;
+            var modelJSON = this.model.toJSON();
             var form;
             var contentType;
             var id;

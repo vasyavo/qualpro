@@ -293,6 +293,9 @@ allowedParams[CONTENT_TYPES.PROMOTIONSITEMS] = {
     },
     9: {
         create: []
+    },
+    10: {
+        create:  ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText']
     }
 };
 
@@ -1242,7 +1245,7 @@ allowedParams[CONTENT_TYPES.COMPETITORPROMOTION] = {
 
 allowedParams[CONTENT_TYPES.ACHIEVEMENTFORM] = {
     0: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     1: {
@@ -1250,35 +1253,39 @@ allowedParams[CONTENT_TYPES.ACHIEVEMENTFORM] = {
         update: []
     },
     2: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     3: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     4: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     5: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     6: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     7: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     8: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     },
     9: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
+        update: []
+    },
+    10: {
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: []
     }
 };
@@ -1591,6 +1598,7 @@ allowedParams[CONTENT_TYPES.QUESTIONNARIES] = {
         update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
     },
     10: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
         update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
     }
 };
@@ -1635,6 +1643,10 @@ allowedParams[CONTENT_TYPES.CONSUMER_SURVEY] = {
     9: {
         create: ['title', 'dueDate', 'startDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
         update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    10 : {
+        create: ['title', 'dueDate', 'startDate',  'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
     }
 };
 

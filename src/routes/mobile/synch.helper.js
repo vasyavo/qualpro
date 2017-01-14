@@ -784,7 +784,6 @@ const standardPack = [
     shouldGetAlAlaliPromoEvaluation,
     shouldGetCompetitorPromoActivity,
     shouldGetShelfShare,
-    shouldGetPriceSurvey,
     shouldGetNewProductLaunch,
 
     shouldGetBrandingActivity,

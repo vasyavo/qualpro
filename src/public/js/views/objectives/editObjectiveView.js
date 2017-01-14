@@ -154,6 +154,7 @@ define([
         },
 
         openForm: function () {
+            return;
             var modelJSON = this.model.toJSON();
             var form;
             var id;
@@ -161,6 +162,10 @@ define([
             var description;
             var self = this;
             var formOptions;
+
+            if (modelJSON.status._id !== 'draft') {
+                return;
+            }
 
             if (this.duplicate) {
                 form = this.linkedForm;

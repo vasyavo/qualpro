@@ -7,20 +7,14 @@ module.exports = (args, docId, callback) => {
     async.waterfall([
 
         (cb) => {
-            ConsumerSurveyModel.findById(docId, (err, model) => {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (!model) {
-                    return cb(true);
-                }
-
-                cb(null, model);
-            });
+            ConsumerSurveyModel.findById(docId, cb);
         },
 
         (model, cb) => {
+            if (!model) {
+                return cb(null);
+            }
+
             model.status = status;
 
             model.save((err, model, numAffected) => {

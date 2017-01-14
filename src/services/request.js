@@ -15,7 +15,7 @@ const circuitRequest = (requestOptions, callback) => {
         }
 
         if (response.statusCode > 100 && response.statusCode < 400) {
-            callback(null, body);
+            return callback(null, body);
         }
 
         callback(body);
@@ -31,17 +31,7 @@ const post = (opts, callback) => {
     circuitRequest(requestOptions, callback);
 };
 
-const del = (opts, callback) => {
-    const requestOptions = Object.assign({
-        method: 'DELETE',
-        url : `${config.schedulerHost}/tasks`
-    }, opts);
-
-    circuitRequest(requestOptions, callback);
-};
-
 module.exports = {
     post,
-    del,
     circuitRequest,
 };
