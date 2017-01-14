@@ -75,7 +75,7 @@ define([
                     description: this.description
                 }
             });
-debugger;
+
             if (before.files.length) {
                 var container;
                 var beforeFile = before.files[0];
