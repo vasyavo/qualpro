@@ -1,7 +1,8 @@
 const async = require('async');
 const _ = require('lodash');
 const logger = require('./../../utils/logger');
-const releaseSchedulerTask = require('./../../services/request').del;
+const config = require('./../../config');
+const circuitRequest = require('./../../services/request').circuitRequest;
 const TaskSchedulerModel = require('../../types/taskScheduler/model');
 const actions = require('./actions');
 
@@ -20,8 +21,8 @@ module.exports = (req, res, next) => {
         // find available tasks
         (cb) => {
             TaskSchedulerModel.find({
-                scheduleId : {
-                    $in : arrayOfDelayedId
+                scheduleId: {
+                    $in: arrayOfDelayedId
                 }
             }).lean().exec(cb);
         },
@@ -59,8 +60,8 @@ module.exports = (req, res, next) => {
 
                     cb(null, {
                         processed: setProcessedId,
-                        ignored: setIgnoredId,
                         released: setToBeReleasedId,
+                        ignored: setIgnoredId,
                     });
                 }
 
@@ -89,7 +90,7 @@ module.exports = (req, res, next) => {
 
             // remove ignored and processed tasks from store
             cleanupStore: (cb) => {
-                logger.info(`[abstract-scheduler:${requestId}] Processed:`, released);
+                logger.info(`[abstract-scheduler:${requestId}] Released:`, released);
 
                 TaskSchedulerModel.remove({
                     scheduleId: {
@@ -103,10 +104,13 @@ module.exports = (req, res, next) => {
             unregisterRequest: (cb) => {
                 logger.info(`[abstract-scheduler:${requestId}] Ignored:`, ignored);
 
-                releaseSchedulerTask({
-                    json: {
-                        data: conclusion.ignored,
-                    },
+                circuitRequest({
+                    method: 'DELETE',
+                    url: `${config.schedulerHost}/tasks`,
+                    json: true,
+                    body: {
+                        data: ignored,
+                    }
                 }, cb);
             },
 
