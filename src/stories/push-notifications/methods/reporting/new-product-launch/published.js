@@ -9,8 +9,8 @@ const ActivityModel = require('./../../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.PRICE_SURVEY;
-        const contentType = contentTypes.PRICESURVEY;
+        const moduleId = aclModules.NEW_PRODUCT_LAUNCH;
+        const contentType = contentTypes.NEWPRODUCTLAUNCH;
         const actionType = activityTypes.CREATED;
 
         const {
