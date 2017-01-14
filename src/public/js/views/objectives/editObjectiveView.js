@@ -154,6 +154,7 @@ define([
         },
 
         openForm: function () {
+            return;
             var modelJSON = this.model.toJSON();
             var form;
             var id;
