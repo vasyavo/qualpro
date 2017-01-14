@@ -30,14 +30,17 @@ module.exports = (req, res, next) => {
 
                 (cb) => {
                     async.map(arrayOfRegistered, (task, cb) => {
-                        const action = actions[task.functionName];
+                        const actionType = task.functionName;
+                        const taskId = task.documentId;
+                        const scheduleId = task.scheduleId.toString();
+                        const action = actions[actionType];
 
-                        action(task.args, task.documentId, (err) => {
+                        action(task.args, taskId, (err) => {
                             if (err) {
                                 return cb(err);
                             }
 
-                            cb(null, task.scheduleId);
+                            cb(null, scheduleId);
                         });
 
                     }, cb);
