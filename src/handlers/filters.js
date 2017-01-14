@@ -19,6 +19,7 @@ const DocumentModel = require('./../types/document/model');
 const DomainModel = require('./../types/domain/model');
 const NoteModel = require('./../types/note/model');
 const ShelfSharesModel = require('./../types/shelfShare/model');
+const PriceSurveyModel = require('./../types/priceSurvey/model');
 const NotificationModel = require('./../types/notification/model');
 const BranchModel = require('./../types/branch/model');
 const OutletModel = require('./../types/outlet/model');
@@ -1812,6 +1813,193 @@ const Filters = function(db, redis) {
                 filtersObject : result,
                 personnelId : req.personnelModel._id,
                 contentType : CONTENT_TYPES.SHELFSHARES
+            }, function(err, response) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send(response);
+            });
+        });
+    };
+
+    this.priceSurveyFilters = function(req, res, next) {
+        var query = req.query;
+        var currentSelected = query.current;
+        var queryFilter = query.filter || {};
+        var filterMapper = new FilterMapper();
+        var filter = filterMapper.mapFilter({
+            filter : queryFilter,
+            personnel : req.personnelModel
+        });
+        var filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
+        var pipeLine = [];
+        var aggregation;
+        var personnelFilter;
+        var positionFilter;
+        var aggregateHelper;
+
+        if (filter.personnel) {
+            personnelFilter = filter.personnel;
+            delete filter.personnel;
+        }
+
+        if (filter.position) {
+            positionFilter = filter.position;
+            delete filter.position;
+        }
+
+        aggregateHelper = new AggregationHelper($defProjection, filter);
+
+        if (personnelFilter) {
+            pipeLine.push({
+                $match : {
+                    'createdBy.user' : personnelFilter
+                }
+            });
+        }
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'categories',
+            key : 'category',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'domains',
+            key : 'country',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'domains',
+            key : 'region',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'domains',
+            key : 'subRegion',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'retailSegments',
+            key : 'retailSegment',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'outlets',
+            key : 'outlet',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'branches',
+            key : 'branch',
+            isArray : false
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'personnels',
+            key : 'createdBy.user',
+            addProjection : ['position', 'firstName', 'lastName'],
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1
+                }
+            }
+        }));
+
+        if (positionFilter) {
+            pipeLine.push({
+                $match : {
+                    'createdBy.user.position' : positionFilter
+                }
+            });
+        }
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'positions',
+            key : 'createdBy.user.position',
+            isArray : false,
+            includeSiblings : {
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        position : 1,
+                        firstName : 1,
+                        lastName : 1
+                    }
+                }
+            }
+        }));
+
+        pipeLine.push({
+            $project : aggregateHelper.getProjection({
+                createdBy : {
+                    date : 1,
+                    user : {
+                        _id : 1,
+                        name : {
+                            en : {$concat : ['$createdBy.user.firstName.en', ' ', '$createdBy.user.lastName.en']},
+                            ar : {$concat : ['$createdBy.user.firstName.ar', ' ', '$createdBy.user.lastName.ar']}
+                        }
+                    }
+                },
+                position : {$arrayElemAt : ['$createdBy.user.position', 0]}
+            })
+        });
+
+        pipeLine.push({
+            $group : {
+                _id : null,
+                branch : {$addToSet : '$branch'},
+                outlet : {$addToSet : '$outlet'},
+                retailSegment : {$addToSet : '$retailSegment'},
+                subRegion : {$addToSet : '$subRegion'},
+                region : {$addToSet : '$region'},
+                country : {$addToSet : '$country'},
+                category : {$addToSet : '$category'},
+                position : {$addToSet : '$position'},
+                personnel : {$addToSet : '$createdBy.user'}
+            }
+        });
+
+        aggregation = PriceSurveyModel.aggregate(pipeLine);
+
+        aggregation.options = {
+            allowDiskUse : true
+        };
+
+        aggregation.exec(function(err, result) {
+            if (err) {
+                return next(err);
+            }
+
+            result = result[0] || {};
+
+            result = {
+                branch : result.branch || [],
+                outlet : result.outlet || [],
+                retailSegment : result.retailSegment || [],
+                subRegion : result.subRegion || [],
+                region : result.region || [],
+                country : result.country || [],
+                category : result.category || [],
+                position : result.position || [],
+                personnel : result.personnel || []
+            };
+
+            redisFilters({
+                currentSelected : currentSelected,
+                filterExists : filterExists,
+                filtersObject : result,
+                personnelId : req.personnelModel._id,
+                contentType : CONTENT_TYPES.PRICESURVEY
             }, function(err, response) {
                 if (err) {
                     return next(err);

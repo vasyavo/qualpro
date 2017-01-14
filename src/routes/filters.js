@@ -13,7 +13,7 @@ module.exports = function(db, app, redis) {
 
     router.use(require('../utils/redirectFilterMiddleware'));
 
-    router.get('/priceSurvey', checkAuth, require('./../stories/reporting/price-survey/filters'));
+    router.get('/priceSurvey', checkAuth,  handler.priceSurveyFilters);
     router.get('/shelfShares', checkAuth, handler.shelfSharesFilters);
     router.get('/personnel', checkAuth, handler.personnelFilters);
     router.get('/planogram', checkAuth, handler.planogramFilters);
