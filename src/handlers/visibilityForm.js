@@ -504,21 +504,21 @@ var VisibilityForm = function (db, redis, event) {
                             {
                                 $gt: [{$size: {$ifNull: ['$$item.before.files', []]}}, 0]
                             }, {
-                                $gt: [{$size: {$ifNull: ['$$item.aster.files', []]}}, 0]
+                                $gt: [{$size: {$ifNull: ['$$item.after.files', []]}}, 0]
                             }, {
-                                $gt: [{$ifNull: ['$$item.aster.description', '']}, '']
+                                $gt: [{$ifNull: ['$$item.after.description', '']}, '']
                             }
                         ]
                     }
                 }},
             }
         });
-        
+
         VisibilityFormModel.aggregate(pipeline).allowDiskUse(true).exec(function (err, result) {
             if (err) {
                 return callback(err);
             }
-            
+
             function setUrl(file) {
                 file.url = fileHandler.computeUrl(file.fileName, 'visibilityForm');
                 return file;
@@ -530,7 +530,7 @@ var VisibilityForm = function (db, redis, event) {
                 }
 
                 if (element.after.files && element.after.files.length) {
-                    element.after.files = element.before.after.map(setUrl);
+                    element.after.files = element.after.files.map(setUrl);
                 }
 
                 if (element.after.description) {
@@ -544,7 +544,7 @@ var VisibilityForm = function (db, redis, event) {
                         }
 
                         if (item.after.files && item.after.files.length) {
-                            item.after.files = item.before.after.map(setUrl);
+                            item.after.files = item.after.files.map(setUrl);
                         }
 
                         if (item.after.description) {
