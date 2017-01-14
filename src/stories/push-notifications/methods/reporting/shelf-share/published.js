@@ -9,8 +9,8 @@ const ActivityModel = require('./../../../../../types/activityList/model');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.PRICE_SURVEY;
-        const contentType = contentTypes.PRICESURVEY;
+        const moduleId = aclModules.SHELF_SHARES;
+        const contentType = contentTypes.SHELFSHARES;
         const actionType = activityTypes.CREATED;
 
         const {
@@ -59,21 +59,21 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Price survey published',
+                en: 'Shelf share published',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
             recipients: [supervisor],
             subject: {
-                en: 'Subordinate published price survey',
+                en: 'Subordinate published report',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
             recipients: admins.filter((admin) => (admin !== actionOriginator)),
             subject: {
-                en: 'Price survey received',
+                en: 'Shelf share received',
                 ar: '',
             },
             payload: activityAsJson,

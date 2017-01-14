@@ -21,5 +21,9 @@ activityLog.on('in-store-task:reassigned', require('./methods/inStoreTask/update
 activityLog.on('in-store-task:comment-added', require('./methods/inStoreTask/commentAdded'));
 
 activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
+activityLog.on('reporting:shelf-share:published', require('./methods/reporting/shelf-share/published'));
+activityLog.on('reporting:competitor-branding-and-display-report:published', require('./methods/reporting/competitor-branding-and-display-report/published'));
+activityLog.on('reporting:competitor-promotion-activities:published', require('./methods/reporting/competitor-promotion-activities/published'));
+activityLog.on('reporting:new-product-launch:published', require('./methods/reporting/new-product-launch/published'));
 
 module.exports = activityLog;

@@ -59,21 +59,21 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Price survey published',
+                en: 'New product launch published',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
             recipients: [supervisor],
             subject: {
-                en: 'Subordinate published price survey',
+                en: 'Subordinate published new product launch',
                 ar: '',
             },
             payload: activityAsJson,
         }, {
             recipients: admins.filter((admin) => (admin !== actionOriginator)),
             subject: {
-                en: 'Price survey received',
+                en: 'New product launch received',
                 ar: '',
             },
             payload: activityAsJson,
