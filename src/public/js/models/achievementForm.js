@@ -1,8 +1,9 @@
 define([
     'models/parrent',
     'validation',
-    'constants/contentType'
-], function (parent, validation, CONTENT_TYPES) {
+    'constants/contentType',
+    'custom'
+], function (parent, validation, CONTENT_TYPES, custom) {
     var Model = parent.extend({
         defaults      : {},
         attachmentsKey: 'attachments',
@@ -42,6 +43,8 @@ define([
             model.retailSegmentString = model.retailSegment ? model.retailSegment.name.currentLanguage : '';
             model.outletString = model.outlet ? model.outlet.name.currentLanguage : '';
             model.branchString = model.branch ? model.branch.name.currentLanguage : '';
+            model.startDate = model.startDate ?  custom.dateFormater('DD.MM.YYYY', model.startDate) : '';
+            model.endDate = model.endDate ? custom.dateFormater('DD.MM.YYYY', model.endDate) : '';
             model.location = model.countryString + '>' + model.regionString + '>' + model.subRegionString + '>' + model.retailSegmentString + '>' + model.outletString + '>' + model.branchString;
 
             return model;
