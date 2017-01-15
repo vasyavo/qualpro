@@ -2,8 +2,8 @@ const async = require('async');
 const _ = require('lodash');
 const logger = require('./../../utils/logger');
 const config = require('./../../config');
-const circuitRequest = require('./../../services/request').circuitRequest;
-const TaskSchedulerModel = require('../../types/taskScheduler/model');
+const circuitRequest = require('./request').circuitRequest;
+const SchedulerModel = require('./model');
 const actions = require('./actions');
 
 module.exports = (req, res, next) => {
@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
 
         // find available tasks
         (cb) => {
-            TaskSchedulerModel.find({
+            SchedulerModel.find({
                 scheduleId: {
                     $in: arrayOfDelayedId
                 }
@@ -35,28 +35,49 @@ module.exports = (req, res, next) => {
             async.waterfall([
 
                 (cb) => {
-                    async.map(arrayOfRegistered, (task, cb) => {
+                    async.map(arrayOfRegistered, (task, mapCb) => {
                         const actionType = task.functionName;
-                        const taskId = task.documentId;
+                        const documentId = task.documentId;
                         const scheduleId = task.scheduleId.toString();
                         const action = actions[actionType];
 
-                        action(task.args, taskId, (err) => {
+                        const callback = (err, isProcessed) => {
                             if (err) {
-                                return cb(err);
+                                return mapCb(err);
                             }
 
-                            cb(null, scheduleId);
-                        });
+                            if (isProcessed) {
+                                return mapCb(null, scheduleId);
+                            }
 
-                    }, cb);
+                            return mapCb(null);
+                        };
+
+                        if (documentId) {
+                            return action(task.args, documentId, callback);
+                        }
+
+                        logger.info(`[abstract-scheduler:${requestId}/${scheduleId}]:`, task.args);
+
+                        action(task.args, callback);
+                    }, (err, setProcessedId) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, {
+                            arrayOfRegistered,
+                            setProcessedId,
+                        })
+                    });
                 },
 
                 // registered array contains lean documents
                 // processed array contains ObjectId
-                (setProcessedId, cb) => {
-                    const setIgnoredId = _.difference(arrayOfDelayedId, setProcessedId);
-                    const setToBeReleasedId = _.union(setIgnoredId, setProcessedId);
+                (options, cb) => {
+                    const setProcessedId = _.compact(options.setProcessedId);
+                    const setIgnoredId = _.difference(arrayOfDelayedId, arrayOfRegistered);
+                    const setToBeReleasedId = _.union(setIgnoredId, []);
 
                     cb(null, {
                         processed: setProcessedId,
@@ -92,7 +113,7 @@ module.exports = (req, res, next) => {
             cleanupStore: (cb) => {
                 logger.info(`[abstract-scheduler:${requestId}] Released:`, released);
 
-                TaskSchedulerModel.remove({
+                SchedulerModel.remove({
                     scheduleId: {
                         $in: conclusion.released,
                     },

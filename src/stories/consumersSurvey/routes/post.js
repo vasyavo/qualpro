@@ -9,8 +9,8 @@ const ACL_MODULES = require('../../../constants/aclModulesNames');
 const getByIdAggr = require('../reusable-components/getByIdAggr');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const ACTIVITY_TYPES = require('../../../constants/activityTypes');
-const TaskSchedulerModel = require('../../../types/taskScheduler/model');
-const requestService = require('../../../services/request');
+const SchedulerModel = require('./../../scheduler/model');
+const requestService = require('../../scheduler/request');
 const config = require('../../../config');
 
 const $defProjection = {
@@ -112,7 +112,7 @@ module.exports = (req, res, next) => {
                             }
                         }, (err, response) => {
                             if (!err) {
-                                const taskSchedulerModel = new TaskSchedulerModel();
+                                const taskSchedulerModel = new SchedulerModel();
                                 taskSchedulerModel.set({
                                     scheduleId: response.id,
                                     documentId: result._id,
@@ -129,7 +129,7 @@ module.exports = (req, res, next) => {
                         }
                     }, (err, response) => {
                         if (!err) {
-                            const taskSchedulerModel = new TaskSchedulerModel();
+                            const taskSchedulerModel = new SchedulerModel();
                             taskSchedulerModel.set({
                                 scheduleId: response.id,
                                 documentId: result._id,

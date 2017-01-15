@@ -247,68 +247,73 @@ var Objectives = function (db, redis, event) {
                     }
                     newObjectiveId = objective._id;
 
-                    if (TestUtils.isObjectiveDraft(model)) {
-                        ActivityLog.emit('sub-objective:draft-created', {
-                            originatorId: createdById,
-                            accessRoleLevel,
-                            objective: model.toJSON(),
-                        });
-                    }
-
-                    if (TestUtils.isObjectivePublished(model)) {
-                        ActivityLog.emit('sub-objective:published', {
-                            originatorId: createdById,
-                            accessRoleLevel,
-                            objective: model.toJSON(),
-                        });
-                    }
-
                     cb(null, objective);
                 });
             },
 
             function (objectiveModel, cb) {
-                var data;
+                const hasForm = formType;
+                const isDistribution = hasForm && formType === 'distribution';
 
-                if (!formType && formType !== 'distribution' && formType !== 'visibility') {
-                    return cb(null, objectiveModel);
+                // skip in case with visibility form
+                if (!hasForm || isDistribution) {
+                    if (TestUtils.isObjectiveDraft(objectiveModel)) {
+                        ActivityLog.emit('sub-objective:draft-created', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: objectiveModel.toJSON(),
+                        });
+                    }
+
+                    if (TestUtils.isObjectivePublished(objectiveModel)) {
+                        ActivityLog.emit('sub-objective:published', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: objectiveModel.toJSON(),
+                        });
+                    }
                 }
 
                 if (formType === 'distribution') {
-                    data = {
+                    const data = {
                         objective: objectiveModel.get('_id')
                     };
 
-                    distributionFormHandler.createForm(createdById, data, function (err, formModel) {
+                    return distributionFormHandler.createForm(createdById, data, (err, formModel) => {
                         if (err) {
                             return cb(err);
                         }
 
                         objectiveModel.form = {
-                            _id        : formModel.get('_id'),
-                            contentType: formType
+                            _id: formModel.get('_id'),
+                            contentType: body.formType
                         };
 
                         cb(null, objectiveModel);
                     });
-                } else {
-                    data = {
-                        objective  : objectiveModel.get('_id'),
-                        description: ''
+                }
+
+                if (formType === 'visibility') {
+                    const data = {
+                        objective: objectiveModel.get('_id'),
+                        createdBy,
                     };
-                    visibilityFormHandler.createForm(createdById, data, function (err, formModel) {
+
+                    return visibilityFormHandler.createForm(createdById, data, (err, formModel) => {
                         if (err) {
                             return cb(err);
                         }
 
                         objectiveModel.form = {
-                            _id        : formModel.get('_id'),
+                            _id: formModel.get('_id'),
                             contentType: formType
                         };
 
                         cb(null, objectiveModel);
                     });
                 }
+
+                cb(null, objectiveModel);
             },
 
             function (objectiveModel, cb) {
@@ -532,6 +537,10 @@ var Objectives = function (db, redis, event) {
             var saveObjective;
             var objective;
             var error;
+            const createdBy = {
+                user: userId,
+                date: new Date()
+            };
 
             saveObjective = body.saveObjective;
 
@@ -559,10 +568,6 @@ var Objectives = function (db, redis, event) {
                 },
 
                 function (filesIds, cb) {
-                    var createdBy = {
-                        user: userId,
-                        date: new Date()
-                    };
                     var status = saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
 
                     body.title = {
@@ -602,22 +607,6 @@ var Objectives = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        if (TestUtils.isObjectiveDraft(model)) {
-                            ActivityLog.emit('objective:draft-created', {
-                                originatorId: userId,
-                                accessRoleLevel,
-                                objective: model.toJSON(),
-                            });
-                        }
-
-                        if (TestUtils.isObjectivePublished(model)) {
-                            ActivityLog.emit('objective:published', {
-                                originatorId: userId,
-                                accessRoleLevel,
-                                objective: model.toJSON(),
-                            });
-                        }
-
                         if (model) {
                             if (model.title) {
                                 model.title = {
@@ -637,48 +626,69 @@ var Objectives = function (db, redis, event) {
                     });
                 },
 
-                function (objectiveModel, cb) {
-                    var data;
+                (objectiveModel, cb) => {
+                    const hasForm = body.hasOwnProperty('formType');
+                    const isDistribution = body.hasOwnProperty('formType') && body.formType === 'distribution';
 
-                    if (!body.formType && body.formType !== 'distribution' && body.formType !== 'visibility') {
-                        return cb(null, objectiveModel);
+                    // skip in case with visibility form
+                    if (!hasForm || isDistribution) {
+                        if (TestUtils.isObjectiveDraft(model)) {
+                            ActivityLog.emit('objective:draft-created', {
+                                originatorId: userId,
+                                accessRoleLevel,
+                                objective: model.toJSON(),
+                            });
+                        }
+
+                        if (TestUtils.isObjectivePublished(model)) {
+                            ActivityLog.emit('objective:published', {
+                                originatorId: userId,
+                                accessRoleLevel,
+                                objective: model.toJSON(),
+                            });
+                        }
                     }
 
                     if (body.formType === 'distribution') {
-                        data = {
+                        const data = {
                             objective: objectiveModel.get('_id')
                         };
 
-                        distributionFormHandler.createForm(userId, data, function (err, formModel) {
+                        return distributionFormHandler.createForm(userId, data, (err, formModel) => {
                             if (err) {
                                 return cb(err);
                             }
 
                             objectiveModel.form = {
-                                _id        : formModel.get('_id'),
-                                contentType: body.formType
-                            };
-
-                            cb(null, objectiveModel);
-                        });
-                    } else {
-                        data = {
-                            objective  : objectiveModel.get('_id'),
-                        };
-
-                        visibilityFormHandler.createForm(userId, data, function (err, formModel) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            objectiveModel.form = {
-                                _id        : formModel.get('_id'),
+                                _id: formModel.get('_id'),
                                 contentType: body.formType
                             };
 
                             cb(null, objectiveModel);
                         });
                     }
+
+                    if (body.formType === 'visibility') {
+                        const data = {
+                            objective: objectiveModel.get('_id'),
+                            createdBy,
+                        };
+
+                        return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            objectiveModel.form = {
+                                _id: formModel.get('_id'),
+                                contentType: body.formType
+                            };
+
+                            cb(null, objectiveModel);
+                        });
+                    }
+
+                    cb(null, objectiveModel);
                 },
 
                 function (objectiveModel, cb) {
@@ -924,38 +934,52 @@ var Objectives = function (db, redis, event) {
                 });
             }
 
-            function createForms(objectiveModel, waterFallCb) {
-                var data;
-
-                function callBack(err, formModel) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    objectiveModel.form = {
-                        _id        : formModel.get('_id'),
-                        contentType: updateObject.formType
-                    };
-
-                    waterFallCb(null, objectiveModel);
-                }
-
-                if (updateObject.formType === 'distribution') {
-                    data = {
-                        objective: objectiveModel.get('_id')
-                    };
-
-                    distributionFormHandler.createForm(userId, data, callBack);
-                } else {
-
+            function createForms(objectiveModel, cb) {
+                if (body.formType === 'distribution') {
                     /* TODO fill description from task if AM or AincM will link forms */
-                    data = {
-                        objective  : objectiveModel.get('_id'),
-                        description: ''
+                    const data = {
+                        objective: objectiveModel.get('_id'),
+                        description: '',
                     };
 
-                    visibilityFormHandler.createForm(userId, data, callBack);
+                    return distributionFormHandler.createForm(userId, data, (err, formModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        objectiveModel.form = {
+                            _id: formModel.get('_id'),
+                            contentType: body.formType
+                        };
+
+                        cb(null, objectiveModel);
+                    });
                 }
+
+                if (body.formType === 'visibility') {
+                    const data = {
+                        objective: objectiveModel.get('_id'),
+                        createdBy: {
+                            userId,
+                            date: objectiveModel.createdBy.date,
+                        },
+                    };
+
+                    return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        objectiveModel.form = {
+                            _id: formModel.get('_id'),
+                            contentType: body.formType
+                        };
+
+                        cb(null, objectiveModel);
+                    });
+                }
+
+                cb(null, objectiveModel);
             }
 
             function updateObjectiveWithForm(objectiveModel, waterFallCb) {
