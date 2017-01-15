@@ -18,7 +18,7 @@ define([
     'populate',
     'moment',
     'views/objectives/linkFormView',
-    'views/visibilityForm/editView',
+    'views/objectives/visibilityForm/editView',
     'async',
     'views/fileDialog/fileDialog',
     'dataService',
@@ -169,6 +169,7 @@ define([
 
             this.linkedForm = null;
             this.branchesForVisibility = [];
+            this.outletsForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
             $el.find('#formThumbnail').html('');
@@ -203,12 +204,12 @@ define([
 
             if (contentType === 'visibility' && (App.currentUser.accessRole.level === 3 || App.currentUser.accessRole.level === 4) && this.assignedTo.level > 4) {
                 this.visibilityForm = new VisibilityEditView({
-                    id                  : id,
-                    branchName          : this.branchesForVisibility.join(', '),
-                    description         : description,
-                    savedVisibilityModel: this.savedVisibilityModel,
-                    oldAjaxObj          : this.visibilityFormAjax,
-                    translation         : self.translation
+                    forCreate : true,
+                    outlets : this.outletsForVisibility,
+                    description : description,
+                    savedVisibilityModel : this.savedVisibilityModel,
+                    oldAjaxObj : this.visibilityFormAjax,
+                    translation : self.translation
                 });
                 this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
                     self.savedVisibilityModel = ajaxObj.model;
@@ -250,26 +251,95 @@ define([
                 },
 
                 function (collection, cb) {
+                    if (context.visibilityFormAjax.model.get('files').length) {
+                        $.ajax({
+                            url : '/file',
+                            method : 'POST',
+                            data : context.visibilityFormAjax.data,
+                            contentType: false,
+                            processData: false,
+                            success : function (response) {
+                                cb(null, collection, response);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model, {
+                            files : []
+                        });
+                    }
+                },
+
+                function (collection, files, cb) {
                     if (!context.visibilityFormAjax) {
                         return cb(null, collection);
                     }
 
-                    context.visibilityFormAjax.success = function () {
-                        cb(null, collection);
-                    };
+                    var requestPayload;
 
-                    context.visibilityFormAjax.error = function () {
-                        cb(true);
-                    };
+                    var modelFiles = context.visibilityFormAjax.model.get('files');
+                    if (context.visibilityFormAjax.model.get('applyFileToAll')) {
+                        requestPayload = {
+                            before: {
+                                files: files.files.map(function (item) {
+                                    return item._id;
+                                })
+                            },
+                            after: {
+                                description: '',
+                                files: []
+                            },
+                            branches: []
+                        };
+                    } else {
+                        requestPayload = {
+                            before: {
+                                files: []
+                            },
+                            after: {
+                                description: '',
+                                files: []
+                            },
+                            branches: modelFiles.map(function (item) {
+                                var fileFromServer = _.findWhere(files.files, {
+                                    originalName: item.fileName
+                                });
 
-                    delete context.visibilityFormAjax.model;
+                                return {
+                                    branchId: item.branch,
+                                    before: {
+                                        files: [fileFromServer._id]
+                                    },
+                                    after: {
+                                        files: [],
+                                        description: ''
+                                    }
+                                };
+                            })
+                        };
+                    }
 
-                    $.ajax(context.visibilityFormAjax);
+                    var formId = collection.models[0].get('form')._id;
+                    $.ajax({
+                        url : 'form/visibility/before/' + formId,
+                        method : 'PUT',
+                        contentType : 'application/json',
+                        dataType : 'json',
+                        data : JSON.stringify(requestPayload),
+                        success : function () {
+                            cb(null, collection);
+                        },
+                        error : function () {
+                            cb(true);
+                        }
+                    });
                 }
 
             ], function (err, collection) {
                 if (err) {
-                    return App.render({type: 'error', message: ERROR_MESSAGES.somethingWentWrong[currentLanguage]});
+                    return App.render({type: 'error', message: ERROR_MESSAGES.objectiveNotSaved[currentLanguage]});
                 }
 
                 context.trigger('modelSaved', collection);
@@ -365,8 +435,30 @@ define([
             this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
                 return item._id;
             });
-            this.branchesForVisibility = _.map(this.branchesForVisibility, function (branch) {
-                return branch.name.currentLanguage;
+
+            this.outletsForVisibility = _.filter(this.outletsForVisibility, function (outlet) {
+                return self.locations.outlet.indexOf(outlet._id) !== -1;
+            });
+            this.outletsForVisibility = _.uniq(this.outletsForVisibility, false, function (item) {
+                return item._id;
+            });
+            this.outletsForVisibility = _.map(this.outletsForVisibility, function (outlet) {
+                let result = {
+                    name : outlet.name.currentLanguage,
+                    _id : outlet._id,
+                    branches : []
+                };
+
+                self.branchesForVisibility.map((branch) => {
+                    if (outlet._id === branch.outlet) {
+                        result.branches.push({
+                            name : branch.name.currentLanguage,
+                            _id : branch._id
+                        });
+                    }
+                });
+
+                return result;
             });
 
             this.$el.find('#personnelLocation').html(data.location);
@@ -390,6 +482,7 @@ define([
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
 
                 self.branchesForVisibility = [];
+                self.outletsForVisibility = [];
                 self.treeView = new TreeView({
                     ids        : personnelsIds,
                     translation: self.translation
@@ -404,6 +497,7 @@ define([
 
                 jsonPersonnels.forEach(function (personnel) {
                     self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                    self.outletsForVisibility = self.outletsForVisibility.concat(personnel.outlet);
                 });
 
                 if (self.assign) {
