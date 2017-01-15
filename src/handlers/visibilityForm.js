@@ -858,17 +858,17 @@ var VisibilityForm = function (db, redis, event) {
                 ]);
             };
 
-            const fetchSetFileId = (model, cb) => {
+            const fetchSetFileId = (form, cb) => {
                 const setBranchesBeforeFiles = [];
 
-                model.branches.forEach(branch => {
+                form.branches.forEach(branch => {
                     branch.before.files.forEach(file => {
                         setBranchesBeforeFiles.push(file);
                     })
                 });
-                const setBeforeFiles = model.before.files;
+                const setBeforeFiles = form.before.files;
                 const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
-                const createdByDate = model.createdBy.date;
+                const createdByDate = form.createdBy.date;
                 const setCompactFileId = _.compact(setFileId);
 
                 cb(null);
@@ -876,7 +876,7 @@ var VisibilityForm = function (db, redis, event) {
                 if (setCompactFileId.length) {
                     registerTaskOnCreated({
                         formId: id,
-                        objectiveId: model.objective,
+                        objectiveId: form.objective,
                         setFileId: setCompactFileId,
                         date: createdByDate,
                     });

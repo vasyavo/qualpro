@@ -77,12 +77,10 @@ module.exports = (req, res, next) => {
                 (options, cb) => {
                     const setProcessedId = _.compact(options.setProcessedId);
                     const setIgnoredId = _.difference(arrayOfDelayedId, arrayOfRegistered);
-                    const setToBeReleasedId = _.union(setIgnoredId, []);
 
                     cb(null, {
                         processed: setProcessedId,
-                        released: setToBeReleasedId,
-                        ignored: setIgnoredId,
+                        released: _.union(setProcessedId, setIgnoredId),
                     });
                 }
 
@@ -96,7 +94,6 @@ module.exports = (req, res, next) => {
         const {
             processed,
             released,
-            ignored,
         } = conclusion;
 
         async.parallel({
@@ -115,7 +112,7 @@ module.exports = (req, res, next) => {
 
                 SchedulerModel.remove({
                     scheduleId: {
-                        $in: conclusion.released,
+                        $in: released,
                     },
                 }, cb);
 
@@ -123,13 +120,13 @@ module.exports = (req, res, next) => {
 
             // unregister task in scheduler
             unregisterRequest: (cb) => {
-                logger.info(`[abstract-scheduler:${requestId}] Ignored:`, ignored);
+                logger.info(`[abstract-scheduler:${requestId}] Ignored:`, released);
 
                 circuitRequest({
                     method: 'DELETE',
                     url: `${config.schedulerHost}/tasks`,
                     json: {
-                        data: ignored,
+                        data: released,
                     }
                 }, cb);
             },
