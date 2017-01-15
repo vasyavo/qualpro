@@ -249,7 +249,7 @@ define([
                 this.model.set({
                     after: {
                         description: descriptionAfter,
-                        files      : filesAfter
+                        files      : filesAfter[0]
                     }
                 });
 

@@ -2,6 +2,7 @@ define([
     'Backbone',
     'Underscore',
     'jQuery',
+    'async',
     'text!templates/inStoreTasks/preview.html',
     'text!templates/inStoreTasks/form/form.html',
     'text!templates/file/preView.html',
@@ -31,7 +32,7 @@ define([
     'constants/contentType',
     'helpers/objectivesStatusHelper',
     'constants/errorMessages'
-], function (Backbone, _, $, PreviewTemplate, FormTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+], function (Backbone, _, $, async, PreviewTemplate, FormTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, TaskFlowModel, BaseView, FileDialogView, CommentCollection,
              TaskFlowCollection, populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
              VisibilityForm, UpdatedPreview, TaskFlowTemplate, Model, TreeView, PersonnelListForSelectionView,
@@ -530,7 +531,6 @@ define([
             }
 
             if (!Object.keys(this.changed).length) {
-
                 cb();
             } else {
                 saveObj = {
@@ -559,9 +559,80 @@ define([
                 });
             }
             if (this.visibilityFormAjax) {
-                delete this.visibilityFormAjax.model;
+                async.waterfall([
 
-                $.ajax(this.visibilityFormAjax);
+                    function (cb) {
+                        var visibilityFormAjax = self.visibilityFormAjax;
+                        var VFData = null;
+                        var file = null;
+
+                        if (visibilityFormAjax) {
+                            VFData = self.visibilityFormAjax.data;
+                        }
+
+                        if (VFData) {
+                            file = self.visibilityFormAjax.data.get('inputAfter');
+                        }
+
+                        if (file) {
+                            $.ajax({
+                                url : '/file',
+                                method : 'POST',
+                                data : VFData,
+                                contentType: false,
+                                processData: false,
+                                success : function (response) {
+                                    cb(null, response);
+                                },
+                                error : function () {
+                                    cb(true);
+                                }
+                            });
+                        } else {
+                            cb(null, {
+                                files : []
+                            });
+                        }
+                    },
+
+                    function (files, cb) {
+                        delete self.visibilityFormAjax.model;
+
+                        self.visibilityFormAjax.contentType = 'application/json';
+                        self.visibilityFormAjax.dataType = 'json';
+
+                        self.visibilityFormAjax.success = function() {
+                            return cb();
+                        };
+
+                        self.visibilityFormAjax.error = function() {
+                            return cb(true);
+                        };
+
+                        self.visibilityFormAjax.url = '/form/visibility/after/' + self.model.get('form')._id;
+
+                        var description = self.visibilityFormAjax.data.get('description');
+
+                        self.visibilityFormAjax.data = JSON.stringify({
+                            after : {
+                                files : files.files.map(function (item) {
+                                    return item._id;
+                                }),
+                                description : description
+                            }
+                        });
+
+                        $.ajax(self.visibilityFormAjax);
+                    }
+
+                ], function (err) {
+                    if (err) {
+                        return App.render({
+                            type : 'error',
+                            message : ERROR_MESSAGES.notSaved[App.currentUser.currentLanguage]
+                        });
+                    }
+                });
             }
         },
 
