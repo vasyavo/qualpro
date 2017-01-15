@@ -8,8 +8,7 @@ const schema = new Schema({
         required: true
     },
     documentId : {
-        type : ObjectId,
-        required : true
+        type : ObjectId
     },
     functionName : {
         type: String,

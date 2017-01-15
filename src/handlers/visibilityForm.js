@@ -1,4 +1,8 @@
-'use strict';
+const ObjectId = require('mongoose').Types.ObjectId;
+const ObjectiveModel = require('./../types/objective/model');
+const SchedulerModel = require('./../stories/scheduler/model');
+const SchedulerRequest = require('./../stories/scheduler/request');
+
 var VisibilityForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
@@ -30,7 +34,7 @@ var VisibilityForm = function (db, redis, event) {
     };
 
     this.createForm = function (userId, body, callback) {
-        const createdBy = {
+        const createdBy = body.createdBy || {
             user: userId,
             date: new Date()
         };
@@ -738,9 +742,12 @@ var VisibilityForm = function (db, redis, event) {
     };
 
     this.updateBefore = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             const id = req.params.id;
-            const userId = req.session.uId;
             const aggregateHelper = new AggregationHelper($defProjection);
             const editedBy = {
                 user: objectId(userId),
@@ -753,6 +760,70 @@ var VisibilityForm = function (db, redis, event) {
                 error.status = 400;
                 return next(error);
             }
+
+            const ifCreatedThenRegisterTask = (options) => {
+                const {
+                    formId,
+                    objectiveId,
+                    setFileId
+                } = options;
+
+                async.waterfall([
+
+                    (cb) => {
+                        const query = {
+                            _id: ObjectId(objectiveId),
+                            'form._id': ObjectId(formId),
+                            'form.contentType': 'visibility',
+                            'editedBy.date': new Date(options.date),
+                        };
+
+                        ObjectiveModel.findOne(query)
+                            .lean()
+                            .exec((err, objective) => {
+                                if (err) {
+                                    return cb(err);
+                                }
+
+                                if (!objective) {
+                                    return cb('Objective not registered');
+                                }
+
+                                cb();
+                            });
+                    },
+
+                    (cb) => {
+                        const dueDate = new Date();
+
+                        dueDate.setSeconds(dueDate.getSeconds() + 10);
+                        SchedulerRequest.post({
+                            json : {
+                                date: dueDate.getSeconds(),
+                            },
+                        }, cb);
+                    },
+
+                    (response, cb) => {
+                        const delayedTask = new SchedulerModel();
+
+                        delayedTask.set({
+                            scheduleId: response.id,
+                            functionName: 'emitObjectiveRegistered',
+                            args: {
+                                objectiveId,
+                                visibilityFormId: formId,
+                                setFileId,
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                            },
+                        });
+
+                        delayedTask.save(cb);
+                    }
+
+                ]);
+            };
 
             function updateVisibilityForm(cb) {
                 VisibilityFormModel.findById(id, function (err, model) {
@@ -784,6 +855,27 @@ var VisibilityForm = function (db, redis, event) {
                     model.save(function (err, model) {
                         if (err) {
                             return cb(err);
+                        }
+
+                        const setBranchesBeforeFiles = [];
+
+                        model.branches.forEach(branch => {
+                            branch.before.files.forEach(file => {
+                                setBranchesBeforeFiles.push(file);
+                            })
+                        });
+                        const setBeforeFiles = model.before.files;
+                        const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
+                        const createdByDate = model.createdBy.date;
+                        const setCompactFileId = _.compact(setFileId);
+
+                        if (setCompactFileId.length) {
+                            ifCreatedThenRegisterTask({
+                                formId: id,
+                                objectiveId: model.objective,
+                                setFileId: setCompactFileId,
+                                date: createdByDate,
+                            });
                         }
 
                         cb(null, model);
@@ -833,6 +925,7 @@ var VisibilityForm = function (db, redis, event) {
 
             async.waterfall([
                     updateVisibilityForm,
+                    ifCreatedThenRegisterTask,
                     populateVisibilityForm,
                     getVisibilityForm
                 ], function (err, result) {
