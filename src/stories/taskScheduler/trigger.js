@@ -107,8 +107,7 @@ module.exports = (req, res, next) => {
                 circuitRequest({
                     method: 'DELETE',
                     url: `${config.schedulerHost}/tasks`,
-                    json: true,
-                    body: {
+                    json: {
                         data: ignored,
                     }
                 }, cb);

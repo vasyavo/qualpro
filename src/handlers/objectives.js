@@ -335,21 +335,21 @@ var Objectives = function (db, redis, event) {
 
                 function updateParentObjective(id, seriesCb) {
                     async.waterfall([
-                        function (waterFallCB) {
+                        (cb) => {
                             ObjectiveModel.findById(id, function (err, parentModel) {
                                 if (err) {
-                                    return waterFallCb(err);
+                                    return cb(err);
                                 }
 
                                 if (!parentModel) {
-                                    return waterFallCB('Parent objective not found');
+                                    return cb('Parent objective not found');
                                 }
 
-                                waterFallCB(null, parentModel);
+                                cb(null, parentModel);
                             });
                         },
 
-                        function (parentModel, waterFallCB) {
+                        (parentModel, cb) => {
                             var query = {
                                 level: parseInt(parentModel.level, 10) + 1
                             };
@@ -382,11 +382,11 @@ var Objectives = function (db, redis, event) {
                                     parentModel.status = OBJECTIVE_STATUSES.RE_OPENED;
                                 }
 
-                                waterFallCB(null, parentModel);
+                                cb(null, parentModel);
                             });
                         }
 
-                    ], function (err, parentModel) {
+                    ], (err, parentModel) => {
                         if (err) {
                             return seriesCb(err);
                         }
