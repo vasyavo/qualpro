@@ -249,7 +249,7 @@ define([
                 this.model.set({
                     after: {
                         description: descriptionAfter,
-                        files      : filesAfter
+                        files      : filesAfter[0]
                     }
                 });
 
@@ -270,7 +270,7 @@ define([
                 this.model.set({
                     before: {
                         description: this.description,
-                        files      : files[0]
+                        files      : files[0] ? files[0] : files
                     }
                 });
 
