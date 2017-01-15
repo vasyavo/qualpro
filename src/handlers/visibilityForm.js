@@ -741,27 +741,60 @@ var VisibilityForm = function (db, redis, event) {
         });
     };
 
-    this.updateBefore = function (req, res, next) {
+    this.updateBefore = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
+        const id = req.params.id;
+        const body = req.body;
 
-        function queryRun(body) {
-            const id = req.params.id;
+        const queryRun = (body, callback) => {
             const aggregateHelper = new AggregationHelper($defProjection);
-            const editedBy = {
-                user: objectId(userId),
-                date: new Date()
-            };
-            let error;
 
             if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
+                const error = new Error('Invalid parameter id');
+
                 error.status = 400;
                 return next(error);
             }
 
-            const ifCreatedThenRegisterTask = (options) => {
+            const updateVisibilityForm = (cb) => {
+                VisibilityFormModel.findById(id, (err, model) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    model.editedBy = {
+                        user: objectId(userId),
+                        date: new Date()
+                    };
+
+                    if (body.before) {
+                        model.before = body.before;
+                    }
+
+                    if (body.branches && body.branches.length) {
+                        _.each(body.branches, (elem) => {
+                            let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
+
+                            if (existingBranch) {
+                                existingBranch.before = elem.before;
+                            } else {
+                                model.branches.push({
+                                    branchId: elem.branchId,
+                                    before   : elem.before
+                                });
+                            }
+                        });
+                    }
+
+                    model.save((err, model) => {
+                        cb(err, model);
+                    });
+                });
+            };
+
+            const registerTaskOnCreated = (options) => {
                 const {
                     formId,
                     objectiveId,
@@ -825,143 +858,78 @@ var VisibilityForm = function (db, redis, event) {
                 ]);
             };
 
-            function updateVisibilityForm(cb) {
-                VisibilityFormModel.findById(id, function (err, model) {
-                    if (err) {
-                        return cb(err);
-                    }
+            const fetchSetFileId = (model, cb) => {
+                const setBranchesBeforeFiles = [];
 
-                    model.editedBy = editedBy;
-
-                    if (body.before) {
-                        model.before = body.before;
-                    }
-
-                    if (body.branches && body.branches.length) {
-                        _.each(body.branches, function (elem) {
-                            let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
-
-                            if (existingBranch) {
-                                existingBranch.before = elem.before;
-                            } else {
-                                model.branches.push({
-                                    branchId: elem.branchId,
-                                    before   : elem.before
-                                });
-                            }
-                        });
-                    }
-
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        const setBranchesBeforeFiles = [];
-
-                        model.branches.forEach(branch => {
-                            branch.before.files.forEach(file => {
-                                setBranchesBeforeFiles.push(file);
-                            })
-                        });
-                        const setBeforeFiles = model.before.files;
-                        const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
-                        const createdByDate = model.createdBy.date;
-                        const setCompactFileId = _.compact(setFileId);
-
-                        if (setCompactFileId.length) {
-                            ifCreatedThenRegisterTask({
-                                formId: id,
-                                objectiveId: model.objective,
-                                setFileId: setCompactFileId,
-                                date: createdByDate,
-                            });
-                        }
-
-                        cb(null, model);
-                    });
+                model.branches.forEach(branch => {
+                    branch.before.files.forEach(file => {
+                        setBranchesBeforeFiles.push(file);
+                    })
                 });
-            }
+                const setBeforeFiles = model.before.files;
+                const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
+                const createdByDate = model.createdBy.date;
+                const setCompactFileId = _.compact(setFileId);
 
-            function populateVisibilityForm(model, cb) {
-                VisibilityFormModel.populate(model, {
-                    path  : 'objective',
-                    select: 'context'
-                }, function (err, model) {
-                    if (err) {
-                        return cb(err);
-                    }
+                cb(null);
 
-                    var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
-                        ? ACL_MODULES.VISIBILITY_FORM :
-                        ACL_MODULES.IN_STORE_REPORTING;
-
-                    event.emit('activityChange', {
-                        module     : module,
-                        actionType : ACTIVITY_TYPES.UPDATED,
-                        createdBy  : editedBy,
-                        itemId     : model.objective._id,
-                        itemType   : model.objective.context,
-                        itemDetails: CONTENT_TYPES.VISIBILITYFORM
+                if (setCompactFileId.length) {
+                    registerTaskOnCreated({
+                        formId: id,
+                        objectiveId: model.objective,
+                        setFileId: setCompactFileId,
+                        date: createdByDate,
                     });
+                }
+            };
 
-                    cb(null);
-                });
-            }
-
-            function getVisibilityForm(cb) {
+            const getVisibilityForm = (cb) => {
                 getAllAggregate({
                     aggregateHelper: aggregateHelper,
-                    queryObject    : {_id: objectId(id)},
-                    isMobile       : req.isMobile
-                }, function (err, result) {
+                    queryObject: {
+                        _id: objectId(id),
+                    },
+                    isMobile: req.isMobile
+                }, (err, result) => {
                     if (err) {
                         return cb(err);
                     }
 
                     cb(null, result[0]);
                 });
-            }
+            };
 
             async.waterfall([
-                    updateVisibilityForm,
-                    ifCreatedThenRegisterTask,
-                    populateVisibilityForm,
-                    getVisibilityForm
-                ], function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
 
-                    res.status(200).send(result);
-                }
-            );
-        }
+                updateVisibilityForm,
+                fetchSetFileId,
+                getVisibilityForm,
 
-        access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
-            var body = req.body;
+            ], callback);
+        };
 
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 
-    this.updateAfter = function (req, res, next) {
+    this.updateAfter = (req, res, next) => {
         function queryRun(body) {
             const id = req.params.id;
             const userId = req.session.uId;
