@@ -76,7 +76,7 @@ define([
         },
 
         hideLinkForm: function () {
-            var $liEl = this.$el.find('#attachForm');
+            var $liEl = this.$el.find('#attachForm');2
 
             $liEl.addClass('hidden');
         },

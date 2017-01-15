@@ -227,8 +227,13 @@ define([
             var context = e.data.context;
             var data = new FormData(this);
             var currentLanguage = App.currentUser.currentLanguage;
-
+debugger;
             e.preventDefault();
+
+            if (!context.body.formType) {
+                context.body.formType = context.linkedForm._id;
+            }
+
             data.append('data', JSON.stringify(context.body));
 
             async.waterfall([
@@ -239,9 +244,10 @@ define([
                         data       : data,
                         contentType: false,
                         processData: false,
-                        success    : function (collection) {
-                            var newCollection = new ObjectiveCollection(collection, {silence: true, parse: true});
-                            cb(null, newCollection);
+                        success    : function (xhr) {
+                            debugger;
+                            var model = new Model(xhr, {parse: true});
+                            cb(null, model);
                         },
                         error      : function () {
                             cb(true);
@@ -250,8 +256,20 @@ define([
 
                 },
 
-                function (collection, cb) {
-                    if (context.visibilityFormAjax.model.get('files').length) {
+                function (model, cb) {
+                    var visibilityFormAjax = context.visibilityFormAjax;
+                    var visibilityFormAjaxModel = null;
+                    var files = null;
+
+                    if (visibilityFormAjax) {
+                        visibilityFormAjaxModel = visibilityFormAjax.model;
+                    }
+
+                    if (visibilityFormAjaxModel) {
+                        files = visibilityFormAjaxModel.get('files');
+                    }
+
+                    if (files && files.length) {
                         $.ajax({
                             url : '/file',
                             method : 'POST',
@@ -259,7 +277,7 @@ define([
                             contentType: false,
                             processData: false,
                             success : function (response) {
-                                cb(null, collection, response);
+                                cb(null, model, response);
                             },
                             error : function () {
                                 cb(true);
@@ -272,9 +290,10 @@ define([
                     }
                 },
 
-                function (collection, files, cb) {
+                function (model, files, cb) {
+                debugger;
                     if (!context.visibilityFormAjax) {
-                        return cb(null, collection);
+                        return cb(null, model);
                     }
 
                     var requestPayload;
@@ -320,8 +339,8 @@ define([
                             })
                         };
                     }
-
-                    var formId = collection.models[0].get('form')._id;
+debugger;
+                    var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,
                         method : 'PUT',
@@ -329,7 +348,7 @@ define([
                         dataType : 'json',
                         data : JSON.stringify(requestPayload),
                         success : function () {
-                            cb(null, collection);
+                            cb(null, model);
                         },
                         error : function () {
                             cb(true);
@@ -337,12 +356,12 @@ define([
                     });
                 }
 
-            ], function (err, collection) {
+            ], function (err) {
                 if (err) {
                     return App.render({type: 'error', message: ERROR_MESSAGES.objectiveNotSaved[currentLanguage]});
                 }
 
-                context.trigger('modelSaved', collection);
+                context.trigger('modelSaved');
             });
         },
 
