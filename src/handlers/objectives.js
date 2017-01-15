@@ -420,118 +420,22 @@ var Objectives = function (db, redis, event) {
                     if (err) {
                         return cb(err);
                     }
-                    parentIds = _.compact(_.values(parents));
-                    cb(null, parents);
+
+                    cb(null);
                 });
             },
 
-            function (parents, cb) {
-                if (isMobile) {
-                    return cb(null, null);
-                }
-                coveredByMe(PersonnelModel, ObjectId(options.createdById), cb);
-            },
+            function (cb) {
+                newObjectiveId = typeof newObjectiveId === 'string' ? ObjectId(newObjectiveId) : newObjectiveId;
 
-            function (coveredIds, cb) {
-                if (isMobile) {
-                    newObjectiveId = ObjectId(newObjectiveId);
-                    self.getByIdAggr({id: newObjectiveId, isMobile: isMobile}, function (err, result) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return cb(null, result);
-                    });
-                } else {
-                    var pipeLine;
-                    var aggregation;
-                    var queryObject = {
-                        _id: {
-                            $in: parentIds
-                        }
-                    };
-                    var aggregateHelper = new AggregationHelper($defProjection);
+                self.getByIdAggr({id: newObjectiveId, isMobile: isMobile}, function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
 
-                    pipeLine = getAllPipeline({
-                        aggregateHelper: aggregateHelper,
-                        queryObject    : queryObject,
-                        isMobile       : isMobile,
-                        forSync        : true,
-                        coveredIds     : coveredIds
-                    });
+                    return cb(null, result);
+                });
 
-                    aggregation = ObjectiveModel.aggregate(pipeLine);
-
-                    aggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    aggregation.exec(function (err, response) {
-                        var idsPersonnel = [];
-                        var idsFile = [];
-                        var options = {
-                            data: {}
-                        };
-                        if (err) {
-                            return cb(err);
-                        }
-                        response = response ? response[0] : {data: [], total: 0};
-
-                        if(!response.data.length){
-                            return cb(null, response);
-                        }
-
-                        response.data = _.map(response.data, function (model) {
-                            if (model.title) {
-                                model.title = {
-                                    en: model.title.en ? _.unescape(model.title.en) : '',
-                                    ar: model.title.ar ? _.unescape(model.title.ar) : ''
-                                };
-                            }
-                            if (model.description) {
-                                model.description = {
-                                    en: model.description.en ? _.unescape(model.description.en) : '',
-                                    ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                                };
-                            }
-                            if (model.companyObjective) {
-                                model.companyObjective = {
-                                    en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                                    ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
-                                };
-                            }
-
-                            idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                            idsPersonnel.push(model.createdBy.user._id);
-                            idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
-
-                            return model;
-                        });
-
-                        idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                        options.data[CONTENT_TYPES.FILES] = idsFile;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                cb(null, response);
-                            })
-                        });
-                    });
-                }
             }
 
         ], function (err, parentCollection) {
