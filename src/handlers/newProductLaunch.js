@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var NewProductLaunch = function(db, redis, event) {
     const logger = require('../utils/logger');
     var async = require('async');
@@ -48,6 +50,10 @@ var NewProductLaunch = function(db, redis, event) {
     };
 
     this.create = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files;
             var session = req.session;
@@ -132,12 +138,10 @@ var NewProductLaunch = function(db, redis, event) {
 
                         res.status(201).send(model);
 
-                        event.emit('activityChange', {
-                            module : ACL_MODULES.NEW_PRODUCT_LAUNCH,
-                            actionType : ACTIVITY_TYPES.CREATED,
-                            createdBy : model.get('createdBy'),
-                            itemId : model._id,
-                            itemType : CONTENT_TYPES.NEWPRODUCTLAUNCH
+                        ActivityLog.emit('reporting:new-product-launch:published', {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body
                         });
 
                         cb(null, model);

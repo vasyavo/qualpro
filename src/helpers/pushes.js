@@ -50,8 +50,9 @@ module.exports = function() {
                     logger.info(`Firebase device ${deviceId} message payload:`, payload);
 
                     fcmClient.send({
-                        to: deviceId,
-                        data: payload
+                        registration_ids: [deviceId],
+                        data: payload,
+                        priority: 'high',
                     }, (err, data) => {
                         if (err) {
                             logger.error('Firebase returns', err);

@@ -1,24 +1,28 @@
 const async = require('async');
 const _ = require('lodash');
 const logger = require('./../../utils/logger');
-const releaseSchedulerTask = require('./../../services/request').del;
+const config = require('./../../config');
+const circuitRequest = require('./../../services/request').circuitRequest;
 const TaskSchedulerModel = require('../../types/taskScheduler/model');
 const actions = require('./actions');
 
 module.exports = (req, res, next) => {
     const arrayOfDelayedId = req.body;
+    const requestId = req.id;
 
     if (!arrayOfDelayedId || !arrayOfDelayedId.length) {
         return res.status(200).send([]);
     }
+
+    logger.info(`[abstract-scheduler:${requestId}] Received delayed tasks:`, arrayOfDelayedId);
 
     async.waterfall([
 
         // find available tasks
         (cb) => {
             TaskSchedulerModel.find({
-                scheduleId : {
-                    $in : arrayOfDelayedId
+                scheduleId: {
+                    $in: arrayOfDelayedId
                 }
             }).lean().exec(cb);
         },
@@ -26,18 +30,23 @@ module.exports = (req, res, next) => {
         // execute action per task
         // and diff not existed
         (arrayOfRegistered, cb) => {
+            logger.info(`[abstract-scheduler:${requestId}] Registered tasks:`, arrayOfRegistered);
+
             async.waterfall([
 
                 (cb) => {
                     async.map(arrayOfRegistered, (task, cb) => {
-                        const action = actions[task.functionName];
+                        const actionType = task.functionName;
+                        const taskId = task.documentId;
+                        const scheduleId = task.scheduleId.toString();
+                        const action = actions[actionType];
 
-                        action(task.args, task.documentId, (err) => {
+                        action(task.args, taskId, (err) => {
                             if (err) {
                                 return cb(err);
                             }
 
-                            cb(null, task.scheduleId);
+                            cb(null, scheduleId);
                         });
 
                     }, cb);
@@ -45,14 +54,14 @@ module.exports = (req, res, next) => {
 
                 // registered array contains lean documents
                 // processed array contains ObjectId
-                (arrayOfProcessedId, cb) => {
-                    const arrayOfIgnoredId = _.difference(arrayOfDelayedId, arrayOfProcessedId);
-                    const arrayOfToBeReleasedId = _.union(arrayOfIgnoredId, arrayOfProcessedId);
+                (setProcessedId, cb) => {
+                    const setIgnoredId = _.difference(arrayOfDelayedId, setProcessedId);
+                    const setToBeReleasedId = _.union(setIgnoredId, setProcessedId);
 
                     cb(null, {
-                        processed: arrayOfProcessedId,
-                        ignored: arrayOfIgnoredId,
-                        released: arrayOfToBeReleasedId,
+                        processed: setProcessedId,
+                        released: setToBeReleasedId,
+                        ignored: setIgnoredId,
                     });
                 }
 
@@ -63,17 +72,26 @@ module.exports = (req, res, next) => {
         if (err) {
             return next(err);
         }
+        const {
+            processed,
+            released,
+            ignored,
+        } = conclusion;
 
         async.parallel({
 
             // send processed tasks
             processedRequest: (cb) => {
-                res.status(200).send(conclusion.processed);
+                logger.info(`[abstract-scheduler:${requestId}] Processed:`, processed);
+
+                res.status(200).send(processed);
                 cb();
             },
 
             // remove ignored and processed tasks from store
             cleanupStore: (cb) => {
+                logger.info(`[abstract-scheduler:${requestId}] Released:`, released);
+
                 TaskSchedulerModel.remove({
                     scheduleId: {
                         $in: conclusion.released,
@@ -84,10 +102,14 @@ module.exports = (req, res, next) => {
 
             // unregister task in scheduler
             unregisterRequest: (cb) => {
-                releaseSchedulerTask({
+                logger.info(`[abstract-scheduler:${requestId}] Ignored:`, ignored);
+
+                circuitRequest({
+                    method: 'DELETE',
+                    url: `${config.schedulerHost}/tasks`,
                     json: {
-                        data: conclusion.ignored,
-                    },
+                        data: ignored,
+                    }
                 }, cb);
             },
 

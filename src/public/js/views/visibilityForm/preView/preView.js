@@ -72,7 +72,7 @@ define([
             self.model.set({
                 before: {
                     description: this.description,
-                    files      : before.files
+                    files      : before.files[0]
                 }
             });
 

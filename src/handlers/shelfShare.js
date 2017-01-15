@@ -1,5 +1,6 @@
-var ShelfShareHandler;
-ShelfShareHandler = function (db, redis, event) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var ShelfShareHandler = function (db, redis, event) {
     var _ = require('underscore');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
@@ -765,9 +766,13 @@ ShelfShareHandler = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             body.createdBy = {
-                user: req.session.uId,
+                user: userId,
                 date: new Date()
             };
             if (body.brands && body.brands.length) {
@@ -789,12 +794,10 @@ ShelfShareHandler = function (db, redis, event) {
                     return next(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.SHELF_SHARES,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : body.createdBy,
-                    itemId    : result._id,
-                    itemType  : CONTENT_TYPES.SHELFSHARES
+                ActivityLog.emit('reporting:shelf-share:published', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body
                 });
 
                 res.status(200).send(result);
@@ -815,7 +818,7 @@ ShelfShareHandler = function (db, redis, event) {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.SHELFSHARES, 'create', function (err, saveData) {
+            bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.SHELFSHARES, 'create', function (err, saveData) {
                 if (err) {
                     return next(err);
                 }

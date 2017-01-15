@@ -151,8 +151,6 @@ define([
             };
 
             if (this.assigneWithoutBranches) {
-
-
                 this.visibilityForm = new VisibilityFormViewWithoutBranches({
                     translation : self.translation,
                     description : description[App.currentUser.currentLanguage],
@@ -182,7 +180,6 @@ define([
                     self.savedVisibilityModel = ajaxObj.model;
                 });
             }
-
         },
 
         saveObjective: function (options, cb) {
@@ -269,7 +266,6 @@ define([
                 },
 
                 function (model, cb) {
-                debugger;
                     if (context.assigneWithoutBranches) {
                         var file = context.fileForVFWithoutBranches.file;
 
@@ -309,13 +305,14 @@ define([
                                 }
                             });
                         } else {
-                            cb(null, model, []);
+                            cb(null, model, {
+                                files : []
+                            });
                         }
                     }
                 },
 
                 function (model, files, cb) {
-                debugger;
                     if (!context.visibilityFormAjax && !context.fileForVFWithoutBranches.file) {
                         return cb(null, model);
                     }
@@ -371,7 +368,7 @@ define([
                             };
                         }
                     }
-debugger;
+
                     var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,

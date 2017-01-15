@@ -259,6 +259,14 @@
         selectOneFile : {
             en: 'Select only one file',
             ar: '' //todo
+        },
+        notSaved : {
+            en: 'Not saved',
+            ar: '' //todo
+        },
+        enterDescription : {
+            en: 'Description expected',
+            ar: '' //todo
         }
     };
 
