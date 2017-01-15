@@ -251,8 +251,10 @@ module.exports = function() {
                         if (err) {
                             return cb(err);
                         }
+                        const fileId = model._id;
 
-                        fileOptions._id = model._id;
+                        fileOptions._id = fileId;
+                        filesId.push(fileId);
                         cb();
                     })
                 },

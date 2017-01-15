@@ -765,7 +765,7 @@ var VisibilityForm = function (db, redis, event) {
                 const {
                     formId,
                     objectiveId,
-                    setFileId
+                    setFileId,
                 } = options;
 
                 async.waterfall([
@@ -806,19 +806,19 @@ var VisibilityForm = function (db, redis, event) {
 
                     (response, cb) => {
                         const delayedTask = new SchedulerModel();
-
-                        delayedTask.set({
+                        const data = {
                             scheduleId: response.id,
                             functionName: 'emitObjectiveRegistered',
                             args: {
                                 objectiveId,
-                                visibilityFormId: formId,
+                                visibilityFormId: ObjectId(formId),
                                 setFileId,
-                                actionOriginator: userId,
+                                actionOriginator: ObjectId(userId),
                                 accessRoleLevel,
                             },
-                        });
+                        };
 
+                        delayedTask.set(data);
                         delayedTask.save(cb);
                     }
 

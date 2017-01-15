@@ -1,8 +1,9 @@
 const async = require('async');
 const _ = require('lodash');
+const logger = require('./../../../utils/logger');
 const ObjectiveModel = require('./../../../types/objective/model');
 const FileModel = require('./../../../types/file/model');
-const TestUtils = require('./../../test-utils');
+const TestUtils = require('./../../push-notifications/utils/TestUtils');
 const ActivityLog = require('./../../push-notifications/activityLog');
 
 module.exports = (args, callback) => {
@@ -47,11 +48,17 @@ module.exports = (args, callback) => {
         },
 
         (objective, cb) => {
+            if (!objective) {
+                logger.info(`Ignoring objective ${objectiveId}`);
+
+                return cb(null, false);
+            }
+
             if (TestUtils.isObjectiveDraft(objective)) {
                 ActivityLog.emit('sub-objective:draft-created', {
                     originatorId: actionOriginator,
                     accessRoleLevel,
-                    objective: objective.toJSON(),
+                    objective: objective,
                 });
             }
 
@@ -59,7 +66,7 @@ module.exports = (args, callback) => {
                 ActivityLog.emit('sub-objective:published', {
                     originatorId: actionOriginator,
                     accessRoleLevel,
-                    objective: objective.toJSON(),
+                    objective: objective,
                 });
             }
 

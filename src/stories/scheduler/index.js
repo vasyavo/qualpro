@@ -57,7 +57,7 @@ module.exports = (req, res, next) => {
                             return action(task.args, documentId, callback);
                         }
 
-                        logger.info(`[abstract-scheduler:${requestId}/${scheduleId}]:{${task.args}}`);
+                        logger.info(`[abstract-scheduler:${requestId}/${scheduleId}]:`, task.args);
 
                         action(task.args, callback);
                     }, (err, setProcessedId) => {
