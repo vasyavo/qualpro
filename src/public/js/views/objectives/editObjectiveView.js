@@ -511,7 +511,7 @@ define([
                     }
 
                     var requestPayload;
-                    if (context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
+                    if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
                         var branches = context.branchesForVisibility;
                         requestPayload = {
                             before: {
@@ -534,7 +534,7 @@ define([
                                 };
                             })
                         };
-                    } else if (context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
+                    } else if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
                         var fileToAllBranches = context.visibilityFormAjax.model.get('fileToAllBranches');
                         var branches = context.branchesForVisibility;
 
@@ -560,8 +560,8 @@ define([
                             })
                         };
                     } else {
-                        var modelFiles = context.visibilityFormAjax.model.get('files');
-                        var clearBranch = context.visibilityFormAjax.model.get('clearBranch') || [];
+                        var modelFiles = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('files') || [] : [];
+                        var clearBranch = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('clearBranch') || [] : [];
                         var result = modelFiles.map(function (item) {
                             var fileFromServer = _.findWhere(files.files, {
                                 originalName: item.fileName
