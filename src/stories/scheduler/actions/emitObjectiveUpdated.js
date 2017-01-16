@@ -59,7 +59,7 @@ module.exports = (args, callback) => {
             ActivityLog.emit('objective:updated', {
                 actionOriginator,
                 accessRoleLevel,
-                objective: objective,
+                body: objective,
             });
         },
 
