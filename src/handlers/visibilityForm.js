@@ -885,14 +885,12 @@ var VisibilityForm = function (db, redis, event) {
                 const setCompactFileId = _.compact(setFileId);
                 const updatedAt = new Date(form.editedBy.date);
 
-                if (setCompactFileId.length) {
-                    registerEvent({
-                        formId: id,
-                        objectiveId: form.objective,
-                        setFileId: setCompactFileId,
-                        updatedAt,
-                    });
-                }
+                registerEvent({
+                    formId     : id,
+                    objectiveId: form.objective,
+                    setFileId  : setCompactFileId,
+                    updatedAt,
+                });
 
                 form.editedBy = {
                     user: ObjectId(userId),
