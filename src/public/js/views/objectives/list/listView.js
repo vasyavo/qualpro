@@ -120,10 +120,8 @@ define([
                 translation: this.translation
             });
             this.createSubObjectivesView.on('modelSaved', function () {
-                debugger;
                 self.collection.fetch({
                     success : function () {
-                        debugger;
                         self.showMoreContent(self.collection);
                     }
                 });
