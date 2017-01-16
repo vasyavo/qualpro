@@ -749,8 +749,6 @@ var VisibilityForm = function (db, redis, event) {
         const body = req.body;
 
         const queryRun = (body, callback) => {
-            const aggregateHelper = new AggregationHelper($defProjection);
-
             if (!VALIDATION.OBJECT_ID.test(id)) {
                 const error = new Error('Invalid parameter id');
 
@@ -895,8 +893,10 @@ var VisibilityForm = function (db, redis, event) {
             };
 
             const getVisibilityForm = (cb) => {
+                const aggregateHelper = new AggregationHelper($defProjection);
+
                 getAllAggregate({
-                    aggregateHelper: aggregateHelper,
+                    aggregateHelper,
                     queryObject: {
                         _id: objectId(id),
                     },
@@ -926,7 +926,7 @@ var VisibilityForm = function (db, redis, event) {
             },
 
             (allowed, personnel, cb) => {
-                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', cb);
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.VISIBILITYFORM, 'update', cb);
             },
 
             queryRun,
@@ -941,38 +941,32 @@ var VisibilityForm = function (db, redis, event) {
     };
 
     this.updateAfter = (req, res, next) => {
-        function queryRun(body) {
-            const id = req.params.id;
-            const userId = req.session.uId;
-            const aggregateHelper = new AggregationHelper($defProjection);
-            const editedBy = {
-                user: objectId(userId),
-                date: new Date()
-            };
-            let error;
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        const body = req.body;
 
+        const queryRun = (body, callback) => {
             if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
+                const error = new Error('Invalid parameter id');
+
                 error.status = 400;
                 return next(error);
             }
 
-            function updateVisibilityForm(cb) {
-                body.editedBy = editedBy;
-
-                VisibilityFormModel.findById(id, function (err, model) {
+            const updateVisibilityForm = (cb) => {
+                VisibilityFormModel.findById(id, (err, model) => {
                     if (err) {
                         return cb(err);
                     }
-
-                    model.editedBy = editedBy;
 
                     if (body.after) {
                         model.after = body.after;
                     }
 
                     if (body.branches && body.branches.length) {
-                        _.each(body.branches, function (elem) {
+                        _.each(body.branches, (elem) => {
                             let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
 
                             if (existingBranch) {
@@ -986,90 +980,147 @@ var VisibilityForm = function (db, redis, event) {
                         });
                     }
 
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
+                    cb(null, model);
+                });
+            };
+
+            const registerEvent = (options) => {
+                const {
+                    formId,
+                    objectiveId,
+                    setFileId,
+                } = options;
+
+                const exec = (options) => {
+                    const {
+                        query,
+                        functionName,
+                    } = options;
+
+                    async.waterfall([
+
+                        (cb) => {
+                            ObjectiveModel.findOne(query)
+                                .lean()
+                                .exec((err, objective) => {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+
+                                    if (!objective) {
+                                        return cb('Objective not registered');
+                                    }
+
+                                    cb();
+                                });
+                        },
+
+                        (response, cb) => {
+                            const delayedTask = new SchedulerModel();
+                            const data = {
+                                scheduleId: response.id,
+                                functionName,
+                                args: {
+                                    objectiveId,
+                                    visibilityFormId: ObjectId(formId),
+                                    setFileId,
+                                    actionOriginator: ObjectId(userId),
+                                    accessRoleLevel,
+                                },
+                            };
+
+                            delayedTask.set(data);
+                            delayedTask.save(cb);
                         }
 
-                        cb(null, model);
-                    });
+                    ]);
+                };
+
+                exec({
+                    query: {
+                        _id: ObjectId(objectiveId),
+                        'form._id': ObjectId(formId),
+                        'form.contentType': 'visibility',
+                    },
+                    functionName: 'emitObjectiveUpdated',
                 });
-            }
+            };
 
-            function populateVisibilityForm(model, cb) {
-                VisibilityFormModel.populate(model, {
-                    path  : 'objective',
-                    select: 'context'
-                }, function (err, model) {
-                    if (err) {
-                        return cb(err);
-                    }
+            const fetchSetFileId = (form, cb) => {
+                const setBranchesAfterFiles = [];
 
-                    var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
-                        ? ACL_MODULES.VISIBILITY_FORM :
-                        ACL_MODULES.IN_STORE_REPORTING;
-
-                    event.emit('activityChange', {
-                        module     : module,
-                        actionType : ACTIVITY_TYPES.UPDATED,
-                        createdBy  : editedBy,
-                        itemId     : model.objective._id,
-                        itemType   : model.objective.context,
-                        itemDetails: CONTENT_TYPES.VISIBILITYFORM
-                    });
-
-                    cb(null);
+                form.branches.forEach(branch => {
+                    branch.after.files.forEach(file => {
+                        setBranchesAfterFiles.push(file);
+                    })
                 });
-            }
+                const setAfterFiles = form.after.files;
+                const setFileId = _.union(setBranchesAfterFiles, setAfterFiles);
+                const setCompactFileId = _.compact(setFileId);
 
-            function getVisibilityForm(cb) {
+                if (setCompactFileId.length) {
+                    registerEvent({
+                        formId: id,
+                        objectiveId: form.objective,
+                        setFileId: setCompactFileId,
+                    });
+                }
+
+                form.editedBy = {
+                    user: ObjectId(userId),
+                    date: new Date(),
+                };
+
+                form.save((err, model) => {
+                    cb(err, model);
+                });
+            };
+
+            const getVisibilityForm = (cb) => {
+                const aggregateHelper = new AggregationHelper($defProjection);
+
                 getAllAggregate({
-                    aggregateHelper: aggregateHelper,
-                    queryObject    : {_id: objectId(id)},
-                    isMobile       : req.isMobile
-                }, function (err, result) {
+                    aggregateHelper,
+                    queryObject: {
+                        _id: objectId(id),
+                    },
+                    isMobile: req.isMobile
+                }, (err, result) => {
                     if (err) {
                         return cb(err);
                     }
 
                     cb(null, result[0]);
                 });
-            }
+            };
 
             async.waterfall([
-                    updateVisibilityForm,
-                    populateVisibilityForm,
-                    getVisibilityForm
-                ], function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
 
-                    res.status(200).send(result);
-                }
-            );
-        }
+                updateVisibilityForm,
+                fetchSetFileId,
+                getVisibilityForm,
 
-        access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
-            var body = req.body;
+            ], callback);
+        };
 
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.VISIBILITYFORM, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 
