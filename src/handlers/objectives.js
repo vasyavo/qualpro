@@ -2558,7 +2558,8 @@ var Objectives = function (db, redis, event) {
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'branches',
-            key : 'branch'
+            key : 'branch',
+            addProjection : ['_id', 'name', 'outlet']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

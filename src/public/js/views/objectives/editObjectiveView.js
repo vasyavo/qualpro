@@ -19,7 +19,7 @@ define([
     'constants/otherConstants',
     'dataService',
     'moment',
-    'views/visibilityForm/editView',
+    'views/objectives/visibilityForm/editView',
     'views/fileDialog/fileDialog',
     'async',
     'constants/contentType',
@@ -154,7 +154,6 @@ define([
         },
 
         openForm: function () {
-            return;
             var modelJSON = this.model.toJSON();
             var form;
             var id;
@@ -182,19 +181,35 @@ define([
                     ar: this.$el.find('.objectivesTextarea[data-property="ar"]').val()
                 };
 
-                if (!this.duplicate) {
-                    this.branchesForVisibility = modelJSON.branch;
-                    this.branchesForVisibility = _.map(this.branchesForVisibility, function (branch) {
-                        return branch.name.currentLanguage;
+                var currentLanguage =  App.currentUser.currentLanguage;
+
+                this.branchesForVisibility = modelJSON.branch;
+                this.outletsForVisibility = _.map(modelJSON.outlet, function (outlet) {
+                    let result = {
+                        name : outlet.name[currentLanguage],
+                        _id : outlet._id,
+                        branches : []
+                    };
+
+                    self.branchesForVisibility.map((branch) => {
+                        if (outlet._id === branch.outlet) {
+                            result.branches.push({
+                                name : branch.name[currentLanguage],
+                                _id : branch._id
+                            });
+                        }
                     });
-                }
+
+                    return result;
+                });
 
                 formOptions = {
-                    branchName          : this.branchesForVisibility.join(', '),
-                    description         : description,
-                    savedVisibilityModel: this.savedVisibilityModel,
-                    oldAjaxObj          : this.visibilityFormAjax,
-                    translation         : self.translation
+                    forEdit : true,
+                    outlets : this.outletsForVisibility,
+                    description : description,
+                    savedVisibilityModel : this.savedVisibilityModel,
+                    oldAjaxObj : this.visibilityFormAjax,
+                    translation : self.translation
                 };
 
                 if (this.duplicate) {
@@ -429,31 +444,194 @@ define([
                     }
 
                     $.ajax(ajaxData);
-
                 },
+
                 function (model, cb) {
-                    var formId;
+                    var visibilityFormAjax = context.visibilityFormAjax;
+                    var VFData = null;
+                    var files = [];
 
+                    context.branchesForVisibility.map(function (item) {
+
+                    });
+
+                    if (visibilityFormAjax) {
+                        VFData = context.visibilityFormAjax.data;
+                    }
+
+                    if (VFData) {
+                        files = context.branchesForVisibility.map(function (item) {
+                            return VFData.get(item._id);
+                        }).filter(function (item) {
+                            return item;
+                        });
+                    }
+
+                    if (files && files.length) {
+                        $.ajax({
+                            url : '/file',
+                            method : 'POST',
+                            data : VFData,
+                            contentType: false,
+                            processData: false,
+                            success : function (response) {
+                                cb(null, model, response);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model, {
+                            files : []
+                        });
+                    }
+                },
+
+                function (model, files, cb) {
+                    var formId = model.get('form')._id;
                     if (!context.visibilityFormAjax) {
-                        return cb(null, model);
+                        $.ajax({
+                            url : 'form/visibility/before/' + formId,
+                            method : 'PUT',
+                            contentType : 'application/json',
+                            dataType : 'json',
+                            data : JSON.stringify({
+                                before : {
+                                    files : []
+                                }
+                            }),
+                            success : function () {
+                                cb(null, model);
+                            },
+                            error : function () {
+                                cb(null, model);
+                            }
+                        });
                     }
 
-                    context.visibilityFormAjax.success = function () {
-                        cb(null, model);
-                    };
+                    var requestPayload;
+                    if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
+                        var branches = context.branchesForVisibility;
+                        requestPayload = {
+                            before: {
+                                files: []
+                            },
+                            after: {
+                                description: '',
+                                files: []
+                            },
+                            branches: branches.map(function (item) {
+                                return {
+                                    branchId: item._id,
+                                    before: {
+                                        files: [files.files[0]._id]
+                                    },
+                                    after: {
+                                        files: [],
+                                        description: ''
+                                    }
+                                };
+                            })
+                        };
+                    } else if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
+                        var fileToAllBranches = context.visibilityFormAjax.model.get('fileToAllBranches');
+                        var branches = context.branchesForVisibility;
 
-                    context.visibilityFormAjax.error = function () {
-                        cb(true);
-                    };
+                        requestPayload = {
+                            before: {
+                                files: []
+                            },
+                            after: {
+                                description: '',
+                                files: []
+                            },
+                            branches: branches.map(function (item) {
+                                return {
+                                    branchId: item._id,
+                                    before: {
+                                        files: [fileToAllBranches]
+                                    },
+                                    after: {
+                                        files: [],
+                                        description: ''
+                                    }
+                                };
+                            })
+                        };
+                    } else {
+                        var modelFiles = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('files') || [] : [];
+                        var clearBranch = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('clearBranch') || [] : [];
+                        var result = modelFiles.map(function (item) {
+                            var fileFromServer = _.findWhere(files.files, {
+                                originalName: item.fileName
+                            });
 
-                    if (context.duplicate) {
-                        formId = model.get('form')._id;
-                        context.visibilityFormAjax.url = 'form/visibility/' + formId;
+                            if (fileFromServer) {
+                                return {
+                                    branchId: item.branch,
+                                    before : {
+                                        files: [fileFromServer._id]
+                                    },
+                                    after : {
+                                        files : [],
+                                        description : ''
+                                    }
+                                };
+                            }
+
+                            return {
+                                branchId : item.branch,
+                                before : {
+                                    files : [item._id]
+                                },
+                                after : {
+                                    files : [],
+                                    description : ''
+                                }
+                            };
+                        });
+
+                        clearBranch.map(function (item) {
+                            var branchModel = _.find(result, function (branch) {
+                                return branch.branchId === item;
+                            });
+
+                            if (!branchModel) {
+                                result.push({
+                                    branchId : item,
+                                    before : {
+                                        files : []
+                                    }
+                                });
+                            }
+                        });
+
+                        requestPayload = {
+                            before : {
+                                files : []
+                            },
+                            after : {
+                                files : [],
+                                description : ''
+                            },
+                            branches : result
+                        };
                     }
 
-                    delete context.visibilityFormAjax.model;
-
-                    $.ajax(context.visibilityFormAjax);
+                    $.ajax({
+                        url : 'form/visibility/before/' + formId,
+                        method : 'PUT',
+                        contentType : 'application/json',
+                        dataType : 'json',
+                        data : JSON.stringify(requestPayload),
+                        success : function () {
+                            cb(null, model);
+                        },
+                        error : function () {
+                            cb(true);
+                        }
+                    });
                 }
             ], function (err, model) {
                 if (err) {
