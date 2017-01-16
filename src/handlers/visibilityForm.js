@@ -816,6 +816,17 @@ var VisibilityForm = function (db, redis, event) {
                                 });
                         },
 
+                        (cb) => {
+                            const dueDate = new Date();
+
+                            dueDate.setSeconds(dueDate.getSeconds() + 10);
+                            SchedulerRequest.post({
+                                json : {
+                                    date: dueDate.getSeconds(),
+                                },
+                            }, cb);
+                        },
+
                         (response, cb) => {
                             const delayedTask = new SchedulerModel();
                             const data = {
@@ -1014,6 +1025,17 @@ var VisibilityForm = function (db, redis, event) {
 
                                     cb();
                                 });
+                        },
+
+                        (cb) => {
+                            const dueDate = new Date();
+
+                            dueDate.setSeconds(dueDate.getSeconds() + 10);
+                            SchedulerRequest.post({
+                                json : {
+                                    date: dueDate.getSeconds(),
+                                },
+                            }, cb);
                         },
 
                         (response, cb) => {
