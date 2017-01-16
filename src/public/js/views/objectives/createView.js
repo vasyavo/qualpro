@@ -367,6 +367,7 @@ define([
                                 })
                             };
                         } else {
+                            var modelFiles = context.visibilityFormAjax.model.get('files');
                             requestPayload = {
                                 before: {
                                     files: []
