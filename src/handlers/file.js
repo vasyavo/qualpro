@@ -231,6 +231,14 @@ module.exports = function() {
             }
         }
 
+        // validation for mobile, response with error if file is empty
+        if (_.find(series, el => !el.size)) {
+            const error = new Error('Some of the file is empty or not valid');
+
+            error.status = 400;
+            return callback(error);
+        }
+
         async.each(series, (file, eachCb) => {
             const fileOptions = {
                 type            : file.type,
