@@ -864,6 +864,7 @@ var VisibilityForm = function (db, redis, event) {
                 const setBranchesBeforeFiles = [];
 
                 form.branches.forEach(branch => {
+                    branch.before.files &&
                     branch.before.files.forEach(file => {
                         setBranchesBeforeFiles.push(file);
                     })
@@ -1050,6 +1051,7 @@ var VisibilityForm = function (db, redis, event) {
                 const setBranchesAfterFiles = [];
 
                 form.branches.forEach(branch => {
+                    branch.after.files &&
                     branch.after.files.forEach(file => {
                         setBranchesAfterFiles.push(file);
                     })
