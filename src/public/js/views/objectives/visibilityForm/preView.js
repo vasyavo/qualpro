@@ -129,17 +129,22 @@ define([
                         return branch._id === item.branchId;
                     });
 
+                    branchModel.beforeFileContainer = '';
+                    branchModel.beforeFileName = '';
+
                     var beforeFile = item.before.files[0];
-                    var beforeFileType = beforeFile.contentType.substr(0, 5);
+                    if (beforeFile) {
+                        var beforeFileType = beforeFile.contentType.substr(0, 5);
 
-                    if (beforeFileType === 'video') {
-                        beforeFileContainer = '<video class="showPreview before" width="400" controls><source src="' + beforeFile.url + '"></video>';
-                    } else {
-                        beforeFileContainer = '<img class="imgResponsive showPreview before" src="' + beforeFile.url + '">';
+                        if (beforeFileType === 'video') {
+                            beforeFileContainer = '<video class="showPreview before" width="400" controls><source src="' + beforeFile.url + '"></video>';
+                        } else {
+                            beforeFileContainer = '<img class="imgResponsive showPreview before" src="' + beforeFile.url + '">';
+                        }
+
+                        branchModel.beforeFileContainer = beforeFileContainer;
+                        branchModel.beforeFileName = beforeFile.originalName;
                     }
-
-                    branchModel.beforeFileContainer = beforeFileContainer;
-                    branchModel.beforeFileName = beforeFile.originalName;
 
                     branchModel.afterFileContainer = '';
                     branchModel.afterFileName = 'No File';
