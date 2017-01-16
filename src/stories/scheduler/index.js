@@ -68,11 +68,12 @@ module.exports = (req, res, next) => {
                 // registered array contains lean documents
                 // processed array contains ObjectId
                 (setProcessedId, cb) => {
+                    const setCompactProcessedId = _.compact(setProcessedId);
                     const setIgnoredId = _.difference(setDelayedId, setRegisteredId);
 
                     cb(null, {
-                        processed: setProcessedId,
-                        released: _.union(setProcessedId, setIgnoredId),
+                        processed: setCompactProcessedId,
+                        released: _.union(setCompactProcessedId, setIgnoredId),
                     });
                 }
 
