@@ -6,7 +6,7 @@ const SchedulerRequest = require('./../stories/scheduler/request');
 var VisibilityForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
-    var _ = require('underscore');
+    var _ = require('lodash');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var VALIDATION = require('../public/js/constants/validation.js');
     var CONSTANTS = require('../constants/mainConstants');
@@ -872,7 +872,7 @@ var VisibilityForm = function (db, redis, event) {
             };
 
             const fetchSetFileId = (form, cb) => {
-                const setBranchesBeforeFiles = [];
+                let setBranchesBeforeFiles = [];
 
                 form.branches.forEach(branch => {
                     branch.before.files &&
@@ -880,13 +880,15 @@ var VisibilityForm = function (db, redis, event) {
                         setBranchesBeforeFiles.push(file);
                     })
                 });
-                const setBeforeFiles = form.before.files;
-                const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
+
+                setBranchesBeforeFiles = _.compact(setBranchesBeforeFiles);
+                const setBeforeFiles = _.compact(form.before.files);
+                const setFileId = _.unionBy(setBranchesBeforeFiles, setBeforeFiles, elem => elem.toString());
                 const setCompactFileId = _.compact(setFileId);
                 const updatedAt = new Date(form.editedBy.date);
 
                 registerEvent({
-                    formId     : id,
+                    formId: id,
                     objectiveId: form.objective,
                     setFileId  : setCompactFileId,
                     updatedAt,
@@ -1068,7 +1070,7 @@ var VisibilityForm = function (db, redis, event) {
             };
 
             const fetchSetFileId = (form, cb) => {
-                const setBranchesAfterFiles = [];
+                let setBranchesAfterFiles = [];
 
                 form.branches.forEach(branch => {
                     branch.after.files &&
@@ -1076,8 +1078,10 @@ var VisibilityForm = function (db, redis, event) {
                         setBranchesAfterFiles.push(file);
                     })
                 });
-                const setAfterFiles = form.after.files;
-                const setFileId = _.union(setBranchesAfterFiles, setAfterFiles);
+
+                setBranchesAfterFiles = _.compact(setBranchesAfterFiles);
+                const setAfterFiles = _.compact(form.after.files);
+                const setFileId = _.unionBy(setBranchesAfterFiles, setAfterFiles, elem => elem.toString());
                 const setCompactFileId = _.compact(setFileId);
 
                 if (setCompactFileId.length) {

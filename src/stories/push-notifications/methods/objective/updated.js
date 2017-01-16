@@ -60,13 +60,13 @@ module.exports = (options) => {
                 user: actionOriginator,
             },
             accessRoleLevel,
-            personnels: _.uniq([
+            personnels: _.uniqBy([
                 actionOriginator,
                 contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
                 ...arrayOfOriginator,
-            ]),
+            ], el => el.toString()),
             assignedTo,
             country: body.country,
             region: body.region,
@@ -81,8 +81,12 @@ module.exports = (options) => {
         const payload = {
             actionType,
         };
+
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniqBy([
+                actionOriginator,
+                contentAuthor
+            ], el => el.toString()),
             subject: {
                 en: 'Objective updated',
                 ar: '',
