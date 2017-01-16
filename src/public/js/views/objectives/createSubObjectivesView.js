@@ -227,7 +227,7 @@ define([
             var context = e.data.context;
             var data = new FormData(this);
             var currentLanguage = App.currentUser.currentLanguage;
-debugger;
+
             e.preventDefault();
 
             if (!context.body.formType) {
@@ -245,7 +245,6 @@ debugger;
                         contentType: false,
                         processData: false,
                         success    : function (xhr) {
-                            debugger;
                             var model = new Model(xhr, {parse: true});
                             cb(null, model);
                         },
@@ -291,7 +290,6 @@ debugger;
                 },
 
                 function (model, files, cb) {
-                debugger;
                     if (!context.visibilityFormAjax) {
                         return cb(null, model);
                     }
@@ -339,7 +337,7 @@ debugger;
                             })
                         };
                     }
-debugger;
+
                     var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,
