@@ -889,7 +889,7 @@ var VisibilityForm = function (db, redis, event) {
                 };
 
                 form.save((err, model) => {
-                    cb(err, model);
+                    cb(err);
                 });
             };
 
@@ -1074,7 +1074,7 @@ var VisibilityForm = function (db, redis, event) {
                 };
 
                 form.save((err, model) => {
-                    cb(err, model);
+                    cb(err);
                 });
             };
 
