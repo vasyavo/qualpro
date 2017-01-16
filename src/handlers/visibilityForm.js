@@ -883,7 +883,7 @@ var VisibilityForm = function (db, redis, event) {
                 const setBeforeFiles = form.before.files;
                 const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
                 const setCompactFileId = _.compact(setFileId);
-                const updatedAt = form.editedBy.date;
+                const updatedAt = new Date(form.editedBy.date);
 
                 if (setCompactFileId.length) {
                     registerEvent({
