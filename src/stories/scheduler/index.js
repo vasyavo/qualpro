@@ -7,14 +7,14 @@ const SchedulerModel = require('./model');
 const actions = require('./actions');
 
 module.exports = (req, res, next) => {
-    const arrayOfDelayedId = req.body;
+    const setDelayedId = req.body;
     const requestId = req.id;
 
-    if (!arrayOfDelayedId || !arrayOfDelayedId.length) {
+    if (!setDelayedId || !setDelayedId.length) {
         return res.status(200).send([]);
     }
 
-    logger.info(`[abstract-scheduler:${requestId}] Received delayed tasks:`, arrayOfDelayedId);
+    logger.info(`[abstract-scheduler:${requestId}] Received delayed tasks:`, setDelayedId);
 
     async.waterfall([
 
@@ -22,20 +22,22 @@ module.exports = (req, res, next) => {
         (cb) => {
             SchedulerModel.find({
                 scheduleId: {
-                    $in: arrayOfDelayedId
+                    $in: setDelayedId
                 }
             }).lean().exec(cb);
         },
 
         // execute action per task
         // and diff not existed
-        (arrayOfRegistered, cb) => {
-            logger.info(`[abstract-scheduler:${requestId}] Registered tasks:`, arrayOfRegistered);
+        (setRegistered, cb) => {
+            const setRegisteredId = setRegistered.map(task => task.scheduleId.toString());
+
+            logger.info(`[abstract-scheduler:${requestId}] Registered tasks:`, setRegisteredId);
 
             async.waterfall([
 
                 (cb) => {
-                    async.map(arrayOfRegistered, (task, mapCb) => {
+                    async.map(setRegistered, (task, mapCb) => {
                         const actionType = task.functionName;
                         const documentId = task.documentId;
                         const scheduleId = task.scheduleId.toString();
@@ -60,23 +62,13 @@ module.exports = (req, res, next) => {
                         logger.info(`[abstract-scheduler:${requestId}/${scheduleId}]:`, task.args);
 
                         action(task.args, callback);
-                    }, (err, setProcessedId) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, {
-                            arrayOfRegistered,
-                            setProcessedId,
-                        })
-                    });
+                    }, cb);
                 },
 
                 // registered array contains lean documents
                 // processed array contains ObjectId
-                (options, cb) => {
-                    const setProcessedId = _.compact(options.setProcessedId);
-                    const setIgnoredId = _.difference(arrayOfDelayedId, arrayOfRegistered);
+                (setProcessedId, cb) => {
+                    const setIgnoredId = _.difference(setDelayedId, setRegisteredId);
 
                     cb(null, {
                         processed: setProcessedId,

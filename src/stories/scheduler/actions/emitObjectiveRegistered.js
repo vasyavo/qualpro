@@ -54,6 +54,8 @@ module.exports = (args, callback) => {
                 return cb(null, false);
             }
 
+            cb(null, true);
+
             if (TestUtils.isObjectiveDraft(objective)) {
                 ActivityLog.emit('sub-objective:draft-created', {
                     originatorId: actionOriginator,
@@ -69,8 +71,6 @@ module.exports = (args, callback) => {
                     objective: objective,
                 });
             }
-
-            cb(null, true);
         },
 
     ], callback);
