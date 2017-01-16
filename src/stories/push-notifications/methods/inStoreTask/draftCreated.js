@@ -44,15 +44,18 @@ module.exports = (options) => {
             branch: inStoreTask.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
+
+        const payload = {
+            actionType,
+        };
         const groups = [{
             recipients: [originatorId],
             subject: {
                 en: 'Draft in-store task saved',
                 ar: 'Draft in-store task saved',
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);
