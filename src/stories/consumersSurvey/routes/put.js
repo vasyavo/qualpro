@@ -1,16 +1,15 @@
 const async = require('async');
 const _ = require('underscore');
 const event = require('../../../utils/eventEmitter');
-const PersonnelModel = require('../../../types/personnel/model');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
-const TaskSchedulerModel = require('../../../types/taskScheduler/model');
+const SchedulerModel = require('./../../scheduler/model');
 const ACTIVITY_TYPES = require('../../../constants/activityTypes');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
 const bodyValidator = require('../../../helpers/bodyValidator');
 const access = require('../../../helpers/access')();
 const getByIdAggr = require('../reusable-components/getByIdAggr');
-const requestService = require('../../../services/request');
+const requestService = require('../../scheduler/request');
 const config = require('../../../config');
 
 module.exports = (req, res, next) => {
@@ -82,7 +81,7 @@ module.exports = (req, res, next) => {
             },
 
             (consumersSurveyModel, cb) => {
-                TaskSchedulerModel.find({
+                SchedulerModel.find({
                     documentId : consumersSurveyModel._id,
                     functionName : {
                         $in : ['setConsumerSurveyStatusActive', 'setConsumerSurveyStatusCompleted']
@@ -106,7 +105,7 @@ module.exports = (req, res, next) => {
                             data : arrayOfSchedulesId
                         }
                     }, () => {
-                        TaskSchedulerModel.remove({
+                        SchedulerModel.remove({
                             scheduleId : {
                                 $in : arrayOfSchedulesId
                             }
@@ -127,7 +126,7 @@ module.exports = (req, res, next) => {
                         }
                     }, (err, response) => {
                         if (!err) {
-                            const taskSchedulerModel = new TaskSchedulerModel();
+                            const taskSchedulerModel = new SchedulerModel();
                             taskSchedulerModel.set({
                                 scheduleId: response.id,
                                 documentId: consumerSurveyModel._id,
@@ -144,7 +143,7 @@ module.exports = (req, res, next) => {
                     }
                 }, (err, response) => {
                     if (!err) {
-                        const taskSchedulerModel = new TaskSchedulerModel();
+                        const taskSchedulerModel = new SchedulerModel();
                         taskSchedulerModel.set({
                             scheduleId: response.id,
                             documentId: consumerSurveyModel._id,

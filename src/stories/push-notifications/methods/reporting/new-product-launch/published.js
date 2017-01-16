@@ -53,30 +53,32 @@ module.exports = (options) => {
             branch: body.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
 
+        const payload = {
+            actionType,
+        };
         const groups = [{
             recipients: [actionOriginator],
             subject: {
                 en: 'New product launch published',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: [supervisor],
             subject: {
                 en: 'Subordinate published new product launch',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: admins.filter((admin) => (admin !== actionOriginator)),
             subject: {
                 en: 'New product launch received',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);

@@ -17,7 +17,12 @@ const schema = new Schema({
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
         date: { type: Date, default: new Date() }
     },
-    preview: { type: String, default: null }
+    preview: { type: String, default: null },
+    isProcessing: {
+        type: Boolean,
+        required: true,
+        default: true,
+    },
 }, { collection: 'files' });
 
 module.exports = schema;
