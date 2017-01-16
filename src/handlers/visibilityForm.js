@@ -875,8 +875,6 @@ var VisibilityForm = function (db, redis, event) {
                 const setCompactFileId = _.compact(setFileId);
                 const updatedAt = form.editedBy.date;
 
-                cb(null);
-
                 if (setCompactFileId.length) {
                     registerEvent({
                         formId: id,
