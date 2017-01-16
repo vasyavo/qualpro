@@ -82,6 +82,7 @@ module.exports = (options) => {
             actionType,
         };
 
+        // fixme: make uniqBy on the database
         const groups = [{
             recipients: _.uniqBy([
                 actionOriginator,
@@ -93,21 +94,21 @@ module.exports = (options) => {
             },
             payload,
         }, {
-            recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
+            recipients: _.uniqBy(arrayOfOriginator.filter((originator) => (originator !== actionOriginator)), el => el.toString()),
             subject: {
                 en: 'Sub-objective updated',
                 ar: '',
             },
             payload,
         }, {
-            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
+            recipients: _.uniqBy(assignedTo.filter((assignee) => (assignee !== actionOriginator)), el => el.toString()),
             subject: {
                 en: 'Received updated objective',
                 ar: '',
             },
             payload,
         }, {
-            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
+            recipients: _.uniqBy(arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),el => el.toString()),
             subject: {
                 en: `Subordinate's objective updated`,
                 ar: '',
