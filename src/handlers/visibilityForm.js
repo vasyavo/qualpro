@@ -764,11 +764,6 @@ var VisibilityForm = function (db, redis, event) {
                         return cb(err);
                     }
 
-                    model.editedBy = {
-                        user: objectId(userId),
-                        date: new Date()
-                    };
-
                     if (body.before) {
                         model.before = body.before;
                     }
@@ -788,74 +783,83 @@ var VisibilityForm = function (db, redis, event) {
                         });
                     }
 
-                    model.save((err, model) => {
-                        cb(err, model);
-                    });
+                    cb(null, model);
                 });
             };
 
-            const registerTaskOnCreated = (options) => {
+            const registerEvent = (options) => {
                 const {
                     formId,
                     objectiveId,
                     setFileId,
                 } = options;
 
-                async.waterfall([
+                const exec = (options) => {
+                    const {
+                        query,
+                        functionName,
+                    } = options;
 
-                    (cb) => {
-                        const query = {
-                            _id: ObjectId(objectiveId),
-                            'form._id': ObjectId(formId),
-                            'form.contentType': 'visibility',
-                            'editedBy.date': new Date(options.date),
-                        };
+                    async.waterfall([
 
-                        ObjectiveModel.findOne(query)
-                            .lean()
-                            .exec((err, objective) => {
-                                if (err) {
-                                    return cb(err);
-                                }
+                        (cb) => {
+                            ObjectiveModel.findOne(query)
+                                .lean()
+                                .exec((err, objective) => {
+                                    if (err) {
+                                        return cb(err);
+                                    }
 
-                                if (!objective) {
-                                    return cb('Objective not registered');
-                                }
+                                    if (!objective) {
+                                        return cb('Objective not registered');
+                                    }
 
-                                cb();
-                            });
+                                    cb();
+                                });
+                        },
+
+                        (response, cb) => {
+                            const delayedTask = new SchedulerModel();
+                            const data = {
+                                scheduleId: response.id,
+                                functionName,
+                                args: {
+                                    objectiveId,
+                                    visibilityFormId: ObjectId(formId),
+                                    setFileId,
+                                    actionOriginator: ObjectId(userId),
+                                    accessRoleLevel,
+                                },
+                            };
+
+                            delayedTask.set(data);
+                            delayedTask.save(cb);
+                        }
+
+                    ]);
+                };
+
+                exec({
+                    query: {
+                        _id: ObjectId(objectiveId),
+                        'form._id': ObjectId(formId),
+                        'form.contentType': 'visibility',
+                        'createdBy.date': new Date(options.updatedAt),
                     },
+                    functionName: 'emitObjectiveRegistered',
+                });
 
-                    (cb) => {
-                        const dueDate = new Date();
-
-                        dueDate.setSeconds(dueDate.getSeconds() + 10);
-                        SchedulerRequest.post({
-                            json : {
-                                date: dueDate.getSeconds(),
-                            },
-                        }, cb);
+                exec({
+                    query: {
+                        _id: ObjectId(objectiveId),
+                        'form._id': ObjectId(formId),
+                        'form.contentType': 'visibility',
+                        'createdBy.date': {
+                            $lt: new Date(options.updatedAt)
+                        },
                     },
-
-                    (response, cb) => {
-                        const delayedTask = new SchedulerModel();
-                        const data = {
-                            scheduleId: response.id,
-                            functionName: 'emitObjectiveRegistered',
-                            args: {
-                                objectiveId,
-                                visibilityFormId: ObjectId(formId),
-                                setFileId,
-                                actionOriginator: ObjectId(userId),
-                                accessRoleLevel,
-                            },
-                        };
-
-                        delayedTask.set(data);
-                        delayedTask.save(cb);
-                    }
-
-                ]);
+                    functionName: 'emitObjectiveUpdated',
+                });
             };
 
             const fetchSetFileId = (form, cb) => {
@@ -868,19 +872,28 @@ var VisibilityForm = function (db, redis, event) {
                 });
                 const setBeforeFiles = form.before.files;
                 const setFileId = _.union(setBranchesBeforeFiles, setBeforeFiles);
-                const createdByDate = form.createdBy.date;
                 const setCompactFileId = _.compact(setFileId);
+                const updatedAt = form.updatedBy.date;
 
                 cb(null);
 
                 if (setCompactFileId.length) {
-                    registerTaskOnCreated({
+                    registerEvent({
                         formId: id,
                         objectiveId: form.objective,
                         setFileId: setCompactFileId,
-                        date: createdByDate,
+                        updatedAt,
                     });
                 }
+
+                form.editedBy = {
+                    user: ObjectId(userId),
+                    date: new Date(),
+                };
+
+                form.save((err, model) => {
+                    cb(err, model);
+                });
             };
 
             const getVisibilityForm = (cb) => {

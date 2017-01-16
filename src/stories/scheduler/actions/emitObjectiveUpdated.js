@@ -56,42 +56,11 @@ module.exports = (args, callback) => {
 
             cb(null, true);
 
-            const arrayOfParentObjectiveId = _(objective.parent)
-                .values()
-                .compact()
-                .value();
-
-            if (TestUtils.isObjectiveDraft(objective)) {
-                if (arrayOfParentObjectiveId.length) {
-                    ActivityLog.emit('sub-objective:draft-created', {
-                        originatorId: actionOriginator,
-                        accessRoleLevel,
-                        objective: objective,
-                    });
-                } else {
-                    ActivityLog.emit('objective:draft-created', {
-                        originatorId: actionOriginator,
-                        accessRoleLevel,
-                        objective: objective,
-                    });
-                }
-            }
-
-            if (TestUtils.isObjectivePublished(objective)) {
-                if (arrayOfParentObjectiveId.length) {
-                    ActivityLog.emit('sub-objective:published', {
-                        originatorId: actionOriginator,
-                        accessRoleLevel,
-                        objective: objective,
-                    });
-                } else {
-                    ActivityLog.emit('objective:published', {
-                        originatorId: actionOriginator,
-                        accessRoleLevel,
-                        objective: objective,
-                    });
-                }
-            }
+            ActivityLog.emit('objective:updated', {
+                actionOriginator,
+                accessRoleLevel,
+                objective: objective,
+            });
         },
 
     ], callback);
