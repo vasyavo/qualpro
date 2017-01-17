@@ -612,6 +612,10 @@ var InStoreReports = function() {
                     'editedBy.date': 1
                 };
 
+            var showAll = filter.showAll;
+
+            delete filter.showAll;
+
             var aggregateHelper;
 
             for (key in sort) {
@@ -708,6 +712,15 @@ var InStoreReports = function() {
                     queryObject._id = {
                         $ne: ObjectId(currentUserId)
                     };
+
+                    if (showAll){
+                        queryObject.$or = [
+                            {country : queryObject.country},
+                            {country : {$size : 0}}
+                        ];
+                        delete queryObject.country;
+                        delete queryObject.region;
+                    }
 
                     pipeLine.push({
                         $match: queryObject

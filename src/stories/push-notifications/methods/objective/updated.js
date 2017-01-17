@@ -2,13 +2,13 @@ const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
-const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
+const toString = require('./../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -17,12 +17,12 @@ module.exports = (options) => {
         const actionType = activityTypes.UPDATED;
 
         const {
-            actionOriginator,
             accessRoleLevel,
             body,
         } = options;
 
-        const contentAuthor = _.get(body, 'createdBy.user');
+        const actionOriginator = toString(options, 'actionOriginator');
+        const contentAuthor = toString(body, 'createdBy.user');
         const arrayOfParentObjectiveId = _(body.parent)
             .values()
             .compact()
@@ -60,13 +60,13 @@ module.exports = (options) => {
                 user: actionOriginator,
             },
             accessRoleLevel,
-            personnels: _.uniqBy([
+            personnels: _.uniq([
                 actionOriginator,
                 contentAuthor,
                 ...assignedTo,
                 ...arrayOfSupervisor,
                 ...arrayOfOriginator,
-            ], el => el.toString()),
+            ]),
             assignedTo,
             country: body.country,
             region: body.region,
@@ -81,34 +81,29 @@ module.exports = (options) => {
         const payload = {
             actionType,
         };
-
-        // fixme: make uniqBy on the database
         const groups = [{
-            recipients: _.uniqBy([
-                actionOriginator,
-                contentAuthor
-            ], el => el.toString()),
+            recipients: _.uniq([actionOriginator, contentAuthor]),
             subject: {
                 en: 'Objective updated',
                 ar: '',
             },
             payload,
         }, {
-            recipients: _.uniqBy(arrayOfOriginator.filter((originator) => (originator !== actionOriginator)), el => el.toString()),
+            recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
             subject: {
                 en: 'Sub-objective updated',
                 ar: '',
             },
             payload,
         }, {
-            recipients: _.uniqBy(assignedTo.filter((assignee) => (assignee !== actionOriginator)), el => el.toString()),
+            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received updated objective',
                 ar: '',
             },
             payload,
         }, {
-            recipients: _.uniqBy(arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),el => el.toString()),
+            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: `Subordinate's objective updated`,
                 ar: '',
