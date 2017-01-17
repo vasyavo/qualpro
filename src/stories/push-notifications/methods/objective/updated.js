@@ -17,11 +17,11 @@ module.exports = (options) => {
         const actionType = activityTypes.UPDATED;
 
         const {
-            actionOriginator,
             accessRoleLevel,
             body,
         } = options;
 
+        const actionOriginator = toString(options, 'actionOriginator');
         const contentAuthor = toString(body, 'createdBy.user');
         const arrayOfParentObjectiveId = _(body.parent)
             .values()
