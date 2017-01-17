@@ -82,7 +82,7 @@ module.exports = (options) => {
             actionType,
         };
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniq([actionOriginator, contentAuthor]),
             subject: {
                 en: 'Objective updated',
                 ar: '',
