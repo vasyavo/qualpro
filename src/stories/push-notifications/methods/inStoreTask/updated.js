@@ -68,7 +68,7 @@ module.exports = (options) => {
             actionType,
         };
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniq([actionOriginator, contentAuthor]),
             subject: {
                 en: 'In-store task updated',
                 ar: '',
