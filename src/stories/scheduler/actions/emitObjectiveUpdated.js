@@ -6,6 +6,10 @@ const FileModel = require('./../../../types/file/model');
 const TestUtils = require('./../../push-notifications/utils/TestUtils');
 const ActivityLog = require('./../../push-notifications/activityLog');
 
+const getObjectiveContext =  (objective) => {
+    return objective.context === 'objectives'? 'objective': 'in-store-task'
+};
+
 module.exports = (args, callback) => {
     const {
         objectiveId,
@@ -56,7 +60,7 @@ module.exports = (args, callback) => {
 
             cb(null, true);
 
-            ActivityLog.emit('objective:updated', {
+            ActivityLog.emit(`${getObjectiveContext(objective)}:updated`, {
                 actionOriginator,
                 accessRoleLevel,
                 body: objective,

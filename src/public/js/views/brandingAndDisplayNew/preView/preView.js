@@ -348,8 +348,8 @@ define([
                 model.branchString = model.branch.name[currentLanguage];
                 model.outletString = model.outlet.name[currentLanguage];
                 model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType[0].name[currentLanguage] : '';
-                model.startDate = moment(model.startDate).format('DD.MM.YYYY');
-                model.endDate = moment(model.endDate).format('DD.MM.YYYY');
+                model.dateStart = moment(model.dateStart).format('DD.MM.YYYY');
+                model.dateEnd = moment(model.dateEnd).format('DD.MM.YYYY');
                 model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;
                 model.regionString = (model.region) ? model.region.name[currentLanguage] : self.translation.missedData;
                 model.subRegionString = (model.subRegion) ? model.subRegion.name[currentLanguage] : self.translation.missedData;
