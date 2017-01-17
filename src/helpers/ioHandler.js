@@ -6,7 +6,7 @@ module.exports = function(io, unreadCache) {
     const logger = require('../utils/logger');
     const logWriter = require('../helpers/logWriter.js');
     const MAIN_CONSTANTS = require('../constants/mainConstants.js');
-    const actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
+    const redisActionPrefix = MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING;
     const redis = unreadCache.redis;
     const onlineKey = 'online';
 
@@ -16,10 +16,7 @@ module.exports = function(io, unreadCache) {
         socket.on('save_socket_connection', function(data) {
             var _this = this;
             var userId = data.uId;
-            var actionKey = actionKeyTemplate({
-                userId : userId,
-                moduleId : 'alalali'
-            });
+            const actionKey = `${redisActionPrefix}:${userId}`;
 
             _this.uId = data.uId;
             unreadCache.setUserSocketId(data.uId, _this.id);

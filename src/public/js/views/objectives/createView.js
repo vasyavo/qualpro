@@ -314,24 +314,29 @@ define([
 
                 function (model, files, cb) {
                     if (!context.visibilityFormAjax && !context.fileForVFWithoutBranches.file) {
-                        var formId = model.get('form')._id;
-                        $.ajax({
-                            url : 'form/visibility/before/' + formId,
-                            method : 'PUT',
-                            contentType : 'application/json',
-                            dataType : 'json',
-                            data : JSON.stringify({
-                                before : {
-                                    files : []
+                        var form = model.get('form');
+                        if (form) {
+                            var formId = model.get('form')._id;
+                            $.ajax({
+                                url : 'form/visibility/before/' + formId,
+                                method : 'PUT',
+                                contentType : 'application/json',
+                                dataType : 'json',
+                                data : JSON.stringify({
+                                    before : {
+                                        files : []
+                                    }
+                                }),
+                                success : function () {
+                                    cb(null, model);
+                                },
+                                error : function () {
+                                    cb(null, model);
                                 }
-                            }),
-                            success : function () {
-                                cb(null, model);
-                            },
-                            error : function () {
-                                cb(null, model);
-                            }
-                        });
+                            });
+                        } else {
+                            return cb(null, model);
+                        }
                     }
 
                     var requestPayload;
