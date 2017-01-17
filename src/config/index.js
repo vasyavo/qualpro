@@ -29,7 +29,7 @@ config.mongodbUri = process.env.MONGODB_URI;
 /* Database configurations */
 
 config.sendgirdApiKey = process.env.SENDGRID_APIKEY;
-config.redisUrl = process.env.REDIS_URL;
+config.redisUrl = process.env.REDIS_URL || process.env.REDISGREEN_URL;
 config.redisSessionDb = process.env.REDIS_SESSION_DB || 7;
 
 /* Twilio configurations */
