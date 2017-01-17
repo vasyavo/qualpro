@@ -392,7 +392,7 @@ define([
                 notCheckFilters   : true
             };
 
-            if (~[3,4].indexOf(App.currentUser.accessRole.level)){
+            if (~[2,3,4].indexOf(App.currentUser.accessRole.level)){
                 optionsObj.filter = {
                     showAll : true
                 };
