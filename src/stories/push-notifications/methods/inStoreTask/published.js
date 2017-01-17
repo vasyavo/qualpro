@@ -8,6 +8,7 @@ const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
+const toString = require('./../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -19,8 +20,8 @@ module.exports = (options) => {
             accessRoleLevel,
             inStoreTask,
         } = options;
-        const actionOriginator = options.originatorId;
 
+        const actionOriginator = toString(options, 'originatorId');
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
             assignedTo: inStoreTask.assignedTo,
             actionOriginator,

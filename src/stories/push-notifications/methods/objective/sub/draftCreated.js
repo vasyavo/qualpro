@@ -4,6 +4,7 @@ const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
 const contentTypes = require('./../../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../../types/activityList/model');
+const toString = require('./../../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -12,10 +13,10 @@ module.exports = (options) => {
         const actionType = activityTypes.CREATED;
 
         const {
-            originatorId,
             accessRoleLevel,
             objective,
         } = options;
+        const actionOriginator = toString(options, 'originatorId');
 
         const newActivity = new ActivityModel();
 
@@ -29,11 +30,11 @@ module.exports = (options) => {
                 ar: objective.title.ar,
             },
             createdBy: {
-                user: originatorId,
+                user: actionOriginator,
             },
             accessRoleLevel,
             personnels: [
-                originatorId,
+                actionOriginator,
             ],
             assignedTo: objective.assignedTo,
             country: objective.country,
@@ -50,7 +51,7 @@ module.exports = (options) => {
             actionType,
         };
         const groups = [{
-            recipients: [originatorId],
+            recipients: [actionOriginator],
             subject: {
                 en: 'Draft objective saved',
                 ar: '',
