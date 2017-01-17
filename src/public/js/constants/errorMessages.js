@@ -267,6 +267,10 @@
         enterDescription : {
             en: 'Description expected',
             ar: '' //todo
+        },
+        nothingToShow : {
+            en : 'Nothing to show',
+            ar : '' //todo
         }
     };
 

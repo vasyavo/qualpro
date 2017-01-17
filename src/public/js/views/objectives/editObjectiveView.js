@@ -244,7 +244,10 @@ define([
                                 });
                         }
                     } else {
-                        return;
+                        return App.render({
+                            type   : 'alert',
+                            message: ERROR_MESSAGES.nothingToShow[currentLanguage]
+                        });;
                     }
                 } else {
                     this.branchesForVisibility = modelJSON.branch;
