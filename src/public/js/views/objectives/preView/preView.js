@@ -488,7 +488,7 @@ define([
             var defFilter = this.defFilterLogic.getDefFilter('personnel', 'assignToElse');
             var modelJSON = this.model.toJSON();
 
-            if (modelJSON.objectiveType === 'country'){
+            if (modelJSON.objectiveType === 'country') {
                 this.trigger('showSubObjectiveDialog', this.model, true, defFilter);
             } else {
                 this.trigger('showAssignObjectiveDialog', this.model, true, defFilter);

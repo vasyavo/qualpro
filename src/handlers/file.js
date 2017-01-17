@@ -141,16 +141,47 @@ module.exports = function() {
         }
 
         function uploadFile(fileOptions) {
-            fileUploader.uploadFromFile(fileOptions, bucket, (err) => {
+            const {
+                _id,
+            } = fileOptions;
+
+            async.waterfall([
+
+                (cb) => {
+                    fileUploader.uploadFromFile(fileOptions, bucket, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb();
+                    });
+                },
+
+                (cb) => {
+                    const query = {
+                        _id,
+                    };
+                    const update = {
+                        isProcessing: false,
+                    };
+
+                    FileModel.findOneAndUpdate(query, update, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb();
+                    });
+                },
+
+                (cb) => {
+                    fs.unlink(fileOptions.tempPath, cb);
+                },
+
+            ], (err) => {
                 if (err) {
                     logger.error(err);
                 }
-
-                fs.unlink(fileOptions.tempPath, (err) => {
-                    if (err) {
-                        logger.error(err);
-                    }
-                });
             });
         }
 
@@ -200,6 +231,14 @@ module.exports = function() {
             }
         }
 
+        // validation for mobile, response with error if file is empty
+        if (_.find(series, el => !el.size)) {
+            const error = new Error('Some of the file is empty or not valid');
+
+            error.status = 400;
+            return callback(error);
+        }
+
         async.each(series, (file, eachCb) => {
             const fileOptions = {
                 type            : file.type,
@@ -208,10 +247,25 @@ module.exports = function() {
                 tempPath        : file.path,
                 name            : createFileName()
             };
+            let newFile;
 
             fileOptions.fileNameWithoutExtension = fileOptions.originalFilename.substr(0, fileOptions.originalFilename.length - fileOptions.extension.length - 1);
 
             async.waterfall([
+
+                (cb) => {
+                    newFile = new FileModel();
+                    newFile.save((err, model) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        const fileId = model._id;
+
+                        fileOptions._id = fileId;
+                        filesId.push(fileId);
+                        cb();
+                    })
+                },
                 // if video file
                 (cb) => {
                     if (!_.includes(OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, fileOptions.type)) {
@@ -328,12 +382,12 @@ module.exports = function() {
                         preview: fileOptions.preview
                     };
 
-                    FileModel.create(saveData, (err, model) => {
+                    newFile.set(saveData);
+                    newFile.save((err) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        filesId.push(model.get('_id'));
                         cb(null);
                     });
                 }

@@ -8,6 +8,7 @@ const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
+const toString = require('./../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -16,11 +17,11 @@ module.exports = (options) => {
         const actionType = activityTypes.UPDATED;
 
         const {
-            actionOriginator,
             accessRoleLevel,
             body,
         } = options;
 
+        const actionOriginator = toString(options, 'actionOriginator');
         const contentAuthor = _.get(body, 'createdBy.user');
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
             assignedTo: body.assignedTo,
@@ -61,30 +62,32 @@ module.exports = (options) => {
             branch: body.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
 
+        const payload = {
+            actionType,
+        };
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniq([actionOriginator, contentAuthor]),
             subject: {
                 en: 'In-store task updated',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received updated in-store task',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: `Subordinate's in-store task updated`,
                 ar: ''
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);

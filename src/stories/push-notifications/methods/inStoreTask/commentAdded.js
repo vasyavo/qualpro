@@ -63,30 +63,32 @@ module.exports = (options) => {
             branch: body.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
 
+        const payload = {
+            actionType,
+        };
         const groups = [{
             recipients: [actionOriginator],
             subject: {
                 en: 'Comment sent',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Objective commented',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: `Subordinate's objective commented`,
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);

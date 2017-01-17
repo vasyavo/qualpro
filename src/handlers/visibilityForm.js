@@ -1,8 +1,12 @@
-'use strict';
+const ObjectId = require('mongoose').Types.ObjectId;
+const ObjectiveModel = require('./../types/objective/model');
+const SchedulerModel = require('./../stories/scheduler/model');
+const SchedulerRequest = require('./../stories/scheduler/request');
+
 var VisibilityForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
-    var _ = require('underscore');
+    var _ = require('lodash');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var VALIDATION = require('../public/js/constants/validation.js');
     var CONSTANTS = require('../constants/mainConstants');
@@ -30,7 +34,7 @@ var VisibilityForm = function (db, redis, event) {
     };
 
     this.createForm = function (userId, body, callback) {
-        const createdBy = {
+        const createdBy = body.createdBy || {
             user: userId,
             date: new Date()
         };
@@ -737,37 +741,37 @@ var VisibilityForm = function (db, redis, event) {
         });
     };
 
-    this.updateBefore = function (req, res, next) {
-        function queryRun(body) {
-            const id = req.params.id;
-            const userId = req.session.uId;
-            const aggregateHelper = new AggregationHelper($defProjection);
-            const editedBy = {
-                user: objectId(userId),
-                date: new Date()
-            };
-            let error;
+    this.updateBefore = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        const body = req.body;
+        const editedBy = {
+            user: ObjectId(userId),
+            date: new Date(),
+        };
 
+        const queryRun = (body, callback) => {
             if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
+                const error = new Error('Invalid parameter id');
+
                 error.status = 400;
                 return next(error);
             }
 
-            function updateVisibilityForm(cb) {
-                VisibilityFormModel.findById(id, function (err, model) {
+            const updateVisibilityForm = (cb) => {
+                VisibilityFormModel.findById(id, (err, model) => {
                     if (err) {
                         return cb(err);
                     }
-
-                    model.editedBy = editedBy;
 
                     if (body.before) {
                         model.before = body.before;
                     }
 
                     if (body.branches && body.branches.length) {
-                        _.each(body.branches, function (elem) {
+                        _.each(body.branches, (elem) => {
                             let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
 
                             if (existingBranch) {
@@ -781,126 +785,215 @@ var VisibilityForm = function (db, redis, event) {
                         });
                     }
 
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, model);
-                    });
+                    cb(null, model);
                 });
-            }
+            };
 
-            function populateVisibilityForm(model, cb) {
-                VisibilityFormModel.populate(model, {
-                    path  : 'objective',
-                    select: 'context'
-                }, function (err, model) {
+            const updateObjective = (form, cb) => {
+                ObjectiveModel.findByIdAndUpdate(form.objective, {editedBy: editedBy}, (err) => {
                     if (err) {
                         return cb(err);
                     }
 
-                    var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
-                        ? ACL_MODULES.VISIBILITY_FORM :
-                        ACL_MODULES.IN_STORE_REPORTING;
-
-                    event.emit('activityChange', {
-                        module     : module,
-                        actionType : ACTIVITY_TYPES.UPDATED,
-                        createdBy  : editedBy,
-                        itemId     : model.objective._id,
-                        itemType   : model.objective.context,
-                        itemDetails: CONTENT_TYPES.VISIBILITYFORM
-                    });
-
-                    cb(null);
+                    cb(null, form);
                 });
-            }
+            };
 
-            function getVisibilityForm(cb) {
+            const registerEvent = (options) => {
+                const {
+                    formId,
+                    objectiveId,
+                    setFileId,
+                } = options;
+
+                const exec = (options) => {
+                    const {
+                        query,
+                        functionName,
+                    } = options;
+
+                    async.waterfall([
+
+                        (cb) => {
+                            ObjectiveModel.findOne(query)
+                                .lean()
+                                .exec((err, objective) => {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+
+                                    if (!objective) {
+                                        return cb('Objective not registered');
+                                    }
+
+                                    cb();
+                                });
+                        },
+
+                        (cb) => {
+                            const dueDate = new Date();
+
+                            dueDate.setSeconds(dueDate.getSeconds() + 10);
+                            SchedulerRequest.post({
+                                json : {
+                                    date: dueDate.getSeconds(),
+                                },
+                            }, cb);
+                        },
+
+                        (response, cb) => {
+                            const delayedTask = new SchedulerModel();
+                            const data = {
+                                scheduleId: response.id,
+                                functionName,
+                                args: {
+                                    objectiveId,
+                                    visibilityFormId: ObjectId(formId),
+                                    setFileId,
+                                    actionOriginator: ObjectId(userId),
+                                    accessRoleLevel,
+                                },
+                            };
+
+                            delayedTask.set(data);
+                            delayedTask.save(cb);
+                        }
+
+                    ]);
+                };
+
+                exec({
+                    query: {
+                        _id: ObjectId(objectiveId),
+                        'form._id': ObjectId(formId),
+                        'form.contentType': 'visibility',
+                        'createdBy.date': new Date(options.updatedAt),
+                    },
+                    functionName: 'emitObjectiveRegistered',
+                });
+
+                exec({
+                    query: {
+                        _id: ObjectId(objectiveId),
+                        'form._id': ObjectId(formId),
+                        'form.contentType': 'visibility',
+                        'createdBy.date': {
+                            $lt: new Date(options.updatedAt)
+                        },
+                    },
+                    functionName: 'emitObjectiveUpdated',
+                });
+            };
+
+            const fetchSetFileId = (form, cb) => {
+                let setBranchesBeforeFiles = [];
+
+                form.branches.forEach(branch => {
+                    branch.before.files &&
+                    branch.before.files.forEach(file => {
+                        setBranchesBeforeFiles.push(file);
+                    })
+                });
+
+                setBranchesBeforeFiles = _.compact(setBranchesBeforeFiles);
+                const setBeforeFiles = _.compact(form.before.files);
+                const setFileId = _.unionBy(setBranchesBeforeFiles, setBeforeFiles, elem => elem.toString());
+                const setCompactFileId = _.compact(setFileId);
+                const updatedAt = new Date(form.editedBy.date);
+
+                registerEvent({
+                    formId: id,
+                    objectiveId: form.objective,
+                    setFileId  : setCompactFileId,
+                    updatedAt,
+                });
+
+                form.editedBy = editedBy;
+
+                form.save((err, model) => {
+                    cb(err);
+                });
+            };
+
+            const getVisibilityForm = (cb) => {
+                const aggregateHelper = new AggregationHelper($defProjection);
+
                 getAllAggregate({
-                    aggregateHelper: aggregateHelper,
-                    queryObject    : {_id: objectId(id)},
-                    isMobile       : req.isMobile
-                }, function (err, result) {
+                    aggregateHelper,
+                    queryObject: {
+                        _id: objectId(id),
+                    },
+                    isMobile: req.isMobile
+                }, (err, result) => {
                     if (err) {
                         return cb(err);
                     }
 
                     cb(null, result[0]);
                 });
-            }
+            };
 
             async.waterfall([
-                    updateVisibilityForm,
-                    populateVisibilityForm,
-                    getVisibilityForm
-                ], function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
+                updateVisibilityForm,
+                updateObjective,
+                fetchSetFileId,
+                getVisibilityForm,
 
-                    res.status(200).send(result);
-                }
-            );
-        }
+            ], callback);
+        };
 
-        access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
-            var body = req.body;
+        async.waterfall([
 
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.VISIBILITYFORM, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 
-    this.updateAfter = function (req, res, next) {
-        function queryRun(body) {
-            const id = req.params.id;
-            const userId = req.session.uId;
-            const aggregateHelper = new AggregationHelper($defProjection);
-            const editedBy = {
-                user: objectId(userId),
-                date: new Date()
-            };
-            let error;
+    this.updateAfter = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        const body = req.body;
+        const editedBy = {
+            user: ObjectId(userId),
+            date: new Date(),
+        };
 
+        const queryRun = (body, callback) => {
             if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
+                const error = new Error('Invalid parameter id');
+
                 error.status = 400;
                 return next(error);
             }
 
-            function updateVisibilityForm(cb) {
-                body.editedBy = editedBy;
-
-                VisibilityFormModel.findById(id, function (err, model) {
+            const updateVisibilityForm = (cb) => {
+                VisibilityFormModel.findById(id, (err, model) => {
                     if (err) {
                         return cb(err);
                     }
-
-                    model.editedBy = editedBy;
 
                     if (body.after) {
                         model.after = body.after;
                     }
 
                     if (body.branches && body.branches.length) {
-                        _.each(body.branches, function (elem) {
+                        _.each(body.branches, (elem) => {
                             let existingBranch = _.find(model.branches, item => item.branchId.toString() === elem.branchId);
 
                             if (existingBranch) {
@@ -914,90 +1007,167 @@ var VisibilityForm = function (db, redis, event) {
                         });
                     }
 
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, model);
-                    });
+                    cb(null, model);
                 });
-            }
+            };
 
-            function populateVisibilityForm(model, cb) {
-                VisibilityFormModel.populate(model, {
-                    path  : 'objective',
-                    select: 'context'
-                }, function (err, model) {
+            const updateObjective = (form, cb) => {
+                ObjectiveModel.findByIdAndUpdate(form.objective, {editedBy: editedBy}, (err) => {
                     if (err) {
                         return cb(err);
                     }
 
-                    var module = model.objective.context === CONTENT_TYPES.OBJECTIVES
-                        ? ACL_MODULES.VISIBILITY_FORM :
-                        ACL_MODULES.IN_STORE_REPORTING;
-
-                    event.emit('activityChange', {
-                        module     : module,
-                        actionType : ACTIVITY_TYPES.UPDATED,
-                        createdBy  : editedBy,
-                        itemId     : model.objective._id,
-                        itemType   : model.objective.context,
-                        itemDetails: CONTENT_TYPES.VISIBILITYFORM
-                    });
-
-                    cb(null);
+                    cb(null, form);
                 });
-            }
+            };
 
-            function getVisibilityForm(cb) {
+            const registerEvent = (options) => {
+                const {
+                    formId,
+                    objectiveId,
+                    setFileId,
+                } = options;
+
+                const exec = (options) => {
+                    const {
+                        query,
+                        functionName,
+                    } = options;
+
+                    async.waterfall([
+
+                        (cb) => {
+                            ObjectiveModel.findOne(query)
+                                .lean()
+                                .exec((err, objective) => {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+
+                                    if (!objective) {
+                                        return cb('Objective not registered');
+                                    }
+
+                                    cb();
+                                });
+                        },
+
+                        (cb) => {
+                            const dueDate = new Date();
+
+                            dueDate.setSeconds(dueDate.getSeconds() + 10);
+                            SchedulerRequest.post({
+                                json : {
+                                    date: dueDate.getSeconds(),
+                                },
+                            }, cb);
+                        },
+
+                        (response, cb) => {
+                            const delayedTask = new SchedulerModel();
+                            const data = {
+                                scheduleId: response.id,
+                                functionName,
+                                args: {
+                                    objectiveId,
+                                    visibilityFormId: ObjectId(formId),
+                                    setFileId,
+                                    actionOriginator: ObjectId(userId),
+                                    accessRoleLevel,
+                                },
+                            };
+
+                            delayedTask.set(data);
+                            delayedTask.save(cb);
+                        }
+
+                    ]);
+                };
+
+                exec({
+                    query: {
+                        _id: ObjectId(objectiveId),
+                        'form._id': ObjectId(formId),
+                        'form.contentType': 'visibility',
+                    },
+                    functionName: 'emitObjectiveUpdated',
+                });
+            };
+
+            const fetchSetFileId = (form, cb) => {
+                let setBranchesAfterFiles = [];
+
+                form.branches.forEach(branch => {
+                    branch.after.files &&
+                    branch.after.files.forEach(file => {
+                        setBranchesAfterFiles.push(file);
+                    })
+                });
+
+                setBranchesAfterFiles = _.compact(setBranchesAfterFiles);
+                const setAfterFiles = _.compact(form.after.files);
+                const setFileId = _.unionBy(setBranchesAfterFiles, setAfterFiles, elem => elem.toString());
+                const setCompactFileId = _.compact(setFileId);
+
+                registerEvent({
+                    formId     : id,
+                    objectiveId: form.objective,
+                    setFileId  : setCompactFileId,
+                });
+
+                form.editedBy = editedBy;
+
+                form.save((err, model) => {
+                    cb(err);
+                });
+            };
+
+            const getVisibilityForm = (cb) => {
+                const aggregateHelper = new AggregationHelper($defProjection);
+
                 getAllAggregate({
-                    aggregateHelper: aggregateHelper,
-                    queryObject    : {_id: objectId(id)},
-                    isMobile       : req.isMobile
-                }, function (err, result) {
+                    aggregateHelper,
+                    queryObject: {
+                        _id: objectId(id),
+                    },
+                    isMobile: req.isMobile
+                }, (err, result) => {
                     if (err) {
                         return cb(err);
                     }
 
                     cb(null, result[0]);
                 });
-            }
+            };
 
             async.waterfall([
-                    updateVisibilityForm,
-                    populateVisibilityForm,
-                    getVisibilityForm
-                ], function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
 
-                    res.status(200).send(result);
-                }
-            );
-        }
+                updateVisibilityForm,
+                updateObjective,
+                fetchSetFileId,
+                getVisibilityForm,
 
-        access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, function (err, allowed) {
-            var body = req.body;
+            ], callback);
+        };
 
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.VISIBILITY_FORM, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.VISIBILITYFORM, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.VISIBILITYFORM, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 

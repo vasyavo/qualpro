@@ -229,6 +229,11 @@ define([
             var currentLanguage = App.currentUser.currentLanguage;
 
             e.preventDefault();
+
+            if (!context.body.formType) {
+                context.body.formType = context.linkedForm._id;
+            }
+
             data.append('data', JSON.stringify(context.body));
 
             async.waterfall([
@@ -239,9 +244,9 @@ define([
                         data       : data,
                         contentType: false,
                         processData: false,
-                        success    : function (collection) {
-                            var newCollection = new ObjectiveCollection(collection, {silence: true, parse: true});
-                            cb(null, newCollection);
+                        success    : function (xhr) {
+                            var model = new Model(xhr, {parse: true});
+                            cb(null, model);
                         },
                         error      : function () {
                             cb(true);
@@ -250,8 +255,20 @@ define([
 
                 },
 
-                function (collection, cb) {
-                    if (context.visibilityFormAjax.model.get('files').length) {
+                function (model, cb) {
+                    var visibilityFormAjax = context.visibilityFormAjax;
+                    var visibilityFormAjaxModel = null;
+                    var files = null;
+
+                    if (visibilityFormAjax) {
+                        visibilityFormAjaxModel = visibilityFormAjax.model;
+                    }
+
+                    if (visibilityFormAjaxModel) {
+                        files = visibilityFormAjaxModel.get('files');
+                    }
+
+                    if (files && files.length) {
                         $.ajax({
                             url : '/file',
                             method : 'POST',
@@ -259,7 +276,7 @@ define([
                             contentType: false,
                             processData: false,
                             success : function (response) {
-                                cb(null, collection, response);
+                                cb(null, model, response);
                             },
                             error : function () {
                                 cb(true);
@@ -272,28 +289,55 @@ define([
                     }
                 },
 
-                function (collection, files, cb) {
+                function (model, files, cb) {
                     if (!context.visibilityFormAjax) {
-                        return cb(null, collection);
+                        var formId = model.get('form')._id;
+                        $.ajax({
+                            url : 'form/visibility/before/' + formId,
+                            method : 'PUT',
+                            contentType : 'application/json',
+                            dataType : 'json',
+                            data : JSON.stringify({
+                                before : {
+                                    files : []
+                                }
+                            }),
+                            success : function () {
+                                cb(null, model);
+                            },
+                            error : function () {
+                                cb(null, model);
+                            }
+                        });
                     }
 
                     var requestPayload;
 
-                    var modelFiles = context.visibilityFormAjax.model.get('files');
+                    var branches = context.branchesForVisibility;
                     if (context.visibilityFormAjax.model.get('applyFileToAll')) {
                         requestPayload = {
                             before: {
-                                files: files.files.map(function (item) {
-                                    return item._id;
-                                })
+                                files: []
                             },
                             after: {
                                 description: '',
                                 files: []
                             },
-                            branches: []
+                            branches: branches.map(function (item) {
+                                return {
+                                    branchId: item._id,
+                                    before: {
+                                        files: [files.files[0]._id]
+                                    },
+                                    after: {
+                                        files: [],
+                                        description: ''
+                                    }
+                                };
+                            })
                         };
                     } else {
+                        var modelFiles = context.visibilityFormAjax.model.get('files');
                         requestPayload = {
                             before: {
                                 files: []
@@ -321,7 +365,7 @@ define([
                         };
                     }
 
-                    var formId = collection.models[0].get('form')._id;
+                    var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,
                         method : 'PUT',
@@ -329,7 +373,7 @@ define([
                         dataType : 'json',
                         data : JSON.stringify(requestPayload),
                         success : function () {
-                            cb(null, collection);
+                            cb(null, model);
                         },
                         error : function () {
                             cb(true);
@@ -337,12 +381,12 @@ define([
                     });
                 }
 
-            ], function (err, collection) {
+            ], function (err) {
                 if (err) {
                     return App.render({type: 'error', message: ERROR_MESSAGES.objectiveNotSaved[currentLanguage]});
                 }
 
-                context.trigger('modelSaved', collection);
+                context.trigger('modelSaved');
             });
         },
 

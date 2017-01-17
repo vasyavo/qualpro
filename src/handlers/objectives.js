@@ -247,68 +247,73 @@ var Objectives = function (db, redis, event) {
                     }
                     newObjectiveId = objective._id;
 
-                    if (TestUtils.isObjectiveDraft(model)) {
-                        ActivityLog.emit('sub-objective:draft-created', {
-                            originatorId: createdById,
-                            accessRoleLevel,
-                            objective: model.toJSON(),
-                        });
-                    }
-
-                    if (TestUtils.isObjectivePublished(model)) {
-                        ActivityLog.emit('sub-objective:published', {
-                            originatorId: createdById,
-                            accessRoleLevel,
-                            objective: model.toJSON(),
-                        });
-                    }
-
                     cb(null, objective);
                 });
             },
 
             function (objectiveModel, cb) {
-                var data;
+                const hasForm = formType;
+                const isDistribution = hasForm && formType === 'distribution';
 
-                if (!formType && formType !== 'distribution' && formType !== 'visibility') {
-                    return cb(null, objectiveModel);
+                // skip in case with visibility form
+                if (!hasForm || isDistribution) {
+                    if (TestUtils.isObjectiveDraft(objectiveModel)) {
+                        ActivityLog.emit('sub-objective:draft-created', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: objectiveModel.toJSON(),
+                        });
+                    }
+
+                    if (TestUtils.isObjectivePublished(objectiveModel)) {
+                        ActivityLog.emit('sub-objective:published', {
+                            originatorId: createdById,
+                            accessRoleLevel,
+                            objective: objectiveModel.toJSON(),
+                        });
+                    }
                 }
 
                 if (formType === 'distribution') {
-                    data = {
+                    const data = {
                         objective: objectiveModel.get('_id')
                     };
 
-                    distributionFormHandler.createForm(createdById, data, function (err, formModel) {
+                    return distributionFormHandler.createForm(createdById, data, (err, formModel) => {
                         if (err) {
                             return cb(err);
                         }
 
                         objectiveModel.form = {
-                            _id        : formModel.get('_id'),
-                            contentType: formType
+                            _id: formModel.get('_id'),
+                            contentType: body.formType
                         };
 
                         cb(null, objectiveModel);
                     });
-                } else {
-                    data = {
-                        objective  : objectiveModel.get('_id'),
-                        description: ''
+                }
+
+                if (formType === 'visibility') {
+                    const data = {
+                        objective: objectiveModel.get('_id'),
+                        createdBy,
                     };
-                    visibilityFormHandler.createForm(createdById, data, function (err, formModel) {
+
+                    return visibilityFormHandler.createForm(createdById, data, (err, formModel) => {
                         if (err) {
                             return cb(err);
                         }
 
                         objectiveModel.form = {
-                            _id        : formModel.get('_id'),
+                            _id: formModel.get('_id'),
                             contentType: formType
                         };
 
                         cb(null, objectiveModel);
                     });
                 }
+
+                cb(null, objectiveModel);
             },
 
             function (objectiveModel, cb) {
@@ -420,118 +425,22 @@ var Objectives = function (db, redis, event) {
                     if (err) {
                         return cb(err);
                     }
-                    parentIds = _.compact(_.values(parents));
-                    cb(null, parents);
+
+                    cb(null);
                 });
             },
 
-            function (parents, cb) {
-                if (isMobile) {
-                    return cb(null, null);
-                }
-                coveredByMe(PersonnelModel, ObjectId(options.createdById), cb);
-            },
+            function (cb) {
+                newObjectiveId = typeof newObjectiveId === 'string' ? ObjectId(newObjectiveId) : newObjectiveId;
 
-            function (coveredIds, cb) {
-                if (isMobile) {
-                    newObjectiveId = ObjectId(newObjectiveId);
-                    self.getByIdAggr({id: newObjectiveId, isMobile: isMobile}, function (err, result) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return cb(null, result);
-                    });
-                } else {
-                    var pipeLine;
-                    var aggregation;
-                    var queryObject = {
-                        _id: {
-                            $in: parentIds
-                        }
-                    };
-                    var aggregateHelper = new AggregationHelper($defProjection);
+                self.getByIdAggr({id: newObjectiveId, isMobile: isMobile}, function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
 
-                    pipeLine = getAllPipeline({
-                        aggregateHelper: aggregateHelper,
-                        queryObject    : queryObject,
-                        isMobile       : isMobile,
-                        forSync        : true,
-                        coveredIds     : coveredIds
-                    });
+                    return cb(null, result);
+                });
 
-                    aggregation = ObjectiveModel.aggregate(pipeLine);
-
-                    aggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    aggregation.exec(function (err, response) {
-                        var idsPersonnel = [];
-                        var idsFile = [];
-                        var options = {
-                            data: {}
-                        };
-                        if (err) {
-                            return cb(err);
-                        }
-                        response = response ? response[0] : {data: [], total: 0};
-
-                        if(!response.data.length){
-                            return cb(null, response);
-                        }
-
-                        response.data = _.map(response.data, function (model) {
-                            if (model.title) {
-                                model.title = {
-                                    en: model.title.en ? _.unescape(model.title.en) : '',
-                                    ar: model.title.ar ? _.unescape(model.title.ar) : ''
-                                };
-                            }
-                            if (model.description) {
-                                model.description = {
-                                    en: model.description.en ? _.unescape(model.description.en) : '',
-                                    ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                                };
-                            }
-                            if (model.companyObjective) {
-                                model.companyObjective = {
-                                    en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                                    ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
-                                };
-                            }
-
-                            idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                            idsPersonnel.push(model.createdBy.user._id);
-                            idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
-
-                            return model;
-                        });
-
-                        idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                        options.data[CONTENT_TYPES.FILES] = idsFile;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                cb(null, response);
-                            })
-                        });
-                    });
-                }
             }
 
         ], function (err, parentCollection) {
@@ -628,6 +537,10 @@ var Objectives = function (db, redis, event) {
             var saveObjective;
             var objective;
             var error;
+            const createdBy = {
+                user: userId,
+                date: new Date()
+            };
 
             saveObjective = body.saveObjective;
 
@@ -655,10 +568,6 @@ var Objectives = function (db, redis, event) {
                 },
 
                 function (filesIds, cb) {
-                    var createdBy = {
-                        user: userId,
-                        date: new Date()
-                    };
                     var status = saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
 
                     body.title = {
@@ -698,22 +607,6 @@ var Objectives = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        if (TestUtils.isObjectiveDraft(model)) {
-                            ActivityLog.emit('objective:draft-created', {
-                                originatorId: userId,
-                                accessRoleLevel,
-                                objective: model.toJSON(),
-                            });
-                        }
-
-                        if (TestUtils.isObjectivePublished(model)) {
-                            ActivityLog.emit('objective:published', {
-                                originatorId: userId,
-                                accessRoleLevel,
-                                objective: model.toJSON(),
-                            });
-                        }
-
                         if (model) {
                             if (model.title) {
                                 model.title = {
@@ -733,48 +626,69 @@ var Objectives = function (db, redis, event) {
                     });
                 },
 
-                function (objectiveModel, cb) {
-                    var data;
+                (objectiveModel, cb) => {
+                    const hasForm = body.hasOwnProperty('formType');
+                    const isDistribution = body.hasOwnProperty('formType') && body.formType === 'distribution';
 
-                    if (!body.formType && body.formType !== 'distribution' && body.formType !== 'visibility') {
-                        return cb(null, objectiveModel);
+                    // skip in case with visibility form
+                    if (!hasForm || isDistribution) {
+                        if (TestUtils.isObjectiveDraft(model)) {
+                            ActivityLog.emit('objective:draft-created', {
+                                originatorId: userId,
+                                accessRoleLevel,
+                                objective: model.toJSON(),
+                            });
+                        }
+
+                        if (TestUtils.isObjectivePublished(model)) {
+                            ActivityLog.emit('objective:published', {
+                                originatorId: userId,
+                                accessRoleLevel,
+                                objective: model.toJSON(),
+                            });
+                        }
                     }
 
                     if (body.formType === 'distribution') {
-                        data = {
+                        const data = {
                             objective: objectiveModel.get('_id')
                         };
 
-                        distributionFormHandler.createForm(userId, data, function (err, formModel) {
+                        return distributionFormHandler.createForm(userId, data, (err, formModel) => {
                             if (err) {
                                 return cb(err);
                             }
 
                             objectiveModel.form = {
-                                _id        : formModel.get('_id'),
-                                contentType: body.formType
-                            };
-
-                            cb(null, objectiveModel);
-                        });
-                    } else {
-                        data = {
-                            objective  : objectiveModel.get('_id'),
-                        };
-
-                        visibilityFormHandler.createForm(userId, data, function (err, formModel) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            objectiveModel.form = {
-                                _id        : formModel.get('_id'),
+                                _id: formModel.get('_id'),
                                 contentType: body.formType
                             };
 
                             cb(null, objectiveModel);
                         });
                     }
+
+                    if (body.formType === 'visibility') {
+                        const data = {
+                            objective: objectiveModel.get('_id'),
+                            createdBy,
+                        };
+
+                        return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            objectiveModel.form = {
+                                _id: formModel.get('_id'),
+                                contentType: body.formType
+                            };
+
+                            cb(null, objectiveModel);
+                        });
+                    }
+
+                    cb(null, objectiveModel);
                 },
 
                 function (objectiveModel, cb) {
@@ -1020,38 +934,52 @@ var Objectives = function (db, redis, event) {
                 });
             }
 
-            function createForms(objectiveModel, waterFallCb) {
-                var data;
-
-                function callBack(err, formModel) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    objectiveModel.form = {
-                        _id        : formModel.get('_id'),
-                        contentType: updateObject.formType
-                    };
-
-                    waterFallCb(null, objectiveModel);
-                }
-
-                if (updateObject.formType === 'distribution') {
-                    data = {
-                        objective: objectiveModel.get('_id')
-                    };
-
-                    distributionFormHandler.createForm(userId, data, callBack);
-                } else {
-
+            function createForms(objectiveModel, cb) {
+                if (body.formType === 'distribution') {
                     /* TODO fill description from task if AM or AincM will link forms */
-                    data = {
-                        objective  : objectiveModel.get('_id'),
-                        description: ''
+                    const data = {
+                        objective: objectiveModel.get('_id'),
+                        description: '',
                     };
 
-                    visibilityFormHandler.createForm(userId, data, callBack);
+                    return distributionFormHandler.createForm(userId, data, (err, formModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        objectiveModel.form = {
+                            _id: formModel.get('_id'),
+                            contentType: body.formType
+                        };
+
+                        cb(null, objectiveModel);
+                    });
                 }
+
+                if (body.formType === 'visibility') {
+                    const data = {
+                        objective: objectiveModel.get('_id'),
+                        createdBy: {
+                            userId,
+                            date: objectiveModel.createdBy.date,
+                        },
+                    };
+
+                    return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        objectiveModel.form = {
+                            _id: formModel.get('_id'),
+                            contentType: body.formType
+                        };
+
+                        cb(null, objectiveModel);
+                    });
+                }
+
+                cb(null, objectiveModel);
             }
 
             function updateObjectiveWithForm(objectiveModel, waterFallCb) {
@@ -2630,7 +2558,8 @@ var Objectives = function (db, redis, event) {
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'branches',
-            key : 'branch'
+            key : 'branch',
+            addProjection : ['_id', 'name', 'outlet']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

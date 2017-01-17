@@ -9,6 +9,7 @@ const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
 const contentTypes = require('./../../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../../types/activityList/model');
+const toString = require('./../../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -20,7 +21,7 @@ module.exports = (options) => {
             accessRoleLevel,
             objective,
         } = options;
-        const actionOriginator = options.originatorId;
+        const actionOriginator = toString(options, 'originatorId');
 
         const arrayOfParentObjectiveId = _(objective.parent)
             .values()
@@ -75,30 +76,32 @@ module.exports = (options) => {
             branch: objective.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
 
+        const payload = {
+            actionType,
+        };
         const groups = [{
             recipients: [actionOriginator],
             subject: {
                 en: 'Objective published',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
             subject: {
                 en: 'Sub-objective published',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received new objective',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             /*
             * if CA assign to AM
@@ -111,7 +114,7 @@ module.exports = (options) => {
                 en: 'Subordinate received new objective',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);

@@ -8,6 +8,7 @@ const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
+const toString = require('./../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -19,8 +20,8 @@ module.exports = (options) => {
             accessRoleLevel,
             inStoreTask,
         } = options;
-        const actionOriginator = options.originatorId;
 
+        const actionOriginator = toString(options, 'originatorId');
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
             assignedTo: inStoreTask.assignedTo,
             actionOriginator,
@@ -59,30 +60,32 @@ module.exports = (options) => {
             branch: inStoreTask.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
 
+        const payload = {
+            actionType,
+        };
         const groups = [{
             recipients: [actionOriginator],
             subject: {
                 en: 'In-store task published',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received new in-store task',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: 'Subordinate received new in-store task',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);

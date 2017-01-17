@@ -2,13 +2,13 @@ const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
-const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
+const toString = require('./../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -17,12 +17,12 @@ module.exports = (options) => {
         const actionType = activityTypes.UPDATED;
 
         const {
-            actionOriginator,
             accessRoleLevel,
             body,
         } = options;
 
-        const contentAuthor = _.get(body, 'createdBy.user');
+        const actionOriginator = toString(options, 'actionOriginator');
+        const contentAuthor = toString(body, 'createdBy.user');
         const arrayOfParentObjectiveId = _(body.parent)
             .values()
             .compact()
@@ -76,37 +76,39 @@ module.exports = (options) => {
             branch: body.branch,
         });
 
-        const savedActivity = yield newActivity.save();
-        const activityAsJson = savedActivity.toJSON();
+        yield newActivity.save();
 
+        const payload = {
+            actionType,
+        };
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniq([actionOriginator, contentAuthor]),
             subject: {
                 en: 'Objective updated',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
             subject: {
                 en: 'Sub-objective updated',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received updated objective',
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }, {
             recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: `Subordinate's objective updated`,
                 ar: '',
             },
-            payload: activityAsJson,
+            payload,
         }];
 
         yield dispatch(groups);
