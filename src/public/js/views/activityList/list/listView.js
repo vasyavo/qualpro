@@ -188,7 +188,7 @@ define([
                     }
                 };
 
-                dataService.getData(modelType + '/' + model.get('itemId'), {}, function (err, response) {
+                dataService.getData(modelType + '/' + (model.get('itemId') || model.get('_id')), {}, function (err, response) {
                     if (err) {
                         return App.render({type: 'error', message: err.message});
                     }
