@@ -387,7 +387,8 @@ define([
             });
 
             if (modelJSON.status._id === CONSTANTS.OBJECTIVE_STATUSES.CLOSED
-                && App.currentUser._id !== modelJSON.createdBy.user._id) {
+                && App.currentUser._id !== modelJSON.createdBy.user._id
+                && modelJSON.createdBy.user.accessRole.level < App.currentUser.accessRole.level) {
                 return false;
             }
 
