@@ -77,7 +77,10 @@ const sendPush = (groups, callback) => {
             payload,
         } = group;
         const action = {
-            subject: group.subject || 'New activity',
+            subject: group.subject || {
+                en: 'New activity',
+                ar: '',
+            },
             payload,
         };
 

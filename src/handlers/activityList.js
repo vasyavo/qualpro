@@ -17,7 +17,7 @@ var Personnel = function(db, redis, event) {
     var logWriter = require('../helpers/logWriter.js');
     var MAIN_CONSTANTS = require('../constants/mainConstants.js');
     var MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity.js');
-    var actionKeyTemplate = _.template(MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING);
+    const redisActionPrefix = MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING;
     var $defProjection = {
         _id : 1,
         module : 1,
@@ -616,16 +616,12 @@ var Personnel = function(db, redis, event) {
         });
     }
 
-    this.getBadge = function(req, res, next) {
-        function queryRun(activity) {
-            var userId = req.session.uId;
+    this.getBadge = (req, res, next) => {
+        const queryRun = (callback) => {
+            const userId = req.session.uId;
+            const actionKey = `${redisActionPrefix}:${userId}`;
 
-            var actionKey = actionKeyTemplate({
-                userId : userId,
-                moduleId : 'alalali'
-            });
-
-            redis.cacheStore.readFromStorage(actionKey, function(err, number) {
+            redis.cacheStore.readFromStorage(actionKey, (err, number) => {
                 if (err) {
                     return next(err);
                 }
@@ -633,51 +629,58 @@ var Personnel = function(db, redis, event) {
                 if (!number) {
                     number = 0;
                 }
-                res.status(200).send({badge : number});
-            });
-        }
 
-        access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, function(err, allowed, personnel) {
+                callback(null, {badge : number});
+            });
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun(personnel);
+            res.status(200).send(body);
         });
     };
 
-    this.deleteBadge = function(req, res, next) {
-        function queryRun(activity) {
-            var userId = req.session.uId;
-            var actionKey = actionKeyTemplate({
-                userId : userId,
-                moduleId : 'alalali'
-            });
+    this.deleteBadge = (req, res, next) => {
+        const queryRun = (callback) => {
+            const userId = req.session.uId;
+            const actionKey = `${redisActionPrefix}:${userId}`;
 
             redis.cacheStore.removeFromStorage(actionKey);
 
-            res.status(200).send({message : 'OK Delete'});
-        }
+            callback(null, {
+                message : 'OK Delete'
+            });
+        };
 
-        access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, function(err, allowed, personnel) {
-            var error;
+        async.waterfall([
+
+            (cb) => {
+                access.getReadAccess(req, ACL_MODULES.ACTIVITY_LIST, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+
+        ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                error = new Error();
-                error.status = 403;
 
-                return next(error);
-            }
-
-            queryRun(personnel);
+            res.status(200).send(body);
         });
     };
 
