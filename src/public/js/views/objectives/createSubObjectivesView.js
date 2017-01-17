@@ -291,30 +291,35 @@ define([
 
                 function (model, files, cb) {
                     if (!context.visibilityFormAjax) {
-                        var formId = model.get('form')._id;
-                        $.ajax({
-                            url : 'form/visibility/before/' + formId,
-                            method : 'PUT',
-                            contentType : 'application/json',
-                            dataType : 'json',
-                            data : JSON.stringify({
-                                before : {
-                                    files : []
+                        var form = model.get('form');
+                        if (form) {
+                            var formId = model.get('form')._id;
+                            $.ajax({
+                                url : 'form/visibility/before/' + formId,
+                                method : 'PUT',
+                                contentType : 'application/json',
+                                dataType : 'json',
+                                data : JSON.stringify({
+                                    before : {
+                                        files : []
+                                    }
+                                }),
+                                success : function () {
+                                    cb(null, model);
+                                },
+                                error : function () {
+                                    cb(null, model);
                                 }
-                            }),
-                            success : function () {
-                                cb(null, model);
-                            },
-                            error : function () {
-                                cb(null, model);
-                            }
-                        });
+                            });
+                        } else {
+                            return cb(null, model);
+                        }
                     }
 
                     var requestPayload;
 
                     var branches = context.branchesForVisibility;
-                    if (context.visibilityFormAjax.model.get('applyFileToAll')) {
+                    if (context.visibilityFormAjax && context.visibilityFormAjax.model.get('applyFileToAll')) {
                         requestPayload = {
                             before: {
                                 files: []
@@ -337,7 +342,7 @@ define([
                             })
                         };
                     } else {
-                        var modelFiles = context.visibilityFormAjax.model.get('files');
+                        var modelFiles = (context.visibilityFormAjax) ? context.visibilityFormAjax.model.get('files') || [] : [];
                         requestPayload = {
                             before: {
                                 files: []
