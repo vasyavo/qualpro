@@ -33,7 +33,6 @@ define([
         },
 
         initialize: function (options) {
-
             this.translation = options.translation;
             this.filter = options.filter;
             this.tabName = options.tabName;
@@ -102,6 +101,8 @@ define([
         },
 
         showAssignObjectiveDialog: function (model, multiselect, defFilter) {
+            var self = this;
+
             this.assignObjectiveView = new CreateSubObjectivesView({
                 model          : model,
                 assign         : true,
@@ -109,21 +110,29 @@ define([
                 assignDefFilter: defFilter,
                 translation    : this.translation
             });
+
+            this.assignObjectiveView.on('modelSaved', function () {
+                self.collection.fetch({
+                    success : function () {
+                        self.showMoreContent(self.collection);
+                    }
+                });
+            });
         },
 
         showSubObjectiveDialog: function (model, multiselect, defFilter) {
             var self = this;
+
             this.createSubObjectivesView = new CreateSubObjectivesView({
                 model : model,
                 multiselect : multiselect,
                 assignDefFilter : defFilter,
                 translation: this.translation
             });
+
             this.createSubObjectivesView.on('modelSaved', function () {
-                debugger;
                 self.collection.fetch({
                     success : function () {
-                        debugger;
                         self.showMoreContent(self.collection);
                     }
                 });

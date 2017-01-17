@@ -70,7 +70,7 @@ define(function (require) {
             fileReader.onload = function(fileReaderEvent) {
                 var container;
                 var fileAsBase64String = fileReaderEvent.target.result;
-                var fileType = fileAsBase64String.substring(0, 10);
+                var fileType = fileAsBase64String.substr(0, 10);
 
                 if (fileType === 'data:video') {
                     container = '<video width="400" controls><source src="' + fileAsBase64String + '"></video>';

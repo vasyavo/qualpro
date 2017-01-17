@@ -2,13 +2,13 @@ const co = require('co');
 const _ = require('lodash');
 const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
 const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
-const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
+const toString = require('./../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
@@ -22,7 +22,7 @@ module.exports = (options) => {
             body,
         } = options;
 
-        const contentAuthor = _.get(body, 'createdBy.user');
+        const contentAuthor = toString(body, 'createdBy.user');
         const arrayOfParentObjectiveId = _(body.parent)
             .values()
             .compact()

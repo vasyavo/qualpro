@@ -30,6 +30,7 @@ define([
 
             options = options || {};
 
+            self.forEdit = options.forEdit;
             this.forCreate = options.forCreate;
             this.translation = options.translation;
             this.description = options.description[currentLanguage];
@@ -58,6 +59,7 @@ define([
                     this.model.fetch({
                         success: function () {
                             self.makeRender();
+                            self.combineFiles();
                             self.render();
                         },
                         error  : function () {
@@ -76,6 +78,32 @@ define([
             }
 
             this.model.set('originalApplyStatus', this.model.get('applyFileToAll'));
+        },
+
+        combineFiles : function () {
+            var branches = this.model.get('branches');
+
+            var files = branches.map(function (branch) {
+                var result = {
+                    branch : branch.branchId
+                };
+                var fileData = branch.before.files[0];
+
+                if (fileData) {
+                    result.fileName = fileData.originalName;
+                    result.contentType = fileData.contentType.substring(0, 5);
+                    result.url  = fileData.url;
+                    result._id = fileData._id;
+                } else {
+                    result.fileName = '';
+                    result.contentType = '';
+                    result.url  = '';
+                }
+
+                return result;
+            });
+
+            this.model.set('files', files);
         },
 
         applyFileToAllBranches : function (event) {
@@ -116,6 +144,10 @@ define([
                 this.$el.find('.close').addClass('hidden');
                 this.$el.find('.uploadInput').attr('disabled', true);
 
+                if (this.forEdit) {
+                    this.model.set('fileToAllBranches', file._id);
+                }
+
                 this.model.set('applyFileToAll', true);
             } else {
                 this.$el.find('.bannerImage').html('');
@@ -123,29 +155,31 @@ define([
                 this.$el.find(`#removeFile-${file.branch}`).removeClass('hidden');
                 this.$el.find('.uploadInput').attr('disabled', false);
 
+                this.model.unset('fileToAllBranches');
+
                 this.model.unset('applyFileToAll');
             }
         },
 
         removeFile: function (e) {
-            const $target = $(e.target);
-            const branchId = e.target.id.substring(e.target.id.lastIndexOf('-') + 1, e.target.id.length);
-
-            $(`#imageMy-${branchId}`).html('');
+            var $target = $(e.target);
+            var branchId = e.target.id.substring(e.target.id.lastIndexOf('-') + 1, e.target.id.length);
+debugger;
+            var fileContainerHolder = $('#imageMy-' + branchId);
+            fileContainerHolder.html('');
 
             $target.addClass('hidden');
 
             //delete from temp file objects storage
             var tempAddedFiles = this.model.get('tempFiles');
             if (tempAddedFiles) {
-                const tempFileToDeleteIndex = tempAddedFiles.map((item) => {
+                var tempFileToDeleteIndex = tempAddedFiles.map((item) => {
                     return item.branch;
                 }).indexOf(branchId);
                 if (tempFileToDeleteIndex > -1) {
                     tempAddedFiles.splice(tempFileToDeleteIndex, 1);
                 }
             }
-
 
             //delete from temp storage of real files
             var tempRealFiles = this.model.get('tempRealFiles');
@@ -156,7 +190,7 @@ define([
             //delete from file objects storage
             var addedFiles = this.model.get('files');
             if (addedFiles) {
-                const fileToDeleteIndex = addedFiles.map((item) => {
+                var fileToDeleteIndex = addedFiles.map((item) => {
                     return item.branch;
                 }).indexOf(branchId);
                 if (fileToDeleteIndex > -1) {
@@ -182,6 +216,14 @@ define([
                 tempRemovedRealFiles[branchId] = realFiles[branchId];
                 delete realFiles[branchId];
             }
+
+            var clearBranch = this.model.get('clearBranch');
+            if (clearBranch) {
+                clearBranch.push(branchId);
+            } else {
+                this.model.set('clearBranch', [branchId]);
+            }
+
         },
 
         formSend: function (e) {
@@ -374,10 +416,10 @@ define([
 
                         oldFiles.map((file) => {
                             if (file.branch === branch._id) {
-                                let type = file.url.substr(0, 10);
+                                let type = file.contentType;
                                 let container;
 
-                                if (type === 'data:video') {
+                                if (type === 'data:video' || type === 'video') {
                                     container = '<video width="400" controls><source src="' + file.url + '"></video>';
                                 } else {
                                     container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';
@@ -449,8 +491,15 @@ define([
                                     cb();
                                 }
                             ], function () {
-                                //save model
+                                //set files to remove from server in visibility from ajax object
+                                var tempRemovedFiles = self.model.get('tempRemovedFiles');
+                                var files = self.model.get('files');
 
+                                if (self.forEdit && files && files.length) {
+                                    self.model.set('existedFiles');
+                                }
+
+                                //save model
                                 self.saveData();
                             });
                         }

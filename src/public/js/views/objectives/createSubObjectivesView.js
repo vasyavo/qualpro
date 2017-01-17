@@ -227,7 +227,7 @@ define([
             var context = e.data.context;
             var data = new FormData(this);
             var currentLanguage = App.currentUser.currentLanguage;
-debugger;
+
             e.preventDefault();
 
             if (!context.body.formType) {
@@ -245,7 +245,6 @@ debugger;
                         contentType: false,
                         processData: false,
                         success    : function (xhr) {
-                            debugger;
                             var model = new Model(xhr, {parse: true});
                             cb(null, model);
                         },
@@ -291,28 +290,54 @@ debugger;
                 },
 
                 function (model, files, cb) {
-                debugger;
                     if (!context.visibilityFormAjax) {
-                        return cb(null, model);
+                        var formId = model.get('form')._id;
+                        $.ajax({
+                            url : 'form/visibility/before/' + formId,
+                            method : 'PUT',
+                            contentType : 'application/json',
+                            dataType : 'json',
+                            data : JSON.stringify({
+                                before : {
+                                    files : []
+                                }
+                            }),
+                            success : function () {
+                                cb(null, model);
+                            },
+                            error : function () {
+                                cb(null, model);
+                            }
+                        });
                     }
 
                     var requestPayload;
 
-                    var modelFiles = context.visibilityFormAjax.model.get('files');
+                    var branches = context.branchesForVisibility;
                     if (context.visibilityFormAjax.model.get('applyFileToAll')) {
                         requestPayload = {
                             before: {
-                                files: files.files.map(function (item) {
-                                    return item._id;
-                                })
+                                files: []
                             },
                             after: {
                                 description: '',
                                 files: []
                             },
-                            branches: []
+                            branches: branches.map(function (item) {
+                                return {
+                                    branchId: item._id,
+                                    before: {
+                                        files: [files.files[0]._id]
+                                    },
+                                    after: {
+                                        files: [],
+                                        description: ''
+                                    }
+                                };
+                            })
                         };
                     } else {
+                        var modelFiles = context.visibilityFormAjax.model.get('files');
                         requestPayload = {
                             before: {
                                 files: []
@@ -339,7 +364,7 @@ debugger;
                             })
                         };
                     }
-debugger;
+
                     var formId = model.get('form')._id;
                     $.ajax({
                         url : 'form/visibility/before/' + formId,
