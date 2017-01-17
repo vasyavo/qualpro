@@ -109,5 +109,5 @@ Ask credentials in your administrator.
  - `FCM_API_KEY`
 
 ##### Heroku:
- - `REDIS_URL` Redis url which passed by Heroku Redis addon
+ - `REDIS_URL` or `REDISGREEN_URL` Redis url
  - `MONGODB_URI` MongoDB url passed by mLab addon
