@@ -164,8 +164,8 @@ define([
         removeFile: function (e) {
             var $target = $(e.target);
             var branchId = e.target.id.substring(e.target.id.lastIndexOf('-') + 1, e.target.id.length);
-debugger;
-            var fileContainerHolder = $('#imageMy-' + branchId);
+
+            var fileContainerHolder = this.$el.find('#imageMy-' + branchId);
             fileContainerHolder.html('');
 
             $target.addClass('hidden');
@@ -217,13 +217,12 @@ debugger;
                 delete realFiles[branchId];
             }
 
-            var clearBranch = this.model.get('clearBranch');
-            if (clearBranch) {
-                clearBranch.push(branchId);
+            var tempClearBranch = this.model.get('tempClearBranch');
+            if (tempClearBranch) {
+                tempClearBranch.push(branchId);
             } else {
-                this.model.set('clearBranch', [branchId]);
+                this.model.set('tempClearBranch', [branchId]);
             }
-
         },
 
         formSend: function (e) {
@@ -289,7 +288,6 @@ debugger;
             this.newFileUploaded = false;
 
             $curEl.dialog('close').dialog('destroy').remove();
-
         },
 
         imageIsLoaded: function (branchId, fileName, e) {
@@ -491,13 +489,19 @@ debugger;
                                     cb();
                                 }
                             ], function () {
-                                //set files to remove from server in visibility from ajax object
-                                var tempRemovedFiles = self.model.get('tempRemovedFiles');
-                                var files = self.model.get('files');
+                                //define branches to delete
+                                var tempClearBranch = self.model.get('tempClearBranch') || [];
+                                var clearBranch = self.model.get('clearBranch') || [];
 
-                                if (self.forEdit && files && files.length) {
-                                    self.model.set('existedFiles');
+                                clearBranch = clearBranch.concat(tempClearBranch);
+
+                                if (clearBranch && clearBranch.length) {
+                                    self.model.set('clearBranch', clearBranch);
+                                } else {
+                                    self.model.unset('clearBranch');
                                 }
+
+                                self.model.unset('tempClearBranch');
 
                                 //save model
                                 self.saveData();
@@ -510,6 +514,7 @@ debugger;
                         click: function() {
                             self.model.unset('tempFiles');
                             self.model.unset('tempRealFiles');
+                            self.model.unset('tempClearBranch');
 
                             var tempRemovedFiles = self.model.get('tempRemovedFiles');
                             var tempRemovedRealFiles = self.model.get('tempRemovedRealFiles');
@@ -518,7 +523,7 @@ debugger;
 
                             if (tempRemovedFiles) {
                                 files = files.concat(tempRemovedFiles);
-                                self.model.set('files', tempRemovedFiles);
+                                self.model.set('files', files);
                             }
 
                             if (tempRemovedRealFiles) {
@@ -527,6 +532,8 @@ debugger;
                             }
 
                             self.model.set('applyFileToAll', self.model.get('originalApplyStatus'));
+
+                            self.$el.dialog('close');
                         }
                     }
                 }
