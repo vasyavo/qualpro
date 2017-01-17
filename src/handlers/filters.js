@@ -4155,6 +4155,10 @@ const Filters = function(db, redis) {
 
         delete queryFilter.translated;
 
+        var showAll = queryFilter.showAll;
+
+        delete queryFilter.showAll;
+
         var filter = filterMapper.mapFilter({
             contentType : CONTENT_TYPES.PERSONNEL,
             filter   : queryFilter,
@@ -4185,6 +4189,15 @@ const Filters = function(db, redis) {
         beforeFilter.translated = true;
 
         if (Object.keys(beforeFilter)) {
+            if (showAll){
+                beforeFilter.$or = [
+                    {country : beforeFilter.country},
+                    {country : {$size : 0}}
+                ];
+                delete beforeFilter.country;
+                delete beforeFilter.region;
+
+            }
             pipeLine.push({
                 $match: beforeFilter
             });
@@ -4338,9 +4351,11 @@ const Filters = function(db, redis) {
             }
         });
 
-        pipeLine.push(...domainPileLine({
-            filter: filter
-        }));
+        if (!showAll){
+            pipeLine.push(...domainPileLine({
+                filter: filter
+            }));
+        }
 
         pipeLine.push({
             $project: {

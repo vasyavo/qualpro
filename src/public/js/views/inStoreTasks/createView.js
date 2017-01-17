@@ -385,13 +385,20 @@ define([
         showPersonnelView: function () {
             var personnelLocation = this.$el.find('#personnelLocation');
             var self = this;
-
-            this.personnelListForSelectionView = new PersonnelListForSelectionView({
+            var optionsObj = {
                 multiselect       : false,
                 withoutTabs       : true,
                 parrentContentType: this.contentType,
                 notCheckFilters   : true
-            });
+            };
+
+            if (~[3,4].indexOf(App.currentUser.accessRole.level)){
+                optionsObj.filter = {
+                    showAll : true
+                };
+            }
+
+            this.personnelListForSelectionView = new PersonnelListForSelectionView(optionsObj);
             this.personnelListForSelectionView.on('coverSaved', function (personnelCollection) {
                 var jsonPersonnels = personnelCollection.toJSON();
                 var personnelsIds = _.pluck(jsonPersonnels, '_id');
