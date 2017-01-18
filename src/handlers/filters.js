@@ -5319,6 +5319,73 @@ const Filters = function(db, redis) {
                 }
 
                 pipeLine.push({
+                    $project : {
+                        country : {
+                            $map: {
+                                input: {$setDifference: ['$country', [null]]},
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                }
+                            }
+                        },
+                        subRegion : {
+                            $map: {
+                                input: {$setDifference: ['$subRegion', [null]]},
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                }
+                            }
+                        },
+                        region : {
+                            $map: {
+                                input: {$setDifference: ['$region', [null]]},
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                }
+                            }
+                        },
+                        retailSegment : {
+                            $map: {
+                                input: {$setDifference: ['$retailSegment', [null]]},
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                }
+                            }
+                        },
+                        outlet : {
+                            $map: {
+                                input: {$setDifference: ['$outlet', [null]]},
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                }
+                            }
+                        },
+                        branch : {
+                            $map: {
+                                input: {$setDifference: ['$branch', [null]]},
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                }
+                            }
+                        },
+                        position :1,
+                        personnel : 1
+                    }
+                });
+
+                pipeLine.push({
                     $group : {
                         _id : null,
                         country : {$addToSet : '$country'},
@@ -5343,17 +5410,26 @@ const Filters = function(db, redis) {
                         return waterfallCb(err);
                     }
 
-                    result = result[0] || {};
+                    result = result[0] || {
+                            country      : [],
+                            region       : [],
+                            subRegion    : [],
+                            branch       : [],
+                            retailSegment: [],
+                            outlet       : [],
+                            position     : [],
+                            personnel    : []
+                        };
 
                     result = {
-                        country : result.country && _.uniq(_.flatten(result.country)) || [],
-                        region : result.region && _.uniq(_.flatten(result.region)) || [],
-                        subRegion : result.subRegion && _.uniq(_.flatten(result.subRegion)) || [],
-                        retailSegment : result.retailSegment && _.uniq(_.flatten(result.retailSegment)) || [],
-                        outlet : result.outlet && _.uniq(_.flatten(result.outlet)) || [],
-                        branch : result.branch && _.uniq(_.flatten(result.branch)) || [],
-                        position : result.position && _.uniq(_.flatten(result.position)) || [],
-                        personnel : result.personnel && _.uniq(_.flatten(result.personnel)) || []
+                        country : result.country && unionById(result.country),
+                        region : result.region && unionById(result.region),
+                        subRegion : result.subRegion && unionById(result.subRegion),
+                        retailSegment : result.retailSegment && unionById(result.retailSegment),
+                        outlet : result.outlet && unionById(result.outlet),
+                        branch : result.branch && unionById(result.branch),
+                        position : result.position && unionById(result.position),
+                        personnel : result.personnel && unionById(result.personnel)
                     };
 
                     Object.keys(result).forEach(function(key) {
