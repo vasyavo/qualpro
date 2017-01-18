@@ -53,6 +53,7 @@ define([
         },
 
         rowClick: function (e) {
+            debugger;
             var self = this;
             var $tr = $(e.currentTarget);
             var activityid = $tr.attr('data-id');
@@ -205,7 +206,6 @@ define([
                     Backbone.history.navigate(url, true);
                 });
             }
-
         },
 
         personnelClick: function (e) {
@@ -247,7 +247,7 @@ define([
                 collection : this.collection
             }).render());
 
-            this.$el.find('tr').on('click', _.throttle(this.rowClick.bind(this), 1000));
+            this.$el.find('tbody.listTable tr').on('click', _.throttle(this.rowClick.bind(this), 1000));
 
             return this;
         },
@@ -270,6 +270,8 @@ define([
 
             $holder.append(itemView.render());
             itemView.undelegateEvents();
+
+            this.$el.find('tbody.listTable tr').on('click', _.throttle(this.rowClick.bind(this), 1000));
 
             $holder.find('#checkAll').prop('checked', false);
         }

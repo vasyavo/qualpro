@@ -1,7 +1,7 @@
 <% var showCheckboxes = showCheckboxes || null; %>
 <% var level = App.currentUser.accessRole.level; %>
 <% collection.forEach(function(activity, index){ %>
-<tr data-id="<%=activity._id%>" class="listRow">
+<tr data-id="<%- activity._id %>" class="listRow">
     <td><%=(activity.module && activity.module.name && activity.module.name.currentLanguage || '') + ' ' +  (activity.itemName && activity.itemName.currentLanguage || '') + ' ' + (activity.actionType && activity.actionType.name && activity.actionType.name.currentLanguage) + ' '  + ((activity.itemDetails) ? ( '(' + activity.itemDetails + ')' ) : '') %></td>
     <td><%= activity.country.map(function(country) { if (country) { return country.name.currentLanguage } }).join(', ') %></td>
     <td class="person" data-id="<%= (activity.createdBy && activity.createdBy.user && activity.createdBy.user._id) ? activity.createdBy.user._id : '' %>">
