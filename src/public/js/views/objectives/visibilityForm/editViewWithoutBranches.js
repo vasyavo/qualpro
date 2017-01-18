@@ -4,11 +4,13 @@ define(function (require) {
     var _ = require('Underscore');
     var Backbone = require('Backbone');
     var CONSTANTS = require('constants/otherConstants');
+    var ERROR_MESSAGES = require('constants/otherConstants');
     var Template = require('text!templates/objectives/visibilityForm/editWithoutBranches.html');
 
     return Backbone.View.extend({
 
         initialize : function (options) {
+            var that = this;
             this.translation = options.translation;
 
             this.templateOptions = {
@@ -68,6 +70,8 @@ define(function (require) {
                 }
 
                 that.selectedTempFile.preview = container;
+
+                that.deleteSavedFile = false;
 
                 that.ui.filePreviewHolder.html(container);
                 that.ui.removeFileButton.removeClass('hidden');

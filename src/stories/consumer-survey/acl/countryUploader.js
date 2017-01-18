@@ -7,9 +7,5 @@ module.exports = {
         edit: true,
         read : true
     },
-    mobile: {
-        read: true,
-        write: true,
-        edit : true
-    }
+    mobile: {}
 };

@@ -233,14 +233,21 @@ define([
 
                     unlockFilters = self.getCheckedMandatoryCount() === self.mandatoryCount;
 
+                    var filterNameBlock = self.$el.find('.filterName:not(".mandatory")');
                     if (!unlockFilters) {
-                        self.$el
-                            .find('.filterName:not(".mandatory") input')
-                            .prop('disabled', true);
+                        filterNameBlock.children('input')
+                            .attr('disabled', true);
+
+                        filterNameBlock
+                            .parent()
+                            .addClass('filterBlocked');
                     } else {
-                        self.$el
-                            .find('.filterName:not(".mandatory") input')
-                            .prop('disabled', false);
+                        filterNameBlock.children('input')
+                            .attr('disabled', false);
+
+                        filterNameBlock
+                            .parent()
+                            .removeClass('filterBlocked');
                     }
 
                     self.useFilterEventState = true;
@@ -254,14 +261,22 @@ define([
 
                 unlockFilters = self.getCheckedMandatoryCount() === self.mandatoryCount;
 
+                var filterNameBlock = self.$el.find('.filterName:not(".mandatory")');
+
                 if (!unlockFilters) {
-                    self.$el
-                        .find('.filterName:not(".mandatory") input')
-                        .prop('disabled', true);
+                    filterNameBlock.children('input')
+                        .attr('disabled', true);
+
+                    filterNameBlock
+                        .parent()
+                        .addClass('filterBlocked');
                 } else {
-                    self.$el
-                        .find('.filterName:not(".mandatory") input')
-                        .prop('disabled', false);
+                    filterNameBlock.children('input')
+                        .attr('disabled', false);
+
+                    filterNameBlock
+                        .parent()
+                        .removeClass('filterBlocked');
                 }
 
                 self.useFilterEventState = true;
@@ -474,14 +489,22 @@ define([
 
             unlockFilters = this.getCheckedMandatoryCount() === this.mandatoryCount;
 
+            var filterNameBlock = this.$el.find('.filterName:not(".mandatory")');
+
             if (!unlockFilters) {
-                this.$el
-                    .find('.filterName:not(".mandatory") input')
-                    .prop('disabled', true);
+                filterNameBlock.children('input')
+                    .attr('disabled', true);
+
+                filterNameBlock
+                    .parent()
+                    .addClass('filterBlocked');
             } else {
-                this.$el
-                    .find('.filterName:not(".mandatory") input')
-                    .prop('disabled', false);
+                filterNameBlock.children('input')
+                    .attr('disabled', false);
+
+                filterNameBlock
+                    .parent()
+                    .removeClass('filterBlocked');
             }
 
             return this;

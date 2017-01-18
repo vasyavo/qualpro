@@ -20,15 +20,17 @@ define([
     'dataService',
     'moment',
     'views/objectives/visibilityForm/editView',
+    'views/objectives/visibilityForm/editViewWithoutBranches',
     'views/fileDialog/fileDialog',
     'async',
     'constants/contentType',
     'helpers/objectivesStatusHelper',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'constants/aclRoleIndexes'
 ], function (Backbone, _, $, EditTemplate, FormTemplate, FileTemplate, BaseView, FileDialogView, Model,
              populate, LinkFormView, FilterCollection, FileCollection, FileModel, PersonnelListForSelectionView, TreeView,
-             implementShowHideArabicInputIn, CONSTANTS, dataService, moment, VisibilityEditView,
-             FileDialogPreviewView, async, CONTENT_TYPES, objectivesStatusHelper, ERROR_MESSAGES) {
+             implementShowHideArabicInputIn, CONSTANTS, dataService, moment, VisibilityEditView, VisibilityEditViewWithoutBranches,
+             FileDialogPreviewView, async, CONTENT_TYPES, objectivesStatusHelper, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
 
     var EditView = BaseView.extend({
         contentType: CONTENT_TYPES.OBJECTIVES,
@@ -47,6 +49,8 @@ define([
             outlet       : [],
             branch       : []
         },
+
+        fileForVFWithoutBranches : {},
 
         events: {
             'click #assignDd'            : 'showPersonnelView',
@@ -72,6 +76,10 @@ define([
             this.duplicate = options.duplicate;
             this.model = options.model.toJSON ? options.model : new Model(options.model, {parse: true});
             this.changed = {};
+
+            var assigne = this.model.get('assignedTo')[0];
+
+            this.assigneWithoutBranches = [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(assigne.accessRole.level) === -1;
 
             parent = this.model.get('parent');
             this.parentObjectiveId = parent && parent[App.currentUser.accessRole.level - 1];
@@ -183,46 +191,106 @@ define([
 
                 var currentLanguage =  App.currentUser.currentLanguage;
 
-                this.branchesForVisibility = modelJSON.branch;
-                this.outletsForVisibility = _.map(modelJSON.outlet, function (outlet) {
-                    let result = {
-                        name : outlet.name[currentLanguage],
-                        _id : outlet._id,
-                        branches : []
-                    };
+                if (self.assigneWithoutBranches) {
+                    var form = self.model.get('form');
+                    if (form) {
+                        function showVF() {
+                            this.visibilityForm = new VisibilityEditViewWithoutBranches({
+                                description : description[App.currentUser.currentLanguage],
+                                locationString : self.model.get('location'),
+                                translation : self.translation,
+                                previewOfSelectedFile : self.fileForVFWithoutBranches.preview
+                            });
 
-                    self.branchesForVisibility.map((branch) => {
-                        if (outlet._id === branch.outlet) {
-                            result.branches.push({
-                                name : branch.name[currentLanguage],
-                                _id : branch._id
+                            this.visibilityForm.on('save', function (fileModel) {
+                                self.fileForVFWithoutBranches = fileModel;
+                                self.VFWithoutBranchesChanged = true;
+                            });
+
+                            this.visibilityForm.on('delete-file', function () {
+                                self.fileForVFWithoutBranches = {};
+                                self.VFWithoutBranchesChanged = true;
                             });
                         }
+
+                        if (self.fileForVFWithoutBranches.preview || self.VFWithoutBranchesChanged) {
+                            showVF();
+                        } else {
+                            var formId = form._id;
+                            $.getJSON('/form/visibility/' + formId)
+                                .success(function (response) {
+                                    var file = response.before.files[0];
+
+                                    if (file) {
+                                        var container;
+                                        var fileType = file.contentType.substr(0, 5);
+
+                                        if (fileType === 'video') {
+                                            container = '<video width="400" controls><source src="' + file.url + '"></video>';
+                                        } else {
+                                            container = '<img id="myImg" class="imgResponsive" src="' + file.url + '">';
+                                        }
+
+                                        self.fileForVFWithoutBranches.preview = container;
+                                    }
+
+                                    showVF();
+                                })
+                                .error(function () {
+                                    return App.render({
+                                        type   : 'alert',
+                                        message: ERROR_MESSAGES.readError[currentLanguage]
+                                    });
+                                });
+                        }
+                    } else {
+                        return App.render({
+                            type   : 'alert',
+                            message: ERROR_MESSAGES.nothingToShow[currentLanguage]
+                        });
+                    }
+                } else {
+                    this.branchesForVisibility = modelJSON.branch;
+                    this.outletsForVisibility = _.map(modelJSON.outlet, function (outlet) {
+                        let result = {
+                            name : outlet.name[currentLanguage],
+                            _id : outlet._id,
+                            branches : []
+                        };
+
+                        self.branchesForVisibility.map((branch) => {
+                            if (outlet._id === branch.outlet) {
+                                result.branches.push({
+                                    name : branch.name[currentLanguage],
+                                    _id : branch._id
+                                });
+                            }
+                        });
+
+                        return result;
                     });
 
-                    return result;
-                });
+                    formOptions = {
+                        forEdit : true,
+                        outlets : this.outletsForVisibility,
+                        description : description,
+                        savedVisibilityModel : this.savedVisibilityModel,
+                        oldAjaxObj : this.visibilityFormAjax,
+                        translation : self.translation
+                    };
 
-                formOptions = {
-                    forEdit : true,
-                    outlets : this.outletsForVisibility,
-                    description : description,
-                    savedVisibilityModel : this.savedVisibilityModel,
-                    oldAjaxObj : this.visibilityFormAjax,
-                    translation : self.translation
-                };
+                    if (this.duplicate) {
+                        formOptions.forCreate = true;
+                    } else {
+                        formOptions.id = id;
+                    }
 
-                if (this.duplicate) {
-                    formOptions.forCreate = true;
-                } else {
-                    formOptions.id = id;
+                    this.visibilityForm = new VisibilityEditView(formOptions);
+                    this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
+                        self.visibilityFormAjax = ajaxObj;
+                        self.savedVisibilityModel = ajaxObj.model;
+                    });
                 }
-
-                this.visibilityForm = new VisibilityEditView(formOptions);
-                this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                    self.visibilityFormAjax = ajaxObj;
-                    self.savedVisibilityModel = ajaxObj.model;
-                });
             } else {
                 App.render({
                     type   : 'alert',
@@ -447,50 +515,77 @@ define([
                 },
 
                 function (model, cb) {
-                    var visibilityFormAjax = context.visibilityFormAjax;
-                    var VFData = null;
-                    var files = [];
+                    if (context.assigneWithoutBranches) {
+                        var file = context.fileForVFWithoutBranches.file;
 
-                    context.branchesForVisibility.map(function (item) {
+                        if (file) {
+                            var dataWithoutBranches = new FormData();
+                            dataWithoutBranches.append('file', file);
 
-                    });
-
-                    if (visibilityFormAjax) {
-                        VFData = context.visibilityFormAjax.data;
-                    }
-
-                    if (VFData) {
-                        files = context.branchesForVisibility.map(function (item) {
-                            return VFData.get(item._id);
-                        }).filter(function (item) {
-                            return item;
-                        });
-                    }
-
-                    if (files && files.length) {
-                        $.ajax({
-                            url : '/file',
-                            method : 'POST',
-                            data : VFData,
-                            contentType: false,
-                            processData: false,
-                            success : function (response) {
-                                cb(null, model, response);
-                            },
-                            error : function () {
-                                cb(true);
-                            }
-                        });
+                            $.ajax({
+                                url : '/file',
+                                method : 'POST',
+                                data : dataWithoutBranches,
+                                contentType: false,
+                                processData: false,
+                                success : function (response) {
+                                    cb(null, model, response);
+                                },
+                                error : function () {
+                                    cb(true);
+                                }
+                            });
+                        } else {
+                            return cb(null, model, {
+                                files : []
+                            });
+                        }
                     } else {
-                        cb(null, model, {
-                            files : []
+                        var visibilityFormAjax = context.visibilityFormAjax;
+                        var VFData = null;
+                        var files = [];
+
+                        context.branchesForVisibility.map(function (item) {
+
                         });
+
+                        if (visibilityFormAjax) {
+                            VFData = context.visibilityFormAjax.data;
+                        }
+
+                        if (VFData) {
+                            files = context.branchesForVisibility.map(function (item) {
+                                return VFData.get(item._id);
+                            }).filter(function (item) {
+                                return item;
+                            });
+                        }
+
+                        if (files && files.length) {
+                            $.ajax({
+                                url : '/file',
+                                method : 'POST',
+                                data : VFData,
+                                contentType: false,
+                                processData: false,
+                                success : function (response) {
+                                    cb(null, model, response);
+                                },
+                                error : function () {
+                                    cb(true);
+                                }
+                            });
+                        } else {
+                            return cb(null, model, {
+                                files : []
+                            });
+                        }
                     }
                 },
 
                 function (model, files, cb) {
                     var formId = model.get('form')._id;
-                    if (!context.visibilityFormAjax) {
+                    if (!context.visibilityFormAjax && !context.VFWithoutBranchesChanged) {
                         $.ajax({
                             url : 'form/visibility/before/' + formId,
                             method : 'PUT',
@@ -511,112 +606,135 @@ define([
                     }
 
                     var requestPayload;
-                    if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
-                        var branches = context.branchesForVisibility;
-                        requestPayload = {
-                            before: {
-                                files: []
-                            },
-                            after: {
-                                description: '',
-                                files: []
-                            },
-                            branches: branches.map(function (item) {
-                                return {
-                                    branchId: item._id,
-                                    before: {
-                                        files: [files.files[0]._id]
-                                    },
-                                    after: {
-                                        files: [],
-                                        description: ''
-                                    }
-                                };
-                            })
-                        };
-                    } else if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
-                        var fileToAllBranches = context.visibilityFormAjax.model.get('fileToAllBranches');
-                        var branches = context.branchesForVisibility;
 
-                        requestPayload = {
-                            before: {
-                                files: []
-                            },
-                            after: {
-                                description: '',
-                                files: []
-                            },
-                            branches: branches.map(function (item) {
-                                return {
-                                    branchId: item._id,
-                                    before: {
-                                        files: [fileToAllBranches]
-                                    },
-                                    after: {
-                                        files: [],
-                                        description: ''
-                                    }
-                                };
-                            })
-                        };
-                    } else {
-                        var modelFiles = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('files') || [] : [];
-                        var clearBranch = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('clearBranch') || [] : [];
-                        var result = modelFiles.map(function (item) {
-                            var fileFromServer = _.findWhere(files.files, {
-                                originalName: item.fileName
-                            });
+                    if (context.assigneWithoutBranches) {
+                        var file = files.files[0];
 
-                            if (fileFromServer) {
-                                return {
-                                    branchId: item.branch,
+                        if (file) {
+                            requestPayload = {
+                                before : {
+                                    files : [file._id]
+                                }
+                            };
+                        } else {
+                            if (context.fileForVFWithoutBranches.preview) {
+                                return cb(null, model);
+                            } else {
+                                requestPayload = {
                                     before : {
-                                        files: [fileFromServer._id]
+                                        files : []
+                                    }
+                                };
+                            }
+                        }
+                    } else {
+                        if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
+                            var branches = context.branchesForVisibility;
+                            requestPayload = {
+                                before: {
+                                    files: []
+                                },
+                                after: {
+                                    description: '',
+                                    files: []
+                                },
+                                branches: branches.map(function (item) {
+                                    return {
+                                        branchId: item._id,
+                                        before: {
+                                            files: [files.files[0]._id]
+                                        },
+                                        after: {
+                                            files: [],
+                                            description: ''
+                                        }
+                                    };
+                                })
+                            };
+                        } else if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
+                            var fileToAllBranches = context.visibilityFormAjax.model.get('fileToAllBranches');
+                            var branches = context.branchesForVisibility;
+
+                            requestPayload = {
+                                before: {
+                                    files: []
+                                },
+                                after: {
+                                    description: '',
+                                    files: []
+                                },
+                                branches: branches.map(function (item) {
+                                    return {
+                                        branchId: item._id,
+                                        before: {
+                                            files: [fileToAllBranches]
+                                        },
+                                        after: {
+                                            files: [],
+                                            description: ''
+                                        }
+                                    };
+                                })
+                            };
+                        } else {
+                            var modelFiles = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('files') || [] : [];
+                            var clearBranch = (context.visibilityFormAjax && context.visibilityFormAjax.model) ? context.visibilityFormAjax.model.get('clearBranch') || [] : [];
+                            var result = modelFiles.map(function (item) {
+                                var fileFromServer = _.findWhere(files.files, {
+                                    originalName: item.fileName
+                                });
+
+                                if (fileFromServer) {
+                                    return {
+                                        branchId: item.branch,
+                                        before : {
+                                            files: [fileFromServer._id]
+                                        },
+                                        after : {
+                                            files : [],
+                                            description : ''
+                                        }
+                                    };
+                                }
+
+                                return {
+                                    branchId : item.branch,
+                                    before : {
+                                        files : [item._id]
                                     },
                                     after : {
                                         files : [],
                                         description : ''
                                     }
                                 };
-                            }
+                            });
 
-                            return {
-                                branchId : item.branch,
+                            clearBranch.map(function (item) {
+                                var branchModel = _.find(result, function (branch) {
+                                    return branch.branchId === item;
+                                });
+
+                                if (!branchModel) {
+                                    result.push({
+                                        branchId : item,
+                                        before : {
+                                            files : []
+                                        }
+                                    });
+                                }
+                            });
+
+                            requestPayload = {
                                 before : {
-                                    files : [item._id]
+                                    files : []
                                 },
                                 after : {
                                     files : [],
                                     description : ''
-                                }
+                                },
+                                branches : result
                             };
-                        });
-
-                        clearBranch.map(function (item) {
-                            var branchModel = _.find(result, function (branch) {
-                                return branch.branchId === item;
-                            });
-
-                            if (!branchModel) {
-                                result.push({
-                                    branchId : item,
-                                    before : {
-                                        files : []
-                                    }
-                                });
-                            }
-                        });
-
-                        requestPayload = {
-                            before : {
-                                files : []
-                            },
-                            after : {
-                                files : [],
-                                description : ''
-                            },
-                            branches : result
-                        };
+                        }
                     }
 
                     $.ajax({
@@ -919,8 +1037,7 @@ define([
                 this.attachments = [];
             }
 
-
-            if (!Object.keys(this.changed).length && !this.updateCount && !this.visibilityFormAjax) {
+            if (!Object.keys(this.changed).length && !this.updateCount && !this.visibilityFormAjax && !this.VFWithoutBranchesChanged) {
                 return cb();
             }
 
@@ -1026,6 +1143,12 @@ define([
                         } else {
                             self.onDuplicate({save: true});
                         }
+                    }
+                },
+                cancel : {
+                    text : 'cancel',
+                    click : function () {
+                        self.remove();
                     }
                 }
             };
