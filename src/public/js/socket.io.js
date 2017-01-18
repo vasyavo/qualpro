@@ -5,7 +5,10 @@ define([
     'constants/errorMessages'
 ], function (Backbone, io, PersonnelModel, ERROR_MESSAGES) {
     'use strict';
-    var socket = io.connect();
+    var socket = io.connect({
+        upgrade: false,
+        transports: ['websocket'],
+    });
 
     socket.on('connect', function () {
         if (App.currentUser) {
