@@ -72,7 +72,7 @@ const sendPush = (groups, callback) => {
                             }
 
                             if (data.failure) {
-                                const err = data.errors.length ? data.errors.pop() : {};
+                                const err = data.results.length ? data.results.pop() : {};
                                 const isNotRegistered = err.error === 'NotRegistered';
 
                                 if (isNotRegistered) {
