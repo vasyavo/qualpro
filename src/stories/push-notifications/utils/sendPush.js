@@ -76,7 +76,9 @@ const sendPush = (groups, callback) => {
                                 const isNotRegistered = err.error === 'NotRegistered';
 
                                 if (isNotRegistered) {
-                                    return SessionModel.findByIdAndRemove(record._id, (err) => {
+                                    return SessionModel.remove({
+                                        _id: record._id,
+                                    }, (err) => {
                                         if (err) {
                                             logger.error('[push-service] Session cannot be removed:', record);
 
