@@ -351,18 +351,34 @@ var Notifications = function (db, redis, event) {
             }));
         }
 
-        pipeLine.push({
-            $project: {
-                _id        : 1,
-                country    : 1,
-                createdBy  : 1,
-                editedBy   : 1,
-                description: 1,
-                position   : 1,
-                recipients : 1,
-                attachments: 1
-            }
-        });
+        if(isMobile){
+            pipeLine.push({
+                $project: {
+                    _id        : 1,
+                    country    : 1,
+                    createdBy  : 1,
+                    editedBy   : 1,
+                    description: 1,
+                    position   : 1,
+                    recipients : 1,
+                    attachments: 1
+                }
+            });
+        } else {
+            //because only 6 elements shows on UI
+            pipeLine.push({
+                $project: {
+                    _id        : 1,
+                    country    : 1,
+                    createdBy  : 1,
+                    editedBy   : 1,
+                    description: 1,
+                    position   : 1,
+                    recipients : {$slice: ['$recipients', 6]},
+                    attachments: 1
+                }
+            });
+        }
 
         /*pipeLine.push({
          $sort: {
