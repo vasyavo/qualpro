@@ -1,5 +1,4 @@
 const async = require('async');
-const _ = require('lodash');
 const Bluebird = require('bluebird');
 const config = require('./../../../config');
 const FCM = require('./../../push-notifications/utils/fcm');
@@ -80,7 +79,7 @@ const sendPush = (groups, callback) => {
                                         _id: record._id,
                                     }, (err) => {
                                         if (err) {
-                                            logger.error('[push-service] Session cannot be removed:', record);
+                                            logger.error('[push-service] Session cannot be removed:', record, err);
 
                                             return null;
                                         }

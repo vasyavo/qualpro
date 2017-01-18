@@ -1,8 +1,9 @@
-'use strict';
-
 const Schema = require('mongoose').Schema;
 
 const schema = new Schema({
+    _id: {
+        type: String,
+    },
     session: {
         type: String
     },
