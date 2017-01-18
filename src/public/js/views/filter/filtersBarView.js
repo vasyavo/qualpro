@@ -234,7 +234,6 @@ define([
                     unlockFilters = self.getCheckedMandatoryCount() === self.mandatoryCount;
 
                     var filterNameBlock = self.$el.find('.filterName:not(".mandatory")');
-debugger;
                     if (!unlockFilters) {
                         filterNameBlock.children('input')
                             .attr('disabled', true);
