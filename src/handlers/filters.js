@@ -1299,7 +1299,7 @@ const Filters = function(db, redis) {
     }
 
     function unionById (arr){
-       return lodash.unionBy(...arr, elem => elem._id.toString())
+       return lodash.unionBy(...arr, elem => elem._id && elem._id.toString())
     }
 
     this.brandingActivityFilters = function(req, res, next) {
