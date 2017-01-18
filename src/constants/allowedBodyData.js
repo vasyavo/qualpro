@@ -199,6 +199,10 @@ allowedParams[CONTENT_TYPES.NOTIFICATIONS] = {
     9: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
             'outlet', 'branch', 'position', 'recipients', 'description']
+    },
+    10 : {
+    create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
+        'outlet', 'branch', 'position', 'recipients', 'description']
     }
 };
 
