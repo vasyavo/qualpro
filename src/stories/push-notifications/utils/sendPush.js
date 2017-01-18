@@ -1,4 +1,5 @@
 const async = require('async');
+const _ = require('lodash');
 const Bluebird = require('bluebird');
 const config = require('./../../../config');
 const FCM = require('./../../push-notifications/utils/fcm');
@@ -73,7 +74,6 @@ const sendPush = (groups, callback) => {
     };
     const itGroup = (group, itCallback) => {
         const {
-            recipients,
             payload,
         } = group;
         const action = {
@@ -83,6 +83,7 @@ const sendPush = (groups, callback) => {
             },
             payload,
         };
+        const recipients = group.recipients.filter(recipient => recipient);
 
         async.each(recipients, itRecipient(action), itCallback);
     };
