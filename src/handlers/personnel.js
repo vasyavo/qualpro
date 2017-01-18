@@ -2013,7 +2013,7 @@ var Personnel = function(db, redis, event) {
                             },
                             {
                                 country : {$eq : []},
-                                'accessRole.level' : ACL_CONSTANTS.MASTER_ADMIN
+                                'accessRole.level' : {$in: [ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.TRADE_MARKETER]}
                             },
                             {
                                 temp : true //TODO, limit by country for mobile
@@ -2577,7 +2577,7 @@ var Personnel = function(db, redis, event) {
                 isMobile,
                 sort,
                 level : req.session.level,
-                supervisorFilter
+
             });
 
             finalStepToRetrieve({

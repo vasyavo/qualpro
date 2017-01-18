@@ -2,7 +2,7 @@ const ACL_MODULES = require('./../../constants/aclModulesNames');
 
 module.exports = [
     {
-        module: 1,
+        module: ACL_MODULES.ACTIVITY_LIST,
         cms: {
             archive: false,
             edit: false,
@@ -16,7 +16,7 @@ module.exports = [
             read: false
         }
     }, {
-        module: 2,
+        module: ACL_MODULES.LOCATIONS,
         cms: {
             archive: true,
             edit: true,
@@ -27,10 +27,10 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 3,
+        module: ACL_MODULES.COUNTRY,
         cms: {
             archive: true,
             edit: true,
@@ -41,10 +41,10 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 4,
+        module: ACL_MODULES.CUSTOMER,
         cms: {
             archive: true,
             edit: true,
@@ -55,10 +55,10 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 5,
+        module: ACL_MODULES.TRADE_CHANNEL,
         cms: {
             archive: true,
             edit: true,
@@ -69,10 +69,10 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 6,
+        module: ACL_MODULES.PERSONNEL,
         cms: {
             archive: true,
             edit: true,
@@ -84,10 +84,10 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 7,
+        module: ACL_MODULES.OBJECTIVE,
         cms: {
             archive: false,
             edit: false,
@@ -115,49 +115,7 @@ module.exports = [
             read: false
         }
     }, {
-        module: 10,
-        cms: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
-        },
-        mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
-        }
-    }, {
-        module: 11,
-        cms: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
-        },
-        mobile: {
-            archive: false,
-            edit: true,
-            write: true,
-            read: true
-        }
-    }, {
-        module: 12,
-        cms: {
-            archive: true,
-            edit: true,
-            write: false,
-            read: true
-        },
-        mobile: {
-            archive: true,
-            edit: true,
-            write: false,
-            read: true
-        }
-    }, {
-        module: 13,
+        module: ACL_MODULES.ITEMS_AND_PRICES,
         cms: {
             archive: true,
             edit: true,
@@ -168,10 +126,52 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 14,
+        module: ACL_MODULES.PLANOGRAM,
+        cms: {
+            archive: true,
+            edit: true,
+            write: true,
+            read: true
+        },
+        mobile: {
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
+        }
+    }, {
+        module: ACL_MODULES.COMPETITOR_LIST,
+        cms: {
+            archive: true,
+            edit: true,
+            write: false,
+            read: true
+        },
+        mobile: {
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
+        }
+    }, {
+        module: ACL_MODULES.PROFILE,
+        cms: {
+            archive: true,
+            edit: true,
+            write: true,
+            read: true
+        },
+        mobile: {
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
+        }
+    }, {
+        module: ACL_MODULES.PERFORMANCE,
         cms: {
             archive: false,
             edit: true,
@@ -182,10 +182,10 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
-        module: 15,
+        module: ACL_MODULES.REPORTING,
         cms: {
             archive: false,
             edit: true,
@@ -194,12 +194,12 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
-        module: 16,
+        module: ACL_MODULES.AL_ALALI_MARKETING,
         cms: {
             archive: false,
             edit: true,
@@ -208,12 +208,12 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
-        module: 17,
+        module: ACL_MODULES.OBJECTIVES_AND_TASKS_FORM,
         cms: {
             archive: false,
             edit: true,
@@ -222,12 +222,12 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
-        module: 18,
+        module: ACL_MODULES.IN_STORE_REPORTING,
         cms: {
             archive: false,
             edit: false,
@@ -241,7 +241,7 @@ module.exports = [
             read: false
         }
     }, {
-        module: 19,
+        module: ACL_MODULES.CONTRACT,
         cms: {
             upload: true,
             edit: true,
@@ -250,12 +250,12 @@ module.exports = [
         },
         mobile: {
             upload: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
-        module: 20,
+        module: ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY,
         cms: {
             upload: true,
             edit: true,
@@ -264,12 +264,12 @@ module.exports = [
         },
         mobile: {
             upload: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
-        module: 21,
+        module: ACL_MODULES.VISIBILITY,
         cms: {
             upload: true,
             edit: false,
@@ -280,7 +280,7 @@ module.exports = [
             upload: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
         module: ACL_MODULES.CONTRACT_SECONDARY,
@@ -292,9 +292,9 @@ module.exports = [
         },
         mobile: {
             upload: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
         module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
@@ -329,10 +329,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
         module: ACL_MODULES.NOTIFICATION,
@@ -344,7 +344,7 @@ module.exports = [
         mobile: {
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     }, {
         module: ACL_MODULES.SETTINGS,
@@ -355,10 +355,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
         module: ACL_MODULES.LOGIN_CREDENTIALS,
@@ -369,10 +369,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
         module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
@@ -383,10 +383,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     }, {
         module: 30,
@@ -397,17 +397,17 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
         module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
         cms: {
             archive: false,
-            edit: true,
+            edit: false,
             write: true,
             read: true
         },
@@ -428,9 +428,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
@@ -443,9 +443,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
@@ -457,10 +457,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
@@ -503,9 +503,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: true,
-            write: true,
-            read: true
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
@@ -513,14 +513,14 @@ module.exports = [
         cms: {
             archive: false,
             edit: false,
-            write: true,
-            read: true
+            write: false,
+            read: false
         },
         mobile: {
             archive: false,
             edit: false,
-            write: true,
-            read: true
+            write: false,
+            read: false
         }
     },
     {
@@ -534,8 +534,8 @@ module.exports = [
         mobile: {
             archive: false,
             edit: false,
-            write: true,
-            read: true
+            write: false,
+            read: false
         }
     },
     {
@@ -547,29 +547,29 @@ module.exports = [
             read: true
         },
         mobile: {
-            upload: true,
-            edit: true,
-            write: true,
-            read: true
+            upload: false,
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
         module: ACL_MODULES.DOCUMENT,
         cms: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         },
         mobile: {
-            archive: true,
-            edit: true,
-            write: true,
-            read: true
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
         }
     },
     {
-        module: 103,
+        module: ACL_MODULES.REGION,
         cms: {
             archive: true,
             edit: true,
@@ -580,11 +580,11 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     },
     {
-        module: 104,
+        module: ACL_MODULES.SUB_REGION,
         cms: {
             archive: true,
             edit: true,
@@ -595,11 +595,11 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     },
     {
-        module: 105,
+        module: ACL_MODULES.BRANCH,
         cms: {
             archive: true,
             edit: true,
@@ -610,7 +610,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     },
     {
@@ -624,12 +624,12 @@ module.exports = [
         mobile: {
             archive: false,
             edit: false,
-            write: true,
-            read: true
+            write: false,
+            read: false
         }
     },
     {
-        module: 31,
+        module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
         cms: {
             archive: false,
             edit: true,
@@ -640,7 +640,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: true
+            read: false
         }
     },
     {
@@ -654,7 +654,7 @@ module.exports = [
         mobile: {
             archive: false,
             edit: false,
-            write: true,
+            write: false,
             read: false
         }
     },
@@ -670,7 +670,7 @@ module.exports = [
         mobile: {
             archive: false,
             edit: false,
-            write: true,
+            write: false,
             read: false
         }
     }
