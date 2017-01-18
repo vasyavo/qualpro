@@ -27,19 +27,19 @@ const sendPush = (groups, callback) => {
                         }],
                     };
 
-                    SessionModel.find(search, cb);
+                    SessionModel.find(search)
+                        .lean()
+                        .exec(cb);
                 },
 
                 (setRecord, cb) => {
                     async.each(setRecord, (record, eachCb) => {
-                        const recordAsJson = record.toJSON();
-
                         let session;
 
                         try {
                             session = JSON.parse(record.session);
                         } catch (ex) {
-                            logger.error('[push-service] Cannot parse session:', recordAsJson);
+                            logger.error('[push-service] Cannot parse session:', record);
 
                             return cb(null);
                         }
@@ -47,7 +47,7 @@ const sendPush = (groups, callback) => {
                         const deviceId = session.deviceId;
 
                         if (!deviceId) {
-                            logger.error('[push-service] Device ID is undefined:', recordAsJson);
+                            logger.error('[push-service] Device ID is undefined:', record);
 
                             return cb(null);
                         }
@@ -66,7 +66,7 @@ const sendPush = (groups, callback) => {
                             priority: 'high'
                         }, (err, data) => {
                             if (err) {
-                                logger.error(`[push-service:${deviceId}] Something went wrong in the end of request:`, recordAsJson);
+                                logger.error(`[push-service:${deviceId}] Something went wrong in the end of request:`, record);
 
                                 return null;
                             }
@@ -76,18 +76,18 @@ const sendPush = (groups, callback) => {
                                 const isNotRegistered = err.error === 'NotRegistered';
 
                                 if (isNotRegistered) {
-                                    return record.remove((err) => {
+                                    return SessionModel.findByIdAndRemove(record._id, (err) => {
                                         if (err) {
-                                            logger.error('[push-service] Session cannot be removed:', recordAsJson);
+                                            logger.error('[push-service] Session cannot be removed:', record);
 
                                             return null;
                                         }
 
-                                        logger.info(`[push-service] Session terminated:`, recordAsJson);
+                                        logger.info(`[push-service] Session terminated:`, record);
                                     });
                                 }
 
-                                logger.error('[push-service] Default exception:', recordAsJson);
+                                logger.error('[push-service] Default exception:', record);
 
                                 return null;
                             }
