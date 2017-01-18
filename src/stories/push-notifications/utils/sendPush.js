@@ -27,31 +27,38 @@ const sendPush = (groups, callback) => {
                         }],
                     };
 
-                    SessionModel.find(search, (err, sessions) => {
-                        if (err) {
-                            return cb(err);
-                        }
-                        const arrayOfDeviceId = sessions.map((sessionAsString) => {
-                            const sessionAsObject = JSON.parse(sessionAsString.session);
-
-                            if (sessionAsObject.deviceId) {
-                                return sessionAsObject.deviceId;
-                            }
-
-                        }).filter(item => item);
-
-                        cb(null, arrayOfDeviceId);
-                    });
-
+                    SessionModel.find(search, cb);
                 },
 
-                (arrayOfDeviceId, cb) => {
-                    async.each(arrayOfDeviceId, (deviceId, eachCb) => {
+                (setRecord, cb) => {
+                    async.each(setRecord, (record, eachCb) => {
+                        const recordAsJson = record.toJSON();
+
+                        let session;
+
+                        try {
+                            session = JSON.parse(record.session);
+                        } catch (ex) {
+                            logger.error('[push-service] Cannot parse session:', recordAsJson);
+
+                            return cb(null);
+                        }
+
+                        const deviceId = session.deviceId;
+
+                        if (!deviceId) {
+                            logger.error('[push-service] Device ID is undefined:', recordAsJson);
+
+                            return cb(null);
+                        }
+
                         const readyPayload = Object.assign({}, action.payload, {
                             title: action.subject,
                         });
 
-                        logger.info(`Firebase device ${deviceId} message payload:`, readyPayload);
+                        logger.info(`[push-service:${deviceId}] Message payload:`, readyPayload);
+
+                        eachCb(null);
 
                         fcmClient.send({
                             registration_ids: [deviceId],
@@ -59,13 +66,34 @@ const sendPush = (groups, callback) => {
                             priority: 'high'
                         }, (err, data) => {
                             if (err) {
-                                logger.error('Firebase returns', err);
+                                logger.error(`[push-service:${deviceId}] Something went wrong in the end of request:`, recordAsJson);
+
                                 return null;
                             }
 
-                            logger.info('Firebase response data:', data);
+                            if (data.failure) {
+                                const err = data.errors.length ? data.errors.pop() : {};
+                                const isNotRegistered = err.error === 'NotRegistered';
+
+                                if (isNotRegistered) {
+                                    return record.remove((err) => {
+                                        if (err) {
+                                            logger.error('[push-service] Session cannot be removed:', recordAsJson);
+
+                                            return null;
+                                        }
+
+                                        logger.info(`[push-service] Session terminated:`, recordAsJson);
+                                    });
+                                }
+
+                                logger.error('[push-service] Default exception:', recordAsJson);
+
+                                return null;
+                            }
+
+                            logger.info(`[push-service:${deviceId}] Response data:`, data);
                         });
-                        eachCb(null);
                     }, cb);
                 },
 
