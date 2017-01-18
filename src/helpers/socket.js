@@ -21,8 +21,6 @@ module.exports = (server) => {
 
     io.set('transports', [
         'websocket',
-        'polling',
-        'xhr-polling'
     ]);
 
     io.adapter(redisAdapter(config.redisUrl, {
