@@ -94,9 +94,9 @@ module.exports = [
     {
         module: ACL_MODULES.CUSTOMER,
         cms   : {
-            archive: true,
-            edit   : true,
-            write  : true,
+            archive: false,
+            edit   : false,
+            write  : false,
             read   : true
         },
         mobile: {
@@ -146,10 +146,10 @@ module.exports = [
             read   : false
         },
         mobile: {
-            archive: true,
-            edit   : true,
-            write  : true,
-            read   : true
+            archive: false,
+            edit   : false,
+            write  : false,
+            read   : false
         }
     },
     {
@@ -480,15 +480,15 @@ module.exports = [
         module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
         cms   : {
             archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
+            edit   : true,
+            write  : true,
+            read   : true
         },
         mobile: {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : true,
-            read   : false
+            read   : true
         }
     },
     {
@@ -501,9 +501,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit   : false,
-            write  : false,
-            read   : false
+            edit   : true,
+            write  : true,
+            read   : true
         }
     },
     require('./../../stories/consumer-survey/acl/tradeMarketer'),
@@ -615,9 +615,9 @@ module.exports = [
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
         cms   : {
-            upload: true,
-            edit  : true,
-            write : true,
+            upload: false,
+            edit  : false,
+            write : false,
             read  : true
         },
         mobile: {
@@ -676,12 +676,24 @@ module.exports = [
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms   : {
             archive: false,
-            edit   : false,
-            write  : false,
+            edit   : true,
+            write  : true,
             read   : true
         },
         mobile: {
             archive: false,
+            edit   : false,
+            write  : true,
+            read   : false
+        }
+    }, {
+    module : ACL_MODULES.CONTACT_US,
+        cms : {
+            edit   : false,
+            write  : false,
+            read   : false
+        },
+        mobile : {
             edit   : false,
             write  : true,
             read   : false
