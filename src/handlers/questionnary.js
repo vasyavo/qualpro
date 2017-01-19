@@ -1145,9 +1145,11 @@ const QuestionnaryHandler = function (db, redis, event) {
                             outlet        : body.outlet,
                             branch        : body.branch
                         };
+
                         if (answer.optionIndex && answer.optionIndex.length) {
                             newAnswer.optionIndex = answer.optionIndex;
                         }
+
                         if (answer.text && Object.keys(answer.text).length) {
                             newAnswer.text = {
                                 en: _.escape(answer.text.en),
