@@ -35,7 +35,7 @@
     "levee": "1.2.0",
     "lodash": "4.0.0",
     "moment": "2.16.0",
-    "mongodb": "2.0.44",
+    "mongodb": "2.2.21",
     "mongodb-migrate": "2.0.1",
     "mongoose": "4.7.7",
     "morgan": "1.5.1",
