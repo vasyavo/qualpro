@@ -126,7 +126,7 @@ var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
                         <label for="cover"><%= translation.cover %></label>
                     </div>
                     <div class="cell">
-                        <span id="cover"><%= (model.vacation && model.vacation.cover) ? model.vacation.cover.firstName.currentLanguage + ' ' + model.vacation.cover.lastName.currentLanguage : '' %></span>
+                        <span id="cover"><%= (model.vacation && model.vacation.cover && model.vacation.cover.firstName) ? model.vacation.cover.firstName.currentLanguage + ' ' + model.vacation.cover.lastName.currentLanguage : '' %></span>
                     </div>
                 </div>
                 <% } %>
