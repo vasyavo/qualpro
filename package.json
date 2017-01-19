@@ -37,7 +37,7 @@
     "moment": "2.16.0",
     "mongodb": "2.0.44",
     "mongodb-migrate": "2.0.1",
-    "mongoose": "4.3.6",
+    "mongoose": "4.7.7",
     "morgan": "1.5.1",
     "multiparty": "4.1.2",
     "nconf": "0.8.4",
