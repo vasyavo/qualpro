@@ -23,7 +23,7 @@ module.exports = (args, docId, callback) => {
                     return cb(err);
                 }
 
-                err(null, true);
+                cb(null, true);
             });
         }
 
