@@ -193,8 +193,8 @@
                                       class="coveredItem formField"
                                       data-parent="vacation"
                                       data-property="cover"
-                                      data-value="cover" <%= (vacation && vacation.cover) ? 'class="formField" data-id="' + vacation.cover._id + '"' : 'class="hidden formField"' %>>
-                                    <%= (vacation && vacation.cover) ? model.vacation.cover.firstName.currentLanguage + ' ' +
+                                      data-value="cover" <%= (vacation && vacation.cover && vacation.cover._id) ? 'class="formField" data-id="' + vacation.cover._id + '"' : 'class="hidden formField"' %>>
+                                    <%= (vacation && vacation.cover && vacation.cover._id) ? model.vacation.cover.firstName.currentLanguage + ' ' +
                                     model.vacation.cover.lastName.currentLanguage : '' %>
                                 </span>
                                 <a id="coverDiag"
