@@ -780,6 +780,7 @@ define([
                 || (statusId === STATUSES.CLOSED)
                 || (statusId === STATUSES.FAIL)
                 || (statusId === STATUSES.OVER_DUE && !createdByMe)
+                || (statusId === STATUSES.RE_OPENED && createdByMe)
                 || this.activityList
                 || jsonModel.myCC
                 || !App.currentUser.workAccess

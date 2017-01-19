@@ -53,7 +53,6 @@ define([
         },
 
         rowClick: function (e) {
-            debugger;
             var self = this;
             var $tr = $(e.currentTarget);
             var activityid = $tr.attr('data-id');
