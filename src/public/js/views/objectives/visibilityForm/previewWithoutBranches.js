@@ -173,6 +173,8 @@ define(function (require) {
                                         });
                                     }
 
+                                    that.trigger('after-part-filled');
+
                                     that.$el.dialog('close').dialog('destroy').remove();
                                 });
                             } else if (!newAfterDescription && that.selectedTempFile) {
