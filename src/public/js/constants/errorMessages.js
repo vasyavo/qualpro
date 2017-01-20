@@ -271,6 +271,10 @@
         nothingToShow : {
             en : 'Nothing to show',
             ar : '' //todo
+        },
+        afterPartNotFilled : {
+            en : 'Visibility form after part in not filled',
+            ar : '' //todo
         }
     };
 
