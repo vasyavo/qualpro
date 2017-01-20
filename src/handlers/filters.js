@@ -4495,6 +4495,13 @@ const Filters = function(db, redis) {
 
                     (cb)=> {
                         PersonnelModel.aggregate([{
+                                $match : {
+                                    status : {
+                                        $ne : 'onLeave'
+                                    }
+                                }
+                            },
+                            {
                                 $project: {
                                     country   : 1,
                                     region    : 1,
