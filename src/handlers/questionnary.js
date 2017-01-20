@@ -1292,6 +1292,16 @@ const QuestionnaryHandler = function (db, redis, event) {
                 date: new Date()
             };
 
+            let questionnaryId;
+
+            try {
+                questionnaryId = data[0].questionnaryId;
+            } catch (e) {
+                let error = new Error('questionnaryId is required');
+                error.status = 400;
+                return next(error)
+            }
+
             async.each(data, (item, cb) =>{
                 const options = {
                     data: item,
@@ -1301,25 +1311,23 @@ const QuestionnaryHandler = function (db, redis, event) {
 
                 createOrUpdateQuestionnaryAnswer(options, cb)
             }, (err) => {
-                    if (err) {
-                        return next(err);
-                    }
+                if (err) {
+                    return next(err);
+                }
 
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : createdBy,
-                        itemId    : data[0].questionnaryId,
-                        itemType  : CONTENT_TYPES.QUESTIONNARIES
-                    });
+                event.emit('activityChange', {
+                    module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
+                    actionType: ACTIVITY_TYPES.UPDATED,
+                    createdBy : createdBy,
+                    itemId    : questionnaryId,
+                    itemType  : CONTENT_TYPES.QUESTIONNARIES
+                });
 
-                    res.status(200).send({});
+                res.status(200).send({});
             });
         }
 
         access.getEditAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed) {
-            var updateObject;
-
             if (err) {
                 return next(err);
             }
