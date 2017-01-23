@@ -113,7 +113,7 @@ const QuestionnaryHandler = function (db, redis, event) {
         const body = result && result[0] ?
             result[0] : { data: [], total: 0 };
 
-        if (accessRoleLevel !== 1) {
+        if (accessRoleLevel !== 1 && accessRoleLevel !== 10) {
             body.data = body.data.filter((question) => {
                 const personnelArray = question.personnels.fromObjectID();
                 const isEnoughMembers = question.personnels && personnelArray.length;
