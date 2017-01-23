@@ -6,10 +6,9 @@ define([
     'views/baseDialog',
     'collections/file/collection',
     'views/fileDialog/fileDialog',
-    'text!templates/notifications/preview.html'
-],
-function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPreviewView, PreviewTemplate) {
-    'use strict';
+    'text!templates/notifications/preview.html',
+    'constants/levelConfig'
+], function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPreviewView, PreviewTemplate, LEVEL_CONFIG) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.NOTIFICATIONS,
@@ -17,6 +16,7 @@ function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPre
         template: _.template(PreviewTemplate),
 
         initialize: function (options) {
+            this.activityList = options.activityList;
             this.translation = options.translation;
             this.model = options.model;
             this.language = App.currentUser.currentLanguage;
@@ -28,7 +28,8 @@ function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPre
         },
 
         events : {
-            'click .fileThumbnailItem' : 'showFilePreview'
+            'click .fileThumbnailItem' : 'showFilePreview',
+            'click #goToBtn' : 'goTo'
         },
 
         showFilePreview : function (event) {
@@ -47,6 +48,7 @@ function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPre
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
+            var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
             jsonModel.currentLanguage = this.language;
 
             formString = this.$el.html(this.template({
@@ -85,6 +87,29 @@ function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPre
                     $('body').css({overflow: 'inherit'});
                 }
             });
+
+            if (App.currentUser.workAccess && this.activityList) {
+                currentConfig.forEach(function (config) {
+                    require([
+                            config.template
+                        ],
+                        function (template) {
+                            var container = self.$el.find(config.selector);
+
+                            template = _.template(template);
+
+                            if (!container.find('#' + config.elementId).length) {
+                                container[config.insertType](template({
+                                    elementId  : config.elementId,
+                                    translation: self.translation
+                                }));
+                            }
+                        });
+
+                });
+            } else {
+                this.$el.find('.objectivesTopBtnBlockSmall').hide();
+            }
 
             this.delegateEvents(this.events);
         }
