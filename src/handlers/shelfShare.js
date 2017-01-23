@@ -368,6 +368,9 @@ var ShelfShareHandler = function (db, redis, event) {
                             },
                             {
                                 'createdBy.user.country': {$exists: false}
+                            },
+                            {
+                                'createdBy.user.country': {$size: 0}
                             }
                         ]
                     }
