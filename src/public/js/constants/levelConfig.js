@@ -625,6 +625,36 @@ define([
         }
     };
 
+    var newProductLunchConfig = {
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
+
+    var competitorBrandingConfig = {
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
+
     config[CONTENT_TYPES.OBJECTIVES] = objectivesConfig;
     config[CONTENT_TYPES.INSTORETASKS] = inStoreTasksConfig;
     config[CONTENT_TYPES.DOCUMENTS] = documentsConfig;
@@ -636,6 +666,7 @@ define([
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
     config[CONTENT_TYPES.CONSUMER_SURVEY] = consumersSurveyConfig;
     config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = newProductLunchConfig;
+    config[CONTENT_TYPES.COMPETITORBRANDING] = competitorBrandingConfig;
 
     return config;
 });

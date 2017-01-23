@@ -32,8 +32,8 @@ define([
         // topBar
         all        : 'Competitor branding & display report',
         okBtn      : 'Ok',
-        dialogTitle: 'Comment attachments'
-
+        dialogTitle: 'Comment attachments',
+        goToBtn : 'Go to'
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);

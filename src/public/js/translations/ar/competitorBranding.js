@@ -33,7 +33,9 @@ define([
         // topBar
         all        : ' العلامات التجارية وتقارير العرض للمنافسين',
         okBtn      : 'موافق',
-        dialogTitle: ' التعليقات والمرفقات'
+        dialogTitle: ' التعليقات والمرفقات',
+        goToBtn : '' //todo
+
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });
