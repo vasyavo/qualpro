@@ -420,7 +420,8 @@ define([
             var questionnarieTableTitle;
             var idToSearch = '#' + this.currentLanguage;
             var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
-            var dateStart = new Date();
+            var dateStart = jsonModel.startDate && moment(jsonModel.startDate, 'DD.MM.YYYY').toDate();
+            var startDate = dateStart && (dateStart < new Date()) ? dateStart :  new Date();
             var dateEnd;
             var idToFind;
 
@@ -471,11 +472,11 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
-                defaultDate: new Date(dateEnd),
+                minDate    : startDate,
                 onClose    : function (selectedDate) {
-                    $endDate.datepicker('option', 'minDate', selectedDate);
+                    if (selectedDate){
+                        $endDate.datepicker('option', 'minDate', selectedDate);
+                    }
                 }
             });
 
@@ -483,12 +484,7 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
-                defaultDate: new Date(dateEnd),
-                onClose    : function (selectedDate) {
-                    $startDate.datepicker('option', 'maxDate', selectedDate);
-                }
+                minDate    : startDate
             });
 
             implementShowHideArabicInputIn(this);
