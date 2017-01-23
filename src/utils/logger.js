@@ -1,8 +1,7 @@
 const util = require('util');
 const winston = require('winston');
-const config = require('./../config');
 
-require('winston-mongodb');
+winston.cli();
 
 const logger = new (winston.Logger)({
     transports: [

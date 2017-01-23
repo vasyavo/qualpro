@@ -2693,17 +2693,32 @@ var Personnel = function(db, redis, event) {
                 delete queryObject.outlet;
             }
 
-            if (queryObject.status) {
+            const onLeave = queryObject.status && queryObject.status.$in && ~queryObject.status.$in.indexOf('onLeave') && queryObject.status.$in.length === 1;
+
+            if (queryObject.status && queryObject.status.$in && !onLeave) {
                 let onlineUserIds = onlineUsers.map(el => ObjectId(el));
-                if (queryObject.status.$in && queryObject.status.$in.length === 1 && ~queryObject.status.$in.indexOf('online')) {
-                    delete queryObject.status;
+                const onlineStatus = queryObject.status.$in.indexOf('online');
+
+                if (queryObject.status.$in.length === 1 && ~onlineStatus) {
+                    queryObject.status = {
+                        $ne : 'onLeave'
+                    };
                     queryObject._id = {
                         $in : onlineUserIds
                     }
-                } else {
+                } else if (!~onlineStatus) {
                     queryObject._id = {
                         $nin : onlineUserIds
-                    }
+                    };
+                } else {
+                    queryObject.status.$in.splice(onlineStatus, 1);
+                    queryObject.$or = [{_id : {
+                        $in : onlineUserIds
+                    }}, {
+                        status : queryObject.status
+                    }];
+
+                    delete queryObject.status;
                 }
             }
 
@@ -2743,7 +2758,7 @@ var Personnel = function(db, redis, event) {
                 }
 
                 body.data.forEach((el)=> {
-                    if (~onlineUsers.indexOf(el._id.toString())) {
+                    if (el.status !== 'onLeave' && ~onlineUsers.indexOf(el._id.toString())) {
                         el.status = 'online';
                     }
                 });

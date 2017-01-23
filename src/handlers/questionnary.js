@@ -139,6 +139,168 @@ const QuestionnaryHandler = function (db, redis, event) {
         cb(null, body);
     };
 
+    const createOrUpdateQuestionnaryAnswer = (options, callback) => {
+        const {
+            data,
+            createdBy,
+            personnelId
+        } = options;
+
+        let personnelAnswerExists = true;
+        let updater = {};
+        let update;
+
+        async.waterfall([
+            function (waterfallCB) {
+                if (data && !data.answers) {
+                    data.answers = [];
+                }
+
+                // each answer of questionnary
+                async.each(data.answers, (answer, eachCallback) => {
+                    const newAnswer = {
+                        personnelId   : personnelId,
+                        questionnaryId: data.questionnaryId,
+                        questionId    : answer.questionId,
+                        country       : data.country,
+                        region        : data.region,
+                        subRegion     : data.subRegion,
+                        retailSegment : data.retailSegment,
+                        outlet        : data.outlet,
+                        branch        : data.branch
+                    };
+
+                    // if option
+                    if (answer.optionIndex && answer.optionIndex.length) {
+                        newAnswer.optionIndex = answer.optionIndex;
+                    }
+
+                    // if fullAnswer
+                    if (answer.text && Object.keys(answer.text).length) {
+                        newAnswer.text = {
+                            en: _.escape(answer.text.en),
+                            ar: _.escape(answer.text.ar)
+                        }
+                    }
+
+                    async.waterfall([
+                        function (waterfallCb) {
+                            const query = {
+                                personnelId   : personnelId,
+                                questionnaryId: newAnswer.questionnaryId
+                            };
+
+                            QuestionnaryAnswerModel.findOne(query, function (err, result) {
+                                if (err) {
+                                    return waterfallCb(err);
+                                }
+
+                                if (!result) {
+                                    personnelAnswerExists = false;
+                                }
+
+                                waterfallCb(null);
+                            });
+                        },
+
+                        function (waterfallCb) {
+                            const query = {
+                                personnelId   : personnelId,
+                                questionnaryId: newAnswer.questionnaryId,
+                                questionId    : newAnswer.questionId,
+                                branch        : newAnswer.branch
+                            };
+
+                            QuestionnaryAnswerModel.findOne(query, function (err, result) {
+                                if (err) {
+                                    return waterfallCb(err);
+                                }
+
+                                if (!result) {
+                                    return waterfallCb(null, false);
+                                }
+
+                                waterfallCb(null, result._id.toString());
+                            });
+                        },
+
+                        function (questionAnswerIdToUpdate, waterfallCb) {
+                            if (questionAnswerIdToUpdate) {
+                                newAnswer.editedBy = createdBy;
+
+                                QuestionnaryAnswerModel.update({_id: questionAnswerIdToUpdate}, {$set: newAnswer}, function (err) {
+                                    if (err) {
+                                        return waterfallCb(err);
+                                    }
+                                    update = true;
+                                    waterfallCb(null);
+                                });
+
+                            } else {
+                                newAnswer.createdBy = createdBy;
+                                newAnswer.editedBy = createdBy;
+
+                                QuestionnaryAnswerModel.create(newAnswer, function (err) {
+                                    if (err) {
+                                        return waterfallCb(err);
+                                    }
+                                    waterfallCb(null);
+                                });
+                            }
+                        }
+                    ], eachCallback);
+                }, (err) => {
+                    if (err) {
+                        return waterfallCB(err);
+                    }
+
+                    waterfallCB(null);
+                });
+            },
+
+            function (waterfallCB) {
+                QuestionnaryModel.findById(data.questionnaryId, function (err, questionnary) {
+                    var error;
+
+                    if (err) {
+                        return waterfallCB(err);
+                    }
+
+                    if (!questionnary) {
+                        error = new Error('Questionnary not found');
+                        error.status = 404;
+
+                        return waterfallCB(error);
+                    }
+
+                    waterfallCB(null, questionnary);
+                });
+            },
+
+            function (questionnary, waterfallCB) {
+                if (update) {
+                    return waterfallCB(null);
+                }
+
+                updater.$inc = personnelAnswerExists ? {countBranches: -1} : {countAnswered: 1, countBranches: -1};
+
+                if (questionnary.countBranches * 1 - 1 <= 0) {
+                    updater.status = 'completed';
+                }
+
+                updater.editedBy = createdBy;
+
+                QuestionnaryModel.findByIdAndUpdate(data.questionnaryId, updater, function (err) {
+                    if (err) {
+                        return waterfallCB(err);
+                    }
+
+                    waterfallCB(null);
+                });
+            }
+        ], callback);
+    };
+
     this.getAllForSync = function (req, res, next) {
         function queryRun(personnel, callback) {
             const query = req.query;
@@ -1123,154 +1285,32 @@ const QuestionnaryHandler = function (db, redis, event) {
     };
 
     this.questionnaryAnswer = function (req, res, next) {
-        function queryRun(body) {
-            var personnelId = ObjectId(req.session.uId);
-            var update;
-            var updater = {};
-            var personnelAnswerExists = true;
-            async.waterfall([
-                function (waterfallCB) {
-                    if (body && !body.answers) {
-                        body.answers = [];
-                    }
-                    async.each(body.answers, function (answer, eachCallback) {
-                        var newAnswer = {
-                            personnelId   : personnelId,
-                            questionnaryId: body.questionnaryId,
-                            questionId    : answer.questionId,
-                            country       : body.country,
-                            region        : body.region,
-                            subRegion     : body.subRegion,
-                            retailSegment : body.retailSegment,
-                            outlet        : body.outlet,
-                            branch        : body.branch
-                        };
+        function queryRun(data) {
+            const personnelId = ObjectId(req.session.uId);
+            const createdBy = {
+                user: personnelId,
+                date: new Date()
+            };
 
-                        if (answer.optionIndex && answer.optionIndex.length) {
-                            newAnswer.optionIndex = answer.optionIndex;
-                        }
+            let questionnaryId;
 
-                        if (answer.text && Object.keys(answer.text).length) {
-                            newAnswer.text = {
-                                en: _.escape(answer.text.en),
-                                ar: _.escape(answer.text.ar)
-                            }
-                        }
+            try {
+                questionnaryId = data[0].questionnaryId;
+            } catch (e) {
+                let error = new Error('questionnaryId is required');
+                error.status = 400;
+                return next(error)
+            }
 
-                        async.waterfall([
-                            function (waterfallCb) {
-                                var query = {
-                                    personnelId   : personnelId,
-                                    questionnaryId: newAnswer.questionnaryId
-                                };
-                                QuestionnaryAnswerModel.findOne(query, function (err, result) {
-                                    if (err) {
-                                        return waterfallCb(err);
-                                    }
-                                    if (!result) {
-                                        personnelAnswerExists = false;
-                                    }
-                                    waterfallCb(null);
-                                });
-                            },
-                            function (waterfallCb) {
-                                var query = {
-                                    personnelId   : personnelId,
-                                    questionnaryId: newAnswer.questionnaryId,
-                                    questionId    : newAnswer.questionId,
-                                    branch        : newAnswer.branch
-                                };
-                                QuestionnaryAnswerModel.findOne(query, function (err, result) {
-                                    if (err) {
-                                        return waterfallCb(err);
-                                    }
-                                    if (!result) {
-                                        return waterfallCb(null, false);
-                                    }
-                                    waterfallCb(null, result._id.toString());
-                                });
-                            },
-                            function (questionAnswerIdToUpdate, waterfallCb) {
-                                var createdBy = {
-                                    user: personnelId,
-                                    date: new Date()
-                                };
-                                if (questionAnswerIdToUpdate) {
-                                    newAnswer.editedBy = createdBy;
+            async.each(data, (item, cb) =>{
+                const options = {
+                    data: item,
+                    createdBy: createdBy,
+                    personnelId: personnelId
+                };
 
-                                    QuestionnaryAnswerModel.update({_id: questionAnswerIdToUpdate}, {$set: newAnswer}, function (err) {
-                                        if (err) {
-                                            return waterfallCb(err);
-                                        }
-                                        update = true;
-                                        waterfallCb(null);
-                                    });
-                                } else {
-                                    newAnswer.createdBy = createdBy;
-                                    newAnswer.editedBy = createdBy;
-
-                                    QuestionnaryAnswerModel.create(newAnswer, function (err) {
-                                        if (err) {
-                                            return waterfallCb(err);
-                                        }
-                                        waterfallCb(null);
-                                    });
-                                }
-                            }
-                        ], function (err, result) {
-                            if (err) {
-                                return eachCallback(err);
-                            }
-                            eachCallback(null);
-                        });
-                    }, function (err) {
-                        if (err) {
-                            return waterfallCB(err);
-                        }
-                        waterfallCB(null);
-                    });
-                },
-                function (waterfallCB) {
-                    QuestionnaryModel.findById(body.questionnaryId, function (err, questionnary) {
-                        var error;
-
-                        if (err) {
-                            return waterfallCB(err);
-                        }
-
-                        if (!questionnary) {
-                            error = new Error('Questionnary not found');
-                            error.status = 404;
-
-                            return waterfallCB(error);
-                        }
-
-                        waterfallCB(null, questionnary);
-                    });
-                },
-                function (questionnary, waterfallCB) {
-                    if (update) {
-                        return waterfallCB(null);
-                    }
-
-                    updater.$inc = personnelAnswerExists ? {countBranches: -1} : {countAnswered: 1, countBranches: -1};
-
-                    if (questionnary.countBranches * 1 - 1 <= 0) {
-                        updater.status = 'completed';
-                    }
-
-                    updater.editedBy = {
-                        user: personnelId,
-                        date: new Date()
-                    };
-                    QuestionnaryModel.findByIdAndUpdate(body.questionnaryId, updater, function (err) {
-                        if (err) {
-                            return waterfallCB(err);
-                        }
-                        waterfallCB(null);
-                    });
-                }
-            ], function (err, result) {
+                createOrUpdateQuestionnaryAnswer(options, cb)
+            }, (err) => {
                 if (err) {
                     return next(err);
                 }
@@ -1278,18 +1318,16 @@ const QuestionnaryHandler = function (db, redis, event) {
                 event.emit('activityChange', {
                     module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
                     actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : updater.editedBy,
-                    itemId    : body.questionnaryId,
+                    createdBy : createdBy,
+                    itemId    : questionnaryId,
                     itemType  : CONTENT_TYPES.QUESTIONNARIES
                 });
 
-                next({status: 200, body: {}});
+                res.status(200).send({});
             });
         }
 
         access.getEditAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, function (err, allowed) {
-            var updateObject;
-
             if (err) {
                 return next(err);
             }
@@ -1300,17 +1338,14 @@ const QuestionnaryHandler = function (db, redis, event) {
                 return next(err);
             }
 
-            try {
-                if (req.body.data) {
-                    updateObject = JSON.parse(req.body.data);
-                } else {
-                    updateObject = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
+            const options = {
+                data       : req.body.data,
+                level      : req.session.level,
+                contentType: CONTENT_TYPES.QUESTIONNARIES,
+                method     : 'update'
+            };
 
-            bodyValidator.validateBody(updateObject, req.session.level, CONTENT_TYPES.QUESTIONNARIES, 'update', function (err, saveData) {
+            bodyValidator.validateEachBody(options, function (err, saveData) {
                 if (err) {
                     return next(err);
                 }
