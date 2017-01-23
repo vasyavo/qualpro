@@ -360,9 +360,11 @@ define([
             var formString;
             var self = this;
             var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : LEVEL_CONFIG[this.contentType]['1'].preview;
+
             if (jsonModel.status._id === 'expired') {
                 currentConfig = LEVEL_CONFIG[this.contentType]['2'].preview;
             }
+
             formString = this.$el.html(this.template({
                 jsonModel   : jsonModel,
                 translation : this.translation,

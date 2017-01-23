@@ -30,7 +30,9 @@ define([
         price        : 'سعر البيع للمستهلك ',
         displayType  : 'نوع العرض ',
         distributor  : 'الموزع ',
-        shelfLife    : 'تاريخ الانتاج / تاريخ الانتهاء'
+        shelfLife    : 'تاريخ الانتاج / تاريخ الانتهاء',
+
+        goToBtn : '' //todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
 });

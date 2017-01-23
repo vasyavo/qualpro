@@ -32,7 +32,8 @@ define([
             location    : 'Location',
             commentText : 'Comment Text',
             okBtn       : 'Ok',
-            dialogTitle : 'Comment attachments'
+            dialogTitle : 'Comment attachments',
+            goToBtn : 'Go to'
         };
         return _.extend({}, paginationTranslation, filtersTranslation, translation);
     });
