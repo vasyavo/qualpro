@@ -16,8 +16,8 @@ module.exports = session({
     rolling: true,
     saveUninitialized: true,
     store: new MongoStore({
-        url: config.mongodbUri,
         autoRemove: 'interval',
-        autoRemoveInterval: 10
+        autoRemoveInterval: 10,
+        db: mongo.db,
     })
 });
