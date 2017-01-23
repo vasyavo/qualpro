@@ -143,7 +143,7 @@ var CompetitorBranding = function(db, redis, event) {
                         ActivityLog.emit('reporting:competitor-promotion-activities:published', {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body
+                            body : model.toJSON()
                         });
 
                         cb(null, model);
@@ -388,8 +388,8 @@ var CompetitorBranding = function(db, redis, event) {
             var isMobile = req.isMobile;
 
             self.getByIdAggr({
-                id : ObjectId(id),
-                isMobile : isMobile
+                id,
+                isMobile
             }, function(err, result) {
                 if (err) {
                     return next(err);
@@ -752,7 +752,7 @@ var CompetitorBranding = function(db, redis, event) {
             }
 
             if (!response || !response.length) {
-                return callback(response);
+                return callback(null, response);
             }
 
             response = response ? response[0] : {};
