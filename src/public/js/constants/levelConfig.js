@@ -610,37 +610,7 @@ define([
         }
     };
 
-    var newProductLunchConfig = {
-        activityList: {
-            preview: [
-                {
-                    selector       : '#topButtons',
-                    insertType     : 'append',
-                    elementId      : 'goToBtn',
-                    template       : 'text!templates/objectives/preview/goToBtn.html',
-                    forAll         : true,
-                    forAllWithoutMy: false
-                }
-            ]
-        }
-    };
-
-    var newProductLunchConfig = {
-        activityList: {
-            preview: [
-                {
-                    selector       : '#topButtons',
-                    insertType     : 'append',
-                    elementId      : 'goToBtn',
-                    template       : 'text!templates/objectives/preview/goToBtn.html',
-                    forAll         : true,
-                    forAllWithoutMy: false
-                }
-            ]
-        }
-    };
-
-    var competitorBrandingConfig = {
+    var defaultActivityListGoToButton = {
         activityList: {
             preview: [
                 {
@@ -665,8 +635,9 @@ define([
     config[CONTENT_TYPES.BRANDING_ACTIVITY] = brandingAndDisplayConfig;
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
     config[CONTENT_TYPES.CONSUMER_SURVEY] = consumersSurveyConfig;
-    config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = newProductLunchConfig;
-    config[CONTENT_TYPES.COMPETITORBRANDING] = competitorBrandingConfig;
+    config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.COMPETITORBRANDING] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.COMPETITORPROMOTION] = defaultActivityListGoToButton;
 
     return config;
 });
