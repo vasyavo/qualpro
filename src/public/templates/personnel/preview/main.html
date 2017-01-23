@@ -120,13 +120,12 @@ var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
                             <span id="onLeave"><%= (model.vacation && model.vacation.onLeave) ? 'Yes' : 'No' %></span>
                         </div>
                     </div>
-                    <div class="row" style=<%= (model.vacation && model.vacation.onLeave) ?
-                    "" : "display:none" %>>
+                    <div class="row" style=<%= (model.vacation && model.vacation.onLeave) ? "" : "display:none" %>>
                     <div class="cell">
                         <label for="cover"><%= translation.cover %></label>
                     </div>
                     <div class="cell">
-                        <span id="cover"><%= (model.vacation && model.vacation.cover) ? model.vacation.cover.firstName.currentLanguage + ' ' + model.vacation.cover.lastName.currentLanguage : '' %></span>
+                        <span id="cover"><%= (model.vacation && model.vacation.cover && model.vacation.cover.firstName) ? model.vacation.cover.firstName.currentLanguage + ' ' + model.vacation.cover.lastName.currentLanguage : '' %></span>
                     </div>
                 </div>
                 <% } %>
@@ -203,7 +202,7 @@ var modelLevel = model.accessRole ? model.accessRole.level : 100; %>
                         <label for="managerDd"><%= translation.supervisor %></label>
                     </div>
                     <div class="cell">
-                        <span id="managerDd" class="managerDd hoverFullText"><%= model.manager ? model.manager.firstName.currentLanguage + ' ' + model.manager.lastName.currentLanguage : '' %></span>
+                        <span id="managerDd" class="managerDd hoverFullText"><%= (model.manager && model.manager._id) ? model.manager.firstName.currentLanguage + ' ' + model.manager.lastName.currentLanguage : '' %></span>
                     </div>
                 </div>
             </div>

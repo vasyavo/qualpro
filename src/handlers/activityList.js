@@ -108,24 +108,23 @@ var Personnel = function(db, redis, event) {
             }
         };
         var contractsQuery = {
-            $or : [
-                {
-                    $and : [
-                        {
-                            checkPersonnel : 1
-                        },
-                        {
-                            personnels : {
-                                $in : usersArray
+            $and: [{
+                $or : [
+                    {
+                        $and : [
+                            {
+                                checkPersonnel : 1
+                            }, {
+                                personnels : {
+                                    $in : usersArray
+                                }
                             }
-                        }
-                    ]
-                },
-                {
-                    checkPersonnel : 0
-                }
-
-            ]
+                        ]
+                    }, {
+                        checkPersonnel : 0,
+                    }
+                ]
+            }]
         };
         var itemsPricesQuery;
         var competitorItemQuery;
@@ -136,6 +135,11 @@ var Personnel = function(db, redis, event) {
         var notificationQuery;
 
         var afterIteMTypeQuery = options.afterIteMTypeQuery || {};
+
+        var allowedPersonnelTaskItemTypes = [
+            CONTENT_TYPES.OBJECTIVES,
+            CONTENT_TYPES.INSTORETASKS
+        ];
 
         if (currentUser.cover && currentUser.cover.length) {
             usersArray = usersArray.concat(currentUser.cover);
@@ -373,6 +377,11 @@ var Personnel = function(db, redis, event) {
 
             if (currentUser.accessRoleLevel === ACL_CONSTANTS.TRADE_MARKETER) {
                 regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
+
+                // prevent send activity with type === objective for trade marketer
+                allowedPersonnelTaskItemTypes = [
+                    CONTENT_TYPES.INSTORETASKS
+                ];
             }
 
             if (currentUser.accessRoleLevel === 4) {
@@ -400,10 +409,7 @@ var Personnel = function(db, redis, event) {
                                     }
                                 }, {
                                     itemType : {
-                                        $in : [
-                                            CONTENT_TYPES.OBJECTIVES,
-                                            CONTENT_TYPES.INSTORETASKS
-                                        ]
+                                        $in : allowedPersonnelTaskItemTypes
                                     }
                                 }
                             ]
@@ -455,8 +461,7 @@ var Personnel = function(db, redis, event) {
                         },
                         {
                             assignedTo : {$in : usersArray}
-                        },
-                        contractsQuery
+                        }
                     ]
                 }
             });

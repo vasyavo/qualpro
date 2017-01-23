@@ -53,7 +53,6 @@ define([
         },
 
         rowClick: function (e) {
-            debugger;
             var self = this;
             var $tr = $(e.currentTarget);
             var activityid = $tr.attr('data-id');
@@ -108,7 +107,9 @@ define([
                         translationUrl
                     ],
                     function (TargetModel, PreView, translation) {
-                        var itemModel = new TargetModel({_id: id});
+                        var itemModel = new TargetModel({
+                            _id : id
+                        });
                         itemModel.on('sync', function (prettyModel) {
                             self.preView = new PreView({
                                 model       : prettyModel,

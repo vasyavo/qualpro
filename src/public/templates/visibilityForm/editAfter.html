@@ -1,25 +1,32 @@
 <div class="dialogCategotyWrap visibilityContainer inStoreForm">
     <%
-    var container;
+
+    var fileType;
+    var container = '';
+    var containerAfter = '';
     var files = model.after.files || {};
-    var fileType = files.contentType && files.contentType.substr(0, 5);
-    var beforeFileType;
-    var containerAfter;
+
+    if (files) {
+        fileType = files.contentType && files.contentType.substr(0, 5);
+    }
 
     if (model.before && model.before.files && model.before.files.contentType){
-    beforeFileType = model.before.files.contentType.substr(0, 5);
-    if(beforeFileType==='video'){
-    container = model.before.files.url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files.url+'"></video>' : '';
-    } else {
-    container = model.before.files.url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files.url+'">' : '';
-    }
+        var beforeFileType = model.before.files.contentType.substr(0, 5);
+        if(beforeFileType==='video'){
+            container = model.before.files.url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files.url+'"></video>' : '';
+        } else {
+            container = model.before.files.url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files.url+'">' : '';
+        }
     }
 
-    if(fileType==='video'){
-    containerAfter = model.after.files.url ? '<video width="400" controls><source src="'+model.after.files.url+'"></video>' : '';
-    } else {
-    containerAfter = model.after.files.url ? '<img class="imgResponsive" src="'+ model.after.files.url+'">' : '';
+    if (fileType) {
+        if (fileType === 'video') {
+            containerAfter = model.after.files.url ? '<video width="400" controls><source src="'+model.after.files.url+'"></video>' : '';
+        } else {
+            containerAfter = model.after.files.url ? '<img class="imgResponsive" src="'+ model.after.files.url+'">' : '';
+        }
     }
+
     %>
     <div class="title">
         <span class="titleDescription"><%= translation.titleEditVisibility %></span>

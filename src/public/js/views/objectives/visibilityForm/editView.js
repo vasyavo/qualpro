@@ -168,6 +168,9 @@ define([
             var fileContainerHolder = this.$el.find('#imageMy-' + branchId);
             fileContainerHolder.html('');
 
+            var fileInput = this.$el.find('#branch-photo-' + branchId);
+            fileInput[0].value = null;
+
             $target.addClass('hidden');
 
             //delete from temp file objects storage

@@ -344,7 +344,7 @@ define([
                     if (context.assigneWithoutBranches) {
                         requestPayload = {
                             before : {
-                                files : (files.files[0]) ? [file.files[0]._id] : []
+                                files : (files.files[0]) ? [files.files[0]._id] : []
                             }
                         }
                     } else {

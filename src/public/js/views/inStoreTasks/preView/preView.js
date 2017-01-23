@@ -523,7 +523,17 @@ define([
         save: function (options, cb) {
             var saveObj;
             var self = this;
+            var STATUSES = CONSTANTS.OBJECTIVE_STATUSES;
             var status = this.$el.find('#statusDd').data().id;
+
+            if (status === STATUSES.COMPLETED) {
+                if (!self.savedVisibilityModel || !self.savedVisibilityModel.get('descriptionAfter')) {
+                    return App.render({
+                        type : 'error',
+                        message : ERROR_MESSAGES.afterPartNotFilled[App.currentUser.currentLanguage]
+                    });
+                }
+            }
 
             if (status && status !== this.model.get('status')._id) {
                 this.changed.status = status;

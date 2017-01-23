@@ -141,7 +141,7 @@ var NewProductLaunch = function(db, redis, event) {
                         ActivityLog.emit('reporting:new-product-launch:published', {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body
+                            body : model.toJSON()
                         });
 
                         cb(null, model);

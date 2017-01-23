@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const async = require('async');
 const CONSTANTS = require('./../constants/allowedBodyData');
 const CONTENT_TYPE = require('./../public/js/constants/contentType');
 
@@ -287,6 +288,33 @@ validationFunctions[CONTENT_TYPE.CONSUMER_SURVEY] = function(value, key, allowed
     return _.includes(allowedObject, key);
 };
 
+const validateEachBody = (options, callback) => {
+    let resultArray = [];
+    const {
+        data,
+        level,
+        contentType,
+        method,
+    } = options;
+
+    async.each(data, (el, cb) => {
+        validateBody(el, level, contentType, method, (err, val) => {
+            if(err){
+                return cb(err);
+            }
+
+            resultArray.push(val);
+            cb(null);
+        });
+    }, (err)=> {
+        if(err){
+            return callback(err);
+        }
+
+        callback(null, resultArray);
+    })
+};
+
 function validateBody(body, level, contentType, method, callback) {
     const allowedObject = CONSTANTS[contentType] &&
         CONSTANTS[contentType][level] &&
@@ -333,6 +361,7 @@ const validateBodyPromise = (args) => {
 module.exports = {
     validationFunctions,
     validateBody,
+    validateEachBody,
     validateBodyPromise
 };
 
