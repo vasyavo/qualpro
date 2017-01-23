@@ -24,7 +24,8 @@ define([
         attachments  : 'المرفقات',
         noTranslation: ' لا يوجد ترجمة',
         files        : 'الملفات',
-        all          : 'استمارة الإنجازات'
+        all          : 'استمارة الإنجازات',
+        goToBtn : '' //todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });

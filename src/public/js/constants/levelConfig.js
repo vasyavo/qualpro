@@ -638,6 +638,7 @@ define([
     config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = defaultActivityListGoToButton;
     config[CONTENT_TYPES.COMPETITORBRANDING] = defaultActivityListGoToButton;
     config[CONTENT_TYPES.COMPETITORPROMOTION] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.ACHIEVEMENTFORM] = defaultActivityListGoToButton;
 
     return config;
 });
