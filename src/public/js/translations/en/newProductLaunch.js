@@ -30,7 +30,9 @@ define([
         price        : 'RSP',
         displayType  : 'Display type',
         distributor  : 'Distributor',
-        shelfLife    : 'Shelf life'
+        shelfLife    : 'Shelf life',
+
+        goToBtn : 'Go to'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
 });
