@@ -41,10 +41,12 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #goToBtn'                  : 'goTo'
         },
 
         initialize: function (options) {
+            this.activityList = options.activityList;
             this.translation = options.translation;
             this.model = options.model;
             this.files = new FileCollection();
@@ -333,10 +335,11 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
+            var currentConfig = this.activityList ? levelConfig[this.contentType].activityList.preview : [];
 
             formString = this.$el.html(this.template({
-                jsonModel  : jsonModel,
-                translation: this.translation
+                jsonModel : jsonModel,
+                translation : this.translation
             }));
 
             this.$el = formString.dialog({
@@ -374,6 +377,29 @@ define([
                     $('body').css({overflow: 'inherit'});
                 }
             });
+
+            if (App.currentUser.workAccess && this.activityList) {
+                currentConfig.forEach(function (config) {
+                    require([
+                            config.template
+                        ],
+                        function (template) {
+                            var container = self.$el.find(config.selector);
+
+                            template = _.template(template);
+
+                            if (!container.find('#' + config.elementId).length) {
+                                container[config.insertType](template({
+                                    elementId  : config.elementId,
+                                    translation: self.translation
+                                }));
+                            }
+                        });
+
+                });
+            } else {
+                this.$el.find('.objectivesTopBtnBlockSmall').hide();
+            }
 
             this.$el.find('#commentForm').on('submit', {
                 body   : this.commentBody,

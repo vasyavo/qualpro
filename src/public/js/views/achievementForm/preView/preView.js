@@ -7,9 +7,10 @@ define([
     'collections/file/collection',
     'views/baseDialog',
     'views/fileDialog/fileDialog',
-    'models/achievementForm'
+    'models/achievementForm',
+    'constants/levelConfig'
 ], function (Backbone, _, $, PreviewTemplate, FilePreviewTemplate,
-             FileCollection, BaseView, FileDialogPreviewView, Model) {
+             FileCollection, BaseView, FileDialogPreviewView, Model, LEVEL_CONFIG) {
 
     var PreviewView = BaseView.extend({
         contentType: 'achievementForm',
@@ -19,12 +20,14 @@ define([
 
         events: {
             'click .fileThumbnailItem': 'showFilePreviewDialog',
-            'click #downloadFile'     : 'stopPropagation'
+            'click #downloadFile'     : 'stopPropagation',
+            'click #goToBtn'          : 'goTo'
         },
 
         initialize: function (options) {
             var self = this;
 
+            this.activityList = options.activityList;
             this.translation = options.translation;
             this.model = options.model.toJSON() ? options.model : new Model(options.model, {merge: true, parse: true});
             this.previewFiles = new FileCollection(this.model.get('attachments'));
@@ -77,6 +80,7 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
+            var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
 
             formString = this.$el.html(this.template({model: jsonModel, translation: this.translation}));
 
@@ -111,6 +115,29 @@ define([
                     $('body').css({overflow: 'inherit'});
                 }
             });
+
+            if (App.currentUser.workAccess && this.activityList) {
+                currentConfig.forEach(function (config) {
+                    require([
+                            config.template
+                        ],
+                        function (template) {
+                            var container = self.$el.find(config.selector);
+
+                            template = _.template(template);
+
+                            if (!container.find('#' + config.elementId).length) {
+                                container[config.insertType](template({
+                                    elementId  : config.elementId,
+                                    translation: self.translation
+                                }));
+                            }
+                        });
+
+                });
+            } else {
+                this.$el.find('.objectivesTopBtnBlockSmall').hide();
+            }
 
             this.$el.find('.filesBlock').hide();
             this.setSelectedFiles();
