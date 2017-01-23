@@ -391,7 +391,7 @@ const create = (req, res, next) => {
         ActivityLog.emit('reporting:price-survey:published', {
             actionOriginator: userId,
             accessRoleLevel,
-            body
+            body : body.toJSON(),
         });
 
         res.status(201).send(body);
