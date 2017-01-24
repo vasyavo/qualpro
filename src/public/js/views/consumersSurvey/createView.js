@@ -296,6 +296,11 @@ define([
                 validate: false,
                 wait    : true,
                 success : function (xhr) {
+                    var startDate = xhr.get('startDate');
+                    if (startDate) {
+                        xhr.set('startDate', moment(startDate).format('DD.MM.YYYY'));
+                    }
+
                     self.trigger('modelSaved', xhr);
 
                     cb();

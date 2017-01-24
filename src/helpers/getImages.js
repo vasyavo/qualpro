@@ -64,7 +64,9 @@ class ImageHelper {
         }
 
         function getImageById(key, field) {
-            const imgSrcObject = _.find(result[key], { _id: field._id });
+            const imgSrcObject = _.find(result[key], (elem) => {
+               return elem._id && field._id && elem._id.toString() === field._id.toString()
+            });
 
             if (imgSrcObject && [
                 CONTENT_TYPES.PERSONNEL,

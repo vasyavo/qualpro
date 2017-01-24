@@ -721,7 +721,6 @@ define([
             });
 
             editView.on('modelSaved', function (model) {
-
                 if (App.currentUser._id === model.get('_id')) {
                     App.currentUser = model.toJSON();
                     self.trigger('renderCurrentUserInfo');

@@ -1,23 +1,31 @@
-var express = require('express');
-var router = express.Router();
-var access = require('../../helpers/access');
+const express = require('express');
+const router = express.Router();
+const noteHandler = require('../../handlers/note');
+const access = require('../../helpers/access');
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart();
 
-var Handler = require('../../handlers/note');
-
-module.exports = function (db, redis) {
+module.exports = function (db, redis, event) {
     'use strict';
 
-    var handler = new Handler(db, redis);
-    var checkAuth = access.checkAuth;
+    const handler = new noteHandler(db, redis, event);
+    const checkAuth = access.checkAuth;
 
     router.use(checkAuth);
 
-    router.post('/', handler.create);
     router.get('/', handler.getAll);
+    router.get('/sync', handler.getAllForSync);
+    router.get('/:id([0-9a-fA-F]{24})', handler.getById);
+
+    router.post('/', multipartMiddleware, handler.create);
+    
     router.put('/remove', handler.archive);
-    router.put('/:id', handler.update);
-    router.patch('/:id', handler.update);
-    router.delete('/:id', handler.delete);
+    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
+    
+    router.patch('/delete', handler.deleteMany);
+    router.patch('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
+    
+    router.delete('/:id([0-9a-fA-F]{24})', handler.delete);
 
     return router;
 };
