@@ -3,6 +3,7 @@ define([
     'Underscore',
     'jQuery',
     'lodash',
+    'moment',
     'text!templates/consumersSurvey/preview.html',
     'text!templates/consumersSurvey/npmQuestion.html',
     'text!templates/consumersSurvey/questionList.html',
@@ -20,7 +21,7 @@ define([
     'constants/contentType',
     'd3',
     'constants/levelConfig'
-], function (Backbone, _, $, lodash, PreViewTemplate, npsQuestionTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
+], function (Backbone, _, $, lodash, moment, PreViewTemplate, npsQuestionTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
              QuestionFullAnswerTemplate, QuestionSingleSelectTemplate, QuestionMultiselectTemplate,
              Model, QuestionModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
              BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG) {
