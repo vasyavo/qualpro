@@ -1368,13 +1368,13 @@ const Filters = function(db, redis) {
             }
         });
 
-        pipeLine.push({
+        /*pipeLine.push({
             $match : {
                 status : {
                     $ne : 'expired'
                 }
             }
-        });
+        });*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'categories',
