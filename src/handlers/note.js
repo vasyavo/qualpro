@@ -33,6 +33,7 @@ var Note = function (db, redis, event) {
         editedBy   : 1,
         title      : 1,
         description: 1,
+        archived   : 1,
         theme      : 1,
         attachments: 1
     };
@@ -193,6 +194,37 @@ var Note = function (db, redis, event) {
 
         return pipeLine;
     }
+    
+    function removeNote(id, cb) {
+        const query = NoteModel.findByIdAndRemove({_id: id});
+        
+        async.waterfall([
+            (cb) => {
+                query.exec(cb);
+            },
+            
+            (noteModel, callback) => {
+                const attachments = noteModel.get('attachments');
+                
+                if (!attachments && !attachments.length) {
+                    return callback();
+                }
+                
+                async.each(attachments, (fileId, cb) => {
+                    FileModel.findByIdAndRemove(fileId, (err, fileModel) => {
+                        fileHandler.deleteFile(fileModel.get('name'), 'notes', cb);
+                    })
+                }, callback);
+                
+            }
+        ], (err) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            cb(null);
+        });
+    }
 
     this.create = function (req, res, next) {
         function queryRun(body) {
@@ -313,6 +345,7 @@ var Note = function (db, redis, event) {
 
     this.update = function (req, res, next) {
         function queryRun(updateObject) {
+            var isMobile = req.isMobile;
             var session = req.session;
             var userId = session.uId;
             var noteId = req.params.id;
@@ -320,7 +353,7 @@ var Note = function (db, redis, event) {
             async.waterfall([
 
                 (wfcb) => {
-                    if (!updateObject.filesToDelete && !updateObject.filesToDelete.length) {
+                    if (!updateObject.filesToDelete || !updateObject.filesToDelete.length) {
                         return wfcb(null);
                     }
 
@@ -379,10 +412,9 @@ var Note = function (db, redis, event) {
                         const attachments = noteModel.get('attachments').map((item) => {
                             return item.toString();
                         });
-                        const attachmentsWithoutDeleted = _.without(attachments, ...updateObject.filesToDelete);
-                        const newAttachments = attachmentsWithoutDeleted.concat(arrayOfNewFilesId);
+                        const attachmentsWithoutDeleted = _.without(attachments, ...(updateObject.filesToDelete || []));
 
-                        updateObject.attachments = newAttachments;
+                        updateObject.attachments = isMobile ? arrayOfNewFilesId : attachmentsWithoutDeleted.concat(arrayOfNewFilesId);;
 
                         delete updateObject.filesToDelete;
 
@@ -590,6 +622,130 @@ var Note = function (db, redis, event) {
             queryRun();
         });
     };
+    
+    this.getAllForSync = function (req, res, next) {
+        function queryRun() {
+            var currentUserId = req.session.uId;
+            var query = req.query;
+            var filter = query.filter || {};
+            var lastLogOut = new Date(query.lastLogOut);
+            var aggregateHelper;
+            var filterMapper = new FilterMapper();
+            var queryObject;
+            var pipeLine;
+            var aggregation;
+            var positionFilter = {};
+            
+            delete filter.globalSearch;
+            
+            queryObject = filterMapper.mapFilter({
+                contentType: CONTENT_TYPES.NOTES,
+                filter     : filter
+            });
+            
+            aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            
+            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
+            
+            if (queryObject.personnel) {
+                queryObject['createdBy.user'] = queryObject.personnel;
+                delete queryObject.personnel;
+            }
+            
+            pipeLine = getAllPipeline({
+                currentUserId  : currentUserId,
+                aggregateHelper: aggregateHelper,
+                queryObject    : queryObject,
+                positionFilter : positionFilter,
+                isMobile       : req.isMobile,
+                forSync        : true
+            });
+            
+            aggregation = NoteModel.aggregate(pipeLine);
+            
+            aggregation.options = {
+                allowDiskUse: true
+            };
+            
+            aggregation.exec(function (err, response) {
+                if (err) {
+                    return next(err);
+                }
+                
+                const options = {
+                    data: {}
+                };
+                
+                let personnelIds = [];
+                
+                response = response && response[0] ? response[0] : {data: [], total: 0};
+                
+                if (!response.data.length) {
+                    return next({status: 200, body: response});
+                }
+                
+                response.data = _.map(response.data, function (element) {
+                    if (element.attachments) {
+                        element.attachments.map((file) => {
+                            file.url = fileHandler.computeUrl(file.name);
+                            
+                            return file;
+                        });
+                    }
+                    if (element.title) {
+                        element.title = _.unescape(element.title);
+                    }
+                    if (element.theme) {
+                        element.theme = _.unescape(element.theme);
+                    }
+                    if (element.description) {
+                        element.description = _.unescape(element.description);
+                    }
+                    
+                    personnelIds.push(element.createdBy.user._id);
+                    
+                    return element;
+                });
+                
+                personnelIds = _.uniqBy(personnelIds, 'id');
+                
+                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
+                
+                getImagesHelper.getImages(options, function (err, result) {
+                    var fieldNames = {};
+                    var setOptions;
+                    if (err) {
+                        return next(err);
+                    }
+                    
+                    setOptions = {
+                        response  : response,
+                        imgsObject: result
+                    };
+                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
+                    setOptions.fields = fieldNames;
+                    
+                    getImagesHelper.setIntoResult(setOptions, function (response) {
+                        next({status: 200, body: response});
+                    })
+                });
+            });
+        }
+        
+        access.getReadAccess(req, ACL_MODULES.NOTE, function (err, allowed) {
+            if (err) {
+                return next(err);
+            }
+            if (!allowed) {
+                err = new Error();
+                err.status = 403;
+                
+                return next(err);
+            }
+            
+            queryRun();
+        });
+    };
 
     this.archive = function (req, res, next) {
         function queryRun() {
@@ -628,32 +784,23 @@ var Note = function (db, redis, event) {
             queryRun();
         });
     };
+    
+    this.deleteMany = function (req, res, next) {
+        const idsToDelete = req.body.ids || [];
+        
+        async.each(idsToDelete, removeNote, function (err) {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send();
+        });
+    };
 
     this.delete = function (req, res, next) {
         const id = req.params.id;
-
-        const query = NoteModel.findByIdAndRemove({_id: id});
-
-        async.waterfall([
-            (cb) => {
-                query.exec(cb);
-            },
-
-            (noteModel, callback) => {
-                const attachments = noteModel.get('attachments');
-
-                if (!attachments && !attachments.length) {
-                    return callback();
-                }
-
-                async.each(attachments, (fileId, cb) => {
-                    FileModel.findByIdAndRemove(fileId, (err, fileModel) => {
-                        fileHandler.deleteFile(fileModel.get('name'), 'notes', cb);
-                    })
-                }, callback);
-
-            }
-        ], (err) => {
+    
+        removeNote(id, (err) => {
             if (err) {
                 return next(err);
             }

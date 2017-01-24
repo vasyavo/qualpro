@@ -14,6 +14,7 @@ module.exports = function (db, app, redis, event) {
     var brandingActivityItemsRouter = require('./mobile/brandingActivityItems')(db, redis, event);
     var domainRouter = require('./mobile/domain')(db, redis, event);
     var notificationsRouter = require('./mobile/notifications')(db);
+    var notesRouter = require('./mobile/note')(db, redis, event);
     var retailSegmentRouter = require('./mobile/retailSegment')(db, redis, event);
     var outletRouter = require('./mobile/outlet')(db, redis, event);
     var itemRouter = require('./mobile/item')(db);
@@ -56,6 +57,7 @@ module.exports = function (db, app, redis, event) {
     router.use('/domain', domainRouter);
     router.use('/accessRole', accessRoleRouter);
     router.use('/notifications', notificationsRouter);
+    router.use('/note', notesRouter);
     // router.use('/country', domainRouter);
     // router.use('/region', domainRouter);
     // router.use('/subRegion', domainRouter);
