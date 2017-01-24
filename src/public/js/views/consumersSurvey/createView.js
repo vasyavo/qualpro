@@ -296,6 +296,11 @@ define([
                 validate: false,
                 wait    : true,
                 success : function (xhr) {
+                    var startDate = xhr.get('startDate');
+                    if (startDate) {
+                        xhr.set('startDate', moment(startDate).format('DD.MM.YYYY'));
+                    }
+
                     self.trigger('modelSaved', xhr);
 
                     cb();
@@ -405,8 +410,13 @@ define([
             var jsonModel = this.model.toJSON();
             var title = this.edit ? this.translation.editBtn : this.translation.duplicateBtn;
             var anotherLanguage = this.currentLanguage === 'en' ? 'Ar' : 'En';
+
             if (this.create) {
                 title = this.translation.create;
+            }
+
+            if (jsonModel.startDate) {
+                jsonModel.startDate = moment(jsonModel.startDate).format('DD.MM.YYYY');
             }
 
             var formString = this.template({
@@ -415,6 +425,7 @@ define([
                 translation: this.translation,
                 edit       : this.edit
             });
+
             var self = this;
             var $curEl;
             var questionnarieTableTitle;
