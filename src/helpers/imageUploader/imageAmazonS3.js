@@ -145,9 +145,10 @@ var imageUploader = function (awsConfig) {
 
     function removeObjectFromAWS(bucket, name, callback) {
         var params = {
-            Bucket: bucket,
-            Key: name
+            Bucket: awsConfig.bucketName,
+            Key   : name
         };
+        
         s3.deleteObject(params, function (err, data) {
             if (callback && typeof callback === 'function') {
                 callback(err, data);
