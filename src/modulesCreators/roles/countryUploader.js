@@ -601,13 +601,13 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         },
         mobile: {
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     },
     {

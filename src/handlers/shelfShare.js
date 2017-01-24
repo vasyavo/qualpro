@@ -368,6 +368,9 @@ var ShelfShareHandler = function (db, redis, event) {
                             },
                             {
                                 'createdBy.user.country': {$exists: false}
+                            },
+                            {
+                                'createdBy.user.country': {$size: 0}
                             }
                         ]
                     }
@@ -789,7 +792,7 @@ var ShelfShareHandler = function (db, redis, event) {
                 body.totalBrandsLength = _.escape(body.totalBrandsLength);
             }
 
-            ShelfShareModel.create(body, function (err, result) {
+            ShelfShareModel.create(body, function (err, model) {
                 if (err) {
                     return next(err);
                 }
@@ -797,10 +800,10 @@ var ShelfShareHandler = function (db, redis, event) {
                 ActivityLog.emit('reporting:shelf-share:published', {
                     actionOriginator: userId,
                     accessRoleLevel,
-                    body
+                    body : model.toJSON()
                 });
 
-                res.status(200).send(result);
+                res.status(200).send(model);
             });
         }
 

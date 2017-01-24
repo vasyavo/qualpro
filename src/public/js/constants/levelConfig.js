@@ -610,6 +610,20 @@ define([
         }
     };
 
+    var defaultActivityListGoToButton = {
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
 
     config[CONTENT_TYPES.OBJECTIVES] = objectivesConfig;
     config[CONTENT_TYPES.INSTORETASKS] = inStoreTasksConfig;
@@ -621,6 +635,11 @@ define([
     config[CONTENT_TYPES.BRANDING_ACTIVITY] = brandingAndDisplayConfig;
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
     config[CONTENT_TYPES.CONSUMER_SURVEY] = consumersSurveyConfig;
+    config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.COMPETITORBRANDING] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.COMPETITORPROMOTION] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.ACHIEVEMENTFORM] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.NOTIFICATIONS] = defaultActivityListGoToButton;
 
     return config;
 });

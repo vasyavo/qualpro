@@ -24,7 +24,8 @@ define([
         attachments  : 'Attachments',
         noTranslation: 'No translation',
         files        : 'Files',
-        all          : 'Achievement form'
+        all          : 'Achievement form',
+        goToBtn : 'Go to'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });
