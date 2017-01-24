@@ -207,20 +207,10 @@ define([
                     Backbone.history.navigate(url, true);
                 });
             } else if (['item'].indexOf(modelType) !== -1) {
-                timeDate = modelJSON.createdBy.date;
-                fromTime = timeDate ? moment(timeDate, 'DD.MM.YYYY, h:mm:ss').set('hour', 0).set('minute', 1).toISOString() : null;
-                toTime = timeDate ? moment(timeDate, 'DD.MM.YYYY, h:mm:ss').set('hour', 23).set('minute', 59).toISOString() : null;
-                timeValues = [fromTime, toTime];
                 _.map(modelJSON.country, function (countryObj) {
                     countryIds.push(countryObj._id);
                     countryNames.push(countryObj.name[self.currentLanguage]);
                 });
-                _.map(modelJSON.branch, function (branchObj) {
-                    branchIds.push(branchObj._id);
-                    branchNames.push(branchObj.name[self.currentLanguage]);
-                });
-
-                personnelName.push(modelJSON.createdBy.user.firstName.currentLanguage + ' ' + modelJSON.createdBy.user.lastName.currentLanguage);
 
                 filter = {
                     country: {
@@ -244,6 +234,36 @@ define([
                     }
 
                     url = 'qualPro/itemsPrices/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
+                    Backbone.history.navigate(url, true);
+                });
+            } else if (['competitorItem'].indexOf(modelType) !== -1) {
+                _.map(modelJSON.country, function (countryObj) {
+                    countryIds.push(countryObj._id);
+                    countryNames.push(countryObj.name[self.currentLanguage]);
+                });
+
+                filter = {
+                    country: {
+                        type  : 'ObjectId',
+                        values: countryIds,
+                        names : countryNames
+                    }
+                };
+
+                dataService.getData(modelType + '/' + (model.get('itemId') || model.get('_id')), {}, function (err, response) {
+                    if (err) {
+                        return App.render({type: 'error', message: err.message});
+                    }
+
+                    if (response && response.brand) {
+                        filter.brand = response && response.brand && {
+                                type  : 'ObjectId',
+                                values: [response.brand._id],
+                                names : [response.brand.name[self.currentLanguage]]
+                            };
+                    }
+
+                    url = 'qualPro/competitorsList/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
                     Backbone.history.navigate(url, true);
                 });
             }
