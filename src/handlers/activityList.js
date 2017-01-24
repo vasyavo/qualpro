@@ -255,7 +255,8 @@ var Personnel = function(db, redis, event) {
 
         if (!_.includes(_(ACL_CONSTANTS).pick([
                 'MASTER_ADMIN',
-                'MASTER_UPLOADER'
+                'MASTER_UPLOADER',
+                'TRADE_MARKETER'
             ]).values().value(), currentUser.accessRoleLevel)) {
 
             planogramQuery = [
