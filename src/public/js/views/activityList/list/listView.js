@@ -206,6 +206,66 @@ define([
                     url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
                     Backbone.history.navigate(url, true);
                 });
+            } else if (['item'].indexOf(modelType) !== -1) {
+                _.map(modelJSON.country, function (countryObj) {
+                    countryIds.push(countryObj._id);
+                    countryNames.push(countryObj.name[self.currentLanguage]);
+                });
+
+                filter = {
+                    country: {
+                        type  : 'ObjectId',
+                        values: countryIds,
+                        names : countryNames
+                    }
+                };
+
+                dataService.getData(modelType + '/' + (model.get('itemId') || model.get('_id')), {}, function (err, response) {
+                    if (err) {
+                        return App.render({type: 'error', message: err.message});
+                    }
+
+                    if (response && response.category) {
+                        filter.category = response && response.category && {
+                                type  : 'ObjectId',
+                                values: [response.category._id],
+                                names : [response.category.name[self.currentLanguage]]
+                            };
+                    }
+
+                    url = 'qualPro/itemsPrices/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
+                    Backbone.history.navigate(url, true);
+                });
+            } else if (['competitorItem'].indexOf(modelType) !== -1) {
+                _.map(modelJSON.country, function (countryObj) {
+                    countryIds.push(countryObj._id);
+                    countryNames.push(countryObj.name[self.currentLanguage]);
+                });
+
+                filter = {
+                    country: {
+                        type  : 'ObjectId',
+                        values: countryIds,
+                        names : countryNames
+                    }
+                };
+
+                dataService.getData(modelType + '/' + (model.get('itemId') || model.get('_id')), {}, function (err, response) {
+                    if (err) {
+                        return App.render({type: 'error', message: err.message});
+                    }
+
+                    if (response && response.brand) {
+                        filter.brand = response && response.brand && {
+                                type  : 'ObjectId',
+                                values: [response.brand._id],
+                                names : [response.brand.name[self.currentLanguage]]
+                            };
+                    }
+
+                    url = 'qualPro/competitorsList/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
+                    Backbone.history.navigate(url, true);
+                });
             }
         },
 

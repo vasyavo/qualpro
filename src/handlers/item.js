@@ -53,6 +53,7 @@ var Item = function (db, event) {
 
         query
             .populate('origin', 'name')
+            .populate('category', '_id name')
             .exec(callback);
     };
 
@@ -984,14 +985,8 @@ var Item = function (db, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err) {
             if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
                 return next(err);
             }
 
