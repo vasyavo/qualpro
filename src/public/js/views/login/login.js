@@ -1,19 +1,23 @@
-define(['Backbone',
+define([
+    'Backbone',
     'jQuery',
     'Underscore',
+    'js-cookie',
     'text!templates/login/login.html',
     'models/personnel',
     'custom',
     'constants/validation',
     'constants/errorMessages',
     'moment'
-], function (Backbone, $, _, loginTemplate, PersonnelModel, custom, CONSTANTS, ERROR_MESSAGES, moment) {
+], function (Backbone, $, _, Cookie, loginTemplate, PersonnelModel, custom, CONSTANTS, ERROR_MESSAGES, moment) {
 
     var LoginView = Backbone.View.extend({
         el      : '#wrapper',
         template: _.template(loginTemplate),
 
-        error: null,
+        emailPhoneErrors: {},
+
+        passwordErrors : {},
 
         initialize: function () {
             delete App.currentUser;
@@ -30,8 +34,8 @@ define(['Backbone',
             'focusout #ulogin'        : 'usernameFocus',
             'focusout #upass'         : 'passwordFocus',
             'click .remember-me'      : 'checkClick',
-            'keyup #email'            : 'checkEmail',
             'change #email'           : 'checkEmail',
+            'change #pass'            : 'checkPassword',
             'click .onoffswitch-label': 'rememberMe',
             'click #forgotPass'       : 'goForgotPass'
         },
@@ -40,10 +44,37 @@ define(['Backbone',
             var target = $(e.target);
             var value = target.val().trim();
 
-            if (!CONSTANTS.EMAIL_REGEXP.test(value) && !CONSTANTS.PHONE_REGEXP.test(value)) {
-                target.addClass('error');
+            this.emailPhoneErrors = {};
+
+            if (!value) {
+                return this.emailPhoneErrors.emptyEmailPhoneInput = ERROR_MESSAGES.enterYourEmail.en + '<br/>' + ERROR_MESSAGES.enterYourEmail.ar;
+            }
+
+            var checkValue = value.replace('+', '');
+            checkValue = checkValue.replace('(', '');
+            checkValue = checkValue.replace(')', '');
+
+            var isPhone = /^\d+$/.test(checkValue);
+
+            if (isPhone) {
+                if (!CONSTANTS.PHONE_REGEXP.test(value) || value.length < 10 || value.length > 15) {
+                    this.emailPhoneErrors.wrongPhoneValue = ERROR_MESSAGES.login.enterCorrectPhoneNumber.en + '<br>' + ERROR_MESSAGES.login.enterCorrectPhoneNumber.ar;
+                }
             } else {
-                target.removeClass('error');
+                if (!CONSTANTS.EMAIL_REGEXP.test(value)) {
+                    this.emailPhoneErrors.wrongEmailValue = ERROR_MESSAGES.login.enterCorrectEmail.en + '<br>' + ERROR_MESSAGES.login.enterCorrectEmail.ar;
+                }
+            }
+        },
+
+        checkPassword : function (event) {
+            var target = $(event.target);
+            var value = target.val();
+
+            this.passwordErrors = {};
+
+            if (!value) {
+                this.passwordErrors.emptyPasswordInput = ERROR_MESSAGES.login.enterYourPassword.en + '<br>' + ERROR_MESSAGES.login.enterYourPassword.ar;
             }
         },
 
@@ -113,13 +144,20 @@ define(['Backbone',
                 rememberMe: checked
             };
 
-            var errors = thisEl.find('input.error');
+            var errors = Object.assign({}, self.emailPhoneErrors, self.passwordErrors);
+            var errorKeys = Object.keys(errors);
 
-            if (errors.length) {
-                return App.render({
-                    type   : 'error',
-                    message: ERROR_MESSAGES.invalidCredentials.en + '</br>' + ERROR_MESSAGES.invalidCredentials.ar
+            if (errorKeys.length) {
+                errorKeys.map(function (key) {
+                    if (errors.hasOwnProperty(key)) {
+                        App.render({
+                            type : 'error',
+                            message : errors[key]
+                        });
+                    }
                 });
+
+                return;
             }
 
             loginForm.removeClass('notRegister');
