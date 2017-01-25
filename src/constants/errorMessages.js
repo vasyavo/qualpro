@@ -24,4 +24,5 @@ module.exports = {
     USER_LOCATION_IS_NOT_SPECIFIED: 'user_location_is_not_specified',
     USER_NOT_FOUND                : 'user_not_found',
     EMAIL_IS_NOT_VALID            : 'email_is_not_valid',
+    INCORRECT_VERIFICATION_CODE   : 'incorrect_verification_code',
 };

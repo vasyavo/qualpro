@@ -86,4 +86,9 @@ errorDescriptions[ERROR_MSG.EMAIL_IS_NOT_VALID] = {
     ar: 'Email is invalid.'
 };
 
+errorDescriptions[ERROR_MSG.INCORRECT_VERIFICATION_CODE] = {
+    en: 'The verification code you entered is incorrect. Please try again.',
+    ar: 'رمز التحقق الذي قمت بإدخاله غير صحيح، يرجى المحاولة مرة أخرى.'
+};
+
 module.exports = errorDescriptions;
