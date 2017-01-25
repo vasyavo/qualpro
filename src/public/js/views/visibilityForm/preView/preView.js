@@ -76,6 +76,12 @@ define([
                 }
             });
 
+            var afterPart = this.model.get('after');
+            var file = afterPart.files[0];
+            afterPart.files = file;
+
+            this.model.set('after', afterPart);
+
             $formString = $(self.template({
                 model      : self.model.toJSON(),
                 branchName : self.branchName,
