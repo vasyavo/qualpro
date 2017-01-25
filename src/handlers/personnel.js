@@ -3709,11 +3709,11 @@ const Personnel = function (db, redis, event) {
             }
             
             if (!result) {
-                errorSender.badRequest(next, ERROR_MESSAGES.USER_NOT_FOUND);
+               return errorSender.badRequest(next, ERROR_MESSAGES.USER_NOT_FOUND);
             }
             
             if (result.forgotToken !== code) {
-                errorSender.notAuthorized(next);
+                return errorSender.notAuthorized(next);
             }
             
             res.status(200).send(url);
