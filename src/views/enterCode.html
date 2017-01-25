@@ -376,7 +376,7 @@
             error  : function (xhr) {
                 var messageClass = xhr.type || 'error';
                 var index = xhr.index || 1;
-                var text = xhr.description || 'Invalid credentials';
+                var text = xhr.responseJSON.description || 'Invalid credentials';
                 var $renderEl = $('<div class="animate ' + messageClass + '">' + text.en + '<br>' + text.ar + '</div>');
 
                 $('#errorHandler').append($renderEl);
