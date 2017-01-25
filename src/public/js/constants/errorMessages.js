@@ -4,6 +4,38 @@
     var root;
 
     var ERRORMESSAGES = {
+        enterYourPhoneNumber : {
+            en : 'Please enter your phone number.',
+            ar : 'يرجى إدخال رقم الهاتف.'
+        },
+        enterYourEmail : {
+            en : 'Please enter your email address.',
+            ar : 'الرجاء إدخال عنوان البريد الإلكتروني.'
+        },
+        login : {
+            enterYourPassword : {
+                en : 'Please enter your password.',
+                ar : 'يرجى إدخال كلمة المرور.'
+            },
+            enterCorrectPhoneNumber : {
+                en : 'Please enter the correct phone number.',
+                ar : 'يرجى إدخال رقم الهاتف الصحيح.'
+            },
+            enterCorrectEmail : {
+                en : 'Please enter the correct email address.',
+                ar : 'يرجى إدخال عنوان البريد الإلكتروني الصحيح.'
+            },
+        },
+        forgotPassword : {
+            incorrectPhoneNumber : {
+                en : 'The phone you entered is incorrect. Please try again.',
+                ar : 'رقم الهاتف الذي أدخلته غير صحيح، يرجى المحاولة مرة أخرى.'
+            },
+            incorrectEmailAddress : {
+                en : 'The email address you entered is incorrect. Please try again.',
+                ar : 'عنوان البريد الإلكتروني الذي أدخلته غير صحيح، يرجى المحاولة مرة أخرى.'
+            }
+        },
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
             ar: 'المستند قيد الاستخدام ولا يمكن حفظه فى الارشيف'

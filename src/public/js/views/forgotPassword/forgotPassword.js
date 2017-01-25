@@ -12,7 +12,9 @@ define([
         template      : _.template(forgotTemplate),
         $errrorHandler: null,
 
-        error: null,
+        errors: {
+            emptyPhoneInput : ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar
+        },
 
         initialize: function (options) {
             this.render();
@@ -34,19 +36,35 @@ define([
 
         checkLogin: function (e) {
             var target = $(e.target);
+            var value = target.val();
             var phoneRadio = this.$el.find('#phoneNumberRadio');
+            var isPhone = phoneRadio.is(':checked');
             var regexp;
 
-            if (!phoneRadio.is(':checked')) {
+            this.errors = {};
+
+            if (!value) {
+                if (isPhone) {
+                    this.errors.emptyPhoneInput = ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar;
+                } else {
+                    this.errors.emptyEmailInput = ERROR_MESSAGES.enterYourEmail.en + '<br>' + ERROR_MESSAGES.enterYourEmail.ar;
+                }
+
+                return;
+            }
+
+            if (!isPhone) {
                 regexp = CONSTANTS.EMAIL_REGEXP;
             } else {
                 regexp = CONSTANTS.PHONE_REGEXP;
             }
 
             if (!regexp.test(target.val())) {
-                target.addClass('error');
-            } else {
-                target.removeClass('error');
+                if (isPhone) {
+                    this.errors.incorrectPhoneValue = ERROR_MESSAGES.forgotPassword.incorrectPhoneNumber.en + '<br>' + ERROR_MESSAGES.forgotPassword.incorrectPhoneNumber.ar;
+                } else {
+                    this.errors.incorrectEmailValue = ERROR_MESSAGES.forgotPassword.incorrectEmailAddress.en + '<br>' + ERROR_MESSAGES.forgotPassword.incorrectEmailAddress.ar;
+                }
             }
         },
 
@@ -84,16 +102,25 @@ define([
                 login  : login,
                 ifPhone: ifPhone
             };
-            var errors = thisEl.find('input.error');
-            event.preventDefault();
 
-            if (errors.length) {
-                return App.render({type: 'error', message: ERROR_MESSAGES.invalidCredentials.en + '</br>' + ERROR_MESSAGES.invalidCredentials.ar});
+            var errors = this.errors;
+            var errorKeys = Object.keys(errors);
+
+            if (errorKeys.length) {
+                errorKeys.map(function (key) {
+                    if (errors.hasOwnProperty(key)) {
+                        App.render({
+                            type : 'error',
+                            message : errors[key]
+                        });
+                    }
+                });
+
+                return;
             }
 
-            form.removeClass('notRegister');
-            if (data.login === '') {
-                form.addClass('notRegister');
+            if (data.login !== '') {
+                form.removeClass('notRegister');
             }
 
             $.ajax({
@@ -124,9 +151,17 @@ define([
             $loginInput.attr('data-masked', true);
 
             if (!e || e.target.id === 'phoneNumberRadio') {
+                this.errors= {
+                    emptyPhoneInput : ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar
+                };
+
                 $loginInput.inputmask('+999(99)-999-9999');
                 $loginInput.attr('placeholder', 'Enter phone number');
             } else {
+                this.errors= {
+                    emptyEmailInput : ERROR_MESSAGES.enterYourEmail.en + '<br>' + ERROR_MESSAGES.enterYourEmail.ar
+                };
+
                 $loginInput.inputmask({
                     mask  : '*{1,20}[.*{1,20}][.*{1,20}][.*{1,20}]@*{1,20}[.*{2,6}][.*{1,2}]',
                     greedy: false,
