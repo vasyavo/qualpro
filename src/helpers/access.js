@@ -1,5 +1,6 @@
 'use strict';
 
+const ERROR_MESSAGES = require('../constants/errorMessages');
 const async = require('async');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
@@ -177,7 +178,7 @@ access.checkAuth = (req, res, next) => {
         return next();
     }
 
-    const err = new Error('Not Authorized');
+    const err = new Error(ERROR_MESSAGES.NOT_AUTHORIZED);
 
     err.status = 401;
     next(err);
