@@ -87,7 +87,10 @@ module.exports = function(app, db, event) {
     app.get('/', csrfProtection, function(req, res, next) {
         //ToDo remove (res.cookie) this one after test sms
         //res.cookie('lang', 'ae');
-        res.render('index.html', {csrfToken : req.csrfToken()});
+        res.render('index.html', {
+            csrfToken : req.csrfToken(),
+            pubnubSubscribeKey: config.pubnub.subscribeKey,
+        });
     });
 
     // endpoint for handling api documents

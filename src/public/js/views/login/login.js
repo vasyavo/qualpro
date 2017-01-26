@@ -6,8 +6,9 @@ define(['Backbone',
     'custom',
     'constants/validation',
     'constants/errorMessages',
-    'moment'
-], function (Backbone, $, _, loginTemplate, PersonnelModel, custom, CONSTANTS, ERROR_MESSAGES, moment) {
+    'moment',
+    'services/pubnub'
+], function (Backbone, $, _, loginTemplate, PersonnelModel, custom, CONSTANTS, ERROR_MESSAGES, moment, PubNubClient) {
 
     var LoginView = Backbone.View.extend({
         el      : '#wrapper',
@@ -157,6 +158,12 @@ define(['Backbone',
                                 $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
                                 moment.locale(App.currentUser.currentLanguage);
                                 custom.runApplication(true);
+
+                                var userId = App.currentUser._id;
+
+                                PubNubClient.subscribe({
+                                    userId: userId
+                                });
                             },
                             error  : function () {
                                 App.render({message: ERROR_MESSAGES.canNotFetchCurrentUser.en + '</br>' + ERROR_MESSAGES.canNotFetchCurrentUser.ar});

@@ -1,84 +1,29 @@
 const co = require('co');
-const _ = require('lodash');
-const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
-const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
-const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
-const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
-const ActivityModel = require('./../../../../types/activityList/model');
+const prototype = require('./prototype');
 
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.OBJECTIVE;
         const contentType = contentTypes.OBJECTIVES;
         const actionType = activityTypes.COMMENTED;
+        const extendedOptions = Object.assign({}, options, {
+            moduleId,
+            contentType,
+            actionType,
+        });
 
         const {
+            payload,
             actionOriginator,
-            accessRoleLevel,
-            body,
-        } = options;
+            setOriginator,
+            setAssignee,
+            setSupervisor,
+        } = yield prototype(extendedOptions);
 
-        const arrayOfParentObjectiveId = _(body.parent)
-            .values()
-            .compact()
-            .value();
-
-        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
-            assignedTo: body.assignedTo,
-            actionOriginator,
-        });
-        const [
-            arrayOfSupervisor,
-            arrayOfOriginator,
-        ] = yield [
-            getSupervisorByAssigneeAndOriginator({
-                assignedTo,
-                originator: actionOriginator,
-            }),
-            getOriginatorByParentObjective({
-                objectives: arrayOfParentObjectiveId,
-            })
-        ];
-
-        const newActivity = new ActivityModel();
-
-        newActivity.set({
-            itemType: contentType,
-            module: moduleId,
-            actionType,
-            itemId: body._id,
-            itemName: {
-                en: body.title.en,
-                ar: body.title.ar,
-            },
-            createdBy: {
-                user: actionOriginator,
-            },
-            accessRoleLevel,
-            personnels: _.uniq([
-                actionOriginator,
-                ...assignedTo,
-                ...arrayOfSupervisor,
-                ...arrayOfOriginator,
-            ]),
-            assignedTo,
-            country: body.country,
-            region: body.region,
-            subRegion: body.subRegion,
-            retailSegment: body.retailSegment,
-            outlet: body.outlet,
-            branch: body.branch,
-        });
-
-        yield newActivity.save();
-
-        const payload = {
-            actionType,
-        };
         const groups = [{
             recipients: [actionOriginator],
             subject: {
@@ -87,21 +32,21 @@ module.exports = (options) => {
             },
             payload,
         }, {
-            recipients: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
+            recipients: setOriginator,
             subject: {
                 en: 'Sub-objective commented',
                 ar: '',
             },
             payload,
         }, {
-            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
+            recipients: setAssignee,
             subject: {
                 en: 'Objective commented',
                 ar: '',
             },
             payload,
         }, {
-            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
+            recipients: setSupervisor,
             subject: {
                 en: `Subordinate's objective commented`,
                 ar: '',

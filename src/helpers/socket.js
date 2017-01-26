@@ -1,12 +1,15 @@
-"use strict";
-
 const config = require('./../config');
 const redis = require('redis');
 const socketIo = require('socket.io');
 const redisAdapter = require('socket.io-redis');
 const unreadCache = require('./unreadCache');
 
-module.exports = (server) => {
+module.exports = (options) => {
+    const {
+        server,
+        port,
+    } = options;
+
     function onError(err) {
         if (err) {
             console.log(err.message || err);
@@ -17,7 +20,9 @@ module.exports = (server) => {
     const pub = redis.createClient(config.redisUrl, redisOptions);
     const sub = redis.createClient(config.redisUrl, redisOptions);
 
-    const io = socketIo(server);
+    const io = socketIo();
+
+    io.listen(server || port);
 
     io.set('transports', [
         'websocket',

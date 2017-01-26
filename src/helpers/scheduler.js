@@ -6,522 +6,510 @@ const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
 const ACTIVITY_TYPES = require('../constants/activityTypes');
 const logger = require('./../utils/logger');
+const mongo = require('./../utils/mongo');
+const event = require('./../utils/eventEmitter');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-const logWriter = require('../helpers/logWriter');
-const hourlyRule = '0 * * * *';
+const getPipeline = (query) => {
+    const pipeLine = [];
 
-function consoleLogENV(message) {
-    if (process.env.NODE_ENV !== 'production') {
-        console.log(message);
-    }
-}
-
-module.exports = function(db, event) {
-    function getPipeLine(query) {
-        const pipeLine = [];
-
-        pipeLine.push({
-            $match : query
-        });
-
-        pipeLine.push({
-            $group : {
-                _id : null,
-                ids : {
-                    $addToSet : '$_id'
-                }
+    pipeLine.push({
+        $match: query
+    });
+    pipeLine.push({
+        $group: {
+            _id: null,
+            setId: {
+                $addToSet: '$_id'
             }
-        });
+        }
+    });
 
-        return pipeLine;
-    }
+    return pipeLine;
+};
 
-    function triggerEvent(mid, id, itemType) {
-        event.emit('activityChange', {
-            module : mid,
-            actionType : ACTIVITY_TYPES.UPDATED,
-            createdBy : {
-                user : null,
-                date : new Date()
-            },
-            itemId : id,
-            itemType : itemType
-        });
-    }
+const triggerEvent = (mid, id, itemType) => {
+    event.emit('activityChange', {
+        module: mid,
+        actionType: ACTIVITY_TYPES.UPDATED,
+        createdBy: {
+            user: null,
+            date: new Date()
+        },
+        itemId: id,
+        itemType
+    });
+};
 
-    function schedulerCallBack(scheduler, type, updateFunction) {
-        return function(err, resObject) {
+const exec = (options) => {
+    const {
+        domain,
+        actionType,
+        iterator,
+    } = options;
+
+    return (err, resObject) => {
+        if (err) {
+            logger.error(`[scheduler] ${domain}:${actionType}`, err);
+        } else if (resObject[0] && resObject[0].setId && resObject[0].setId.length) {
+            iterator(resObject[0].setId, (err) => {
+                if (err) {
+                    logger.error(`[scheduler] branding-and-display:expired`, err);
+                    return
+                }
+
+                logger.info(`[scheduler] ${domain}:${actionType} updated.`);
+            });
+        } else {
+            logger.info(`[scheduler] ${domain}:${actionType} skipping...`);
+        }
+    };
+};
+
+const updateEachGenerator = (updateMethod) => {
+    return (setId, callback) => {
+        async.each(setId, updateMethod, callback);
+    };
+};
+
+const personnelInactive = () => {
+    const PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
+    const PersonnelModel = require('./../types/personnel/model');
+    const startDate = new Date();
+    const endDate = new Date(startDate.getMonth() - 2);
+    const query = {
+        lastAccess: {
+            $lte: endDate
+        },
+        temp: false,
+        status: {
+            $nin: [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id]
+        }
+    };
+    const updatePersonnel = (id, callback) => {
+        PersonnelModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PERSONNEL_STATUSES.INACTIVE._id
+            }
+        }, (err, model) => {
             if (err) {
-                logWriter.log('Scheduler.' + scheduler + '' + type + ' aggregate Err ' + err);
-                consoleLogENV(err);
-            } else if (resObject[0] && resObject[0].ids && resObject[0].ids.length) {
-                updateFunction(resObject[0].ids, function(err) {
-                    if (err) {
-                        logWriter.log('Scheduler.brandingAndDisplayExpired Update Err ' + err);
-                        consoleLogENV(err);
-                    }
-                    logWriter.log('Scheduler.' + scheduler + '' + type + ' Update completed');
-                    consoleLogENV(scheduler + ' ' + type + ' done');
-                });
-            } else {
-                logWriter.log('Scheduler.' + scheduler + '' + type + ' No Expired');
-                consoleLogENV('No ' + scheduler + '' + type);
-            }
-        };
-    }
-
-    function updateEachGenerator(updateMethod) {
-        return function(ids, cb) {
-            async.each(ids, updateMethod, function(err) {
-                if (err) {
-                    return cb(err);
-                }
-
-                cb(null);
-            });
-        };
-    }
-
-    function personnelInactive() {
-        var PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
-        const PersonnelModel = require('./../types/personnel/model');
-        var startDate = new Date();
-        var endDate = new Date(startDate.getMonth() - 2);
-        var query = {
-            lastAccess : {
-                $lte : endDate
-            },
-
-            temp : false,
-
-            status : {
-                $nin : [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id]
-            }
-        };
-
-        function updatePersonnel(id, cb) {
-            PersonnelModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PERSONNEL_STATUSES.INACTIVE._id
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(20, id, CONTENT_TYPES.PERSONNEL);
-                }
-
-                cb(null);
-            });
-        }
-
-        PersonnelModel.aggregate(getPipeLine(query), schedulerCallBack('personnel', 'Inactive', updateEachGenerator(updatePersonnel)));
-
-    }
-
-    function contractsYearlyExpired() {
-        const ContractYearlyModel = require('./../types/contractYearly/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
-            }
-        };
-
-        function updateContract(id, cb) {
-            ContractYearlyModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(20, id, CONTENT_TYPES.CONTRACTSYEARLY);
-                }
-
-                cb(null);
-            });
-        }
-
-        ContractYearlyModel.aggregate(getPipeLine(query), schedulerCallBack('contractsYearly', 'Expired', updateEachGenerator(updateContract)));
-
-    }
-
-    function contractsSecondaryExpired() {
-        const ContractSecondaryModel = require('./../types/contractSecondary/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
-            }
-        };
-
-        function updateContract(id, cb) {
-            ContractSecondaryModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(22, id, CONTENT_TYPES.CONTRACTSSECONDARY);
-                }
-
-                cb(null);
-            });
-        }
-
-        ContractSecondaryModel.aggregate(getPipeLine(query), schedulerCallBack('contractsSecondary', 'Expired', updateEachGenerator(updateContract)));
-    }
-
-    function promotionExpired() {
-        const PromotionModel = require('./../types/promotion/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
+                return callback(err);
             }
 
-        };
-
-        function updatePromotion(id, cb) {
-            PromotionModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(33, id, CONTENT_TYPES.PROMOTIONS);
-                }
-
-                cb(null);
-            });
-        }
-
-        PromotionModel.aggregate(getPipeLine(query), schedulerCallBack('promotions', 'Expired', updateEachGenerator(updatePromotion)));
-    }
-
-    function promotionItemExpired() {
-        const PromotionItemModel = require('./../types/promotionItem/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $in : [PROMOTION_STATUSES.ACTIVE, PROMOTION_STATUSES.DRAFT]
+            if (model) {
+                triggerEvent(20, id, CONTENT_TYPES.PERSONNEL);
             }
 
-        };
+            callback(null);
+        });
+    };
 
-        function updatePromotionItems(id, cb) {
-            PromotionItemModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
+    PersonnelModel.aggregate(getPipeline(query), exec('personnel', 'Inactive', updateEachGenerator(updatePersonnel)));
+};
 
-                if (model) {
-                    triggerEvent(35, id, CONTENT_TYPES.PROMOTIONSITEMS);
-                }
+const contractsYearlyExpired = () => {
+    const ContractYearlyModel = require('./../types/contractYearly/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
 
-                cb(null);
-            });
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
         }
+    };
 
-        PromotionItemModel.aggregate(getPipeLine(query), schedulerCallBack(CONTENT_TYPES.PROMOTIONSITEMS, 'Expired', updateEachGenerator(updatePromotionItems)));
-    }
-
-    function competitorPromotionExpired() {
-        const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
+    const updateContract = (id, callback) => {
+        ContractYearlyModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
             }
 
-        };
-
-        function updateCompetitorPromotion(id, cb) {
-            CompetitorPromotionModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(32, id, CONTENT_TYPES.COMPETITORPROMOTION);
-                }
-
-                cb(null);
-            });
-        }
-
-        CompetitorPromotionModel.aggregate(getPipeLine(query), schedulerCallBack('competitorPromotion', 'Expired', updateEachGenerator(updateCompetitorPromotion)));
-    }
-
-    function brandingActivityExpired() {
-        const BrandingActivityModel = require('../types/brandingActivity/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
+            if (model) {
+                triggerEvent(20, id, CONTENT_TYPES.CONTRACTSYEARLY);
             }
-        };
 
-        function updateBrandingActivity(id, cb) {
-            BrandingActivityModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
+            callback(null);
+        });
+    };
 
-                if (model) {
-                    triggerEvent(38, id, CONTENT_TYPES.BRANDING_ACTIVITY);
-                }
+    ContractYearlyModel.aggregate(getPipeline(query), exec('contractsYearly', 'Expired', updateEachGenerator(updateContract)));
+};
 
-                cb(null);
-            });
+const contractsSecondaryExpired = () => {
+    const ContractSecondaryModel = require('./../types/contractSecondary/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
+
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
         }
+    };
 
-        BrandingActivityModel.aggregate(getPipeLine(query), schedulerCallBack('brandingActivity', 'Expired', updateEachGenerator(updateBrandingActivity)));
-    }
-
-    function competitorBrandingAndDisplayExpired() {
-        const CompetitorBrandingModel = require('./../types/competitorBranding/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
+    const updateContract = (id, callback) => {
+        ContractSecondaryModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
             }
-        };
-
-        function updateCompetitorBrandingAndDisplay(id, cb) {
-            CompetitorBrandingModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(34, id, CONTENT_TYPES.COMPETITORBRANDING);
-                }
-
-                cb(null);
-            });
-        }
-
-        CompetitorBrandingModel.aggregate(getPipeLine(query), schedulerCallBack('competitorBranding', 'Expired', updateEachGenerator(updateCompetitorBrandingAndDisplay)));
-    }
-
-    function questionaryExpired() {
-        const QuestionnariesModel = require('./../types/questionnaries/model');
-        var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
-
-        var query = {
-            dueDate : {
-                $lt : new Date()
-            },
-
-            status : {
-                $eq : PROMOTION_STATUSES.ACTIVE
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
             }
-        };
 
-        function updateQuestionary(id, cb) {
-            QuestionnariesModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : PROMOTION_STATUSES.EXPIRED
-                }
-            }, function(err, model) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    triggerEvent(34, id, CONTENT_TYPES.COMPETITORBRANDING);
-                }
-
-                cb(null);
-            });
-        }
-
-        QuestionnariesModel.aggregate(getPipeLine(query), schedulerCallBack('questionnary', 'Expired', updateEachGenerator(updateQuestionary)));
-    }
-
-    function objectivesOverDue() {
-        const ObjectiveModel = require('./../types/objective/model');
-        var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-
-        var query = {
-            dateEnd : {
-                $lt : new Date()
-            },
-            status : {
-                $in : [
-                    OBJECTIVE_STATUSES.IN_PROGRESS,
-                    OBJECTIVE_STATUSES.RE_OPENED,
-                    OBJECTIVE_STATUSES.TO_BE_DISCUSSED
-                ]
+            if (model) {
+                triggerEvent(22, id, CONTENT_TYPES.CONTRACTSSECONDARY);
             }
-        };
 
-        function updateObjective(id, cb) {
-            ObjectiveModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : OBJECTIVE_STATUSES.OVER_DUE
-                }
-            }, function(err, model) {
-                var type;
-                var mid;
+            callback(null);
+        });
+    };
 
-                if (err) {
-                    return cb(err);
-                }
+    ContractSecondaryModel.aggregate(getPipeline(query), exec('contractsSecondary', 'Expired', updateEachGenerator(updateContract)));
+};
 
-                if (model) {
-                    type = model.context;
-                    mid = type === CONTENT_TYPES.OBJECTIVES ? 7 : 18;
+const promotionExpired = () => {
+    const PromotionModel = require('./../types/promotion/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
 
-                    triggerEvent(mid, id, type);
-                }
-
-                cb(null);
-            });
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
         }
 
-        ObjectiveModel.aggregate(getPipeLine(query), schedulerCallBack('objectives', 'OverDue', updateEachGenerator(updateObjective)));
+    };
+    const updatePromotion = (id, callback) => {
+        PromotionModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                triggerEvent(33, id, CONTENT_TYPES.PROMOTIONS);
+            }
+
+            callback(null);
+        });
+    };
+
+    PromotionModel.aggregate(getPipeline(query), exec('promotions', 'Expired', updateEachGenerator(updatePromotion)));
+};
+
+const promotionItemExpired = () => {
+    const PromotionItemModel = require('./../types/promotionItem/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
+
+        status: {
+            $in: [PROMOTION_STATUSES.ACTIVE, PROMOTION_STATUSES.DRAFT]
+        }
+
+    };
+
+    const updatePromotionItems = (id, callback) => {
+        PromotionItemModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                triggerEvent(35, id, CONTENT_TYPES.PROMOTIONSITEMS);
+            }
+
+            callback(null);
+        });
+    };
+
+    PromotionItemModel.aggregate(getPipeline(query), exec(CONTENT_TYPES.PROMOTIONSITEMS, 'Expired', updateEachGenerator(updatePromotionItems)));
+};
+
+const competitorPromotionExpired = () => {
+    const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
+
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
+        }
+
+    };
+
+    const updateCompetitorPromotion = (id, callback) => {
+        CompetitorPromotionModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                triggerEvent(32, id, CONTENT_TYPES.COMPETITORPROMOTION);
+            }
+
+            callback(null);
+        });
+    };
+
+    CompetitorPromotionModel.aggregate(getPipeline(query), exec('competitorPromotion', 'Expired', updateEachGenerator(updateCompetitorPromotion)));
+};
+
+const brandingActivityExpired = () => {
+    const BrandingActivityModel = require('../types/brandingActivity/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
+
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
+        }
+    };
+
+    const updateBrandingActivity = (id, callback) => {
+        BrandingActivityModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                triggerEvent(38, id, CONTENT_TYPES.BRANDING_ACTIVITY);
+            }
+
+            callback(null);
+        });
+    };
+
+    BrandingActivityModel.aggregate(getPipeline(query), exec('brandingActivity', 'Expired', updateEachGenerator(updateBrandingActivity)));
+};
+
+const competitorBrandingAndDisplayExpired = () => {
+    const CompetitorBrandingModel = require('./../types/competitorBranding/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
+
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
+        }
+    };
+
+    const updateCompetitorBrandingAndDisplay = (id, callback) => {
+        CompetitorBrandingModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                triggerEvent(34, id, CONTENT_TYPES.COMPETITORBRANDING);
+            }
+
+            callback(null);
+        });
+    };
+
+    CompetitorBrandingModel.aggregate(getPipeline(query), exec('competitorBranding', 'Expired', updateEachGenerator(updateCompetitorBrandingAndDisplay)));
+};
+
+const questionaryExpired = () => {
+    const QuestionnariesModel = require('./../types/questionnaries/model');
+    const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
+    const query = {
+        dueDate: {
+            $lt: new Date()
+        },
+
+        status: {
+            $eq: PROMOTION_STATUSES.ACTIVE
+        }
+    };
+    const updateQuestionary = (id, callback) => {
+        QuestionnariesModel.findByIdAndUpdate(id, {
+            $set: {
+                status: PROMOTION_STATUSES.EXPIRED
+            }
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                triggerEvent(34, id, CONTENT_TYPES.COMPETITORBRANDING);
+            }
+
+            callback(null);
+        });
     }
 
-    function objectivesFail() {
-        const ObjectiveModel = require('./../types/objective/model');
-        var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+    QuestionnariesModel.aggregate(getPipeline(query), exec('questionnary', 'Expired', updateEachGenerator(updateQuestionary)));
+};
 
-        var query = {
-            'editedBy.date' : {
-                $lte : moment().add(-30, 'days')
+const objectivesOverDue = () => {
+    const ObjectiveModel = require('./../types/objective/model');
+    const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+    const query = {
+        dateEnd: {
+            $lt: new Date()
+        },
+        status: {
+            $in: [
+                OBJECTIVE_STATUSES.IN_PROGRESS,
+                OBJECTIVE_STATUSES.RE_OPENED,
+                OBJECTIVE_STATUSES.TO_BE_DISCUSSED
+            ]
+        }
+    };
+    const updateObjective = (id, callback) => {
+        ObjectiveModel.findByIdAndUpdate(id, {
+            $set: {
+                status: OBJECTIVE_STATUSES.OVER_DUE,
             },
-            status : OBJECTIVE_STATUSES.OVER_DUE
-        };
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
 
-        function updateObjective(id, cb) {
-            ObjectiveModel.findByIdAndUpdate(id, {
-                $set : {
-                    status : OBJECTIVE_STATUSES.FAIL
-                }
-            }, function(err, model) {
-                var type;
-                var mid;
+            if (model) {
+                const type = model.context;
+                const modelAsJson = model.toJSON();
+                const payload = {
+                    accessRoleLevel: modelAsJson.level,
+                    userId: modelAsJson.createdBy.user,
+                    body: modelAsJson,
+                };
 
-                if (err) {
-                    return cb(err);
-                }
-
-                if (model) {
-                    type = model.context;
-                    mid = type === CONTENT_TYPES.OBJECTIVES ? 7 : 18;
-
-                    triggerEvent(mid, id, type);
+                if (type === CONTENT_TYPES.OBJECTIVES) {
+                    ActivityLog.emit('objective:overdue', payload)
                 }
 
-                cb(null);
-            });
-        }
+                if (type === CONTENT_TYPES.INSTORETASKS) {
+                    ActivityLog.emit('in-store-task:overdue', payload);
+                }
+            }
 
-        ObjectiveModel.aggregate(getPipeLine(query), schedulerCallBack('objectives', 'Fail', updateEachGenerator(updateObjective)));
-    }
+            callback(null);
+        });
+    };
 
-    function Scheduler() {
-        var hourlySchedulersArray = [
+    ObjectiveModel.aggregate(getPipeline(query), exec({
+        domain: 'objective',
+        actionType: 'overdue',
+        iterator: updateObjective,
+    }));
+};
+
+const objectivesFail = () => {
+    const ObjectiveModel = require('./../types/objective/model');
+    const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+    const query = {
+        'editedBy.date': {
+            $lte: moment().add(-30, 'days')
+        },
+        status: OBJECTIVE_STATUSES.OVER_DUE,
+    };
+    const updateObjective = (id, callback) => {
+        ObjectiveModel.findByIdAndUpdate(id, {
+            $set: {
+                status: OBJECTIVE_STATUSES.FAIL,
+            },
+        }, (err, model) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (model) {
+                const type = model.context;
+                const modelAsJson = model.toJSON();
+                const payload = {
+                    accessRoleLevel: modelAsJson.level,
+                    userId: modelAsJson.createdBy.user,
+                    body: modelAsJson,
+                };
+
+                if (type === CONTENT_TYPES.OBJECTIVES) {
+                    ActivityLog.emit('objective:fail', payload)
+                }
+
+                if (type === CONTENT_TYPES.INSTORETASKS) {
+                    ActivityLog.emit('in-store-task:fail', payload);
+                }
+            }
+
+            callback(null);
+        });
+    };
+
+    ObjectiveModel.aggregate(getPipeline(query), exec({
+        domain: 'objective',
+        actionType: 'fail',
+        iterator: updateObjective,
+    }));
+};
+
+class Scheduler {
+
+    subscribe(jobs, schedule) {
+        jobs.forEach((job) => {
+            nodeScheduler.scheduleJob(schedule, job);
+        });
+    };
+
+    start() {
+        const jobs = [
             objectivesFail,
             objectivesOverDue,
-            contractsYearlyExpired,
-            contractsSecondaryExpired,
-            promotionExpired,
-            promotionItemExpired,
-            brandingActivityExpired,
-            competitorBrandingAndDisplayExpired,
-            competitorPromotionExpired,
-            personnelInactive,
-            questionaryExpired
+            // contractsYearlyExpired,
+            // contractsSecondaryExpired,
+            // promotionExpired,
+            // promotionItemExpired,
+            // brandingActivityExpired,
+            // competitorBrandingAndDisplayExpired,
+            // competitorPromotionExpired,
+            // personnelInactive,
+            // questionaryExpired,
         ];
 
-        function addJobs(array, rule) {
-            array.forEach(function(scheduler) {
-                nodeScheduler.scheduleJob(rule, scheduler);
-            });
-        }
+        this.subscribe(jobs, '*/20 * * * * *'); // every 20 seconds
 
-        this.initEveryHourScheduler = function() {
-
-            if (!process.env.INITED_SCHEDULER) {
-
-                addJobs(hourlySchedulersArray, hourlyRule);
-
-                process.env.INITED_SCHEDULER = true;
-                logger.info('=================== initEveryHourScheduler ===================');
-            } else {
-                logWriter.log('Scheduler.initEveryHourScheduler is inited');
-                logger.info('============== initEveryHourScheduler is INITED ==============');
-            }
-        };
+        logger.info('Scheduler started');
     }
 
-    return Scheduler;
-};
+}
+
+module.exports = Scheduler;

@@ -6,8 +6,9 @@ define([
     'moment',
     'constants/contentType',
     'constants/errorMessages',
-    'constants/aclRoleIndexes'
-], function (Backbone, $, async, dataService, moment, CONSTANTS, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
+    'constants/aclRoleIndexes',
+    'services/pubnub'
+], function (Backbone, $, async, dataService, moment, CONSTANTS, ERROR_MESSAGES, ACL_ROLE_INDEXES, PubNubClient) {
 
     var runApplication = function (success) {
         var url;
@@ -51,11 +52,18 @@ define([
                 currentUser.url = '/personnel/currentUser';
                 currentUser.fetch({
                     success: function (currentUser) {
-                        App.currentUser = currentUser.toJSON();
-                        $.datepicker.setDefaults($.datepicker.regional[App.currentUser.currentLanguage]);
-                        moment.locale(App.currentUser.currentLanguage);
+                        var currentUser = currentUser.toJSON();
+                        var userId = currentUser._id;
+
+                        App.currentUser = currentUser;
+                        $.datepicker.setDefaults($.datepicker.regional[currentUser.currentLanguage]);
+                        moment.locale(currentUser.currentLanguage);
                         loadUrl(success);
-                        App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
+                        App.socket.emit('save_socket_connection', { uId: userId });
+
+                        PubNubClient.subscribe({
+                            userId: userId
+                        });
                     },
 
                     error: function (err) {

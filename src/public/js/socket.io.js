@@ -15,10 +15,6 @@ define([
             socket.emit('save_socket_connection', {uId: App.currentUser._id});
         }
     });
-    socket.on('message', function (data) {
-        App.badge = data.badge;
-        App.setMenuCount(1, App.badge);
-    });
 
     socket.on('onLeave', function () {
         var url = window.location.hash;
