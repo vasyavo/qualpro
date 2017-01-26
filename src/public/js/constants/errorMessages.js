@@ -61,7 +61,12 @@
                 ar : ''//todo
             }
         },
-
+        retailSegment : {
+            emptyNameInput : {
+                en : 'Please enter the trade channel name.',
+                ar : 'يرجى إدخال اسم الفئة التجارية.'
+            }
+        },
 
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
