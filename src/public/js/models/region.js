@@ -38,7 +38,7 @@ define([
                     }
 
                     if (validation.hasInvalidChars(fieldValue)) {
-                        errors.push(ERROR_MESSAGES.region.invalidChars[currentLanguage]);
+                        errors.push(ERROR_MESSAGES.invalidChars[currentLanguage]);
                     }
                 }
 
