@@ -99,6 +99,10 @@ define([
                     $curEl.off('change');
                     $curEl.dialog('destroy');
                     App.render({type: 'notification', message: ERROR_MESSAGES.successfullySaved[currentLanguage]});
+                    if (self.model){
+                        self.model.set('status', {_id : 'closed'});
+                        self.model.collection.remove(self.model);
+                    }
                 },
                 error   : function () {
                     App.render({type: 'error', message: ERROR_MESSAGES.ajaxPostError[currentLanguage]});

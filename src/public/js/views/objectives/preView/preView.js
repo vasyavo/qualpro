@@ -718,7 +718,7 @@ define([
             var saveObj;
             var self = this;
             var STATUSES = CONSTANTS.OBJECTIVE_STATUSES;
-            var status = this.$el.find('#statusDd').data().id;
+            var status = this.$el.find('#statusDd').attr('data-id');
 
             if (status === STATUSES.COMPLETED) {
                 if (!self.afterPartFilled) {
