@@ -46,6 +46,18 @@
                 ar : "'~ < > ^ * ?' لا يمكن لحقل ادخال البيانات ان يشمل رموز او علامات مثل "
             }
         },
+        region : {
+            emptyNameInput : {
+                en : 'Please enter name of region.',
+                ar : ''//todo
+            }
+        },
+        subRegion : {
+            emptyNameInput : {
+                en : 'Please enter name of sub region.',
+                ar : ''//todo
+            }
+        },
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
             ar: 'المستند قيد الاستخدام ولا يمكن حفظه فى الارشيف'
