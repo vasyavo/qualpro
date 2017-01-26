@@ -505,7 +505,7 @@ class Scheduler {
             // questionaryExpired,
         ];
 
-        this.subscribe(jobs, '*/20 * * * * *'); // every 20 seconds
+        this.subscribe(jobs, '0 * * * *'); // every hour
 
         logger.info('Scheduler started');
     }
