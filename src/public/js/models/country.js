@@ -1,9 +1,10 @@
 define([
         'models/parrent',
         'validation',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages'
     ],
-    function (parent, validation, CONTENT_TYPES) {
+    function (parent, validation, CONTENT_TYPES, ERROR_MESSAGES) {
         var Model = parent.extend({
             defaults: {
                 imageSrc: '',
@@ -24,10 +25,19 @@ define([
             ],
 
             validate: function (attrs) {
+                var currentLanguage = App.currentUser.currentLanguage;
                 var errors = [];
 
-                if(this.translatedFields.name){
-                    validation.checkDomainNameField(errors, true, attrs.name[App.currentUser.currentLanguage], this.translatedFields.name);
+                if(this.translatedFields.name) {
+                    var fieldValue = attrs.name[App.currentUser.currentLanguage];
+
+                    if (!fieldValue) {
+                        errors.push(ERROR_MESSAGES.country.emptyNameInput[currentLanguage]);
+                    }
+
+                    if (validation.hasInvalidChars(fieldValue)) {
+                        errors.push(ERROR_MESSAGES.country.invalidChars[currentLanguage]);
+                    }
                 }
 
                 if (errors.length > 0) {

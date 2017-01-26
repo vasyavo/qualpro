@@ -1,7 +1,10 @@
-const _ = require('lodash');
 const ObjectId = require('mongoose').Types.ObjectId;
 const PersonnelModel = require('./../../../types/personnel/model');
-const setHighAdmin = require('./../../../utils/accessRoleCache').setHighAdmins;
+const accessRoles = require('./../../../constants/aclRolesNames');
+const setHighAdmin = [
+    accessRoles.MASTER_ADMIN,
+    accessRoles.TRADE_MARKETER,
+];
 
 module.exports = function * (options) {
     const actionOriginator = ObjectId(options.actionOriginator);
