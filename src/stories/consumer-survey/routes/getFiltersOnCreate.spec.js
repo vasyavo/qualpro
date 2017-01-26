@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const _ = require('lodash');
 const ObjectId = require('bson-objectid');
 const request = require('supertest-as-promised');
-const server = require('./../../../server');
 const faker = require('faker');
 const logger = require('./../../../utils/logger');
 

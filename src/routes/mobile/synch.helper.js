@@ -1,6 +1,5 @@
 const expect = require('chai').expect;
 const async = require('async');
-const server = require('./../../server');
 
 const assertGetResponse = (body) => {
     expect(body).to.be.an('Object')
