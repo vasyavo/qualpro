@@ -1368,13 +1368,13 @@ const Filters = function(db, redis) {
             }
         });
 
-        pipeLine.push({
+        /*pipeLine.push({
             $match : {
                 status : {
                     $ne : 'expired'
                 }
             }
-        });
+        });*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'categories',
@@ -7286,7 +7286,13 @@ const Filters = function(db, redis) {
                     outlet : 1
                 };
                 var customQuery = {subRegion : subRegionFromFilter ? subRegionFromFilter : {$in : _.pluck(collection, '_id')}};
-                queryForFunction = personnel.branch.length ? customQuery._id = {$in : personnel.branch} : customQuery;
+                
+                if(personnel.branch.length){
+                    customQuery._id = {$in : personnel.branch}
+                }
+                
+                queryForFunction = customQuery;
+               
                 if (_.indexOf(keys, 'branch') !== -1) {
                     queryForFunction._id = filter.branch;
                 } else {
@@ -7299,6 +7305,7 @@ const Filters = function(db, redis) {
                         queryForFunction.outlet = filter.outlet;
                     }
                 }
+                
                 self.getLocationIds(BranchModel, {
                     addProjection : addProjection,
                     query : queryForFunction
@@ -7584,8 +7591,14 @@ const Filters = function(db, redis) {
                     retailSegment : 1,
                     outlet : 1
                 };
-                var customQuery = {subRegion : subRegionFromFilter ? subRegionFromFilter : {$in : _.pluck(collection, '_id')}};
-                queryForFunction = personnel.branch.length ? customQuery._id = {$in : personnel.branch} : customQuery;
+                var customQuery = {subRegion: subRegionFromFilter ? subRegionFromFilter : {$in: _.pluck(collection, '_id')}};
+    
+                if (personnel.branch.length) {
+                    customQuery._id = {$in: personnel.branch}
+                }
+    
+                queryForFunction = customQuery;
+                
                 if (_.indexOf(keys, 'branch') !== -1) {
                     queryForFunction._id = filter.branch;
                 } else {

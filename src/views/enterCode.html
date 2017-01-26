@@ -344,12 +344,29 @@
         var data = frm.serialize();
         var url = frm.attr('action');
         var type = frm.attr('method');
+
+        var verificationCode = data.replace('code=', '');
+
+        if (!verificationCode) {
+            var $renderEl = $('<div class="animate error">' + 'Please enter the verification code.' + '<br>' + 'الرجاء ادخال رمز التحقق.' + '</div>');
+
+            $('#errorHandler').append($renderEl);
+
+            setTimeout(function () {
+                $renderEl.remove();
+                $('#code').val('');
+            }, 4000);
+
+            return;
+        }
+
         data = data + '&phone=' + phoneNumber;
 
         $.ajax({
             headers: {
                 'X-CSRF-Token': CSRF_TOKEN
             },
+            method : 'POST',
             type   : type,
             url    : url,
             data   : data,
@@ -359,8 +376,8 @@
             error  : function (xhr) {
                 var messageClass = xhr.type || 'error';
                 var index = xhr.index || 1;
-                var text = xhr.message || 'Invalid credentials';
-                var $renderEl = $('<div class="animate ' + messageClass + '">' + text + '</div>');
+                var text = xhr.responseJSON.description || 'Invalid credentials';
+                var $renderEl = $('<div class="animate ' + messageClass + '">' + text.en + '<br>' + text.ar + '</div>');
 
                 $('#errorHandler').append($renderEl);
 

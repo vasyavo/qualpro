@@ -6,22 +6,22 @@
     var fileTypeAfter;
 
     if (model.before.files && model.before.files.contentType){
-    fileType = model.before.files.contentType.substr(0, 5);
-    if(fileType==='video'){
-    container = model.before.files.url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files.url+'"></video>' : '';
-    } else {
-    container = model.before.files.url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files.url+'">' : '';
-    }
+        fileType = model.before.files.contentType.substr(0, 5);
+        if(fileType==='video'){
+            container = model.before.files.url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files.url+'"></video>' : '';
+        } else {
+            container = model.before.files.url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files.url+'">' : '';
+        }
     }
 
     if (model.after.files && model.after.files.contentType){
-    fileTypeAfter = model.after.files.contentType.substr(0, 5);
+        fileTypeAfter = model.after.files.contentType.substr(0, 5);
 
-    if(fileTypeAfter==='video'){
-    containerAfter = model.after.files.url ? '<video class="showPreview after" width="400" controls><source src="'+model.after.files.url+'"></video>' : '';
-    } else {
-    containerAfter = model.after.files.url ? '<img class="imgResponsive showPreview after" src="' + model.after.files.url + '">' : '';
-    }
+        if(fileTypeAfter==='video'){
+            containerAfter = model.after.files.url ? '<video class="showPreview after" width="400" controls><source src="'+model.after.files.url+'"></video>' : '';
+        } else {
+            containerAfter = model.after.files.url ? '<img class="imgResponsive showPreview after" src="' + model.after.files.url + '">' : '';
+        }
     }
     %>
     <div class="title">

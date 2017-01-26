@@ -41,13 +41,15 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #goToBtn'                  : 'goTo'
         },
 
         initialize: function (options) {
             var self = this;
             this.translation = options.translation;
 
+            this.activityList = options.activityList;
             this.model = options.model;
             this.files = new FileCollection();
             this.previewFiles = new FileCollection(this.model.get('attachments'), true);
@@ -325,6 +327,7 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
+            var currentConfig = this.activityList ? levelConfig[this.contentType].activityList.preview : [];
 
             jsonModel.displayTypeString = jsonModel.displayType.map((item) => {
                 return item.name.currentLanguage;
@@ -371,6 +374,29 @@ define([
                     $('body').css({overflow: 'inherit'});
                 }
             });
+
+            if (App.currentUser.workAccess && this.activityList) {
+                currentConfig.forEach(function (config) {
+                    require([
+                            config.template
+                        ],
+                        function (template) {
+                            var container = self.$el.find(config.selector);
+
+                            template = _.template(template);
+
+                            if (!container.find('#' + config.elementId).length) {
+                                container[config.insertType](template({
+                                    elementId  : config.elementId,
+                                    translation: self.translation
+                                }));
+                            }
+                        });
+
+                });
+            } else {
+                this.$el.find('.objectivesTopBtnBlockSmall').hide();
+            }
 
             this.$el.find('#commentForm').on('submit', {
                 body   : this.commentBody,

@@ -120,7 +120,7 @@ var CompetitorBranding = function(db, redis, event) {
                     model.set('attachments', filesIds);
                     model.save(cb);
                 }
-            ], function(err) {
+            ], function(err, model) {
                 if (err) {
                     if (!res.headersSent) {
                         next(err);
@@ -132,7 +132,7 @@ var CompetitorBranding = function(db, redis, event) {
                 ActivityLog.emit('reporting:competitor-branding-and-display-report:published', {
                     actionOriginator: userId,
                     accessRoleLevel,
-                    body
+                    body : model.toJSON()
                 });
             });
 

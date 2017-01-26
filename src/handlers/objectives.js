@@ -1405,6 +1405,7 @@ var Objectives = function (db, redis, event) {
 
     function getAllPipeline(options) {
         const subordinates = options.subordinates;
+        const personnel = options.personnel;
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var parentIds = options.parentIds;
@@ -1467,10 +1468,8 @@ var Objectives = function (db, redis, event) {
                             $or: [
                                 {
                                     assignedTo: {$in: subordinates},
-                                    status: {$nin: [OBJECTIVE_STATUSES.DRAFT]}
                                 }, {
                                     assignedTo: {$in: coveredIds},
-                                    status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]}
                                 }, {
                                     'createdBy.user': {$in: coveredIds}
                                 }
@@ -1479,6 +1478,20 @@ var Objectives = function (db, redis, event) {
                     });
                 }
             }
+    
+            // prevent retrieving objectives with status === draft if user not creator
+            pipeLine.push({
+                $match: {
+                    $or: [
+                        {
+                            status: {$ne: OBJECTIVE_STATUSES.DRAFT}
+                        },{
+                            status    : {$eq: OBJECTIVE_STATUSES.DRAFT},
+                            'createdBy.user': {$eq: personnel}
+                        }
+                    ]
+                }
+            });
         }
 
         if (!isMobile) {
@@ -1757,6 +1770,7 @@ var Objectives = function (db, redis, event) {
                         queryObject     : queryObject,
                         isMobile        : true,
                         forSync         : true,
+                        personnel       : ObjectId(req.session.uId),
                         coveredIds      : coveredIds,
                         currentUserLevel: currentUserLevel,
                         subordinates    : arrayOfSubordinateUsersId
@@ -1979,7 +1993,7 @@ var Objectives = function (db, redis, event) {
 
                 function (coveredIds, cb) {
                     var pipeLine;
-
+    
                     pipeLine = getAllPipeline({
                         aggregateHelper  : aggregateHelper,
                         queryObject      : queryObject,
@@ -1989,6 +2003,7 @@ var Objectives = function (db, redis, event) {
                         filterSearch     : filterSearch,
                         skip             : skip,
                         limit            : limit,
+                        prsonnel         : ObjectId(uId),
                         coveredIds       : coveredIds,
                         subordinates     : arrayOfSubordinateUsersId,
                         currentUserLevel : currentUserLevel

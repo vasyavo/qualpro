@@ -2,27 +2,29 @@
 
 const PasswordManager = require('./../helpers/passwordManager');
 
-var Personnel = function(db, redis, event) {
-    var mongoose = require('mongoose');
-    var ACL_CONSTANTS = require('../constants/aclRolesNames');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var RESPONSES_CONSTANTS = require('../constants/responses');
-    var CONSTANTS = require('../constants/mainConstants');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var REGEXP = require('../public/js/constants/validation.js');
-    var PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
-    var validator = require('validator');
-    var bcrypt = require('bcryptjs');
-    var crypto = require('crypto');
-    var access = require('../helpers/access')(db);
-    var generator = require('../helpers/randomPass.js');
-    var mailer = require('../helpers/mailer');
-    var smsSender = require('../helpers/smsSender');
-    var FilterMapper = require('../helpers/filterMapper');
-    var async = require('async');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+const Personnel = function (db, redis, event) {
+    const mongoose = require('mongoose');
+    const ACL_CONSTANTS = require('../constants/aclRolesNames');
+    const ACL_MODULES = require('../constants/aclModulesNames');
+    const RESPONSES_CONSTANTS = require('../constants/responses');
+    const CONSTANTS = require('../constants/mainConstants');
+    const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+    const ACTIVITY_TYPES = require('../constants/activityTypes');
+    const ERROR_MESSAGES = require('../constants/errorMessages');
+    const REGEXP = require('../public/js/constants/validation.js');
+    const PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
+    const validator = require('validator');
+    const bcrypt = require('bcryptjs');
+    const crypto = require('crypto');
+    const access = require('../helpers/access')(db);
+    const generator = require('../helpers/randomPass.js');
+    const errorSender = require('../utils/errorSender');
+    const mailer = require('../helpers/mailer');
+    const smsSender = require('../helpers/smsSender');
+    const FilterMapper = require('../helpers/filterMapper');
+    const async = require('async');
+    const GetImagesHelper = require('../helpers/getImages');
+    const getImagesHelper = new GetImagesHelper(db);
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
     const CountryModel = require('./../types/domain/model');
@@ -30,17 +32,18 @@ var Personnel = function(db, redis, event) {
     const BranchModel = require('./../types/branch/model');
     const retailSegmentModel = require('./../types/retailSegment/model');
     const SessionModel = require('./../types/session/model');
-    var xssFilters = require('xss-filters');
-    var ObjectId = mongoose.Types.ObjectId;
-    var Archiver = require('../helpers/archiver');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var archiver = new Archiver(PersonnelModel);
-    var _ = require('lodash');
-    var bodyValidator = require('../helpers/bodyValidator');
-    var logWriter = require('../helpers/logWriter.js');
-    var SomeEvents = require('../helpers/someEvents');
-    var someEvents = new SomeEvents();
-    var app = require('../server');
+    const xssFilters = require('xss-filters');
+    const ObjectId = mongoose.Types.ObjectId;
+    const Archiver = require('../helpers/archiver');
+    const AggregationHelper = require('../helpers/aggregationCreater');
+    const archiver = new Archiver(PersonnelModel);
+    const _ = require('lodash');
+    const bodyValidator = require('../helpers/bodyValidator');
+    const logWriter = require('../helpers/logWriter.js');
+    const SomeEvents = require('../helpers/someEvents');
+    const someEvents = new SomeEvents();
+    const app = require('../server');
+    const config = require('../config');
     const redisClient = require('../helpers/redisClient');
 
     var $defProjection = {
@@ -530,16 +533,11 @@ var Personnel = function(db, redis, event) {
         }
 
         access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
-            var customErr;
-
             if (err) {
                 return next(err);
             }
             if (!allowed) {
-                customErr = new Error();
-                customErr.status = 403;
-
-                return next(customErr);
+                return errorSender.forbidden(next);
             }
 
             queryRun();
@@ -563,10 +561,7 @@ var Personnel = function(db, redis, event) {
             var instoreObjective = req.query.instoreObjective;
 
             if (!queryObject.ids || !(queryObject.ids instanceof Array) || !currentLanguage) {
-                error = new Error('Not enough params');
-                error.status = 400;
-
-                return next(error);
+                return errorSender.badRequest(next, ERROR_MESSAGES.NOT_ENOUGH_PARAMS);
             }
 
             async.waterfall([
@@ -985,10 +980,7 @@ var Personnel = function(db, redis, event) {
                 return next(err);
             }
             if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
+                return errorSender.forbidden(next);
             }
 
             queryRun();
@@ -1009,11 +1001,9 @@ var Personnel = function(db, redis, event) {
             if (err) {
                 return next(err);
             }
+    
             if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
+                return errorSender.forbidden(next);
             }
 
             queryRun();
@@ -1032,10 +1022,7 @@ var Personnel = function(db, redis, event) {
         }
 
         if (!isEmailValid) {
-            const error = new Error('Email is invalid');
-
-            error.status = 400;
-            return next(error);
+            return errorSender.badRequest(next, ERROR_MESSAGES.EMAIL_IS_NOT_VALID);
         }
 
         email = validator.escape(email);
@@ -1306,10 +1293,7 @@ var Personnel = function(db, redis, event) {
         }
 
         if (!login || !pass || (!isEmailValid && !isPhoneValid)) {
-            error = new Error();
-            error.status = 400;
-
-            return next(error);
+            return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS)
         }
 
         login = validator.escape(login);
@@ -1336,56 +1320,38 @@ var Personnel = function(db, redis, event) {
             if (err) {
                 return next(err);
             }
-
+    
             if (!personnel || !bcrypt.compareSync(pass, personnel.pass)) {
-                error = new Error();
-                error.status = 401;
-
-                return next(error);
+                return errorSender.notAuthorized(next, ERROR_MESSAGES.INVALID_CREDENTIALS);
             }
-
+    
             if (!personnel.confirmed && !personnel.super) {
-                error = new Error('Your account is not confirmed. Please check your email or phone.');
-                error.status = 400;
-
-                return next(error);
+                return errorSender.badRequest(next, ERROR_MESSAGES.ACCOUNT_IS_NOT_CONFIRMED);
             }
-
+    
             /* if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
              error = new Error('You cannot access the app while being on leave');
              error.status = 400;
-
+     
              return next(error);
              }*/
-
+    
             if (personnel.archived) {
-                error = new Error('Your account is blocked. Please contact with administration.');
-                error.status = 400;
-
-                return next(error);
+                return errorSender.badRequest(next, ERROR_MESSAGES.ACCOUNT_IS_BLOCKED);
             }
-
+    
             level = personnel.accessRole ? personnel.accessRole.level : null;
 
             if (notAllowedLevelsCMS.indexOf(level) !== -1 && !req.isMobile) {
-                error = new Error('You can not login to CMS.');
-                error.status = 403;
-
-                return next(error);
+                return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_TO_CMS);
             } else if (notAllowedLevelsMobile.indexOf(level) !== -1 && req.isMobile) {
-                error = new Error('You can not login from application.');
-                error.status = 403;
-
-                return next(error);
+                return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_FROM_APP);
             }
 
             locationField = locationsByLevel[level];
 
             if (locationField && personnel[locationField] && !personnel[locationField].length) {
-                error = new Error('You have no location. Please contact with administration.');
-                error.status = 403;
-
-                return next(error);
+                return errorSender.forbidden(next, ERROR_MESSAGES.USER_LOCATION_IS_NOT_SPECIFIED);
             }
 
             let onLeave = personnel.vacation.onLeave;
@@ -1481,26 +1447,18 @@ var Personnel = function(db, redis, event) {
     };
 
     this.deviceId = function(req, res, next) {
-        var body = req.body;
-        var error;
+        const {body} = req;
 
         if (!req.session.loggedIn) {
-            error = new Error();
-            error.status = 401;
-            error.message = 'Unauthorized';
-            return next(error);
+            return errorSender.notAuthorized(next)
         }
+    
         if (!req.isMobile) {
-            error = new Error();
-            error.status = 400;
-            error.message = 'device is not mobile';
-            return next(error);
+            return errorSender.badRequest(next)
         }
+    
         if (!body.deviceId) {
-            error = new Error();
-            error.status = 400;
-            error.message = 'deviceId is required';
-            return next(error);
+            return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS)
         }
 
         req.session.deviceId = body.deviceId;
@@ -1569,11 +1527,9 @@ var Personnel = function(db, redis, event) {
             if (err) {
                 return next(err);
             }
+    
             if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
+                return errorSender.forbidden(next);
             }
 
             queryRun();
@@ -1908,11 +1864,9 @@ var Personnel = function(db, redis, event) {
             if (err) {
                 return next(err);
             }
+    
             if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
+                return errorSender.forbidden(next);
             }
 
             queryRun();
@@ -3272,11 +3226,9 @@ var Personnel = function(db, redis, event) {
             if (err) {
                 return next(err);
             }
+    
             if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
+                return errorSender.forbidden(next);
             }
 
             queryRun(personnel);
@@ -3565,10 +3517,7 @@ var Personnel = function(db, redis, event) {
 
                 (personnel, cb) => {
                     if (!personnel) {
-                        const error = new Error('Personnel not found');
-
-                        error.status = 400;
-                        return cb(error);
+                        return errorSender.badRequest(cb, ERROR_MESSAGES.USER_NOT_FOUND);
                     }
 
                     let oldAccessRole;
@@ -3655,7 +3604,6 @@ var Personnel = function(db, redis, event) {
         var login = body.login;
         var option = body.ifPhone;
         var forgotToken;
-        var error;
         var isValid;
 
         if (option === 'true') {
@@ -3667,10 +3615,7 @@ var Personnel = function(db, redis, event) {
         }
 
         if (!isValid) {
-            error = new Error();
-            error.status = 400;
-
-            return next(error);
+            return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
         }
 
         login = validator.escape(login);
@@ -3688,10 +3633,7 @@ var Personnel = function(db, redis, event) {
                 }
 
                 if (!result) {
-                    error = new Error();
-                    error.status = 401;
-
-                    return next(error);
+                    return errorSender.badRequest(next, ERROR_MESSAGES.USER_NOT_FOUND);
                 }
 
                 PersonnelModel.findOneAndUpdate(
@@ -3749,43 +3691,33 @@ var Personnel = function(db, redis, event) {
             if (err) {
                 return next(err);
             }
-            res.redirect(302, process.env.HOST + '/#login/confirmed');
+            res.redirect(302, `${config.localhost}/#login/confirmed`);
         });
     };
-
-    this.checkVerifCode = function(req, res, next) {
-        var body = req.body;
-        var phoneNumber = body.phone;
-        var code = body.code;
-        var error;
-
-        var url = process.env.HOST + '/passwordChange/' + code;
-
-        PersonnelModel.findOne(
-            {
-                phoneNumber : phoneNumber
-            },
-            function(err, result) {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!result) {
-                    error = new Error();
-                    error.status = 400;
-
-                    return next(error);
-                }
-                if (result.forgotToken !== code) {
-                    error = new Error();
-                    error.status = 401;
-
-                    return next(error);
-                }
-
-                res.status(200).send(url);
-            });
-
+    
+    this.checkVerifCode = function (req, res, next) {
+        const body = req.body;
+        const phoneNumber = body.phone;
+        const code = body.code;
+        const url = `${config.localhost}/passwordChange/${code}`;
+        
+        PersonnelModel.findOne({
+            phoneNumber: phoneNumber
+        }, function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            
+            if (!result) {
+                return errorSender.badRequest(next, ERROR_MESSAGES.USER_NOT_FOUND);
+            }
+            
+            if (result.forgotToken !== code) {
+                return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_VERIFICATION_CODE);
+            }
+            
+            res.status(200).send(url);
+        });
     };
 
     this.changePassword = function(req, res, next) {
@@ -3816,7 +3748,7 @@ var Personnel = function(db, redis, event) {
                 message : message,
                 title : title
             };
-            url = process.env.HOST + '/passwordChangeNotification/' + JSON.stringify(objToSend);
+            url = `${config.localhost}/passwordChangeNotification/${JSON.stringify(objToSend)}`;
 
             res.status(200).send(url);
         });
@@ -3846,10 +3778,7 @@ var Personnel = function(db, redis, event) {
             var error;
 
             if (!result) {
-                error = new Error();
-                error.status = 400;
-
-                return callback(error);
+                return errorSender.badRequest(callback);
             }
 
             PersonnelModel.findOneAndUpdate(

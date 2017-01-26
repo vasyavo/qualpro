@@ -31,7 +31,8 @@ define([
             send        : 'ارسال',
             location    : 'الموقع',
             okBtn       : 'موافق',
-            dialogTitle : ' التعليقات والمرفقات'
+            dialogTitle : ' التعليقات والمرفقات',
+            goToBtn : '' //todo
         };
 
         return _.extend({}, paginationTranslation, filtersTranslation, translation);

@@ -1,23 +1,29 @@
 const logger = require('./logger');
 
 module.exports = (err, req, res, next) => {
-    const status = err.status || 500;
-    const requestId = req.id;
-    const stackTrace = err.stack;
-    const session = req.session;
-    const userId = session ? session.uId : null;
+    const {
+        status = 500,
+        stack: stackTrace = '',
+        message = 'unhandled_error',
+        description = { en: '', ar: ''}
+    } = err;
+    const {
+        id: requestId,
+        session: {uId : userId} = {uId: null}
+    } = req;
 
     logger.error({
         userId,
         requestId,
         statusCode: status,
-        message: err.message
+        message
     }, `Stack trace: ${stackTrace}`);
 
     const body = {
         status,
         requestId,
-        message: err.message || 'Something went wrong...'
+        message,
+        description
     };
 
     res.status(status).send(body);
