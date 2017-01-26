@@ -10,6 +10,7 @@ const consolidate = require('consolidate');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const compress = require('compression');
+const PubNubClient = require('./stories/push-notifications/utils/pubnub');
 
 mongoose.Schemas = {}; // important thing
 
@@ -17,7 +18,6 @@ const config = require('./config');
 const mongo = require('./utils/mongo');
 const logger = require('./utils/logger');
 const eventEmitter = require('./utils/eventEmitter');
-const MessageDispatcher = require('./stories/push-notifications/utils/messageDispatcher');
 
 process.on('unhandledRejection', (reason, p) => {
     logger.error(p, reason);
@@ -60,13 +60,15 @@ app.get('/info', require('./utils/isApiAvailable'));
 
 require('./routes/index')(app, mongo, eventEmitter);
 
-const node = http.createServer(app);
-const io = require('./helpers/socket')(node);
+const server = http.createServer(app);
+const io = require('./helpers/socket')({
+    server,
+});
 
 app.set('io', io);
-MessageDispatcher.setIo(io);
+PubNubClient.init();
 
-node.listen(config.port, () => {
+server.listen(config.port, () => {
     logger.info(`Server started at port ${config.port} in ${config.env} environment:`, config);
 });
 

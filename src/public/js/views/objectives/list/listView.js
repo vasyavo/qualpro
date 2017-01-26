@@ -50,7 +50,8 @@ define([
             var targetEl = $(e.target);
             var targetRow = targetEl.closest('.listRow');
             var id = targetRow.attr('data-id');
-            var model = self.collection.get(id);
+            var collection =  this.collection;
+            var model = collection.get(id);
 
             self.preView = new PreView({
                 model      : model,
@@ -65,6 +66,16 @@ define([
             self.preView.on('showSubObjectiveDialog', self.showSubObjectiveDialog, self);
             self.preView.on('showAssignObjectiveDialog', self.showAssignObjectiveDialog, self);
             self.preView.on('showEditObjectiveDialog', self.showEditObjectiveDialog, self);
+            collection.once('remove', function () {
+                collection.totalRecords--;
+                collection.trigger('renderFinished', {
+                    length     : collection.totalRecords,
+                    currentPage: collection.currentPage,
+                    itemsNumber: collection.pageSize
+                });
+
+                self.showMoreContent(collection);
+            });
         },
 
         showEditObjectiveDialog: function (model, duplicate) {
@@ -96,6 +107,7 @@ define([
                         self.collection.add(model, {merge: true});
                         self.addReplaceRow(model);
                     });
+
                 });
             }
         },
@@ -109,14 +121,6 @@ define([
                 multiselect    : multiselect,
                 assignDefFilter: defFilter,
                 translation    : this.translation
-            });
-
-            this.assignObjectiveView.on('modelSaved', function () {
-                self.collection.fetch({
-                    success : function () {
-                        self.showMoreContent(self.collection);
-                    }
-                });
             });
         },
 

@@ -92,5 +92,10 @@ config.fcmApiKey = process.env.FCM_API_KEY;
 config.webConcurrency = process.env.WEB_CONCURRENCY || 1;
 config.isMaster = cluster.isMaster;
 
+config.pubnub = {
+    publishKey: process.env.PUBNUB_PUBLISH_KEY,
+    subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY,
+};
+
 // import this file at begin of server.js
 module.exports = config;

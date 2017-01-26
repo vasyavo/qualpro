@@ -1146,7 +1146,7 @@ define([
                     }
                 },
                 cancel : {
-                    text : 'cancel',
+                    text : 'Cancel',
                     click : function () {
                         self.remove();
                     }

@@ -4,6 +4,7 @@
     var root;
 
     var ERRORMESSAGES = {
+        //login, forgotPassword, restorePassword messages
         enterYourPhoneNumber : {
             en : 'Please enter your phone number.',
             ar : 'يرجى إدخال رقم الهاتف.'
@@ -36,6 +37,32 @@
                 ar : 'عنوان البريد الإلكتروني الذي أدخلته غير صحيح، يرجى المحاولة مرة أخرى.'
             }
         },
+
+        //location messages
+        invalidChars : {
+            en : "field can not contain '~ < > ^ * ₴' signs",
+            ar : "'~ < > ^ * ?' لا يمكن لحقل ادخال البيانات ان يشمل رموز او علامات مثل "
+        },
+        country : {
+            emptyNameInput : {
+                en : 'Please enter the country name you would like to create.',
+                ar : 'الرجاء إدخال اسم الدولة التي ترغب في إنشائها.'
+            }
+        },
+        region : {
+            emptyNameInput : {
+                en : 'Please enter name of region.',
+                ar : ''//todo
+            }
+        },
+        subRegion : {
+            emptyNameInput : {
+                en : 'Please enter name of sub region.',
+                ar : ''//todo
+            }
+        },
+
+
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
             ar: 'المستند قيد الاستخدام ولا يمكن حفظه فى الارشيف'

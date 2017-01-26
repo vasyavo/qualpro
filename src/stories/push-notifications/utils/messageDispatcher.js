@@ -1,19 +1,9 @@
 const async = require('async');
 const Bluebird = require('bluebird');
-const redis = require('./../../../helpers/redisClient');
+const PubNubClient = require('./pubnub');
 const addAction = require('./../utils/addAction');
 
-const getSocketIdByUserId = (userId, callback) => {
-    const route = `socket_Uid:${userId}:*`;
-
-    redis.redisClient.keys(route, callback);
-};
-
 class MessageDispatcher {
-
-    static setIo(io) {
-        this.io = io;
-    }
 
     /*
      * @param {Object[]} groups
@@ -30,32 +20,22 @@ class MessageDispatcher {
          * */
         const itRecipient = (action) => {
             return (recipient, itCallback) => {
-                async.parallel({
+                async.waterfall([
 
-                    numberOfNewActivities: async.apply(addAction, recipient),
+                    async.apply(addAction, recipient),
 
-                    setRedisKeys: async.apply(getSocketIdByUserId, recipient),
-
-                }, (err, values) => {
-                    if (err) {
-                        return itCallback(err);
-                    }
-
-                    const {
-                        numberOfNewActivities,
-                        setRedisKeys
-                    } = values;
-
-                    async.each(setRedisKeys, (redisKey, eachCb) => {
-                        const socketId = redisKey.split(':')[2];
-                        const payload = Object.assign({}, action.paylaod, {
+                    (numberOfNewActivities, cb) => {
+                        const payload = Object.assign({}, action.payload, {
                             badge: numberOfNewActivities,
                         });
 
-                        this.io.to(socketId).emit('message', payload);
-                        eachCb(null);
-                    }, itCallback);
-                });
+                        PubNubClient.publish({
+                            message: payload,
+                            channel: recipient,
+                        }, cb);
+                    }
+
+                ], itCallback);
             }
         };
 

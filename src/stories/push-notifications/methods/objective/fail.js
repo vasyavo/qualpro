@@ -27,28 +27,28 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Objective updated',
+                en: 'Objective failed',
                 ar: '',
             },
             payload,
         }, {
             recipients: setOriginator,
             subject: {
-                en: 'Sub-objective updated',
+                en: 'Sub-objective failed',
                 ar: '',
             },
             payload,
         }, {
             recipients: setAssignee,
             subject: {
-                en: 'Received updated objective',
+                en: 'Objective failed',
                 ar: '',
             },
             payload,
         }, {
             recipients: setSupervisor,
             subject: {
-                en: `Subordinate's objective updated`,
+                en: `Subordinate fails objective`,
                 ar: '',
             },
             payload,

@@ -718,9 +718,11 @@ define([
             var saveObj;
             var self = this;
             var STATUSES = CONSTANTS.OBJECTIVE_STATUSES;
-            var status = this.$el.find('#statusDd').data().id;
+            var status = this.$el.find('#statusDd').attr('data-id');
+            var createdByUserId = self.model.get('createdBy').user._id;
+            var currentUserId = App.currentUser._id;
 
-            if (status === STATUSES.COMPLETED) {
+            if (status === STATUSES.COMPLETED && createdByUserId !== currentUserId) {
                 if (!self.afterPartFilled) {
                     return App.render({
                         type : 'error',
@@ -762,7 +764,7 @@ define([
                         cb();
                     },
                     error  : function (model, res) {
-                        var err = res.responseJSON || res.responseText;
+                        var err = res.responseJSON || res.responseText || {};
 
                         App.render(err);
                     }

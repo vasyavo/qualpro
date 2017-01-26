@@ -1,22 +1,27 @@
 const mongoose = require('mongoose');
 const async = require('async');
+const mongo = require('./utils/mongo');
+const config = require('./config');
+const logger = require('./utils/logger');
+const PubNubClient = require('./stories/push-notifications/utils/pubnub');
 
 mongoose.Schemas = {}; // important thing
 require('./types');
 
-const mongo = require('./utils/mongo');
-const eventEmitter = require('./utils/eventEmitter');
-
-const Scheduler = require('./helpers/scheduler')(mongo, eventEmitter);
+const Scheduler = require('./helpers/scheduler');
 const scheduler = new Scheduler();
-scheduler.initEveryHourScheduler();
 
 mongo.on('connected', () => {
-    async.series([
-
-        (cb) => {
-            require('./modulesCreators')(cb)
-        },
-
-    ])
+    logger.info('Master connected to MongoDB.');
 });
+
+// warning: be careful whit this glitch
+if (config.isTest) {
+    PubNubClient.init();
+    scheduler.start();
+} else {
+    require('./modulesCreators')(() => {
+        PubNubClient.init();
+        scheduler.start();
+    });
+}

@@ -42,7 +42,6 @@ const Personnel = function (db, redis, event) {
     const logWriter = require('../helpers/logWriter.js');
     const SomeEvents = require('../helpers/someEvents');
     const someEvents = new SomeEvents();
-    const app = require('../server');
     const config = require('../config');
     const redisClient = require('../helpers/redisClient');
 
@@ -592,6 +591,10 @@ const Personnel = function (db, redis, event) {
                                 error.status = 400;
 
                                 return cb(err, null);
+                            }
+
+                            if (level ===  ACL_CONSTANTS.AREA_IN_CHARGE && personnelModel.get('branch') && personnelModel.get('branch').length){
+                                level = ACL_CONSTANTS.SALES_MAN;
                             }
 
                             cb(null, level);

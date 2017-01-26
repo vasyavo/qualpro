@@ -491,7 +491,7 @@ const getAll = (req, res, next) => {
                             'createdBy.user.region': queryObject.region
                         },
                         {
-                            'createdBy.user.region': { $exists: false }
+                            'createdBy.user.region': {  $size: 0 }
                         }
                     ]
                 }
@@ -506,7 +506,7 @@ const getAll = (req, res, next) => {
                             'createdBy.user.subRegion': queryObject.subRegion
                         },
                         {
-                            'createdBy.user.subRegion': { $exists: false }
+                            'createdBy.user.subRegion': {  $size: 0 }
                         }
                     ]
                 }
@@ -553,10 +553,10 @@ const getAll = (req, res, next) => {
                 $match: {
                     $or: [
                         {
-                            'branches.subRegion': queryObject.subRegion
+                            'branch.subRegion': queryObject.subRegion
                         },
                         {
-                            'branches.subRegion': { $exists: false }
+                            'branch.subRegion': { $exists: false }
                         }
                     ]
                 }
@@ -581,10 +581,10 @@ const getAll = (req, res, next) => {
                 $match: {
                     $or: [
                         {
-                            'branches.subRegion.parent': queryObject.region
+                            'branch.subRegion.parent': queryObject.region
                         },
                         {
-                            'branches.subRegion.parent': { $exists: false }
+                            'branch.subRegion.parent': { $exists: false }
                         }
                     ]
                 }
@@ -845,6 +845,7 @@ const getAll = (req, res, next) => {
         };
 
         aggregation.exec(function(err, response) {
+            console.log(response[0]);
             if (err) {
                 return next(err);
             }
@@ -865,8 +866,10 @@ const getAll = (req, res, next) => {
                     return model;
                 });
             }
+            console.log(response[0]);
 
             response = response && response[0] ? response[0] : { data: [], total: 0 };
+
 
             // res.status(200).send(response);
 
@@ -1139,6 +1142,8 @@ const getBrands = (req, res, next) => {
 const getById = (req, res, next) => {
     function queryRun() {
         var id = ObjectId(req.params.id);
+
+        console.log(id);
 
         aggregateById({ id: id }, function(err, result) {
             if (err) {
