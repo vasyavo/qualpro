@@ -594,6 +594,10 @@ const Personnel = function (db, redis, event) {
                                 return cb(err, null);
                             }
 
+                            if (level ===  ACL_CONSTANTS.AREA_IN_CHARGE && personnelModel.get('branch') && personnelModel.get('branch').length){
+                                level = ACL_CONSTANTS.SALES_MAN;
+                            }
+
                             cb(null, level);
                         });
                 },

@@ -562,12 +562,14 @@ define([
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
                 var collectionJSON = personnelCollection.toJSON();
                 var isTradeMarketer = collectionJSON.length === 1 && (collectionJSON[0].accessRole.level === 10 || collectionJSON[0].accessRole.level === 1);
+                var accessLevel = jsonPersonnels[0].accessRole.level === 4 && jsonPersonnels[0].branch.length ? 5 : jsonPersonnels[0].accessRole.level;
+
 
                 if (!isTradeMarketer){
                     self.treeView = new TreeView({
                         ids             : personnelsIds,
                         instoreObjective: true,
-                        selectedLevel   : jsonPersonnels[0].accessRole.level,
+                        selectedLevel   : accessLevel,
                         translation     : self.translation
                     });
                     self.treeView.on('locationSelected', self.locationSelected, self);
