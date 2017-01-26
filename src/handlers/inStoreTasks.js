@@ -720,6 +720,8 @@ var InStoreReports = function() {
                         ];
                         delete queryObject.country;
                         delete queryObject.region;
+                        delete queryObject.subRegion;
+
                     }
 
                     pipeLine.push({
