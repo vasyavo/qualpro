@@ -11,21 +11,16 @@ const event = require('./../utils/eventEmitter');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const getPipeline = (query) => {
-    const pipeLine = [];
-
-    pipeLine.push({
+    return [{
         $match: query
-    });
-    pipeLine.push({
+    }, {
         $group: {
             _id: null,
             setId: {
                 $addToSet: '$_id'
             }
         }
-    });
-
-    return pipeLine.length ? pipeLine.slice().pop().setId : [];
+    }];
 };
 
 const triggerEvent = (mid, id, itemType) => {
@@ -49,7 +44,9 @@ const exec = (options) => {
     } = options;
     const infoMessage = `scheduler:${domain}:${actionType}/`;
 
-    return (err, setId) => {
+    return (err, result) => {
+        const setId = result.length ? result.slice().pop().setId : [];
+
         if (err) {
             logger.error(`[${infoMessage}/*]:`, err);
         }
