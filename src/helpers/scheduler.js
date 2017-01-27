@@ -25,7 +25,7 @@ const getPipeline = (query) => {
         }
     });
 
-    return pipeLine;
+    return pipeLine.length ? pipeLine.slice().pop().setId : [];
 };
 
 const triggerEvent = (mid, id, itemType) => {
@@ -47,22 +47,29 @@ const exec = (options) => {
         actionType,
         iterator,
     } = options;
+    const infoMessage = `scheduler:${domain}:${actionType}/`;
 
-    return (err, resObject) => {
+    return (err, setId) => {
         if (err) {
-            logger.error(`[scheduler] ${domain}:${actionType}`, err);
-        } else if (resObject[0] && resObject[0].setId && resObject[0].setId.length) {
-            iterator(resObject[0].setId, (err) => {
+            logger.error(`[${infoMessage}/*]:`, err);
+        }
+
+        if (!setId.length) {
+            logger.info(`[${infoMessage}/*]: Skipping...`);
+            return
+        }
+
+        async.each(setId, (id, eachCb) => {
+            iterator(id, (err) => {
                 if (err) {
-                    logger.error(`[scheduler] branding-and-display:expired`, err);
-                    return
+                    logger.error(`[${infoMessage}/${id}]:`, err);
+                    return eachCb(null);
                 }
 
-                logger.info(`[scheduler] ${domain}:${actionType} updated.`);
+                logger.info(`[${infoMessage}/${id}]: Done.`);
+                eachCb(null);
             });
-        } else {
-            logger.info(`[scheduler] ${domain}:${actionType} skipping...`);
-        }
+        })
     };
 };
 
