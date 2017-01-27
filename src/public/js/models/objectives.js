@@ -51,24 +51,31 @@ define([
             if (this.translatedFields.title) {
                 validation.checkTitleField(errors, true, attrs.title, this.translatedFields.title);
             }
+
             if (this.translatedFields.type) {
                 validation.checkForValuePresence(errors, true, attrs.objectiveType, this.translatedFields.type);
             }
+
             if (this.translatedFields.assignTo) {
                 validation.checkForValuePresence(errors, true, attrs.assignedTo, this.translatedFields.assignTo);
             }
+
             if (this.translatedFields.priority) {
                 validation.checkForValuePresence(errors, true, attrs.priority, this.translatedFields.priority);
             }
+
             if (this.translatedFields.location) {
                 validation.checkForValuePresence(errors, true, attrs.location, this.translatedFields.location);
             }
+
             if (this.translatedFields.startDate) {
                 validation.checkForValuePresence(errors, true, attrs.dateStart, this.translatedFields.startDate);
             }
+
             if (this.translatedFields.endDate) {
                 validation.checkForValuePresence(errors, true, attrs.dateEnd, this.translatedFields.endDate);
             }
+
             if (this.translatedFields.description) {
                 validation.checkDescriptionField(errors, true, attrs.description, this.translatedFields.description);
             }
@@ -79,6 +86,7 @@ define([
                 }
                 return errors;
             }
+
             if (!cb.parse) {
                 return cb(null);
             }

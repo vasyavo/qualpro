@@ -190,7 +190,7 @@
         },
         ajaxPostError: {
             en: 'Ajax post error',
-            ar: 'Ar Ajax post error' // todo translation
+            ar: '' // todo translation
         },
         onlyOneDocumentAttach: {
             en: 'Only one document can be attached',
