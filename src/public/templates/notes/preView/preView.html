@@ -28,8 +28,8 @@
                         <div data-id="<%- attachment._id %>" class="fileThumbnailItem brandItem masonryThumbnail">
                             <div class="thumbnail_js thumbnailBody">
                                 <div class="thumbnail_js thumbnailBody">
-                                    <div class="filetype-<%- attachment.name.split('.').pop() %>">
-                                        <% if(attachment.name.split('.').pop() == 'png' || attachment.name.split('.').pop() == 'jpg') { %>
+                                    <div class="filetype-<%- attachment.name.split('.').pop().toLowerCase() %>">
+                                        <% if(['png', 'jpg', 'jpeg'].indexOf(attachment.name.split('.').pop().toLowerCase()) != -1) { %>
                                         <img class="" src="<%- attachment.url %>"/>
                                         <% } %>
                                     </div>
