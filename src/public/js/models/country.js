@@ -33,9 +33,7 @@ define([
 
                     if (!fieldValue) {
                         errors.push(ERROR_MESSAGES.country.emptyNameInput[currentLanguage]);
-                    }
-
-                    if (validation.hasInvalidChars(fieldValue)) {
+                    } else if (validation.hasInvalidChars(fieldValue)) {
                         errors.push(ERROR_MESSAGES.invalidChars[currentLanguage]);
                     }
                 }

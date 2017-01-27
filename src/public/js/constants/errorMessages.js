@@ -61,7 +61,28 @@
                 ar : ''//todo
             }
         },
-
+        retailSegment : {
+            emptyNameInput : {
+                en : 'Please enter the trade channel name.',
+                ar : 'يرجى إدخال اسم الفئة التجارية.'
+            }
+        },
+        branch : {
+            emptyNameInput : {
+                en : 'Please enter the branch name.',
+                ar : ''
+            },
+            emptyOutletInput : {
+                en : 'Please select customer name.',
+                ar : 'يرجى تحديد اسم العميل'
+            }
+        },
+        outlet : {
+            emptyNameInput : {
+                en : 'Please enter the customer name.',
+                ar : 'الرجاء إدخال اسم منفذ البيع.'
+            },
+        },
 
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
@@ -169,7 +190,7 @@
         },
         ajaxPostError: {
             en: 'Ajax post error',
-            ar: 'Ar Ajax post error' // todo translation
+            ar: '' // todo translation
         },
         onlyOneDocumentAttach: {
             en: 'Only one document can be attached',
