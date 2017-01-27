@@ -33,7 +33,7 @@ define([
             validate: function (attrs) {
                 var currentLanguage = App.currentUser.currentLanguage;
                 var errors = [];
-debugger;
+
                 if(this.translatedFields.name) {
                     var fieldValue = attrs.name[App.currentUser.currentLanguage];
 
