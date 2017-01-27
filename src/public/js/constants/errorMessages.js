@@ -77,6 +77,12 @@
                 ar : 'يرجى تحديد اسم العميل'
             }
         },
+        outlet : {
+            emptyNameInput : {
+                en : 'Please enter the customer name.',
+                ar : 'الرجاء إدخال اسم منفذ البيع.'
+            },
+        },
 
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
