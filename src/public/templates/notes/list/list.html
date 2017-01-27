@@ -23,7 +23,7 @@
                                     <% model.attachments.map((attachment) => { %>
                                         <div class="filetype-<%- attachment.name.split('.').pop() %> floatLeft">
                                             <% if(attachment.name.split('.').pop() == 'png' || attachment.name.split('.').pop() == 'jpg') { %>
-                                                <img class="" src="<%- attachment.url %>"/>
+                                                <img class="" src="<%- attachment.preview %>"/>
                                             <% } %>
                                         </div>
                                     <% }); %>

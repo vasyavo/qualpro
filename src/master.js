@@ -5,7 +5,7 @@ const config = require('./config');
 const logger = require('./utils/logger');
 const PubNubClient = require('./stories/push-notifications/utils/pubnub');
 
-mongoose.Schemas = {}; // important thing
+mongoose.Schemas = mongoose.Schemas || {}; // important thing
 require('./types');
 
 const Scheduler = require('./helpers/scheduler');

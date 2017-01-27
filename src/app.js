@@ -10,14 +10,14 @@ const consolidate = require('consolidate');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const compress = require('compression');
-const PubNubClient = require('./stories/push-notifications/utils/pubnub');
 
-mongoose.Schemas = {}; // important thing
+mongoose.Schemas = mongoose.Schemas || {}; // important thing
 
 const config = require('./config');
 const mongo = require('./utils/mongo');
 const logger = require('./utils/logger');
 const eventEmitter = require('./utils/eventEmitter');
+const PubNubClient = require('./stories/push-notifications/utils/pubnub');
 
 process.on('unhandledRejection', (reason, p) => {
     logger.error(p, reason);
