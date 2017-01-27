@@ -10,9 +10,20 @@ module.exports = function * (options) {
     const actionOriginator = ObjectId(options.actionOriginator);
 
     const pipeline = [{
+        $lookup: {
+            from: 'accessRoles',
+            localField: 'accessRole',
+            foreignField: '_id',
+            as: 'accessRole',
+        },
+    }, {
+        $unwind: {
+            path: '$accessRole',
+        },
+    }, {
         $match: {
             $or: [{
-                level: {
+                'accessRole.level': {
                     $in: setHighAdmin,
                 }
             }, {
