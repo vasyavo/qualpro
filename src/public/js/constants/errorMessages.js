@@ -67,6 +67,16 @@
                 ar : 'يرجى إدخال اسم الفئة التجارية.'
             }
         },
+        branch : {
+            emptyNameInput : {
+                en : 'Please enter the branch name.',
+                ar : ''
+            },
+            emptyOutletInput : {
+                en : 'Please select customer name.',
+                ar : 'يرجى تحديد اسم العميل'
+            }
+        },
 
         documentArchiveForbidden: {
             en: 'Document is in use and can\'t be archive',
