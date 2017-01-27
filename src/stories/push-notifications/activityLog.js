@@ -21,8 +21,8 @@ activityLog.on('in-store-task:updated', require('./methods/inStoreTask/updated')
 activityLog.on('in-store-task:status-updated', require('./methods/inStoreTask/updated')); // todo: change event handler
 activityLog.on('in-store-task:reassigned', require('./methods/inStoreTask/updated')); // todo: change event handler
 activityLog.on('in-store-task:comment-added', require('./methods/inStoreTask/commentAdded'));
-activityLog.on('in-store-task:overdue', require('./methods/objective/overDue'));
-activityLog.on('in-store-task:fail', require('./methods/objective/fail'));
+activityLog.on('in-store-task:overdue', require('./methods/inStoreTask/overDue'));
+activityLog.on('in-store-task:fail', require('./methods/inStoreTask/fail'));
 
 activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
 activityLog.on('reporting:shelf-share:published', require('./methods/reporting/shelf-share/published'));
