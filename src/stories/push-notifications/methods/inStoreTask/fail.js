@@ -26,21 +26,21 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'In-store task updated',
+                en: 'In-store task failed',
                 ar: '',
             },
             payload,
         }, {
             recipients: setAssignee,
             subject: {
-                en: 'Received updated in-store task',
+                en: 'In-store task failed',
                 ar: '',
             },
             payload,
         }, {
             recipients: setSupervisor,
             subject: {
-                en: `Subordinate's in-store task updated`,
+                en: `Subordinate fails in-store task`,
                 ar: '',
             },
             payload,

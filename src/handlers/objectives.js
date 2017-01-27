@@ -935,7 +935,7 @@ var Objectives = function (db, redis, event) {
             }
 
             function createForms(objectiveModel, cb) {
-                if (body.formType === 'distribution') {
+                if (updateObject.formType === 'distribution') {
                     /* TODO fill description from task if AM or AincM will link forms */
                     const data = {
                         objective: objectiveModel.get('_id'),
@@ -949,14 +949,14 @@ var Objectives = function (db, redis, event) {
 
                         objectiveModel.form = {
                             _id: formModel.get('_id'),
-                            contentType: body.formType
+                            contentType: updateObject.formType
                         };
 
                         cb(null, objectiveModel);
                     });
                 }
 
-                if (body.formType === 'visibility') {
+                if (updateObject.formType === 'visibility') {
                     const data = {
                         objective: objectiveModel.get('_id'),
                         createdBy: {
@@ -972,7 +972,7 @@ var Objectives = function (db, redis, event) {
 
                         objectiveModel.form = {
                             _id: formModel.get('_id'),
-                            contentType: body.formType
+                            contentType: updateObject.formType
                         };
 
                         cb(null, objectiveModel);
@@ -2760,7 +2760,7 @@ var Objectives = function (db, redis, event) {
                 var fieldNames = {};
                 var setOptions;
                 if (err) {
-                    return next(err);
+                    return callback(err);
                 }
 
                 setOptions = {
