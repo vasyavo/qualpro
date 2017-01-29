@@ -85,7 +85,6 @@
     "mocha": "3.1.2",
     "mocha-junit-reporter": "1.12.1",
     "mongo-xlsx": "1.0.12",
-    "node-inspector": "0.12.8",
     "nyc": "8.3.2",
     "open": "0.0.5",
     "pre-push": "0.1.1",
@@ -100,14 +99,16 @@
     "test:consumer-survey": "cross-env NODE_ENV=test mocha --require co-mocha src/stories/consumer-survey/testSetup.spec.js",
     "start": "node src/server.js",
     "dev": "cross-env NODE_ENV=development node src/server.js",
-    "debug": "cross-env NODE_ENV=production WEB_CONCURRENCY=1 node-debug --save-live-edit src/server.js",
+    "debug": "cross-env NODE_ENV=development node-debug --save-live-edit src/server.js",
     "postinstall": "chmod +x postinstall.sh && ./postinstall.sh",
     "commit": "git-cz",
     "coverage": "nyc npm run test",
-    "docs": "./API_documentation/update_docs.sh"
+    "docs": "./API_documentation/update_docs.sh",
+    "lint": "eslint src/"
   },
   "pre-push": [
-    "test"
+    "test",
+    "lint"
   ],
   "engines": {
     "node": "6.5.0",

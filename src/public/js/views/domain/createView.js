@@ -148,7 +148,10 @@ define([
                         self.trigger('modelSaved', data);
                     },
                     error  : function (model, xhr) {
-                        App.render({type: 'error', message: xhr.responseText});
+                        var errorText = xhr.responseJSON.description;
+                        var currentLanguage = App.currentUser.currentLanguage;
+
+                        App.render({type: 'error', message: errorText[currentLanguage]});
                     }
                 });
         },

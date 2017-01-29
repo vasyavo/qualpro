@@ -901,6 +901,7 @@ define(
             checkDescriptionField     : checkDescriptionField,
             checkForValuePresence     : checkForValuePresence,
             checkForValidMongoId      : checkForValidMongoId,
-            checkTitleField           : checkTitleField
+            checkTitleField           : checkTitleField,
+            hasInvalidChars : hasInvalidChars
         }
     });

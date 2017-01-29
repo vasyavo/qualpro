@@ -42,7 +42,6 @@ const Personnel = function (db, redis, event) {
     const logWriter = require('../helpers/logWriter.js');
     const SomeEvents = require('../helpers/someEvents');
     const someEvents = new SomeEvents();
-    const app = require('../server');
     const config = require('../config');
     const redisClient = require('../helpers/redisClient');
 

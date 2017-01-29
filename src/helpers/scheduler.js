@@ -11,21 +11,16 @@ const event = require('./../utils/eventEmitter');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const getPipeline = (query) => {
-    const pipeLine = [];
-
-    pipeLine.push({
+    return [{
         $match: query
-    });
-    pipeLine.push({
+    }, {
         $group: {
             _id: null,
             setId: {
                 $addToSet: '$_id'
             }
         }
-    });
-
-    return pipeLine;
+    }];
 };
 
 const triggerEvent = (mid, id, itemType) => {
@@ -47,34 +42,38 @@ const exec = (options) => {
         actionType,
         iterator,
     } = options;
+    const infoMessage = `scheduler:${domain}:${actionType}`;
 
-    return (err, resObject) => {
+    return (err, result) => {
+        const setId = result.length ? result.slice().pop().setId : [];
+
         if (err) {
-            logger.error(`[scheduler] ${domain}:${actionType}`, err);
-        } else if (resObject[0] && resObject[0].setId && resObject[0].setId.length) {
-            iterator(resObject[0].setId, (err) => {
+            logger.error(`[${infoMessage}/*]:`, err);
+        }
+
+        if (!setId.length) {
+            logger.info(`[${infoMessage}/*]: Skipping...`);
+            return
+        }
+
+        async.each(setId, (id, eachCb) => {
+            iterator(id, (err) => {
                 if (err) {
-                    logger.error(`[scheduler] branding-and-display:expired`, err);
-                    return
+                    logger.error(`[${infoMessage}/${id}]:`, err);
+                    return eachCb(null);
                 }
 
-                logger.info(`[scheduler] ${domain}:${actionType} updated.`);
+                logger.info(`[${infoMessage}/${id}]: Done.`);
+                eachCb(null);
             });
-        } else {
-            logger.info(`[scheduler] ${domain}:${actionType} skipping...`);
-        }
-    };
-};
-
-const updateEachGenerator = (updateMethod) => {
-    return (setId, callback) => {
-        async.each(setId, updateMethod, callback);
+        })
     };
 };
 
 const personnelInactive = () => {
     const PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
     const PersonnelModel = require('./../types/personnel/model');
+    const contentType = CONTENT_TYPES.PERSONNEL;
     const startDate = new Date();
     const endDate = new Date(startDate.getMonth() - 2);
     const query = {
@@ -86,7 +85,7 @@ const personnelInactive = () => {
             $nin: [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id]
         }
     };
-    const updatePersonnel = (id, callback) => {
+    const iterator = (id, callback) => {
         PersonnelModel.findByIdAndUpdate(id, {
             $set: {
                 status: PERSONNEL_STATUSES.INACTIVE._id
@@ -97,18 +96,24 @@ const personnelInactive = () => {
             }
 
             if (model) {
-                triggerEvent(20, id, CONTENT_TYPES.PERSONNEL);
+                triggerEvent(20, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    PersonnelModel.aggregate(getPipeline(query), exec('personnel', 'Inactive', updateEachGenerator(updatePersonnel)));
+
+    PersonnelModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'inactive',
+        iterator,
+    }));
 };
 
 const contractsYearlyExpired = () => {
     const ContractYearlyModel = require('./../types/contractYearly/model');
+    const contentType = CONTENT_TYPES.CONTRACTSYEARLY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -120,7 +125,7 @@ const contractsYearlyExpired = () => {
         }
     };
 
-    const updateContract = (id, callback) => {
+    const iterator = (id, callback) => {
         ContractYearlyModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -131,18 +136,23 @@ const contractsYearlyExpired = () => {
             }
 
             if (model) {
-                triggerEvent(20, id, CONTENT_TYPES.CONTRACTSYEARLY);
+                triggerEvent(20, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    ContractYearlyModel.aggregate(getPipeline(query), exec('contractsYearly', 'Expired', updateEachGenerator(updateContract)));
+    ContractYearlyModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
-const contractsSecondaryExpired = () => {
+const contractSecondaryExpired = () => {
     const ContractSecondaryModel = require('./../types/contractSecondary/model');
+    const contentType = CONTENT_TYPES.CONTRACTSSECONDARY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -154,7 +164,7 @@ const contractsSecondaryExpired = () => {
         }
     };
 
-    const updateContract = (id, callback) => {
+    const iterator = (id, callback) => {
         ContractSecondaryModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -165,18 +175,23 @@ const contractsSecondaryExpired = () => {
             }
 
             if (model) {
-                triggerEvent(22, id, CONTENT_TYPES.CONTRACTSSECONDARY);
+                triggerEvent(22, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    ContractSecondaryModel.aggregate(getPipeline(query), exec('contractsSecondary', 'Expired', updateEachGenerator(updateContract)));
+    ContractSecondaryModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
 const promotionExpired = () => {
     const PromotionModel = require('./../types/promotion/model');
+    const contentType = CONTENT_TYPES.PROMOTIONS;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -188,7 +203,7 @@ const promotionExpired = () => {
         }
 
     };
-    const updatePromotion = (id, callback) => {
+    const iterator = (id, callback) => {
         PromotionModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -199,18 +214,23 @@ const promotionExpired = () => {
             }
 
             if (model) {
-                triggerEvent(33, id, CONTENT_TYPES.PROMOTIONS);
+                triggerEvent(33, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    PromotionModel.aggregate(getPipeline(query), exec('promotions', 'Expired', updateEachGenerator(updatePromotion)));
+    PromotionModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
 const promotionItemExpired = () => {
     const PromotionItemModel = require('./../types/promotionItem/model');
+    const contentType = CONTENT_TYPES.PROMOTIONSITEMS;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -222,8 +242,7 @@ const promotionItemExpired = () => {
         }
 
     };
-
-    const updatePromotionItems = (id, callback) => {
+    const iterator = (id, callback) => {
         PromotionItemModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -234,18 +253,23 @@ const promotionItemExpired = () => {
             }
 
             if (model) {
-                triggerEvent(35, id, CONTENT_TYPES.PROMOTIONSITEMS);
+                triggerEvent(35, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    PromotionItemModel.aggregate(getPipeline(query), exec(CONTENT_TYPES.PROMOTIONSITEMS, 'Expired', updateEachGenerator(updatePromotionItems)));
+    PromotionItemModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
 const competitorPromotionExpired = () => {
     const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
+    const contentType = CONTENT_TYPES.COMPETITORPROMOTION;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -258,7 +282,7 @@ const competitorPromotionExpired = () => {
 
     };
 
-    const updateCompetitorPromotion = (id, callback) => {
+    const iterator = (id, callback) => {
         CompetitorPromotionModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -269,18 +293,23 @@ const competitorPromotionExpired = () => {
             }
 
             if (model) {
-                triggerEvent(32, id, CONTENT_TYPES.COMPETITORPROMOTION);
+                triggerEvent(32, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    CompetitorPromotionModel.aggregate(getPipeline(query), exec('competitorPromotion', 'Expired', updateEachGenerator(updateCompetitorPromotion)));
+    CompetitorPromotionModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
 const brandingActivityExpired = () => {
     const BrandingActivityModel = require('../types/brandingActivity/model');
+    const contentType = CONTENT_TYPES.BRANDING_ACTIVITY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -292,7 +321,7 @@ const brandingActivityExpired = () => {
         }
     };
 
-    const updateBrandingActivity = (id, callback) => {
+    const iterator = (id, callback) => {
         BrandingActivityModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -303,18 +332,23 @@ const brandingActivityExpired = () => {
             }
 
             if (model) {
-                triggerEvent(38, id, CONTENT_TYPES.BRANDING_ACTIVITY);
+                triggerEvent(38, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    BrandingActivityModel.aggregate(getPipeline(query), exec('brandingActivity', 'Expired', updateEachGenerator(updateBrandingActivity)));
+    BrandingActivityModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
 const competitorBrandingAndDisplayExpired = () => {
     const CompetitorBrandingModel = require('./../types/competitorBranding/model');
+    const contentType = CONTENT_TYPES.COMPETITORBRANDING;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
@@ -326,7 +360,7 @@ const competitorBrandingAndDisplayExpired = () => {
         }
     };
 
-    const updateCompetitorBrandingAndDisplay = (id, callback) => {
+    const iterator = (id, callback) => {
         CompetitorBrandingModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
@@ -337,18 +371,23 @@ const competitorBrandingAndDisplayExpired = () => {
             }
 
             if (model) {
-                triggerEvent(34, id, CONTENT_TYPES.COMPETITORBRANDING);
+                triggerEvent(34, id, contentType);
             }
 
             callback(null);
         });
     };
 
-    CompetitorBrandingModel.aggregate(getPipeline(query), exec('competitorBranding', 'Expired', updateEachGenerator(updateCompetitorBrandingAndDisplay)));
+    CompetitorBrandingModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
-const questionaryExpired = () => {
-    const QuestionnariesModel = require('./../types/questionnaries/model');
+const questionnaireExpired = () => {
+    const QuestionnaireModel = require('./../types/questionnaries/model');
+    const contentType = CONTENT_TYPES.QUESTIONNARIES;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dueDate: {
@@ -359,8 +398,8 @@ const questionaryExpired = () => {
             $eq: PROMOTION_STATUSES.ACTIVE
         }
     };
-    const updateQuestionary = (id, callback) => {
-        QuestionnariesModel.findByIdAndUpdate(id, {
+    const iterator = (id, callback) => {
+        QuestionnaireModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED
             }
@@ -370,17 +409,21 @@ const questionaryExpired = () => {
             }
 
             if (model) {
-                triggerEvent(34, id, CONTENT_TYPES.COMPETITORBRANDING);
+                triggerEvent(34, id, contentType);
             }
 
             callback(null);
         });
-    }
+    };
 
-    QuestionnariesModel.aggregate(getPipeline(query), exec('questionnary', 'Expired', updateEachGenerator(updateQuestionary)));
+    QuestionnaireModel.aggregate(getPipeline(query), exec({
+        domain: contentType,
+        actionType: 'expired',
+        iterator,
+    }));
 };
 
-const objectivesOverDue = () => {
+const objectiveOverdue = () => {
     const ObjectiveModel = require('./../types/objective/model');
     const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
     const query = {
@@ -395,7 +438,7 @@ const objectivesOverDue = () => {
             ]
         }
     };
-    const updateObjective = (id, callback) => {
+    const iterator = (id, callback) => {
         ObjectiveModel.findByIdAndUpdate(id, {
             $set: {
                 status: OBJECTIVE_STATUSES.OVER_DUE,
@@ -430,11 +473,11 @@ const objectivesOverDue = () => {
     ObjectiveModel.aggregate(getPipeline(query), exec({
         domain: 'objective',
         actionType: 'overdue',
-        iterator: updateObjective,
+        iterator,
     }));
 };
 
-const objectivesFail = () => {
+const objectiveFail = () => {
     const ObjectiveModel = require('./../types/objective/model');
     const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
     const query = {
@@ -443,7 +486,7 @@ const objectivesFail = () => {
         },
         status: OBJECTIVE_STATUSES.OVER_DUE,
     };
-    const updateObjective = (id, callback) => {
+    const iterator = (id, callback) => {
         ObjectiveModel.findByIdAndUpdate(id, {
             $set: {
                 status: OBJECTIVE_STATUSES.FAIL,
@@ -478,7 +521,7 @@ const objectivesFail = () => {
     ObjectiveModel.aggregate(getPipeline(query), exec({
         domain: 'objective',
         actionType: 'fail',
-        iterator: updateObjective,
+        iterator,
     }));
 };
 
@@ -492,17 +535,17 @@ class Scheduler {
 
     start() {
         const jobs = [
-            objectivesFail,
-            objectivesOverDue,
-            // contractsYearlyExpired,
-            // contractsSecondaryExpired,
-            // promotionExpired,
-            // promotionItemExpired,
-            // brandingActivityExpired,
-            // competitorBrandingAndDisplayExpired,
-            // competitorPromotionExpired,
-            // personnelInactive,
-            // questionaryExpired,
+            objectiveFail,
+            objectiveOverdue,
+            contractsYearlyExpired,
+            contractSecondaryExpired,
+            promotionExpired,
+            promotionItemExpired,
+            brandingActivityExpired,
+            competitorBrandingAndDisplayExpired,
+            competitorPromotionExpired,
+            personnelInactive,
+            questionnaireExpired,
         ];
 
         this.subscribe(jobs, '0 * * * *'); // every hour

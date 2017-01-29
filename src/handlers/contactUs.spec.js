@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const request = require('supertest-as-promised');
-const server = require('./../server');
+const server = require('./../app');
 const faker = require('faker');
 const agent = request.agent(server);
 const bcrypt = require('bcryptjs');

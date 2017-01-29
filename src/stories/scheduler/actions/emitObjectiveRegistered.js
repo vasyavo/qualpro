@@ -6,8 +6,8 @@ const FileModel = require('./../../../types/file/model');
 const TestUtils = require('./../../push-notifications/utils/TestUtils');
 const ActivityLog = require('./../../push-notifications/activityLog');
 
-const getObjectiveContext =  (objective) => {
-  return objective.context === 'objectives'? 'objective': 'in-store-task'
+const getObjectiveContext = (objective) => {
+    return objective.context === 'objectives' ? 'objective' : 'in-store-task';
 };
 
 module.exports = (args, callback) => {
@@ -70,13 +70,13 @@ module.exports = (args, callback) => {
                     ActivityLog.emit('sub-objective:draft-created', {
                         originatorId: actionOriginator,
                         accessRoleLevel,
-                        objective: objective,
+                        body: objective,
                     });
                 } else {
                     ActivityLog.emit(`${getObjectiveContext(objective)}:draft-created`, {
                         originatorId: actionOriginator,
                         accessRoleLevel,
-                        objective: objective,
+                        body: objective,
                     });
                 }
             }
@@ -86,13 +86,13 @@ module.exports = (args, callback) => {
                     ActivityLog.emit('sub-objective:published', {
                         originatorId: actionOriginator,
                         accessRoleLevel,
-                        objective: objective,
+                        body: objective,
                     });
                 } else {
                     ActivityLog.emit(`${getObjectiveContext(objective)}:published`, {
                         originatorId: actionOriginator,
                         accessRoleLevel,
-                        objective: objective,
+                        body: objective,
                     });
                 }
             }

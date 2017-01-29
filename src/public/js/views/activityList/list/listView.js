@@ -196,7 +196,7 @@ define([
                     }
 
                     if (response && response.category) {
-                        filter.category = response && response.category && {
+                        filter.category = {
                                 type  : 'ObjectId',
                                 values: [response.category._id],
                                 names : [response.category.name[self.currentLanguage]]
