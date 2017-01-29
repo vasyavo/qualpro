@@ -111,8 +111,8 @@
     "lint"
   ],
   "engines": {
-    "node": "7.4.0",
-    "npm": "4.0.5"
+    "node": "6.5.0",
+    "npm": "3.10.3"
   },
   "config": {
     "commitizen": {
