@@ -1,3 +1,7 @@
 {
-  "extends": "udosoft"
+  "extends": "udosoft",
+  "rules": {
+    "max-len": [2, 200],
+    "no-shadow": [1]
+  }
 }
