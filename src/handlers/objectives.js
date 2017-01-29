@@ -261,7 +261,7 @@ var Objectives = function (db, redis, event) {
                         ActivityLog.emit('sub-objective:draft-created', {
                             originatorId: createdById,
                             accessRoleLevel,
-                            objective: objectiveModel.toJSON(),
+                            body: objectiveModel.toJSON(),
                         });
                     }
 
@@ -269,7 +269,7 @@ var Objectives = function (db, redis, event) {
                         ActivityLog.emit('sub-objective:published', {
                             originatorId: createdById,
                             accessRoleLevel,
-                            objective: objectiveModel.toJSON(),
+                            body: objectiveModel.toJSON(),
                         });
                     }
                 }
@@ -636,7 +636,7 @@ var Objectives = function (db, redis, event) {
                             ActivityLog.emit('objective:draft-created', {
                                 originatorId: userId,
                                 accessRoleLevel,
-                                objective: model.toJSON(),
+                                body: model.toJSON(),
                             });
                         }
 
@@ -644,7 +644,7 @@ var Objectives = function (db, redis, event) {
                             ActivityLog.emit('objective:published', {
                                 originatorId: userId,
                                 accessRoleLevel,
-                                objective: model.toJSON(),
+                                body: model.toJSON(),
                             });
                         }
                     }
