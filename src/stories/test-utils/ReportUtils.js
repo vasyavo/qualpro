@@ -41,8 +41,6 @@ class ReportUtils extends UtilsPrototype {
 
         if (this.isPublished()) {
             ActivityLog.emit(`reporting:${reportType}:published`, eventPayload);
-        } else if (state.status) {
-            ActivityLog.emit(`reporting:${reportType}:status-updated`, eventPayload);
         } else {
             ActivityLog.emit(`reporting:${reportType}:updated`, eventPayload);
         }
