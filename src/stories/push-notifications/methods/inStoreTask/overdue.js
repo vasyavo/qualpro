@@ -40,7 +40,7 @@ module.exports = (options) => {
         }, {
             recipients: setSupervisor,
             subject: {
-                en: `Subordinate's in-store task overdue`,
+                en: 'Subordinate\'s in-store task overdue',
                 ar: '',
             },
             payload,

@@ -108,7 +108,7 @@
   },
   "pre-push": [
     "test",
-    "lint",
+    "lint"
   ],
   "engines": {
     "node": "7.4.0",

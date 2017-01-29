@@ -42,7 +42,7 @@ const exec = (options) => {
         actionType,
         iterator,
     } = options;
-    const infoMessage = `scheduler:${domain}:${actionType}/`;
+    const infoMessage = `scheduler:${domain}:${actionType}`;
 
     return (err, result) => {
         const setId = result.length ? result.slice().pop().setId : [];
