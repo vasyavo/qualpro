@@ -76,15 +76,15 @@ define([
         },
 
         hideLinkForm: function () {
-            var $liEl = this.$el.find('#attachForm');2
+            var $liEl = this.$el.find('#attachForm');
 
             $liEl.addClass('hidden');
         },
 
         openForm: function () {
             var description = {
-                en: this.$el.find('.objectivesTextarea[data-property="en"]').val(),
-                ar: this.$el.find('.objectivesTextarea[data-property="ar"]').val()
+                en: CKEDITOR.instances.editor1.document.getBody().getText(),
+                ar: CKEDITOR.instances.editor2.document.getBody().getText()
             };
             var self = this;
 
@@ -125,8 +125,8 @@ define([
                 dateEnd      : endDate,
                 location     : $curEl.find('#personnelLocation').attr('data-location'),
                 description  : {
-                    en: $curEl.find('.objectivesTextarea[data-property="en"]').val(),
-                    ar: $curEl.find('.objectivesTextarea[data-property="ar"]').val()
+                    en: CKEDITOR.instances.editor1.document.getBody().getText(),
+                    ar: CKEDITOR.instances.editor2.document.getBody().getText()
                 },
                 country      : this.locations.country,
                 region       : this.locations.region,
@@ -135,7 +135,6 @@ define([
                 outlet       : this.locations.outlet,
                 branch       : this.locations.branch
             };
-
             if (this.linkedForm) {
                 this.body.formType = this.linkedForm._id;
             }

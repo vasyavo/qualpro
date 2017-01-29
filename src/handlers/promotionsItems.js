@@ -1,3 +1,6 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const extractBody = require('./../utils/extractBody');
+
 var Promotions = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
@@ -470,21 +473,24 @@ var Promotions = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var sellInSum = 0;
-            var closingStockSum = 0;
-            var sellOutSum = 0;
-            var createdBy = {
-                user: req.session.uId,
-                date: new Date()
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (body, callback) => {
+            const createdBy = {
+                user: userId,
+                date: new Date(),
             };
 
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
             if (body.sellIn) {
-                body.sellIn.forEach(function (sellIn) {
+                let sellInSum = 0;
+
+                body.sellIn.forEach((sellIn) => {
                     sellInSum += sellIn * 1;
                 });
 
@@ -492,7 +498,9 @@ var Promotions = function (db, redis, event) {
             }
 
             if (body.closingStock) {
-                body.closingStock.forEach(function (closingStock) {
+                let closingStockSum = 0;
+
+                body.closingStock.forEach((closingStock) => {
                     closingStockSum += closingStock * 1;
                 });
 
@@ -500,7 +508,9 @@ var Promotions = function (db, redis, event) {
             }
 
             if (body.sellOut) {
-                body.sellOut.forEach(function (sellOut) {
+                let sellOutSum = 0;
+
+                body.sellOut.forEach((sellOut) => {
                     sellOutSum += sellOut * 1;
                 });
 
@@ -512,89 +522,85 @@ var Promotions = function (db, redis, event) {
             }
 
             async.waterfall([
-                function (callback) {
+
+                (cb) => {
                     PromotionItemModel.create(body, (error, model) => {
                         if (error) {
-                            return callback(error);
+                            return cb(error);
                         }
 
                         res.status(200).send(model);
 
-                        callback(null, model);
+                        cb(null, model);
                     });
                 },
 
-                function (model, callback) {
-                    var saveObj = {
-                        text       : body.commentText,
+                (model, cb) => {
+                    const saveObj = {
+                        text: body.commentText,
                         objectiveId: model._id,
-                        userId     : req.session.uId,
-                        files      : req.files,
-                        createdBy  : createdBy,
+                        userId,
+                        files: req.files,
+                        createdBy,
                     };
 
-                    commentCreator(saveObj, function (err, comment) {
+                    commentCreator(saveObj, (err, comment) => {
                         if (err) {
-                            return callback(err);
+                            return cb(err);
                         }
 
-                        callback(null, model, comment);
+                        cb(null, {
+                            model,
+                            comment,
+                        });
                     });
                 },
 
-                function (model, comment, callback) {
-                    PromotionItemModel.findByIdAndUpdate(model._id, {$set: {comment: comment._id}}, {new: true}, callback);
-                }
+                (options, cb) => {
+                    const {
+                        model,
+                        comment,
+                    } = options;
 
-            ], function (err, result) {
-                if (err) {
-                    if (!res.headersSent) {
-                        next(err);
-                    }
+                    PromotionItemModel.findByIdAndUpdate(model._id, {
+                        $set: {
+                            comment: comment._id,
+                        },
+                    }, {
+                        new: true,
+                    }, cb);
+                },
 
-                    return logger.error(err);
-                }
+            ], callback);
+        };
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : result.get('createdBy'),
-                    itemId    : result.promotion,
-                    itemType  : CONTENT_TYPES.PROMOTIONS
-                });
-            });
-        }
+        async.waterfall([
 
-        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, function (err, allowed) {
-            var body;
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, cb);
+            },
 
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.PROMOTIONSITEMS, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, model) => {
             if (err) {
-                return next(err);
-            }
-
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PROMOTIONSITEMS, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
+                if (!res.headersSent) {
+                    next(err);
                 }
 
-                queryRun(saveData);
+                return logger.error(err);
+            }
+
+            ActivityLog.emit('reporting:al-alali-promo-evaluation:item-published', {
+                actionOriginator: userId,
+                accessRoleLevel,
+                body: model.toJSON(),
             });
         });
     };

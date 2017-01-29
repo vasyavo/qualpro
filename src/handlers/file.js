@@ -65,19 +65,22 @@ module.exports = function() {
         });
     };
 
-    this.deleteFew = function (array, callback) {
+    this.deleteFew = (setFileId, callback) => {
+        if (!setFileId.length) {
+            return callback(null, null);
+        }
+
         FileModel.remove({
             _id: {
-                $in: array
-            }
-        }, function (err, fileModels) {
+                $in: setFileId,
+            },
+        }, (err) => {
             if (err) {
                 return callback(err);
             }
-            return callback(null, null);
+
+            callback(null, null);
         });
-
-
     };
 
     this.getById = function (req, res, next) {

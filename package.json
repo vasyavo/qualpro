@@ -99,18 +99,20 @@
     "test:consumer-survey": "cross-env NODE_ENV=test mocha --require co-mocha src/stories/consumer-survey/testSetup.spec.js",
     "start": "node src/server.js",
     "dev": "cross-env NODE_ENV=development node src/server.js",
-    "debug": "cross-env NODE_ENV=production WEB_CONCURRENCY=1 node-debug --save-live-edit src/server.js",
+    "debug": "cross-env NODE_ENV=development node-debug --save-live-edit src/server.js",
     "postinstall": "chmod +x postinstall.sh && ./postinstall.sh",
     "commit": "git-cz",
     "coverage": "nyc npm run test",
-    "docs": "./API_documentation/update_docs.sh"
+    "docs": "./API_documentation/update_docs.sh",
+    "lint": "eslint src/"
   },
   "pre-push": [
-    "test"
+    "test",
+    "lint"
   ],
   "engines": {
-    "node": "7.4.0",
-    "npm": "4.0.5"
+    "node": "6.5.0",
+    "npm": "3.10.3"
   },
   "config": {
     "commitizen": {

@@ -245,7 +245,7 @@ var InStoreReports = function() {
                         ActivityLog.emit('in-store-task:draft-created', {
                             originatorId: userId,
                             accessRoleLevel,
-                            inStoreTask: inStoreTaskModel.toJSON(),
+                            body: inStoreTaskModel.toJSON(),
                         });
                     }
 
@@ -253,7 +253,7 @@ var InStoreReports = function() {
                         ActivityLog.emit('in-store-task:published', {
                             originatorId: userId,
                             accessRoleLevel,
-                            inStoreTask: inStoreTaskModel.toJSON(),
+                            body: inStoreTaskModel.toJSON(),
                         });
                     }
 

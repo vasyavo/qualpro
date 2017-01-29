@@ -34,7 +34,7 @@ class PubNubClient {
 
                 callback(status);
             } else {
-                logger.info('Message published', payload, response.timetoken);
+                logger.info('Message published', payload, response);
                 callback(null, response);
             }
         });
