@@ -2,6 +2,7 @@ const _ = require('lodash');
 const ActivityModel = require('./../../../../types/activityList/model');
 const toString = require('./../../../../utils/toString');
 const getReportGroupsByOriginator = require('./../../utils/getReportGroupsByOriginator');
+const getEveryoneInLocation = require('./../../utils/getEveryoneInLocation');
 
 module.exports = function * (options) {
     const {
@@ -21,6 +22,20 @@ module.exports = function * (options) {
     } = yield getReportGroupsByOriginator({
         actionOriginator,
     });
+    const setPersonnel = _.uniq([
+        actionOriginator,
+        contentAuthor,
+        supervisor,
+        ...setAdmin,
+    ]);
+    const setEveryoneInLocation = yield getEveryoneInLocation({
+        exclude: setPersonnel,
+        setCountry: Array.isArray(body.country) ? body.country : [],
+        setRegion: Array.isArray(body.region) ? body.region : [],
+        setSubRegion: Array.isArray(body.subRegion) ? body.subRegion : [],
+        setOutlet: Array.isArray(body.outlet) ? body.outlet : [],
+        setBranch: Array.isArray(body.branch) ? body.branch : [],
+    });
     const newActivity = new ActivityModel();
 
     newActivity.set({
@@ -36,12 +51,10 @@ module.exports = function * (options) {
             user: actionOriginator,
         },
         accessRoleLevel,
-        personnels: _.uniq([
-            actionOriginator,
-            contentAuthor,
-            supervisor,
-            ...setAdmin,
-        ]),
+        personnels: [
+            ...setPersonnel,
+            ...setEveryoneInLocation,
+        ],
         country: body.country,
         region: body.region,
         subRegion: body.subRegion,
@@ -61,6 +74,9 @@ module.exports = function * (options) {
         actionOriginator,
         contentAuthor,
         supervisor,
-        setAdmin,
+        setEveryoneInLocation: [
+            ...setEveryoneInLocation,
+            ...setAdmin,
+        ],
     };
 };
