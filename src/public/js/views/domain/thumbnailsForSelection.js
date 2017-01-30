@@ -34,8 +34,6 @@ define([
                         var $target = $(e.currentTarget);
                         var value = $target.val();
                         var newFilteredCollection;
-                        var $fullContainer = $target.closest('.filterFullContainer');
-                        var $dropDown = $fullContainer.find('.dropDownContent');
 
                         if (!value) {
                             return self.filteredCollection.reset(self.collection.toJSON());
