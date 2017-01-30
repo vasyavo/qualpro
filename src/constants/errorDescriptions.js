@@ -91,4 +91,9 @@ errorDescriptions[ERROR_MSG.INCORRECT_VERIFICATION_CODE] = {
     ar: 'رمز التحقق الذي قمت بإدخاله غير صحيح، يرجى المحاولة مرة أخرى.'
 };
 
+errorDescriptions[ERROR_MSG.INCORRECT_USERNAME_OR_PASSWORD] = {
+    en: 'The username or password is incorrect. Please try again',
+    ar: 'The username or password is incorrect. Please try again'
+};
+
 module.exports = errorDescriptions;

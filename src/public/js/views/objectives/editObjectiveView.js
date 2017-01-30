@@ -584,25 +584,30 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var formId = model.get('form')._id;
+                    var form = odel.get('form');
+                    var formId = form._id;
+                    var formType = form.contentType;
+
                     if (!context.visibilityFormAjax && !context.VFWithoutBranchesChanged) {
-                        $.ajax({
-                            url : 'form/visibility/before/' + formId,
-                            method : 'PUT',
-                            contentType : 'application/json',
-                            dataType : 'json',
-                            data : JSON.stringify({
-                                before : {
-                                    files : []
+                        if (formType === 'visibility') {
+                            $.ajax({
+                                url : 'form/visibility/before/' + formId,
+                                method : 'PUT',
+                                contentType : 'application/json',
+                                dataType : 'json',
+                                data : JSON.stringify({
+                                    before : {
+                                        files : []
+                                    }
+                                }),
+                                success : function () {
+                                    cb(null, model);
+                                },
+                                error : function () {
+                                    cb(null, model);
                                 }
-                            }),
-                            success : function () {
-                                cb(null, model);
-                            },
-                            error : function () {
-                                cb(null, model);
-                            }
-                        });
+                            });
+                        }
                     }
 
                     var requestPayload;
@@ -737,19 +742,23 @@ define([
                         }
                     }
 
-                    $.ajax({
-                        url : 'form/visibility/before/' + formId,
-                        method : 'PUT',
-                        contentType : 'application/json',
-                        dataType : 'json',
-                        data : JSON.stringify(requestPayload),
-                        success : function () {
-                            cb(null, model);
-                        },
-                        error : function () {
-                            cb(true);
-                        }
-                    });
+                    if (formType === 'visibility') {
+                        $.ajax({
+                            url : 'form/visibility/before/' + formId,
+                            method : 'PUT',
+                            contentType : 'application/json',
+                            dataType : 'json',
+                            data : JSON.stringify(requestPayload),
+                            success : function () {
+                                cb(null, model);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model);
+                    }
                 }
             ], function (err, model) {
                 if (err) {

@@ -20,6 +20,7 @@ var VisibilityForm = function (db, redis, event) {
     var validator = require('validator');
     var fileHandler = new FileHandler(db);
     var bodyValidator = require('../helpers/bodyValidator');
+    var errorSender = require('../utils/errorSender');
     var self = this;
     var $defProjection = {
         _id        : 1,
@@ -764,6 +765,10 @@ var VisibilityForm = function (db, redis, event) {
                 VisibilityFormModel.findById(id, (err, model) => {
                     if (err) {
                         return cb(err);
+                    }
+    
+                    if (!model) {
+                        return errorSender.badRequest(cb);
                     }
 
                     if (body.before) {
