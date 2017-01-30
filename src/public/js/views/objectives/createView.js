@@ -287,7 +287,9 @@ define([
                                 }
                             });
                         } else {
-                            cb(null, model, []);
+                            cb(null, model, {
+                                files : []
+                            });
                         }
                     } else {
                         if (context.visibilityFormAjax.model.get('files').length) {
@@ -316,24 +318,28 @@ define([
                     if (!context.visibilityFormAjax && !context.fileForVFWithoutBranches.file) {
                         var form = model.get('form');
                         if (form) {
-                            var formId = model.get('form')._id;
-                            $.ajax({
-                                url : 'form/visibility/before/' + formId,
-                                method : 'PUT',
-                                contentType : 'application/json',
-                                dataType : 'json',
-                                data : JSON.stringify({
-                                    before : {
-                                        files : []
+                            var formId = form._id;
+                            var formType = form.contentType;
+
+                            if (formType === 'visibility') {
+                                $.ajax({
+                                    url : 'form/visibility/before/' + formId,
+                                    method : 'PUT',
+                                    contentType : 'application/json',
+                                    dataType : 'json',
+                                    data : JSON.stringify({
+                                        before : {
+                                            files : []
+                                        }
+                                    }),
+                                    success : function () {
+                                        cb(null, model);
+                                    },
+                                    error : function () {
+                                        cb(null, model);
                                     }
-                                }),
-                                success : function () {
-                                    cb(null, model);
-                                },
-                                error : function () {
-                                    cb(null, model);
-                                }
-                            });
+                                });
+                            }
                         } else {
                             return cb(null, model);
                         }
@@ -401,20 +407,26 @@ define([
                         }
                     }
 
-                    var formId = model.get('form')._id;
-                    $.ajax({
-                        url : 'form/visibility/before/' + formId,
-                        method : 'PUT',
-                        contentType : 'application/json',
-                        dataType : 'json',
-                        data : JSON.stringify(requestPayload),
-                        success : function () {
-                            cb(null, model);
-                        },
-                        error : function () {
-                            cb(true);
-                        }
-                    });
+                    var form = model.get('form');
+                    var formId = form._id;
+                    var formType = form.contentType;
+                    if (formType === 'visibility') {
+                        $.ajax({
+                            url : 'form/visibility/before/' + formId,
+                            method : 'PUT',
+                            contentType : 'application/json',
+                            dataType : 'json',
+                            data : JSON.stringify(requestPayload),
+                            success : function () {
+                                cb(null, model);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model);
+                    }
                 }
 
             ], function (err, model) {
