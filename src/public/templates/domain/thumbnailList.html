@@ -1,0 +1,16 @@
+<div class="scrollable">
+<%collection.forEach(function(domain,index){%>
+<div class="thumbnail" data-id="<%=domain._id%>">
+    <div class="thumbnailTop">
+        <%var id = domain._id;%>
+        <%var checked = selected.indexOf(id) !== -1;%>
+        <input type="checkbox" value="<%=id%>" id="<%=id%>" class="customCheckbox hidden"<%=checked ?'checked':''%> />
+        <label for="<%=id%>" class="checkboxLabel"></label>
+        <img class="thumbnailImage" src="<%=domain.imageSrc%>">
+    </div>
+    <div class="thumbnailBottom">
+        <span class="thumbnailUserName"><%=domain.name.currentLanguage%></span>
+    </div>
+</div>
+<% }) %>
+</div>
