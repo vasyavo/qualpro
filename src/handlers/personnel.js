@@ -1296,7 +1296,7 @@ const Personnel = function (db, redis, event) {
         }
 
         if (!login || !pass || (!isEmailValid && !isPhoneValid)) {
-            return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS)
+            return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD)
         }
 
         login = validator.escape(login);
@@ -1325,7 +1325,7 @@ const Personnel = function (db, redis, event) {
             }
     
             if (!personnel || !bcrypt.compareSync(pass, personnel.pass)) {
-                return errorSender.notAuthorized(next, ERROR_MESSAGES.INVALID_CREDENTIALS);
+                return errorSender.notAuthorized(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD);
             }
     
             if (!personnel.confirmed && !personnel.super) {
