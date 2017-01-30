@@ -14,7 +14,7 @@ module.exports = (options) => {
         const {
             originatorId,
             accessRoleLevel,
-            inStoreTask,
+            body,
         } = options;
 
         const newActivity = new ActivityModel();
@@ -23,10 +23,10 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: inStoreTask._id,
+            itemId: body._id,
             itemName: {
-                en: inStoreTask.title.en,
-                ar: inStoreTask.title.ar,
+                en: body.title.en,
+                ar: body.title.ar,
             },
             createdBy: {
                 user: originatorId,
@@ -35,13 +35,13 @@ module.exports = (options) => {
             personnels: [
                 originatorId,
             ],
-            assignedTo: inStoreTask.assignedTo,
-            country: inStoreTask.country,
-            region: inStoreTask.region,
-            subRegion: inStoreTask.subRegion,
-            retailSegment: inStoreTask.retailSegment,
-            outlet: inStoreTask.outlet,
-            branch: inStoreTask.branch,
+            assignedTo: body.assignedTo,
+            country: body.country,
+            region: body.region,
+            subRegion: body.subRegion,
+            retailSegment: body.retailSegment,
+            outlet: body.outlet,
+            branch: body.branch,
         });
 
         yield newActivity.save();

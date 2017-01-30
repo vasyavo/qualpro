@@ -1,63 +1,28 @@
 const co = require('co');
-const _ = require('lodash');
-const getReportGroupsByOriginator = require('./../../../utils/getReportGroupsByOriginator');
 const dispatch = require('./../../../utils/dispatch');
 const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
 const contentTypes = require('./../../../../../public/js/constants/contentType');
-const ActivityModel = require('./../../../../../types/activityList/model');
+const prototype = require('./../prototype');
 
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.SHELF_SHARES;
         const contentType = contentTypes.SHELFSHARES;
         const actionType = activityTypes.CREATED;
+        const extendedOptions = Object.assign({}, options, {
+            moduleId,
+            contentType,
+            actionType,
+        });
 
         const {
+            payload,
             actionOriginator,
-            accessRoleLevel,
-            body,
-        } = options;
-
-        const {
             supervisor,
-            admins,
-        } = yield getReportGroupsByOriginator({
-            actionOriginator
-        });
-        const newActivity = new ActivityModel();
+            setAdmin,
+        } = yield prototype(extendedOptions);
 
-        newActivity.set({
-            itemType: contentType,
-            module: moduleId,
-            actionType,
-            itemId: body._id,
-            itemName: {
-                en: '',
-                ar: '',
-            },
-            createdBy: {
-                user: actionOriginator,
-            },
-            accessRoleLevel,
-            personnels: _.uniq([
-                actionOriginator,
-                supervisor,
-                ...admins,
-            ]),
-            country: body.country,
-            region: body.region,
-            subRegion: body.subRegion,
-            retailSegment: body.retailSegment,
-            outlet: body.outlet,
-            branch: body.branch,
-        });
-
-        yield newActivity.save();
-
-        const payload = {
-            actionType,
-        };
         const groups = [{
             recipients: [actionOriginator],
             subject: {
@@ -73,7 +38,7 @@ module.exports = (options) => {
             },
             payload,
         }, {
-            recipients: admins.filter((admin) => (admin !== actionOriginator)),
+            recipients: setAdmin,
             subject: {
                 en: 'Shelf share received',
                 ar: '',

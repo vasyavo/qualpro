@@ -3,12 +3,12 @@ const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
-const prototype = require('./prototype');
+const prototype = require('./../objective/prototype');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.OBJECTIVE;
-        const contentType = contentTypes.OBJECTIVES;
+        const moduleId = aclModules.IN_STORE_REPORTING;
+        const contentType = contentTypes.INSTORETASKS;
         const actionType = activityTypes.UPDATED;
         const extendedOptions = Object.assign({}, options, {
             moduleId,
@@ -19,7 +19,6 @@ module.exports = (options) => {
         const {
             payload,
             actionOriginator,
-            setOriginator,
             setAssignee,
             setSupervisor,
         } = yield prototype(extendedOptions);
@@ -27,28 +26,21 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Objective overdue',
-                ar: '',
-            },
-            payload,
-        }, {
-            recipients: setOriginator,
-            subject: {
-                en: 'Sub-objective overdue',
+                en: 'In-store task overdue',
                 ar: '',
             },
             payload,
         }, {
             recipients: setAssignee,
             subject: {
-                en: 'Objective overdue',
+                en: 'In-store task overdue',
                 ar: '',
             },
             payload,
         }, {
             recipients: setSupervisor,
             subject: {
-                en: `Subordinate's objective overdue`,
+                en: 'Subordinate\'s in-store task overdue',
                 ar: '',
             },
             payload,

@@ -1,3 +1,7 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const extractBody = require('./../utils/extractBody');
+const ReportUtils = require('./../stories/test-utils').ReportUtils;
+
 var Promotions = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
@@ -283,122 +287,144 @@ var Promotions = function (db, redis, event) {
         return pipeLine;
     }
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
-            var savePromotion = body.savePromotion;
-            var functions;
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const isMobile = req.isMobile;
 
-            var keys = Object.keys(body);
-            keys.forEach(function (key) {
+        const queryRun = (body, callback) => {
+            const files = req.files;
+
+            Object.keys(body).forEach((key) => {
                 if (_.indexOf(['region', 'subRegion', 'retailSegment', 'outlet', 'branch'], key) !== -1) {
                     if (typeof body[key] === 'string') {
-                        body[key] = body[key].split(',');
-                        body[key] = body[key].objectID();
+                        const setStringId = body[key].split(',');
+
+                        body[key] = setStringId.objectID();
                     } else if (_.indexOf(['category', 'country'], key) !== -1) {
                         body[key] = ObjectId(body[key]);
                     }
                 }
             });
 
-            function uploadFiles(files, body, userId, cb) {
+            const uploadFiles = (options, cb) => {
+                const {
+                    files,
+                    body,
+                    userId,
+                } = options;
+
                 if (!files) {
-                    return cb(null, [], body, userId);
+                    return cb(null, {
+                        filesIds: [],
+                        body,
+                        userId,
+                    });
                 }
 
-                fileHandler.uploadFile(userId, files, 'promotions', function (err, filesIds) {
+                fileHandler.uploadFile(userId, files, 'promotions', (err, filesIds) => {
                     if (err) {
                         return cb(err);
                     }
 
-                    cb(null, filesIds, body, userId);
+                    cb(null, {
+                        filesIds,
+                        body,
+                        userId,
+                    });
                 });
-            }
+            };
 
-            function createPromotion(filesIds, body, userId, cb) {
-                var createdBy = {
+            const createPromotion = (options, cb) => {
+                const {
+                    filesIds,
+                    body,
+                    userId,
+                } = options;
+                const createdBy = {
                     user: ObjectId(userId),
-                    date: new Date()
+                    date: new Date(),
                 };
-                var model;
 
                 body.attachments = filesIds;
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
-                body.status = savePromotion ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
+                body.status = body.savePromotion ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
                 body.promotionType = {
                     en: _.escape(body.promotionType.en),
-                    ar: _.escape(body.promotionType.ar)
+                    ar: _.escape(body.promotionType.ar),
                 };
                 body.displayType = body.displayType.split(',');
 
-                model = new PromotionModel(body);
-                model.save(function (err, model) {
+                const model = new PromotionModel();
+
+                model.set(body);
+                model.save((err, report) => {
                     if (err) {
                         return cb(err);
                     }
+                    const modelAsJson = report.toJSON();
+                    const eventPayload = {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: modelAsJson,
+                    };
 
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId    : model._id,
-                        itemType  : CONTENT_TYPES.PROMOTIONS
-                    });
+                    if (modelAsJson.status === PROMOTION_STATUSES.DRAFT) {
+                        ActivityLog.emit('reporting:al-alali-promo-evaluation:draft-created', eventPayload);
+                    }
 
-                    cb(null, model);
+                    if (modelAsJson.status === PROMOTION_STATUSES.ACTIVE) {
+                        ActivityLog.emit('reporting:al-alali-promo-evaluation:published', eventPayload);
+                    }
+
+                    cb(null, report);
                 });
-            }
+            };
 
-            function getPromotionAggr(model, cb) {
-                var id = model.get('_id');
+            const aggregateReport = (report, cb) => {
+                const id = report.get('_id');
 
-                self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
-            }
+                self.getByIdAggr({
+                    id,
+                    isMobile,
+                }, cb);
+            };
 
-            functions = [].concat(async.apply(uploadFiles, files, body, userId), createPromotion, getPromotionAggr);
+            async.waterfall([
 
-            async.waterfall(functions, function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+                async.apply(uploadFiles, {
+                    files,
+                    body,
+                    userId,
+                }),
+                createPromotion,
+                aggregateReport,
 
-                res.status(201).send(result);
-            });
-        }
+            ], callback);
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, function (err, allowed) {
-            var body;
+        async.waterfall([
 
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.PROMOTIONS, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PROMOTIONS, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(201).send(result);
         });
     };
 
@@ -700,207 +726,191 @@ var Promotions = function (db, redis, event) {
         });
     };
 
-    this.update = function (req, res, next) {
-        function queryRun(updateObject) {
-            var files = req.files;
-            var filesPresence = Object.keys(files).length;
-            var attachPresence = updateObject.attachments;
-            var both = attachPresence && filesPresence;
-            var session = req.session;
-            var userId = session.uId;
-            var promotionId = req.params.id;
-            var savePromotion = updateObject.savePromotion;
-            var fullUpdate = {
-                $set: updateObject
-            };
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const isMobile = req.isMobile;
+        const promotionId = req.params.id;
+        const files = req.files;
+        const filesPresence = Object.keys(files).length;
+        const store = new ReportUtils({
+            actionOriginator: userId,
+            accessRoleLevel,
+            reportType: 'al-alali-promo-evaluation',
+        });
 
+        const update = (options, callback) => {
+            const {
+                updateObject,
+            } = options;
+            const setBeforeAttachmentsId = [];
+            const fullUpdate = {
+                $set: updateObject,
+            };
 
             async.waterfall([
 
-                function (cb) {
-                    if (!filesPresence) {
-                        return cb(null, null);
-                    }
-
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PROMOTIONS, function (err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        return cb(null, filesIds);
-                    });
+                (cb) => {
+                    PromotionModel.findOne({ _id: promotionId }).lean().exec(cb);
                 },
 
-                function (filesIds, cb) {
+                (report, cb) => {
+                    if (!report) {
+                        const error = new Error('Promotion not found');
+
+                        error.status = 400;
+                        return cb(error);
+                    }
+
+                    store.setPreviousState(report);
+
                     updateObject.editedBy = {
                         user: ObjectId(userId),
-                        date: new Date()
+                        date: new Date(),
                     };
-                    var quantity = updateObject.quantity;
-                    var barcode = updateObject.barcode;
-                    var packing = updateObject.packing;
-                    var subRegion = updateObject.subRegion;
-                    var retailSegment = updateObject.retailSegment;
-                    var region = updateObject.region;
-                    var ppt = updateObject.ppt;
-                    var outlet = updateObject.outlet;
-                    var branch = updateObject.branch;
 
                     if (updateObject.displayType) {
                         updateObject.displayType = updateObject.displayType.split(',');
                     }
-                    if (quantity) {
-                        updateObject.quantity = _.escape(quantity);
+                    if (updateObject.quantity) {
+                        updateObject.quantity = _.escape(updateObject.quantity);
                     }
-                    if (barcode) {
-                        updateObject.barcode = _.escape(barcode);
+                    if (updateObject.barcode) {
+                        updateObject.barcode = _.escape(updateObject.barcode);
                     }
-                    if (packing) {
-                        updateObject.packing = _.escape(packing);
+                    if (updateObject.packing) {
+                        updateObject.packing = _.escape(updateObject.packing);
                     }
-                    if (ppt) {
-                        updateObject.ppt = _.escape(ppt);
+                    if (updateObject.ppt) {
+                        updateObject.ppt = _.escape(updateObject.ppt);
                     }
-                    if (outlet) {
-                        updateObject.outlet = outlet.split(',');
+                    if (updateObject.outlet) {
+                        updateObject.outlet = updateObject.outlet.split(',');
                     }
-                    if (region) {
+                    if (updateObject.region) {
                         updateObject.region = updateObject.region.split(',');
                     }
-                    if (subRegion) {
+                    if (updateObject.subRegion) {
                         updateObject.subRegion = updateObject.subRegion.split(',');
                     }
-                    if (retailSegment) {
+                    if (updateObject.retailSegment) {
                         updateObject.retailSegment = updateObject.retailSegment.split(',');
                     }
-                    if (branch) {
-                        updateObject.branch = branch.split(',');
-                    }
-                    if (!filesPresence && attachPresence) {
-                        filesIds = updateObject.attachments.objectID();
-                    }
-                    if (filesIds) {
-                        updateObject.attachments = both ? _.union(filesIds, updateObject.attachments.objectID()) : filesIds;
+                    if (updateObject.branch) {
+                        updateObject.branch = updateObject.branch.split(',');
                     }
 
-                    PromotionModel.findOne({_id: promotionId}, function (err, promotionModel) {
-                        var error;
-                        var deletedAttachments = [];
-                        var promotionModel = promotionModel;
-                        var fileIdsBackend = promotionModel.toObject();
-                        fileIdsBackend = fileIdsBackend.attachments.fromObjectID();
+                    // map ObjectId[] to String[]
+                    const setFileId = options.setFileId
+                        .filter(id => id)
+                        .map(id => id.toString());
 
+                    // union both String[]
+                    updateObject.attachments = _.union(setFileId, updateObject.attachments);
 
+                    cb(null, report);
+                },
+
+                (report, cb) => {
+                    // attachments before state is String[]
+                    setBeforeAttachmentsId.push(...report.attachments.fromObjectID());
+
+                    updateObject.status = updateObject.savePromotion ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
+
+                    if (updateObject.promotionType) {
+                        if (updateObject.promotionType.en) {
+                            updateObject.promotionType.en = _.escape(updateObject.promotionType.en);
+                        }
+                        if (updateObject.promotionType.ar) {
+                            updateObject.promotionType.ar = _.escape(updateObject.promotionType.ar);
+                        }
+                    }
+
+                    fullUpdate.$addToSet = {
+                        attachments: {
+                            $each: updateObject.attachments.objectID(),
+                        },
+                    };
+                    delete updateObject.attachments;
+
+                    cb();
+                },
+
+                (cb) => {
+                    PromotionModel.findByIdAndUpdate(promotionId, fullUpdate, { new: true }, cb);
+                },
+
+                (report, cb) => {
+                    store.setNextState(report.toJSON());
+
+                    // attachments after state is String[]
+                    const setAfterAttachmentsId = report.attachments.fromObjectID();
+                    const deletedAttachments = _.difference(setBeforeAttachmentsId, setAfterAttachmentsId);
+
+                    fileHandler.deleteFew(deletedAttachments, (err) => {
                         if (err) {
                             return cb(err);
                         }
-                        if (!promotionModel) {
-                            error = new Error('Promotion not found');
-                            error.status = 400;
-                            return cb(error);
-                        }
 
-                        async.waterfall([
-                            function (callback) {
-                                updateObject.status = savePromotion ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
-
-                                if (updateObject.promotionType) {
-                                    if (updateObject.promotionType.en) {
-                                        updateObject.promotionType.en = _.escape(updateObject.promotionType.en);
-                                    }
-                                    if (updateObject.promotionType.ar) {
-                                        updateObject.promotionType.ar = _.escape(updateObject.promotionType.ar);
-                                    }
-                                }
-
-                                if (filesPresence && !both) {
-                                    fullUpdate.$addToSet = {};
-                                    fullUpdate.$addToSet.attachments = {$each: updateObject.attachments};
-                                    delete updateObject.attachments;
-                                }
-
-                                PromotionModel.findByIdAndUpdate(promotionId, fullUpdate, {new: true}, function (err, result) {
-                                    if (err) {
-                                        return callback(err);
-                                    }
-                                    var fileIdsBackendNew = result.toObject();
-                                    fileIdsBackendNew = fileIdsBackendNew.attachments.fromObjectID();
-                                    deletedAttachments = _.difference(fileIdsBackend, fileIdsBackendNew);
-                                    promotionModel = result;
-                                    return callback(null, deletedAttachments);
-                                });
-                            },
-                            function (deletedAttachments, callback) {
-                                if (!deletedAttachments.length || !filesIds) {
-                                    return callback(null, null);
-                                }
-
-                                fileHandler.deleteFew(deletedAttachments, function (err, result) {
-                                    if (err) {
-                                        return callback(err);
-                                    }
-                                    return callback(null);
-                                })
-                            }
-                        ], function (err, result) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            event.emit('activityChange', {
-                                module    : ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
-                                actionType: ACTIVITY_TYPES.UPDATED,
-                                createdBy : updateObject.editedBy,
-                                itemId    : promotionId,
-                                itemType  : CONTENT_TYPES.PROMOTIONS
-                            });
-                            return cb(null, promotionModel._id);
-                        });
+                        cb();
                     });
                 },
 
-                function (id, cb) {
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
-                }
+            ], callback);
+        };
 
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+        const queryRun = (updateObject, callback) => {
+            async.waterfall([
 
-                res.status(200).send(result);
-            });
-        }
+                (cb) => {
+                    if (!filesPresence) {
+                        return cb(null, []);
+                    }
 
-        access.getEditAccess(req, ACL_MODULES.REPORTING, function (err, allowed) {
-            var updateObject;
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PROMOTIONS, cb);
+                },
 
+                (setFileId, cb) => {
+                    update({
+                        updateObject,
+                        setFileId,
+                    }, cb);
+                },
+
+                (cb) => {
+                    self.getByIdAggr({
+                        id: promotionId,
+                        isMobile,
+                    }, cb);
+                },
+
+            ], callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.REPORTING, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.PROMOTIONS, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
+            store.difference();
+            store.publish();
 
-            try {
-                if (req.body.data) {
-                    updateObject = JSON.parse(req.body.data);
-                } else {
-                    updateObject = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(updateObject, req.session.level, CONTENT_TYPES.PROMOTIONS, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 

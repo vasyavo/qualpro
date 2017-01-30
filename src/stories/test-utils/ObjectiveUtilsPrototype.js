@@ -1,9 +1,12 @@
 const _ = require('lodash');
 const arrayOfObjectIdToArrayOfString = require('./../push-notifications/utils/arrayOfObjectIdToArrayOfString');
+const UtilsPrototype = require('./UtilsPrototype');
 
-class ObjectiveUtilsPrototype {
+class ObjectiveUtilsPrototype extends UtilsPrototype {
 
     constructor(props) {
+        super(props);
+
         const {
             actionOriginator,
             accessRoleLevel,
@@ -13,23 +16,6 @@ class ObjectiveUtilsPrototype {
             actionOriginator,
             accessRoleLevel,
         };
-    }
-
-    setPreviousState(state) {
-        this.previousState = state;
-    }
-
-    setNextState(state) {
-        this.nextState = state;
-    }
-
-    isStatusChanged() {
-        const {
-            previousState,
-            nextState,
-        } = this;
-
-        return previousState.status !== nextState.status;
     }
 
     isReassigned() {
@@ -45,7 +31,7 @@ class ObjectiveUtilsPrototype {
             nextState.assignedTo
         );
 
-        return !!_.intersection(previousAssignee, newAssignee).length
+        return !!_.intersection(previousAssignee, newAssignee).length;
     }
 
     difference() {

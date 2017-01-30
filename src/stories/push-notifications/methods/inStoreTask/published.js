@@ -18,12 +18,12 @@ module.exports = (options) => {
 
         const {
             accessRoleLevel,
-            inStoreTask,
+            body,
         } = options;
 
         const actionOriginator = toString(options, 'originatorId');
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
-            assignedTo: inStoreTask.assignedTo,
+            assignedTo: body.assignedTo,
             actionOriginator,
         });
         const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
@@ -37,10 +37,10 @@ module.exports = (options) => {
             itemType: contentType,
             module: moduleId,
             actionType,
-            itemId: inStoreTask._id,
+            itemId: body._id,
             itemName: {
-                en: inStoreTask.title.en,
-                ar: inStoreTask.title.ar,
+                en: body.title.en,
+                ar: body.title.ar,
             },
             createdBy: {
                 user: actionOriginator,
@@ -52,12 +52,12 @@ module.exports = (options) => {
                 ...arrayOfSupervisor,
             ]),
             assignedTo,
-            country: inStoreTask.country,
-            region: inStoreTask.region,
-            subRegion: inStoreTask.subRegion,
-            retailSegment: inStoreTask.retailSegment,
-            outlet: inStoreTask.outlet,
-            branch: inStoreTask.branch,
+            country: body.country,
+            region: body.region,
+            subRegion: body.subRegion,
+            retailSegment: body.retailSegment,
+            outlet: body.outlet,
+            branch: body.branch,
         });
 
         yield newActivity.save();
