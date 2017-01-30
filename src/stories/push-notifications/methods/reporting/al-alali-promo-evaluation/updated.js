@@ -22,7 +22,7 @@ module.exports = (options) => {
             actionOriginator,
             contentAuthor,
             supervisor,
-            setAdmin,
+            setEveryoneInLocation,
         } = yield prototype(extendedOptions);
 
         const groups = [{
@@ -40,7 +40,7 @@ module.exports = (options) => {
             },
             payload,
         }, {
-            recipients: setAdmin,
+            recipients: setEveryoneInLocation,
             subject: {
                 en: 'Promo evaluation updated',
                 ar: '',

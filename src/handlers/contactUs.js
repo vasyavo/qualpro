@@ -112,34 +112,33 @@ var ContactUs = function(db, redis, event) {
                 ], query.globalSearch);
 
             var fMatch = filterSearch || {};
-            var formCondition = [];
-            var foreignCondition = [];
+            var formCondition;
+            var foreignCondition;
 
-            _.forOwn(query, function(value, key) {
+            _.forOwn(query, function (value, key) {
                 if (_.includes(searchVariants, key)) {
                     match[key] = {};
                     match[key].$in = value.values;
                 }
             });
-            _.forOwn(query, function(value, key) {
+            _.forOwn(query, function (value, key) {
                 if (_.includes(foreignVariants, key)) {
                     fMatch[`createdBy.user.${key}`] = {};
                     fMatch[`createdBy.user.${key}`].$in = value.values;
                 }
             });
 
-            formCondition.push({
-                $match : match
-            });
+            formCondition = {
+                $match: match
+            };
 
-            foreignCondition.push({
-                $match : fMatch
-            });
-            console.dir(fMatch);
+            foreignCondition = {
+                $match: fMatch
+            };
 
             return {
-                formCondition : formCondition,
-                foreignCondition : foreignCondition
+                formCondition   : formCondition,
+                foreignCondition: foreignCondition
             };
         }
 
@@ -151,137 +150,148 @@ var ContactUs = function(db, redis, event) {
                 query.filter.endDate = query.filter.time.values[1];
             }
             const condition = generateSearchCondition(query.filter);
-            const mongoQuery = ContactUsModel.aggregate()
-                .append(condition.formCondition)
-                .lookup({
-                    from : CONTENT_TYPES.COMMENT + 's',
-                    localField : '_id',
-                    foreignField : 'taskId',
-                    as : 'commentaries'
-                })
-                .lookup({
-                    from : CONTENT_TYPES.PERSONNEL + 's',
-                    localField : 'createdBy',
-                    foreignField : '_id',
-                    as : 'createdBy.user'
-                })
-                .project({
-                    type : 1,
-                    createdAt : 1,
-                    description : 1,
-                    status : 1,
-                    attachments : 1,
-                    'commentaries.body' : 1,
-                    'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
-                })
-                .project({
-                    type : 1,
-                    createdAt : 1,
-                    description : 1,
-                    status : 1,
-                    attachments : 1,
-                    'commentaries.body' : 1,
-                    'createdBy.user._id' : 1,
-                    'createdBy.user.ID' : 1,
-                    'createdBy.user.country' : 1,
-                    'createdBy.user.lastName' : 1,
-                    'createdBy.user.firstName' : 1,
-                    'createdBy.user.position' : 1,
-                    'createdBy.user.imageSrc' : 1
-                })
-                .append(condition.foreignCondition)
-                .lookup({
-                    from : CONTENT_TYPES.POSITION + 's',
-                    localField : 'createdBy.user.position',
-                    foreignField : '_id',
-                    as : 'position'
-                })
-                .unwind('position')
-                .project({
-                    type : 1,
-                    createdAt : 1,
-                    description : 1,
-                    status : 1,
-                    attachments : 1,
-                    'commentaries.body' : 1,
-                    'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
-                    'position.name' : 1,
-                    'position._id' : 1
-                })
-                .unwind('createdBy.user.country')
-                .lookup({
-                    from : CONTENT_TYPES.DOMAIN + 's',
-                    localField : 'createdBy.user.country',
-                    foreignField : '_id',
-                    as : 'country'
-                })
-                .unwind('country')
-                .project({
-                    type : 1,
-                    createdAt : 1,
-                    description : 1,
-                    status : 1,
-                    attachments : 1,
-                    'commentaries.body' : 1,
-                    'createdBy.user' : {$ifNull : ["$createdBy.user", []]},
-                    'country.name' : 1,
-                    'country._id' : 1
-                })
-                .sort({[query.sortBy]: -1})
-                .skip(skip)
-                .limit(count)
-                .allowDiskUse(true);
+            const mongoQuery = ContactUsModel.aggregate([
+                condition.formCondition,
+                {
+                    $lookup: {
+                        from        : CONTENT_TYPES.COMMENT + 's',
+                        localField  : '_id',
+                        foreignField: 'taskId',
+                        as          : 'commentaries'
+                    }
+                }, {
+                    $lookup: {
+                        from        : CONTENT_TYPES.PERSONNEL + 's',
+                        localField  : 'createdBy',
+                        foreignField: '_id',
+                        as          : 'createdBy.user'
+                    }
+                }, {
+                    $project: {
+                        type               : 1,
+                        createdAt          : 1,
+                        description        : 1,
+                        status             : 1,
+                        attachments        : 1,
+                        'commentaries.body': 1,
+                        'createdBy.user'   : {$arrayElemAt: ['$createdBy.user', 0]}
+                    }
+                }, {
+                    $project: {
+                        type                      : 1,
+                        createdAt                 : 1,
+                        description               : 1,
+                        status                    : 1,
+                        attachments               : 1,
+                        'commentaries.body'       : 1,
+                        'createdBy.user._id'      : 1,
+                        'createdBy.user.ID'       : 1,
+                        'createdBy.user.country'  : 1,
+                        'createdBy.user.lastName' : 1,
+                        'createdBy.user.firstName': 1,
+                        'createdBy.user.position' : 1,
+                        'createdBy.user.imageSrc' : 1
+                    }
+                },
+                condition.foreignCondition,
+                {
+                    $lookup: {
+                        from        : CONTENT_TYPES.POSITION + 's',
+                        localField  : 'createdBy.user.position',
+                        foreignField: '_id',
+                        as          : 'position'
+                    }
+                },
+                {
+                    $unwind: '$position'
+                },
+                {
+                    $project: {
+                        type               : 1,
+                        createdAt          : 1,
+                        description        : 1,
+                        status             : 1,
+                        attachments        : 1,
+                        'commentaries.body': 1,
+                        'createdBy.user'   : {$ifNull: ["$createdBy.user", []]},
+                        'position.name'    : 1,
+                        'position._id'     : 1
+                    }
+                }, {
+                    $unwind: {
+                        path                      : '$createdBy.user.country',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from        : CONTENT_TYPES.DOMAIN + 's',
+                        localField  : 'createdBy.user.country',
+                        foreignField: '_id',
+                        as          : 'country'
+                    }
+                }, {
+                    $unwind: {
+                        path                      : '$country',
+                        preserveNullAndEmptyArrays: true
+                    }
+                }, {
+                    $project: {
+                        type               : 1,
+                        createdAt          : 1,
+                        description        : 1,
+                        status             : 1,
+                        attachments        : 1,
+                        'commentaries.body': 1,
+                        'createdBy.user'   : {$ifNull: ["$createdBy.user", []]},
+                        'country.name'     :  {$ifNull: ["$country.name", '']},
+                        'country._id'     :  {$ifNull: ["$country._id", '']},
+                    }
+                }, {
+                    $group: {
+                        _id  : null,
+                        total: {$sum: 1},
+                        root : {$push: '$$ROOT'}
+                    }
+                }, {
+                    $unwind: '$root'
+                }, {
+                    $project: {
+                        _id         : '$root._id',
+                        type        : '$root.type',
+                        createdAt   : '$root.createdAt',
+                        description : '$root.description',
+                        attachments : '$root.attachments',
+                        commentaries: '$root.commentaries',
+                        createdBy   : '$root.createdBy',
+                        country     : '$root.country',
+                        total       : 1
+                    }
+                }, {
+                    $sort: {
+                        [query.sortBy]: -1
+                    }
+                }, {
+                    $skip: skip
+                }, {
+                    $limit: count
+                }]);
 
-            function getCount(cb) {
-                ContactUsModel.aggregate()
-                    .append(condition.formCondition)
-                    .lookup({
-                        from : CONTENT_TYPES.PERSONNEL + 's',
-                        localField : 'createdBy',
-                        foreignField : '_id',
-                        as : 'createdBy.user'
-                    })
-                    .project({
-                        type : 1,
-                        createdAt : 1,
-                        description : 1,
-                        status : 1,
-                        'createdBy.user' : {$arrayElemAt : ['$createdBy.user', 0]}
-                    })
-                    .append(condition.foreignCondition)
-                    .append([
-                        {
-                            $group : {
-                                _id : null,
-                                count : {
-                                    $sum : 1
-                                }
-                            }
-                        }
-                    ])
-                    .exec(cb)
-            }
+            mongoQuery.options = {
+                allowDiskUse: true
+            };
 
-            function getData(cb) {
-                mongoQuery.exec(cb)
-            }
 
-            async.parallel([
-                getCount,
-                getData
-            ], function(err, result) {
+            mongoQuery.exec(function (err, result) {
+                var total;
                 if (err) {
                     return next(err);
                 }
-                var count = 0;
-
-                if (result[0][0] && result[0][0].count) {
-                    count = result[0][0].count
-                }
+                total = result && result[0] ? result[0].total : 0;
 
                 res.send(200, {
-                    total : count,
-                    data : result[1]
+                    total: total,
+                    data : result
                 });
             });
         }

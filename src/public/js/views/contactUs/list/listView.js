@@ -63,7 +63,11 @@ define([
             prepareDataToDisplay : function (data) {
                 _.each(data, (model) => {
                     model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
-                    model.country.name.currentLanguage = model.country.name[App.currentUser.currentLanguage];
+
+                   if (model.country && model.country.name ){
+                       model.country.name.currentLanguage = model.country.name[App.currentUser.currentLanguage];
+                   }
+
                     model.createdAt = moment(model.createdAt).format('DD.MM.YYYY');
                 });
             },

@@ -2,12 +2,15 @@ define([
         'Backbone',
         'Underscore',
         'jQuery',
-        'text!templates/domain/thumbnailsForSelection.html'
+        'text!templates/domain/thumbnailsForSelection.html',
+        'text!templates/domain/thumbnailList.html',
+        'collections/filter/filterCollection'
     ],
-    function (Backbone, _, $, thumbnailsTemplate) {
+    function (Backbone, _, $, thumbnailsTemplate, thumbnailsList, FilterCollection) {
         var View = Backbone.View.extend({
-            viewType: 'thumbnails',
-            template: _.template(thumbnailsTemplate),
+            viewType        : 'thumbnails',
+            template        : _.template(thumbnailsTemplate),
+            reRenderTemplate: _.template(thumbnailsList),
 
             events: {
                 "click .thumbnail:not(label,input)": "thumbnailsClick",
@@ -15,11 +18,52 @@ define([
             },
 
             initialize: function (options) {
+                var self = this;
                 this.collection = options.collection;
                 this.selected = options.selected;
+                this.filteredCollection = new FilterCollection(this.collection.toJSON());
                 this.contentType = options.contentType;
                 this.multiselect = options.multiselect;
+
+                this.filteredCollection.on('reset', _.debounce(function () {
+                    self.reRender();
+                }), 500);
+
+                this.inputEvent = _.debounce(
+                    function (e) {
+                        var $target = $(e.currentTarget);
+                        var value = $target.val();
+                        var newFilteredCollection;
+
+                        if (!value) {
+                            return self.filteredCollection.reset(self.collection.toJSON());
+                        }
+
+                        newFilteredCollection = self.filterCollection(value);
+
+                        self.filteredCollection.reset(newFilteredCollection);
+                    }, 500);
+
                 this.render();
+            },
+
+            filterCollection: function (value) {
+                var resultCollection;
+                var regex;
+
+                regex = new RegExp(value, 'i');
+
+                resultCollection = this.collection.filter(function (model) {
+                    var name = model.get('name');
+                    var nameEn = model.get('name').en || '';
+                    var nameAr = model.get('name').ar || '';
+
+                    if (nameEn.match(regex) || nameAr.match(regex)) {
+                        return model;
+                    }
+                });
+
+                return resultCollection;
             },
 
             checkCheckAll: function (checked, id) {
@@ -57,6 +101,17 @@ define([
                 $checkboxes.prop("checked", check);
             },
 
+            reRender : function (){
+                var opt = {
+                    collection : this.filteredCollection.toJSON(),
+                    itemsCount : this.filteredCollection.length,
+                    selected   : this.selected
+                };
+                this.$el.find('.scrollable').remove();
+                this.$el.closest('.domainDialog').append(this.reRenderTemplate(opt));
+                this.$el.find('.scrollable').mCustomScrollbar();
+            },
+
             render: function () {
                 var opt = {
                     collection : this.collection.toJSON(),
@@ -65,6 +120,7 @@ define([
                     contentType: this.contentType,
                     multiselect: this.multiselect
                 };
+                var $nameInput;
 
                 var formString = this.template(opt);
                 var self = this;
@@ -95,6 +151,12 @@ define([
                 if (!this.multiselect && this.selected.length === 1) {
                     this.$checkbox = this.$el.find('input[type="checkbox"]:not(#checkAll):checked');
                 }
+
+                $nameInput = this.$el.find('.searchInputWrap > input');
+
+                $nameInput.on('input', function (e) {
+                    self.inputEvent(e);
+                });
 
                 this.$el.find('.scrollable').mCustomScrollbar();
 
