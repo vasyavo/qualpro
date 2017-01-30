@@ -20,6 +20,7 @@ var CompetitorBranding = function(db, redis, event) {
     var ObjectId = mongoose.Types.ObjectId;
     var FileModel = require('./../types/file/model');
     var bodyValidator = require('../helpers/bodyValidator');
+    const errorSender = require('../utils/errorSender');
     var self = this;
 
     var $defProjection = {
@@ -665,7 +666,7 @@ var CompetitorBranding = function(db, redis, event) {
             }
 
             if (!response.length) {
-                return callback(response);
+                return errorSender.badRequest(callback);
             }
 
             response = response && response[0] ? response[0] : {};
