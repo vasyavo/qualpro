@@ -10,10 +10,9 @@ define([
     'dataService',
     'custom',
     'constants/contentType',
-    'js-cookie',
-    'views/documents/create'
+    'js-cookie'
 ], function (Backbone, $, _, moment, mainView, LoginView, CreateSuperAdminView,
-             forgotPassView, dataService, custom, CONSTANTS, Cookies, CreateDocumentView) {
+             forgotPassView, dataService, custom, CONSTANTS, Cookies) {
     'use strict';
 
     var appRouter = Backbone.Router.extend({
@@ -27,8 +26,6 @@ define([
             home : 'any',
             'login(/:confirmed)' : 'login',
             forgotPass : 'forgotPass',
-            'qualPro/documents/:id' : 'showDocumentsView',
-            'qualPro/documents' : 'showDocumentsView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -52,16 +49,6 @@ define([
             });
 
             custom.applyDefaults();
-        },
-
-        showDocumentsView : function (folder) {
-            if (!folder) {
-                folder = 'home';
-            }
-
-            var createDocumentView = new CreateDocumentView();
-            debugger;
-            this.changeWrapperView(createDocumentView);
         },
 
         redirectTo: function () {
