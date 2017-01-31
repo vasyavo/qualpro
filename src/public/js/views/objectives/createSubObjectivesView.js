@@ -290,16 +290,16 @@ define([
                 },
 
                 function (model, files, cb) {
+                    var form = model.get('form');
+                    var formId;
+                    var formType;
+
+                    if (form) {
+                        formId = form._id;
+                        formType = form.contentType;
+                    }
+
                     if (!context.visibilityFormAjax) {
-                        var form = model.get('form');
-                        var formId;
-                        var formType;
-
-                        if (form) {
-                            formId = form._id;
-                            formType = form.contentType;
-                        }
-
                         if (form && formType === 'visibility') {
                             $.ajax({
                                 url : 'form/visibility/before/' + formId,
@@ -318,6 +318,7 @@ define([
                                     cb(null, model);
                                 }
                             });
+                            return;
                         } else {
                             return cb(null, model);
                         }
