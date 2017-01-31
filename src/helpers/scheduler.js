@@ -1,25 +1,34 @@
 const async = require('async');
 const nodeScheduler = require('node-schedule');
-const mongoose = require('mongoose');
 const moment = require('moment');
-const CONTENT_TYPES = require('../public/js/constants/contentType.js');
-const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
+const CONTENT_TYPES = require('../public/js/constants/contentType');
+const OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
 const ACTIVITY_TYPES = require('../constants/activityTypes');
 const logger = require('./../utils/logger');
-const mongo = require('./../utils/mongo');
 const event = require('./../utils/eventEmitter');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
+const PERSONNEL_STATUSES = require('./../public/js/constants/personnelStatuses');
+const PersonnelModel = require('./../types/personnel/model');
+const ContractYearlyModel = require('./../types/contractYearly/model');
+const ContractSecondaryModel = require('./../types/contractSecondary/model');
+const ObjectiveModel = require('./../types/objective/model');
+const PromotionModel = require('./../types/promotion/model');
+const PromotionItemModel = require('./../types/promotionItem/model');
+const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
+const BrandingActivityModel = require('./../types/brandingActivity/model');
+const CompetitorBrandingModel = require('./../types/competitorBranding/model');
+const QuestionnaireModel = require('./../types/questionnaries/model');
 
 const getPipeline = (query) => {
     return [{
-        $match: query
+        $match: query,
     }, {
         $group: {
             _id: null,
             setId: {
-                $addToSet: '$_id'
-            }
-        }
+                $addToSet: '$_id',
+            },
+        },
     }];
 };
 
@@ -29,10 +38,10 @@ const triggerEvent = (mid, id, itemType) => {
         actionType: ACTIVITY_TYPES.UPDATED,
         createdBy: {
             user: null,
-            date: new Date()
+            date: new Date(),
         },
         itemId: id,
-        itemType
+        itemType,
     });
 };
 
@@ -53,7 +62,7 @@ const exec = (options) => {
 
         if (!setId.length) {
             logger.info(`[${infoMessage}/*]: Skipping...`);
-            return
+            return;
         }
 
         async.each(setId, (id, eachCb) => {
@@ -66,36 +75,35 @@ const exec = (options) => {
                 logger.info(`[${infoMessage}/${id}]: Done.`);
                 eachCb(null);
             });
-        })
+        });
     };
 };
 
 const personnelInactive = () => {
-    const PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
-    const PersonnelModel = require('./../types/personnel/model');
     const contentType = CONTENT_TYPES.PERSONNEL;
     const startDate = new Date();
     const endDate = new Date(startDate.getMonth() - 2);
     const query = {
         lastAccess: {
-            $lte: endDate
+            $lte: endDate,
         },
         temp: false,
         status: {
-            $nin: [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id]
-        }
+            $nin: [PERSONNEL_STATUSES.ONLEAVE._id, PERSONNEL_STATUSES.INACTIVE._id],
+        },
     };
     const iterator = (id, callback) => {
         PersonnelModel.findByIdAndUpdate(id, {
             $set: {
-                status: PERSONNEL_STATUSES.INACTIVE._id
-            }
+                status: PERSONNEL_STATUSES.INACTIVE._id,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(20, id, contentType);
             }
 
@@ -112,30 +120,30 @@ const personnelInactive = () => {
 };
 
 const contractsYearlyExpired = () => {
-    const ContractYearlyModel = require('./../types/contractYearly/model');
     const contentType = CONTENT_TYPES.CONTRACTSYEARLY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
 
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
 
     const iterator = (id, callback) => {
         ContractYearlyModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(20, id, contentType);
             }
 
@@ -151,30 +159,30 @@ const contractsYearlyExpired = () => {
 };
 
 const contractSecondaryExpired = () => {
-    const ContractSecondaryModel = require('./../types/contractSecondary/model');
     const contentType = CONTENT_TYPES.CONTRACTSSECONDARY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
 
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
 
     const iterator = (id, callback) => {
         ContractSecondaryModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(22, id, contentType);
             }
 
@@ -190,30 +198,28 @@ const contractSecondaryExpired = () => {
 };
 
 const promotionExpired = () => {
-    const PromotionModel = require('./../types/promotion/model');
     const contentType = CONTENT_TYPES.PROMOTIONS;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
-
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
-
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
     const iterator = (id, callback) => {
         PromotionModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(33, id, contentType);
             }
 
@@ -229,30 +235,28 @@ const promotionExpired = () => {
 };
 
 const promotionItemExpired = () => {
-    const PromotionItemModel = require('./../types/promotionItem/model');
     const contentType = CONTENT_TYPES.PROMOTIONSITEMS;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
-
         status: {
-            $in: [PROMOTION_STATUSES.ACTIVE, PROMOTION_STATUSES.DRAFT]
-        }
-
+            $in: [PROMOTION_STATUSES.ACTIVE, PROMOTION_STATUSES.DRAFT],
+        },
     };
     const iterator = (id, callback) => {
         PromotionItemModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(35, id, contentType);
             }
 
@@ -268,31 +272,29 @@ const promotionItemExpired = () => {
 };
 
 const competitorPromotionExpired = () => {
-    const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
     const contentType = CONTENT_TYPES.COMPETITORPROMOTION;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
-
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
-
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
 
     const iterator = (id, callback) => {
         CompetitorPromotionModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(32, id, contentType);
             }
 
@@ -308,30 +310,29 @@ const competitorPromotionExpired = () => {
 };
 
 const brandingActivityExpired = () => {
-    const BrandingActivityModel = require('../types/brandingActivity/model');
     const contentType = CONTENT_TYPES.BRANDING_ACTIVITY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
-
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
 
     const iterator = (id, callback) => {
         BrandingActivityModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(38, id, contentType);
             }
 
@@ -347,30 +348,29 @@ const brandingActivityExpired = () => {
 };
 
 const competitorBrandingAndDisplayExpired = () => {
-    const CompetitorBrandingModel = require('./../types/competitorBranding/model');
     const contentType = CONTENT_TYPES.COMPETITORBRANDING;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
-
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
 
     const iterator = (id, callback) => {
         CompetitorBrandingModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(34, id, contentType);
             }
 
@@ -386,29 +386,28 @@ const competitorBrandingAndDisplayExpired = () => {
 };
 
 const questionnaireExpired = () => {
-    const QuestionnaireModel = require('./../types/questionnaries/model');
     const contentType = CONTENT_TYPES.QUESTIONNARIES;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dueDate: {
-            $lt: new Date()
+            $lt: new Date(),
         },
-
         status: {
-            $eq: PROMOTION_STATUSES.ACTIVE
-        }
+            $eq: PROMOTION_STATUSES.ACTIVE,
+        },
     };
     const iterator = (id, callback) => {
         QuestionnaireModel.findByIdAndUpdate(id, {
             $set: {
-                status: PROMOTION_STATUSES.EXPIRED
-            }
+                status: PROMOTION_STATUSES.EXPIRED,
+            },
         }, (err, model) => {
             if (err) {
                 return callback(err);
             }
 
             if (model) {
+                // todo: replace with new ActivityLog
                 triggerEvent(34, id, contentType);
             }
 
@@ -424,19 +423,18 @@ const questionnaireExpired = () => {
 };
 
 const objectiveOverdue = () => {
-    const ObjectiveModel = require('./../types/objective/model');
     const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
     const query = {
         dateEnd: {
-            $lt: new Date()
+            $lt: new Date(),
         },
         status: {
             $in: [
                 OBJECTIVE_STATUSES.IN_PROGRESS,
                 OBJECTIVE_STATUSES.RE_OPENED,
-                OBJECTIVE_STATUSES.TO_BE_DISCUSSED
-            ]
-        }
+                OBJECTIVE_STATUSES.TO_BE_DISCUSSED,
+            ],
+        },
     };
     const iterator = (id, callback) => {
         ObjectiveModel.findByIdAndUpdate(id, {
@@ -458,7 +456,7 @@ const objectiveOverdue = () => {
                 };
 
                 if (type === CONTENT_TYPES.OBJECTIVES) {
-                    ActivityLog.emit('objective:overdue', payload)
+                    ActivityLog.emit('objective:overdue', payload);
                 }
 
                 if (type === CONTENT_TYPES.INSTORETASKS) {
@@ -478,11 +476,10 @@ const objectiveOverdue = () => {
 };
 
 const objectiveFail = () => {
-    const ObjectiveModel = require('./../types/objective/model');
     const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
     const query = {
         'editedBy.date': {
-            $lte: moment().add(-30, 'days')
+            $lte: moment().add(-30, 'days'),
         },
         status: OBJECTIVE_STATUSES.OVER_DUE,
     };
@@ -506,7 +503,7 @@ const objectiveFail = () => {
                 };
 
                 if (type === CONTENT_TYPES.OBJECTIVES) {
-                    ActivityLog.emit('objective:fail', payload)
+                    ActivityLog.emit('objective:fail', payload);
                 }
 
                 if (type === CONTENT_TYPES.INSTORETASKS) {
@@ -531,7 +528,7 @@ class Scheduler {
         jobs.forEach((job) => {
             nodeScheduler.scheduleJob(schedule, job);
         });
-    };
+    }
 
     start() {
         const jobs = [
