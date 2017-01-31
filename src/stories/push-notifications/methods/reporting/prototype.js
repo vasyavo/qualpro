@@ -4,6 +4,7 @@ const toString = require('./../../../../utils/toString');
 const getReportGroupsByOriginator = require('./../../utils/getReportGroupsByOriginator');
 const getEveryoneInLocation = require('./../../utils/getEveryoneInLocation');
 
+// todo: revise event as it store exclusive data in db in comparison with other reports
 module.exports = function * (options) {
     const {
         moduleId,
