@@ -55,7 +55,7 @@ define([
         events: {
             'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
-            'input #title, #titleAr'     : 'changeTitle',
+            'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
             'click #unlinkForm'          : 'showUnlinkPopUp',
             //events for duplicate
@@ -545,10 +545,6 @@ define([
                         var VFData = null;
                         var files = [];
 
-                        context.branchesForVisibility.map(function (item) {
-
-                        });
-
                         if (visibilityFormAjax) {
                             VFData = context.visibilityFormAjax.data;
                         }
@@ -584,9 +580,14 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var form = odel.get('form');
-                    var formId = form._id;
-                    var formType = form.contentType;
+                    var form = model.get('form');
+                    var formId;
+                    var formType;
+
+                    if (form) {
+                        formId = form._id;
+                        formType = form.contentType;
+                    }
 
                     if (!context.visibilityFormAjax && !context.VFWithoutBranchesChanged) {
                         if (formType === 'visibility') {
@@ -607,6 +608,8 @@ define([
                                     cb(null, model);
                                 }
                             });
+                        } else {
+                            cb(null, model);
                         }
                     }
 
