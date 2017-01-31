@@ -103,6 +103,8 @@ define(function (require) {
 
             if (!afterFileData.afterDescription && this.assigneId === App.currentUser._id) {
                 that.templateOptions.editAfter = true;
+            } else if (!afterFileData.afterDescription && Object.keys(App.currentUser.covered).indexOf(this.assigneId) !== -1) {
+                that.templateOptions.editAfter = true;
             }
 
             var layout = $(this.template(
