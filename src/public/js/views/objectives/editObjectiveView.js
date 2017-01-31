@@ -584,7 +584,7 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var form = odel.get('form');
+                    var form = model.get('form');
                     var formId = form._id;
                     var formType = form.contentType;
 

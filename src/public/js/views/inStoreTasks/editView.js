@@ -226,7 +226,7 @@ define([
 
             val = moment(val, 'DD.MM.YYYY').toISOString();
 
-            id === 'dataStart' ? this.body.dateStart = val : this.body.dateEnd = val;
+            id === 'dateStart' ? this.body.dateStart = val : this.body.dateEnd = val;
         },
 
         changeDesc: function (e) {
