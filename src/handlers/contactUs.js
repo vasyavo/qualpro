@@ -259,6 +259,7 @@ var ContactUs = function(db, redis, event) {
                     $project: {
                         _id         : '$root._id',
                         type        : '$root.type',
+                        status      : '$root.status',
                         createdAt   : '$root.createdAt',
                         description : '$root.description',
                         attachments : '$root.attachments',
