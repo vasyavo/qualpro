@@ -545,10 +545,6 @@ define([
                         var VFData = null;
                         var files = [];
 
-                      /*  context.branchesForVisibility.map(function (item) {
-
-                        });*/
-
                         if (visibilityFormAjax) {
                             VFData = context.visibilityFormAjax.data;
                         }

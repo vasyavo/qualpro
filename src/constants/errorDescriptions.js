@@ -92,8 +92,8 @@ errorDescriptions[ERROR_MSG.INCORRECT_VERIFICATION_CODE] = {
 };
 
 errorDescriptions[ERROR_MSG.INCORRECT_USERNAME_OR_PASSWORD] = {
-    en: 'The username or password is incorrect. Please try again',
-    ar: 'The username or password is incorrect. Please try again'
+    en: 'The username or password is incorrect. Please try again.',
+    ar: 'اسم المستخدم أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.'
 };
 
 module.exports = errorDescriptions;

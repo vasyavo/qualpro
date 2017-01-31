@@ -27,7 +27,6 @@ module.exports = function(app, db, event) {
     var modulesHandler = new ModuleslHandler(db);
     var docsHandler = new DocsHandler(db);
 
-    var brandingAndDisplayRouter = require('./brandingAndDisplay')(db, redis, event);
     var brandingActivityRouter = require('./brandingActivity')(db, redis, event);
     var brandingActivityItems = require('./brandingActivityItems')(db, redis, event);
     var personnelRouter = require('./personnel')(db, app, event, redis);
@@ -112,7 +111,7 @@ module.exports = function(app, db, event) {
     app.use(require('./../stories/user-registration'));
 
     app.use('/activityList', activityList);
-    app.use('/brandingAndDisplayNew', brandingAndDisplayRouter);
+    app.use('/brandingAndDisplayNew', require('./brandingAndDisplay'));
     app.use('/brandingActivity', brandingActivityRouter);
     app.use('/brandingActivityItems', brandingActivityItems);
     app.use('/personnel', personnelRouter);

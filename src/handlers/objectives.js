@@ -259,7 +259,7 @@ var Objectives = function (db, redis, event) {
                 if (!hasForm || isDistribution) {
                     if (TestUtils.isObjectiveDraft(objectiveModel)) {
                         ActivityLog.emit('sub-objective:draft-created', {
-                            originatorId: createdById,
+                            actionOriginator: createdById,
                             accessRoleLevel,
                             body: objectiveModel.toJSON(),
                         });
@@ -267,7 +267,7 @@ var Objectives = function (db, redis, event) {
 
                     if (TestUtils.isObjectivePublished(objectiveModel)) {
                         ActivityLog.emit('sub-objective:published', {
-                            originatorId: createdById,
+                            actionOriginator: createdById,
                             accessRoleLevel,
                             body: objectiveModel.toJSON(),
                         });
@@ -634,7 +634,7 @@ var Objectives = function (db, redis, event) {
                     if (!hasForm || isDistribution) {
                         if (TestUtils.isObjectiveDraft(model)) {
                             ActivityLog.emit('objective:draft-created', {
-                                originatorId: userId,
+                                actionOriginator: userId,
                                 accessRoleLevel,
                                 body: model.toJSON(),
                             });
@@ -642,7 +642,7 @@ var Objectives = function (db, redis, event) {
 
                         if (TestUtils.isObjectivePublished(model)) {
                             ActivityLog.emit('objective:published', {
-                                originatorId: userId,
+                                actionOriginator: userId,
                                 accessRoleLevel,
                                 body: model.toJSON(),
                             });

@@ -17,7 +17,7 @@ module.exports = (options) => {
             objective,
         } = options;
 
-        const actionOriginator = toString(options, 'originatorId');
+        const actionOriginator = toString(options, 'actionOriginator');
 
         const newActivity = new ActivityModel();
 

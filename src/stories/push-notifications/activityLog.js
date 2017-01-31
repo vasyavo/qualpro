@@ -36,4 +36,6 @@ activityLog.on('reporting:al-alali-promo-evaluation:published', require('./metho
 activityLog.on('reporting:al-alali-promo-evaluation:updated', require('./methods/reporting/al-alali-promo-evaluation/updated'));
 activityLog.on('reporting:al-alali-promo-evaluation:item-published', require('./methods/reporting/al-alali-promo-evaluation/itemPublished'));
 
+activityLog.on('marketing:al-alali-branding-and-display-report:published', require('./methods/marketing/al-alali-branding-and-display-report/published'));
+
 module.exports = activityLog;

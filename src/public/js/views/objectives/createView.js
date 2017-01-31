@@ -408,8 +408,14 @@ define([
                     }
 
                     var form = model.get('form');
-                    var formId = form._id;
-                    var formType = form.contentType;
+                    var formId;
+                    var formType;
+
+                    if (form) {
+                        formId = form._id;
+                        formType = form.contentType;
+                    }
+
                     if (formType === 'visibility') {
                         $.ajax({
                             url : 'form/visibility/before/' + formId,

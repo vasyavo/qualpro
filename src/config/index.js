@@ -23,6 +23,7 @@ const host = process.env.HOST;
 config.port = parseInt(process.env.PORT) || 3000;
 config.host = host || 'localhost';
 config.localhost = host ? host : `https://${config.host}:${config.port}`;
+config.debug = process.env.DEBUG_DEV || false;
 
 /* Database configurations */
 config.mongodbUri = process.env.MONGODB_URI;

@@ -68,13 +68,13 @@ module.exports = (args, callback) => {
             if (TestUtils.isObjectiveDraft(objective)) {
                 if (arrayOfParentObjectiveId.length) {
                     ActivityLog.emit('sub-objective:draft-created', {
-                        originatorId: actionOriginator,
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });
                 } else {
                     ActivityLog.emit(`${getObjectiveContext(objective)}:draft-created`, {
-                        originatorId: actionOriginator,
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });
@@ -84,13 +84,13 @@ module.exports = (args, callback) => {
             if (TestUtils.isObjectivePublished(objective)) {
                 if (arrayOfParentObjectiveId.length) {
                     ActivityLog.emit('sub-objective:published', {
-                        originatorId: actionOriginator,
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });
                 } else {
                     ActivityLog.emit(`${getObjectiveContext(objective)}:published`, {
-                        originatorId: actionOriginator,
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });

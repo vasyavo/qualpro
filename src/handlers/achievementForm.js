@@ -132,14 +132,18 @@ var AchievementForm = function (db, redis, event) {
 
         ], (err, report) => {
             if (err) {
-                return next(err);
-            }
+                if (!res.headersSent) {
+                    next(err);
+                }
 
-            ActivityLog.emit('reporting:achievement-form:published', {
-                actionOriginator: userId,
-                accessRoleLevel,
-                body: report.toJSON(),
-            });
+                logger.error(err);
+            } else {
+                ActivityLog.emit('reporting:achievement-form:published', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: report.toJSON(),
+                });
+            }
         });
     };
 
