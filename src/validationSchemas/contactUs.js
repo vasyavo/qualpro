@@ -7,7 +7,10 @@ const CONSTANTS = require('../constants/mainConstants');
 const TYPES = [
     'Application Related Issue',
     'Future Application Ideas',
-    'Others'
+    'Others',
+    'Sales Feedback',
+    'Trade Feedback',
+    'Consumers Feedback',
 ];
 const STATUSES = [
     'new',
