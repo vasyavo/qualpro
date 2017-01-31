@@ -30,6 +30,11 @@ define(function (require) {
             });
             this.model.fetch({
                 success: function () {
+                    var afterPart = that.model.get('after');
+                    if (afterPart.description) {
+                        that.trigger('after-part-filled');
+                    }
+
                     that.render();
                     that.defineUiElements();
                 },
