@@ -1,6 +1,12 @@
 const throng = require('throng');
 const config = require('./config');
 
+if (config.debug) {
+    require('./app');
+    require('./master');
+    return;
+}
+
 function startWorker(id) {
     console.log(`Started worker ${ id }`);
 
