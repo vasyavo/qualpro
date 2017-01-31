@@ -2003,7 +2003,7 @@ var Objectives = function (db, redis, event) {
                         filterSearch     : filterSearch,
                         skip             : skip,
                         limit            : limit,
-                        prsonnel         : ObjectId(uId),
+                        personnel        : ObjectId(uId),
                         coveredIds       : coveredIds,
                         subordinates     : arrayOfSubordinateUsersId,
                         currentUserLevel : currentUserLevel
