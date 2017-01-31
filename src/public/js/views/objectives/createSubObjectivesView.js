@@ -292,8 +292,10 @@ define([
                 function (model, files, cb) {
                     if (!context.visibilityFormAjax) {
                         var form = model.get('form');
-                        if (form) {
-                            var formId = model.get('form')._id;
+                        var formId = form._id;
+                        var formType = form.contentType;
+
+                        if (form && formType === 'visibility') {
                             $.ajax({
                                 url : 'form/visibility/before/' + formId,
                                 method : 'PUT',
@@ -370,20 +372,23 @@ define([
                         };
                     }
 
-                    var formId = model.get('form')._id;
-                    $.ajax({
-                        url : 'form/visibility/before/' + formId,
-                        method : 'PUT',
-                        contentType : 'application/json',
-                        dataType : 'json',
-                        data : JSON.stringify(requestPayload),
-                        success : function () {
-                            cb(null, model);
-                        },
-                        error : function () {
-                            cb(true);
-                        }
-                    });
+                    if (formType === 'visibility') {
+                        $.ajax({
+                            url : 'form/visibility/before/' + formId,
+                            method : 'PUT',
+                            contentType : 'application/json',
+                            dataType : 'json',
+                            data : JSON.stringify(requestPayload),
+                            success : function () {
+                                cb(null, model);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    } else {
+                        cb(null, model);
+                    }
                 }
 
             ], function (err) {

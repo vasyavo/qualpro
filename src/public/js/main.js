@@ -21,7 +21,8 @@ require.config({
         imageCrop            : './libs/Jcrop/js/jquery.Jcrop.min',
         jqueryui             : './libs/jquery-ui/jquery-ui.min',
         Underscore           : './libs/underscore/underscore-min',
-        Backbone             : './libs/backbone/backbone-min',
+        Backbone : './libs/backbone/backbone-min',
+        'backbone.radio' : './libs/backbone.radio/build/backbone.radio',
         templates            : '../templates',
         text                 : './libs/requirejs-text/text',
         helpers              : 'helpers',
@@ -39,7 +40,8 @@ require.config({
         sprintf              : './libs/sprintf/dist/sprintf.min',
         minigrid             : './libs/minigrid/dist/minigrid.min',
         socketio             : '/socket.io/socket.io.js',
-        lodash               : './libs/lodash/lodash'
+        lodash               : './libs/lodash/lodash',
+        marionette : './libs/backbone.marionette/lib/backbone.marionette'
     },
     shim : {
         jqueryui : ['jQuery'],

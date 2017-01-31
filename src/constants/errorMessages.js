@@ -25,4 +25,5 @@ module.exports = {
     USER_NOT_FOUND                : 'user_not_found',
     EMAIL_IS_NOT_VALID            : 'email_is_not_valid',
     INCORRECT_VERIFICATION_CODE   : 'incorrect_verification_code',
+    INCORRECT_USERNAME_OR_PASSWORD: 'incorrect_username_or_password',
 };

@@ -10,6 +10,7 @@ const csrfProtection = require('./../utils/csrfProtection');
 const checkAuth = require('./../utils/isAuth');
 const addRequestId = require('express-request-id')();
 const config = require('./../config');
+const express = require('express');
 
 module.exports = function(app, db, event) {
     var logWriter = require('../helpers/logWriter');
@@ -91,6 +92,11 @@ module.exports = function(app, db, event) {
             csrfToken : req.csrfToken(),
             pubnubSubscribeKey: config.pubnub.subscribeKey,
         });
+    });
+
+    app.use('/js/backbone.js', (req, res) => {
+        let pathToFile = path.join(config.workingDirectory, 'src/public/js/libs/backbone/backbone-min.js').normalize();
+        res.sendfile(pathToFile);
     });
 
     // endpoint for handling api documents

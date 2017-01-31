@@ -1,5 +1,9 @@
+const async = require('async');
+const ACL_MODULES = require('./../constants/aclModulesNames');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const extractBody = require('./../utils/extractBody');
+
 var AchievementForm = function (db, redis, event) {
-    var async = require('async');
     var _ = require('lodash');
     var logger = require('../utils/logger');
     var mongoose = require('mongoose');
@@ -38,123 +42,103 @@ var AchievementForm = function (db, redis, event) {
         endDate          : 1
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
-            var model;
-            var achievementForm;
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const files = req.files;
 
+        const queryRun = (body, callback) => {
             async.waterfall([
-                function (cb) {
-                    var createdBy = {
+                (cb) => {
+                    const createdBy = {
                         user: userId,
-                        date: new Date()
+                        date: new Date(),
                     };
+
                     if (body.description) {
                         body.description = {
                             en: _.escape(body.description.en),
-                            ar: _.escape(body.description.ar)
+                            ar: _.escape(body.description.ar),
                         };
                     }
                     if (body.additionalComment) {
                         body.additionalComment = {
                             en: _.escape(body.additionalComment.en),
-                            ar: _.escape(body.additionalComment.ar)
+                            ar: _.escape(body.additionalComment.ar),
                         };
                     }
 
-                    achievementForm = {
-                        description      : body.description,
+                    const achievementForm = {
+                        description: body.description,
                         additionalComment: body.additionalComment,
-                        country          : body.country,
-                        region           : body.region,
-                        subRegion        : body.subRegion,
-                        retailSegment    : body.retailSegment,
-                        outlet           : body.outlet,
-                        branch           : body.branch,
-                        location         : body.location,
-                        date             : body.date,
-                        createdBy        : createdBy,
-                        editedBy         : createdBy,
-                        startDate        : body.startDate,
-                        endDate          : body.endDate
+                        country: body.country,
+                        region: body.region,
+                        subRegion: body.subRegion,
+                        retailSegment: body.retailSegment,
+                        outlet: body.outlet,
+                        branch: body.branch,
+                        location: body.location,
+                        date: body.date,
+                        createdBy,
+                        editedBy: createdBy,
+                        startDate: body.startDate,
+                        endDate: body.endDate,
                     };
 
-                    AchievementFormModel.create(achievementForm, function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
+                    const newReport = new AchievementFormModel();
 
-                        res.status(201).send(model);
-
-                        event.emit('activityChange', {
-                            module    : 37,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : achievementForm.createdBy,
-                            itemId    : model._id,
-                            itemType  : CONTENT_TYPES.ACHIEVEMENTFORM
-                        });
-
-                        cb(null, model);
+                    newReport.set(achievementForm);
+                    newReport.save((err, model) => {
+                        cb(err, model);
                     });
                 },
 
-                function (model, cb) {
+                (report, cb) => {
+                    res.status(201).send(report);
+
                     if (!files) {
-                        return cb(null, model, []);
+                        return cb(null);
                     }
 
-                    //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'achievementForm', function (err, filesIds) {
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.ACHIEVEMENTFORM, (err, setFileId) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        cb(null, model, filesIds);
+                        report.set('attachments', setFileId);
+                        report.save((err, model) => {
+                            cb(err, model);
+                        });
                     });
                 },
 
-                function (model, filesIds, cb) {
-                    model.set('attachments', filesIds);
-                    model.save(cb);
-                }
+            ], callback);
+        };
 
-            ], function (err) {
-                if (err) {
-                    if (!res.headersSent) {
-                        next(err);
-                    }
+        async.waterfall([
 
-                    return logger.error(err);
-                }
-            });
-        }
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.ACHIEVEMENT_FORM, cb);
+            },
 
-        access.getWriteAccess(req, 37, function (err) {
-            var body;
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
 
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.ACHIEVEMENTFORM, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, report) => {
             if (err) {
                 return next(err);
             }
 
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.ACHIEVEMENTFORM, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
+            ActivityLog.emit('reporting:achievement-form:published', {
+                actionOriginator: userId,
+                accessRoleLevel,
+                body: report.toJSON(),
             });
         });
     };

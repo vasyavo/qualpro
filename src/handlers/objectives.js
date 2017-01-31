@@ -286,7 +286,7 @@ var Objectives = function (db, redis, event) {
 
                         objectiveModel.form = {
                             _id: formModel.get('_id'),
-                            contentType: body.formType
+                            contentType: formType
                         };
 
                         cb(null, objectiveModel);

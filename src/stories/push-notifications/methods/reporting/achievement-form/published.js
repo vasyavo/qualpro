@@ -7,8 +7,8 @@ const prototype = require('./../prototype');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT;
-        const contentType = contentTypes.COMPETITORBRANDING;
+        const moduleId = aclModules.ACHIEVEMENT_FORM;
+        const contentType = contentTypes.ACHIEVEMENTFORM;
         const actionType = activityTypes.CREATED;
         const extendedOptions = Object.assign({}, options, {
             moduleId,
@@ -26,21 +26,21 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Branding and display report published',
+                en: 'Achievement form published',
                 ar: '',
             },
             payload,
         }, {
             recipients: [supervisor],
             subject: {
-                en: 'Subordinate published report',
+                en: 'Subordinate published achievement form',
                 ar: '',
             },
             payload,
         }, {
             recipients: setEveryoneInLocation,
             subject: {
-                en: 'Competitor branding and display report received',
+                en: 'Achievement form received',
                 ar: '',
             },
             payload,
