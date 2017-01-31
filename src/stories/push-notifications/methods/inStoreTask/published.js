@@ -21,7 +21,7 @@ module.exports = (options) => {
             body,
         } = options;
 
-        const actionOriginator = toString(options, 'originatorId');
+        const actionOriginator = toString(options, 'actionOriginator');
         const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
             assignedTo: body.assignedTo,
             actionOriginator,

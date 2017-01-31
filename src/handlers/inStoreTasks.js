@@ -243,7 +243,7 @@ var InStoreReports = function() {
                 (inStoreTaskModel, cb) => {
                     if (TestUtils.isInStoreTaskDraft(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:draft-created', {
-                            originatorId: userId,
+                            actionOriginator: userId,
                             accessRoleLevel,
                             body: inStoreTaskModel.toJSON(),
                         });
@@ -251,7 +251,7 @@ var InStoreReports = function() {
 
                     if (TestUtils.isInStoreTaskPublished(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:published', {
-                            originatorId: userId,
+                            actionOriginator: userId,
                             accessRoleLevel,
                             body: inStoreTaskModel.toJSON(),
                         });
