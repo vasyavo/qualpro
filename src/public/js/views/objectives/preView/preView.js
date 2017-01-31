@@ -723,7 +723,7 @@ define([
             var currentUserId = App.currentUser._id;
 
             if (status === STATUSES.COMPLETED && createdByUserId !== currentUserId) {
-                if (!self.afterPartFilled) {
+                if (this.model.get('form') && !self.afterPartFilled) {
                     return App.render({
                         type : 'error',
                         message : ERROR_MESSAGES.afterPartNotFilled[App.currentUser.currentLanguage]

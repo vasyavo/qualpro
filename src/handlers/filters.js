@@ -7942,23 +7942,39 @@ const Filters = function(db, redis) {
         const TYPES = [
             {
                 _id : 'Application Related Issue',
-                name : {
-                    en : 'Application Related Issue',
-                    ar : ''
+                name: {
+                    en: 'Application Related Issue',
+                    ar: ''
                 }
-            },
-            {
+            }, {
                 _id : 'Future Application Ideas',
-                name : {
-                    en : 'Future Application Ideas',
-                    ar : ''
+                name: {
+                    en: 'Future Application Ideas',
+                    ar: ''
                 }
-            },
-            {
+            }, {
+                _id : 'Sales Feedback',
+                name: {
+                    en: 'Sales Feedback',
+                    ar: ''
+                }
+            }, {
+                _id : 'Trade Feedback',
+                name: {
+                    en: 'Trade Feedback',
+                    ar: ''
+                }
+            }, {
+                _id : 'Consumers Feedback',
+                name: {
+                    en: 'Consumers Feedback',
+                    ar: ''
+                }
+            }, {
                 _id : 'Others',
-                name : {
-                    en : 'Others',
-                    ar : ''
+                name: {
+                    en: 'Others',
+                    ar: ''
                 }
             }
         ];
