@@ -49,7 +49,7 @@ define([
         events: {
             'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
-            'input #title, #titleAr'     : 'changeTitle',
+            'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
             'click #attachForm'          : 'linkVisibilityForm',
             'click #actionHolder:not(ul)': 'showHideActionDropdown',
@@ -226,7 +226,7 @@ define([
 
             val = moment(val, 'DD.MM.YYYY').toISOString();
 
-            id === 'dataStart' ? this.body.dateStart = val : this.body.dateEnd = val;
+            id === 'dateStart' ? this.body.dateStart = val : this.body.dateEnd = val;
         },
 
         changeDesc: function (e) {
