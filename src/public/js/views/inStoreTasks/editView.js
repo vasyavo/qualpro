@@ -49,7 +49,7 @@ define([
         events: {
             'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
-            'input #title, #titleAr'     : 'changeTitle',
+            'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
             'click #attachForm'          : 'linkVisibilityForm',
             'click #actionHolder:not(ul)': 'showHideActionDropdown',
