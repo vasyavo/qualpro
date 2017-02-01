@@ -450,8 +450,8 @@ const objectiveOverdue = () => {
                 const type = model.context;
                 const modelAsJson = model.toJSON();
                 const payload = {
+                    actionOriginator: modelAsJson.createdBy.user,
                     accessRoleLevel: modelAsJson.level,
-                    userId: modelAsJson.createdBy.user,
                     body: modelAsJson,
                 };
 
@@ -497,8 +497,8 @@ const objectiveFail = () => {
                 const type = model.context;
                 const modelAsJson = model.toJSON();
                 const payload = {
+                    actionOriginator: modelAsJson.createdBy.user,
                     accessRoleLevel: modelAsJson.level,
-                    userId: modelAsJson.createdBy.user,
                     body: modelAsJson,
                 };
 
