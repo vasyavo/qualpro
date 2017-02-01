@@ -99,7 +99,7 @@ module.exports = function * (options) {
         $group: {
             _id: null,
             setInLocation: {
-                $addToSet: '$_id',
+                $push: '$_id',
             },
         },
     }, {
