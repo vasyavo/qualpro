@@ -581,13 +581,8 @@ define([
 
                 function (model, files, cb) {
                     var form = model.get('form');
-                    var formId;
-                    var formType;
-
-                    if (form) {
-                        formId = form._id;
-                        formType = form.contentType;
-                    }
+                    var formId = form._id;
+                    var formType = form.contentType;
 
                     if (!context.visibilityFormAjax && !context.VFWithoutBranchesChanged) {
                         if (formType === 'visibility') {
@@ -608,8 +603,6 @@ define([
                                     cb(null, model);
                                 }
                             });
-                        } else {
-                            cb(null, model);
                         }
                     }
 

@@ -2382,7 +2382,7 @@ var Objectives = function (db, redis, event) {
                         addProjection: ['outlet']
                     }));
 
-                    if (objectiveType !== 'individual') {
+                    if (objectiveType && objectiveType !== 'individual') {
                         if (personnel.accessRole.level <= 2) {
                             queryObjectAfterLookup['accessRole.level'] = {
                                 $eq: personnel.accessRole.level + 1
