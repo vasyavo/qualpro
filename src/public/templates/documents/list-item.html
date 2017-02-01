@@ -1,0 +1,25 @@
+<div class="documentItem thumbnail">
+    <div class="documentBody">
+        <input id="checkbox" type="checkbox" class="customCheckbox">
+        <label class="checkboxLabel"></label>
+        <div class="bannerWrap">
+            <div class="bannerMin">
+                <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                    <div class="thumbnail_js thumbnailBody">
+                        <% if (attachment.preview) { %>
+                            <img src="<%= attachment.preview %>" class="bannerImage mCS_img_loaded">
+                        <% } else { %>
+                            <div class="bannerImage iconThumbnail <%= attachment.type %>"></div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <span class="textSmall floatRight"></span>
+        </div>
+        <div class="editContent"></div>
+    </div>
+    <div class="documentFooter">
+        <span class="documentDescription hoverFullText fontGray"><%- title %></span>
+        <span class="documentDate"><%- dateString %></span>
+    </div>
+</div>

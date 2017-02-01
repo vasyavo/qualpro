@@ -355,10 +355,7 @@ define([
 
             e.stopPropagation();
 
-            // $('.dropDownContent').not(ulContainer).hide();
-
             ulContainer.toggleClass('showActionDropDown');
-            // ulContainer.toggle();
         },
 
         changeActionButtonState: function (data) {

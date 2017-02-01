@@ -2281,6 +2281,12 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 .showActionDropDown .archiveBtn {
   line-height: 38px;
 }
+
+.showActionsDropDown .hasSubMenu,
+.showActionsDropDown .archiveBtn {
+  line-height: 38px;
+}
+
 .prevButton {
   float: left;
 }
@@ -5890,6 +5896,17 @@ form.visibilityContainer.inStoreForm {
   visibility: visible;
   opacity: 1;
 }
+
+.actionHolder .showActionsDropDown {
+  visibility: visible;
+  opacity: 1;
+  transition: all ease .4s;
+}
+.actionHolder .showActionsDropDown .hasSubMenu:hover .subMenu {
+  visibility: visible;
+  opacity: 1;
+}
+
 .paginationHolder {
   float: right;
 }

@@ -353,7 +353,9 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var formId = model.get('form')._id;
+                    var form = model.get('form');
+                    var formId = form._id;
+                    var formType = form.contentType;
 
                     if (!context.visibilityFormAjax) {
                         return cb(null, model);
@@ -381,7 +383,11 @@ define([
                         }
                     });
 
-                    $.ajax(context.visibilityFormAjax);
+                    if (formType === 'visibility') {
+                        $.ajax(context.visibilityFormAjax);
+                    } else {
+                        cb(null, model);
+                    }
                 }
             ], function (err, model) {
                 if (err) {

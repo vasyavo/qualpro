@@ -10,10 +10,12 @@ define([
     'dataService',
     'custom',
     'constants/contentType',
-    'js-cookie'
+    'js-cookie',
+    'views/documents/list',
+    'views/documents/topBar'
 ], function (Backbone, $, _, moment, mainView, LoginView, CreateSuperAdminView,
-             forgotPassView, dataService, custom, CONSTANTS, Cookies) {
-    'use strict';
+             forgotPassView, dataService, custom, CONSTANTS, Cookies,
+             DocumentsListView, DocumentsTopBarView) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -26,6 +28,8 @@ define([
             home : 'any',
             'login(/:confirmed)' : 'login',
             forgotPass : 'forgotPass',
+            'qualPro/documents/:id' : 'showDocumentsView',
+            'qualPro/documents' : 'showDocumentsView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -49,6 +53,53 @@ define([
             });
 
             custom.applyDefaults();
+        },
+
+        showDocumentsView : function (folder) {
+            var that = this;
+            this.checkLogin(function (success) {
+                if (!success) {
+                    return that.redirectTo();
+                }
+
+                if (that.view) {
+                    that.view.undelegateEvents();
+                }
+
+                if (that.wrapperView) {
+                    that.wrapperView.undelegateEvents();
+                }
+
+                if (!that.wrapperView) {
+                    that.main('documents');
+                }
+
+                var $loader = $('#alaliLogo');
+                if (!$loader.hasClass('smallLogo')) {
+                    $loader.addClass('animated');
+                    $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+                }
+
+                var currentLanguage = App.currentUser.currentLanguage;
+                require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {
+                    var documentsCollection = new collection();
+
+                    var documentsTopBarView = new DocumentsTopBarView({
+                        translation : translation,
+                        collection : documentsCollection
+                    });
+                    $('#topBarHolder').html(documentsTopBarView.render().$el);
+
+                    var documentsListView = new DocumentsListView({
+                        collection : documentsCollection,
+                        translation : translation
+                    });
+
+                    $('#contentHolder').html(documentsListView.render().$el);
+
+                    documentsCollection.fetch();
+                });
+            });
         },
 
         redirectTo: function () {
@@ -601,7 +652,6 @@ define([
                     });
                 }
             });
-
         },
 
         changeTopBarView: function (topBarView) {

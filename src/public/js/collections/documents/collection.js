@@ -1,27 +1,21 @@
 define([
-        'collections/parrent',
-        'models/documents',
-        'constants/contentType'
-    ],
-    function (Parent, Model, CONTENT_TYPES) {
-        'use strict';
+    'Backbone',
+    'models/documents',
+    'constants/contentType'
+], function (Backbone, Model, CONTENT_TYPES) {
 
-        var Collection = Parent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.DOCUMENTS,
-            viewType   : null,
-            contentType: null,
+    return Backbone.Collection.extend({
 
-            initialize: function (options) {
-                var page;
+        model : Model,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        checked : [],
 
-                this.getPage(page, options);
-            }
-        });
+        url : CONTENT_TYPES.DOCUMENTS,
 
-        return Collection;
+        parse : function (response) {
+            return response.data;
+        }
+
     });
+
+});

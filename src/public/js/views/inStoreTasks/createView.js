@@ -214,8 +214,6 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var formId;
-
                     if (!context.visibilityFormAjax) {
                         return cb(null, model);
                     }
@@ -228,7 +226,10 @@ define([
                         cb(true);
                     };
 
-                    formId = model.get('form')._id;
+                    var form = this.model.get('form');
+                    var formId = form._id;
+                    var formType = form.contentType;
+
                     context.visibilityFormAjax.url = 'form/visibility/before/' + formId;
 
                     delete context.visibilityFormAjax.model;
@@ -244,7 +245,12 @@ define([
                         }
                     });
 
-                    $.ajax(context.visibilityFormAjax);
+                    if (formType === 'visibility') {
+                        $.ajax(context.visibilityFormAjax);
+                    }
+                    else {
+                        cb(null, model);
+                    }
                 }
 
             ], function (err, model) {

@@ -1,0 +1,34 @@
+<div class="featureTitleWrap" data-translation="all"><%- translation.all %></div>
+<div class="filterBar"></div>
+
+<div id="viewBar" class="viewBar planogramsViewBar" class="viewBar documentsViewBar">
+    <div id="templateSwitcher" class="templateSwitcher">
+        <a class="changeContentView filterType viewBarTabActive"
+           data-archived-type="false"
+           data-translation="all"
+           id="all"><%- translation.all %>
+        </a>
+        <a class="changeContentView filterType"
+           data-archived-type="true"
+           data-translation="archive"
+           id="archived"><%- translation.archive %>
+        </a>
+    </div>
+
+    <span id="createFolder" class="createBtn" data-translation="newDocument">New Folder</span> <!-- new folder button. todo translation -->
+    <span id="createBtn" class="createBtn" data-translation="newDocument"><%- translation.newDocument %></span>
+    <div class="checkboxArea">
+        <input type="checkbox" id="check-all" class="btnCustomCheckbox"/>
+        <label for="check-all" class="btnCheckboxLabel" data-translation="selectAll"><%- translation.selectAll %></label>
+    </div>
+
+    <div id="actionHolder" class="actionHolder actionBtn hidden">
+        <span class="dropDown downArrow triUp"><%- translation.action %></span>
+        <ul id="actions-dropdown" class="dropDownContent">
+            <li id="archiveBtn" class="archiveBtn"><%- translation.disable %></li>
+            <li id="unArchiveBtn" class="archiveBtn"><%- translation.unDisable %></li>
+        </ul>
+    </div>
+
+    <div id="paginationHolder" class="paginationHolder"></div>
+</div>

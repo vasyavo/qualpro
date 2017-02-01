@@ -1,16 +1,23 @@
 define([
         'models/parrent',
         'validation',
+        'moment',
         'constants/otherConstants',
         'dataService',
         'custom',
         'models/file',
         'constants/contentType'
     ],
-    function (parent, validation, otherConstants, dataService, custom, FileModel, CONTENT_TYPES) {
-        'use strict';
+    function (parent, validation, moment, otherConstants, dataService, custom, FileModel, CONTENT_TYPES) {
 
         var Model = parent.extend({
+
+            initialize : function () {
+              var lastEditDate = this.get('editedBy').date;
+              lastEditDate = moment(lastEditDate).format('DD.MM.YYYY');
+              this.set('dateString', lastEditDate);
+            },
+
             defaults      : {},
             attachmentsKey: 'attachments',
 
