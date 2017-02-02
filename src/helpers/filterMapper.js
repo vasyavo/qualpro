@@ -151,7 +151,7 @@ const FilterMapper = function () {
 
         if (personnel) {
             this.setFilterLocation(filter, personnel, 'country', context);
-            if (contentType !== CONTENT_TYPES.PERSONNEL) {
+            if (contentType !== CONTENT_TYPES.PERSONNEL && contentType !== CONTENT_TYPES.INSTORETASKS) {
                 this.setFilterLocation(filter, personnel, 'region', context);
                 this.setFilterLocation(filter, personnel, 'subRegion', context);
             }
