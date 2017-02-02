@@ -6,7 +6,7 @@ const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
 const contentTypes = require('./../../../../../public/js/constants/contentType');
 const toString = require('./../../../../../utils/toString');
-const getEveryAdminInSameLocationAsOriginator = require('./../../../utils/getEveryAdminInSameLocationAsOriginator');
+const getEveryAdminInSameCountryAsOriginator = require('./../../../utils/getEveryAdminInSameCountryAsOriginator');
 
 module.exports = (options) => {
     co(function * () {
@@ -19,7 +19,7 @@ module.exports = (options) => {
         } = options;
 
         const actionOriginator = toString(options, 'actionOriginator');
-        const setAdmin = yield getEveryAdminInSameLocationAsOriginator({
+        const setAdmin = yield getEveryAdminInSameCountryAsOriginator({
             actionOriginator,
         });
 
