@@ -21,6 +21,15 @@ module.exports = function * (options) {
     const setBranch = options.setBranch.map(id => ObjectId(id));
 
     const pipeline = [{
+        $project: {
+            accessRole: 1,
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            outlet: 1,
+            branch: 1,
+        },
+    }, {
         $lookup: {
             from: 'accessRoles',
             localField: 'accessRole',

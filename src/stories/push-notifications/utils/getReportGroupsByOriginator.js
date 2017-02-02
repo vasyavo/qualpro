@@ -11,6 +11,11 @@ module.exports = function * (options) {
     const actionOriginator = ObjectId(options.actionOriginator);
 
     const pipeline = [{
+        $project: {
+            accessRole: 1,
+            manager: 1,
+        },
+    }, {
         $lookup: {
             from: 'accessRoles',
             localField: 'accessRole',
