@@ -24,6 +24,15 @@ activityLog.on('in-store-task:comment-added', require('./methods/inStoreTask/com
 activityLog.on('in-store-task:overdue', require('./methods/inStoreTask/overdue'));
 activityLog.on('in-store-task:fail', require('./methods/inStoreTask/fail'));
 
+activityLog.on('personnel:created', require('./methods/personnel/created'));
+activityLog.on('personnel:updated', require('./methods/personnel/updated'));
+activityLog.on('personnel:on-leave', require('./methods/personnel/onLeave'));
+activityLog.on('personnel:cover', require('./methods/personnel/cover'));
+activityLog.on('personnel:assigned', require('./methods/personnel/assigned'));
+activityLog.on('personnel:bi-yearly', require('./methods/personnel/evaluatedYearly'));
+activityLog.on('personnel:monthly', require('./methods/personnel/evaluated'));
+activityLog.on('personnel:archived', require('./methods/personnel/archived'));
+
 activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
 activityLog.on('reporting:shelf-share:published', require('./methods/reporting/shelf-share/published'));
 activityLog.on('reporting:competitor-branding-and-display-report:published', require('./methods/reporting/competitor-branding-and-display-report/published'));
