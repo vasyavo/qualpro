@@ -15,7 +15,7 @@ const ObjectiveModel = require('./../types/objective/model');
 const PromotionModel = require('./../types/promotion/model');
 const PromotionItemModel = require('./../types/promotionItem/model');
 const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
-const BrandingActivityModel = require('./../types/brandingActivity/model');
+const MarketingCampaignModel = require('./../types/brandingActivity/model');
 const CompetitorBrandingModel = require('./../types/competitorBranding/model');
 const QuestionnaireModel = require('./../types/questionnaries/model');
 
@@ -309,7 +309,7 @@ const competitorPromotionExpired = () => {
     }));
 };
 
-const brandingActivityExpired = () => {
+const marketingCampaignExpired = () => {
     const contentType = CONTENT_TYPES.BRANDING_ACTIVITY;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
@@ -322,7 +322,7 @@ const brandingActivityExpired = () => {
     };
 
     const iterator = (id, callback) => {
-        BrandingActivityModel.findByIdAndUpdate(id, {
+        MarketingCampaignModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
@@ -340,7 +340,7 @@ const brandingActivityExpired = () => {
         });
     };
 
-    BrandingActivityModel.aggregate(getPipeline(query), exec({
+    MarketingCampaignModel.aggregate(getPipeline(query), exec({
         domain: contentType,
         actionType: 'expired',
         iterator,
@@ -538,7 +538,7 @@ class Scheduler {
             contractSecondaryExpired,
             promotionExpired,
             promotionItemExpired,
-            brandingActivityExpired,
+            marketingCampaignExpired,
             competitorBrandingAndDisplayExpired,
             competitorPromotionExpired,
             personnelInactive,
