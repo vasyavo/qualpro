@@ -4,7 +4,6 @@ const toString = require('./../../../../utils/toString');
 const getReportGroupsByOriginator = require('./../../utils/getReportGroupsByOriginator');
 const getEveryoneInLocation = require('./../../utils/getEveryoneInLocation');
 
-// todo: revise event as it store exclusive data in db in comparison with other reports
 module.exports = function * (options) {
     const {
         moduleId,
@@ -29,13 +28,20 @@ module.exports = function * (options) {
         supervisor,
         ...setAdmin,
     ]);
+
+    const setCountry = Array.isArray(body.country) ? body.country : [];
+    const setRegion = Array.isArray(body.region) ? body.region : [];
+    const setSubRegion = Array.isArray(body.subRegion) ? body.subRegion : [];
+    const setOutlet = Array.isArray(body.outlet) ? body.outlet : [];
+    const setBranch = Array.isArray(body.branch) ? body.branch : [];
+
     const setEveryoneInLocation = yield getEveryoneInLocation({
         exclude: setPersonnel,
-        setCountry: Array.isArray(body.country) ? body.country : [],
-        setRegion: Array.isArray(body.region) ? body.region : [],
-        setSubRegion: Array.isArray(body.subRegion) ? body.subRegion : [],
-        setOutlet: Array.isArray(body.outlet) ? body.outlet : [],
-        setBranch: Array.isArray(body.branch) ? body.branch : [],
+        setCountry,
+        setRegion,
+        setSubRegion,
+        setOutlet,
+        setBranch,
     });
     const newActivity = new ActivityModel();
 
@@ -56,12 +62,12 @@ module.exports = function * (options) {
             ...setPersonnel,
             ...setEveryoneInLocation,
         ],
-        country: body.country,
-        region: body.region,
-        subRegion: body.subRegion,
+        country: setCountry,
+        region: setRegion,
+        subRegion: setSubRegion,
         retailSegment: body.retailSegment,
-        outlet: body.outlet,
-        branch: body.branch,
+        outlet: setOutlet,
+        branch: setBranch,
     });
 
     yield newActivity.save();
