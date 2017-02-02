@@ -2194,6 +2194,14 @@ var InStoreReports = function() {
                 })
             });
 
+            pipeLine.push(...aggregateHelper.aggregationPartMaker({
+                from : 'visibilityForms',
+                key : 'form._id',
+                as : 'form',
+                isArray : false,
+                addProjection : ['_id', 'after']
+            }));
+
             aggregation = ObjectiveModel.aggregate(pipeLine);
 
             aggregation.options = {
