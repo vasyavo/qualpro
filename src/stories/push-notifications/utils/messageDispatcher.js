@@ -33,10 +33,10 @@ class MessageDispatcher {
                             message: payload,
                             channel: recipient,
                         }, cb);
-                    }
+                    },
 
                 ], itCallback);
-            }
+            };
         };
 
         const itGroup = (group, itCallback) => {
@@ -45,7 +45,7 @@ class MessageDispatcher {
                 payload,
             } = group;
             const action = {
-                payload
+                payload,
             };
 
             async.each(recipients, itRecipient(action), itCallback);

@@ -1,4 +1,5 @@
 const OTHER_CONSTANTS = require('./../../../public/js/constants/otherConstants.js');
+
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
 /*
@@ -38,7 +39,7 @@ const isInStoreTaskPublished = (state) => {
  * @returns {Boolean}
  * */
 const isObjectiveStatusChanged = (state) => {
-    return state.hasOwnProperty('status');
+    return Object.hasOwnProperty.apply(state, ['status']);
 };
 
 /*
@@ -46,7 +47,7 @@ const isObjectiveStatusChanged = (state) => {
  * @returns {Boolean}
  * */
 const isObjectiveAssigneeChanged = (state) => {
-    return state.hasOwnProperty('assignedTo');
+    return Object.hasOwnProperty.apply(state, ['assignedTo']);
 };
 
 module.exports = {

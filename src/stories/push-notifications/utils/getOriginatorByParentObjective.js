@@ -16,14 +16,14 @@ module.exports = function * (options) {
         },
     }, {
         $project: {
-            '_id': 0,
-            'originator': '$createdBy.user',
+            _id: 0,
+            originator: '$createdBy.user',
         },
     }, {
         $group: {
             _id: null,
-            originator: { $addToSet: '$originator', },
-        }
+            originator: { $push: '$originator' },
+        },
     }];
 
     const result = yield ObjectiveModel.aggregate(pipeline).exec();

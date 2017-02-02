@@ -1,46 +1,66 @@
 const co = require('co');
+const _ = require('lodash');
+const ActivityModel = require('./../../../../../types/activityList/model');
 const dispatch = require('./../../../utils/dispatch');
 const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
 const contentTypes = require('./../../../../../public/js/constants/contentType');
-const prototype = require('./../../reporting/prototype');
+const toString = require('./../../../../../utils/toString');
+const getEveryAdminInSameCountryAsOriginator = require('./../../../utils/getEveryAdminInSameCountryAsOriginator');
 
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT;
         const contentType = contentTypes.BRANDINGANDDISPLAY;
         const actionType = activityTypes.CREATED;
-        const extendedOptions = Object.assign({}, options, {
-            moduleId,
-            contentType,
-            actionType,
+        const {
+            accessRoleLevel,
+            body,
+        } = options;
+
+        const actionOriginator = toString(options, 'actionOriginator');
+        const setAdmin = yield getEveryAdminInSameCountryAsOriginator({
+            actionOriginator,
         });
 
-        const {
-            payload,
+        const personnels = [
             actionOriginator,
-            supervisor,
-            setEveryoneInLocation,
-        } = yield prototype(extendedOptions);
+            ...setAdmin,
+        ];
+        const newActivity = new ActivityModel();
+
+        newActivity.set({
+            itemType: contentType,
+            module: moduleId,
+            actionType,
+            itemId: body._id,
+            itemName: {
+                en: '',
+                ar: '',
+            },
+            createdBy: {
+                user: actionOriginator,
+            },
+            accessRoleLevel,
+            personnels,
+            country: body.country,
+            region: body.region,
+            subRegion: body.subRegion,
+            retailSegment: body.retailSegment,
+            outlet: body.outlet,
+            branch: body.branch,
+        });
+
+        yield newActivity.save();
+
+        const payload = {
+            actionType,
+        };
 
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: personnels,
             subject: {
                 en: 'Branding & Display report published',
-                ar: '',
-            },
-            payload,
-        }, {
-            recipients: [supervisor],
-            subject: {
-                en: 'Subordinate published Branding & Display report',
-                ar: '',
-            },
-            payload,
-        }, {
-            recipients: setEveryoneInLocation,
-            subject: {
-                en: 'Branding & Display report received',
                 ar: '',
             },
             payload,

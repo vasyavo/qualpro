@@ -17,7 +17,7 @@ module.exports = function * (options) {
                 manager: {
                     $ne: originator,
                 },
-            }]
+            }],
         },
     }, {
         $project: {
@@ -27,8 +27,8 @@ module.exports = function * (options) {
     }, {
         $group: {
             _id: null,
-            manager: { $addToSet: '$manager', },
-        }
+            manager: { $push: '$manager' },
+        },
     }];
 
     const result = yield PersonnelModel.aggregate(pipeline).exec();

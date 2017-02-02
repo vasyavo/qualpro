@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const ActivityModel = require('./../../../../types/activityList/model');
 const toString = require('./../../../../utils/toString');
-const getReportGroupsByOriginator = require('./../../utils/getReportGroupsByOriginator');
 const getEveryoneInLocation = require('./../../utils/getEveryoneInLocation');
 
 module.exports = function * (options) {
@@ -15,20 +14,6 @@ module.exports = function * (options) {
     } = options;
 
     const actionOriginator = toString(options, 'actionOriginator');
-    const contentAuthor = toString(body, 'createdBy.user');
-    const {
-        supervisor,
-        setAdmin,
-    } = yield getReportGroupsByOriginator({
-        actionOriginator,
-    });
-    const setPersonnel = _.uniq([
-        actionOriginator,
-        contentAuthor,
-        supervisor,
-        ...setAdmin,
-    ]);
-
     const setCountry = Array.isArray(body.country) ? body.country : [];
     const setRegion = Array.isArray(body.region) ? body.region : [];
     const setSubRegion = Array.isArray(body.subRegion) ? body.subRegion : [];
@@ -36,13 +21,14 @@ module.exports = function * (options) {
     const setBranch = Array.isArray(body.branch) ? body.branch : [];
 
     const setEveryoneInLocation = yield getEveryoneInLocation({
-        exclude: setPersonnel,
+        exclude: [],
         setCountry,
         setRegion,
         setSubRegion,
         setOutlet,
         setBranch,
     });
+
     const newActivity = new ActivityModel();
 
     newActivity.set({
@@ -51,23 +37,20 @@ module.exports = function * (options) {
         actionType,
         itemId: body._id,
         itemName: {
-            en: '',
-            ar: '',
+            en: _.get(body, 'title.en'),
+            ar: _.get(body, 'title.ar'),
         },
         createdBy: {
             user: actionOriginator,
         },
         accessRoleLevel,
-        personnels: [
-            ...setPersonnel,
-            ...setEveryoneInLocation,
-        ],
-        country: setCountry,
-        region: setRegion,
-        subRegion: setSubRegion,
+        personnels: setEveryoneInLocation,
+        country: body.country,
+        region: body.region,
+        subRegion: body.subRegion,
         retailSegment: body.retailSegment,
-        outlet: setOutlet,
-        branch: setBranch,
+        outlet: body.outlet,
+        branch: body.branch,
     });
 
     yield newActivity.save();
@@ -78,12 +61,6 @@ module.exports = function * (options) {
 
     return {
         payload,
-        actionOriginator,
-        contentAuthor,
-        supervisor,
-        setEveryoneInLocation: [
-            ...setEveryoneInLocation,
-            ...setAdmin,
-        ],
+        setEveryoneInLocation,
     };
 };

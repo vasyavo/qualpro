@@ -1,15 +1,16 @@
 const co = require('co');
-const dispatch = require('./../../utils/dispatch');
-const aclModules = require('./../../../../constants/aclModulesNames');
-const activityTypes = require('./../../../../constants/activityTypes');
-const contentTypes = require('./../../../../public/js/constants/contentType');
-const ActivityModel = require('./../../../../types/activityList/model');
-const toString = require('./../../../../utils/toString');
+const _ = require('lodash');
+const dispatch = require('./../../../utils/dispatch');
+const aclModules = require('./../../../../../constants/aclModulesNames');
+const activityTypes = require('./../../../../../constants/activityTypes');
+const contentTypes = require('./../../../../../public/js/constants/contentType');
+const ActivityModel = require('./../../../../../types/activityList/model');
+const toString = require('./../../../../../utils/toString');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.OBJECTIVE;
-        const contentType = contentTypes.OBJECTIVES;
+        const moduleId = aclModules.AL_ALALI_QUESTIONNAIRE;
+        const contentType = contentTypes.QUESTIONNARIES;
         const actionType = activityTypes.CREATED;
 
         const {
@@ -27,8 +28,8 @@ module.exports = (options) => {
             actionType,
             itemId: body._id,
             itemName: {
-                en: body.title.en,
-                ar: body.title.ar,
+                en: _.get(body, 'title.en'),
+                ar: _.get(body, 'title.ar'),
             },
             createdBy: {
                 user: actionOriginator,
@@ -54,7 +55,7 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Draft objective saved',
+                en: 'Questionnaire saved',
                 ar: '',
             },
             payload,

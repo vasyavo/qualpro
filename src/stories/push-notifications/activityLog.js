@@ -38,4 +38,19 @@ activityLog.on('reporting:al-alali-promo-evaluation:item-published', require('./
 
 activityLog.on('marketing:al-alali-branding-and-display-report:published', require('./methods/marketing/al-alali-branding-and-display-report/published'));
 
+activityLog.on('marketing:al-alali-marketing-campaigns:draft-created', require('./methods/marketing/al-alali-marketing-campaigns/draftCreated'));
+activityLog.on('marketing:al-alali-marketing-campaigns:published', require('./methods/marketing/al-alali-marketing-campaigns/published'));
+activityLog.on('marketing:al-alali-marketing-campaigns:updated', require('./methods/marketing/al-alali-marketing-campaigns/updated'));
+activityLog.on('marketing:al-alali-marketing-campaigns:expired', require('./methods/marketing/al-alali-marketing-campaigns/expired'));
+
+activityLog.on('marketing:al-alali-questionnaire:draft-created', require('./methods/marketing/al-alali-questionnaire/draftCreated'));
+activityLog.on('marketing:al-alali-questionnaire:published', require('./methods/marketing/al-alali-questionnaire/published'));
+activityLog.on('marketing:al-alali-questionnaire:updated', require('./methods/marketing/al-alali-questionnaire/updated'));
+activityLog.on('marketing:al-alali-questionnaire:expired', require('./methods/marketing/al-alali-questionnaire/expired'));
+
+activityLog.on('marketing:consumer-survey:draft-created', require('./methods/marketing/consumer-survey/draftCreated'));
+activityLog.on('marketing:consumer-survey:published', require('./methods/marketing/consumer-survey/published'));
+activityLog.on('marketing:consumer-survey:updated', require('./methods/marketing/consumer-survey/updated'));
+activityLog.on('marketing:consumer-survey:expired', require('./methods/marketing/consumer-survey/expired'));
+
 module.exports = activityLog;
