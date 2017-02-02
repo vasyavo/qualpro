@@ -1,45 +1,64 @@
 const accessRoles = require('./../../../../constants/aclRolesNames');
 
 const getHighAdmin = {
-    $setIsSubset: [['$$item.accessRole.level'], [
+    $setIsSubset: [['$$accessRoleLevel'], [
         accessRoles.MASTER_ADMIN,
         accessRoles.TRADE_MARKETER,
     ]],
 };
 
 const setIsSubsetCountry = {
-    $setIsSubset: ['$$item.country', '$$setCountry'],
+    $setIsSubset: ['$$personnel.country', '$$setCountry'],
 };
 const inCountry = {
     $or: [getHighAdmin, {
         $and: [{
-            $eq: ['$$item.accessRole.level', accessRoles.COUNTRY_ADMIN],
+            $setIsSubset: [['$$accessRoleLevel'], [
+                accessRoles.COUNTRY_ADMIN,
+                accessRoles.AREA_MANAGER,
+                accessRoles.AREA_IN_CHARGE,
+            ]],
         }, setIsSubsetCountry],
     }],
 };
 
 const setIntersectionRegion = {
     $gt: [{
-        $setIntersection: ['$$item.region', '$$setRegion'],
+        $setIntersection: ['$$personnel.region', '$$setRegion'],
     }, 0],
 };
 const includedToRegion = {
-    $or: [...inCountry.$or, {
+    $or: [getHighAdmin, {
         $and: [{
-            $eq: ['$$item.accessRole.level', accessRoles.AREA_MANAGER],
+            $eq: ['$$accessRoleLevel', accessRoles.COUNTRY_ADMIN],
+        }, setIsSubsetCountry],
+    }, {
+        $and: [{
+            $setIsSubset: [['$$accessRoleLevel'], [
+                accessRoles.AREA_MANAGER,
+                accessRoles.AREA_IN_CHARGE,
+            ]],
         }, setIsSubsetCountry, setIntersectionRegion],
     }],
 };
 
 const setIntersectionSubRegion = {
     $gt: [{
-        $setIntersection: ['$$item.subRegion', '$$setSubRegion'],
+        $setIntersection: ['$$personnel.subRegion', '$$setSubRegion'],
     }, 0],
 };
 const includedToSubRegion = {
-    $or: [...includedToRegion.$or, {
+    $or: [getHighAdmin, {
         $and: [{
-            $eq: ['$$item.accessRole.level', accessRoles.AREA_IN_CHARGE],
+            $eq: ['$$accessRoleLevel', accessRoles.COUNTRY_ADMIN],
+        }, setIsSubsetCountry],
+    }, {
+        $and: [{
+            $eq: ['$$accessRoleLevel', accessRoles.AREA_MANAGER],
+        }, setIsSubsetCountry, setIntersectionRegion],
+    }, {
+        $and: [{
+            $eq: ['$$accessRoleLevel', accessRoles.AREA_IN_CHARGE],
         }, setIsSubsetCountry, setIntersectionRegion, setIntersectionSubRegion],
     }],
 };

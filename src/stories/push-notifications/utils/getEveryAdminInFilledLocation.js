@@ -61,8 +61,15 @@ module.exports = function * (options) {
                     in: {
                         $filter: {
                             input: '$setPersonnel',
-                            as: 'item',
-                            cond: condition,
+                            as: 'personnel',
+                            cond: {
+                                $let: {
+                                    vars: {
+                                        accessRoleLevel: '$$personnel.accessRole.level',
+                                        in: condition,
+                                    },
+                                },
+                            },
                         },
                     },
                 },
