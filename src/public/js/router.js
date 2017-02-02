@@ -28,8 +28,8 @@ define([
             home : 'any',
             'login(/:confirmed)' : 'login',
             forgotPass : 'forgotPass',
-            'qualPro/documents/:id' : 'showDocumentsView',
-            'qualPro/documents' : 'showDocumentsView',
+            'qualPro/documents(/:filter)' : 'documentsHomePage',
+            'qualPro/documents/:id(/:filter)' : 'showDocumentsView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -55,8 +55,13 @@ define([
             custom.applyDefaults();
         },
 
-        showDocumentsView : function (folder) {
+        documentsHomePage : function (filter) {
+            this.showDocumentsView(null, filter);
+        },
+
+        showDocumentsView : function (folder, filter) {
             var that = this;
+
             this.checkLogin(function (success) {
                 if (!success) {
                     return that.redirectTo();
@@ -83,6 +88,13 @@ define([
                 var currentLanguage = App.currentUser.currentLanguage;
                 require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {
                     var documentsCollection = new collection();
+
+                    //todo -> if folder
+
+                    if (filter) {
+                        filter = JSON.parse(filter);
+                        documentsCollection.url = CONSTANTS.DOCUMENTS + '?' + $.param(filter);
+                    }
 
                     var documentsTopBarView = new DocumentsTopBarView({
                         translation : translation,

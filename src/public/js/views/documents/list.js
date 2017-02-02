@@ -6,8 +6,6 @@ define(function (require) {
     return Marionette.CollectionView.extend({
 
         initialize : function (options) {
-            this.listenToOnce(this.collection, 'sync', this.render);
-
             this.translation = options.translation;
         },
 
@@ -39,6 +37,10 @@ define(function (require) {
             }
 
             this.collection.trigger('item:checked');
+        },
+
+        collectionEvents : {
+            'sync' : 'render'
         }
 
     });

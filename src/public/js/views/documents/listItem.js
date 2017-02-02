@@ -3,6 +3,7 @@ define(function (require) {
     var Marionette = require('marionette');
     var _ = require('underscore');
     var documentPreview = require('views/documents/preview');
+    var EditDocumentView = require('views/documents/edit');
     var Template = require('text!templates/documents/list-item.html');
 
     return Marionette.View.extend({
@@ -19,8 +20,9 @@ define(function (require) {
         },
 
         ui : {
-            thumbnail : '.documentItem',
-            checkbox : '#checkbox'
+            thumbnail : '#item',
+            checkbox : '#checkbox',
+            edit : '#edit'
         },
 
         events: {
@@ -34,7 +36,8 @@ define(function (require) {
             'dblclick @ui.thumbnail': function(event) {
                 this.doucleckicked = true;
                 this.onDoubleClick.call(this, event);
-            }
+            },
+            'click @ui.edit' : 'showEditView'
         },
 
         onSingleClick: function() {
@@ -51,6 +54,13 @@ define(function (require) {
 
         onDoubleClick : function () {
             new documentPreview({
+                model : this.model,
+                translation : this.translation
+            });
+        },
+
+        showEditView : function () {
+            new EditDocumentView({
                 model : this.model,
                 translation : this.translation
             });

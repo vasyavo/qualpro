@@ -1,7 +1,10 @@
 define(function (require) {
 
+    var Backbone = require('Backbone');
     var Marionette = require('marionette');
+    var $ = require('jquery');
     var _ = require('underscore');
+    var CONTENT_TYPES = require('constants/contentType');
     var Template = require('text!templates/documents/topBar.html');
 
     return Marionette.View.extend({
@@ -16,19 +19,27 @@ define(function (require) {
 
         templateContext: function () {
             return {
-                translation: this.translation
+                translation: this.translation,
+                filterForArchivedTab : JSON.stringify(this.additionalVariables.filterForArchivedTab)
             };
         },
 
         ui : {
             actionHolder : '#actionHolder',
             checkAll : '#check-all',
-            actionsDropdown : '#actions-dropdown'
+            checkboxArea : '#checkbox-area',
+            actionsDropdown : '#actions-dropdown',
+            archivedTab : '#archived-tab',
+            unarchivedTab : '#unarchived-tab',
+            createFile : '#create-file',
+            createFolder : '#create-folder'
         },
 
         events : {
             'click @ui.checkAll' : 'checkAllItems',
-            'click @ui.actionHolder' : 'openActions'
+            'click @ui.actionHolder' : 'openActions',
+            'click @ui.archivedTab' : 'goToArchivedTab',
+            'click @ui.unarchivedTab' : 'goToUnarchivedTab'
         },
 
         checkAllItems : function (event) {
@@ -53,8 +64,50 @@ define(function (require) {
             this.ui.actionsDropdown.toggleClass('showActionsDropDown');
         },
 
+        goToArchivedTab : function () {
+            var ui = this.ui;
+
+            if (!ui.archivedTab.hasClass('viewBarTabActive')) {
+                ui.archivedTab.addClass('viewBarTabActive');
+                ui.unarchivedTab.removeClass('viewBarTabActive');
+
+                ui.createFile.addClass('hidden');
+                ui.createFolder.addClass('hidden');
+
+                this.unselectAllItems();
+
+                var filterForArchivedTab = this.additionalVariables.filterForArchivedTab;
+                var collection = this.collection;
+                collection.url = CONTENT_TYPES.DOCUMENTS + '?' + $.param(filterForArchivedTab);
+                collection.fetch();
+
+                Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS + '/' + JSON.stringify(filterForArchivedTab));
+            }
+        },
+
+        goToUnarchivedTab : function () {
+            var ui = this.ui;
+
+            if (!ui.unarchivedTab.hasClass('viewBarTabActive')) {
+                ui.archivedTab.removeClass('viewBarTabActive');
+                ui.unarchivedTab.addClass('viewBarTabActive');
+
+                ui.createFile.removeClass('hidden');
+                ui.createFolder.removeClass('hidden');
+
+                this.unselectAllItems();
+
+                var collection = this.collection;
+                collection.url = CONTENT_TYPES.DOCUMENTS;
+                collection.fetch();
+
+                Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS);
+            }
+        },
+
         collectionEvents : {
-            'item:checked' : 'itemChecked'
+            'item:checked' : 'itemChecked',
+            'sync' : 'whetherOrNotShowSelectAllButton'
         },
 
         itemChecked : function () {
@@ -70,11 +123,39 @@ define(function (require) {
             }
         },
 
+        whetherOrNotShowSelectAllButton : function () {
+            if (this.collection.length) {
+                this.ui.checkboxArea.removeClass('hidden');
+            } else {
+                this.ui.checkboxArea.addClass('hidden');
+            }
+        },
+
         changeActionHolderState : function (condition) {
             if (condition) {
                 this.ui.actionHolder.removeClass('hidden');
             } else {
                 this.ui.actionHolder.addClass('hidden');
+            }
+        },
+
+        unselectAllItems : function () {
+            var ui = this.ui;
+
+            this.collection.checked = [];
+
+            ui.actionHolder.addClass('hidden');
+            ui.checkAll.prop('checked', false);
+        },
+
+        additionalVariables : {
+            filterForArchivedTab : {
+                filter : {
+                    archived : {
+                        type : 'boolean',
+                        values : [true]
+                    }
+                }
             }
         }
 
