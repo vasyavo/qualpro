@@ -26,7 +26,7 @@ var Note = function (db, redis, event) {
     const fileHandler = new FileHandler(db);
 
     var self = this;
-
+    
     var $defProjection = {
         _id        : 1,
         createdBy  : 1,
@@ -34,6 +34,7 @@ var Note = function (db, redis, event) {
         title      : 1,
         description: 1,
         archived   : 1,
+        deleted    : 1,
         theme      : 1,
         attachments: 1
     };
@@ -51,11 +52,18 @@ var Note = function (db, redis, event) {
         var pipeLine = [];
         var currentUserId = options.currentUserId;
 
-        pipeLine.push({
+        const matchObj = {
             $match: {
                 'createdBy.user': ObjectId(currentUserId)
             }
-        });
+        };
+        
+        // mobile needs to know which notes are deleted when sync
+        if(!isMobile || (isMobile && !forSync)){
+            matchObj.$match.deleted = false;
+        }
+        
+        pipeLine.push(matchObj);
 
         pipeLine.push({
             $match: queryObject
@@ -195,29 +203,15 @@ var Note = function (db, redis, event) {
         return pipeLine;
     }
     
+    // ToDo: need to send push-notification
     function removeNote(id, cb) {
-        const query = NoteModel.findByIdAndRemove({_id: id});
+        const now = new Date();
+        const updateOpt = {
+            deleted         : true,
+            'createdBy.date': now
+        };
         
-        async.waterfall([
-            (cb) => {
-                query.exec(cb);
-            },
-            
-            (noteModel, callback) => {
-                const attachments = noteModel.get('attachments');
-                
-                if (!attachments && !attachments.length) {
-                    return callback();
-                }
-                
-                async.each(attachments, (fileId, cb) => {
-                    FileModel.findByIdAndRemove(fileId, (err, fileModel) => {
-                        fileHandler.deleteFile(fileModel.get('name'), 'notes', cb);
-                    })
-                }, callback);
-                
-            }
-        ], (err) => {
+        NoteModel.findByIdAndUpdate(id, updateOpt, (err) => {
             if (err) {
                 return cb(err);
             }
