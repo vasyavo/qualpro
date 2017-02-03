@@ -18,6 +18,7 @@ define([
 
         // create
         createTitle : 'إنشاء وثيقة',
+        createFolderTitle : '',//todo
         titleInput  : 'إدخال عنوان النص',
         title       : 'عنوان النص',
         createBtn   : 'إنشاء',

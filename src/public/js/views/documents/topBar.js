@@ -42,7 +42,8 @@ define(function (require) {
             'click @ui.actionHolder' : 'openActions',
             'click @ui.archivedTab' : 'goToArchivedTab',
             'click @ui.unarchivedTab' : 'goToUnarchivedTab',
-            'click @ui.createFile' : 'showCreateFileView'
+            'click @ui.createFile' : 'showCreateFileView',
+            'click @ui.createFolder' : 'showCreateFolderView'
         },
 
         checkAllItems : function (event) {
@@ -110,6 +111,12 @@ define(function (require) {
 
         showCreateFileView : function () {
             new CreateFileView({
+                translation : this.translation
+            });
+        },
+
+        showCreateFolderView : function () {
+            new CreateFolderView({
                 translation : this.translation
             });
         },

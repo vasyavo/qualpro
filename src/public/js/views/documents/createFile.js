@@ -6,6 +6,7 @@ define(function (require) {
     var ERROR_MESSAGES = require('constants/errorMessages');
     var CONSTANTS = require('constants/otherConstants');
     var FileModel = require('models/file');
+    var DocumentModel = require('models/documents');
     var Template = require('text!templates/documents/create-file.html');
 
     return Backbone.View.extend({
@@ -27,7 +28,9 @@ define(function (require) {
             };
         },
 
-        ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES).join(', '),
+        ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
+
+        model : new DocumentModel(),
 
         template : _.template(Template),
 
@@ -44,12 +47,20 @@ define(function (require) {
 
         saveFileInMemory : function (event) {
             var that = this;
+            var currentLanguage = App.currentUser.currentLanguage;
             var file = event.target.files[0];
 
             if (!file) {
-                App.render({
+                return App.render({
                     type : 'error',
-                    message : ERROR_MESSAGES.fileNotSelected[App.currentUser.currentLanguage]
+                    message : ERROR_MESSAGES.fileNotSelected[currentLanguage]
+                });
+            }
+
+            if (that.ALLOWED_CONTENT_TYPES.indexOf(file.type) === -1) {
+                return App.render({
+                    type: 'error',
+                    message: ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage]
                 });
             }
 
@@ -91,7 +102,7 @@ define(function (require) {
             var that = this;
             var layout = this.$el.html(this.template({
                 translation : this.translation,
-                allowedFileTypes : this.ALLOWED_CONTENT_TYPES
+                allowedFileTypes : this.ALLOWED_CONTENT_TYPES.join(', ')
             }));
 
             this.$el = layout.dialog({
@@ -105,6 +116,7 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
                         click: function () {
+                            //todo implement saving file
                             alert('currently not implemented!');
                         }
                     },

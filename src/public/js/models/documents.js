@@ -13,9 +13,17 @@ define([
         var Model = parent.extend({
 
             initialize : function () {
-                var lastEditDate = this.get('editedBy').date;
-                lastEditDate = moment(lastEditDate).format('DD.MM.YYYY');
-                this.set('dateString', lastEditDate);
+                var lastEditDate;
+                var editedBy = this.get('editedBy');
+
+                if (editedBy) {
+                    lastEditDate = editedBy.date;
+                }
+
+                if (lastEditDate) {
+                    lastEditDate = moment(lastEditDate).format('DD.MM.YYYY');
+                    this.set('dateString', lastEditDate);
+                }
             },
 
             defaults      : {},

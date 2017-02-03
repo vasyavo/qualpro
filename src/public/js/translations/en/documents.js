@@ -18,6 +18,7 @@ define([
 
         // create
         createTitle : 'Create Document',
+        createFolderTitle : 'Create Folder',
         titleInput  : 'Input title',
         title       : 'Title',
         createBtn   : 'Create',
