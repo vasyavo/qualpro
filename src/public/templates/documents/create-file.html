@@ -32,12 +32,11 @@
                         <div class="formBlock borderBottom objectivesPaddingBlock">
                             <div id="formThumbnail"></div>
                         </div>
+                        <input id="file-input" type="file" accept="<%- allowedFileTypes %>" hidden="hidden">
                         <div class="promotionFilesBlock borderBottom documentFilesBlock">
-                            <input id="file-input" type="file" accept="<%- allowedFileTypes %>" hidden="hidden">
                             <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock">
-                                <div class="thumbnail_js thumbnailBody">
-                                    <img src="">
-                                    <div class="objectivesFileName fontMicro"></div>
+                                <div class="fileThumbnailItem brandItem masonryThumbnail hidden">
+                                    <div id="file-holder" class="thumbnail_js thumbnailBody"></div>
                                 </div>
                             </div>
                         </div>
@@ -47,3 +46,4 @@
         </div>
     </div>
 </div>
+
