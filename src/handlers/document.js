@@ -20,6 +20,8 @@ var Documents = function (db, redis, event) {
     var Archiver = require('../helpers/archiver');
     var archiver = new Archiver(DocumentModel);
     var logWriter = require('../helpers/logWriter.js');
+    var errorSender = require('../utils/errorSender');
+    var ERROR_MESSAGES = require('../constants/errorMessages');
     var ObjectId = mongoose.Types.ObjectId;
     var access = require('../helpers/access')(db);
     var bodyValidator = require('../helpers/bodyValidator');
@@ -38,8 +40,8 @@ var Documents = function (db, redis, event) {
         creationDate: 1,
         updateDate  : 1
     };
-
-    function getAllPipeline(options) {
+    
+    function getAllPipelineOld(options) {
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var positionFilter = options.positionFilter;
@@ -200,74 +202,495 @@ var Documents = function (db, redis, event) {
 
         return pipeLine;
     }
-
+    
+    // projectTotal option needs for getAll method
+    function getMainPipeline(options) {
+        let pipeLine = [];
+        
+        pipeLine.push({
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs'
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id       : 1,
+                title     : 1,
+                total     : 1,
+                createdBy : 1,
+                editedBy  : 1,
+                attachment: 1,
+                type      : 1,
+                parent    : 1,
+                deleted   : 1,
+                archived  : 1,
+                
+                breadcrumbs: {
+                    _id  : 1,
+                    title: 1
+                }
+            }
+        }, {
+            $group: {
+                _id       : '$_id',
+                total     : {$first: '$total'},
+                title     : {$first: '$title'},
+                createdBy : {$first: '$createdBy'},
+                editedBy  : {$first: '$editedBy'},
+                attachment: {$first: '$attachment'},
+                type      : {$first: '$type'},
+                parent    : {$first: '$parent'},
+                deleted   : {$first: '$deleted'},
+                archived  : {$first: '$archived'},
+                
+                breadcrumbs: {
+                    $push: '$breadcrumbs'
+                }
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'parent',
+                as          : 'parent'
+            }
+        }, {
+            $unwind: {
+                path                      : '$parent',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'personnels',
+                foreignField: '_id',
+                localField  : 'createdBy.user',
+                as          : 'createdBy.user'
+            }
+        }, {
+            $unwind: {
+                path                      : '$createdBy.user',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'personnels',
+                foreignField: '_id',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user'
+            }
+        }, {
+            $unwind: {
+                path                      : '$editedBy.user',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                total      : 1,
+                title      : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
+                attachment : 1,
+                breadcrumbs: 1,
+                createdBy  : {
+                    date: 1,
+                    user: {
+                        _id      : 1,
+                        firstName: 1,
+                        lastName : 1
+                    }
+                },
+                editedBy   : {
+                    date: 1,
+                    user: {
+                        _id      : 1,
+                        firstName: 1,
+                        lastName : 1
+                    }
+                },
+                parent     : {
+                    _id  : 1,
+                    title: 1
+                }
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                total      : 1,
+                title      : 1,
+                createdBy  : 1,
+                editedBy   : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
+                breadcrumbs: 1,
+                attachment : 1,
+                parent     : {
+                    $ifNull: ['$parent', null]
+                }
+            }
+        });
+        
+        return pipeLine;
+    }
+    
+    const getById = (_id, cb) => {
+        let pipeLine = [{
+            $match: {
+                _id: ObjectId(_id)
+                
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs'
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id       : 1,
+                title     : 1,
+                createdBy : 1,
+                editedBy  : 1,
+                attachment: 1,
+                type      : 1,
+                parent    : 1,
+                deleted   : 1,
+                archived  : 1,
+                
+                breadcrumbs: {
+                    _id  : 1,
+                    title: 1
+                }
+            }
+        }, {
+            $group: {
+                _id       : '$_id',
+                title     : {$first: '$title'},
+                createdBy : {$first: '$createdBy'},
+                editedBy  : {$first: '$editedBy'},
+                attachment: {$first: '$attachment'},
+                type      : {$first: '$type'},
+                parent    : {$first: '$parent'},
+                deleted   : {$first: '$deleted'},
+                archived  : {$first: '$archived'},
+                
+                breadcrumbs: {
+                    $push: '$breadcrumbs'
+                }
+            }
+        }, {
+            $lookup: {
+                from        : 'files',
+                foreignField: '_id',
+                localField  : 'attachment',
+                as          : 'attachment'
+            }
+        }, {
+            $unwind: {
+                path                      : '$attachment',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'parent',
+                as          : 'parent'
+            }
+        }, {
+            $unwind: {
+                path                      : '$parent',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'personnels',
+                foreignField: '_id',
+                localField  : 'createdBy.user',
+                as          : 'createdBy.user'
+            }
+        }, {
+            $unwind: {
+                path                      : '$createdBy.user',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'personnels',
+                foreignField: '_id',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user'
+            }
+        }, {
+            $unwind: {
+                path                      : '$editedBy.user',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                title      : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
+                breadcrumbs: 1,
+                createdBy  : {
+                    date: 1,
+                    user: {
+                        _id      : 1,
+                        firstName: 1,
+                        lastName : 1
+                    }
+                },
+                editedBy   : {
+                    date: 1,
+                    user: {
+                        _id      : 1,
+                        firstName: 1,
+                        lastName : 1
+                    }
+                },
+                attachment : {
+                    _id         : 1,
+                    preview     : 1,
+                    contentType : 1,
+                    extension   : 1,
+                    originalName: 1,
+                    name        : 1,
+                },
+                parent     : {
+                    _id  : 1,
+                    title: 1
+                }
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                title      : 1,
+                createdBy  : 1,
+                editedBy   : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
+                breadcrumbs: 1,
+                attachment : 1,
+                parent     : {
+                    $ifNull: ['$parent', null]
+                }
+            }
+        }];
+        
+        DocumentModel.aggregate(pipeLine).allowDiskUse(true).exec((err, docs) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            let result = docs && docs.length ? docs[0] : null;
+            
+            if (!result) {
+                return errorSender.badRequest(cb, 'Document not found')
+            }
+            
+            if (result.deleted) {
+                return errorSender.badRequest(cb, 'Document already deleted')
+            }
+            
+            cb(null, result);
+        });
+    };
+    
+    const getByParent = (options, cb) => {
+        const {
+            parentId = null,
+            personnelId = null,
+            sortBy = 'createdAt',
+            sortOrder = -1,
+            skip = 0,
+            count = 20,
+            search = ''
+        } = options;
+        
+        const pipeLine = [{
+            $match: {
+                parent          : typeof parentId === 'string' ? ObjectId(parentId) : parentId,
+                'createdBy.user': ObjectId(personnelId)
+                
+            }
+        }];
+        
+        if (search) {
+            let regExpObject = {
+                $match: {
+                    title: {
+                        $regex  : search,
+                        $options: 'xi'
+                    }
+                }
+            };
+            
+            pipeLine.push(regExpObject);
+        }
+        
+        pipeLine.push({
+                $group: {
+                    _id  : null,
+                    total: {$sum: 1},
+                    root : {$push: '$$ROOT'}
+                }
+            }, {
+                $unwind: '$root'
+            }, {
+                $project: {
+                    _id        : '$root._id',
+                    title      : '$root.title',
+                    createdBy  : '$root.createdBy',
+                    editedBy   : '$root.editedBy',
+                    type       : '$root.type',
+                    deleted    : '$root.deleted',
+                    archived   : '$root.archived',
+                    breadcrumbs: '$root.breadcrumbs',
+                    parent     : '$root.parent',
+                    total      : 1
+                }
+            }, {
+                $sort: {
+                    [sortBy]: sortOrder
+                }
+            }, {
+                $skip: skip
+            }, {
+                $limit: count
+            },
+            ...getMainPipeline({projectTotal: true}),
+            {
+                $group: {
+                    _id : '$total',
+                    root: {
+                        $push: {
+                            _id        : '$_id',
+                            title      : '$title',
+                            createdBy  : '$createdBy',
+                            editedBy   : '$editedBy',
+                            type       : '$type',
+                            deleted    : '$deleted',
+                            archived   : '$archived',
+                            breadcrumbs: '$breadcrumbs',
+                            parent     : '$parent',
+                        }
+                    }
+                }
+            }, {
+                $project: {
+                    _id  : 0,
+                    total: '$_id',
+                    data : '$root'
+                }
+            });
+        
+        DocumentModel.aggregate(pipeLine).allowDiskUse(true).exec((err, docs) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            let result = docs && docs.length ? docs[0] : null;
+            
+            cb(null, Object.assign({total: 0, data: []}, result));
+        });
+    };
+    
+    const getBreadcrumbsByParent = (parent, cb) => {
+        let breadcrumbs = [];
+        
+        if (!parent) {
+            return cb(null, breadcrumbs);
+        }
+        
+        DocumentModel.findById(parent, (err, doc) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            if (doc.type !== 'folder') {
+                return errorSender.badRequest(cb, 'You can create document only inside folder')
+            }
+            
+            breadcrumbs = [...doc.breadcrumbs, doc._id];
+            
+            cb(null, breadcrumbs);
+        });
+    };
+    
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var files = req.files;
-            var session = req.session;
-            var userId = session.uId;
-            var model;
-            var fileId;
-
+            const {
+                session: {uId : userId} = {uId: null}
+            } = req;
+            const {
+                title,
+                attachment,
+                type,
+                parent,
+            } = body;
+            const createdBy = {
+                user: ObjectId(userId),
+                date: new Date(),
+            };
+            
             async.waterfall([
-
-                function (cb) {
-                    if (!files) {
-                        return cb(null, []);
-                    }
-
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.DOCUMENTS, function (err, filesIds) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        fileId = filesIds[0];
-
-                        cb(null, filesIds);
-                    });
+                
+                // if parent exist => check is valid and get breadcrumbs
+                (cb) => {
+                    getBreadcrumbsByParent(parent, cb);
                 },
-
-                function (fileIds, cb) {
-                    fileHandler.getByIds(fileIds, userId, function (err, result) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return cb(null, result[0]);
-                    });
-                },
-
-                function (fileModel, cb) {
-                    var createdBy = {
-                        user: userId,
-                        date: new Date()
+                
+                (breadcrumbs, cb) => {
+                    const options = {
+                        title     : _.escape(title),
+                        attachment: type == 'file' ? attachment : null,
+                        editedBy  : createdBy,
+                        parent,
+                        type,
+                        breadcrumbs,
+                        createdBy
                     };
-                    body.createdBy = createdBy;
-                    body.editedBy = createdBy;
-                    body.preview = fileModel.preview || fileModel.type;
-                    body.contentType = fileModel.contentType;
-                    body.originalName = fileModel.originalName;
-                    body.attachments = fileId;
-
-                    if (body.title) {
-                        body.title = _.escape(body.title);
-                    }
-
-                    model = new DocumentModel(body);
-                    model.save(function (err, model) {
+                    
+                    DocumentModel.create(options, function (err, model) {
                         if (err) {
                             return cb(err);
                         }
-
+                        
                         cb(null, model);
                     });
                 },
-
-                function (documentModel, cb) {
-                    var id = documentModel.get('_id');
-
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
+                
+                (model, cb) => {
+                    getById(model._id, cb);
                 }
-
             ], function (err, result) {
                 if (err) {
                     return next(err);
@@ -276,37 +699,36 @@ var Documents = function (db, redis, event) {
                 res.status(201).send(result);
             });
         }
-
-        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
-            var body;
+        
+        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+            let body;
 
             if (err) {
                 return next(err);
             }
+            
             if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
+                errorSender.forbidden(next);
             }
-
+            
             try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
+                if (typeof req.body === 'string') {
+                    body = JSON.parse(req.body);
                 } else {
                     body = req.body;
                 }
             } catch (err) {
                 return next(err);
             }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            
+            // bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'create', (err, saveData) => {
+            //     if (err) {
+            //         return next(err);
+            //     }
+            //
+            //     queryRun(saveData);
+            // });
+            queryRun(body);
         });
     };
 
@@ -521,8 +943,8 @@ var Documents = function (db, redis, event) {
             queryRun(req.session.uId);
         });
     };
-
-    this.getAll = function (req, res, next) {
+    
+    this.getAll_old = function (req, res, next) {
         function queryRun(uid) {
             var query = req.query;
             var filter = query.filter || {};
@@ -680,6 +1102,106 @@ var Documents = function (db, redis, event) {
             }
 
             queryRun(req.session.uId);
+        });
+    };
+    
+    this.getAll = function (req, res, next) {
+        function queryRun() {
+            const {
+                session: {uId : personnelId} = {uId: null}
+            } = req;
+            const {
+                skip = 0,
+                count = 10,
+                parentId = null,
+                sortBy = 'createdAt',
+                sortOrder = -1,
+                search = '',
+            } = req.query;
+            
+            getByParent({
+                skip,
+                count,
+                parentId,
+                personnelId,
+                sortBy,
+                sortOrder,
+                search
+            }, (err, result) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                if (result.total === 0) {
+                    res.status(200).send(result);
+                }
+                
+                const fileIds = [];
+                const options = {
+                    data: {}
+                };
+                
+                result.data = _.pluck(result.data, function (elem) {
+                    if (elem.title) {
+                        elem.title = _.unescape(elem.title);
+                    }
+                    
+                    if (elem.attachment) {
+                        fileIds.push(elem.attachment._id);
+                    }
+                    
+                    return elem;
+                });
+                
+                options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
+                
+                getImagesHelper.getImages(options, function (err, result) {
+                    if (err) {
+                        return next(err);
+                    }
+    
+                    const fieldNames = {};
+                    let setOptions = {
+                        response  : response,
+                        imgsObject: result
+                    };
+                    fieldNames[CONTENT_TYPES.DOCUMENTS] = [];
+                    
+                    setOptions.fields = fieldNames;
+                    
+                    getImagesHelper.setIntoResult(setOptions, function (response) {
+                        response.data = _.map(response.data, function (element) {
+                            element.attachment = {
+                                contentType : element.contentType,
+                                _id         : element.attachment,
+                                preview     : element.preview,
+                                originalName: element.originalName
+                            };
+                            
+                            delete element.preview;
+                            delete element.contentType;
+                            delete element.originalName;
+                            
+                            return element;
+                        });
+                        next({status: 200, body: response});
+                    });
+                });
+            })
+        }
+        
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+            if (err) {
+                return next(err);
+            }
+            if (!allowed) {
+                err = new Error();
+                err.status = 403;
+                
+                return next(err);
+            }
+            
+            queryRun();
         });
     };
 
