@@ -3,10 +3,9 @@ define(function (require) {
     var _ = require('underscore');
     var Backbone = require('Backbone');
     var AttachFileView = require('views/objectives/fileDialogView');
-    var CONTENT_TYPES = require('constants/contentType');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var CONSTANTS = require('constants/otherConstants');
-    var FileCollection = require('collections/file/collection');
-    var FileModel = require('models/documents');
+    var FileModel = require('models/file');
     var Template = require('text!templates/documents/create-file.html');
 
     return Backbone.View.extend({
@@ -23,6 +22,8 @@ define(function (require) {
 
             this.ui = {
                 fileInput : context.find('#file-input'),
+                fileHolder : context.find('#file-holder'),
+                thumbnailItem : context.find('.fileThumbnailItem')
             };
         },
 
@@ -35,14 +36,55 @@ define(function (require) {
             'change #file-input' : 'saveFileInMemory'
         },
 
-        files : new FileCollection(),
+        file : null,
 
         showAttachFileView : function () {
             this.ui.fileInput.click();
         },
 
         saveFileInMemory : function (event) {
-            debugger;
+            var that = this;
+            var file = event.target.files[0];
+
+            if (!file) {
+                App.render({
+                    type : 'error',
+                    message : ERROR_MESSAGES.fileNotSelected[App.currentUser.currentLanguage]
+                });
+            }
+
+            this.file = file;
+
+            this.ui.thumbnailItem.removeClass('hidden');
+
+            var fileReader = new FileReader();
+            fileReader.readAsDataURL(file);
+            fileReader.onload = function (event) {
+                var preview;
+                var fileHolder = that.ui.fileHolder;
+
+                if (/image/.test(file.type)) {
+                    var fileAsBase64String = event.target.result;
+
+                    preview = document.createElement('img');
+                    preview.src = fileAsBase64String;
+                } else {
+                    var fileModel = new FileModel();
+                    var fileType = fileModel.getTypeFromContentType(file.type);
+
+                    preview = document.createElement('div');
+                    preview.className = 'iconThumbnail ' + fileType;
+                }
+
+                var div = document.createElement('div');
+                div.className = 'objectivesFileName fontMicro';
+                div.innerHTML = file.name;
+
+                fileHolder.html('');
+
+                fileHolder.append(preview);
+                fileHolder.append(div);
+            };
         },
 
         render : function () {
