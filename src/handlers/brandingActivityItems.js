@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var Promotions = function (db, redis, event) {
     var async = require('async');
     var _ = require('lodash');
@@ -320,6 +322,10 @@ var Promotions = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var createdBy = {
                 user: req.session.uId,
@@ -368,12 +374,10 @@ var Promotions = function (db, redis, event) {
                     return next(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : result.get('createdBy'),
-                    itemId    : result.brandingAndDisplay,
-                    itemType  : CONTENT_TYPES.BRANDINGANDDISPLAY
+                ActivityLog.emit('marketing:al-alali-marketing-campaigns:item-published', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: result,
                 });
 
                 res.status(200).send(result);

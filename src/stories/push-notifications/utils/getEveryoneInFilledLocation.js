@@ -11,6 +11,7 @@ const getPipelineEveryInFilledLocation = require('./getPipelineEveryInFilledLoca
  * @param {String[]} options.setSubRegion
  * @param {String[]} options.setOutlet
  * @param {String[]} options.setBranch
+ * @param {Boolean} options.onlyAdmins
  * @throws {Error}
  * @returns {String[]}
  * */
@@ -23,7 +24,7 @@ module.exports = function * (options) {
     const setBranch = ObjectId(options.setBranch);
     const condition = {
         admins: {},
-        colleagues: getEveryIn.outletAndBranch,
+        colleagues: options.onlyAdmins ? false : getEveryIn.outletAndBranch,
     };
 
     if (setCountry.length && setRegion.length && setSubRegion.length) {
