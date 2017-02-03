@@ -15,6 +15,7 @@ define(function (require) {
             this.translation = options.translation;
 
             this.render();
+            this.bindModelEvents();
             this.defineUIElements();
         },
 
@@ -116,8 +117,15 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
                         click: function () {
-                            //todo implement saving file
-                            alert('currently not implemented!');
+                            var data = new FormData();
+
+                            data.append('file', that.file);
+
+                            data.append('data', JSON.stringify({
+                                title : that.$el.find('#title').val()
+                            }));
+
+                            that.model.saveFile(data);
                         }
                     },
                     cancel: {
@@ -128,6 +136,16 @@ define(function (require) {
                         }
                     }
                 }
+            });
+        },
+
+        bindModelEvents : function () {
+            var that = this;
+            var model = this.model;
+
+            model.on('saved', function (savedData) {
+                that.trigger('file:saved', savedData);
+                that.remove();
             });
         }
 

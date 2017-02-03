@@ -6,6 +6,7 @@ define(function (require) {
     var Marionette = require('marionette');
     var CreateFileView = require('views/documents/createFile');
     var CreateFolderView = require('views/documents/createFolder');
+    var DocumentsModel = require('models/documents');
     var CONTENT_TYPES = require('constants/contentType');
     var Template = require('text!templates/documents/topBar.html');
 
@@ -110,8 +111,17 @@ define(function (require) {
         },
 
         showCreateFileView : function () {
-            new CreateFileView({
+            var that = this;
+
+            this.createFileView = new CreateFileView({
                 translation : this.translation
+            });
+
+            this.createFileView.on('file:saved', function (savedData) {
+                var model = new DocumentsModel(savedData);
+
+                that.collection.add(model);
+                that.collection.trigger('sync');
             });
         },
 
