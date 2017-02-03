@@ -18,6 +18,7 @@ const bodyValidator = require('../helpers/bodyValidator');
 const AggregationHelper = require('../helpers/aggregationCreater');
 const access = require('../helpers/access')();
 const GetImageHelper = require('../helpers/getImages');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const QuestionnaryHandler = function (db, redis, event) {
     const getImagesHelper = new GetImageHelper(db);
@@ -62,6 +63,25 @@ const QuestionnaryHandler = function (db, redis, event) {
         position: 1
     };
     const self = this;
+    const sendEventThatAnswerIsPublished = (options) => {
+        const {
+            questionnaireId,
+            actionOriginator,
+            accessRoleLevel,
+        } = options;
+
+        QuestionnaryModel.findById(questionnaireId)
+            .lean()
+            .exec((err, questionnaire) => {
+                if (err || !questionnaire) return;
+
+                ActivityLog.log('marketing:al-alali-questionnaire:item-published', {
+                    actionOriginator,
+                    accessRoleLevel,
+                    body: questionnaire.toJSON(),
+                });
+            });
+    };
 
     const filterRetrievedResultOnGetAll = (options, cb) => {
         const personnel = options.personnel;
@@ -708,6 +728,10 @@ const QuestionnaryHandler = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var aggregateHelper = new AggregationHelper($defProjection);
 
@@ -903,13 +927,17 @@ const QuestionnaryHandler = function (db, redis, event) {
                             return waterfallCb(err);
                         }
 
-                        event.emit('activityChange', {
-                            module    : 31,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : body.createdBy,
-                            itemId    : result._id,
-                            itemType  : CONTENT_TYPES.QUESTIONNARIES
-                        });
+                        const eventPayload = {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: result.toJSON(),
+                        };
+
+                        if (body.send) {
+                            ActivityLog.log('marketing:al-alali-questionnaire:published', eventPayload);
+                        } else {
+                            ActivityLog.log('marketing:al-alali-questionnaire:draft-created', eventPayload);
+                        }
 
                         waterfallCb(null, result._id);
                     });
@@ -961,6 +989,10 @@ const QuestionnaryHandler = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var id = req.params.id;
             var fullUpdate = {
@@ -1091,13 +1123,17 @@ const QuestionnaryHandler = function (db, redis, event) {
                             return waterfallCb(err);
                         }
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
-                            actionType: ACTIVITY_TYPES.UPDATED,
-                            createdBy : body.editedBy,
-                            itemId    : id,
-                            itemType  : CONTENT_TYPES.QUESTIONNARIES
-                        });
+                        const eventPayload = {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: result.toJSON(),
+                        };
+
+                        if (body.send) {
+                            ActivityLog.log('marketing:al-alali-questionnaire:published', eventPayload);
+                        } else {
+                            ActivityLog.log('marketing:al-alali-questionnaire:updated', eventPayload);
+                        }
 
                         waterfallCb(null, result._id);
                     });
@@ -1285,6 +1321,10 @@ const QuestionnaryHandler = function (db, redis, event) {
     };
 
     this.questionnaryAnswer = function (req, res, next) {
+        const session = req.session;
+        const userId = session.userId;
+        const accessRoleLevel = session.level;
+
         function queryRun(data) {
             const personnelId = ObjectId(req.session.uId);
             const createdBy = {
@@ -1315,12 +1355,10 @@ const QuestionnaryHandler = function (db, redis, event) {
                     return next(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : createdBy,
-                    itemId    : questionnaryId,
-                    itemType  : CONTENT_TYPES.QUESTIONNARIES
+                sendEventThatAnswerIsPublished({
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    questionnaryId: data.questionnaryId,
                 });
 
                 res.status(200).send({});
