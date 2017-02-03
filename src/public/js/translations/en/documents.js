@@ -22,8 +22,8 @@ define([
         title       : 'Title',
         createBtn   : 'Create',
         cancelBtn   : 'Cancel',
-        attachments : 'Attachments',
-        attachFiles : 'Attach Files',
+        attachments : 'Attachment',
+        attachFiles : 'Attach File',
         // edit
         editTitle   : 'Edit Document',
         saveBtn     : 'Save',

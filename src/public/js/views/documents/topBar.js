@@ -1,9 +1,11 @@
 define(function (require) {
 
-    var Backbone = require('Backbone');
-    var Marionette = require('marionette');
     var $ = require('jquery');
     var _ = require('underscore');
+    var Backbone = require('Backbone');
+    var Marionette = require('marionette');
+    var CreateFileView = require('views/documents/createFile');
+    var CreateFolderView = require('views/documents/createFolder');
     var CONTENT_TYPES = require('constants/contentType');
     var Template = require('text!templates/documents/topBar.html');
 
@@ -39,7 +41,8 @@ define(function (require) {
             'click @ui.checkAll' : 'checkAllItems',
             'click @ui.actionHolder' : 'openActions',
             'click @ui.archivedTab' : 'goToArchivedTab',
-            'click @ui.unarchivedTab' : 'goToUnarchivedTab'
+            'click @ui.unarchivedTab' : 'goToUnarchivedTab',
+            'click @ui.createFile' : 'showCreateFileView'
         },
 
         checkAllItems : function (event) {
@@ -103,6 +106,12 @@ define(function (require) {
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS);
             }
+        },
+
+        showCreateFileView : function () {
+            new CreateFileView({
+                translation : this.translation
+            });
         },
 
         collectionEvents : {
