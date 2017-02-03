@@ -407,8 +407,14 @@ const questionnaireExpired = () => {
             }
 
             if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(34, id, contentType);
+                const modelAsJson = model.toJSON();
+                const payload = {
+                    actionOriginator: modelAsJson.createdBy.user,
+                    accessRoleLevel: modelAsJson.level,
+                    body: modelAsJson,
+                };
+
+                ActivityLog.emit('marketing:consumer-survey:expired', payload);
             }
 
             callback(null);
