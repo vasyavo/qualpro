@@ -74,7 +74,7 @@ module.exports = (req, res, next) => {
             },
 
             (updateModel, cb) => {
-                ActivityLog.log('marketing:consumer-survey:updated', {
+                ActivityLog.emit('marketing:consumer-survey:updated', {
                     actionOriginator: userId,
                     accessRoleLevel,
                     body: updateModel.toJSON(),
