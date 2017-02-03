@@ -11,8 +11,13 @@ const access = require('../../../helpers/access')();
 const getByIdAggr = require('../reusable-components/getByIdAggr');
 const requestService = require('../../scheduler/request');
 const config = require('../../../config');
+const ActivityLog = require('./../../push-notifications/activityLog');
 
 module.exports = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+
     function queryRun(body) {
         var id = req.params.id;
         var fullUpdate = {
@@ -69,12 +74,10 @@ module.exports = (req, res, next) => {
             },
 
             (updateModel, cb) => {
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.CONSUMER_SURVEY,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : updateModel.editedBy,
-                    itemId    : id,
-                    itemType  : CONTENT_TYPES.CONSUMER_SURVEY
+                ActivityLog.log('marketing:consumer-survey:updated', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: updateModel.toJSON(),
                 });
 
                 cb(null, updateModel);
