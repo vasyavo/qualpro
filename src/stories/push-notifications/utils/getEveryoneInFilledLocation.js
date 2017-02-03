@@ -9,6 +9,9 @@ const getPipelineEveryInFilledLocation = require('./getPipelineEveryInFilledLoca
  * @param {String[]} options.setCountry
  * @param {String[]} options.setRegion
  * @param {String[]} options.setSubRegion
+ * @param {String[]} options.setOutlet
+ * @param {String[]} options.setBranch
+ * @throws {Error}
  * @returns {String[]}
  * */
 
@@ -16,31 +19,41 @@ module.exports = function * (options) {
     const setCountry = ObjectId(options.setCountry);
     const setRegion = ObjectId(options.setRegion);
     const setSubRegion = ObjectId(options.setSubRegion);
-    const condition = {};
+    const setOutlet = ObjectId(options.setOutlet);
+    const setBranch = ObjectId(options.setBranch);
+    const condition = {
+        admins: {},
+        colleagues: getEveryIn.outletAndBranch,
+    };
 
     if (setCountry.length && setRegion.length && setSubRegion.length) {
-        condition.$or = getEveryIn.subRegion.$or;
+        condition.admins = getEveryIn.subRegion;
     } else if (setCountry.length && setRegion.length) {
-        condition.$or = getEveryIn.region.$or;
+        condition.admins = getEveryIn.region;
     } else if (setCountry.length) {
-        condition.$or = getEveryIn.country.$or;
+        condition.admins = getEveryIn.country;
+    } else {
+        throw new Error('Not permitted use case');
     }
 
     const pipeline = getPipelineEveryInFilledLocation({
         setCountry,
         setRegion,
         setSubRegion,
-        condition: {
-            admins: condition,
-        },
+        setOutlet,
+        setBranch,
+        condition,
     });
 
     const result = yield PersonnelModel.aggregate(pipeline).exec();
-    const setAdmin = result.slice()
-        .pop()
-        .setAdmin
+    const validResult = result.length ?
+        result.slice().pop() : {
+            setAdmin: [],
+            setColleagues: [],
+        };
+    const setEveryone = [...validResult.setAdmin, ...validResult.setColleagues]
         .filter(objectId => objectId)
         .map(objectId => objectId.toString());
 
-    return setAdmin;
+    return setEveryone;
 };
