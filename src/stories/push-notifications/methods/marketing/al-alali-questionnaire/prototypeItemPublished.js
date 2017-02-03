@@ -23,6 +23,7 @@ module.exports = function * (options) {
         setSubRegion,
         setOutlet: [],
         setBranch: [],
+        setAdminOnly: true,
     });
 
     const newActivity = new ActivityModel();
