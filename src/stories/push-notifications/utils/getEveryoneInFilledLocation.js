@@ -17,11 +17,11 @@ const getPipelineEveryInFilledLocation = require('./getPipelineEveryInFilledLoca
  * */
 
 module.exports = function * (options) {
-    const setCountry = ObjectId(options.setCountry);
-    const setRegion = ObjectId(options.setRegion);
-    const setSubRegion = ObjectId(options.setSubRegion);
-    const setOutlet = ObjectId(options.setOutlet);
-    const setBranch = ObjectId(options.setBranch);
+    const setCountry = options.setCountry.map(id => ObjectId(id));
+    const setRegion = options.setRegion.map(id => ObjectId(id));
+    const setSubRegion = options.setSubRegion.map(id => ObjectId(id));
+    const setOutlet = options.setOutlet.map(id => ObjectId(id));
+    const setBranch = options.setBranch.map(id => ObjectId(id));
     const condition = {
         admins: {},
         colleagues: options.onlyAdmins ? false : getEveryIn.outletAndBranch,
