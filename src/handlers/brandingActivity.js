@@ -811,6 +811,13 @@ var BrandingActivity = function (db, redis, event) {
                                         fileIdsBackendNew = fileIdsBackendNew.attachments ? fileIdsBackendNew.attachments.fromObjectID() : fileIdsBackendNew.attachments;
                                         deletedAttachments = _.difference(fileIdsBackend, fileIdsBackendNew);
                                         brandingAndDisplay = result;
+
+                                        ActivityLog.emit('marketing:al-alali-marketing-campaigns:updated', {
+                                            actionOriginator: userId,
+                                            accessRoleLevel,
+                                            body: result.toJSON(),
+                                        });
+
                                         return callback(null, deletedAttachments);
                                     });
                                 },
@@ -845,12 +852,6 @@ var BrandingActivity = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-
-                ActivityLog.emit('marketing:al-alali-marketing-campaigns:updated', {
-                    actionOriginator: userId,
-                    accessRoleLevel,
-                    body: result,
-                });
 
                 res.status(200).send(result);
             });
