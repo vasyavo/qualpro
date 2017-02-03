@@ -104,7 +104,7 @@ module.exports = (req, res, next) => {
                         }
                     });
                 } else {
-                    ActivityLog.emit('marketing:consumer-survey:draft-created', {
+                    ActivityLog.emit('marketing:consumer-survey:published', {
                         actionOriginator: userId,
                         accessRoleLevel,
                         body: survey.toJSON(),
