@@ -2205,7 +2205,7 @@ var InStoreReports = function() {
             pipeLine.push(...aggregateHelper.aggregationPartMaker({
                 from : 'visibilityForms',
                 key : 'form._id',
-                as : 'form',
+                as : 'additionalFormData',
                 isArray : false,
                 addProjection : ['_id', 'after']
             }));
