@@ -53,8 +53,8 @@ module.exports = (options) => {
                         $let: {
                             vars: {
                                 accessRoleLevel: '$$personnel.accessRole.level',
-                                in: condition.admins,
                             },
+                            in: condition.admins,
                         },
                     },
                 },
@@ -78,8 +78,8 @@ module.exports = (options) => {
                         $let: {
                             vars: {
                                 accessRoleLevel: '$$personnel.accessRole.level',
-                                in: condition.colleagues,
                             },
+                            in: condition.colleagues,
                         },
                     },
                 },
@@ -87,16 +87,15 @@ module.exports = (options) => {
         },
     };
 
-    const baseProject = {
-        accessRole: 1,
-        country: 1,
-        region: 1,
-        subRegion: 1,
-        outlet: 1,
-        branch: 1,
-    };
     const pipeline = [{
-        $project: baseProject,
+        $project: {
+            accessRole: 1,
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            outlet: 1,
+            branch: 1,
+        },
     }, {
         $lookup: {
             from: 'accessRoles',
@@ -105,10 +104,15 @@ module.exports = (options) => {
             as: 'accessRole',
         },
     }, {
-        $project: Object.assign({}, baseProject, {
+        $project: {
             'accessRole._id': 1,
             'accessRole.level': 1,
-        }),
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            outlet: 1,
+            branch: 1,
+        },
     }, {
         $unwind: {
             path: '$accessRole',

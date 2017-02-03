@@ -4,7 +4,7 @@ const getEveryIn = require('./conditions/getEveryIn');
 const getPipelineEveryInFilledLocation = require('./getPipelineEveryInFilledLocation');
 
 /*
- * @description Returns every admin in filled location
+ * @description Returns everyone in filled location
  * @param {Object} options
  * @param {String[]} options.setCountry
  * @param {String[]} options.setRegion
