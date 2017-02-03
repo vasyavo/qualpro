@@ -525,7 +525,7 @@ define([
             var self = this;
             var STATUSES = CONSTANTS.OBJECTIVE_STATUSES;
             var status = this.$el.find('#statusDd').data().id;
-            var savedForm = self.modelForFlow.get('form');
+            var savedForm = self.modelForFlow.get('additionalFormData');
             var isFilledAfterPart = false;
 
             if (status === STATUSES.COMPLETED) {

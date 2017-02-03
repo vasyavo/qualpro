@@ -401,11 +401,20 @@ define([
         changeDate: function (e) {
             var $el = $(e.target);
             var id = $el.attr('id');
-            var val = $el.val();
+            var val = moment($el.val(), 'DD.MM.YYYY');
 
-            val = moment(val, 'DD.MM.YYYY').toISOString();
+            var value = val.toISOString();
 
-            id === 'dateStart' ? this.changed.dateStart = val : this.changed.dateEnd = val;
+            if (id === 'dateStart'){
+                this.changed.dateStart = value;
+                if (val.diff(moment(this.model.get('dateEnd'), 'DD.MM.YYYY')) > 0){
+                    this.changed.dateEnd = value;
+                }
+            } else {
+                this.changed.dateEnd = value;
+            }
+
+
         },
 
         changeDesc: function (e) {

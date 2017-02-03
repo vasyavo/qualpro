@@ -1511,7 +1511,7 @@ var InStoreReports = function() {
                     var pipeLine = [];
                     var aggregation;
 
-                    if (!isMobile && !queryObject.cover) {
+                    if (!queryObject.cover) {
                         return cb(null, null, coveredIds);
                     }
 
@@ -2205,7 +2205,7 @@ var InStoreReports = function() {
             pipeLine.push(...aggregateHelper.aggregationPartMaker({
                 from : 'visibilityForms',
                 key : 'form._id',
-                as : 'form',
+                as : 'additionalFormData',
                 isArray : false,
                 addProjection : ['_id', 'after']
             }));
