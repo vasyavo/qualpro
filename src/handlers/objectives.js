@@ -1941,7 +1941,7 @@ var Objectives = function (db, redis, event) {
                     personnel  : personnel
                 });
 
-            if (cover) {
+            if (cover || isMobile) {
                 delete queryObject.region;
                 delete queryObject.subRegion;
                 delete queryObject.branch;
@@ -2051,9 +2051,7 @@ var Objectives = function (db, redis, event) {
 
                         cb(null, response);
                     });
-
                 }
-
             ], function (err, response) {
                 var idsPersonnel = [];
                 var idsFile = [];
