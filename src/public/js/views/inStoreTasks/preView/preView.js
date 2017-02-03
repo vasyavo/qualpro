@@ -525,9 +525,19 @@ define([
             var self = this;
             var STATUSES = CONSTANTS.OBJECTIVE_STATUSES;
             var status = this.$el.find('#statusDd').data().id;
+            var savedForm = self.modelForFlow.get('additionalFormData');
+            var isFilledAfterPart = false;
 
             if (status === STATUSES.COMPLETED) {
-                if (!self.savedVisibilityModel || !self.savedVisibilityModel.get('descriptionAfter')) {
+                if (savedForm.after.description) {
+                    isFilledAfterPart = true;
+                }
+
+                if (self.savedVisibilityModel && self.savedVisibilityModel.get('descriptionAfter')) {
+                    isFilledAfterPart = true;
+                }
+
+                if (!isFilledAfterPart) {
                     return App.render({
                         type : 'error',
                         message : ERROR_MESSAGES.afterPartNotFilled[App.currentUser.currentLanguage]
