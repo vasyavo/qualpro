@@ -12,5 +12,5 @@ module.exports = {
     master: agentMaster,
     countryAdmin,
     areaManager,
-    merchandiser
+    merchandiser,
 };
