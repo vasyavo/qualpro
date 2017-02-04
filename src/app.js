@@ -58,7 +58,7 @@ app.use(cookieParser('CRMkey'));
 app.use(setCacheControl);
 app.get('/info', require('./utils/isApiAvailable'));
 
-require('./routes/index')(app, mongo, eventEmitter);
+require('./routes')(app, mongo, eventEmitter);
 
 const server = http.createServer(app);
 const io = require('./helpers/socket')({
