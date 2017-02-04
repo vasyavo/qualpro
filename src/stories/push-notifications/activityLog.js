@@ -27,14 +27,18 @@ activityLog.on('in-store-task:fail', require('./methods/inStoreTask/fail'));
 activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
 activityLog.on('reporting:shelf-share:published', require('./methods/reporting/shelf-share/published'));
 activityLog.on('reporting:competitor-branding-and-display-report:published', require('./methods/reporting/competitor-branding-and-display-report/published'));
+activityLog.on('reporting:competitor-branding-and-display-report:expired', require('./methods/reporting/competitor-branding-and-display-report/expired'));
 activityLog.on('reporting:competitor-promotion-activities:published', require('./methods/reporting/competitor-promotion-activities/published'));
+activityLog.on('reporting:competitor-promotion-activities:expired', require('./methods/reporting/competitor-promotion-activities/expired'));
 activityLog.on('reporting:new-product-launch:published', require('./methods/reporting/new-product-launch/published'));
 activityLog.on('reporting:achievement-form:published', require('./methods/reporting/achievement-form/published'));
 
 activityLog.on('reporting:al-alali-promo-evaluation:draft-created', require('./methods/reporting/al-alali-promo-evaluation/draftCreated'));
 activityLog.on('reporting:al-alali-promo-evaluation:published', require('./methods/reporting/al-alali-promo-evaluation/published'));
 activityLog.on('reporting:al-alali-promo-evaluation:updated', require('./methods/reporting/al-alali-promo-evaluation/updated'));
+activityLog.on('reporting:al-alali-promo-evaluation:expired', require('./methods/reporting/al-alali-promo-evaluation/expired'));
 activityLog.on('reporting:al-alali-promo-evaluation:item-published', require('./methods/reporting/al-alali-promo-evaluation/itemPublished'));
+activityLog.on('reporting:al-alali-promo-evaluation:item-expired', require('./methods/reporting/al-alali-promo-evaluation/itemExpired'));
 
 activityLog.on('marketing:al-alali-branding-and-display-report:published', require('./methods/marketing/al-alali-branding-and-display-report/published'));
 

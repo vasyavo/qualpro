@@ -1,4 +1,5 @@
 const co = require('co');
+const _ = require('lodash');
 const dispatch = require('./../../../utils/dispatch');
 const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
@@ -7,9 +8,9 @@ const prototype = require('./../prototype');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT;
-        const contentType = contentTypes.COMPETITORBRANDING;
-        const actionType = activityTypes.CREATED;
+        const moduleId = aclModules.AL_ALALI_PROMOTIONS_ITEMS;
+        const contentType = contentTypes.PROMOTIONSITEMS;
+        const actionType = activityTypes.UPDATED;
         const extendedOptions = Object.assign({}, options, {
             moduleId,
             contentType,
@@ -19,28 +20,20 @@ module.exports = (options) => {
         const {
             payload,
             actionOriginator,
+            contentAuthor,
             supervisor,
             setEveryoneInLocation,
         } = yield prototype(extendedOptions);
 
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniq([
+                actionOriginator,
+                contentAuthor,
+                supervisor,
+                ...setEveryoneInLocation,
+            ]),
             subject: {
-                en: 'Competitor Branding & Display report published',
-                ar: '',
-            },
-            payload,
-        }, {
-            recipients: [supervisor],
-            subject: {
-                en: 'Subordinate published report',
-                ar: '',
-            },
-            payload,
-        }, {
-            recipients: setEveryoneInLocation,
-            subject: {
-                en: 'Competitor Branding & Display report received',
+                en: 'Promo evaluation item expired',
                 ar: '',
             },
             payload,
