@@ -1,22 +1,33 @@
 define(function (require) {
 
+    var Backbone = require('Backbone');
     var Marionette = require('marionette');
     var _ = require('underscore');
     var documentPreview = require('views/documents/preview');
     var EditDocumentView = require('views/documents/edit');
-    var Template = require('text!templates/documents/list-item.html');
+    var FileTemplate = require('text!templates/documents/list-item.html');
+    var FolderTemplate = require('text!templates/documents/list-item-folder.html');
 
     return Marionette.View.extend({
 
         initialize : function (options) {
             this.translation = options.translation;
+            this.type = this.model.get('type') || 'file';
 
             var attachment = this.model.get('attachments')[0];
             this.model.set('attachment', attachment);
         },
 
         template : function (ops) {
-            return _.template(Template)(ops);
+            var template;
+
+            if (ops.type === 'file') {
+                template = _.template(FileTemplate)(ops);
+            } else {
+                template = _.template(FolderTemplate)(ops);
+            }
+
+            return template;
         },
 
         ui : {
@@ -53,10 +64,14 @@ define(function (require) {
         },
 
         onDoubleClick : function () {
-            new documentPreview({
-                model : this.model,
-                translation : this.translation
-            });
+            if (this.type === 'file') {
+                new documentPreview({
+                    model : this.model,
+                    translation : this.translation
+                });
+            } else {
+                Backbone.history.navigate('qualPro/documents/' + this.model.get('_id'));
+            }
         },
 
         showEditView : function () {
