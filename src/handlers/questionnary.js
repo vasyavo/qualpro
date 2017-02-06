@@ -75,7 +75,7 @@ const QuestionnaryHandler = function (db, redis, event) {
             .exec((err, questionnaire) => {
                 if (err || !questionnaire) return;
 
-                ActivityLog.log('marketing:al-alali-questionnaire:item-published', {
+                ActivityLog.emit('marketing:al-alali-questionnaire:item-published', {
                     actionOriginator,
                     accessRoleLevel,
                     body: questionnaire.toJSON(),
@@ -934,9 +934,9 @@ const QuestionnaryHandler = function (db, redis, event) {
                         };
 
                         if (body.send) {
-                            ActivityLog.log('marketing:al-alali-questionnaire:published', eventPayload);
+                            ActivityLog.emit('marketing:al-alali-questionnaire:published', eventPayload);
                         } else {
-                            ActivityLog.log('marketing:al-alali-questionnaire:draft-created', eventPayload);
+                            ActivityLog.emit('marketing:al-alali-questionnaire:draft-created', eventPayload);
                         }
 
                         waterfallCb(null, result._id);
@@ -1130,9 +1130,9 @@ const QuestionnaryHandler = function (db, redis, event) {
                         };
 
                         if (body.send) {
-                            ActivityLog.log('marketing:al-alali-questionnaire:published', eventPayload);
+                            ActivityLog.emit('marketing:al-alali-questionnaire:published', eventPayload);
                         } else {
-                            ActivityLog.log('marketing:al-alali-questionnaire:updated', eventPayload);
+                            ActivityLog.emit('marketing:al-alali-questionnaire:updated', eventPayload);
                         }
 
                         waterfallCb(null, result._id);
