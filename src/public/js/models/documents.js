@@ -88,6 +88,40 @@ define([
                 });
             },
 
+            saveFolder : function (data) {
+                var that = this;
+                var errors = [];
+                var currentLanguage = App.currentUser.currentLanguage;
+
+                validation.checkTitleField(errors, true, data.title, 'Title');
+
+                if (errors.length) {
+                    return App.render({
+                        type : 'error',
+                        message : errors[0]
+                    });
+                }
+
+                $.ajax({
+                    url : CONTENT_TYPES.DOCUMENTS,
+                    type : 'POST',
+                    data : JSON.parse(data),
+                    contentType: false,
+                    processData: false,
+                    success    : function (savedData) {
+                        var fileModel = new FileModel();
+
+                        that.trigger('saved', savedData);
+                    },
+                    error : function () {
+                        return App.render({
+                            type : 'error',
+                            message : ERROR_MESSAGES.notSaved[currentLanguage]
+                        });
+                    }
+                });
+            },
+
             urlRoot: function () {
                 return CONTENT_TYPES.DOCUMENTS;
             },

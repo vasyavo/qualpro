@@ -14,8 +14,10 @@ define(function (require) {
             this.translation = options.translation;
             this.type = this.model.get('type') || 'file';
 
-            var attachment = this.model.get('attachments')[0];
-            this.model.set('attachment', attachment);
+            if (this.type === 'file') {
+                var attachment = this.model.get('attachments')[0];
+                this.model.set('attachment', attachment);
+            }
         },
 
         template : function (ops) {

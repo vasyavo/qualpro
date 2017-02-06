@@ -122,7 +122,8 @@ define(function (require) {
                             data.append('file', that.file);
 
                             data.append('data', JSON.stringify({
-                                title : that.$el.find('#title').val()
+                                title : that.$el.find('#title').val(),
+                                type : 'folder'
                             }));
 
                             that.model.saveFile(data);

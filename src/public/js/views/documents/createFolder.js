@@ -11,6 +11,7 @@ define(function (require) {
             this.translation = options.translation;
 
             this.render();
+            this.bindModelEvents();
         },
 
         className : 'form-holder personnelInfo promotionEdit documentsEdit largeHeightPreview',
@@ -36,8 +37,10 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
                         click: function () {
-                            //todo implement saving folder
-                            alert('currently not implemented!');
+                            that.model.saveFolder({
+                                title : that.$el.find('#title').val(),
+                                type : 'file'
+                            });
                         }
                     },
                     cancel: {
@@ -48,6 +51,16 @@ define(function (require) {
                         }
                     }
                 }
+            });
+        },
+
+        bindModelEvents : function () {
+            var that = this;
+            var model = this.model;
+
+            model.on('saved', function (savedData) {
+                that.trigger('file:saved', savedData);
+                that.remove();
             });
         }
 
