@@ -1,4 +1,6 @@
-var Rating = function (db) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var Rating = function (db, event) {
     var _ = require('underscore');
     var async = require('async');
     var mongoose = require('mongoose');
@@ -429,6 +431,13 @@ var Rating = function (db) {
                         return callback(err);
                     }
 
+                    ActivityLog.emit('personnel:monthly', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body: personnel,
+                    });
+
+
                     model = model.toObject();
                     model.avgRating = personnel.avgRating[type];
 
@@ -582,6 +591,12 @@ var Rating = function (db) {
                         if (err) {
                             return next(err);
                         }
+
+                        ActivityLog.emit('personnel:monthly', {
+                            actionOriginator: req.session.uId,
+                            accessRoleLevel : req.session.level,
+                            body: personnel,
+                        });
 
                         result = result.toObject();
                         result.avgRating = personnel.avgRating[type];

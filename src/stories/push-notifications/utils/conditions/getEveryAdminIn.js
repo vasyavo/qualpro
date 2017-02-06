@@ -47,6 +47,7 @@ const setIntersectionSubRegion = {
         $setIntersection: ['$$personnel.subRegion', '$$setSubRegion'],
     }, 0],
 };
+
 const includedToSubRegion = {
     $or: [getHighAdmin, {
         $and: [{

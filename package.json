@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "absctract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git",
     "async": "2.1.2",
     "aws-sdk": "2.2.42",
     "bcryptjs": "2.2.2",
@@ -77,6 +78,7 @@
     "faker": "3.1.0",
     "grunt": "0.4.5",
     "grunt-contrib-jshint": "0.11.2",
+    "abstract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git",
     "grunt-contrib-nodeunit": "0.4.1",
     "grunt-jsdoc": "0.6.8",
     "istanbul": "0.4.5",

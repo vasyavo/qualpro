@@ -26,7 +26,7 @@ module.exports = (options) => {
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Branding and display report published',
+                en: 'Competitor Branding & Display report published',
                 ar: '',
             },
             payload,
@@ -40,7 +40,7 @@ module.exports = (options) => {
         }, {
             recipients: setEveryoneInLocation,
             subject: {
-                en: 'Competitor branding and display report received',
+                en: 'Competitor Branding & Display report received',
                 ar: '',
             },
             payload,

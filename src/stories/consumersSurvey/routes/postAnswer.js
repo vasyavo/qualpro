@@ -10,31 +10,36 @@ const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const access = require('../../../helpers/access')();
 const bodyValidator = require('../../../helpers/bodyValidator');
 const ObjectId = mongoose.Types.ObjectId;
+const ActivityLog = require('./../../push-notifications/activityLog');
 
 module.exports = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+
     function queryRun(body) {
-        const personnelId = ObjectId(req.session.uId);
-        let update;
-        const updater = {};
+        const personnelId = ObjectId(userId);
+        let isItUpdateOperation;
 
         async.waterfall([
-            function (waterfallCB) {
+
+            (cb) => {
                 if (body && !body.answers) {
                     body.answers = [];
                 }
 
-                async.each(body.answers, function (answer, eachCallback) {
-                    var newAnswer = {
-                        country       : body.country,
-                        region        : body.region,
-                        subRegion     : body.subRegion,
-                        retailSegment : body.retailSegment,
-                        customer      : body.customer,
-                        outlet        : body.outlet,
-                        branch        : body.branch,
+                async.each(body.answers, (answer, eachCb) => {
+                    const newAnswer = {
+                        country: body.country,
+                        region: body.region,
+                        subRegion: body.subRegion,
+                        retailSegment: body.retailSegment,
+                        customer: body.customer,
+                        outlet: body.outlet,
+                        branch: body.branch,
                         questionnaryId: body.consumerSurveyId,
-                        questionId    : answer.questionId,
-                        type          : answer.type
+                        questionId: answer.questionId,
+                        type: answer.type,
                     };
 
                     if (answer.optionIndex && answer.optionIndex.length) {
@@ -44,126 +49,111 @@ module.exports = (req, res, next) => {
                     if (answer.text && Object.keys(answer.text).length) {
                         newAnswer.text = {
                             en: _.escape(answer.text.en),
-                            ar: _.escape(answer.text.ar)
-                        }
+                            ar: _.escape(answer.text.ar),
+                        };
                     }
 
                     async.waterfall([
-                        function (waterfallCb) {
-                            var query = {
+
+                        (cb) => {
+                            const query = {
                                 questionnaryId: newAnswer.consumerSurveyId,
-                                questionId    : newAnswer.questionId,
-                                branch        : newAnswer.branch
+                                questionId: newAnswer.questionId,
+                                branch: newAnswer.branch,
                             };
 
-                            ConsumersSurveyAnswersModel.findOne(query, function (err, result) {
+                            ConsumersSurveyAnswersModel.findOne(query, (err, result) => {
                                 if (err) {
-                                    return waterfallCb(err);
+                                    return cb(err);
                                 }
 
                                 if (!result) {
-                                    return waterfallCb(null, false);
+                                    return cb(null, false);
                                 }
 
-                                waterfallCb(null, result._id.toString());
+                                cb(null, result._id.toString());
                             });
                         },
-                        function (questionAnswerIdToUpdate, waterfallCb) {
-                            var createdBy = {
+
+                        (questionAnswerIdToUpdate, cb) => {
+                            const createdBy = {
                                 user: personnelId,
-                                date: new Date()
+                                date: new Date(),
                             };
 
                             if (questionAnswerIdToUpdate) {
                                 newAnswer.editedBy = createdBy;
 
-                                ConsumersSurveyAnswersModel.update({_id: questionAnswerIdToUpdate}, {$set: newAnswer}, function (err) {
+                                return ConsumersSurveyAnswersModel.update({
+                                    _id: questionAnswerIdToUpdate,
+                                }, {
+                                    $set: newAnswer,
+                                }, (err) => {
                                     if (err) {
-                                        return waterfallCb(err);
+                                        return cb(err);
                                     }
 
-                                    update = true;
+                                    isItUpdateOperation = true;
 
-                                    waterfallCb(null);
-                                });
-                            } else {
-                                newAnswer.createdBy = createdBy;
-                                newAnswer.editedBy = createdBy;
-
-                                ConsumersSurveyAnswersModel.create(newAnswer, function (err) {
-                                    if (err) {
-                                        return waterfallCb(err);
-                                    }
-
-                                    waterfallCb(null);
+                                    cb(null);
                                 });
                             }
-                        }
-                    ], function (err) {
-                        if (err) {
-                            return eachCallback(err);
-                        }
 
-                        eachCallback(null);
-                    });
-                }, function (err) {
+                            newAnswer.createdBy = createdBy;
+                            newAnswer.editedBy = createdBy;
+
+                            ConsumersSurveyAnswersModel.create(newAnswer, (err) => {
+                                if (err) {
+                                    return cb(err);
+                                }
+
+                                cb(null);
+                            });
+                        },
+
+                    ], eachCb);
+                }, (err) => {
                     if (err) {
-                        return waterfallCB(err);
+                        return cb(err);
                     }
 
-                    waterfallCB(null);
+                    cb(null);
                 });
             },
-            function (waterfallCB) {
-                ConsumersSurveyModel.findById(body.consumerSurveyId, function (err, questionnary) {
-                    if (err) {
-                        return waterfallCB(err);
-                    }
 
-                    if (!questionnary) {
-                        const error = new Error('Questionnary not found');
-                        error.status = 404;
-
-                        return waterfallCB(error);
-                    }
-
-                    waterfallCB(null, questionnary);
-                });
-            },
-            function (questionnary, waterfallCB) {
-                if (update) {
-                    return waterfallCB(null);
+            (cb) => {
+                if (isItUpdateOperation) {
+                    return cb(null);
                 }
 
-                updater.$inc = {countAnswered: 1};
+                ConsumersSurveyModel.findByIdAndUpdate(body.consumerSurveyId, {
+                    $inc: {
+                        countAnswered: 1,
+                    },
+                    editedBy: {
+                        user: personnelId,
+                        date: new Date(),
+                    },
+                }, {
+                    new: true,
+                }, cb);
+            },
 
-                updater.editedBy = {
-                    user: personnelId,
-                    date: new Date()
-                };
-
-                ConsumersSurveyModel.findByIdAndUpdate(body.consumerSurveyId, updater, function (err) {
-                    if (err) {
-                        return waterfallCB(err);
-                    }
-
-                    waterfallCB(null);
-                });
-            }
-        ], function (err) {
+        ], (err, survey) => {
             if (err) {
                 return next(err);
             }
 
-            event.emit('activityChange', {
-                module    : ACL_MODULES.CONSUMER_SURVEY,
-                actionType: ACTIVITY_TYPES.UPDATED,
-                createdBy : updater.editedBy,
-                itemId    : body.consumerSurveyId,
-                itemType  : CONTENT_TYPES.CONSUMER_SURVEY
+            ActivityLog.emit('marketing:consumer-survey:item-published', {
+                actionOriginator: userId,
+                accessRoleLevel,
+                body: survey.toJSON(),
             });
 
-            next({status: 200, body: {}});
+            next({
+                status: 200,
+                body: {},
+            });
         });
     }
 

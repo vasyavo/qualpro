@@ -1,5 +1,8 @@
 const async = require('async');
+const _ = require('lodash');
 const ConsumerSurveyModel = require('../../../types/consumersSurvey/model');
+const ActivityLog = require('./../../push-notifications/activityLog');
+const accessRoles = require('./../../../constants/aclRolesNames');
 
 module.exports = (args, docId, callback) => {
     const status = 'completed';
@@ -17,15 +20,20 @@ module.exports = (args, docId, callback) => {
 
             model.status = status;
 
-            model.save((err, model, numAffected) => {
-                //tip: do not remove numAffected
+            model.save((err) => {
                 if (err) {
                     return cb(err);
                 }
 
+                ActivityLog.emit('marketing:consumer-survey:expired', {
+                    actionOriginator: _.get(model, 'createdBy.user'),
+                    accessRoleLevel: accessRoles.MASTER_ADMIN,
+                    body: model.toJSON(),
+                });
+
                 cb(null, true);
             });
-        }
+        },
 
     ], callback);
 };

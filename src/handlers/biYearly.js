@@ -1,4 +1,6 @@
-var BiYearlyHandler = function (db) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var BiYearlyHandler = function (db, event) {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -324,6 +326,12 @@ var BiYearlyHandler = function (db) {
                     model = model.toObject();
                     model.avgRating = personnel.avgRating[CONTENT_TYPES.BIYEARLY];
 
+                    ActivityLog.emit('personnel:bi-yearly', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body: personnel,
+                    });
+
                     callback(null, model);
                 });
             }
@@ -490,6 +498,12 @@ var BiYearlyHandler = function (db) {
 
                         result = result.toObject();
                         result.avgRating = personnel.avgRating[CONTENT_TYPES.BIYEARLY];
+
+                        ActivityLog.emit('personnel:bi-yearly', {
+                            actionOriginator: req.session.uId,
+                            accessRoleLevel : req.session.level,
+                            body: personnel,
+                        });
 
                         res.status(200).send(result);
                     });

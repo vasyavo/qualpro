@@ -3,7 +3,7 @@ const dispatch = require('./../../../utils/dispatch');
 const aclModules = require('./../../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../../constants/activityTypes');
 const contentTypes = require('./../../../../../public/js/constants/contentType');
-const prototype = require('./../prototypeUpdated');
+const prototype = require('./prototypeUpdated');
 
 module.exports = (options) => {
     co(function * () {
