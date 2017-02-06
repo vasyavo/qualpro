@@ -18,7 +18,12 @@ module.exports = function (db, redis, event) {
     router.use(checkAuth);
     
     router.post('/', handler.create);
+    
     router.put('/:id([0-9a-fA-F]{24})', handler.update);
+    
+    router.patch('/delete', handler.delete);
+    router.patch('/archive', handler.archive);
+    
     router.get('/', handler.getAllForMobile);
     router.get('/sync', handler.getAllForSync);
 

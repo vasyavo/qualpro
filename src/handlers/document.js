@@ -789,7 +789,97 @@ var Documents = function (db, redis, event) {
                 return errorSender.forbidden(next);
             }
             
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'update', function (err, body) {
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'remove', function (err, body) {
+                if (err) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                }
+    
+                queryRun(body);
+            });
+        });
+    };
+    
+    this.archive = function (req, res, next) {
+        function queryRun(body) {
+            const userId = req.session && req.session.uId;
+            const {
+                items,
+                archive,
+                parent
+            } = body;
+            
+            const editedBy = {
+                user: ObjectId(userId),
+                date: new Date(),
+            };
+            
+            async.waterfall([
+                (cb) => {
+                    const findObj = {
+                        'createdBy.user': userId,
+                        $or             : [
+                            {
+                                _id: {
+                                    $in: items
+                                }
+                            }, {
+                                breadcrumbs: {
+                                    $in: items
+                                }
+                            }
+                        ]
+                        
+                    };
+                    
+                    DocumentModel.distinct('_id', findObj, function (err, ids) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        if (!ids || !ids.length) {
+                            return errorSender.badRequest(cb, 'Document not found')
+                        }
+                        
+                        cb(null, ids);
+                    });
+                },
+                
+                (ids, cb) => {
+                    const updateObj = {
+                        deleted: true,
+                        editedBy
+                    };
+                    
+                    DocumentModel.update({_id: {$in: ids}}, updateObj, {multi: true}, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        // ToDo: push notification only for current user
+                        
+                        cb(null, ids);
+                    });
+                },
+            
+            ], function (err, modified) {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send({modified});
+            });
+        }
+        
+        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+            if (err) {
+                return next(err);
+            }
+            
+            if (!allowed) {
+                return errorSender.forbidden(next);
+            }
+            
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'archive', function (err, body) {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }

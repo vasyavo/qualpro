@@ -18,6 +18,7 @@ module.exports = function (db, redis, event) {
     router.put('/:id([0-9a-fA-F]{24})', handler.update);
     
     router.patch('/delete', handler.delete);
+    router.patch('/archive', handler.archive);
     
     router.get('/folder/:id([0-9a-fA-F]{24})?', handler.getFolderContent);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);

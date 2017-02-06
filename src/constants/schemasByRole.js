@@ -7,64 +7,94 @@ var schemasByRole = {};
 schemasByRole[CONTENT_TYPES.DOCUMENTS] = {};
 
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.SUPER_ADMIN] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.MASTER_ADMIN] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.COUNTRY_ADMIN] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.AREA_MANAGER] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.AREA_IN_CHARGE] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.SALES_MAN] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.MERCHANDISER] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.CASH_VAN] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.MASTER_UPLOADER] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.COUNTRY_UPLOADER] = {
-    sync  : schemas.document.sync,
-    create: schemas.document.create,
-    read  : schemas.document.getAll,
-    update: schemas.document.update
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
 };
 
 // =============== CONTACT_US ========================================

@@ -30,9 +30,20 @@ const sync = Joi.object().keys({
     lastLogOut: Joi.date().required()
 });
 
+const remove = Joi.object().keys({
+    items: Joi.array().items(Joi.objectId())
+});
+
+const archive = Joi.object().keys({
+    items: Joi.array().items(Joi.objectId())
+});
+
 module.exports = {
-    sync  : sync,
-    create: create,
-    getAll: getAll,
-    update: update
+    move   : remove,
+    archive: remove,
+    remove : remove,
+    sync   : sync,
+    create : create,
+    getAll : getAll,
+    update : update
 };
