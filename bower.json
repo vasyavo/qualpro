@@ -36,6 +36,7 @@
     "minigrid": "3.0.6",
     "lodash": "4.17.3",
     "backbone.marionette": "marionette#3.1.0",
-    "backbone.radio": "2.0.0"
+    "backbone.radio": "2.0.0",
+    "backbone.paginator": "2.0.5"
   }
 }

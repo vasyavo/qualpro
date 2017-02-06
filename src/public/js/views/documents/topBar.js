@@ -87,7 +87,7 @@ define(function (require) {
 
                 var filterForArchivedTab = this.additionalVariables.filterForArchivedTab;
                 var collection = this.collection;
-                collection.url = CONTENT_TYPES.DOCUMENTS + '?' + $.param(filterForArchivedTab);
+                collection.url = CONTENT_TYPES.DOCUMENTS + '/folder?' + $.param(filterForArchivedTab);
                 collection.fetch();
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS + '/' + JSON.stringify(filterForArchivedTab));
@@ -110,7 +110,7 @@ define(function (require) {
                 this.unselectAllItems();
 
                 var collection = this.collection;
-                collection.url = CONTENT_TYPES.DOCUMENTS;
+                collection.url = CONTENT_TYPES.DOCUMENTS + '/folder';
                 collection.fetch();
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS);
