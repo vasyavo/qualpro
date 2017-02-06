@@ -424,7 +424,7 @@ const questionnaireExpired = () => {
             if (questionnaire) {
                 const payload = createAction(questionnaire);
 
-                ActivityLog.emit('marketing:consumer-survey:expired', payload);
+                ActivityLog.emit('marketing:al-alali-questionnaire:expired', payload);
             }
 
             callback(null);
