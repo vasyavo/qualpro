@@ -2,6 +2,7 @@ define([
     'Backbone',
     'jQuery',
     'Underscore',
+    'lodash',
     'moment',
     'views/main/main',
     'views/login/login',
@@ -13,7 +14,7 @@ define([
     'js-cookie',
     'views/documents/list',
     'views/documents/topBar'
-], function (Backbone, $, _, moment, mainView, LoginView, CreateSuperAdminView,
+], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
              forgotPassView, dataService, custom, CONSTANTS, Cookies,
              DocumentsListView, DocumentsTopBarView) {
 
@@ -28,8 +29,8 @@ define([
             home : 'any',
             'login(/:confirmed)' : 'login',
             forgotPass : 'forgotPass',
-            'qualPro/documents(/:filter)' : 'documentsHomePage',
-            'qualPro/documents/:id(/:filter)' : 'showDocumentsView',
+            'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
+            'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -59,7 +60,7 @@ define([
             this.showDocumentsView(null, filter);
         },
 
-        showDocumentsView : function (folder, filter) {
+        showDocumentsView : function (folder, filterObj) {
             var that = this;
 
             this.checkLogin(function (success) {
@@ -91,14 +92,15 @@ define([
 
                     //todo -> if folder
 
-                    if (filter) {
-                        filter = JSON.parse(filter);
-                        documentsCollection.url = CONSTANTS.DOCUMENTS + '?' + $.param(filter);
+                    if (filterObj) {
+                        filterObj = JSON.parse(filterObj);
+                        documentsCollection.url = CONSTANTS.DOCUMENTS + '?' + $.param(filterObj);
                     }
 
                     var documentsTopBarView = new DocumentsTopBarView({
                         translation : translation,
-                        collection : documentsCollection
+                        collection : documentsCollection,
+                        archived : lodash.get(filterObj, 'filter.archived.values[0]')
                     });
                     $('#topBarHolder').html(documentsTopBarView.render().$el);
 

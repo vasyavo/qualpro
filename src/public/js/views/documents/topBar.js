@@ -6,6 +6,7 @@ define(function (require) {
     var Marionette = require('marionette');
     var CreateFileView = require('views/documents/createFile');
     var CreateFolderView = require('views/documents/createFolder');
+    var DocumentsModel = require('models/documents');
     var CONTENT_TYPES = require('constants/contentType');
     var Template = require('text!templates/documents/topBar.html');
 
@@ -13,6 +14,7 @@ define(function (require) {
 
         initialize : function (options) {
             this.translation = options.translation;
+            this.archived = options.archived;
         },
 
         template : function (ops) {
@@ -26,6 +28,14 @@ define(function (require) {
             };
         },
 
+        onRender : function () {
+            if (this.archived) {
+                this.switchUIToArchiveTab();
+            } else {
+                this.ui.unArchiveButton.addClass('hidden');
+            }
+        },
+
         ui : {
             actionHolder : '#actionHolder',
             checkAll : '#check-all',
@@ -34,7 +44,9 @@ define(function (require) {
             archivedTab : '#archived-tab',
             unarchivedTab : '#unarchived-tab',
             createFile : '#create-file',
-            createFolder : '#create-folder'
+            createFolder : '#create-folder',
+            archiveButton : '#archive',
+            unArchiveButton : '#unarchive'
         },
 
         events : {
@@ -42,7 +54,8 @@ define(function (require) {
             'click @ui.actionHolder' : 'openActions',
             'click @ui.archivedTab' : 'goToArchivedTab',
             'click @ui.unarchivedTab' : 'goToUnarchivedTab',
-            'click @ui.createFile' : 'showCreateFileView'
+            'click @ui.createFile' : 'showCreateFileView',
+            'click @ui.createFolder' : 'showCreateFolderView'
         },
 
         checkAllItems : function (event) {
@@ -68,15 +81,8 @@ define(function (require) {
         },
 
         goToArchivedTab : function () {
-            var ui = this.ui;
-
-            if (!ui.archivedTab.hasClass('viewBarTabActive')) {
-                ui.archivedTab.addClass('viewBarTabActive');
-                ui.unarchivedTab.removeClass('viewBarTabActive');
-
-                ui.createFile.addClass('hidden');
-                ui.createFolder.addClass('hidden');
-
+            if (!this.ui.archivedTab.hasClass('viewBarTabActive')) {
+                this.switchUIToArchiveTab();
                 this.unselectAllItems();
 
                 var filterForArchivedTab = this.additionalVariables.filterForArchivedTab;
@@ -98,6 +104,9 @@ define(function (require) {
                 ui.createFile.removeClass('hidden');
                 ui.createFolder.removeClass('hidden');
 
+                ui.archiveButton.removeClass('hidden');
+                ui.unArchiveButton.addClass('hidden');
+
                 this.unselectAllItems();
 
                 var collection = this.collection;
@@ -108,8 +117,36 @@ define(function (require) {
             }
         },
 
+        switchUIToArchiveTab : function () {
+            var ui = this.ui;
+
+            ui.archivedTab.addClass('viewBarTabActive');
+            ui.unarchivedTab.removeClass('viewBarTabActive');
+
+            ui.createFile.addClass('hidden');
+            ui.createFolder.addClass('hidden');
+
+            ui.archiveButton.addClass('hidden');
+            ui.unArchiveButton.removeClass('hidden');
+        },
+
         showCreateFileView : function () {
-            new CreateFileView({
+            var that = this;
+
+            this.createFileView = new CreateFileView({
+                translation : this.translation
+            });
+
+            this.createFileView.on('file:saved', function (savedData) {
+                var model = new DocumentsModel(savedData);
+
+                that.collection.add(model);
+                that.collection.trigger('sync');
+            });
+        },
+
+        showCreateFolderView : function () {
+            new CreateFolderView({
                 translation : this.translation
             });
         },

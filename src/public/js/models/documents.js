@@ -6,16 +6,25 @@ define([
         'dataService',
         'custom',
         'models/file',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages'
     ],
-    function (parent, validation, moment, otherConstants, dataService, custom, FileModel, CONTENT_TYPES) {
+    function (parent, validation, moment, otherConstants, dataService, custom, FileModel, CONTENT_TYPES, ERROR_MESSAGES) {
 
         var Model = parent.extend({
 
             initialize : function () {
-                var lastEditDate = this.get('editedBy').date;
-                lastEditDate = moment(lastEditDate).format('DD.MM.YYYY');
-                this.set('dateString', lastEditDate);
+                var lastEditDate;
+                var editedBy = this.get('editedBy');
+
+                if (editedBy) {
+                    lastEditDate = editedBy.date;
+                }
+
+                if (lastEditDate) {
+                    lastEditDate = moment(lastEditDate).format('DD.MM.YYYY');
+                    this.set('dateString', lastEditDate);
+                }
             },
 
             defaults      : {},
@@ -32,6 +41,86 @@ define([
                 'createdBy.user.accessRole.name',
                 'createdBy.user.position.name'
             ],
+
+            saveFile : function (data) {
+                var that = this;
+                var errors = [];
+                var currentLanguage = App.currentUser.currentLanguage;
+                var body = JSON.parse(data.get('data'));
+                var file = data.get('file');
+
+                validation.checkTitleField(errors, true, body.title, 'Title');
+
+                if (errors.length) {
+                    return App.render({
+                        type : 'error',
+                        message : errors[0]
+                    });
+                }
+
+                if (!file || file === 'null') {
+                    return App.render({
+                        type : 'error',
+                        message : ERROR_MESSAGES.fileNotSelected[currentLanguage]
+                    });
+                }
+
+                $.ajax({
+                    url        : CONTENT_TYPES.DOCUMENTS,
+                    type       : 'POST',
+                    data       : data,
+                    contentType: false,
+                    processData: false,
+                    success    : function (savedData) {
+                        var fileModel = new FileModel();
+
+                        savedData.attachments.type = fileModel.getTypeFromContentType(savedData.attachments.contentType);
+                        savedData.attachments = [savedData.attachments];
+
+                        that.trigger('saved', savedData);
+                    },
+                    error : function () {
+                        return App.render({
+                            type : 'error',
+                            message : ERROR_MESSAGES.notSaved[currentLanguage]
+                        });
+                    }
+                });
+            },
+
+            saveFolder : function (data) {
+                var that = this;
+                var errors = [];
+                var currentLanguage = App.currentUser.currentLanguage;
+
+                validation.checkTitleField(errors, true, data.title, 'Title');
+
+                if (errors.length) {
+                    return App.render({
+                        type : 'error',
+                        message : errors[0]
+                    });
+                }
+
+                $.ajax({
+                    url : CONTENT_TYPES.DOCUMENTS,
+                    type : 'POST',
+                    data : JSON.parse(data),
+                    contentType: false,
+                    processData: false,
+                    success    : function (savedData) {
+                        var fileModel = new FileModel();
+
+                        that.trigger('saved', savedData);
+                    },
+                    error : function () {
+                        return App.render({
+                            type : 'error',
+                            message : ERROR_MESSAGES.notSaved[currentLanguage]
+                        });
+                    }
+                });
+            },
 
             urlRoot: function () {
                 return CONTENT_TYPES.DOCUMENTS;
