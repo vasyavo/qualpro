@@ -13,6 +13,7 @@ define(function (require) {
             this.model.set('translation', this.translation);
 
             this.render();
+            this.bindModelEvents();
         },
 
         className : 'form-holder personnelInfo promotionEdit documentsEdit largeHeightPreview',
@@ -34,7 +35,12 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
                         click: function () {
-                            alert('currently not implemented!');
+                            var modelId = that.model.get('_id');
+                            var data = {
+                                title : that.$el.find('#title').val()
+                            };
+
+                            that.model.updateTitle(modelId, data);
                         }
                     },
                     cancel: {
@@ -45,6 +51,16 @@ define(function (require) {
                         }
                     }
                 }
+            });
+        },
+
+        bindModelEvents : function () {
+            var that = this;
+            var model = this.model;
+
+            model.on('saved', function (savedData) {
+                that.trigger('file:saved', savedData);
+                that.remove();
             });
         }
 

@@ -26,6 +26,14 @@ define([
                     lastEditDate = moment(lastEditDate).format('DD.MM.YYYY');
                     this.set('dateString', lastEditDate);
                 }
+
+                var attachment = this.get('attachment');
+
+                if (attachment) {
+                    var fileModel = new FileModel();
+
+                    attachment.type = fileModel.getTypeFromContentType(attachment.contentType);
+                }
             },
 
             defaults      : {},
@@ -88,10 +96,9 @@ define([
 
                         $.ajax({
                             url        : CONTENT_TYPES.DOCUMENTS,
-                            type       : 'POST',
-                            data       : JSON.stringify(body),
-                            contentType: false,
-                            processData: false,
+                            method       : 'POST',
+                            data       : body,
+                            dataType : 'json',
                             success    : function (savedData) {
                                 cb(null, savedData);
                             },
@@ -108,11 +115,11 @@ define([
                             message : ERROR_MESSAGES.notSaved[currentLanguage]
                         });
                     }
-debugger;
+
                     var fileModel = new FileModel();
 
-                    savedData.attachments.type = fileModel.getTypeFromContentType(savedData.attachments.contentType);
-                    savedData.attachments = [savedData.attachments];
+                    savedData.attachment.type = fileModel.getTypeFromContentType(savedData.attachment.contentType);
+                    savedData.attachments = [savedData.attachment];
 
                     that.trigger('saved', savedData);
                 });
@@ -134,13 +141,40 @@ debugger;
 
                 $.ajax({
                     url : CONTENT_TYPES.DOCUMENTS,
-                    type : 'POST',
-                    data : JSON.stringify(data),
-                    contentType: false,
-                    processData: false,
+                    method : 'POST',
+                    data : data,
+                    dataType : 'json',
                     success    : function (savedData) {
-                        var fileModel = new FileModel();
+                        that.trigger('saved', savedData);
+                    },
+                    error : function () {
+                        return App.render({
+                            type : 'error',
+                            message : ERROR_MESSAGES.notSaved[currentLanguage]
+                        });
+                    }
+                });
+            },
 
+            updateTitle : function (modelId, data) {
+                var that = this;
+                var errors = [];
+
+                validation.checkTitleField(errors, true, data.title, 'Title');
+
+                if (errors.length) {
+                    return App.render({
+                        type : 'error',
+                        message : errors[0]
+                    });
+                }
+
+                $.ajax({
+                    url : CONTENT_TYPES.DOCUMENTS + '/' + modelId,
+                    method : 'PUT',
+                    data : data,
+                    dataType : 'json',
+                    success    : function (savedData) {
                         that.trigger('saved', savedData);
                     },
                     error : function () {

@@ -87,10 +87,10 @@ define(function (require) {
 
                 var filterForArchivedTab = this.additionalVariables.filterForArchivedTab;
                 var collection = this.collection;
-                collection.url = CONTENT_TYPES.DOCUMENTS + '/folder?' + $.param(filterForArchivedTab);
+                collection.url = CONTENT_TYPES.DOCUMENTS + '/folder?archived=true';
                 collection.fetch();
 
-                Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS + '/' + JSON.stringify(filterForArchivedTab));
+                Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS + '/filter={"archived":true}');
             }
         },
 
@@ -146,8 +146,17 @@ define(function (require) {
         },
 
         showCreateFolderView : function () {
-            new CreateFolderView({
+            var that = this;
+
+            this.createFileView = new CreateFolderView({
                 translation : this.translation
+            });
+
+            this.createFileView.on('file:saved', function (savedData) {
+                var model = new DocumentsModel(savedData);
+
+                that.collection.add(model);
+                that.collection.trigger('sync');
             });
         },
 
