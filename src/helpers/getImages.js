@@ -95,7 +95,7 @@ class ImageHelper {
                     break;
 
                 case 1:
-                    if (!element[strArray[0]] || array && !element[strArray[0]].length) {
+                    if (!element[strArray[0]] || (array && !element[strArray[0]].length)) {
                         return element;
                     }
                     if (!array) {

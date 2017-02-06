@@ -12,13 +12,16 @@ module.exports = function (db, redis, event) {
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);
-
-    router.post('/', multipartMiddleware, handler.create);
-    router.put('/remove', handler.archive);
-    router.get('/', handler.getAll);
+    
+    router.post('/', handler.create);
+    router.put('/:id([0-9a-fA-F]{24})', handler.update);
+    router.get('/folder/:id([0-9a-fA-F]{24})?', handler.getFolderContent);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
-    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
-    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
+    
+    
+    // router.put('/remove', handler.archive);
+    // router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
+    // router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     return router;
 };
