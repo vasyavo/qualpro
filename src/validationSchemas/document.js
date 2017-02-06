@@ -11,7 +11,7 @@ const create = Joi.object().keys({
     parent    : Joi.objectId().default(null),
     attachment: Joi.objectId().default(null),
     search    : Joi.string().default(null),
-    type      : Joi.string().valid(['file', 'folder']),
+    type      : Joi.string().valid(['file', 'folder']).required(),
 });
 
 const update = Joi.object().keys({
