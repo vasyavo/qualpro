@@ -46,7 +46,8 @@ define(function (require) {
             createFile : '#create-file',
             createFolder : '#create-folder',
             archiveButton : '#archive',
-            unArchiveButton : '#unarchive'
+            unArchiveButton : '#unarchive',
+            delete : '#delete'
         },
 
         events : {
@@ -55,7 +56,10 @@ define(function (require) {
             'click @ui.archivedTab' : 'goToArchivedTab',
             'click @ui.unarchivedTab' : 'goToUnarchivedTab',
             'click @ui.createFile' : 'showCreateFileView',
-            'click @ui.createFolder' : 'showCreateFolderView'
+            'click @ui.createFolder' : 'showCreateFolderView',
+            'click @ui.delete' : 'deleteItems',
+            'click @ui.archiveButton' : 'archiveItems',
+            'click @ui.unArchiveButton' : 'unArchiveItems'
         },
 
         checkAllItems : function (event) {
@@ -158,6 +162,18 @@ define(function (require) {
                 that.collection.add(model);
                 that.collection.trigger('sync');
             });
+        },
+
+        deleteItems : function () {
+            this.collection.deleteItems();
+        },
+
+        archiveItems : function () {
+            this.collection.archiveItems('archive');
+        },
+
+        unArchiveItems : function () {
+            this.collection.archiveItems('unarchive');
         },
 
         collectionEvents : {

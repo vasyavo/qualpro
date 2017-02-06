@@ -14,6 +14,7 @@ define([
         action     : 'اتخاذ إجراء',
         disable    : ' إلغاء تفعيل',
         unDisable  : 'إعادة تفعيل',
+        delete : '', //todo
         // list
 
         // create

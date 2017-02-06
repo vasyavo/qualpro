@@ -14,6 +14,7 @@ define([
         action     : 'Action',
         disable    : 'Disable',
         unDisable  : 'Un Disable',
+        delete : 'Delete',
         // list
 
         // create
