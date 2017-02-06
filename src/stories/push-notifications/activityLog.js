@@ -34,11 +34,11 @@ activityLog.on('personnel:monthly', require('./methods/personnel/evaluated'));
 activityLog.on('personnel:archived', require('./methods/personnel/archived'));
 
 activityLog.on('country:created', require('./methods/locations/createdCountry'));
-activityLog.on('country:updated', require('./methods/locations/updatedCountry'));
+activityLog.on('country:updated', require('./methods/locations/editedCountry'));
 activityLog.on('region:created', require('./methods/locations/createdRegion'));
-activityLog.on('region:updated', require('./methods/locations/updatedRegion'));
+activityLog.on('region:updated', require('./methods/locations/editedRegion'));
 activityLog.on('sub-region:created', require('./methods/locations/createdSubRegion'));
-activityLog.on('sub-region:updated', require('./methods/locations/updatedSubRegion'));
+activityLog.on('sub-region:updated', require('./methods/locations/editedSubRegion'));
 activityLog.on('branch:created', require('./methods/locations/createdBranch'));
 activityLog.on('branch:edited', require('./methods/locations/editedBranch'));
 activityLog.on('trade-channel:created', require('./methods/locations/createdTradeChannel'));
