@@ -1,15 +1,15 @@
 const co = require('co');
-const _ = require('lodash');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const contentTypes = require('./../../../../public/js/constants/contentType');
+const activityTypes = require('./../../../../constants/activityTypes');
 const prototype = require('./prototype');
 
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.PERSONNEL;
         const contentType = contentTypes.PERSONNEL;
-        const actionType = contentTypes.UPDATED;
+        const actionType = activityTypes.UPDATED;
 
         const extendedOptions = Object.assign({}, options, {
             moduleId,
