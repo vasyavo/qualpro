@@ -1,6 +1,15 @@
 const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
 const InStoreTaskUtils = require('./../stories/test-utils').InStoreTaskUtils;
 const ActivityLog = require('./../stories/push-notifications/activityLog');
+const CommentModel = require('./../types/comment/model');
+const ObjectiveModel = require('./../types/objective/model');
+const CompetitorBrandingModel = require('./../types/competitorBranding/model');
+const PromotionModel = require('./../types/promotion/model');
+const PromotionItemModel = require('./../types/promotionItem/model');
+const MarketingCampaignModel = require('./../types/brandingActivity/model');
+const MarketingCampaignItemModel = require('./../types/brandingActivityItem/model');
+const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
+const ContactUsModel = require('../types/contactUs/model');
 
 var Comment = function (db, redis, event) {
     var mongoose = require('mongoose');
@@ -13,14 +22,6 @@ var Comment = function (db, redis, event) {
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
     var getImagesHelper = new GetImagesHelper(db);
-    const CommentModel = require('./../types/comment/model');
-    const ObjectiveModel = require('./../types/objective/model');
-    const CompetitorBrandingModel = require('./../types/competitorBranding/model');
-    var CompetitorBrandingItemModel = require('./../types/brandingActivityItem/model'); // TODO should be double checked
-    const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
-    const PromotionsItemsModel = require('./../types/promotionItem/model');
-    const ContactUsModel = require('../types/contactUs/model');
-    var PromotionsModel = require('./../types/promotion/model');
     var FilesModel = require('./../types/file/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler(db);
@@ -117,13 +118,12 @@ var Comment = function (db, redis, event) {
             let mid;
 
             switch (context) {
-                // fixme: should be double checked
-                case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
-                    mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
+                case CONTENT_TYPES.BRANDING_ACTIVITY:
+                    ContextModel = MarketingCampaignModel;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
+                    ContextModel = MarketingCampaignItemModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
                     break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
@@ -134,13 +134,13 @@ var Comment = function (db, redis, event) {
                     ContextModel = CompetitorPromotionModel;
                     mid = ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY;
                     break;
-                case CONTENT_TYPES.PROMOTIONSITEMS:
-                    ContextModel = PromotionsItemsModel;
-                    mid = ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS;
-                    break;
                 case CONTENT_TYPES.PROMOTIONS:
-                    ContextModel = PromotionsModel;
+                    ContextModel = PromotionModel;
                     mid = ACL_MODULES.AL_ALALI_PROMO_EVALUATION;
+                    break;
+                case CONTENT_TYPES.PROMOTIONSITEMS:
+                    ContextModel = PromotionItemModel;
+                    mid = ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS;
                     break;
                 case CONTENT_TYPES.OBJECTIVES:
                     ContextModel = ObjectiveModel;
@@ -816,7 +816,7 @@ var Comment = function (db, redis, event) {
 
             switch (context) {
                 case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
+                    ContextModel = MarketingCampaignItemModel;
                     break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
                     ContextModel = CompetitorBrandingModel;
@@ -825,13 +825,13 @@ var Comment = function (db, redis, event) {
                     ContextModel = CompetitorPromotionModel;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
+                    ContextModel = MarketingCampaignItemModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:
-                    ContextModel = PromotionsItemsModel;
+                    ContextModel = PromotionItemModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONS:
-                    ContextModel = PromotionsModel;
+                    ContextModel = PromotionModel;
                     break;
                 default:
                     ContextModel = ObjectiveModel;

@@ -1,7 +1,6 @@
-const _ = require('lodash');
-const ActivityModel = require('./../../../../types/activityList/model');
-const toString = require('./../../../../utils/toString');
-const getEveryoneInLocation = require('./../../utils/getEveryoneInLocation');
+const ActivityModel = require('./../../../../../types/activityList/model');
+const toString = require('./../../../../../utils/toString');
+const getEveryoneInFilledLocation = require('./../../../utils/getEveryoneInFilledLocation');
 
 module.exports = function * (options) {
     const {
@@ -17,16 +16,14 @@ module.exports = function * (options) {
     const setCountry = Array.isArray(body.country) ? body.country : [];
     const setRegion = Array.isArray(body.region) ? body.region : [];
     const setSubRegion = Array.isArray(body.subRegion) ? body.subRegion : [];
-    const setOutlet = Array.isArray(body.outlet) ? body.outlet : [];
-    const setBranch = Array.isArray(body.branch) ? body.branch : [];
 
-    const setEveryoneInLocation = yield getEveryoneInLocation({
-        exclude: [],
+    const setEveryoneInLocation = yield getEveryoneInFilledLocation({
         setCountry,
         setRegion,
         setSubRegion,
-        setOutlet,
-        setBranch,
+        setOutlet: [],
+        setBranch: [],
+        setAdminOnly: true,
     });
 
     const newActivity = new ActivityModel();
@@ -37,8 +34,8 @@ module.exports = function * (options) {
         actionType,
         itemId: body._id,
         itemName: {
-            en: _.get(body, 'title.en'),
-            ar: _.get(body, 'title.ar'),
+            en: '',
+            ar: '',
         },
         createdBy: {
             user: actionOriginator,

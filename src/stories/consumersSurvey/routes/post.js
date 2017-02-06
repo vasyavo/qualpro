@@ -12,54 +12,35 @@ const ACTIVITY_TYPES = require('../../../constants/activityTypes');
 const SchedulerModel = require('./../../scheduler/model');
 const requestService = require('../../scheduler/request');
 const config = require('../../../config');
-
-const $defProjection = {
-    _id: 1,
-    title: 1,
-    dueDate: 1,
-    country: 1,
-    region: 1,
-    subRegion: 1,
-    retailSegment: 1,
-    outlet: 1,
-    branch: 1,
-    countAll: 1,
-    countAnswered: 1,
-    status: 1,
-    questions: 1,
-    location: 1,
-    editedBy: 1,
-    createdBy: 1,
-    creationDate: 1,
-    updateDate: 1,
-    position: 1,
-    personnels: 1
-};
+const ActivityLog = require('./../../push-notifications/activityLog');
 
 module.exports = (req, res, next) => {
-    function queryRun(body) {
-        var aggregateHelper = new AggregationHelper($defProjection);
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
 
+    function queryRun(body) {
         async.waterfall([
-            function (waterfallCb) {
-                var createdBy = {
-                    user: req.session.uId,
-                    date: new Date()
+
+            (cb) => {
+                const createdBy = {
+                    user: userId,
+                    date: new Date(),
                 };
 
                 if (body.title) {
                     body.title = {
                         en: _.escape(body.title.en),
-                        ar: _.escape(body.title.ar)
+                        ar: _.escape(body.title.ar),
                     };
                 }
 
                 if (body.questions && body.questions.length) {
-                    body.questions = _.map(body.questions, function (question) {
+                    body.questions = _.map(body.questions, (question) => {
                         if (question.title) {
                             question.title = {
                                 en: _.escape(question.title.en),
-                                ar: _.escape(question.title.ar)
+                                ar: _.escape(question.title.ar),
                             };
                         }
 
@@ -68,8 +49,8 @@ module.exports = (req, res, next) => {
 
                             for (let i = 1; i <= 10; i++) {
                                 options.push({
-                                    en : i,
-                                    ar : i
+                                    en: i,
+                                    ar: i,
                                 });
                             }
 
@@ -77,11 +58,11 @@ module.exports = (req, res, next) => {
                         }
 
                         if (question.options && question.options.length) {
-                            question.options = _.map(question.options, function (option) {
+                            question.options = _.map(question.options, (option) => {
                                 if (option) {
                                     return {
                                         en: _.escape(option.en),
-                                        ar: _.escape(option.ar)
+                                        ar: _.escape(option.ar),
                                     };
                                 }
                             });
@@ -100,65 +81,68 @@ module.exports = (req, res, next) => {
                     body.status = 'active';
                 }
 
-                ConsumersSurveyModel.create(body, function (err, result) {
-                    if (err) {
-                        return waterfallCb(err);
-                    }
+                ConsumersSurveyModel.create(body, (err, survey) => {
+                    cb(err, survey);
+                });
+            },
 
-                    if (body.status !== 'active') {
-                        requestService.post({
-                            json : {
-                                date: body.startDate
-                            }
-                        }, (err, response) => {
-                            if (!err) {
-                                const taskSchedulerModel = new SchedulerModel();
-                                taskSchedulerModel.set({
-                                    scheduleId: response.id,
-                                    documentId: result._id,
-                                    functionName: 'setConsumerSurveyStatusActive'
-                                });
-                                taskSchedulerModel.save();
-                            }
-                        });
-                    }
-
+            (survey, cb) => {
+                if (body.status === 'draft') {
                     requestService.post({
-                        json : {
-                            date: body.dueDate
-                        }
+                        json: {
+                            date: body.startDate,
+                        },
                     }, (err, response) => {
                         if (!err) {
                             const taskSchedulerModel = new SchedulerModel();
                             taskSchedulerModel.set({
                                 scheduleId: response.id,
-                                documentId: result._id,
-                                functionName: 'setConsumerSurveyStatusCompleted'
+                                documentId: survey._id,
+                                functionName: 'setConsumerSurveyStatusActive',
                             });
                             taskSchedulerModel.save();
                         }
                     });
-
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.CONSUMER_SURVEY,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId    : result._id,
-                        itemType  : CONTENT_TYPES.CONSUMER_SURVEY
+                } else {
+                    ActivityLog.emit('marketing:consumer-survey:published', {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: survey.toJSON(),
                     });
+                }
 
-                    waterfallCb(null, result._id);
+                requestService.post({
+                    json: {
+                        date: body.dueDate,
+                    },
+                }, (err, response) => {
+                    if (!err) {
+                        const taskSchedulerModel = new SchedulerModel();
+                        taskSchedulerModel.set({
+                            scheduleId: response.id,
+                            documentId: survey._id,
+                            functionName: 'setConsumerSurveyStatusCompleted',
+                        });
+                        taskSchedulerModel.save();
+                    }
                 });
+
+                cb(null, survey._id);
             },
-            function (id, waterfallCb) {
-                getByIdAggr({id: id}, waterfallCb);
-            }
-        ], function (err, result) {
+
+            (id, cb) => {
+                getByIdAggr({ id }, cb);
+            },
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            next({status: 200, body: result});
+            next({
+                status: 200,
+                body: result,
+            });
         });
     }
 

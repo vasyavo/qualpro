@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var BrandingActivity = function (db, redis, event) {
     var _ = require('lodash');
     var async = require('async');
@@ -582,10 +584,12 @@ var BrandingActivity = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
-            var session = req.session;
             var files = req.files;
-            var userId = session.uId;
             var saveBrandingAndDisplay = body.save;
             var functions;
 
@@ -643,14 +647,6 @@ var BrandingActivity = function (db, redis, event) {
                         return cb(err);
                     }
 
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId    : model._id,
-                        itemType  : CONTENT_TYPES.BRANDING_ACTIVITY
-                    });
-
                     cb(null, model);
                 });
             }
@@ -666,6 +662,12 @@ var BrandingActivity = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
+
+                ActivityLog.emit('marketing:al-alali-marketing-campaigns:published', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: result,
+                });
 
                 res.status(201).send(result);
             });
@@ -706,13 +708,15 @@ var BrandingActivity = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(updateObject) {
             var files = req.files;
             var filesPresence = Object.keys(files).length;
             var attachPresence = updateObject.attachments;
             var both = attachPresence && filesPresence;
-            var session = req.session;
-            var userId = session.uId;
             var brandingAndDisplayId = req.params.id;
             var saveBrandingAndDisplay = updateObject.save;
             var fullUpdate = {
@@ -807,6 +811,13 @@ var BrandingActivity = function (db, redis, event) {
                                         fileIdsBackendNew = fileIdsBackendNew.attachments ? fileIdsBackendNew.attachments.fromObjectID() : fileIdsBackendNew.attachments;
                                         deletedAttachments = _.difference(fileIdsBackend, fileIdsBackendNew);
                                         brandingAndDisplay = result;
+
+                                        ActivityLog.emit('marketing:al-alali-marketing-campaigns:updated', {
+                                            actionOriginator: userId,
+                                            accessRoleLevel,
+                                            body: result.toJSON(),
+                                        });
+
                                         return callback(null, deletedAttachments);
                                     });
                                 },
@@ -826,13 +837,6 @@ var BrandingActivity = function (db, redis, event) {
                                 if (err) {
                                     return cb(err);
                                 }
-                                event.emit('activityChange', {
-                                    module    : ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
-                                    actionType: ACTIVITY_TYPES.UPDATED,
-                                    createdBy : updateObject.editedBy,
-                                    itemId    : brandingAndDisplayId,
-                                    itemType  : CONTENT_TYPES.BRANDINGANDDISPLAY
-                                });
 
                                 return cb(null, brandingAndDisplay._id);
                             });

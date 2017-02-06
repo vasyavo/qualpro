@@ -1,23 +1,23 @@
 const async = require('async');
 const nodeScheduler = require('node-schedule');
 const moment = require('moment');
-const CONTENT_TYPES = require('../public/js/constants/contentType');
-const OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
-const ACTIVITY_TYPES = require('../constants/activityTypes');
-const logger = require('./../utils/logger');
-const event = require('./../utils/eventEmitter');
-const ActivityLog = require('./../stories/push-notifications/activityLog');
-const PERSONNEL_STATUSES = require('./../public/js/constants/personnelStatuses');
-const PersonnelModel = require('./../types/personnel/model');
-const ContractYearlyModel = require('./../types/contractYearly/model');
-const ContractSecondaryModel = require('./../types/contractSecondary/model');
-const ObjectiveModel = require('./../types/objective/model');
-const PromotionModel = require('./../types/promotion/model');
-const PromotionItemModel = require('./../types/promotionItem/model');
-const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
-const MarketingCampaignModel = require('./../types/brandingActivity/model');
-const CompetitorBrandingModel = require('./../types/competitorBranding/model');
-const QuestionnaireModel = require('./../types/questionnaries/model');
+const CONTENT_TYPES = require('../../public/js/constants/contentType');
+const OTHER_CONSTANTS = require('../../public/js/constants/otherConstants');
+const ACTIVITY_TYPES = require('../../constants/activityTypes');
+const logger = require('./../../utils/logger');
+const event = require('./../../utils/eventEmitter');
+const ActivityLog = require('./../push-notifications/activityLog');
+const PERSONNEL_STATUSES = require('./../../public/js/constants/personnelStatuses');
+const PersonnelModel = require('./../../types/personnel/model');
+const ContractYearlyModel = require('./../../types/contractYearly/model');
+const ContractSecondaryModel = require('./../../types/contractSecondary/model');
+const ObjectiveModel = require('./../../types/objective/model');
+const PromotionModel = require('./../../types/promotion/model');
+const PromotionItemModel = require('./../../types/promotionItem/model');
+const CompetitorPromotionModel = require('./../../types/competitorPromotion/model');
+const MarketingCampaignModel = require('./../../types/brandingActivity/model');
+const CompetitorBrandingAndDisplayModel = require('./../../types/competitorBranding/model');
+const QuestionnaireModel = require('./../../types/questionnaries/model');
 
 const getPipeline = (query) => {
     return [{
@@ -43,6 +43,16 @@ const triggerEvent = (mid, id, itemType) => {
         itemId: id,
         itemType,
     });
+};
+
+const createAction = (model) => {
+    const json = model.toJSON();
+
+    return {
+        actionOriginator: json.createdBy.user,
+        accessRoleLevel: json.level,
+        body: json,
+    };
 };
 
 const exec = (options) => {
@@ -213,14 +223,15 @@ const promotionExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, report) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(33, id, contentType);
+            if (report) {
+                const payload = createAction(report);
+
+                ActivityLog.emit('reporting:al-alali-promo-evaluation:expired', payload);
             }
 
             callback(null);
@@ -250,14 +261,15 @@ const promotionItemExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, report) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(35, id, contentType);
+            if (report) {
+                const payload = createAction(report);
+
+                ActivityLog.emit('reporting:al-alali-promo-evaluation:item-expired', payload);
             }
 
             callback(null);
@@ -288,14 +300,15 @@ const competitorPromotionExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, report) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(32, id, contentType);
+            if (report) {
+                const payload = createAction(report);
+
+                ActivityLog.emit('reporting:competitor-promotion-activities:expired', payload);
             }
 
             callback(null);
@@ -326,14 +339,15 @@ const marketingCampaignExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, report) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(38, id, contentType);
+            if (report) {
+                const payload = createAction(report);
+
+                ActivityLog.emit('marketing:al-alali-marketing-campaigns:expired', payload);
             }
 
             callback(null);
@@ -360,25 +374,26 @@ const competitorBrandingAndDisplayExpired = () => {
     };
 
     const iterator = (id, callback) => {
-        CompetitorBrandingModel.findByIdAndUpdate(id, {
+        CompetitorBrandingAndDisplayModel.findByIdAndUpdate(id, {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, report) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(34, id, contentType);
+            if (report) {
+                const payload = createAction(report);
+
+                ActivityLog.emit('reporting:competitor-branding-and-display-report:expired', payload);
             }
 
             callback(null);
         });
     };
 
-    CompetitorBrandingModel.aggregate(getPipeline(query), exec({
+    CompetitorBrandingAndDisplayModel.aggregate(getPipeline(query), exec({
         domain: contentType,
         actionType: 'expired',
         iterator,
@@ -401,14 +416,15 @@ const questionnaireExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, questionnaire) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(34, id, contentType);
+            if (questionnaire) {
+                const payload = createAction(questionnaire);
+
+                ActivityLog.emit('marketing:consumer-survey:expired', payload);
             }
 
             callback(null);
@@ -441,19 +457,14 @@ const objectiveOverdue = () => {
             $set: {
                 status: OBJECTIVE_STATUSES.OVER_DUE,
             },
-        }, (err, model) => {
+        }, (err, objective) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                const type = model.context;
-                const modelAsJson = model.toJSON();
-                const payload = {
-                    actionOriginator: modelAsJson.createdBy.user,
-                    accessRoleLevel: modelAsJson.level,
-                    body: modelAsJson,
-                };
+            if (objective) {
+                const type = objective.context;
+                const payload = createAction(objective);
 
                 if (type === CONTENT_TYPES.OBJECTIVES) {
                     ActivityLog.emit('objective:overdue', payload);
@@ -488,19 +499,14 @@ const objectiveFail = () => {
             $set: {
                 status: OBJECTIVE_STATUSES.FAIL,
             },
-        }, (err, model) => {
+        }, (err, objective) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                const type = model.context;
-                const modelAsJson = model.toJSON();
-                const payload = {
-                    actionOriginator: modelAsJson.createdBy.user,
-                    accessRoleLevel: modelAsJson.level,
-                    body: modelAsJson,
-                };
+            if (objective) {
+                const type = objective.context;
+                const payload = createAction(objective);
 
                 if (type === CONTENT_TYPES.OBJECTIVES) {
                     ActivityLog.emit('objective:fail', payload);
