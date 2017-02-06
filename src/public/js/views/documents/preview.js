@@ -12,9 +12,6 @@ define(function (require) {
             this.translation = options.translation;
             this.model.set('translation', this.translation);
 
-            var attachment = this.model.get('attachments')[0];
-            this.model.set('attachment', attachment);
-
             this.render();
         },
 

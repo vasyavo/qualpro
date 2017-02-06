@@ -13,11 +13,6 @@ define(function (require) {
         initialize : function (options) {
             this.translation = options.translation;
             this.type = this.model.get('type') || 'file';
-
-            if (this.type === 'file') {
-                var attachment = this.model.get('attachments')[0];
-                this.model.set('attachment', attachment);
-            }
         },
 
         template : function (ops) {
@@ -72,14 +67,21 @@ define(function (require) {
                     translation : this.translation
                 });
             } else {
-                Backbone.history.navigate('qualPro/documents/' + this.model.get('_id'));
+                Backbone.history.navigate('qualPro/documents/' + this.model.get('_id'), true);
             }
         },
 
         showEditView : function () {
-            new EditDocumentView({
+            var that = this;
+
+            this.editView = new EditDocumentView({
                 model : this.model,
                 translation : this.translation
+            });
+
+            this.editView.on('file:saved', function (savedData) {
+                that.model.set('title', savedData.title);
+                that.model.collection.trigger('sync');
             });
         },
 

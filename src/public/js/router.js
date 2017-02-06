@@ -60,7 +60,7 @@ define([
             this.showDocumentsView(null, filter);
         },
 
-        showDocumentsView : function (folder, filterObj) {
+        showDocumentsView : function (folder, filter) {
             var that = this;
 
             this.checkLogin(function (success) {
@@ -88,19 +88,24 @@ define([
 
                 var currentLanguage = App.currentUser.currentLanguage;
                 require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {
+                    var rootPath = CONSTANTS.DOCUMENTS + '/folder';
                     var documentsCollection = new collection();
 
-                    //todo -> if folder
+                    if (folder) {
+                        documentsCollection.url = rootPath + '/' + folder;
+                    } else {
+                        documentsCollection.url = rootPath
+                    }
 
-                    if (filterObj) {
-                        filterObj = JSON.parse(filterObj);
-                        documentsCollection.url = CONSTANTS.DOCUMENTS + '?' + $.param(filterObj);
+                    if (filter) {
+                        filter = JSON.parse(filter);
+                        documentsCollection.url = documentsCollection.url + '?' + $.param(filter);
                     }
 
                     var documentsTopBarView = new DocumentsTopBarView({
                         translation : translation,
                         collection : documentsCollection,
-                        archived : lodash.get(filterObj, 'filter.archived.values[0]')
+                        archived : lodash.get(filter, 'archived')
                     });
                     $('#topBarHolder').html(documentsTopBarView.render().$el);
 
