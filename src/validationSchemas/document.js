@@ -23,6 +23,7 @@ const getAll = Joi.object().keys({
     count    : Joi.number().integer().default(CONSTANTS.LIST_COUNT),
     sortBy   : Joi.string().default('createdAt'),
     sortOrder: Joi.number().valid([-1, 1]).default(-1),
+    archived : Joi.boolean().default(false)
 });
 
 const sync = Joi.object().keys({

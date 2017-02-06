@@ -21,6 +21,7 @@ var Documents = function (db, redis, event) {
     var archiver = new Archiver(DocumentModel);
     var logWriter = require('../helpers/logWriter.js');
     var errorSender = require('../utils/errorSender');
+    var logger = require('../utils/logger');
     var ERROR_MESSAGES = require('../constants/errorMessages');
     var ObjectId = mongoose.Types.ObjectId;
     var access = require('../helpers/access')(db);
@@ -385,43 +386,57 @@ var Documents = function (db, redis, event) {
     };
     
     const getAllDocs = (options, cb) => {
+        const pipeLine = [];
         const {
+            isMobile = false,
             parentId = null,
             personnelId = null,
             lastLogOut = null,
+            archived = false,
             sortBy = 'createdAt',
             sortOrder = -1,
             skip = 0,
             count = 20,
             search = ''
         } = options;
-        const pipeLine = [];
+    
         const matchObj = {
             $match: {
                 'createdBy.user': ObjectId(personnelId)
             }
         };
+    
+        if (isMobile) {
+            // for sync only
+            if (lastLogOut) {
+                matchObj.$match.$or = [
+                    {
+                        'createdBy.date': {
+                            $gte: lastLogOut
+                        }
+                    }, {
+                        'updatedBy.date': {
+                            $gte: lastLogOut
+                        }
+                    }
+                ];
+            }
+        } else {
+            // web should not see deleted items
+            matchObj.$match.deleted = false;
         
-        if (parentId) {
-            matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
+            // by default web fetching not archived docs
+            matchObj.$match.archived = archived;
+        
+            if (parentId) {
+                matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
+            }
         }
         
-        if (lastLogOut) {
-            matchObj.$match.$or = [
-                {
-                    'createdBy.date': {
-                        $gte: lastLogOut
-                    }
-                }, {
-                    'updatedBy.date': {
-                        $gte: lastLogOut
-                    }
-                }
-            ];
-        }
         
         pipeLine.push(matchObj);
-        
+    
+        // search sor web only
         if (search) {
             let regExpObject = {
                 $match: {
@@ -467,7 +482,7 @@ var Documents = function (db, redis, event) {
             }, {
                 $limit: count
             },
-            ...getMainPipeline({projectTotal: true}),
+            ...getMainPipeline(),
             {
                 $group: {
                     _id : '$total',
@@ -527,6 +542,18 @@ var Documents = function (db, redis, event) {
         });
     };
     
+    const updateAllChildDocuments = (parent, updateObj, cb) => {
+        let id = typeof parent === 'string' ? ObjectId(parent) : parent;
+        
+        DocumentModel.update({breadcrumbs: {$in: [id]}}, updateObj, (err, doc) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            cb(null);
+        });
+    };
+    
     this.create = function (req, res, next) {
         function queryRun(body) {
             const userId = req.session && req.session.uId;
@@ -540,6 +567,10 @@ var Documents = function (db, redis, event) {
                 user: ObjectId(userId),
                 date: new Date(),
             };
+    
+            if (type === 'file' && !attachment) {
+                return errorSender.badRequest(next, 'Document with type file, should have attachment');
+            }
             
             async.waterfall([
                 
@@ -633,16 +664,23 @@ var Documents = function (db, redis, event) {
                         if (!model) {
                             return errorSender.badRequest(cb, 'Document not found')
                         }
+    
+                        const id = model._id;
                         
                         if(model.type === 'folder') {
-                            // update nested files for mobile sync
-                            // ToDo: push notification
-                            
+                            updateAllChildDocuments(id, {editedBy}, (err) => {
+                                if (err) {
+                                    return logger.error(`Document: updating child documents error: ${err}`);
+                                }
+        
+                                // child documents updated
+                                // ToDo: push notification only for current user
+                            });
                         } else {
-                            // ToDo: push notification
+                            // ToDo: push notification only for current user
                         }
-                        
-                        cb(null, model._id);
+    
+                        cb(null, id);
                     });
                 },
                 getById
@@ -650,8 +688,95 @@ var Documents = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-                
+    
                 res.status(200).send(result);
+            });
+        }
+    
+        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+            if (err) {
+                return next(err);
+            }
+        
+            if (!allowed) {
+                return errorSender.forbidden(next);
+            }
+        
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'update', function (err, body) {
+                if (err) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                }
+            
+                queryRun(body);
+            });
+        });
+    };
+    
+    this.delete = function (req, res, next) {
+        function queryRun(body) {
+            const userId = req.session && req.session.uId;
+            const {
+                items,
+            } = body;
+            const editedBy = {
+                user: ObjectId(userId),
+                date: new Date(),
+            };
+            
+            async.waterfall([
+                (cb) => {
+                    const findObj = {
+                        'createdBy.user': userId,
+                        $or             : [
+                            {
+                                _id: {
+                                    $in: items
+                                }
+                            }, {
+                                breadcrumbs: {
+                                    $in: items
+                                }
+                            }
+                        ]
+                        
+                    };
+                    
+                    DocumentModel.distinct('_id', findObj, function (err, ids) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        if (!ids || !ids.length) {
+                            return errorSender.badRequest(cb, 'Document not found')
+                        }
+                        
+                        cb(null, ids);
+                    });
+                },
+                
+                (ids, cb) => {
+                    const updateObj = {
+                        deleted: true,
+                        editedBy
+                    };
+                    
+                    DocumentModel.update({_id: {$in: ids}}, updateObj, {multi: true}, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        // ToDo: push notification only for current user
+                        
+                        cb(null, ids);
+                    });
+                },
+            
+            ], function (err, modified) {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send({modified});
             });
         }
         
@@ -716,12 +841,14 @@ var Documents = function (db, redis, event) {
                 count,
                 sortBy,
                 sortOrder,
+                archived,
                 search,
             } = query;
             
             getAllDocs({
                 skip,
                 count,
+                archived,
                 parentId,
                 personnelId,
                 sortBy,
@@ -786,7 +913,7 @@ var Documents = function (db, redis, event) {
                 return errorSender.forbidden(next);
             }
             
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, body) {
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, body) {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -811,6 +938,7 @@ var Documents = function (db, redis, event) {
             } = query;
             const skip = (page - 1) * count;
             getAllDocs({
+                isMobile: true,
                 skip,
                 count,
                 parentId,
@@ -896,6 +1024,7 @@ var Documents = function (db, redis, event) {
                 lastLogOut
             } = query;
             getAllDocs({
+                isMobile: true,
                 personnelId,
                 lastLogOut
             }, (err, response) => {
