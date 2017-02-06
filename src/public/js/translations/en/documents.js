@@ -15,6 +15,9 @@ define([
         disable    : 'Disable',
         unDisable  : 'Un Disable',
         delete : 'Delete',
+        copyButton : 'Copy',
+        cutButton : 'Cut',
+        pasteButton : 'Paste',
         // list
 
         // create
