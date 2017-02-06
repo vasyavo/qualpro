@@ -39,7 +39,7 @@ define(function (require) {
                         click: function () {
                             that.model.saveFolder({
                                 title : that.$el.find('#title').val(),
-                                type : 'file'
+                                type : 'folder'
                             });
                         }
                     },

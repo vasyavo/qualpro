@@ -117,16 +117,14 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
                         click: function () {
-                            var data = new FormData();
+                            var formData = new FormData();
 
-                            data.append('file', that.file);
+                            formData.append('file', that.file);
 
-                            data.append('data', JSON.stringify({
+                            that.model.saveFile(formData, {
                                 title : that.$el.find('#title').val(),
-                                type : 'folder'
-                            }));
-
-                            that.model.saveFile(data);
+                                type : 'file'
+                            });
                         }
                     },
                     cancel: {

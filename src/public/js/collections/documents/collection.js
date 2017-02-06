@@ -1,8 +1,10 @@
-define([
-    'Backbone',
-    'models/documents',
-    'constants/contentType'
-], function (Backbone, Model, CONTENT_TYPES) {
+define(function (require) {
+
+    var Backbone = require('Backbone');
+    var Model = require('models/documents');
+    var CONTENT_TYPES = require('constants/contentType');
+
+    require('backbone.paginator');
 
     return Backbone.Collection.extend({
 
@@ -10,7 +12,7 @@ define([
 
         checked : [],
 
-        url : CONTENT_TYPES.DOCUMENTS,
+        url : CONTENT_TYPES.DOCUMENTS + '/folder',
 
         parse : function (response) {
             return response.data;

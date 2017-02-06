@@ -1,6 +1,7 @@
 define([
         'models/parrent',
         'validation',
+        'async',
         'moment',
         'constants/otherConstants',
         'dataService',
@@ -9,7 +10,7 @@ define([
         'constants/contentType',
         'constants/errorMessages'
     ],
-    function (parent, validation, moment, otherConstants, dataService, custom, FileModel, CONTENT_TYPES, ERROR_MESSAGES) {
+    function (parent, validation, async, moment, otherConstants, dataService, custom, FileModel, CONTENT_TYPES, ERROR_MESSAGES) {
 
         var Model = parent.extend({
 
@@ -42,12 +43,11 @@ define([
                 'createdBy.user.position.name'
             ],
 
-            saveFile : function (data) {
+            saveFile : function (formData, body) {
                 var that = this;
                 var errors = [];
                 var currentLanguage = App.currentUser.currentLanguage;
-                var body = JSON.parse(data.get('data'));
-                var file = data.get('file');
+                var file = formData.get('file');
 
                 validation.checkTitleField(errors, true, body.title, 'Title');
 
@@ -65,26 +65,56 @@ define([
                     });
                 }
 
-                $.ajax({
-                    url        : CONTENT_TYPES.DOCUMENTS,
-                    type       : 'POST',
-                    data       : data,
-                    contentType: false,
-                    processData: false,
-                    success    : function (savedData) {
-                        var fileModel = new FileModel();
+                async.waterfall([
 
-                        savedData.attachments.type = fileModel.getTypeFromContentType(savedData.attachments.contentType);
-                        savedData.attachments = [savedData.attachments];
-
-                        that.trigger('saved', savedData);
+                    function (cb) {
+                        $.ajax({
+                            url : '/file',
+                            method : 'POST',
+                            data : formData,
+                            contentType: false,
+                            processData: false,
+                            success : function (response) {
+                                cb(null, response);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
                     },
-                    error : function () {
+
+                    function (fileObj, cb) {
+                        body.attachment = fileObj.files[0]._id;
+
+                        $.ajax({
+                            url        : CONTENT_TYPES.DOCUMENTS,
+                            type       : 'POST',
+                            data       : JSON.stringify(body),
+                            contentType: false,
+                            processData: false,
+                            success    : function (savedData) {
+                                cb(null, savedData);
+                            },
+                            error : function () {
+                                cb(true);
+                            }
+                        });
+                    }
+
+                ], function (err, savedData) {
+                    if (err) {
                         return App.render({
                             type : 'error',
                             message : ERROR_MESSAGES.notSaved[currentLanguage]
                         });
                     }
+debugger;
+                    var fileModel = new FileModel();
+
+                    savedData.attachments.type = fileModel.getTypeFromContentType(savedData.attachments.contentType);
+                    savedData.attachments = [savedData.attachments];
+
+                    that.trigger('saved', savedData);
                 });
             },
 
@@ -105,7 +135,7 @@ define([
                 $.ajax({
                     url : CONTENT_TYPES.DOCUMENTS,
                     type : 'POST',
-                    data : JSON.parse(data),
+                    data : JSON.stringify(data),
                     contentType: false,
                     processData: false,
                     success    : function (savedData) {
