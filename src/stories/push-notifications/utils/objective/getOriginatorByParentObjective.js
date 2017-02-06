@@ -1,5 +1,5 @@
 const ObjectId = require('mongoose').Types.ObjectId;
-const ObjectiveModel = require('./../../../types/objective/model');
+const ObjectiveModel = require('./../../../../types/objective/model');
 
 /*
 * @param {Object[]} options.objectives Array of parent objective ID
@@ -22,7 +22,7 @@ module.exports = function * (options) {
     }, {
         $group: {
             _id: null,
-            originator: { $push: '$originator' },
+            originator: { $addToSet: '$originator' },
         },
     }];
 

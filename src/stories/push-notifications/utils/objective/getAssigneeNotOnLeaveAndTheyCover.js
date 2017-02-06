@@ -1,21 +1,20 @@
 const ObjectId = require('mongoose').Types.ObjectId;
 const _ = require('lodash');
-const PersonnelModel = require('./../../../types/personnel/model');
-const accessRoles = require('./../../../constants/aclRolesNames');
+const PersonnelModel = require('./../../../../types/personnel/model');
 
+/*
+* @description Returns assignee and cover assignee's if it acceptable
+* @param {Object} options
+* @param {String[]} options.assignedTo
+* @param {String} options.actionOriginator
+* @param {Number[]} options.setAllowedRole
+* @returns {String[]}
+* */
 module.exports = function * (options) {
     const assigneeWithoutActionOriginator = _.difference(options.assignedTo, [options.actionOriginator])
         .map(id => ObjectId(id));
 
-    const allowedRoles = [
-        accessRoles.MASTER_ADMIN,
-        accessRoles.MASTER_UPLOADER,
-        accessRoles.COUNTRY_ADMIN,
-        accessRoles.COUNTRY_UPLOADER,
-        accessRoles.AREA_MANAGER,
-        accessRoles.AREA_IN_CHARGE,
-        accessRoles.TRADE_MARKETER,
-    ];
+    const { setAllowedRole } = options;
     const pipeline = [{
         $match: {
             _id: {
@@ -29,27 +28,13 @@ module.exports = function * (options) {
         },
     }, {
         $lookup: {
-            from: 'accessRoles',
-            localField: 'accessRole',
-            foreignField: '_id',
-            as: 'accessRole',
-        },
-    }, {
-        $unwind: {
-            path: '$accessRole',
-            preserveNullAndEmptyArrays: true,
-        },
-    }, {
-        $lookup: {
             from: 'personnels',
             localField: 'cover',
             foreignField: '_id',
             as: 'cover',
         },
     }, {
-        $project: {
-            accessRole: 1,
-            onLeave: 1,
+        $addFields: {
             cover: {
                 $cond: {
                     if: { $gt: [{ $size: '$cover' }, 0] },
@@ -57,6 +42,27 @@ module.exports = function * (options) {
                     else: null,
                 },
             },
+        },
+    }, {
+        $project: {
+            onLeave: 1,
+            'cover.accessRole': 1,
+        },
+    }, {
+        $lookup: {
+            from: 'accessRoles',
+            localField: 'cover.accessRole',
+            foreignField: '_id',
+            as: 'cover.accessRole',
+        },
+    }, {
+        $unwind: {
+            path: '$cover.accessRole',
+        },
+    }, {
+        $project: {
+            onLeave: 1,
+            'cover.accessRole.level': 1,
         },
     }, {
         $group: {
@@ -80,10 +86,6 @@ module.exports = function * (options) {
                         $and: [
                             { $eq: ['$$item.onLeave', true] },
                             { $eq: ['$$item.cover', null] },
-                            { $setIsSubset: [
-                                ['$$item.accessRole.level'],
-                                allowedRoles,
-                            ] },
                         ],
                     },
                 },
@@ -96,6 +98,10 @@ module.exports = function * (options) {
                         $and: [
                             { $eq: ['$$item.onLeave', true] },
                             { $ne: ['$$item.cover', null] },
+                            { $setIsSubset: [
+                                ['$$item.cover.accessRole.level'],
+                                setAllowedRole,
+                            ] },
                         ],
                     },
                 },

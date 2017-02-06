@@ -1,9 +1,11 @@
 const _ = require('lodash');
 const ActivityModel = require('./../../../../types/activityList/model');
 const toString = require('./../../../../utils/toString');
-const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
-const getOriginatorByParentObjective = require('./../../utils/getOriginatorByParentObjective');
-const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
+const getSupervisorByAssigneeAndOriginator = require('./../../utils/objective/getSupervisorByAssigneeAndOriginator');
+const getOriginatorByParentObjective = require('./../../utils/objective/getOriginatorByParentObjective');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/objective/getAssigneeNotOnLeaveAndTheyCover');
+const getAllowedRoles = require('./../../utils/objective/getAllowedRoles');
+const setObjectIdToSetString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 
 module.exports = function * (options) {
     const {
@@ -15,28 +17,42 @@ module.exports = function * (options) {
         body,
     } = options;
 
+    const setAllowedRole = getAllowedRoles({
+        context: body.context,
+    });
     const actionOriginator = toString(options, 'actionOriginator');
     const contentAuthor = toString(body, 'createdBy.user');
     const arrayOfParentObjectiveId = _(body.parent)
         .values()
         .compact()
         .value();
+    const [
+        setActualAssignee,
+    ] = setObjectIdToSetString(
+        body.assignedTo
+    );
 
-    const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
-        assignedTo: body.assignedTo,
+    const setAssigneeNotOnLeaveAndCover = yield getAssigneeNotOnLeaveAndTheyCover({
+        assignedTo: setActualAssignee,
         actionOriginator,
+        setAllowedRole,
     });
+    const setAssignee = _.uniq([
+        ...setActualAssignee,
+        ...setAssigneeNotOnLeaveAndCover,
+    ]);
     const [
         arrayOfSupervisor,
         arrayOfOriginator,
     ] = yield [
         getSupervisorByAssigneeAndOriginator({
-            assignedTo,
+            assignedTo: setAssignee,
             originator: contentAuthor,
+            setAllowedRole,
         }),
         getOriginatorByParentObjective({
             objectives: arrayOfParentObjectiveId,
-        })
+        }),
     ];
 
     const newActivity = new ActivityModel();
@@ -47,8 +63,8 @@ module.exports = function * (options) {
         actionType,
         itemId: body._id,
         itemName: {
-            en: body.title.en,
-            ar: body.title.ar,
+            en: _.get(body, 'title.en'),
+            ar: _.get(body, 'title.ar'),
         },
         createdBy: {
             user: actionOriginator,
@@ -57,11 +73,11 @@ module.exports = function * (options) {
         personnels: _.uniq([
             actionOriginator,
             contentAuthor,
-            ...assignedTo,
+            ...setAssignee,
             ...arrayOfSupervisor,
             ...arrayOfOriginator,
         ]),
-        assignedTo,
+        assignedTo: setAssignee,
         country: body.country,
         region: body.region,
         subRegion: body.subRegion,
@@ -80,7 +96,7 @@ module.exports = function * (options) {
         payload,
         actionOriginator: _.uniq([actionOriginator, contentAuthor]).pop(),
         setOriginator: arrayOfOriginator.filter((originator) => (originator !== actionOriginator)),
-        setAssignee: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
+        setAssignee: setAssignee.filter((assignee) => (assignee !== actionOriginator)),
         setSupervisor: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
     };
 };

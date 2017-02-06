@@ -1,14 +1,15 @@
 const co = require('co');
 const _ = require('lodash');
-const getSupervisorByAssigneeAndOriginator = require('./../../utils/getSupervisorByAssigneeAndOriginator');
-const arrayOfObjectIdToArrayOfString = require('./../../utils/arrayOfObjectIdToArrayOfString');
-const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/getAssigneeNotOnLeaveAndTheyCover');
+const getSupervisorByAssigneeAndOriginator = require('./../../utils/objective/getSupervisorByAssigneeAndOriginator');
+const getAssigneeNotOnLeaveAndTheyCover = require('./../../utils/objective/getAssigneeNotOnLeaveAndTheyCover');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
 const contentTypes = require('./../../../../public/js/constants/contentType');
 const ActivityModel = require('./../../../../types/activityList/model');
 const toString = require('./../../../../utils/toString');
+const getAllowedRoles = require('./../../utils/objective/getAllowedRoles');
+const setObjectIdToSetString = require('./../../utils/arrayOfObjectIdToArrayOfString');
 
 module.exports = (options) => {
     co(function * () {
@@ -21,14 +22,29 @@ module.exports = (options) => {
             body,
         } = options;
 
-        const actionOriginator = toString(options, 'actionOriginator');
-        const assignedTo = yield getAssigneeNotOnLeaveAndTheyCover({
-            assignedTo: body.assignedTo,
-            actionOriginator,
+        const setAllowedRole = getAllowedRoles({
+            context: body.context,
         });
-        const arrayOfSupervisor = yield getSupervisorByAssigneeAndOriginator({
-            assignedTo,
+        const actionOriginator = toString(options, 'actionOriginator');
+        const [
+            setActualAssignee,
+        ] = setObjectIdToSetString(
+            body.assignedTo
+        );
+
+        const setAssigneeNotOnLeaveAndCover = yield getAssigneeNotOnLeaveAndTheyCover({
+            assignedTo: setActualAssignee,
+            actionOriginator,
+            setAllowedRole,
+        });
+        const setAssignee = _.uniq([
+            ...setActualAssignee,
+            ...setAssigneeNotOnLeaveAndCover,
+        ]);
+        const setSupervisor = yield getSupervisorByAssigneeAndOriginator({
+            assignedTo: setAssignee,
             originator: actionOriginator,
+            setAllowedRole,
         });
 
         const newActivity = new ActivityModel();
@@ -39,8 +55,8 @@ module.exports = (options) => {
             actionType,
             itemId: body._id,
             itemName: {
-                en: body.title.en,
-                ar: body.title.ar,
+                en: _.get(body, 'title.en'),
+                ar: _.get(body, 'title.ar'),
             },
             createdBy: {
                 user: actionOriginator,
@@ -48,10 +64,10 @@ module.exports = (options) => {
             accessRoleLevel,
             personnels: _.uniq([
                 actionOriginator,
-                ...assignedTo,
-                ...arrayOfSupervisor,
+                ...setAssignee,
+                ...setSupervisor,
             ]),
-            assignedTo,
+            assignedTo: setAssignee,
             country: body.country,
             region: body.region,
             subRegion: body.subRegion,
@@ -73,14 +89,14 @@ module.exports = (options) => {
             },
             payload,
         }, {
-            recipients: assignedTo.filter((assignee) => (assignee !== actionOriginator)),
+            recipients: setAssignee.filter((assignee) => (assignee !== actionOriginator)),
             subject: {
                 en: 'Received new in-store task',
                 ar: '',
             },
             payload,
         }, {
-            recipients: arrayOfSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
+            recipients: setSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
             subject: {
                 en: 'Subordinate received new in-store task',
                 ar: '',
