@@ -13,7 +13,7 @@ define([
         location   : 'Location',
 
         // preview
-        titlePreview : 'al alali Branding & Display report',
+        titlePreview : 'al alali Branding & Monthly display',
         country      : 'Country',
         region       : 'Region',
         subRegion    : 'Sub-Region',
@@ -31,7 +31,7 @@ define([
         missedData   : 'Missed data',
 
         // topBar
-        all        : 'al alali Branding & Display report',
+        all        : 'al alali Branding & Monthly display',
         okBtn      : 'Ok',
         dialogTitle: 'Comment attachments'
 
