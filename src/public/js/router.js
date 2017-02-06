@@ -2,6 +2,7 @@ define([
     'Backbone',
     'jQuery',
     'Underscore',
+    'lodash',
     'moment',
     'views/main/main',
     'views/login/login',
@@ -13,7 +14,7 @@ define([
     'js-cookie',
     'views/documents/list',
     'views/documents/topBar'
-], function (Backbone, $, _, moment, mainView, LoginView, CreateSuperAdminView,
+], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
              forgotPassView, dataService, custom, CONSTANTS, Cookies,
              DocumentsListView, DocumentsTopBarView) {
 
@@ -59,7 +60,7 @@ define([
             this.showDocumentsView(null, filter);
         },
 
-        showDocumentsView : function (folder, filter) {
+        showDocumentsView : function (folder, filterObj) {
             var that = this;
 
             this.checkLogin(function (success) {
@@ -91,14 +92,15 @@ define([
 
                     //todo -> if folder
 
-                    if (filter) {
-                        filter = JSON.parse(filter);
-                        documentsCollection.url = CONSTANTS.DOCUMENTS + '?' + $.param(filter);
+                    if (filterObj) {
+                        filterObj = JSON.parse(filterObj);
+                        documentsCollection.url = CONSTANTS.DOCUMENTS + '?' + $.param(filterObj);
                     }
 
                     var documentsTopBarView = new DocumentsTopBarView({
                         translation : translation,
-                        collection : documentsCollection
+                        collection : documentsCollection,
+                        archived : lodash.get(filterObj, 'filter.archived.values[0]')
                     });
                     $('#topBarHolder').html(documentsTopBarView.render().$el);
 
