@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var BiYearlyHandler = function (db, event) {
     var async = require('async');
     var _ = require('lodash');
@@ -324,7 +326,7 @@ var BiYearlyHandler = function (db, event) {
                     model = model.toObject();
                     model.avgRating = personnel.avgRating[CONTENT_TYPES.BIYEARLY];
 
-                    event.emit('personnel:bi-yearly', {
+                    ActivityLog.emit('personnel:bi-yearly', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body: personnel,
@@ -497,7 +499,7 @@ var BiYearlyHandler = function (db, event) {
                         result = result.toObject();
                         result.avgRating = personnel.avgRating[CONTENT_TYPES.BIYEARLY];
 
-                        event.emit('personnel:bi-yearly', {
+                        ActivityLog.emit('personnel:bi-yearly', {
                             actionOriginator: req.session.uId,
                             accessRoleLevel : req.session.level,
                             body: personnel,

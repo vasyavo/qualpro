@@ -33,6 +33,24 @@ activityLog.on('personnel:bi-yearly', require('./methods/personnel/evaluatedYear
 activityLog.on('personnel:monthly', require('./methods/personnel/evaluated'));
 activityLog.on('personnel:archived', require('./methods/personnel/archived'));
 
+activityLog.on('country:created', require('./methods/locations/createdCountry'));
+activityLog.on('country:updated', require('./methods/locations/updatedCountry'));
+activityLog.on('region:created', require('./methods/locations/createdRegion'));
+activityLog.on('region:updated', require('./methods/locations/updatedRegion'));
+activityLog.on('sub-region:created', require('./methods/locations/createdSubRegion'));
+activityLog.on('sub-region:updated', require('./methods/locations/updatedSubRegion'));
+activityLog.on('branch:created', require('./methods/locations/createdBranch'));
+activityLog.on('branch:edited', require('./methods/locations/editedBranch'));
+activityLog.on('trade-channel:created', require('./methods/locations/createdTradeChannel'));
+activityLog.on('trade-channel:edited', require('./methods/locations/editedTradeChannel'));
+activityLog.on('branch:removed', require('./methods/locations/removedBranch'));
+activityLog.on('customer:created', require('./methods/locations/createdCustomer'));
+activityLog.on('customer:edited', require('./methods/locations/editedCustomer'));
+
+activityLog.on('sub-region:removed', require('./methods/locations/removedSubRegion'));
+activityLog.on('trade-channel:removed', require('./methods/locations/removedRegion'));
+activityLog.on('country:removed', require('./methods/locations/removedCountry'));
+
 activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
 activityLog.on('reporting:shelf-share:published', require('./methods/reporting/shelf-share/published'));
 activityLog.on('reporting:competitor-branding-and-display-report:published', require('./methods/reporting/competitor-branding-and-display-report/published'));

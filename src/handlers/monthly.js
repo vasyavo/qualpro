@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var Rating = function (db, event) {
     var _ = require('underscore');
     var async = require('async');
@@ -429,7 +431,7 @@ var Rating = function (db, event) {
                         return callback(err);
                     }
 
-                    event.emit('personnel:monthly', {
+                    ActivityLog.emit('personnel:monthly', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body: personnel,
@@ -590,7 +592,7 @@ var Rating = function (db, event) {
                             return next(err);
                         }
 
-                        event.emit('personnel:monthly', {
+                        ActivityLog.emit('personnel:monthly', {
                             actionOriginator: req.session.uId,
                             accessRoleLevel : req.session.level,
                             body: personnel,

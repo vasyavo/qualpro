@@ -1,5 +1,7 @@
 'use strict';
 
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 const PasswordManager = require('./../helpers/passwordManager');
 
 const Personnel = function (db, redis, event) {
@@ -1217,7 +1219,7 @@ const Personnel = function (db, redis, event) {
                 (personnel, cb) => {
                     const personnelId = personnel._id;
 
-                    event.emit('personnel:created', {
+                    ActivityLog.emit('personnel:created', {
                         actionOriginator: uId,
                         accessRoleLevel : accessLevel,
                         body: personnel.toJSON(),
@@ -1503,7 +1505,8 @@ const Personnel = function (db, redis, event) {
                         if (err) {
                             return callback(err)
                         }
-                        event.emit('personnel:archived', {
+
+                        ActivityLog.emit('personnel:archived', {
                             actionOriginator: uId,
                             accessRoleLevel : req.session.level,
                             body: model.toJSON()
@@ -3555,14 +3558,14 @@ const Personnel = function (db, redis, event) {
             };
 
             if (!body.currentLanguage && !body.newPass && !body.vacation && !body.manager) {
-                event.emit('personnel:updated', {
+                ActivityLog.emit('personnel:updated', {
                     actionOriginator: currentUserId,
                     accessRoleLevel : accessLevel,
                     body: personnel,
                 });
             }
             if (body.vacation) {
-                event.emit('personnel:on-leave', {
+                ActivityLog.emit('personnel:on-leave', {
                     actionOriginator: currentUserId,
                     accessRoleLevel : accessLevel,
                     body: personnel,
@@ -3570,7 +3573,7 @@ const Personnel = function (db, redis, event) {
                 });
             }
             if (coverUserId) {
-                event.emit('personnel:cover', {
+                ActivityLog.emit('personnel:cover', {
                     actionOriginator: currentUserId,
                     accessRoleLevel : accessLevel,
                     body: personnel,
@@ -3579,7 +3582,7 @@ const Personnel = function (db, redis, event) {
             }
             if (body.manager) {
                 coveredUsers.push(personnel.manager);
-                event.emit('personnel:assigned', {
+                ActivityLog.emit('personnel:assigned', {
                     actionOriginator: currentUserId,
                     accessRoleLevel : accessLevel,
                     body: personnel,

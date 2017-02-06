@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var RetailSegmentHandler = function (db, redis, event) {
     var async = require('async');
     var _ = require('underscore');
@@ -104,12 +106,10 @@ var RetailSegmentHandler = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.TRADE_CHANNEL,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.RETAILSEGMENT
+                ActivityLog.emit('trade-channel:create', {
+                    actionOriginator: req.session.uId,
+                    accessRoleLevel : req.session.level,
+                    body            : model.toJSON()
                 });
 
                 if (model && model.name) {
@@ -212,19 +212,28 @@ var RetailSegmentHandler = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-                async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.TRADE_CHANNEL,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.RETAILSEGMENT
-                    });
-                    callback();
+                async.each(idsToArchive, (id, eCb)=> {
+                    RetailSegmentModel.findById(id)
+                        .lean()
+                        .exec((err, resp)=> {
+                            if (err) {
+                                return eCb(err)
+                            }
 
-                }, function (err) {
+                            const bodyObject = {
+                                actionOriginator: req.session.uId,
+                                accessRoleLevel : req.session.level,
+                                body            : resp.toJSON()
+                            };
+
+                            ActivityLog.emit('trade-channel:archived', bodyObject);
+
+                            eCb();
+
+                        })
+                }, (err)=> {
                     if (err) {
-                        logWriter.log('planogram archived error', err);
+                        logWriter.log('trade channel archived error', err);
                     }
                 });
                 if (archived) {
@@ -909,12 +918,10 @@ var RetailSegmentHandler = function (db, redis, event) {
                     if (err) {
                         return next(err);
                     }
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.TRADE_CHANNEL,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : body.editedBy,
-                        itemId    : id,
-                        itemType  : CONTENT_TYPES.RETAILSEGMENT
+                    ActivityLog.emit('trade-channel:update', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body            : result.toJSON()
                     });
 
                     if (result && result.name) {
