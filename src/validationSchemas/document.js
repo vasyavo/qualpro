@@ -31,16 +31,25 @@ const sync = Joi.object().keys({
 });
 
 const remove = Joi.object().keys({
-    items: Joi.array().items(Joi.objectId())
+    ids: Joi.array().items(Joi.objectId()).min(1)
 });
 
 const archive = Joi.object().keys({
-    items: Joi.array().items(Joi.objectId())
+    archive: Joi.boolean().required(),
+    ids  : Joi.array().items(Joi.objectId()).min(1),
+    parent : Joi.objectId().default(null)
+});
+
+const move = Joi.object().keys({
+    action: Joi.string().valid(['cut', 'copy']).required(),
+    title: Joi.string().allow('').default(null),
+    ids  : Joi.array().items(Joi.objectId()),
+    parent : Joi.objectId().default(null)
 });
 
 module.exports = {
-    move   : remove,
-    archive: remove,
+    move   : move,
+    archive: archive,
     remove : remove,
     sync   : sync,
     create : create,

@@ -28,22 +28,6 @@ var Documents = function (db, redis, event) {
     var bodyValidator = require('../helpers/bodyValidator');
     var joiValidate = require('../helpers/joiValidate');
     
-    var self = this;
-    
-    var $defProjection = {
-        _id         : 1,
-        createdBy   : 1,
-        editedBy    : 1,
-        title       : 1,
-        attachments : 1,
-        contentType : 1,
-        originalName: 1,
-        archived    : 1,
-        creationDate: 1,
-        updateDate  : 1
-    };
-    
-    
     // projectTotal option needs for getAll method
     const getMainPipeline = () => {
         let pipeLine = [{
@@ -520,7 +504,7 @@ var Documents = function (db, redis, event) {
         });
     };
     
-    const getBreadcrumbsByParent = (parent, cb) => {
+    const getBreadcrumbsIdsByParent = (parent, cb) => {
         let breadcrumbs = [];
         
         if (!parent) {
@@ -542,17 +526,460 @@ var Documents = function (db, redis, event) {
         });
     };
     
-    const updateAllChildDocuments = (parent, updateObj, cb) => {
+    const updateAllChildDocuments = (parent, updateObj, callback) => {
         let id = typeof parent === 'string' ? ObjectId(parent) : parent;
         
-        DocumentModel.update({breadcrumbs: {$in: [id]}}, updateObj, (err, doc) => {
+        async.waterfall([
+            (cb) => {
+                DocumentModel.distinct('_id', {breadcrumbs: {$in: [id]}}, (err, ids) => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    
+                    cb(null, ids);
+                });
+            },
+            
+            (ids, cb) => {
+                if (!ids || !ids.length) {
+                    return cb(null, [])
+                }
+                
+                DocumentModel.update({_id: {$in: ids}}, updateObj, (err) => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    
+                    cb(null, ids);
+                });
+            }
+        ], (err, modified) => {
+            if (err) {
+               return callback(err);
+            }
+    
+            modified.push(id);
+            
+            callback(null, modified);
+        });
+    };
+    
+    const getChangedForMobile = (ids, cb) => {
+        // const ids_ = ids;
+        
+        const pipeLine = [{
+            $match: {
+                _id: {
+                    $in: ids
+                }
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs'
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                title      : 1,
+                editedBy   : 1,
+                parent     : 1,
+                breadcrumbs: {
+                    _id  : 1,
+                    title: 1
+                }
+            }
+        }, {
+            $group: {
+                _id        : '$_id',
+                title      : {$first: '$title'},
+                editedBy   : {$first: '$editedBy'},
+                attachment : {$first: '$attachment'},
+                parent     : {$first: '$parent'},
+                breadcrumbs: {
+                    $push: '$breadcrumbs'
+                }
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'parent',
+                as          : 'parent'
+            }
+        }, {
+            $unwind: {
+                path                      : '$parent',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'personnels',
+                foreignField: '_id',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user'
+            }
+        }, {
+            $unwind: {
+                path                      : '$editedBy.user',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                title      : 1,
+                breadcrumbs: 1,
+                editedBy   : {
+                    date: 1,
+                    user: {
+                        _id      : 1,
+                        firstName: 1,
+                        lastName : 1
+                    }
+                },
+                parent     : {
+                    _id  : 1,
+                    title: 1
+                }
+            }
+        }, {
+            $project: {
+                _id        : 1,
+                title      : 1,
+                editedBy   : 1,
+                breadcrumbs: 1,
+                parent     : {
+                    $ifNull: ['$parent', null]
+                }
+            }
+        }];
+        
+        DocumentModel.aggregate(pipeLine).allowDiskUse(true).exec((err, data) => {
             if (err) {
                 return cb(err);
             }
             
-            cb(null);
+            cb(null, data || []);
         });
     };
+    
+    const getUpdatedBreadcrumbs = (old, newPart, parent) => {
+        if (!parent) {
+            return [...newPart];
+        }
+        
+        let index = old.fromObjectID().indexOf(parent);
+        
+        if (index === -1) {
+            index = 0;
+        }
+        
+        return [...newPart, ...old.slice(index)];
+    };
+    
+    const cutDocumentWithNested = (opt, cb) => {
+        const {
+            id,
+            title,
+            target,
+            archive,
+            personnelId,
+            newBreadcrumbsPart
+        } = opt;
+        
+        const editedBy = {
+            user: personnelId,
+            date: new Date()
+        };
+        
+        async.waterfall([
+            (cb) => {
+                DocumentModel.findById(id, function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    
+                    if (!model || model.deleted) {
+                        return errorSender.badRequest(cb, 'Document not found')
+                    }
+                    
+                    model.parent = target;
+                    model.editedBy = editedBy;
+                    model.breadcrumbs = newBreadcrumbsPart;
+                    
+                    if (typeof archive === 'boolean') {
+                        model.archived = archive;
+                    }
+                    
+                    if (title) {
+                        model.title = title;
+                    }
+                    
+                    model.save((err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        cb(null, model);
+                    });
+                });
+            },
+            
+            (model, cb) => {
+                const parentId = model._id;
+                
+                if (model.type === 'file') {
+                    cb(null, [parentId])
+                }
+                
+                const findObj = {
+                    deleted    : false,
+                    breadcrumbs: {
+                        $in: [parentId]
+                    }
+                };
+                
+                DocumentModel.find(findObj, function (err, models) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    
+                    async.each(models, (elem, eachCb) => {
+                        elem.editedBy = editedBy;
+                        elem.breadcrumbs = getUpdatedBreadcrumbs(elem.breadcrumbs, newBreadcrumbsPart, parentId);
+                        
+                        if (typeof archive === 'boolean') {
+                            elem.archived = archive;
+                        }
+                        
+                        model.save(eachCb)
+                    }, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        let ids = models.map(el => el._id);
+                        ids.push(parentId);
+                        
+                        cb(null, ids)
+                    });
+                });
+            }
+        ], function (err, modified) {
+            if (err) {
+                return cb(err);
+            }
+            
+            cb(null, modified);
+        });
+    };
+    
+    // copy child documents
+    // return array of models with type folder
+    // and array ids of created documents
+    const copyChild = (parentModel, cb) => {
+        const folderDocs = [];
+        const newDocIds = [];
+        
+        DocumentModel.find({
+            deleted: false,
+            parent : parentModel.oldId
+        }).lean().exec((err, needToCopyModels) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            if (!needToCopyModels || !needToCopyModels.length) {
+                return cb(null, [], []);
+            }
+            
+            async.each(needToCopyModels, function (oldModel, eachCb) {
+                let createObj = {
+                    title      : oldModel.title,
+                    type       : oldModel.type,
+                    parent     : parentModel._id,
+                    breadcrumbs: [...parentModel.breadcrumbs, parentModel._id]
+                };
+                
+                DocumentModel.create(createObj, (err, newModel) => {
+                    if (err) {
+                        return eachCb(err);
+                    }
+                    
+                    if (newModel.type === 'folder') {
+                        newModel.oldId = oldModel._id;
+                        folderDocs.push(newModel);
+                    }
+                    
+                    newDocIds.push(newModel._id);
+                    
+                    eachCb(null);
+                });
+            }, (err) => {
+                if (err) {
+                    return cb(err);
+                }
+                
+                cb(null, folderDocs, newDocIds);
+            });
+        });
+    };
+    
+    const copyDocumentWithNested = (opt, cb) => {
+        const {
+            id,
+            title,
+            target,
+            personnelId,
+            newBreadcrumbsPart
+        } = opt;
+        
+        const editedBy = {
+            user: personnelId,
+            date: new Date()
+        };
+        
+        async.waterfall([
+            (cb) => {
+                DocumentModel.findById(id).lean().exec(function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    
+                    if (!model || model.deleted) {
+                        return errorSender.badRequest(cb, 'Document not found')
+                    }
+                    
+                    let createObj = {
+                        title      : title || model.title,
+                        archived   : model.archived,
+                        parent     : target,
+                        editedBy   : editedBy,
+                        createdBy  : editedBy,
+                        breadcrumbs: newBreadcrumbsPart
+                    };
+                    
+                    DocumentModel.create(createObj, (err, newModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        newModel.oldId = model._id;
+                        
+                        cb(null, newModel);
+                    });
+                });
+            },
+            
+            (newModel, cb) => {
+                const modified = [newModel._id];
+                
+                if (newModel.type === 'file') {
+                    cb(null, modified)
+                }
+                
+                let parentModels = [newModel];
+                
+                async.whilst(
+                    // condition func
+                    () => {
+                        return !!parentModels.length
+                    },
+                    
+                    // iterator func
+                    (callback) => {
+                        let tempParentModels = [];
+                        
+                        async.each(parentModels, (parentModel, eachCb) => {
+                            copyChild(parentModel, (err, folderDocs, changedIds) => {
+                                if (err) {
+                                    return eachCb(err);
+                                }
+                                
+                                tempParentModels.push(...folderDocs);
+                                modified.push(...changedIds);
+                                
+                                eachCb(null);
+                            });
+                        }, (err) => {
+                            if (err) {
+                                return callback(err);
+                            }
+                            
+                            parentModels = [...tempParentModels];
+                            callback(null)
+                        });
+                    }, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        cb(null, modified);
+                    }); // final cb
+            }
+        ], function (err, modified) {
+            if (err) {
+                return cb(err);
+            }
+            
+            cb(null, modified);
+        });
+    };
+    
+    const fillImagesIntoResult = (response, cb) => {
+        const fileIds = [];
+        const options = {
+            data: {}
+        };
+        
+        response.data = _.map(response.data, function (elem) {
+            if (elem.title) {
+                elem.title = _.unescape(elem.title);
+            }
+            
+            if (elem.attachment) {
+                fileIds.push(elem.attachment._id);
+            }
+            
+            return elem;
+        });
+        
+        options.data[CONTENT_TYPES.FILES] = fileIds;
+        
+        getImagesHelper.getImages(options, function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+            
+            const fieldNames = {};
+            const setOptions = {
+                response  : response,
+                imgsObject: result
+            };
+            
+            fieldNames[CONTENT_TYPES.FILES] = ['attachment'];
+            setOptions.fields = fieldNames;
+            
+            getImagesHelper.setIntoResult(setOptions, function (response) {
+                
+                cb(null, response);
+            });
+        });
+    };
+    
+    // ============== METHODS ==================
     
     this.create = function (req, res, next) {
         function queryRun(body) {
@@ -576,7 +1003,7 @@ var Documents = function (db, redis, event) {
                 
                 // if parent exist => check is valid and get breadcrumbs
                 (cb) => {
-                    getBreadcrumbsByParent(parent, cb);
+                    getBreadcrumbsIdsByParent(parent, cb);
                 },
                 
                 (breadcrumbs, cb) => {
@@ -634,6 +1061,7 @@ var Documents = function (db, redis, event) {
         function queryRun(body) {
             const userId = req.session && req.session.uId;
             const id = req.params.id;
+            const isMobile = req.isMobile;
             const {
                 title,
             } = body;
@@ -666,24 +1094,32 @@ var Documents = function (db, redis, event) {
                         }
     
                         const id = model._id;
-                        
-                        if(model.type === 'folder') {
-                            updateAllChildDocuments(id, {editedBy}, (err) => {
+    
+                        if (model.type === 'folder') {
+                            updateAllChildDocuments(id, {editedBy}, (err, modified) => {
                                 if (err) {
                                     return logger.error(`Document: updating child documents error: ${err}`);
                                 }
-        
-                                // child documents updated
+    
+                                cb(null, modified);
                                 // ToDo: push notification only for current user
                             });
                         } else {
+                            cb(null, [id]);
                             // ToDo: push notification only for current user
                         }
-    
-                        cb(null, id);
                     });
                 },
-                getById
+                
+                (modified, cb) => {
+                    if (isMobile) {
+                        // get all changed docs for mobile
+            
+                        getChangedForMobile(modified, cb)
+                    } else {
+                        getById(id, cb)
+                    }
+                }
             ], function (err, result) {
                 if (err) {
                     return next(err);
@@ -715,13 +1151,15 @@ var Documents = function (db, redis, event) {
     this.delete = function (req, res, next) {
         function queryRun(body) {
             const userId = req.session && req.session.uId;
-            const {
-                items,
+            let {
+                ids,
             } = body;
             const editedBy = {
                 user: ObjectId(userId),
                 date: new Date(),
             };
+    
+            ids = ids.objectID();
             
             async.waterfall([
                 (cb) => {
@@ -730,27 +1168,27 @@ var Documents = function (db, redis, event) {
                         $or             : [
                             {
                                 _id: {
-                                    $in: items
+                                    $in: ids
                                 }
                             }, {
                                 breadcrumbs: {
-                                    $in: items
+                                    $in: ids
                                 }
                             }
                         ]
                         
                     };
-                    
-                    DocumentModel.distinct('_id', findObj, function (err, ids) {
+    
+                    DocumentModel.distinct('_id', findObj, function (err, items) {
                         if (err) {
                             return cb(err);
                         }
-                        
-                        if (!ids || !ids.length) {
+        
+                        if (!items || !items.length) {
                             return errorSender.badRequest(cb, 'Document not found')
                         }
-                        
-                        cb(null, ids);
+        
+                        cb(null, items);
                     });
                 },
                 
@@ -771,12 +1209,12 @@ var Documents = function (db, redis, event) {
                     });
                 },
             
-            ], function (err, modified) {
+            ], function (err, data) {
                 if (err) {
                     return next(err);
                 }
                 
-                res.status(200).send({modified});
+                res.status(200).send({data});
             });
         }
         
@@ -801,72 +1239,111 @@ var Documents = function (db, redis, event) {
     
     this.archive = function (req, res, next) {
         function queryRun(body) {
-            const userId = req.session && req.session.uId;
+            const personnelId = req.session && req.session.uId;
+            const isMobile = req.isMobile;
+            
             const {
-                items,
+                ids,
                 archive,
                 parent
             } = body;
             
-            const editedBy = {
-                user: ObjectId(userId),
-                date: new Date(),
-            };
-            
             async.waterfall([
                 (cb) => {
-                    const findObj = {
-                        'createdBy.user': userId,
-                        $or             : [
-                            {
-                                _id: {
-                                    $in: items
-                                }
-                            }, {
-                                breadcrumbs: {
-                                    $in: items
-                                }
-                            }
-                        ]
-                        
-                    };
-                    
-                    DocumentModel.distinct('_id', findObj, function (err, ids) {
+                    if (!parent) {
+                        return cb(null);
+                    }
+    
+                    DocumentModel.findById(parent, (err, model) => {
                         if (err) {
-                            return cb(err);
+                            return cb()
                         }
-                        
-                        if (!ids || !ids.length) {
-                            return errorSender.badRequest(cb, 'Document not found')
+        
+                        if (!model) {
+                            return errorSender.badRequest(cb, 'Target folder is not found')
                         }
-                        
-                        cb(null, ids);
+        
+                        if (model.type !== 'folder') {
+                            return errorSender.badRequest(cb, 'Target folder must be a folder')
+                        }
+        
+                        if (model.archived !== archive) {
+                            return errorSender.badRequest(cb, 'Target folder have wrong archived type')
+                        }
+        
+                        cb(null);
                     });
                 },
-                
-                (ids, cb) => {
-                    const updateObj = {
-                        deleted: true,
-                        editedBy
-                    };
-                    
-                    DocumentModel.update({_id: {$in: ids}}, updateObj, {multi: true}, function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        
-                        // ToDo: push notification only for current user
-                        
-                        cb(null, ids);
-                    });
+    
+                (cb) => {
+        
+                    // get new part of breadcrumbs
+                    // each modified document breadcrumbs will be begin from this breadcrumbs
+                    getBreadcrumbsIdsByParent(parent, cb);
                 },
+    
+                (newBreadcrumbsPart, cb) => {
+                    const modified = [];
+        
+                    async.each(ids, (id, eachCb) => {
+                        let opt = {
+                            id,
+                            archive,
+                            parent,
+                            personnelId,
+                            newBreadcrumbsPart
+                        };
             
+                        cutDocumentWithNested(opt, (err, updatedItems) => {
+                            modified.push(...updatedItems);
+                            eachCb(null)
+                        })
+                    }, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+            
+                        cb(null, modified);
+                    })
+                },
+    
+                (modified, cb) => {
+                    if (isMobile) {
+                        // get all changed docs for mobile
+            
+                        getChangedForMobile(modified, cb)
+                    } else {
+                        // get only parent directory that files are pasted in
+            
+                        getAllDocs({
+                            archived: !!archive,
+                            parent,
+                            personnelId
+                        }, (err, response) => {
+                            if (err) {
+                                return cb(err);
+                            }
+                
+                            if (response.total === 0) {
+                                return cb(null, response);
+                            }
+                
+                            fillImagesIntoResult(response, (err, result) => {
+                                if (err) {
+                                    return cb(err);
+                                }
+                    
+                                cb(null, result);
+                            })
+                        })
+                    }
+                }
             ], function (err, modified) {
                 if (err) {
                     return next(err);
                 }
-                
-                res.status(200).send({modified});
+    
+                res.status(200).send(modified);
             });
         }
         
@@ -880,6 +1357,152 @@ var Documents = function (db, redis, event) {
             }
             
             joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'archive', function (err, body) {
+                if (err) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                }
+                
+                queryRun(body);
+            });
+        });
+    };
+    
+    this.move = function (req, res, next) {
+        function queryRun(body) {
+            const personnelId = req.session && req.session.uId;
+            const isMobile = req.isMobile;
+            
+            const {
+                ids,
+                action,
+                title,
+                archive,
+                parent
+            } = body;
+            
+            if (ids && ids.length > 1 && title) {
+                return errorSender.badRequest(next, 'You can set title only when moving exactly 1 item')
+            }
+            
+            async.waterfall([
+                (cb) => {
+                    if (!parent) {
+                        return cb(null);
+                    }
+                    
+                    DocumentModel.findById(parent, (err, model) => {
+                        if (err) {
+                            return cb()
+                        }
+                        
+                        if (!model || model.deleted) {
+                            return errorSender.badRequest(cb, 'Target folder is not found')
+                        }
+                        
+                        if (model.type !== 'folder') {
+                            return errorSender.badRequest(cb, 'Target folder must be a folder')
+                        }
+                        
+                        cb(null);
+                    });
+                },
+                
+                (cb) => {
+                    
+                    // get new part of breadcrumbs
+                    // each modified document breadcrumbs will be begin from this breadcrumbs
+                    getBreadcrumbsIdsByParent(parent, cb);
+                },
+                
+                (newBreadcrumbsPart, cb) => {
+                    const modified = [];
+                    
+                    async.each(ids, (id, eachCb) => {
+                        let opt = {
+                            id,
+                            archive,
+                            parent,
+                            personnelId,
+                            newBreadcrumbsPart
+                        };
+                        
+                        if (action === 'cut') {
+                            cutDocumentWithNested(opt, (err, updatedItems) => {
+                                if (err) {
+                                    return eachCb(err);
+                                }
+                                
+                                modified.push(...updatedItems);
+                                eachCb(null);
+                            });
+                        } else {
+                            copyDocumentWithNested(opt, (err, updatedItems) => {
+                                if (err) {
+                                    return eachCb(err);
+                                }
+                                
+                                modified.push(...updatedItems);
+                                eachCb(null);
+                            });
+                        }
+                        
+                    }, (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        cb(null, modified);
+                    })
+                },
+                
+                (modified, cb) => {
+                    if (isMobile) {
+                        // get all changed docs for mobile
+                        
+                        getChangedForMobile(modified, cb)
+                    } else {
+                        // get only parent directory that files are pasted in
+                        
+                        getAllDocs({
+                            parent,
+                            personnelId
+                        }, (err, response) => {
+                            if (err) {
+                                return cb(err);
+                            }
+                            
+                            if (response.total === 0) {
+                                return cb(null, response);
+                            }
+                            
+                            fillImagesIntoResult(response, (err, result) => {
+                                if (err) {
+                                    return cb(err);
+                                }
+                                
+                                cb(null, result);
+                            })
+                        })
+                    }
+                }
+            ], function (err, modified) {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(modified);
+            });
+        }
+        
+        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+            if (err) {
+                return next(err);
+            }
+            
+            if (!allowed) {
+                return errorSender.forbidden(next);
+            }
+            
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'move', function (err, body) {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -952,45 +1575,14 @@ var Documents = function (db, redis, event) {
                 if (response.total === 0) {
                     return res.status(200).send(response);
                 }
-                
-                const fileIds = [];
-                const options = {
-                    data: {}
-                };
-                
-                response.data = _.map(response.data, function (elem) {
-                    if (elem.title) {
-                        elem.title = _.unescape(elem.title);
-                    }
-                    
-                    if (elem.attachment) {
-                        fileIds.push(elem.attachment._id);
-                    }
-                    
-                    return elem;
-                });
-                
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-                
-                getImagesHelper.getImages(options, function (err, result) {
+    
+                fillImagesIntoResult(response, (err, result) => {
                     if (err) {
                         return next(err);
                     }
-    
-                    const fieldNames = {};
-                    const setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-    
-                    fieldNames[CONTENT_TYPES.FILES] = ['attachment'];
-                    setOptions.fields = fieldNames;
-    
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
         
-                        res.status(200).send(response);
-                    });
-                });
+                    res.status(200).send(result);
+                })
             })
         }
         
@@ -1125,45 +1717,14 @@ var Documents = function (db, redis, event) {
                 if (response.total === 0) {
                     return next({status: 200, body: response});
                 }
-                
-                const fileIds = [];
-                const options = {
-                    data: {}
-                };
-                
-                response.data = _.map(response.data, function (elem) {
-                    if (elem.title) {
-                        elem.title = _.unescape(elem.title);
-                    }
-                    
-                    if (elem.attachment) {
-                        fileIds.push(elem.attachment._id);
-                    }
-                    
-                    return elem;
-                });
-                
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-                
-                getImagesHelper.getImages(options, function (err, result) {
+    
+                fillImagesIntoResult(response, (err, result) => {
                     if (err) {
                         return next(err);
                     }
-    
-                    const fieldNames = {};
-                    const setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-    
-                    fieldNames[CONTENT_TYPES.FILES] = ['attachment'];
-                    setOptions.fields = fieldNames;
-                    
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-    
-                        next({status: 200, body: response});
-                    });
-                });
+        
+                    next({status: 200, body: result});
+                })
             })
         }
         
@@ -1186,292 +1747,6 @@ var Documents = function (db, redis, event) {
         });
     };
     
-    
-    // ===================================================
-    
-    this.archive = function (req, res, next) {
-        function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var uId = req.session.uId;
-            var editedBy = {
-                user: req.session.uId,
-                date: new Date()
-            };
-            var type = ACTIVITY_TYPES.ARCHIVED
-            var options;
-    
-            function getContractsSecondary(parallelCb) {
-                ContractSecondaryModel.find({documents: {$in: idsToArchive}}, function (err, collection) {
-                    if (err) {
-                        return parallelCb(err);
-                    }
-                    if (collection && collection.length) {
-                        return parallelCb(null, true);
-                    }
-                    parallelCb(null, false);
-                });
-            }
-    
-            function getContractsYearly(parallelCb) {
-                ContractYearlyModel.find({documents: {$in: idsToArchive}}, function (err, collection) {
-                    if (err) {
-                        return parallelCb(err);
-                    }
-                    if (collection && collection.length) {
-                        return parallelCb(null, true);
-                    }
-                    parallelCb(null, false);
-                });
-            }
-    
-            async.parallel([getContractsSecondary, getContractsYearly],
-                function (err, result) {
-                    var error;
-    
-                    if (err) {
-                        return next(err);
-                    }
-                    if (result && result.length && (result[0] || result[1])) {
-                        error = new Error();
-                        error.status = 403;
-                        error.message = 'Document is in use';
-    
-                        return next(error);
-                    }
-                    options = [
-                        {
-                            idsToArchive   : idsToArchive,
-                            keyForCondition: '_id',
-                            archived       : archived,
-                            model          : DocumentModel
-                        }
-                    ];
-                    if (!archived) {
-                        type = ACTIVITY_TYPES.UNARCHIVED;
-                    }
-    
-                    archiver.archive(uId, options, function (err) {
-                        if (err) {
-                            return next(err);
-                        }
-                        async.eachSeries(idsToArchive, function (item, callback) {
-                            // event.emit('activityChange', {
-                            //     module    : 42,
-                            //     actionType: type,
-                            //     createdBy : editedBy,
-                            //     itemId    : item,
-                            //     itemType  : CONTENT_TYPES.DOCUMENTS
-                            // });
-                            callback();
-    
-                        }, function (err) {
-                            if (err) {
-                                logWriter.log('document archived error', err);
-                            }
-                        });
-                        res.status(200).send();
-                    });
-                });
-        }
-        
-        access.getArchiveAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                return errorSender.forbidden(next);
-            }
-            
-            queryRun();
-        });
-    };
-    
-    this.getByIdAggr = function (options, callback) {
-        var aggregateHelper;
-        var pipeLine = [];
-        var aggregation;
-        var id = options.id || '';
-        var isMobile = options.isMobile || false;
-        
-        aggregateHelper = new AggregationHelper($defProjection);
-        
-        pipeLine.push({
-            $match: {
-                _id: id
-            }
-        });
-        
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
-        }));
-        
-        pipeLine.push({
-            $group: {
-                _id         : '$_id',
-                title       : {$first: '$title'},
-                contentType : {$first: '$contentType'},
-                originalName: {$first: '$originalName'},
-                attachments : {$first: '$attachments'},
-                editedBy    : {$first: '$editedBy'},
-                createdBy   : {$first: '$createdBy'}
-            }
-        });
-        
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-        
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
-        }));
-        
-        if (isMobile) {
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
-            }));
-            
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
-                            position : 1,
-                            firstName: 1,
-                            lastName : 1
-                        }
-                    }
-                }
-            }));
-            
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
-                            firstName : 1,
-                            lastName  : 1
-                        }
-                    }
-                }
-            }));
-            
-            pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    creationDate: '$createdBy.date',
-                    updateDate  : '$editedBy.date'
-                })
-            });
-        }
-        
-        aggregation = DocumentModel.aggregate(pipeLine);
-        
-        aggregation.options = {
-            allowDiskUse: true
-        };
-        
-        aggregation.exec(function (err, response) {
-            var options = {
-                data: {}
-            };
-            var personnelIds = [];
-            var fileIds = [];
-            if (err) {
-                return callback(err);
-            }
-            
-            if (!response || !response.length) {
-                return callback(null, response);
-            }
-            response = response[0];
-            
-            if (response.title) {
-                response.title = _.unescape(response.title);
-            }
-            
-            personnelIds.push(response.createdBy.user._id);
-            fileIds.push(response._id);
-            
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
-            
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-                
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.DOCUMENTS] = [];
-                setOptions.fields = fieldNames;
-                
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    response.attachments = {
-                        contentType : response.contentType,
-                        _id         : response.attachments,
-                        preview     : response.preview,
-                        originalName: response.originalName
-                    };
-                    
-                    delete response.preview;
-                    delete response.contentType;
-                    delete response.originalName;
-                    
-                    callback(null, response);
-                })
-            });
-        });
-    };
     
     this.createDocIfNewContract = function (user_Id, _files, callback) {
         var files = _files;
@@ -1505,20 +1780,19 @@ var Documents = function (db, redis, event) {
     
                 function iterator(item, callback) {
                     model = new DocumentModel({
-                        attachments : item._id,
-                        createdBy   : {
+                        attachment: item._id,
+                        createdBy : {
                             user: userId,
                             date: new Date()
                         },
-                        editedBy    : {
+                        editedBy  : {
                             user: userId,
                             date: new Date()
                         },
-                        title       : titles[i],
-                        preview     : (item.preview || item.type),
-                        contentType : item.contentType,
-                        originalName: item.originalName
+                        title     : titles[i],
+                        type      : 'file'
                     });
+    
                     model.save(function (err, result) {
                         if (err) {
                             return callback(err);
@@ -1526,6 +1800,7 @@ var Documents = function (db, redis, event) {
                         arrOfDocId.push(result._id);
                         return callback();
                     });
+    
                     i++;
                 }
     
