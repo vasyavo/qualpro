@@ -14,6 +14,10 @@ define([
         action     : 'اتخاذ إجراء',
         disable    : ' إلغاء تفعيل',
         unDisable  : 'إعادة تفعيل',
+        delete : '', //todo
+        copyButton : '',//todo
+        cutButton : '',//todo
+        pasteButton : '',//todo
         // list
 
         // create

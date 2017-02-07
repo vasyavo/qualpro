@@ -46,7 +46,11 @@ define(function (require) {
             createFile : '#create-file',
             createFolder : '#create-folder',
             archiveButton : '#archive',
-            unArchiveButton : '#unarchive'
+            unArchiveButton : '#unarchive',
+            delete : '#delete',
+            copy : '#copy',
+            cut : '#cut',
+            paste : '#paste'
         },
 
         events : {
@@ -55,7 +59,10 @@ define(function (require) {
             'click @ui.archivedTab' : 'goToArchivedTab',
             'click @ui.unarchivedTab' : 'goToUnarchivedTab',
             'click @ui.createFile' : 'showCreateFileView',
-            'click @ui.createFolder' : 'showCreateFolderView'
+            'click @ui.createFolder' : 'showCreateFolderView',
+            'click @ui.delete' : 'deleteItems',
+            'click @ui.archiveButton' : 'archiveItems',
+            'click @ui.unArchiveButton' : 'unArchiveItems'
         },
 
         checkAllItems : function (event) {
@@ -98,14 +105,20 @@ define(function (require) {
             var ui = this.ui;
 
             if (!ui.unarchivedTab.hasClass('viewBarTabActive')) {
+                var hidden = 'hidden';
+
                 ui.archivedTab.removeClass('viewBarTabActive');
                 ui.unarchivedTab.addClass('viewBarTabActive');
 
-                ui.createFile.removeClass('hidden');
-                ui.createFolder.removeClass('hidden');
+                ui.createFile.removeClass(hidden);
+                ui.createFolder.removeClass(hidden);
 
-                ui.archiveButton.removeClass('hidden');
-                ui.unArchiveButton.addClass('hidden');
+                ui.archiveButton.removeClass(hidden);
+                ui.unArchiveButton.addClass(hidden);
+
+                ui.copy.removeClass(hidden);
+                ui.cut.removeClass(hidden);
+                ui.paste.removeClass(hidden);
 
                 this.unselectAllItems();
 
@@ -119,15 +132,20 @@ define(function (require) {
 
         switchUIToArchiveTab : function () {
             var ui = this.ui;
+            var hidden = 'hidden';
 
             ui.archivedTab.addClass('viewBarTabActive');
             ui.unarchivedTab.removeClass('viewBarTabActive');
 
-            ui.createFile.addClass('hidden');
-            ui.createFolder.addClass('hidden');
+            ui.createFile.addClass(hidden);
+            ui.createFolder.addClass(hidden);
 
-            ui.archiveButton.addClass('hidden');
-            ui.unArchiveButton.removeClass('hidden');
+            ui.archiveButton.addClass(hidden);
+            ui.unArchiveButton.removeClass(hidden);
+
+            ui.copy.addClass(hidden);
+            ui.cut.addClass(hidden);
+            ui.paste.addClass(hidden);
         },
 
         showCreateFileView : function () {
@@ -158,6 +176,18 @@ define(function (require) {
                 that.collection.add(model);
                 that.collection.trigger('sync');
             });
+        },
+
+        deleteItems : function () {
+            this.collection.deleteItems();
+        },
+
+        archiveItems : function () {
+            this.collection.archiveItems('archive');
+        },
+
+        unArchiveItems : function () {
+            this.collection.archiveItems('unarchive');
         },
 
         collectionEvents : {
