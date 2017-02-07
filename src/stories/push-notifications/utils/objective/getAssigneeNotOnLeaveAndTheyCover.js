@@ -58,6 +58,7 @@ module.exports = function * (options) {
     }, {
         $unwind: {
             path: '$cover.accessRole',
+            preserveNullAndEmptyArrays: true,
         },
     }, {
         $project: {
