@@ -1,32 +1,30 @@
-var Documents = function (db, redis, event) {
-    'use strict';
+const async = require('async');
+const _ = require('lodash');
+const mongoose = require('mongoose');
+
+const ACL_MODULES = require('../constants/aclModulesNames');
+const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+const CONSTANTS = require('../constants/mainConstants');
+const ACTIVITY_TYPES = require('../constants/activityTypes');
+const ERROR_MESSAGES = require('../constants/errorMessages');
+
+const DocumentModel = require('./../types/document/model');
+const ContractYearlyModel = require('./../types/contractYearly/model');
+const ContractSecondaryModel = require('./../types/contractSecondary/model');
+
+const FileHandler = require('../handlers/file');
+const GetImagesHelper = require('../helpers/getImages');
+const logWriter = require('../helpers/logWriter.js');
+const errorSender = require('../utils/errorSender');
+const logger = require('../utils/logger');
+const joiValidate = require('../helpers/joiValidate');
+
+const Documents = function (db, redis, event) {
     
-    var async = require('async');
-    var _ = require('lodash');
-    var mongoose = require('mongoose');
-    var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var CONSTANTS = require('../constants/mainConstants');
-    var DocumentModel = require('./../types/document/model');
-    var ContractYearlyModel = require('./../types/contractYearly/model');
-    var ContractSecondaryModel = require('./../types/contractSecondary/model');
-    var FilterMapper = require('../helpers/filterMapper');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var Archiver = require('../helpers/archiver');
-    var archiver = new Archiver(DocumentModel);
-    var logWriter = require('../helpers/logWriter.js');
-    var errorSender = require('../utils/errorSender');
-    var logger = require('../utils/logger');
-    var ERROR_MESSAGES = require('../constants/errorMessages');
-    var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
-    var bodyValidator = require('../helpers/bodyValidator');
-    var joiValidate = require('../helpers/joiValidate');
+    const getImagesHelper = new GetImagesHelper(db);
+    const access = require('../helpers/access')(db);
+    const fileHandler = new FileHandler(db);
+    const ObjectId = mongoose.Types.ObjectId;
     
     // projectTotal option needs for getAll method
     const getMainPipeline = () => {
@@ -1753,75 +1751,73 @@ var Documents = function (db, redis, event) {
     };
     
     
-    this.createDocIfNewContract = function (user_Id, _files, callback) {
-        var files = _files;
-        var userId = user_Id;
-        var model;
-        var titles = Object.keys(files);
-        
-        var files_Ids;
+    this.createDocIfNewContract = function (userId, files, callback) {
+        const titles = Object.keys(files);
         
         async.waterfall([
-            function (wtfCb) {
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.DOCUMENTS, function (err, fileIds) {
+            (cb) => {
+                fileHandler.uploadFile(userId, files, CONTENT_TYPES.DOCUMENTS, (err, ids) => {
                     if (err) {
-                        return wtfCb(err);
+                        return cb(err);
                     }
-                    files_Ids = fileIds;
-                    return wtfCb(null, fileIds);
+            
+                    cb(null, ids);
                 });
             },
-            function (fileIds, wtfCb) {
+    
+            (fileIds, cb) => {
                 fileHandler.getByIds(fileIds, userId, function (err, result) {
                     if (err) {
-                        return wtfCb(err);
+                        return cb(err);
                     }
-                    return wtfCb(null, result);
+    
+                    cb(null, result);
                 });
             },
-            function (fileModels, wtfCb) {
-                var i = 0;
-                var arrOfDocId = [];
+    
+            (fileModels, cb) => {
+                const arrOfDocId = [];
+                const createdBy = {
+                    user: userId,
+                    date: new Date()
+                };
+                
+                let i = 0;
     
                 function iterator(item, callback) {
-                    model = new DocumentModel({
-                        attachment: item._id,
-                        createdBy : {
-                            user: userId,
-                            date: new Date()
-                        },
-                        editedBy  : {
-                            user: userId,
-                            date: new Date()
-                        },
-                        title     : titles[i],
-                        type      : 'file'
-                    });
-    
-                    model.save(function (err, result) {
+                    DocumentModel.create({
+                        attachment : item._id,
+                        breadcrumbs: [],
+                        createdBy  : createdBy,
+                        editedBy   : createdBy,
+                        title      : titles[i],
+                        type       : 'file'
+                    }, function (err, result) {
                         if (err) {
                             return callback(err);
                         }
+        
+                        i++;
                         arrOfDocId.push(result._id);
-                        return callback();
+        
+                        callback(null);
                     });
-    
-                    i++;
                 }
     
                 async.each(fileModels, iterator, function (err) {
                     if (err) {
-                        return wtfCb(err);
+                        return cb(err);
                     }
-                    return wtfCb(null, arrOfDocId);
+    
+                    cb(null, arrOfDocId);
                 });
             }
-        ], function (err, result) {
+        ], (err, result) => {
             if (err) {
                 return callback(err);
             }
-            
-            return callback(null, result);
+    
+            callback(null, result);
         });
     };
 };
