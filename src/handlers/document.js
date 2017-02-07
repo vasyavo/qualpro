@@ -595,6 +595,7 @@ var Documents = function (db, redis, event) {
                 _id        : 1,
                 title      : 1,
                 editedBy   : 1,
+                archived   : 1,
                 parent     : 1,
                 breadcrumbs: {
                     _id  : 1,
@@ -608,6 +609,7 @@ var Documents = function (db, redis, event) {
                 editedBy   : {$first: '$editedBy'},
                 attachment : {$first: '$attachment'},
                 parent     : {$first: '$parent'},
+                archived   : {$first: '$archived'},
                 breadcrumbs: {
                     $push: '$breadcrumbs'
                 }
@@ -641,6 +643,7 @@ var Documents = function (db, redis, event) {
                 _id        : 1,
                 title      : 1,
                 breadcrumbs: 1,
+                archived   : 1,
                 editedBy   : {
                     date: 1,
                     user: {
@@ -659,6 +662,7 @@ var Documents = function (db, redis, event) {
                 _id        : 1,
                 title      : 1,
                 editedBy   : 1,
+                archived   : 1,
                 breadcrumbs: 1,
                 parent     : {
                     $ifNull: ['$parent', null]
@@ -751,20 +755,22 @@ var Documents = function (db, redis, event) {
                     }
                 };
                 
-                DocumentModel.find(findObj, function (err, models) {
+                DocumentModel.find(findObj, '_id, breadcrumbs', function (err, models) {
                     if (err) {
                         return cb(err);
                     }
                     
                     async.each(models, (elem, eachCb) => {
-                        elem.editedBy = editedBy;
-                        elem.breadcrumbs = getUpdatedBreadcrumbs(elem.breadcrumbs, newBreadcrumbsPart, parentId);
+                        let obj = {
+                            editedBy,
+                            breadcrumbs: getUpdatedBreadcrumbs(elem.breadcrumbs, newBreadcrumbsPart, parentId),
+                        };
                         
                         if (typeof archive === 'boolean') {
-                            elem.archived = archive;
+                            obj.archived = archive;
                         }
-                        
-                        model.save(eachCb)
+    
+                        DocumentModel.findByIdAndUpdate(elem._id, obj, eachCb);
                     }, (err) => {
                         if (err) {
                             return cb(err);
@@ -773,7 +779,7 @@ var Documents = function (db, redis, event) {
                         let ids = models.map(el => el._id);
                         ids.push(parentId);
                         
-                        cb(null, ids)
+                        cb(null, ids);
                     });
                 });
             }
@@ -1208,7 +1214,6 @@ var Documents = function (db, redis, event) {
                         cb(null, ids);
                     });
                 },
-            
             ], function (err, data) {
                 if (err) {
                     return next(err);
