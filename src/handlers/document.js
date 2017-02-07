@@ -513,6 +513,10 @@ const Documents = function (db, redis, event) {
             if (err) {
                 return cb(err);
             }
+    
+            if (!doc || doc.deleted) {
+                return errorSender.badRequest(cb, 'Target folder is not found')
+            }
             
             if (doc.type !== 'folder') {
                 return errorSender.badRequest(cb, 'You can create document only inside folder')
@@ -681,8 +685,9 @@ const Documents = function (db, redis, event) {
         if (!parent) {
             return [...newPart];
         }
-        
-        let index = old.fromObjectID().indexOf(parent);
+    
+        let _old = old.fromObjectID();
+        let index = _old.indexOf(parent.toString());
         
         if (index === -1) {
             index = 0;
@@ -716,20 +721,22 @@ const Documents = function (db, redis, event) {
                     if (!model || model.deleted) {
                         return errorSender.badRequest(cb, 'Document not found')
                     }
-                    
-                    model.parent = target;
-                    model.editedBy = editedBy;
-                    model.breadcrumbs = newBreadcrumbsPart;
+    
+                    let updateObj = {
+                        parent     : target,
+                        breadcrumbs: newBreadcrumbsPart,
+                        editedBy
+                    };
                     
                     if (typeof archive === 'boolean') {
-                        model.archived = archive;
+                        updateObj.archived = archive;
                     }
                     
                     if (title) {
-                        model.title = title;
+                        updateObj.title = title;
                     }
-                    
-                    model.save((err) => {
+    
+                    DocumentModel.findByIdAndUpdate(id, updateObj, (err) => {
                         if (err) {
                             return cb(err);
                         }
@@ -752,8 +759,8 @@ const Documents = function (db, redis, event) {
                         $in: [parentId]
                     }
                 };
-                
-                DocumentModel.find(findObj, '_id, breadcrumbs', function (err, models) {
+    
+                DocumentModel.find(findObj, '_id breadcrumbs', function (err, models) {
                     if (err) {
                         return cb(err);
                     }
@@ -891,7 +898,7 @@ const Documents = function (db, redis, event) {
                 const modified = [newModel._id];
                 
                 if (newModel.type === 'file') {
-                    cb(null, modified)
+                    return cb(null, modified)
                 }
                 
                 let parentModels = [newModel];
@@ -1378,7 +1385,6 @@ const Documents = function (db, redis, event) {
                 ids,
                 action,
                 title,
-                archive,
                 parent
             } = body;
             
@@ -1422,7 +1428,6 @@ const Documents = function (db, redis, event) {
                     async.each(ids, (id, eachCb) => {
                         let opt = {
                             id,
-                            archive,
                             parent,
                             personnelId,
                             newBreadcrumbsPart
