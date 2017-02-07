@@ -743,7 +743,7 @@ const Documents = function (db, redis, event) {
                 const parentId = model._id;
                 
                 if (model.type === 'file') {
-                    cb(null, [parentId])
+                   return cb(null, [parentId])
                 }
                 
                 const findObj = {
