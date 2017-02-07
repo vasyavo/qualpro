@@ -23,7 +23,6 @@ require.config({
         Underscore           : './libs/underscore/underscore-min',
         Backbone : './libs/backbone/backbone-min',
         'backbone.radio' : './libs/backbone.radio/build/backbone.radio',
-        'backbone.paginator' : './libs/backbone.paginator/lib/backbone.paginator',
         templates            : '../templates',
         text                 : './libs/requirejs-text/text',
         helpers              : 'helpers',
@@ -48,7 +47,6 @@ require.config({
         jqueryui : ['jQuery'],
         imageCrop: ['jQuery'],
         Backbone : ['Underscore', 'jQuery'],
-        'backbone.paginator' : ['Backbone', 'Underscore'],
         app      : ['Backbone', 'jqueryui', 'imageCrop'],
         d3       : {
             exports: 'd3'

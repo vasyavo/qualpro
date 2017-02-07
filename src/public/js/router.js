@@ -93,8 +93,10 @@ define([
 
                     if (folder) {
                         documentsCollection.url = rootPath + '/' + folder;
+                        documentsCollection.folder = folder;
                     } else {
-                        documentsCollection.url = rootPath
+                        documentsCollection.url = rootPath;
+                        documentsCollection.folder = null;
                     }
 
                     if (filter) {

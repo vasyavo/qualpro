@@ -23,8 +23,7 @@ define(function (require) {
 
         templateContext: function () {
             return {
-                translation: this.translation,
-                filterForArchivedTab : JSON.stringify(this.additionalVariables.filterForArchivedTab)
+                translation: this.translation
             };
         },
 
@@ -62,7 +61,10 @@ define(function (require) {
             'click @ui.createFolder' : 'showCreateFolderView',
             'click @ui.delete' : 'deleteItems',
             'click @ui.archiveButton' : 'archiveItems',
-            'click @ui.unArchiveButton' : 'unArchiveItems'
+            'click @ui.unArchiveButton' : 'unArchiveItems',
+            'click @ui.cut' : 'cut',
+            'click @ui.copy' : 'copy',
+            'click @ui.paste' : 'paste',
         },
 
         checkAllItems : function (event) {
@@ -92,8 +94,10 @@ define(function (require) {
                 this.switchUIToArchiveTab();
                 this.unselectAllItems();
 
-                var filterForArchivedTab = this.additionalVariables.filterForArchivedTab;
+                this.archived = true;
+
                 var collection = this.collection;
+                collection.folder = null;
                 collection.url = CONTENT_TYPES.DOCUMENTS + '/folder?archived=true';
                 collection.fetch();
 
@@ -120,9 +124,12 @@ define(function (require) {
                 ui.cut.removeClass(hidden);
                 ui.paste.removeClass(hidden);
 
+                this.archived = false;
+
                 this.unselectAllItems();
 
                 var collection = this.collection;
+                collection.folder = null;
                 collection.url = CONTENT_TYPES.DOCUMENTS + '/folder';
                 collection.fetch();
 
@@ -183,16 +190,40 @@ define(function (require) {
         },
 
         archiveItems : function () {
-            this.collection.archiveItems('archive');
+            this.collection.archiveItems(true);
         },
 
         unArchiveItems : function () {
-            this.collection.archiveItems('unarchive');
+            this.collection.archiveItems(false);
+        },
+
+        cut : function () {
+            var cuttedOrCopied = this.collection.cuttedOrCopied;
+
+            cuttedOrCopied.action = 'cut';
+            cuttedOrCopied.from = this.collection.folder;
+            cuttedOrCopied.ids = [].concat(this.collection.checked);
+
+            this.ui.paste.removeClass('hidden');
+        },
+
+        copy : function () {
+            var cuttedOrCopied = this.collection.cuttedOrCopied;
+
+            cuttedOrCopied.action = 'copy';
+            cuttedOrCopied.from = this.collection.folder;
+            cuttedOrCopied.ids = [].concat(this.collection.checked);
+
+            this.ui.paste.removeClass('hidden');
+        },
+
+        paste : function () {
+            this.collection.moveItems();
         },
 
         collectionEvents : {
             'item:checked' : 'itemChecked',
-            'sync' : 'whetherOrNotShowSelectAllButton'
+            'sync' : 'onCollectionSync'
         },
 
         itemChecked : function () {
@@ -208,11 +239,27 @@ define(function (require) {
             }
         },
 
+        onCollectionSync : function () {
+            this.whetherOrNotShowSelectAllButton();
+            this.whetherOrNotShowPasteButton();
+        },
+
         whetherOrNotShowSelectAllButton : function () {
             if (this.collection.length) {
                 this.ui.checkboxArea.removeClass('hidden');
             } else {
                 this.ui.checkboxArea.addClass('hidden');
+            }
+        },
+
+        whetherOrNotShowPasteButton : function () {
+            var cuttedOrCopied = this.collection.cuttedOrCopied;
+
+            if (!this.archived && Object.keys(cuttedOrCopied).length && cuttedOrCopied.ids.length) {
+                this.ui.actionHolder.removeClass('hidden');
+                this.ui.paste.removeClass('hidden');
+            } else {
+                this.ui.paste.addClass('hidden');
             }
         },
 
@@ -231,17 +278,6 @@ define(function (require) {
 
             ui.actionHolder.addClass('hidden');
             ui.checkAll.prop('checked', false);
-        },
-
-        additionalVariables : {
-            filterForArchivedTab : {
-                filter : {
-                    archived : {
-                        type : 'boolean',
-                        values : [true]
-                    }
-                }
-            }
         }
 
     });
