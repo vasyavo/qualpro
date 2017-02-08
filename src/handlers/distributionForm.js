@@ -822,7 +822,7 @@ var DistributionForm = function (db, redis, event) {
                         const eventPayload = {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body: objective,
+                            body: objective.toJSON(),
                         };
 
                         if (objective.context === CONTENT_TYPES.OBJECTIVES) {
