@@ -781,10 +781,10 @@ const Documents = function (db, redis, event) {
                             return cb(err);
                         }
                         
-                        let ids = models.map(el => el._id);
-                        ids.push(parentId);
+                        let updatedDocIds = models.map(el => el._id);
+                        updatedDocIds.push(parentId);
                         
-                        cb(null, ids);
+                        cb(null, updatedDocIds);
                     });
                 });
             }
@@ -817,13 +817,22 @@ const Documents = function (db, redis, event) {
             }
             
             async.each(needToCopyModels, function (oldModel, eachCb) {
-                let createObj = {
+                const editedBy = {
+                    user: oldModel.editedBy.user,
+                    date: new Date()
+                };
+    
+                const createObj = {
+                    archived   : oldModel.archived,
+                    attachment : oldModel.attachment,
                     title      : oldModel.title,
                     type       : oldModel.type,
                     parent     : parentModel._id,
-                    breadcrumbs: [...parentModel.breadcrumbs, parentModel._id]
+                    breadcrumbs: [...parentModel.breadcrumbs, parentModel._id],
+                    createdBy  : editedBy,
+                    editedBy
                 };
-                
+    
                 DocumentModel.create(createObj, (err, newModel) => {
                     if (err) {
                         return eachCb(err);
@@ -872,10 +881,12 @@ const Documents = function (db, redis, event) {
                     if (!model || model.deleted) {
                         return errorSender.badRequest(cb, 'Document not found')
                     }
-                    
+    
                     let createObj = {
                         title      : title || model.title,
                         archived   : model.archived,
+                        attachment : model.attachment,
+                        type       : model.type,
                         parent     : target,
                         editedBy   : editedBy,
                         createdBy  : editedBy,
@@ -904,13 +915,12 @@ const Documents = function (db, redis, event) {
                 let parentModels = [newModel];
                 
                 async.whilst(
-                    // condition func
-                    () => {
+                    () => {  // <= condition func
                         return !!parentModels.length
                     },
                     
-                    // iterator func
-                    (callback) => {
+                    (callback) => { // <= iterator func
+                        // here will be pushed folders for the next iteration
                         let tempParentModels = [];
                         
                         async.each(parentModels, (parentModel, eachCb) => {
@@ -932,13 +942,13 @@ const Documents = function (db, redis, event) {
                             parentModels = [...tempParentModels];
                             callback(null)
                         });
-                    }, (err) => {
+                    }, (err) => { // <= final cb
                         if (err) {
                             return cb(err);
                         }
                         
                         cb(null, modified);
-                    }); // final cb
+                    });
             }
         ], function (err, modified) {
             if (err) {
@@ -1299,7 +1309,7 @@ const Documents = function (db, redis, event) {
                         let opt = {
                             id,
                             archive,
-                            parent,
+                            target: parent,
                             personnelId,
                             newBreadcrumbsPart
                         };
@@ -1389,7 +1399,11 @@ const Documents = function (db, redis, event) {
             } = body;
             
             if (ids && ids.length > 1 && title) {
-                return errorSender.badRequest(next, 'You can set title only when moving exactly 1 item')
+                return errorSender.badRequest(next, 'You can set title only when moving exactly 1 item');
+            }
+    
+            if (parent && ids.indexOf(parent) !== -1) {
+                return errorSender.badRequest(next, 'You cannot paste files inside itself');
             }
             
             async.waterfall([
@@ -1428,7 +1442,7 @@ const Documents = function (db, redis, event) {
                     async.each(ids, (id, eachCb) => {
                         let opt = {
                             id,
-                            parent,
+                            target: parent,
                             personnelId,
                             newBreadcrumbsPart
                         };
