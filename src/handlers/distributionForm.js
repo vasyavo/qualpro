@@ -1,4 +1,7 @@
-'use strict';
+const extractBody = require('./../utils/extractBody');
+const ObjectiveModel = requie('./../types/objective/model');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var DistributionForm = function (db, redis, event) {
     var mongoose = require('mongoose');
     var async = require('async');
@@ -36,58 +39,35 @@ var DistributionForm = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var userId = req.session.uId;
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
 
-            self.createForm(userId, body, function (err, model) {
-                if (err) {
-                    return next(err);
-                }
+        const queryRun = (body, callback) => {
+            self.createForm(userId, body, callback);
+        };
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.OBJECTIVE,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : model.get('createdBy'),
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.DISTRIBUTIONFORM
-                });
+        async.waterfall([
 
-                res.status(201).send(model);
-            });
-        }
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
 
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body = req.body;
+            (personnel, allowed, cb) => {
+                const body = extractBody(req.body);
 
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.DISTRIBUTIONFORM, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, model) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DISTRIBUTIONFORM, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(201).send(model);
         });
     };
 
@@ -721,125 +701,139 @@ var DistributionForm = function (db, redis, event) {
 
     };
 
-    this.update = function (req, res, next) {
-        function queryRun(body) {
-            var id = req.params.id;
-            var bodyItems = body.items || [];
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
 
-            DistributionFormModel.findById(id, function (err, model) {
-                var isItems = {};
-                var objModelItems;
+        const queryRun = (body, callback) => {
+            const setItemBody = body.items || [];
 
+            DistributionFormModel.findById(id, (err, model) => {
                 if (err) {
                     return next(err);
                 }
 
                 if (!model) {
-                    return next();
+                    const error = new Error('Form not found');
+
+                    error.status = 400;
+                    return next(error);
                 }
 
-                objModelItems = model.items.toObject();
+                const formAsJson = model.toJSON();
+                const setItem = formAsJson.items;
+                const isItems = {};
 
-                objModelItems.forEach(function (objModelItem, index) {
-                    var itemId = objModelItem.item.toJSON();
-                    var isBranches = {};
+                setItem.forEach((container, index) => {
+                    const itemId = container.item;
+                    const branches = {};
 
-                    objModelItem.branches.forEach(function (branch, index) {
-                        var branchId = branch.branch.toJSON();
+                    container.branches.forEach((container, index) => {
+                        const branchId = container.branch;
 
-                        isBranches[branchId] = {index: index};
+                        branches[branchId] = {
+                            index,
+                        };
                     });
 
                     isItems[itemId] = {
-                        index   : index,
-                        branches: isBranches
+                        index,
+                        branches,
                     };
                 });
 
-                bodyItems.forEach(function (bodyItem) {
-                    var categoryId = bodyItem.category;
-                    var variantId = bodyItem.variant;
-                    var itemId = bodyItem.item;
-                    var isBranches;
+                setItemBody.forEach((container) => {
+                    const itemId = container.item;
 
                     if (isItems[itemId]) {
-                        isBranches = isItems[itemId].branches;
+                        const isBranches = isItems[itemId].branches;
 
-                        bodyItem.branches.forEach(function (bodyItemBranch, index) {
-                            var branchId = bodyItemBranch.branch;
-                            var itemIndex = isItems[itemId].index;
-                            var branchIndex;
+                        return container.branches.forEach((bodyItemBranch, index) => {
+                            const branchId = bodyItemBranch.branch;
+                            const itemIndex = isItems[itemId].index;
 
                             if (isBranches[branchId]) {
-                                branchIndex = isBranches[branchId].index;
+                                const branchIndex = isBranches[branchId].index;
+
                                 model.items[itemIndex].branches[branchIndex].set(bodyItemBranch);
                             } else {
-                                isBranches[bodyItemBranch.branch] = {index: index};
+                                isBranches[bodyItemBranch.branch] = {
+                                    index,
+                                };
 
                                 model.items[itemIndex].branches.push(bodyItemBranch);
-                                model.branches.addToSet(bodyItemBranch.branch);
+                                model.branches = {
+                                    $addToSet: bodyItemBranch.branch,
+                                };
                             }
                         });
-                    } else {
-                        isItems[itemId] = {
-                            index   : model.items.length,
-                            branches: {}
-                        };
-
-                        model.items.push(bodyItem);
-
-                        bodyItem.branches.forEach(function (bodyItemBranch, index) {
-                            isItems[itemId].branches[bodyItemBranch.branch] = {index: index};
-
-                            model.branches.addToSet(bodyItemBranch.branch);
-                        });
                     }
+
+                    isItems[itemId] = {
+                        index: model.items.length,
+                        branches: {},
+                    };
+
+                    model.items.push(container);
+
+                    container.branches.forEach((bodyItemBranch, index) => {
+                        isItems[itemId].branches[bodyItemBranch.branch] = {
+                            index,
+                        };
+                        model.branches.addToSet(bodyItemBranch.branch);
+                    });
                 });
 
                 model.editedBy = {
-                    user: req.session.uId,
-                    date: Date.now()
+                    user: userId,
+                    date: Date.now(),
                 };
 
-                model.save({new: true}, function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.OBJECTIVE,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : result.get('editedBy'),
-                        itemId    : result._id,
-                        itemType  : CONTENT_TYPES.DISTRIBUTIONFORM
-                    });
-
-                    res.status(200).send(result);
+                model.save((err, model) => {
+                    callback(err, model);
                 });
             });
-        }
+        };
 
-        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body = req.body;
+        async.waterfall([
 
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                bodyValidator.validateBody(req.body, accessRoleLevel, CONTENT_TYPES.DISTRIBUTIONFORM, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
+            ObjectiveModel.findById(result.objective)
+                .then((objective) => {
+                    if (objective) {
+                        const eventPayload = {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: objective,
+                        };
 
-                return next(err);
-            }
+                        if (objective.context === CONTENT_TYPES.OBJECTIVES) {
+                            ActivityLog.emit('objective:updated', eventPayload);
+                        }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DISTRIBUTIONFORM, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
+                        if (objective.context === CONTENT_TYPES.INSTORETASKS) {
+                            ActivityLog.emit('in-store-task:updated', eventPayload);
+                        }
+                    }
+                });
 
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 
