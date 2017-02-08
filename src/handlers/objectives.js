@@ -168,15 +168,15 @@ var Objectives = function (db, redis, event) {
 
                 if (options.title) {
                     subObjectiveData.title = {
-                        en: _.escape(_.get(options, 'title.en') || ''),
-                        ar: _.escape(_.get(options, 'title.ar') || ''),
+                        en: lodash.escape(lodash.get(options, 'title.en') || ''),
+                        ar: lodash.escape(lodash.get(options, 'title.ar') || ''),
                     };
                 }
 
                 if (options.description) {
                     subObjectiveData.description = {
-                        en: _.escape(_.get(options, 'description.en') || ''),
-                        ar: _.escape(_.get(options, 'description.ar') || ''),
+                        en: lodash.escape(lodash.get(options, 'description.en') || ''),
+                        ar: lodash.escape(lodash.get(options, 'description.ar') || ''),
                     };
                 }
 
@@ -209,8 +209,8 @@ var Objectives = function (db, redis, event) {
 
                 if (options.companyObjective) {
                     subObjectiveData.companyObjective = {
-                        en: _.escape(_.get(options, 'companyObjective.en') || ''),
-                        ar: _.escape(_.get(options, 'companyObjective.ar') || ''),
+                        en: lodash.escape(lodash.get(options, 'companyObjective.en') || ''),
+                        ar: lodash.escape(lodash.get(options, 'companyObjective.ar') || ''),
                     };
                 }
 
@@ -519,12 +519,12 @@ var Objectives = function (db, redis, event) {
                         OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
 
                     body.title = {
-                        en: _.escape(_.get(body, 'title.en') || ''),
-                        ar: _.escape(_.get(body, 'title.ar') || ''),
+                        en: lodash.escape(lodash.get(body, 'title.en') || ''),
+                        ar: lodash.escape(lodash.get(body, 'title.ar') || ''),
                     };
                     body.description = {
-                        en: _.escape(_.get(body, 'description.en') || ''),
-                        ar: _.escape(_.get(body, 'description.ar') || ''),
+                        en: lodash.escape(lodash.get(body, 'description.en') || ''),
+                        ar: lodash.escape(lodash.get(body, 'description.ar') || ''),
                     };
 
                     const data = {
@@ -748,15 +748,15 @@ var Objectives = function (db, redis, event) {
                 }
 
                 if ($set.title) {
-                    $set['title.en'] = _.escape(_.get($set, 'title.en') || '');
-                    $set['title.ar'] = _.escape(_.get($set, 'title.ar') || '');
+                    $set['title.en'] = lodash.escape(lodash.get($set, 'title.en') || '');
+                    $set['title.ar'] = lodash.escape(lodash.get($set, 'title.ar') || '');
 
                     delete $set.title;
                 }
 
                 if ($set.description) {
-                    $set['description.en'] = _.escape(_.get($set, 'description.en') || '');
-                    $set['description.ar'] = _.escape(_.get($set, 'description.ar') || '');
+                    $set['description.en'] = lodash.escape(lodash.get($set, 'description.en') || '');
+                    $set['description.ar'] = lodash.escape(lodash.get($set, 'description.ar') || '');
 
                     delete $set.description;
                 }
