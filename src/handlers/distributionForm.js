@@ -826,11 +826,11 @@ var DistributionForm = function (db, redis, event) {
                         };
 
                         if (objective.context === CONTENT_TYPES.OBJECTIVES) {
-                            ActivityLog.emit('objective:updated', eventPayload);
+                            ActivityLog.emit('objective:distribution-form:updated', eventPayload);
                         }
 
                         if (objective.context === CONTENT_TYPES.INSTORETASKS) {
-                            ActivityLog.emit('in-store-task:updated', eventPayload);
+                            ActivityLog.emit('in-store-task:distribution-form:updated', eventPayload);
                         }
                     }
                 });

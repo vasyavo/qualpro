@@ -10,6 +10,7 @@ activityLog.on('objective:reassigned', require('./methods/objective/updated')); 
 activityLog.on('objective:comment-added', require('./methods/objective/commentAdded'));
 activityLog.on('objective:overdue', require('./methods/objective/overdue'));
 activityLog.on('objective:fail', require('./methods/objective/fail'));
+activityLog.on('objective:distribution-form:updated', require('./methods/objective/distributionFormUpdated'));
 
 activityLog.on('sub-objective:draft-created', require('./methods/objective/sub/draftCreated'));
 activityLog.on('sub-objective:published', require('./methods/objective/sub/published'));
@@ -23,6 +24,7 @@ activityLog.on('in-store-task:reassigned', require('./methods/inStoreTask/update
 activityLog.on('in-store-task:comment-added', require('./methods/inStoreTask/commentAdded'));
 activityLog.on('in-store-task:overdue', require('./methods/inStoreTask/overdue'));
 activityLog.on('in-store-task:fail', require('./methods/inStoreTask/fail'));
+activityLog.on('in-store-task:distribution-form:updated', require('./methods/inStoreTask/distributionFormUpdated'));
 
 activityLog.on('personnel:created', require('./methods/personnel/created'));
 activityLog.on('personnel:updated', require('./methods/personnel/updated'));
