@@ -1572,14 +1572,14 @@ const Documents = function (db, redis, event) {
                 session: {uId : personnelId} = {uId: null}
             } = req;
             const {
-                skip,
+                page,
                 count,
                 sortBy,
                 sortOrder,
                 archived,
                 search,
             } = query;
-            
+            const skip = (page - 1) * count;
             getAllDocs({
                 skip,
                 count,
