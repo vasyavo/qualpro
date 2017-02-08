@@ -1,12 +1,13 @@
-'use strict';
-
+const async = require('async');
+const extractBody = require('./../utils/extractBody');
 const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
 const TestUtils = require('./../stories/push-notifications/utils/TestUtils');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
+const logger = require('./../utils/logger');
+const toString = require('./../utils/toString');
 
 var Objectives = function (db, redis, event) {
-    var async = require('async');
     var _ = require('underscore');
     var lodash = require('lodash');
     var mongoose = require('mongoose');
@@ -20,14 +21,14 @@ var Objectives = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
+    var getImagesHelper = new GetImageHelper();
     var ObjectiveModel = require('./../types/objective/model');
     var PersonnelModel = require('./../types/personnel/model');
     var ObjectiveHistoryModel = require('./../types/objectiveHistory/model');
     var FilterMapper = require('../helpers/filterMapper');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var access = require('../helpers/access')(db);
+    var fileHandler = new FileHandler();
+    var access = require('../helpers/access')();
     var ObjectId = mongoose.Types.ObjectId;
     var FileModel = require('./../types/file/model');
     var DistributionFormHandler = require('../handlers/distributionForm');
@@ -75,143 +76,116 @@ var Objectives = function (db, redis, event) {
         archived         : 1
     };
 
-    function createSubObjective(options, callback) {
-        options = options || {};
-        var parentId = options.parentId;
-        var files = options.files;
-        var assignedToIds = options.assignedToIds;
-        var createdById = options.createdById;
-        var isMobile = options.isMobile;
-        var companyObjective;
-        var description;
-        var parent;
-        var title;
-        var model;
-        var subObjective;
-        var createdBy;
-        var dateStart;
-        var dateEnd;
-        var priority;
-        var newAttachments;
-        var newCountSubTasks;
-        var newProgress;
-        var parentIds;
-        var level = options.level;
-        var saveObjective = options.saveObjective;
-        var attachments = options.attachments || [];
-        var error;
-        var formType = options.formType;
-        var newObjectiveId;
+    const createSubObjective = (options, callback) => {
+        const {
+            parentId,
+            files,
+            isMobile,
+        } = options;
+        const saveObjective = options.saveObjective;
         const accessRoleLevel = options.level;
+        const actionOriginator = options.createdById;
+        const attachments = [];
+        const createdBy = {
+            user: actionOriginator,
+            date: Date.now(),
+        };
 
-        if (!parentId || !createdById) {
-            error = new Error('Not enough params');
-            error.status = 400;
-            return callback(error);
-        }
+        if (!parentId || !actionOriginator || !options.assignedToIds.length) {
+            const error = new Error('Not enough params');
 
-        if (!assignedToIds.length) {
-            error = new Error('Not enough params');
             error.status = 400;
             return callback(error);
         }
 
         async.waterfall([
 
-            function (cb) {
+            (cb) => {
                 if (!files) {
                     return cb(null, []);
                 }
 
-                // TODO: change bucket from constants
-                fileHandler.uploadFile(createdById, files, 'objectives', function (err, filesIds) {
+                fileHandler.uploadFile(actionOriginator, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
                     if (err) {
                         return cb(err, null);
                     }
 
-                    cb(null, filesIds);
+                    cb(null, setFileId);
                 });
             },
 
-            function (filesIds, cb) {
-                ObjectiveModel
-                    .findById(parentId, function (err, parentObjectiveModel) {
-                        var error;
+            (setFileId, cb) => {
+                ObjectiveModel.findById(parentId, (err, parentObjective) => {
+                    if (err) {
+                        return cb(err);
+                    }
 
-                        if (err) {
-                            return cb(err, null);
-                        }
+                    if (!parentObjective) {
+                        const error = new Error('Objective not found');
 
-                        if (!parentObjectiveModel) {
-                            error = new Error('Objective not found');
-                            error.status = 400;
+                        error.status = 400;
+                        return cb(error);
+                    }
 
-                            return cb(error, null);
-                        }
+                    attachments.push(...options.attachments.objectID(), ...setFileId);
 
-                        companyObjective = options.companyObjective || parentObjectiveModel.companyObjective;
-                        description = options.description;
-                        parent = parentObjectiveModel.parent;
-                        title = options.title;
-                        createdBy = {
-                            user: createdById,
-                            date: new Date()
-                        };
-                        dateStart = options.dateStart || parentObjectiveModel.dateStart;
-                        dateEnd = options.dateEnd || parentObjectiveModel.dateEnd;
-                        priority = options.priority || parentObjectiveModel.priority;
-                        attachments = attachments.objectID();
-                        newAttachments = attachments.concat(filesIds);
-
-                        cb(null, parentObjectiveModel);
-                    });
+                    cb(null, parentObjective);
+                });
             },
 
-            function (parentObjectiveModel, cb) {
-                subObjective = {
-                    objectiveType: parentObjectiveModel.objectiveType,
-                    priority     : priority,
-                    status       : saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS,
-                    assignedTo   : assignedToIds || [],
-                    level        : level,
-                    dateStart    : dateStart,
-                    dateEnd      : dateEnd,
-                    createdBy    : createdBy,
-                    editedBy     : createdBy,
-                    attachments  : newAttachments,
-                    location     : options.location,
-                    country      : options.country,
-                    region       : options.region,
-                    subRegion    : options.subRegion,
+            (parentObjective, cb) => {
+                const createdBy = {
+                    user: actionOriginator,
+                    date: new Date(),
+                };
+                const subObjectiveData = {
+                    description: options.description,
+                    parentObjective: parentObjective.parent,
+                    title: options.title,
+                    priority: options.priority || parentObjective.priority,
+                    objectiveType: parentObjective.objectiveType,
+                    status: saveObjective ?
+                        OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS,
+                    assignedTo: options.assignedToIds || [],
+                    level: accessRoleLevel,
+                    dateStart: options.dateStart || parentObjective.dateStart,
+                    dateEnd: options.dateEnd || parentObjective.dateEnd,
+                    createdBy,
+                    editedBy: createdBy,
+                    attachments,
+                    location: options.location,
+                    country: options.country,
+                    region: options.region,
+                    subRegion: options.subRegion,
                     retailSegment: options.retailSegment,
-                    outlet       : options.outlet,
-                    branch       : options.branch
+                    outlet: options.outlet,
+                    branch: options.branch,
                 };
 
-                if (!formType && parentObjectiveModel.form) {
-                    subObjective.form = parentObjectiveModel.form;
+                if (!options.formType && parentObjective.form) {
+                    subObjectiveData.form = parentObjective.form;
                 }
 
-                if (title && (title.en || title.ar)) {
-                    subObjective.title = {
-                        en: _.escape(title.en),
-                        ar: _.escape(title.ar)
+                if (options.title) {
+                    subObjectiveData.title = {
+                        en: lodash.escape(lodash.get(options, 'title.en') || ''),
+                        ar: lodash.escape(lodash.get(options, 'title.ar') || ''),
                     };
                 }
 
-                if (description && (description.en || description.ar)) {
-                    subObjective.description = {
-                        en: _.escape(description.en),
-                        ar: _.escape(description.ar)
+                if (options.description) {
+                    subObjectiveData.description = {
+                        en: lodash.escape(lodash.get(options, 'description.en') || ''),
+                        ar: lodash.escape(lodash.get(options, 'description.ar') || ''),
                     };
                 }
 
-                if (parent) {
-                    subObjective.parent = {
-                        1: parent['1'] || null,
-                        2: parent['2'] || null,
-                        3: parent['3'] || null,
-                        4: parent['4'] || null
+                if (parentObjective.parent) {
+                    subObjectiveData.parent = {
+                        1: parentObjective.parent['1'] || null,
+                        2: parentObjective.parent['2'] || null,
+                        3: parentObjective.parent['3'] || null,
+                        4: parentObjective.parent['4'] || null,
                     };
                     /*
                     * less then or equals to Area in Charge manager without Trade Marketer
@@ -224,234 +198,210 @@ var Objectives = function (db, redis, event) {
                         ACL_CONSTANTS.SALES_MAN,
                     ];
 
-                    if (parentObjectiveModel.level && everyAdmin.indexOf(parentObjectiveModel.level) > -1) {
-                        subObjective.parent[parentObjectiveModel.get('level')] = parentObjectiveModel.get('_id');
+                    if (parentObjective.level && everyAdmin.indexOf(parentObjective.level) > -1) {
+                        subObjectiveData.parent[parentObjective.get('level')] = parentObjective.get('_id');
                     }
                 }
 
-                if (companyObjective && subObjective.parent && (companyObjective.en || companyObjective.ar)) {
-                    subObjective.companyObjective = {
-                        en: _.escape(companyObjective.en),
-                        ar: _.escape(companyObjective.ar)
+                if (parentObjective.companyObjective) {
+                    subObjectiveData.companyObjective = parentObjective.companyObjective;
+                }
+
+                if (options.companyObjective) {
+                    subObjectiveData.companyObjective = {
+                        en: lodash.escape(lodash.get(options, 'companyObjective.en') || ''),
+                        ar: lodash.escape(lodash.get(options, 'companyObjective.ar') || ''),
                     };
                 }
 
-                cb(null, subObjective, parentObjectiveModel);
+                const objective = new ObjectiveModel();
+
+                objective.set(subObjectiveData);
+                objective.save((err, objective) => {
+                    cb(err, objective);
+                });
             },
 
-            function (saveData, parentObjectiveModel, cb) {
-                model = new ObjectiveModel(saveData);
-                model.save(function (err, objective) {
+            (objective, cb) => {
+                if (options.formType === 'distribution') {
+                    const data = {
+                        objective: objective.get('_id'),
+                    };
+
+                    return distributionFormHandler.createForm(actionOriginator, data, (err, formModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        objective.form = {
+                            _id: formModel.get('_id'),
+                            contentType: options.formType,
+                        };
+
+                        cb(null, objective);
+                    });
+                }
+
+                if (options.formType === 'visibility') {
+                    const data = {
+                        objective: objective.get('_id'),
+                        createdBy,
+                    };
+
+                    return visibilityFormHandler.createForm(actionOriginator, data, (err, formModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        objective.form = {
+                            _id: formModel.get('_id'),
+                            contentType: options.formType,
+                        };
+
+                        cb(null, objective);
+                    });
+                }
+            },
+
+            (objective, cb) => {
+                if (!options.formType) {
+                    return cb(null, objective);
+                }
+
+                objective.save((err) => {
                     if (err) {
                         return cb(err);
                     }
-                    newObjectiveId = objective._id;
 
                     cb(null, objective);
                 });
             },
 
-            function (objectiveModel, cb) {
-                const hasForm = formType;
-                const isDistribution = hasForm && formType === 'distribution';
-
-                // skip in case with visibility form
-                if (!hasForm || isDistribution) {
-                    if (TestUtils.isObjectiveDraft(objectiveModel)) {
-                        ActivityLog.emit('sub-objective:draft-created', {
-                            actionOriginator: createdById,
-                            accessRoleLevel,
-                            body: objectiveModel.toJSON(),
-                        });
-                    }
-
-                    if (TestUtils.isObjectivePublished(objectiveModel)) {
-                        ActivityLog.emit('sub-objective:published', {
-                            actionOriginator: createdById,
-                            accessRoleLevel,
-                            body: objectiveModel.toJSON(),
-                        });
-                    }
-                }
-
-                if (formType === 'distribution') {
-                    const data = {
-                        objective: objectiveModel.get('_id')
-                    };
-
-                    return distributionFormHandler.createForm(createdById, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                if (formType === 'visibility') {
-                    const data = {
-                        objective: objectiveModel.get('_id'),
-                        createdBy,
-                    };
-
-                    return visibilityFormHandler.createForm(createdById, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                cb(null, objectiveModel);
-            },
-
-            function (objectiveModel, cb) {
-                if (!formType) {
-                    return cb(null, objectiveModel);
-                }
-
-                objectiveModel.save(function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null, objectiveModel);
-                });
-            },
-
-            function (objectiveModel, cb) {
-                var nextParent;
-                var objectiveModelClone = _.extend({}, objectiveModel.toObject());
-                var level = objectiveModelClone.level;
-                var parents = objectiveModelClone.parent;
-
-                var seriesTasks = [];
-
-                function updateParentObjective(id, seriesCb) {
+            (objective, cb) => {
+                const updateParentObjective = (id, seriesCb) => {
                     async.waterfall([
+
                         (cb) => {
-                            ObjectiveModel.findById(id, function (err, parentModel) {
+                            ObjectiveModel.findById(id, (err, parent) => {
                                 if (err) {
                                     return cb(err);
                                 }
 
-                                if (!parentModel) {
-                                    return cb('Parent objective not found');
+                                if (!parent) {
+                                    const error = new Error('Parent objective not found');
+
+                                    error.status = 400;
+                                    return cb(error);
                                 }
 
-                                cb(null, parentModel);
+                                cb(null, parent);
                             });
                         },
 
-                        (parentModel, cb) => {
-                            var query = {
-                                level: parseInt(parentModel.level, 10) + 1
+                        (parent, cb) => {
+                            const query = {
+                                level: parseInt(parent.level, 10) + 1,
                             };
 
-                            query['parent.' + parentModel.level] = parentModel._id;
+                            query[`parent.${parent.level}`] = parent._id;
 
-                            ObjectiveModel.find(query, function (err, childModels) {
-                                var complete;
+                            ObjectiveModel.find(query, (err, children) => {
+                                const countSubTasks = children.filter((child) => (child.status !== 'draft'));
+                                const completedSubTasks = children.filter((child) => (child.status === 'completed'));
 
-                                parentModel.countSubTasks = _.filter(childModels, function (model) {
-                                    return model.status !== 'draft';
-                                }).length;
-                                parentModel.completedSubTasks = _.filter(childModels, function (model) {
-                                    return model.status === 'completed';
-                                }).length;
+                                parent.countSubTasks = countSubTasks.length;
+                                parent.completedSubTasks = completedSubTasks.length;
 
-                                complete = Math.floor(parentModel.completedSubTasks * 100 / parentModel.countSubTasks);
+                                const complete = Math.floor((parent.completedSubTasks * 100) / parent.countSubTasks);
 
                                 if (isNaN(complete) || !isFinite(complete)) {
-                                    parentModel.complete = 0;
+                                    parent.complete = 0;
                                 } else {
-                                    parentModel.complete = complete;
+                                    parent.complete = complete;
                                 }
 
-                                if (parentModel.complete >= 100 && parentModel.status === OBJECTIVE_STATUSES.RE_OPENED) {
-                                    parentModel.status = OBJECTIVE_STATUSES.CLOSED;
+                                if (parent.complete >= 100 && parent.status === OBJECTIVE_STATUSES.RE_OPENED) {
+                                    parent.status = OBJECTIVE_STATUSES.CLOSED;
                                 }
 
-                                if (parentModel.complete < 100 && parentModel.status === OBJECTIVE_STATUSES.CLOSED) {
-                                    parentModel.status = OBJECTIVE_STATUSES.RE_OPENED;
+                                if (parent.complete < 100 && parent.status === OBJECTIVE_STATUSES.CLOSED) {
+                                    parent.status = OBJECTIVE_STATUSES.RE_OPENED;
                                 }
 
-                                cb(null, parentModel);
+                                cb(null, parent);
                             });
-                        }
+                        },
 
                     ], (err, parentModel) => {
                         if (err) {
                             return seriesCb(err);
                         }
 
-                        parentModel.save(function (err) {
+                        parentModel.save((err) => {
                             if (err) {
                                 return seriesCb(err);
                             }
-                            event.emit('activityChange', {
-                                module    : 7,
-                                actionType: ACTIVITY_TYPES.UPDATED,
-                                createdBy : createdBy,
-                                itemId    : parentModel._id,
-                                itemType  : CONTENT_TYPES.OBJECTIVES
+
+                            ActivityLog.emit('sub-objective:updated', {
+                                actionOriginator,
+                                accessRoleLevel,
+                                body: parentModel.toJSON(),
                             });
+
                             seriesCb(null);
                         });
                     });
-                }
+                };
+                const series = Object.keys(objective.parent)
+                    .map(parentLevel => {
+                        const parent = objective.parent[parentLevel];
 
-                for (var i = level - 1; i >= 1; i--) {
-                    nextParent = parents[i];
-                    if (nextParent) {
-                        seriesTasks.push(
-                            async.apply(updateParentObjective, nextParent)
-                        );
-                    }
-                }
+                        if (parent) {
+                            return (cb) => {
+                                updateParentObjective(parent, cb);
+                            };
+                        }
 
-                async.series(seriesTasks, function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
+                        return false;
+                    })
+                    .filter(it => it);
 
-                    cb(null);
+                async.series(series, (err) => {
+                    cb(err, objective);
                 });
             },
 
-            function (cb) {
-                newObjectiveId = typeof newObjectiveId === 'string' ? ObjectId(newObjectiveId) : newObjectiveId;
+            (objective, cb) => {
+                const isNotVisibility = options.formType !== 'visibility';
 
-                self.getByIdAggr({id: newObjectiveId, isMobile: isMobile}, function (err, result) {
-                    if (err) {
-                        return cb(err);
+                if (isNotVisibility) {
+                    if (TestUtils.isObjectiveDraft(objective)) {
+                        ActivityLog.emit('sub-objective:draft-created', {
+                            actionOriginator,
+                            accessRoleLevel,
+                            body: objective.toJSON(),
+                        });
                     }
 
-                    return cb(null, result);
-                });
+                    if (TestUtils.isObjectivePublished(objective)) {
+                        ActivityLog.emit('sub-objective:published', {
+                            actionOriginator,
+                            accessRoleLevel,
+                            body: objective.toJSON(),
+                        });
+                    }
+                }
 
-            }
+                const id = objective.get('_id');
 
-        ], function (err, parentCollection) {
+                self.getByIdAggr({
+                    id,
+                    isMobile,
+                }, cb);
+            },
 
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, parentCollection);
-        });
-    }
+        ], callback);
+    };
 
     this.getUrl = function (req, res, next) {
         var imageName = req.params.imageName;
@@ -526,132 +476,91 @@ var Objectives = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
+    this.create = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
+        const isMobile = req.isMobile;
 
-        function queryRun(body) {
-            var files = req.files;
-            var model;
-            var saveObjective;
-            var objective;
-            var error;
+        const queryRun = (body, callback) => {
+            const files = req.files;
             const createdBy = {
                 user: userId,
-                date: new Date()
+                date: new Date(),
             };
 
-            saveObjective = body.saveObjective;
+            const saveObjective = body.saveObjective;
 
             if (!body.assignedTo || !body.assignedTo.length) {
-                error = new Error('You must assign person to task');
+                const error = new Error('You must assign person to task');
+
                 error.status = 400;
                 return next(error);
             }
 
             async.waterfall([
 
-                function (cb) {
+                (cb) => {
                     if (!files) {
                         return cb(null, []);
                     }
 
-                    //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'objectives', function (err, filesIds) {
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        cb(null, filesIds);
+                        cb(null, setFileId);
                     });
                 },
 
-                function (filesIds, cb) {
-                    var status = saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
+                (setFileId, cb) => {
+                    const status = saveObjective ?
+                        OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
 
                     body.title = {
-                        en: body.title.en ? _.escape(body.title.en) : '',
-                        ar: body.title.ar ? _.escape(body.title.ar) : ''
+                        en: lodash.escape(lodash.get(body, 'title.en') || ''),
+                        ar: lodash.escape(lodash.get(body, 'title.ar') || ''),
                     };
                     body.description = {
-                        en: body.description.en ? _.escape(body.description.en) : '',
-                        ar: body.description.ar ? _.escape(body.description.ar) : ''
+                        en: lodash.escape(lodash.get(body, 'description.en') || ''),
+                        ar: lodash.escape(lodash.get(body, 'description.ar') || ''),
                     };
 
-                    objective = {
+                    const data = {
                         objectiveType: body.objectiveType,
-                        priority     : body.priority,
-                        status       : status,
-                        assignedTo   : body.assignedTo,
-                        level        : session.level,
-                        dateStart    : body.dateStart,
-                        dateEnd      : body.dateEnd,
-                        country      : body.country,
-                        region       : body.region,
-                        subRegion    : body.subRegion,
+                        priority: body.priority,
+                        status,
+                        assignedTo: body.assignedTo,
+                        level: session.level,
+                        dateStart: body.dateStart,
+                        dateEnd: body.dateEnd,
+                        country: body.country,
+                        region: body.region,
+                        subRegion: body.subRegion,
                         retailSegment: body.retailSegment,
-                        outlet       : body.outlet,
-                        branch       : body.branch,
-                        location     : body.location,
-                        attachments  : filesIds,
-                        createdBy    : createdBy,
-                        editedBy     : createdBy,
-                        title        : body.title,
-                        description  : body.description
+                        outlet: body.outlet,
+                        branch: body.branch,
+                        location: body.location,
+                        attachments: setFileId,
+                        createdBy,
+                        editedBy: createdBy,
+                        title: body.title,
+                        description: body.description,
                     };
 
-                    model = new ObjectiveModel(objective);
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
+                    const objective = new ObjectiveModel();
 
-                        if (model) {
-                            if (model.title) {
-                                model.title = {
-                                    en: model.title.en ? _.unescape(model.title.en) : '',
-                                    ar: model.title.ar ? _.unescape(model.title.ar) : ''
-                                }
-                            }
-                            if (model.description) {
-                                model.description = {
-                                    en: model.description.en ? _.unescape(model.description.en) : '',
-                                    ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                                }
-                            }
-                        }
-
-                        cb(null, model);
+                    objective.set(data);
+                    objective.save((err, model) => {
+                        cb(err, model);
                     });
                 },
 
-                (objectiveModel, cb) => {
-                    const hasForm = body.hasOwnProperty('formType');
-                    const isDistribution = body.hasOwnProperty('formType') && body.formType === 'distribution';
-
-                    // skip in case with visibility form
-                    if (!hasForm || isDistribution) {
-                        if (TestUtils.isObjectiveDraft(model)) {
-                            ActivityLog.emit('objective:draft-created', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: model.toJSON(),
-                            });
-                        }
-
-                        if (TestUtils.isObjectivePublished(model)) {
-                            ActivityLog.emit('objective:published', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: model.toJSON(),
-                            });
-                        }
-                    }
-
+                (objective, cb) => {
                     if (body.formType === 'distribution') {
                         const data = {
-                            objective: objectiveModel.get('_id')
+                            objective: objective.get('_id'),
                         };
 
                         return distributionFormHandler.createForm(userId, data, (err, formModel) => {
@@ -659,18 +568,18 @@ var Objectives = function (db, redis, event) {
                                 return cb(err);
                             }
 
-                            objectiveModel.form = {
+                            objective.form = {
                                 _id: formModel.get('_id'),
-                                contentType: body.formType
+                                contentType: body.formType,
                             };
 
-                            cb(null, objectiveModel);
+                            cb(null, objective);
                         });
                     }
 
                     if (body.formType === 'visibility') {
                         const data = {
-                            objective: objectiveModel.get('_id'),
+                            objective: objective.get('_id'),
                             createdBy,
                         };
 
@@ -679,83 +588,86 @@ var Objectives = function (db, redis, event) {
                                 return cb(err);
                             }
 
-                            objectiveModel.form = {
+                            objective.form = {
                                 _id: formModel.get('_id'),
-                                contentType: body.formType
+                                contentType: body.formType,
                             };
 
-                            cb(null, objectiveModel);
+                            cb(null, objective);
                         });
                     }
 
-                    cb(null, objectiveModel);
+                    cb(null, objective);
                 },
 
-                function (objectiveModel, cb) {
+                (objective, cb) => {
                     if (!body.formType) {
-                        return cb(null, objectiveModel);
+                        return cb(null, objective);
                     }
 
-                    objectiveModel.save(function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, objectiveModel);
+                    objective.save((err) => {
+                        cb(err, objective);
                     });
                 },
 
-                function (objectiveModel, cb) {
-                    var id = objectiveModel.get('_id');
+                (objective, cb) => {
+                    const hasForm = lodash.has(body, 'formType');
+                    const isDistribution = hasForm && body.formType === 'distribution';
 
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
-                }
+                    // skip in case with visibility form
+                    if (!hasForm || isDistribution) {
+                        if (TestUtils.isObjectiveDraft(objective)) {
+                            ActivityLog.emit('objective:draft-created', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: objective.toJSON(),
+                            });
+                        }
 
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+                        if (TestUtils.isObjectivePublished(objective)) {
+                            ActivityLog.emit('objective:published', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: objective.toJSON(),
+                            });
+                        }
+                    }
 
-                res.status(201).send(result);
-            });
+                    const id = objective.get('_id');
 
-        }
+                    self.getByIdAggr({
+                        id,
+                        isMobile,
+                    }, cb);
+                },
 
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body;
+            ], callback);
+        };
 
+        async.waterfall([
+
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.OBJECTIVES, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(201).send(result);
         });
     };
 
-    this.update = function (req, res, next) {
+    this.update = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
@@ -763,487 +675,440 @@ var Objectives = function (db, redis, event) {
             actionOriginator: userId,
             accessRoleLevel,
         });
+        const files = req.files;
+        const body = extractBody(req.body);
+        const objectiveId = req.params.id;
+        const attachments = body.attachments;
 
-        function queryRun(updateObject, body) {
-            var files = req.files;
-            var attachments = body.attachments;
-            var session = req.session;
-            var userId = session.uId;
-            var objectiveId = req.params.id;
-            var description = updateObject.description;
-            var title = updateObject.title;
-
-            var fullUpdate = {
-                $set: updateObject
+        const queryRun = ($set, callback) => {
+            const fullUpdate = {
+                $set,
             };
-            var waterFallTasks = [];
 
-            function updateCover(objective) {
+            const updateCover = (objective) => {
                 PersonnelModel.findOne({
-                    'vacation.cover': ObjectId(userId),
-                    $or             : [
-                        {
-                            _id               : ObjectId(objective.assignedTo),
-                            'vacation.onLeave': true
-                        },
-                        {
-                            _id               : ObjectId(objective.createdBy.user),
-                            'vacation.onLeave': true
-                        }
-                    ]
-                }, function (err, personnel) {
-                    var history;
-                    var objectiveHistory;
-
+                    $and: [{
+                        'vacation.cover': ObjectId(userId),
+                    }, {
+                        $or: [{
+                            _id: {
+                                $in: objective.assignedTo,
+                            },
+                            'vacation.onLeave': true,
+                        }, {
+                            _id: ObjectId(objective.createdBy.user),
+                            'vacation.onLeave': true,
+                        }],
+                    }],
+                }, (err, personnel) => {
                     if (err) {
-                        //TODO: need logger
-                        return console.log(err);
+                        logger.error('Query on objective\'s cover fails', err);
+                        return;
                     }
+
                     if (!personnel) {
-                        //TODO: need logger
-                        return console.log('personnel  not found');
+                        logger.error('Cover personnel not found');
+                        return;
                     }
 
-                    history = {
+                    const objectiveHistory = new ObjectiveHistoryModel({
                         objective: ObjectId(objective._id),
-                        person   : ObjectId(userId)
-                    };
+                        person: ObjectId(userId),
+                    });
 
-                    objectiveHistory = new ObjectiveHistoryModel(history);
-
-                    objectiveHistory.save(function (err) {
+                    objectiveHistory.save((err) => {
                         if (err) {
-                            // TODO: need logger
-                            return console.log(err);
+                            logger.error('Objective\'s history doesn\'t saved', err);
+                            return;
                         }
                     });
                 });
-            }
+            };
 
-            function uploadFiles(waterFallCb) {
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, function (err, filesIds) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    waterFallCb(null, filesIds);
-                });
-            }
-
-            function updateObjective(filesIds, waterFallCb) {
-                if (typeof filesIds === 'function') {
-                    waterFallCb = filesIds;
+            const updateObjective = (setFileId, cb) => {
+                if ($set.status && $set.status !== OBJECTIVE_STATUSES.CLOSED) {
+                    $set.complete = $set.status === OBJECTIVE_STATUSES.COMPLETED ? 100 : 0;
                 }
 
-                if (updateObject.status && updateObject.status !== OBJECTIVE_STATUSES.CLOSED) {
-                    updateObject.complete = updateObject.status === OBJECTIVE_STATUSES.COMPLETED ? 100 : 0;
-                }
-
-                updateObject.editedBy = {
+                $set.editedBy = {
                     user: ObjectId(userId),
-                    date: new Date()
+                    date: new Date(),
                 };
 
                 if (attachments && attachments.length) {
-                    attachments = attachments.objectID();
-
-                    updateObject.attachments = attachments.concat(filesIds);
+                    $set.attachments = attachments.objectID().concat(setFileId);
                 } else {
-                    delete updateObject.attachments;
+                    delete $set.attachments;
 
                     fullUpdate.$addToSet = {
                         attachments: {
-                            $each: filesIds
-                        }
+                            $each: setFileId,
+                        },
                     };
                 }
 
-                if (updateObject.title) {
-                    delete updateObject.title;
+                if ($set.title) {
+                    $set['title.en'] = lodash.escape(lodash.get($set, 'title.en') || '');
+                    $set['title.ar'] = lodash.escape(lodash.get($set, 'title.ar') || '');
 
-                    updateObject['title.en'] = _.escape(title.en || '');
-                    updateObject['title.ar'] = _.escape(title.ar || '');
+                    delete $set.title;
                 }
 
-                if (description) {
-                    delete updateObject.description;
+                if ($set.description) {
+                    $set['description.en'] = lodash.escape(lodash.get($set, 'description.en') || '');
+                    $set['description.ar'] = lodash.escape(lodash.get($set, 'description.ar') || '');
 
-                    updateObject['description.en'] = _.escape(description.en || '');
-                    updateObject['description.ar'] = _.escape(description.ar || '');
+                    delete $set.description;
                 }
 
-                ObjectiveModel.findOne({_id: objectiveId}, function(err, model) {
+                ObjectiveModel.findOne({
+                    _id: objectiveId,
+                }, (err, model) => {
                     if (err) {
-                        return waterFallCb(err);
+                        return cb(err);
                     }
 
                     store.setPreviousState(model.toJSON());
 
                     if (lodash.includes([
-                            OBJECTIVE_STATUSES.FAIL,
-                            OBJECTIVE_STATUSES.CLOSED
-                        ], model.status)) {
-
+                        OBJECTIVE_STATUSES.FAIL,
+                        OBJECTIVE_STATUSES.CLOSED,
+                    ], model.status)) {
                         const error = new Error(`You could not update task with status: "${model.status}"`);
                         error.status = 400;
 
-                        return waterFallCb(error);
+                        return cb(error);
                     }
 
-                    if (model.status === OBJECTIVE_STATUSES.OVER_DUE && model.createdBy.user.toString() !== userId) {
+                    if (model.status === OBJECTIVE_STATUSES.OVER_DUE && toString(model, 'createdBy.user') !== userId) {
                         const error = new Error(`You could not update task with status: "${model.status}"`);
-                        error.status = 400;
 
-                        return waterFallCb(error);
+                        error.status = 400;
+                        return cb(error);
                     }
 
-                    ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
+                    ObjectiveModel.findOneAndUpdate({
+                        _id: objectiveId,
+                    }, fullUpdate, {
+                        new: true,
+                    }, (err, objective) => {
                         if (err) {
-                            return waterFallCb(err);
+                            return cb(err);
                         }
 
                         if (body.cover) {
-                            updateCover(objectiveModel);
+                            updateCover(objective);
                         }
 
-                        if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
-                            && objectiveModel.objectiveType !== 'individual'
-                            && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
-                            ObjectiveModel
-                                .update({
-                                    'parent.1': objectiveModel._id
-                                }, {
-                                    $set: {'archived': true}
-                                }, {
-                                    multi: true
-                                }, function (err, result) {
-                                    if (err) {
-                                        console.log(err);
-                                    }
+                        if (objective.status === OBJECTIVE_STATUSES.CLOSED
+                            && objective.objectiveType !== 'individual'
+                            && objective.level === ACL_CONSTANTS.MASTER_ADMIN) {
+                            ObjectiveModel.update({
+                                'parent.1': objective._id,
+                            }, {
+                                $set: {
+                                    archived: true,
+                                },
+                            }, {
+                                multi: true,
+                            }, (err, result) => {
+                                if (err) {
+                                    logger.error(err);
+                                    return;
+                                }
 
-                                    console.dir(result);
-                                });
+                                logger.info(result);
+                            });
                         }
 
-                        store.setNextState(objectiveModel.toJSON());
+                        store.setNextState(objective.toJSON());
                         store.difference();
                         store.publish();
 
-                        waterFallCb(null, objectiveModel);
+                        cb(null, objective);
                     });
                 });
-            }
+            };
 
-            function createForms(objectiveModel, cb) {
-                if (updateObject.formType === 'distribution') {
-                    /* TODO fill description from task if AM or AincM will link forms */
-                    const data = {
-                        objective: objectiveModel.get('_id'),
-                        description: '',
-                    };
-
-                    return distributionFormHandler.createForm(userId, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: updateObject.formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                if (updateObject.formType === 'visibility') {
-                    const data = {
-                        objective: objectiveModel.get('_id'),
-                        createdBy: {
-                            userId,
-                            date: objectiveModel.createdBy.date,
-                        },
-                    };
-
-                    return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: updateObject.formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                cb(null, objectiveModel);
-            }
-
-            function updateObjectiveWithForm(objectiveModel, waterFallCb) {
-                if (!updateObject.formType) {
-                    return waterFallCb(null, objectiveModel);
-                }
-
-                objectiveModel.save(function (err) {
+            const uploadFiles = (cb) => {
+                fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
                     if (err) {
-                        return waterFallCb(err);
+                        return cb(err);
                     }
 
-                    waterFallCb(null, objectiveModel);
+                    cb(null, setFileId);
                 });
-            }
+            };
 
-            function consoleLogENV(message) {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(message);
-                }
-            }
+            const waterfall = [
+                uploadFiles,
+                updateObjective,
+            ];
 
-            function updateParents(objectiveModel, waterFallCb) {
-                var nextParent;
-                var objectiveModelClone = _.extend({}, objectiveModel.toObject());
-                var level = objectiveModelClone.level;
-                var parents = objectiveModelClone.parent;
+            if ($set.formType) {
+                const createForms = (objective, cb) => {
+                    if ($set.formType === 'distribution') {
+                        /* TODO fill description from task if AM or AincM will link forms */
+                        const data = {
+                            objective: objective.get('_id'),
+                            description: '',
+                        };
 
-                var seriesTasks = [];
+                        return distributionFormHandler.createForm(userId, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
 
-                function updateParentObjective(id, seriesCb) {
-                    async.waterfall([
-                        function (waterFallCB) {
-                            ObjectiveModel.findById(id, function (err, parentModel) {
-                                if (err) {
-                                    return waterFallCb(err);
-                                }
-
-                                if (!parentModel) {
-                                    return waterFallCB('Parent objective not found');
-                                }
-
-                                waterFallCB(null, parentModel);
-                            });
-                        },
-
-                        (parentObjective, cb) => {
-                            const parentModelLevel = parseInt(parentObjective.level, 10);
-                            const query = {
-                                level: parentModelLevel + 1,
-                                [`parent.${parentModelLevel}`]: parentObjective._id,
+                            objective.form = {
+                                _id: formModel.get('_id'),
+                                contentType: $set.formType,
                             };
 
-                            ObjectiveModel.find(query, (err, childModels) => {
-                                const currentStatusOfParentObjective = parentObjective.status;
+                            cb(null, objective);
+                        });
+                    }
 
-                                const countSubTasks = childModels.filter((model) => (model.status !== 'draft')).length;
-                                const completedSubTasks = childModels.filter((model) => (model.status === 'completed')).length;
-                                const complete = Math.floor(completedSubTasks * 100 / countSubTasks);
-                                const changes = {
-                                    countSubTasks,
-                                    completedSubTasks,
-                                    complete,
+                    if ($set.formType === 'visibility') {
+                        const data = {
+                            objective: objective.get('_id'),
+                            createdBy: {
+                                user: userId,
+                                date: objective.createdBy.date,
+                            },
+                        };
+
+                        return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            objective.form = {
+                                _id: formModel.get('_id'),
+                                contentType: $set.formType,
+                            };
+
+                            cb(null, objective);
+                        });
+                    }
+
+                    cb(null, objective);
+                };
+
+                const updateObjectiveWithForm = (objective, cb) => {
+                    if (!$set.formType) {
+                        return cb(null, objective);
+                    }
+
+                    objective.save((err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, objective);
+                    });
+                };
+
+                waterfall.push(createForms);
+                waterfall.push(updateObjectiveWithForm);
+            }
+
+            if ($set.status && $set.status !== OBJECTIVE_STATUSES.CLOSED) {
+                const updateParents = (objective, cb) => {
+                    const updateParentObjective = (id, cb) => {
+                        async.waterfall([
+
+                            (cb) => {
+                                ObjectiveModel.findById(id, (err, parentModel) => {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+
+                                    if (!parentModel) {
+                                        const error = new Error('Parent objective not found');
+
+                                        error.status = 400;
+                                        return cb(error);
+                                    }
+
+                                    cb(null, parentModel);
+                                });
+                            },
+
+                            (parentObjective, cb) => {
+                                const parentModelLevel = parseInt(parentObjective.level, 10);
+                                const query = {
+                                    level: parentModelLevel + 1,
+                                    [`parent.${parentModelLevel}`]: parentObjective._id,
                                 };
 
-                                if (complete >= 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.RE_OPENED) {
-                                    changes.status = OBJECTIVE_STATUSES.CLOSED;
-                                }
+                                ObjectiveModel.find(query, (err, childModels) => {
+                                    const currentStatusOfParentObjective = parentObjective.status;
 
-                                if (complete < 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.CLOSED) {
-                                    changes.status = OBJECTIVE_STATUSES.RE_OPENED;
-                                }
+                                    const countSubTasks = childModels.filter((model) => (model.status !== 'draft')).length;
+                                    const completedSubTasks = childModels.filter((model) => (model.status === 'completed')).length;
+                                    const complete = Math.floor((completedSubTasks * 100) / countSubTasks);
+                                    const changes = {
+                                        countSubTasks,
+                                        completedSubTasks,
+                                        complete,
+                                    };
 
-                                parentObjective.set(changes);
+                                    if (complete >= 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.RE_OPENED) {
+                                        changes.status = OBJECTIVE_STATUSES.CLOSED;
+                                    }
 
-                                cb(null, parentObjective);
-                            });
-                        }
+                                    if (complete < 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.CLOSED) {
+                                        changes.status = OBJECTIVE_STATUSES.RE_OPENED;
+                                    }
 
-                    ], function (err, parentModel) {
-                        if (err) {
-                            return seriesCb(err);
-                        }
+                                    parentObjective.set(changes);
 
-                        parentModel.save(function (err) {
+                                    cb(null, parentObjective);
+                                });
+                            },
+
+                        ], (err, parentModel) => {
                             if (err) {
-                                return seriesCb(err);
+                                return cb(err);
                             }
 
-                            seriesCb(null);
-                        });
-                    });
-                }
-
-                for (var i = level - 1; i >= 1; i--) {
-                    nextParent = parents[i];
-                    if (nextParent) {
-                        seriesTasks.push(
-                            async.apply(updateParentObjective, nextParent)
-                        );
-                    }
-                }
-
-                async.series(seriesTasks, function (err) {
-                    if (err) {
-                        logWriter.log(err);
-                        return consoleLogENV(err);
-                    }
-                });
-
-                waterFallCb(null, objectiveModel);
-            }
-
-            function updateChildObjective(options) {
-                var nextObjectiveIds;
-                var assignedTo;
-
-                options = options || {};
-                nextObjectiveIds = options.nextObjectiveIds;
-                assignedTo = options.assignedTo;
-
-                ObjectiveModel.update({_id: {$in: nextObjectiveIds}}, {$set: {'createdBy.user': ObjectId(assignedTo[0])}}, function (err) {
-                    if (err) {
-                        return consoleLogENV(err);
-                    }
-                });
-            }
-
-            function updateObjectiveByAssigneeLocation(objectiveModel, waterFallCb) {
-                var level;
-                var objectiveModelId;
-                var query = {};
-
-                level = objectiveModel.get('level');
-                objectiveModelId = objectiveModel.get('_id');
-                query['parent.' + level] = objectiveModelId;
-
-                ObjectiveModel.find(query, function (err, models) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    if (models) {
-                        PersonnelModel.findById(updateObject.assignedTo[0], function (err, personnel) {
-                            if (err) {
-                                return waterFallCb(err);
-                            }
-
-                            ObjectiveModel.findByIdAndUpdate(objectiveModelId, {
-                                $set: {
-                                    country  : personnel.country,
-                                    region   : personnel.region,
-                                    subRegion: personnel.subRegion,
-                                    branch   : personnel.branch
-                                }
-                            }, function (err) {
+                            parentModel.save((err) => {
                                 if (err) {
-                                    return waterFallCb(err);
+                                    return cb(err);
                                 }
 
-                                updateChildObjective({
-                                    nextObjectiveIds: _.pluck(models, '_id'),
-                                    assignedTo      : updateObject.assignedTo
+                                cb(null);
+                            });
+                        });
+                    };
+                    const series = Object.keys(objective.parent)
+                        .map(parentLevel => {
+                            const parent = objective.parent[parentLevel];
+
+                            if (parent) {
+                                return (cb) => {
+                                    updateParentObjective(parent, cb);
+                                };
+                            }
+
+                            return false;
+                        })
+                        .filter(it => it);
+
+                    async.series(series, (err) => {
+                        if (err) {
+                            logger.error(err);
+                            return;
+                        }
+                    });
+
+                    cb(null, objective);
+                };
+
+                waterfall.push(updateParents);
+            }
+
+            if ($set.assignedTo && $set.assignedTo[0]) {
+                const updateChildObjective = (options) => {
+                    const {
+                        nextObjectiveIds,
+                        assignedTo,
+                    } = options;
+                    const query = {
+                        _id: {
+                            $in: nextObjectiveIds,
+                        },
+                    };
+
+                    ObjectiveModel.update(query, {
+                        $set: {
+                            'createdBy.user': ObjectId(assignedTo[0]),
+                        },
+                    }, (err) => {
+                        if (err) {
+                            logger.error(err);
+                            return;
+                        }
+                    });
+                };
+
+                const updateObjectiveByAssigneeLocation = (objective, cb) => {
+                    const objectiveLevel = objective.get('level');
+                    const objectiveId = objective.get('_id');
+                    const query = {
+                        [`parent.${objectiveLevel}`]: objectiveId,
+                    };
+
+                    ObjectiveModel.find(query, (err, setObjective) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        if (setObjective) {
+                            PersonnelModel.findById($set.assignedTo[0], (err, personnel) => {
+                                if (err) {
+                                    return cb(err);
+                                }
+
+                                ObjectiveModel.findByIdAndUpdate(objectiveId, {
+                                    $set: {
+                                        country: personnel.country,
+                                        region: personnel.region,
+                                        subRegion: personnel.subRegion,
+                                        branch: personnel.branch,
+                                    },
+                                }, (err) => {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+
+                                    updateChildObjective({
+                                        nextObjectiveIds: setObjective.map(item => item._id),
+                                        assignedTo: $set.assignedTo,
+                                    });
                                 });
                             });
-                        });
-                    }
-
-                    waterFallCb(null, objectiveModel);
-                });
-            }
-
-            function getResultAndSend(objectiveModel, waterFallCb) {
-                var id = objectiveModel.get('_id');
-
-                self.getByIdAggr({id: id, isMobile: req.isMobile}, waterFallCb);
-            }
-
-            if (files) {
-                waterFallTasks.unshift(uploadFiles);
-            }
-
-            waterFallTasks.push(updateObjective);
-
-            if (updateObject.formType) {
-                waterFallTasks.push(createForms);
-
-                waterFallTasks.push(updateObjectiveWithForm);
-            }
-
-            if (updateObject.status && updateObject.status !== OBJECTIVE_STATUSES.CLOSED) {
-                waterFallTasks.push(updateParents);
-            }
-
-            if (updateObject.assignedTo && updateObject.assignedTo[0]) {
-                waterFallTasks.push(updateObjectiveByAssigneeLocation);
-            }
-
-            waterFallTasks.push(getResultAndSend);
-
-            async.waterfall(waterFallTasks, function (err, model) {
-                if (err) {
-                    return next(err);
-                }
-                if (model) {
-                    if (model.title) {
-                        model.title = {
-                            en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : ''
                         }
-                    }
-                    if (model.description) {
-                        model.description = {
-                            en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                        }
-                    }
-                }
 
-                res.status(200).send(model);
-            });
-        }
+                        cb(null, objective);
+                    });
+                };
 
-        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body;
-            var updateObject;
+                waterfall.push(updateObjectiveByAssigneeLocation);
+            }
 
+            const getResultAndSend = (objective, cb) => {
+                const id = objective.get('_id');
+
+                self.getByIdAggr({
+                    id,
+                    isMobile: req.isMobile,
+                }, cb);
+            };
+
+            waterfall.push(getResultAndSend);
+
+            async.waterfall(waterfall, callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, model) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-
-                updateObject = body.changed;
-
-                if (typeof updateObject === 'string') {
-                    updateObject = JSON.parse(updateObject);
-                }
-
-                if (typeof body.attachments === 'string') {
-                    body.attachments = JSON.parse(body.attachments);
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(updateObject, req.session.level, CONTENT_TYPES.OBJECTIVES, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData, body);
-            });
+            res.status(200).send(model);
         });
     };
 
@@ -1320,86 +1185,75 @@ var Objectives = function (db, redis, event) {
         );
     };
 
-    this.createSubObjective = function (req, res, next) {
+    this.createSubObjective = (req, res, next) => {
         const session = req.session;
+        const userId = session.uId;
         const accessRoleLevel = session.level;
 
-        function queryRun(body) {
-            var files = req.files;
-            var userId = req.session.uId;
-            var level = req.session.level;
-            var parentId = body.parentId;
-            var error;
-            var options = {
-                parentId        : parentId,
-                assignedToIds   : body.assignedTo,
-                createdById     : userId,
-                saveObjective   : body.saveObjective,
+        const queryRun = (body, callback) => {
+            const files = req.files;
+            const parentId = body.parentId;
+            const options = {
+                parentId,
+                assignedToIds: body.assignedTo,
+                createdById: userId,
+                saveObjective: body.saveObjective,
                 companyObjective: body.companyObjective,
-                description     : body.description,
-                title           : body.title,
-                dateStart       : body.dateStart,
-                dateEnd         : body.dateEnd,
-                priority        : body.priority,
-                attachments     : body.attachments,
-                files           : files,
-                objectiveType   : body.objectiveType,
-                location        : body.location,
-                country         : body.country,
-                region          : body.region,
-                subRegion       : body.subRegion,
-                retailSegment   : body.retailSegment,
-                outlet          : body.outlet,
-                branch          : body.branch,
-                level           : level,
-                formType        : body.formType,
-                form            : body.form,
-                isMobile        : req.isMobile
+                description: body.description,
+                title: body.title,
+                dateStart: body.dateStart,
+                dateEnd: body.dateEnd,
+                priority: body.priority,
+                attachments: body.attachments,
+                files,
+                objectiveType: body.objectiveType,
+                location: body.location,
+                country: body.country,
+                region: body.region,
+                subRegion: body.subRegion,
+                retailSegment: body.retailSegment,
+                outlet: body.outlet,
+                branch: body.branch,
+                level: accessRoleLevel,
+                formType: body.formType,
+                form: body.form,
+                isMobile: req.isMobile,
             };
 
             if (!body.assignedTo || !body.assignedTo.length) {
-                error = new Error('You must assign person to task');
+                const error = new Error('You must assign person to task');
+
                 error.status = 400;
                 return next(error);
             }
 
-            createSubObjective(options, function (err, parent) {
-                if (err) {
-                    return next(err);
-                }
-                if (!parent) {
-                    return res.status(200).send();
-                }
-                res.status(200).send(parent);
-            });
-        }
+            createSubObjective(options, callback);
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body;
+        async.waterfall([
 
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'createSubObjective', cb);
+            },
+
+            queryRun,
+
+        ], (err, parent) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
+            if (!parent) {
+                return res.status(200).send();
             }
 
-            try {
-                body = JSON.parse(req.body.data);
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.OBJECTIVES, 'createSubObjective', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(parent);
         });
     };
 

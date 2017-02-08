@@ -8,7 +8,9 @@ const isHighAdmin = {
 };
 
 const setIsSubsetCountry = {
-    $setIsSubset: ['$$personnel.country', '$$setCountry'],
+    $gt: [{
+        $setIntersection: ['$$personnel.country', '$$setCountry'],
+    }, 0],
 };
 const inCountry = {
     $or: [isHighAdmin, {
