@@ -89,4 +89,9 @@ activityLog.on('marketing:consumer-survey:updated', require('./methods/marketing
 activityLog.on('marketing:consumer-survey:expired', require('./methods/marketing/consumer-survey/expired'));
 activityLog.on('marketing:consumer-survey:item-published', require('./methods/marketing/consumer-survey/itemPublished'));
 
+activityLog.on('items-and-prices:item-published', require('./methods/itemsAndPrices/itemCreated'));
+activityLog.on('items-and-prices:item-updated', require('./methods/itemsAndPrices/itemUpdated'));
+activityLog.on('items-and-prices:item-archived', require('./methods/itemsAndPrices/itemArchived'));
+activityLog.on('items-and-prices:item-unarchived', require('./methods/itemsAndPrices/itemUnarchived'));
+
 module.exports = activityLog;

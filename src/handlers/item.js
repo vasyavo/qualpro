@@ -1,26 +1,25 @@
-'use strict';
+const async = require('async');
+const mongoose = require('mongoose');
+const xssFilters = require('xss-filters');
+const ACL_MODULES = require('./../constants/aclModulesNames');
+const CONSTANTS = require('./../constants/mainConstants');
+const CONTENT_TYPES = require('./../public/js/constants/contentType');
+const ACTIVITY_TYPES = require('./../constants/activityTypes');
+const access = require('./../helpers/access')();
+const ItemModel = require('./../types/item/model');
+const _ = require('underscore');
+const bodyValidator = require('../helpers/bodyValidator');
+const Archiver = require('./../helpers/archiver');
+const FilterMapper = require('./../helpers/filterMapper');
+const AggregationHelper = require('./../helpers/aggregationCreater');
+const logger = require('./../utils/logger');
+const AcitivityLog = require('./../stories/push-notifications/activityLog');
 
-var Item = function (db, event) {
-    var async = require('async');
-    var mongoose = require('mongoose');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONSTANTS = require('../constants/mainConstants');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var access = require('../helpers/access')(db);
-    var ItemModel = require('./../types/item/model');
-    var _ = require('underscore');
-    var bodyValidator = require('../helpers/bodyValidator');
-    var logWriter = require('../helpers/logWriter.js');
-    var xssFilters = require('xss-filters');
-    var Archiver = require('../helpers/archiver');
-    var archiver = new Archiver(ItemModel);
-    var FilterMapper = require('../helpers/filterMapper');
-    var objectId = mongoose.Types.ObjectId;
-    var self = this;
+const archiver = new Archiver(ItemModel);
+const objectId = mongoose.Types.ObjectId;
 
-    // var _ = require('../node_modules/underscore');
-    var AggregationHelper = require('../helpers/aggregationCreater');
+const Item = function (db, event) {
+    const self = this;
 
     var $defProjection = {
         _id          : 1,
@@ -219,6 +218,10 @@ var Item = function (db, event) {
     }
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var name = body.name;
             var createdBy = {
@@ -238,13 +241,13 @@ var Item = function (db, event) {
                 if (error) {
                     return next(error);
                 }
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.ITEMS_AND_PRICES,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.ITEM
+
+                AcitivityLog.emit('items-and-prices:item-created', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: model.toJSON(),
                 });
+
                 modelFindById(model._id, function (err, model) {
                     if (err) {
                         return next(err);
@@ -995,6 +998,10 @@ var Item = function (db, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var id = req.params.id;
 
@@ -1003,20 +1010,24 @@ var Item = function (db, event) {
                 date: Date.now()
             };
 
-            ItemModel.update({_id: id}, {$set: body}, function (err) {
+            ItemModel.findOneAndUpdate({
+                _id: id,
+            }, {
+                $set: body,
+            }, {
+                new: true,
+            }, (err, model) => {
                 if (err) {
                     return next(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : 10,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : body.editedBy,
-                    itemId    : id,
-                    itemType  : CONTENT_TYPES.ITEM
+                AcitivityLog.emit('items-and-prices:item-updated', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: model.toJSON(),
                 });
 
-                modelFindById(id, function (err, model) {
+                modelFindById(id, (err, model) => {
                     if (err) {
                         return next(err);
                     }
@@ -1107,6 +1118,10 @@ var Item = function (db, event) {
     };
 
     this.archive = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun() {
             var idsToArchive = req.body.ids.objectID();
             var archived = req.body.archived === 'false' ? false : !!req.body.archived;
@@ -1134,19 +1149,30 @@ var Item = function (db, event) {
                 if (err) {
                     return next(err);
                 }
-                async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.ITEMS_AND_PRICES,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.ITEM
-                    });
-                    callback();
 
-                }, function (err) {
+                async.eachSeries(idsToArchive, (id, cb) => {
+
+                    async.waterfall([
+
+                        (cb) => {
+                            ItemModel.findOne({ _id: id }).lean().exec(cb);
+                        },
+
+                        (item, cb) => {
+                            AcitivityLog.emit(`items-and-prices:${item.archived ? 'archived' : 'unarchived'}`, {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: item.toJSON(),
+                            });
+
+                            cb();
+                        },
+
+                    ], cb);
+                }, (err) => {
                     if (err) {
-                        logWriter.log('items archived', err);
+                        logger.error('items archived', err);
+                        return;
                     }
                 });
 
