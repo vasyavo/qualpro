@@ -815,6 +815,8 @@ var DistributionForm = function (db, redis, event) {
             }
 
             ObjectiveModel.findById(result.objective)
+                .lean()
+                .exec()
                 .then((objective) => {
                     if (objective) {
                         const eventPayload = {
