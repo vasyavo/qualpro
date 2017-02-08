@@ -397,7 +397,7 @@ const Documents = function (db, redis, event) {
                             $gte: lastLogOut
                         }
                     }, {
-                        'updatedBy.date': {
+                        'editedBy.date': {
                             $gte: lastLogOut
                         }
                     }
