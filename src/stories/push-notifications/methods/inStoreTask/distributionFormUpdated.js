@@ -8,7 +8,7 @@ const prototype = require('./../objective/prototype');
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.IN_STORE_REPORTING;
-        const contentType = contentTypes.DISTRIBUTIONFORM;
+        const contentType = contentTypes.INSTORETASKS;
         const actionType = activityTypes.UPDATED;
         const extendedOptions = Object.assign({}, options, {
             moduleId,
