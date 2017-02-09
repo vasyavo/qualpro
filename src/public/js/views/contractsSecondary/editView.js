@@ -371,6 +371,7 @@ define([
 
                 fileModel.set('selected', true);
                 fileModel.set('uploaded', true);
+                fileModel.set('document', savedData._id);
 
                 var options = {
                     title : savedData.title,
@@ -704,6 +705,7 @@ define([
                     class: 'btn saveBtn',
                     click: function () {
                         var that = this;
+
                         self.saveContractsYearly({save: true}, function () {
                             $(that).dialog('destroy').remove();
                         });
