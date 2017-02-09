@@ -18,7 +18,7 @@ define([
     'models/branch',
     'helpers/implementShowHideArabicInputIn',
     'views/filter/dropDownView',
-    'views/documents/createView',
+    'views/documents/createFile',
     'constants/otherConstants',
     'moment',
     'dataService',
@@ -49,13 +49,13 @@ define([
             this.files = new FileCollection();
             this.makeRender();
 
-            dataService.getData('documents', {}, function (err, response) {
+            dataService.getData('documents/files', {}, function (err, response) {
                 var documents = response.data;
                 var attachments;
 
                 attachments = _.map(documents, function (document) {
                     var title = document.title;
-                    attachments = document.attachments;
+                    attachments = document.attachment;
                     var attach = attachments;
 
                     attach.originalName = title;
@@ -370,13 +370,24 @@ define([
                 translation: this.translation
             });
 
-            this.newDocumentView.on('contract', function (options) {
+            this.newDocumentView.on('file:saved', function (savedData) {
+                var fileModel = new FileModel(savedData.attachment);
+
+                fileModel.set('selected', true);
+                fileModel.set('uploaded', true);
+                fileModel.set('document', savedData._id);
+
+                var options = {
+                    title : savedData.title,
+                    inputModel : fileModel
+                };
+
                 var inputModel = options.inputModel;
                 var model;
                 inputModel.set('originalName', options.title);
                 fileInput = this.$el.find('#' + inputModel.cid);
                 self.files.add(inputModel);
-                self.formData.append(options.title, fileInput[0].files[0]);
+
                 model = inputModel.toJSON();
                 model.cid = inputModel.cid;
                 model.name = options.title;
