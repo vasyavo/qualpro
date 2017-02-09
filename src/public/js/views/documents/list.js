@@ -3,14 +3,19 @@ define(function (require) {
     var _ = require('underscore');
     var Marionette = require('marionette');
     var ChildView = require('views/documents/listItem');
+    var Template = require('text!templates/documents/wrapper.html');
 
-    return Marionette.CollectionView.extend({
+    return Marionette.CompositeView.extend({
 
         initialize : function (options) {
             this.translation = options.translation;
         },
 
         className : 'thumbnailHolder scrollable',
+
+        template : function () {
+            return Template;
+        },
 
         onRender : function () {
             var that = this;
@@ -36,6 +41,8 @@ define(function (require) {
 
             return false;
         },
+
+        childViewContainer : '.items-container',
 
         childView : ChildView,
 
