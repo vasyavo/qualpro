@@ -481,7 +481,7 @@ var Promotions = function (db, redis, event) {
         const queryRun = (body, callback) => {
             const createdBy = {
                 user: userId,
-                date: new Date(),
+                date: new Date()
             };
 
             body.createdBy = createdBy;
