@@ -400,10 +400,6 @@ var Contract = function (db, redis, event) {
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var files = req.files;
-            var filesPresence = Object.keys(files).length;
-            var attachPresence = body.attachments;
-            var both = attachPresence && filesPresence;
             var session = req.session;
             var userId = session.uId;
             var model;
@@ -419,23 +415,8 @@ var Contract = function (db, redis, event) {
                     }
                 }
             });
-
-            function create(cback) {
-                if (!filesPresence) {
-                    return cback(null, null);
-                }
-                documentHandler.createDocIfNewContract(userId, files, function (err, documentId) {
-                    if (err) {
-                        return cback(err);
-                    }
-
-                    return cback(null, documentId);
-                });
-            }
-
-            functions.push(create);
-
-            function save(documentId, cback) {
+            
+            function save(cback) {
                 var activity = body.activity;
                 var description = body.description;
                 var promotion = body.promotion;
@@ -446,10 +427,8 @@ var Contract = function (db, redis, event) {
                     user: userId,
                     date: new Date()
                 };
-
-                if (!filesPresence) {
-                    documentId = body.attachments.objectID();
-                }
+    
+                const documents = body.attachments.objectID();
                 if (description) {
                     if (description.en) {
                         description.en = _.escape(description.en);
@@ -476,7 +455,7 @@ var Contract = function (db, redis, event) {
                     body.salesTarget = _.escape(salesTarget);
                 }
 
-                body.documents = both ? _.union(documentId, body.attachments.objectID()) : documentId;
+                body.documents = documents;
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
                 body.status = saveContractsSecondary ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
@@ -557,10 +536,6 @@ var Contract = function (db, redis, event) {
 
     this.update = function (req, res, next) {
         function queryRun(updateObject) {
-            var files = req.files;
-            var filesPresence = Object.keys(files).length;
-            var attachPresence = updateObject.attachments;
-            var both = attachPresence && filesPresence;
             var session = req.session;
             var userId = session.uId;
             var saveContractsSecondary = updateObject.saveContractsSecondary;
@@ -580,22 +555,7 @@ var Contract = function (db, redis, event) {
             });
 
             async.waterfall([
-
                     function (cb) {
-                        if (!filesPresence) {
-                            return cb(null, null);
-                        }
-
-                        documentHandler.createDocIfNewContract(userId, files, function (err, documentId) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            cb(null, documentId);
-                        });
-                    },
-
-                    function (documentId, cb) {
                         var activity = updateObject.activity;
                         var description = updateObject.description;
                         var promotion = updateObject.promotion;
@@ -632,16 +592,10 @@ var Contract = function (db, redis, event) {
                         if (salesTarget) {
                             updateObject.salesTarget = _.escape(salesTarget);
                         }
-                        if (!filesPresence && attachPresence) {
-                            documentId = updateObject.attachments.objectID();
-                        }
-
-                        if (documentId) {
-                            updateObject.documents = both ? _.union(documentId, updateObject.attachments.objectID()) : documentId;
-                        }
-                        if (filesPresence && !both) {
+                        
+                        if (updateObject.attachments && updateObject.attachments.length) {
                             fullUpdate.$addToSet = {};
-                            fullUpdate.$addToSet.documents = {$each: updateObject.documents};
+                            fullUpdate.$addToSet.documents = {$each: updateObject.attachments.objectID()};
                             delete updateObject.documents;
                         }
                         updateObject.status = saveContractsSecondary ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
