@@ -534,13 +534,27 @@ const Documents = function (db, redis, event) {
                 preserveNullAndEmptyArrays: true
             }
         }, {
-            $project: {
-                _id  : '$breadcrumbs._id',
-                title: '$breadcrumbs.title'
+            $group: {
+                _id        : {
+                    _id  : '$_id',
+                    title: '$title',
+                },
+                breadcrumbs: {
+                    $push: {
+                        _id  : '$breadcrumbs._id',
+                        title: '$breadcrumbs.title'
+                    }
+                }
+                
             }
-        },{
-            $match: {
-                _id: {$ne: null}
+        }, {
+            $project: {
+                _id        : 0,
+                breadcrumbs: {
+                    $setDifference: [{
+                        $setUnion: ['$breadcrumbs', [{_id: '$_id._id', title: '$_id.title'}]]
+                    }, [null, {}]]
+                }
             }
         });
         
@@ -548,8 +562,10 @@ const Documents = function (db, redis, event) {
             if (err) {
                 return cb(err);
             }
-            
-            cb(null, docs || []);
+    
+            let result = docs && docs.length && docs[0] && docs[0].breadcrumbs;
+    
+            cb(null, result || []);
         });
     };
     
