@@ -7,6 +7,7 @@ var schema = new Schema({
         en: { type: String, default: '' },
         ar: { type: String, default: '' }
     },
+    sequence: Number,
     href: { type: String, default: '' },
     users: {},
     parrent: Number,
