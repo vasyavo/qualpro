@@ -99,4 +99,10 @@ activityLog.on('planogram:updated', require('./methods/planograms/updated'));
 activityLog.on('planogram:archived', require('./methods/planograms/archived'));
 activityLog.on('planogram:unarchived', require('./methods/planograms/unarchived'));
 
+activityLog.on('note:published', require('./methods/notes/created'));
+activityLog.on('note:updated', require('./methods/notes/updated'));
+activityLog.on('note:archived', require('./methods/notes/archived'));
+activityLog.on('note:unarchived', require('./methods/notes/unarchived'));
+activityLog.on('note:deleted', require('./methods/notes/deleted'));
+
 module.exports = activityLog;
