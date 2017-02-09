@@ -409,10 +409,8 @@ const Documents = function (db, redis, event) {
         
             // by default web fetching not archived docs
             matchObj.$match.archived = archived;
-        
-            if (parentId) {
-                matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
-            }
+            
+            matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
         }
         
         
@@ -1337,7 +1335,7 @@ const Documents = function (db, redis, event) {
             
                         getAllDocs({
                             archived: !!archive,
-                            parent,
+                            parentId: parent,
                             personnelId
                         }, (err, response) => {
                             if (err) {
@@ -1485,7 +1483,7 @@ const Documents = function (db, redis, event) {
                         // get only parent directory that files are pasted in
                         
                         getAllDocs({
-                            parent,
+                            parentId: parent,
                             personnelId
                         }, (err, response) => {
                             if (err) {
