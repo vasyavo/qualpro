@@ -831,6 +831,10 @@ var Objectives = function (db, redis, event) {
             };
 
             const uploadFiles = (cb) => {
+                if (files) {
+                    return cb(null, []);
+                }
+
                 fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
                     if (err) {
                         return cb(err);
