@@ -110,7 +110,7 @@ var Contract = function (db, redis, event) {
             key          : 'documents',
             as           : 'documents',
             isArray      : true,
-            addProjection: ['createdBy', 'title', 'contentType']
+            addProjection: ['createdBy', 'title', 'attachment']
         }));
 
         pipeLine.push({

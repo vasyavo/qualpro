@@ -121,7 +121,7 @@ var Contract = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'documents',
             key          : 'documents',
-            addProjection: ['createdBy', 'title', 'contentType']
+            addProjection: ['createdBy', 'title', 'attachment']
         }));
 
         pipeLine.push({
