@@ -1,6 +1,9 @@
 <div class="breadcrumbs">
-    <a href="">Root</a><span> > </span>
-    <a href="">Folder 1</a><span> > </span>
-    <a href="">Folder 2</a>
+    <a href="#qualPro/documents">Root</a>
+
+    <% _.each(breadcrumbs, function (item) { %>
+        <span> > </span>
+        <a href="#qualPro/documents/<%- item._id %>"><%- item.title %></a>
+    <% }); %>
 </div>
 <div class="items-container"></div>

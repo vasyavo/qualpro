@@ -13,8 +13,14 @@ define(function (require) {
 
         className : 'thumbnailHolder scrollable',
 
-        template : function () {
-            return Template;
+        template : function (ops) {
+            return _.template(Template)(ops);
+        },
+
+        templateContext : function () {
+            return {
+                breadcrumbs : this.collection.breadcrumbs
+            };
         },
 
         onRender : function () {
