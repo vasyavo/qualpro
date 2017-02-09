@@ -105,4 +105,9 @@ activityLog.on('note:archived', require('./methods/notes/archived'));
 activityLog.on('note:unarchived', require('./methods/notes/unarchived'));
 activityLog.on('note:deleted', require('./methods/notes/deleted'));
 
+activityLog.on('competitor-list:item-created', require('./methods/competitorList/itemCreated'));
+activityLog.on('competitor-list:item-updated', require('./methods/competitorList/itemUpdated'));
+activityLog.on('competitor-list:item-archived', require('./methods/competitorList/itemArchived'));
+activityLog.on('competitor-list:item-unarchived', require('./methods/competitorList/itemUnarchived'));
+
 module.exports = activityLog;
