@@ -11272,3 +11272,16 @@ label[for=searchInputnoCT]::after {
 .no-padding-bottom {
   padding-bottom: 0;
 }
+.breadcrumbs {
+  width: 100%;
+  border-bottom: 1px solid #cfd8dc;
+  padding: 10px;
+}
+.breadcrumbs a {
+  color: #848d91;
+}
+.breadcrumbs a:last-child {
+  color: #000;
+  cursor: default;
+  pointer-events: none;
+}

@@ -30,6 +30,7 @@ define(function (require) {
 
         parse : function (response) {
             this.state.totalPages = Math.ceil(response.total / this.state.count);
+            this.breadcrumbs = response.breadcrumbs || [];
 
             return response.data;
         },

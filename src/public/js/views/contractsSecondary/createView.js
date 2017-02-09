@@ -116,7 +116,7 @@ define([
                 parent: true,
                 models: this.files.getSelected({selected: true}),
                 json  : true
-            }), '_id');
+            }), 'document');
 
             this.body.attachments = attachments.length ? attachments : null;
 
@@ -244,6 +244,7 @@ define([
 
                 fileModel.set('selected', true);
                 fileModel.set('uploaded', true);
+                fileModel.set('document', savedData._id);
 
                 var options = {
                     title : savedData.title,

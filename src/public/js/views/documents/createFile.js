@@ -143,7 +143,6 @@ define(function (require) {
             var model = this.model;
 
             model.on('saved', function (savedData) {
-                debugger;
                 that.trigger('file:saved', savedData);
                 that.remove();
             });
