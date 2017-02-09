@@ -1,13 +1,13 @@
-var express = require('express');
-var router = express.Router();
-var DocumentHandler = require('../handlers/document');
-var access = require('../helpers/access');
+const express = require('express');
+const router = express.Router();
+const DocumentHandler = require('../handlers/document');
+const access = require('../helpers/access');
 
 module.exports = function (db, redis, event) {
     'use strict';
-
-    var handler = new DocumentHandler(db, redis, event);
-    var checkAuth = access.checkAuth;
+    
+    const handler = new DocumentHandler(db, redis, event);
+    const checkAuth = access.checkAuth;
 
     router.use(checkAuth);
     
@@ -22,11 +22,6 @@ module.exports = function (db, redis, event) {
     router.get('/folder/:id([0-9a-fA-F]{24})?', handler.getFolderContent);
     router.get('/files', handler.getRawFiles);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
-    
-    
-    // router.put('/remove', handler.archive);
-    // router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
-    // router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     return router;
 };
