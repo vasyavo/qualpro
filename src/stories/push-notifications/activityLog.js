@@ -94,4 +94,9 @@ activityLog.on('items-and-prices:item-updated', require('./methods/itemsAndPrice
 activityLog.on('items-and-prices:item-archived', require('./methods/itemsAndPrices/itemArchived'));
 activityLog.on('items-and-prices:item-unarchived', require('./methods/itemsAndPrices/itemUnarchived'));
 
+activityLog.on('planogram:published', require('./methods/planograms/created'));
+activityLog.on('planogram:updated', require('./methods/planograms/updated'));
+activityLog.on('planogram:archived', require('./methods/planograms/archived'));
+activityLog.on('planogram:unarchived', require('./methods/planograms/unarchived'));
+
 module.exports = activityLog;
