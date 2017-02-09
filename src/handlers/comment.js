@@ -166,8 +166,52 @@ var Comment = function (db, redis, event) {
 
             async.waterfall([
 
-                (waterfallCb) => {
-                    self.commentCreator(saveObj, waterfallCb);
+                (cb) => {
+                    self.commentCreator(saveObj, cb);
+                },
+
+                (comment, cb) => {
+                    ContextModel.findByIdAndUpdate(saveObj.objectiveId, {
+                        $push: {
+                            comments: comment._id,
+                        },
+                        $set: {
+                            editedBy: {
+                                user: ObjectId(userId),
+                                date: new Date(),
+                            },
+                        },
+                    }, {
+                        new: true,
+                        runValidators: true,
+                    }, (err, updatedContextModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        if (!updatedContextModel) {
+                            const error = new Error('Context document not found');
+
+                            error.status = 400;
+                            return cb(error);
+                        }
+
+                        const eventPayload = {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: updatedContextModel.toJSON(),
+                        };
+
+                        if (context === CONTENT_TYPES.OBJECTIVES) {
+                            ActivityLog.emit('objective:comment-added', eventPayload);
+                        }
+
+                        if (context === CONTENT_TYPES.INSTORETASKS) {
+                            ActivityLog.emit('in-store-task:comment-added', eventPayload);
+                        }
+
+                        cb(null, comment);
+                    });
                 },
 
                 (comment, waterfallCb) => {
@@ -283,43 +327,6 @@ var Comment = function (db, redis, event) {
                                 waterfallCb(null, response);
                             })
                         });
-                    });
-                },
-
-                (comment, waterfallCb) => {
-                    ContextModel.findByIdAndUpdate(saveObj.objectiveId, {
-                        $push: {comments: comment._id},
-                        $set : {
-                            editedBy: {
-                                user: ObjectId(userId),
-                                date: new Date()
-                            }
-                        }
-                    }, {
-                        new: true,
-                        runValidators: true,
-                    }, (err, updatedContextModel) => {
-                        if (err) {
-                            return waterfallCb(err);
-                        }
-
-                        if (context === CONTENT_TYPES.OBJECTIVES) {
-                            ActivityLog.emit('objective:comment-added', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: updatedContextModel.toJSON(),
-                            })
-                        }
-
-                        if (context === CONTENT_TYPES.INSTORETASKS) {
-                            ActivityLog.emit('in-store-task:comment-added', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: updatedContextModel.toJSON(),
-                            })
-                        }
-
-                        waterfallCb(null, comment);
                     });
                 },
 

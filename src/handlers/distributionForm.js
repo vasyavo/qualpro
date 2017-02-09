@@ -1,5 +1,5 @@
 const extractBody = require('./../utils/extractBody');
-const ObjectiveModel = requie('./../types/objective/model');
+const ObjectiveModel = require('./../types/objective/model');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 var DistributionForm = function (db, redis, event) {

@@ -1,6 +1,6 @@
 const ActivityModel = require('./../../../../types/activityList/model');
 const toString = require('./../../../../utils/toString');
-const getEveryoneInFilledLocation = require('./../../utils/getEveryoneInFilledLocation');
+const getEveryoneInCountry = require('./../../utils/getEveryoneInCountry');
 
 module.exports = function * (options) {
     const {
@@ -16,12 +16,8 @@ module.exports = function * (options) {
     const setCountry = Array.isArray(body.location) ?
         body.location.map(location => location.country) : [];
 
-    const setEveryoneInCountry = yield getEveryoneInFilledLocation({
+    const setEveryoneInCountry = yield getEveryoneInCountry({
         setCountry,
-        setRegion: [],
-        setSubRegion: [],
-        setOutlet: [],
-        setBranch: [],
     });
 
     const newActivity = new ActivityModel();

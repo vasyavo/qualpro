@@ -13,7 +13,7 @@ const Archiver = require('./../helpers/archiver');
 const FilterMapper = require('./../helpers/filterMapper');
 const AggregationHelper = require('./../helpers/aggregationCreater');
 const logger = require('./../utils/logger');
-const AcitivityLog = require('./../stories/push-notifications/activityLog');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const archiver = new Archiver(ItemModel);
 const objectId = mongoose.Types.ObjectId;
@@ -242,7 +242,7 @@ const Item = function (db, event) {
                     return next(error);
                 }
 
-                AcitivityLog.emit('items-and-prices:item-created', {
+                ActivityLog.emit('items-and-prices:item-created', {
                     actionOriginator: userId,
                     accessRoleLevel,
                     body: model.toJSON(),
@@ -1021,7 +1021,7 @@ const Item = function (db, event) {
                     return next(err);
                 }
 
-                AcitivityLog.emit('items-and-prices:item-updated', {
+                ActivityLog.emit('items-and-prices:item-updated', {
                     actionOriginator: userId,
                     accessRoleLevel,
                     body: model.toJSON(),
@@ -1117,81 +1117,70 @@ const Item = function (db, event) {
         });
     };
 
-    this.archive = function (req, res, next) {
+    this.archive = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
 
-        function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var editedBy = {
-                user: req.session.uId,
-                date: Date.now()
-            };
-            var uId = req.session.uId;
-            var type = ACTIVITY_TYPES.ARCHIVED;
-            var options = [
-                {
-                    idsToArchive   : idsToArchive,
-                    keyForCondition: '_id',
-                    archived       : archived,
-                    topArchived    : archived,
-                    model          : ItemModel
-                }
-            ];
+        const queryRun = (callback) => {
+            const setIdToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            const options = [{
+                idsToArchive: setIdToArchive,
+                keyForCondition: '_id',
+                archived,
+                topArchived: archived,
+                model: ItemModel,
+            }];
+            const activityType = archived ? 'archived' : 'unarchived';
 
-            if (!archived) {
-                type = ACTIVITY_TYPES.UNARCHIVED;
-            }
+            async.waterfall([
 
-            archiver.archive(uId, options, function (err) {
+                (cb) => {
+                    archiver.archive(userId, options, cb);
+                },
+
+                (done, cb) => {
+                    callback();
+
+                    ItemModel.find({ _id: setIdToArchive }).lean().exec(cb);
+                },
+
+                (setItem, cb) => {
+                    async.each(setItem, (item, eachCb) => {
+                        ActivityLog.emit(`items-and-prices:${activityType}`, {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: item,
+                        });
+                        eachCb();
+                    }, cb);
+                },
+
+            ], (err) => {
                 if (err) {
-                    return next(err);
+                    logger.error(err);
+                    return;
                 }
-
-                async.eachSeries(idsToArchive, (id, cb) => {
-
-                    async.waterfall([
-
-                        (cb) => {
-                            ItemModel.findOne({ _id: id }).lean().exec(cb);
-                        },
-
-                        (item, cb) => {
-                            AcitivityLog.emit(`items-and-prices:${item.archived ? 'archived' : 'unarchived'}`, {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: item.toJSON(),
-                            });
-
-                            cb();
-                        },
-
-                    ], cb);
-                }, (err) => {
-                    if (err) {
-                        logger.error('items archived', err);
-                        return;
-                    }
-                });
-
-                res.status(200).send();
             });
-        }
+        };
 
-        access.getArchiveAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
+        async.waterfall([
+
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.ITEMS_AND_PRICES, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun();
+            res.status(200).send({});
         });
     };
 
