@@ -796,7 +796,7 @@ var Objectives = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        if (body.cover) {
+                        if ($set.cover) {
                             updateCover(objective);
                         }
 
@@ -1102,7 +1102,7 @@ var Objectives = function (db, redis, event) {
             },
 
             (personnel, allowed, cb) => {
-                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'update', cb);
+                bodyValidator.validateBody(body.changed, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'update', cb);
             },
 
             queryRun,
