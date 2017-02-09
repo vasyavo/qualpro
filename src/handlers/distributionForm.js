@@ -1,6 +1,7 @@
 const extractBody = require('./../utils/extractBody');
 const ObjectiveModel = require('./../types/objective/model');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
+const logger = require('./../utils/logger');
 
 var DistributionForm = function (db, redis, event) {
     var mongoose = require('mongoose');
@@ -816,8 +817,12 @@ var DistributionForm = function (db, redis, event) {
 
             ObjectiveModel.findById(result.objective)
                 .lean()
-                .exec()
-                .then((objective) => {
+                .exec((err, objective) => {
+                    if (err || !objective) {
+                        logger.error('Objective related to Distribution Form not found', err);
+                        return;
+                    }
+
                     if (objective) {
                         const eventPayload = {
                             actionOriginator: userId,
