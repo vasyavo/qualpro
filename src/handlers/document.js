@@ -508,6 +508,51 @@ const Documents = function (db, redis, event) {
         });
     };
     
+    const getPopulatedBreadcrumbsByDocumentId = (id, cb) => {
+        const _id = typeof id === 'string' ? ObjectId(id) : id;
+        const pipeLine = [];
+        
+        pipeLine.push({
+            $match: {
+                _id
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'documents',
+                foreignField: '_id',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs'
+            }
+        }, {
+            $unwind: {
+                path                      : '$breadcrumbs',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                _id  : '$breadcrumbs._id',
+                title: '$breadcrumbs.title'
+            }
+        },{
+            $match: {
+                _id: {$ne: null}
+            }
+        });
+        
+        DocumentModel.aggregate(pipeLine).allowDiskUse(true).exec((err, docs) => {
+            if (err) {
+                return cb(err);
+            }
+            
+            cb(null, docs || []);
+        });
+    };
+    
     const getBreadcrumbsIdsByParent = (parent, cb) => {
         let breadcrumbs = [];
         
@@ -1586,32 +1631,58 @@ const Documents = function (db, redis, event) {
                 search,
             } = query;
             const skip = (page - 1) * count;
-            getAllDocs({
-                skip,
-                count,
-                archived,
-                parentId,
-                personnelId,
-                sortBy,
-                sortOrder,
-                search
-            }, (err, response) => {
+    
+            async.parallel([
+                // get breadcrumbs for parent
+                (parallelCb) => {
+                    if (!parentId) {
+                        return parallelCb(null, []);
+                    }
+            
+                    getPopulatedBreadcrumbsByDocumentId(parentId, parallelCb)
+                },
+        
+                // get data
+                (parallelCb) => {
+                    getAllDocs({
+                        skip,
+                        count,
+                        archived,
+                        parentId,
+                        personnelId,
+                        sortBy,
+                        sortOrder,
+                        search
+                    }, (err, response) => {
+                        if (err) {
+                            return parallelCb(err);
+                        }
+                
+                        if (response.total === 0) {
+                            return parallelCb(null, response);
+                        }
+                
+                        fillImagesIntoResult(response, (err, result) => {
+                            if (err) {
+                                return parallelCb(err);
+                            }
+                    
+                            parallelCb(null, result);
+                        })
+                    })
+                }
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
-                
-                if (response.total === 0) {
-                    return res.status(200).send(response);
-                }
     
-                fillImagesIntoResult(response, (err, result) => {
-                    if (err) {
-                        return next(err);
-                    }
+                const breadcrumbsResult = result[0];
+                const response = result[1];
         
-                    res.status(200).send(result);
-                })
-            })
+                response.breadcrumbs = breadcrumbsResult;
+        
+                res.status(200).send(response);
+            });
         }
         
         access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
