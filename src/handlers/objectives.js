@@ -831,7 +831,7 @@ var Objectives = function (db, redis, event) {
             };
 
             const uploadFiles = (cb) => {
-                if (files) {
+                if (!files) {
                     return cb(null, []);
                 }
 
