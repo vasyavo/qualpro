@@ -20,6 +20,7 @@ module.exports = function (db, redis, event) {
     router.patch('/move', handler.move);
     
     router.get('/folder/:id([0-9a-fA-F]{24})?', handler.getFolderContent);
+    router.get('/files', handler.getRawFiles);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
     
     

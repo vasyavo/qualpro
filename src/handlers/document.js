@@ -375,6 +375,7 @@ const Documents = function (db, redis, event) {
             personnelId = null,
             lastLogOut = null,
             archived = false,
+            filesOnly = false,
             sortBy = 'createdAt',
             sortOrder = -1,
             skip = 0,
@@ -410,7 +411,14 @@ const Documents = function (db, redis, event) {
             // by default web fetching not archived docs
             matchObj.$match.archived = archived;
             
-            matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
+            // filesOnly using only for getRawFiles method
+            // for retrieving all files when creating contracts
+            // in other case just checking for parent
+            if(filesOnly) {
+                matchObj.$match.type = 'file';
+            } else {
+                matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
+            }
         }
         
         
@@ -1601,6 +1609,67 @@ const Documents = function (db, redis, event) {
                         return next(err);
                     }
         
+                    res.status(200).send(result);
+                })
+            })
+        }
+        
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+            if (err) {
+                return next(err);
+            }
+            
+            if (!allowed) {
+                return errorSender.forbidden(next);
+            }
+            
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, body) {
+                if (err) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                }
+    
+                queryRun(body);
+            });
+        });
+    };
+    
+    // web only
+    this.getRawFiles = function (req, res, next) {
+        function queryRun(query) {
+            const {
+                session: {uId : personnelId} = {uId: null}
+            } = req;
+            const {
+                page,
+                count,
+                sortBy,
+                sortOrder,
+                search,
+            } = query;
+            const skip = (page - 1) * count;
+            getAllDocs({
+                filesOnly: true,
+                skip,
+                count,
+                archived : false,
+                personnelId,
+                sortBy,
+                sortOrder,
+                search
+            }, (err, response) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                if (response.total === 0) {
+                    return res.status(200).send(response);
+                }
+                
+                fillImagesIntoResult(response, (err, result) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    
                     res.status(200).send(result);
                 })
             })
