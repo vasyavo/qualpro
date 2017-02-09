@@ -110,4 +110,6 @@ activityLog.on('competitor-list:item-updated', require('./methods/competitorList
 activityLog.on('competitor-list:item-archived', require('./methods/competitorList/itemArchived'));
 activityLog.on('competitor-list:item-unarchived', require('./methods/competitorList/itemUnarchived'));
 
+activityLog.on('notifications:sent', require('./methods/notifications/sent'));
+
 module.exports = activityLog;
