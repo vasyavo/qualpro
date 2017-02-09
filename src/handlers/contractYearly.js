@@ -522,13 +522,12 @@ var Contract = function (db, redis, event) {
             });
 
             async.waterfall([
-                    function (documentId, cb) {
+                    function (cb) {
                         var description = updateObject.description;
                         updateObject.editedBy = {
                             user: ObjectId(userId),
                             date: new Date()
                         };
-
                         
                         if (description) {
                             if (description.en) {

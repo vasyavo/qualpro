@@ -6,7 +6,7 @@ define([
     'text!templates/file/preView.html',
     'views/baseDialog',
     'views/objectives/fileDialogView',
-    'views/documents/createView',
+    'views/documents/createFile',
     'models/contractsYearly',
     'populate',
     'collections/file/collection',
@@ -47,13 +47,13 @@ define([
 
             this.makeRender();
 
-            dataService.getData('documents', {}, function (err, response) {
+            dataService.getData('documents/files', {}, function (err, response) {
                 var documents = response.data;
                 var attachments;
 
                 attachments = _.map(documents, function (document) {
                     var title = document.title;
-                    var attachments = document.attachments;
+                    var attachments = document.attachment;
                     var attach = attachments;
 
                     attach.originalName = title;
@@ -113,7 +113,7 @@ define([
                 parent: true,
                 models: this.files.getSelected({selected: true}),
                 json  : true
-            }), '_id');
+            }), 'document');
 
             this.body.attachments = attachments.length ? attachments : null;
 
@@ -234,13 +234,23 @@ define([
                 translation: this.translation
             });
 
-            this.newDocumentView.on('contract', function (options) {
+            this.newDocumentView.on('file:saved', function (savedData) {
+                var fileModel = new FileModel(savedData.attachment);
+
+                fileModel.set('selected', true);
+                fileModel.set('uploaded', true);
+                fileModel.set('document', savedData._id);
+
+                var options = {
+                    title : savedData.title,
+                    inputModel : fileModel
+                };
+
                 var inputModel = options.inputModel;
                 inputModel.set('originalName', options.title);
                 fileInput = this.$el.find('#' + inputModel.cid);
                 self.files.add(inputModel);
 
-                self.formData.append(options.title, fileInput[0].files[0]);
                 var model = inputModel.toJSON();
                 model.cid = inputModel.cid;
                 model.name = options.title;

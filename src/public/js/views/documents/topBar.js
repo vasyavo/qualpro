@@ -161,7 +161,8 @@ define(function (require) {
             var that = this;
 
             this.createFileView = new CreateFileView({
-                translation : this.translation
+                translation : this.translation,
+                collection : this.collection
             });
 
             this.createFileView.on('file:saved', function (savedData) {
@@ -176,7 +177,8 @@ define(function (require) {
             var that = this;
 
             this.createFileView = new CreateFolderView({
-                translation : this.translation
+                translation : this.translation,
+                collection : this.collection
             });
 
             this.createFileView.on('file:saved', function (savedData) {

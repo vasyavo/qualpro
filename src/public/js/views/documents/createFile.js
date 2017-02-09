@@ -2,7 +2,6 @@ define(function (require) {
 
     var _ = require('underscore');
     var Backbone = require('backbone');
-    var AttachFileView = require('views/objectives/fileDialogView');
     var ERROR_MESSAGES = require('constants/errorMessages');
     var CONSTANTS = require('constants/otherConstants');
     var FileModel = require('models/file');
@@ -118,13 +117,18 @@ define(function (require) {
                         class: 'btn saveBtn',
                         click: function () {
                             var formData = new FormData();
-
                             formData.append('file', that.file);
 
-                            that.model.saveFile(formData, {
+                            var data = {
                                 title : that.$el.find('#title').val(),
                                 type : 'file'
-                            });
+                            };
+                            var folder = that.collection.folder;
+                            if (folder) {
+                                data.parent = folder;
+                            }
+
+                            that.model.saveFile(formData, data);
                         }
                     },
                     cancel: {

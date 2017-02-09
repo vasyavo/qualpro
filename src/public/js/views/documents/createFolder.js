@@ -37,10 +37,16 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
                         click: function () {
-                            that.model.saveFolder({
+                            var data = {
                                 title : that.$el.find('#title').val(),
                                 type : 'folder'
-                            });
+                            };
+                            var folder = that.collection.folder;
+                            if (folder) {
+                                data.parent = folder;
+                            }
+
+                            that.model.saveFolder(data);
                         }
                     },
                     cancel: {

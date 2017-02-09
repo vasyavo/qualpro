@@ -15,7 +15,7 @@ define([
     'helpers/implementShowHideArabicInputIn',
     'dataService',
     'constants/contentType',
-    'views/documents/preView/preView'
+    'views/documents/preview'
 ], function (Backbone, _, $, PreviewTemplate, FileTemplate,
              FileCollection, FileModel, Model, DocumentsModel, BaseView, populate, CONSTANTS,
              LEVEL_CONFIG, implementShowHideArabicInputIn, dataService, CONTENT_TYPES, PreView) {
