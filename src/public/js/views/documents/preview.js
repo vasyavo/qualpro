@@ -1,6 +1,6 @@
 define(function (require) {
 
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var _ = require('underscore');
     var FileFullSizePreview = require('views/fileDialog/fileDialog');
     var FileModel = require('models/file');

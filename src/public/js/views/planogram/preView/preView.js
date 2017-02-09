@@ -1,7 +1,7 @@
 'use strict';
 
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'Underscore',
     'constants/contentType',

@@ -2,7 +2,7 @@ define(function (require) {
 
     var $ = require('jQuery');
     var _ = require('Underscore');
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var async = require('async');
     var VisibilityFormModel = require('models/visibilityForm');
     var ERROR_MESSAGES = require('constants/errorMessages');

@@ -2,7 +2,7 @@ define(function (require) {
 
     var $ = require('jquery');
     var _ = require('underscore');
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var Model = require('models/documents');
     var CONTENT_TYPES = require('constants/contentType');
 
@@ -15,13 +15,9 @@ define(function (require) {
         },
 
         state : {
-            pageSize : 25,
-            totalRecords : null,
+            count : 50,
+            page : 1,
             totalPages : null
-        },
-
-        queryParams : {
-            pageSize : 'count'
         },
 
         model : Model,
@@ -33,14 +29,33 @@ define(function (require) {
         url : CONTENT_TYPES.DOCUMENTS + '/folder',
 
         parse : function (response) {
+            this.state.totalPages = Math.ceil(response.total / this.state.count);
+
             return response.data;
         },
 
-        parseState : function (response) {
-            return {
-                totalRecords : response.total,
-                totalPages : Math.ceil(response.total / this.state.pageSize)
-            };
+        getFirstPage : function () {
+            this.state.page = 1;
+
+            this.fetch({
+                reset : true,
+                data : this.state
+            });
+        },
+
+        getNextPage : function () {
+            var state = this.state;
+
+            if (state.page >= state.totalPages) {
+                return;
+            }
+
+            state.page++;
+
+            this.fetch({
+                remove : false,
+                data : state
+            });
         },
 
         deleteItems : function () {

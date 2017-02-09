@@ -1,7 +1,7 @@
 define(function (require) {
 
     var _ = require('underscore');
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var DocumentModel = require('models/documents');
     var Template = require('text!templates/documents/create-folder.html');
 

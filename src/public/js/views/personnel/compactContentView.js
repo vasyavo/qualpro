@@ -1,8 +1,9 @@
 define([
+        'backbone',
         'text!templates/personnel/compactContent.html',
         'views/createView'
     ],
-    function (compactContentTemplate, CreateView) {
+    function (Backbone, compactContentTemplate, CreateView) {
         var compactContentView = Backbone.View.extend({
 
             className: 'form', //todo check class name logic

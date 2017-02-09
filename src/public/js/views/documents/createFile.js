@@ -1,7 +1,7 @@
 define(function (require) {
 
     var _ = require('underscore');
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var AttachFileView = require('views/objectives/fileDialogView');
     var ERROR_MESSAGES = require('constants/errorMessages');
     var CONSTANTS = require('constants/otherConstants');

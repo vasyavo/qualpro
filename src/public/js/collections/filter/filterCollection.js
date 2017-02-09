@@ -1,6 +1,6 @@
 define([
         'underscore',
-        'Backbone',
+        'backbone',
         'models/filterModel'
     ],
     function (_, Backbone, FilterModel) {

@@ -1,6 +1,6 @@
 'use strict';
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/promotions/edit.html',

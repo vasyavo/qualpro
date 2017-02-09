@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'views/paginator',
     'text!templates/customReports/mainTemplate'
 ], function (Backbone, Paginator, MainTemplate) {

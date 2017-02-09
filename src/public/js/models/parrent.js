@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'custom',
     'js-cookie',
     'collections/file/collection'

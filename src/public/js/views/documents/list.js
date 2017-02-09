@@ -1,5 +1,6 @@
 define(function (require) {
 
+    var _ = require('underscore');
     var Marionette = require('marionette');
     var ChildView = require('views/documents/listItem');
 
@@ -10,6 +11,31 @@ define(function (require) {
         },
 
         className : 'thumbnailHolder scrollable',
+
+        onRender : function () {
+            var that = this;
+            var collection = this.collection;
+
+            this.$el.on('scroll', _.debounce(function (event)  {
+                if (that.isScrollReachedBottom(event)) {
+                    that.collection.getNextPage();
+                }
+            }));
+        },
+
+        isScrollReachedBottom : function (event) {
+            var target = event.target;
+            var scrollTop = target.scrollTop;
+            var scrollHeight = target.scrollHeight;
+            var elementHeight = target.clientHeight;
+            var scrolled = scrollTop + elementHeight;
+
+            if ((scrolled / scrollHeight) === 1) {
+                return true;
+            }
+
+            return false;
+        },
 
         childView : ChildView,
 

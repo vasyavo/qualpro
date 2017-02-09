@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'Underscore',
     'lodash',
@@ -118,7 +118,7 @@ define([
 
                     $('#contentHolder').html(documentsListView.render().$el);
 
-                    documentsCollection.fetch();
+                    documentsCollection.getFirstPage();
                 });
             });
         },

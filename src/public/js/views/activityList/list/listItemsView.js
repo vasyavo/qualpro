@@ -1,5 +1,5 @@
 ﻿define([
-    'Backbone',
+    'backbone',
     'text!templates/activityList/list/list.html',
 ], function (Backbone, listTemplate) {
     var ActivityListItemView = Backbone.View.extend({

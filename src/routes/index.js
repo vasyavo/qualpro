@@ -94,11 +94,6 @@ module.exports = function(app, db, event) {
         });
     });
 
-    app.use('/js/backbone.js', (req, res) => {
-        let pathToFile = path.join(config.workingDirectory, 'src/public/js/libs/backbone/backbone-min.js').normalize();
-        res.sendfile(pathToFile);
-    });
-
     // endpoint for handling api documents
     app.get('/docs', function(req, res, next) {
         res.render(process.cwd() + '/API_documentation/qualPro_API.html');

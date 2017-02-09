@@ -1,6 +1,6 @@
 define(function (require) {
 
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var Marionette = require('marionette');
     var _ = require('underscore');
     var documentPreview = require('views/documents/preview');

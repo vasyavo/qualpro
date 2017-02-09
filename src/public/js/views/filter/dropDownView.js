@@ -2,7 +2,7 @@
 define([
     'jQuery',
     'Underscore',
-    'Backbone',
+    'backbone',
     'text!templates/filter/dropDown.html',
     'text!templates/filter/dropDownContent.html',
     'collections/filter/filterCollection',

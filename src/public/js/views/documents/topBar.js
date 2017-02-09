@@ -2,7 +2,7 @@ define(function (require) {
 
     var $ = require('jquery');
     var _ = require('underscore');
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var Marionette = require('marionette');
     var CreateFileView = require('views/documents/createFile');
     var CreateFolderView = require('views/documents/createFolder');
@@ -98,8 +98,9 @@ define(function (require) {
 
                 var collection = this.collection;
                 collection.folder = null;
-                collection.url = CONTENT_TYPES.DOCUMENTS + '/folder?archived=true';
-                collection.fetch();
+                collection.url = CONTENT_TYPES.DOCUMENTS + '/folder';
+                collection.state.archived = true;
+                collection.getFirstPage();
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS + '/filter={"archived":true}');
             }
@@ -131,7 +132,8 @@ define(function (require) {
                 var collection = this.collection;
                 collection.folder = null;
                 collection.url = CONTENT_TYPES.DOCUMENTS + '/folder';
-                collection.fetch();
+                delete collection.state.archived;
+                collection.getFirstPage();
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS);
             }
