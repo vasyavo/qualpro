@@ -1,10 +1,11 @@
 define([
+    'Underscore',
     'models/parrent',
     'validation',
     'custom',
     'constants/otherConstants',
     'constants/contentType'
-], function (parent, validation, custom, CONSTANTS, CONTENT_TYPES) {
+], function (_, parent, validation, custom, CONSTANTS, CONTENT_TYPES) {
     'use strict';
 
     var Model = parent.extend({
