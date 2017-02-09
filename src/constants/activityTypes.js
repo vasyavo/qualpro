@@ -5,5 +5,6 @@ module.exports = {
     CREATED: 'Created',
     COMMENTED: 'New comment was added',
 
-    COMPETITOR_VARIANT: 'competitorVariant'
+    COMPETITOR_VARIANT: 'competitorVariant',
+    DELETED: 'Deleted',
 };

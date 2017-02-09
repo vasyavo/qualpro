@@ -1148,7 +1148,7 @@ const Item = function (db, event) {
 
                 (setItem, cb) => {
                     async.each(setItem, (item, eachCb) => {
-                        ActivityLog.emit(`items-and-prices:${activityType}`, {
+                        ActivityLog.emit(`items-and-prices:item-${activityType}`, {
                             actionOriginator: userId,
                             accessRoleLevel,
                             body: item,
