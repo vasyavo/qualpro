@@ -115,7 +115,9 @@
   ],
   "engines": {
     "node": "6.5.0",
-    "npm": "3.10.3"
+    "npm": "3.10.3",
+    "redis": "3.2",
+    "mongodb": "3.4.1"
   },
   "config": {
     "commitizen": {
