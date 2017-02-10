@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
-    "absctract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git",
+    "abstract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git",
     "async": "2.1.2",
     "aws-sdk": "2.2.42",
     "bcryptjs": "2.2.2",
@@ -106,7 +106,8 @@
     "commit": "git-cz",
     "coverage": "nyc npm run test",
     "docs": "./API_documentation/update_docs.sh",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "service:scheduler": "cd ./node_modules/abstract-scheduler && cross-env NODE_ENV=development npm start",
   },
   "pre-push": [
     "test",
