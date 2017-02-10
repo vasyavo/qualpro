@@ -49,7 +49,8 @@ define(function (require) {
             delete : '#delete',
             copy : '#copy',
             cut : '#cut',
-            paste : '#paste'
+            paste : '#paste',
+            search : '#search'
         },
 
         events : {
@@ -65,6 +66,7 @@ define(function (require) {
             'click @ui.cut' : 'cut',
             'click @ui.copy' : 'copy',
             'click @ui.paste' : 'paste',
+            'keyup @ui.search' : 'search'
         },
 
         checkAllItems : function (event) {
@@ -100,6 +102,7 @@ define(function (require) {
                 collection.folder = null;
                 collection.url = CONTENT_TYPES.DOCUMENTS + '/folder';
                 collection.state.archived = true;
+                delete collection.state.search;
                 collection.getFirstPage();
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS + '/filter={"archived":true}');
@@ -133,6 +136,7 @@ define(function (require) {
                 collection.folder = null;
                 collection.url = CONTENT_TYPES.DOCUMENTS + '/folder';
                 delete collection.state.archived;
+                delete collection.state.search;
                 collection.getFirstPage();
 
                 Backbone.history.navigate('qualPro/' + CONTENT_TYPES.DOCUMENTS);
@@ -224,6 +228,19 @@ define(function (require) {
         paste : function () {
             this.collection.moveItems();
         },
+
+        search : _.debounce(function () {
+            var value = this.ui.search.val();
+            var collection = this.collection;
+
+            if (value) {
+                collection.state.search = value;
+            } else {
+                delete collection.state.search;
+            }
+
+            collection.getFirstPage();
+        }, 500),
 
         collectionEvents : {
             'item:checked' : 'itemChecked',

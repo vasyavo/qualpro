@@ -91,6 +91,8 @@ define([
                     var rootPath = CONSTANTS.DOCUMENTS + '/folder';
                     var documentsCollection = new collection();
 
+                    delete documentsCollection.state.search;
+
                     if (folder) {
                         documentsCollection.url = rootPath + '/' + folder;
                         documentsCollection.folder = folder;
