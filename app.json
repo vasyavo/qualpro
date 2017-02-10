@@ -12,8 +12,7 @@
   },
   "env": {
     "WEB_CONCURRENCY": {
-      "description": "The number of processes to run.",
-      "value": "5"
+      "description": "The number of processes to run."
     },
     "NODE_ENV": {
       "required": true,
@@ -31,7 +30,7 @@
     },
     "MONGODB_URI": {
       "required": false,
-      "description": "MongoDB uri",
+      "description": "MongoDB URI",
       "value": "Not specified."
     },
     "SENDGRID_APIKEY": {
@@ -72,6 +71,26 @@
     "AWS_SECRET_ACCESS_KEY": {
       "required": true,
       "description": "AWS secret access key",
+      "value": "Not specified."
+    },
+    "FCM_API_KEY": {
+      "required": true,
+      "description": "Firebase Cloud Messaging API key",
+      "value": "Not specified."
+    },
+    "PUBNUB_PUBLISH_KEY": {
+      "required": true,
+      "description": "PubNub publish key",
+      "value": "Not specified."
+    },
+    "PUBNUB_SUBSCRIBE_KEY": {
+      "required": true,
+      "description": "PubNub subscribe key",
+      "value": "Not specified."
+    },
+    "SCHEDULER_HOST": {
+      "required": true,
+      "description": "URL to Abstract Scheduler",
       "value": "Not specified."
     }
   },
