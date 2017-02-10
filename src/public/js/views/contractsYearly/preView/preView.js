@@ -35,7 +35,6 @@ define([
         },
 
         initialize: function (options) {
-
             this.activityList = options.activityList;
             this.translation = options.translation;
             this.model = options.model;
@@ -172,6 +171,12 @@ define([
                         });
                 });
             }
+
+            jsonModel.attachments = jsonModel.attachments.map(function (document) {
+                document.type = document.attachment.type;
+
+                return document;
+            });
 
             this.setSelectedFiles(jsonModel.attachments);
 

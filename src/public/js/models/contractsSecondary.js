@@ -1,11 +1,12 @@
 define([
     'Underscore',
     'models/parrent',
+    'models/file',
     'validation',
     'custom',
     'constants/otherConstants',
     'constants/contentType'
-], function (_, parent, validation, custom, CONSTANTS, CONTENT_TYPES) {
+], function (_, parent, FileModel, validation, custom, CONSTANTS, CONTENT_TYPES) {
     'use strict';
 
     var Model = parent.extend({
@@ -147,6 +148,18 @@ define([
                     model.type.name.currentLanguage = type.name[currentLanguage];
                 }
             });
+
+            var fileModel = new FileModel();
+
+            var documents = model.documents.map(function (doc) {
+                doc.attachment.type = fileModel.getTypeFromContentType(doc.attachment.contentType);
+                doc.preview = doc.attachment.preview;
+
+                return doc;
+            });
+
+            model.documents = documents;
+
             return model;
         }
     });

@@ -35,10 +35,10 @@
                         <div data-id="<%= model.documents[i]._id %>"
                              class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
                             <div class="thumbnail_js thumbnailBody">
-                                <% if (model.documents[i].preview) { %>
-                                <img src="<%= model.documents[i].preview %>" class="bannerImage">
+                                <% if (model.documents[i].attachment.preview) { %>
+                                <img src="<%= model.documents[i].attachment.preview %>" class="bannerImage">
                                 <% } else {%>
-                                <div class="bannerImage iconThumbnail <%= model.documents[i].type %>"></div>
+                                <div class="bannerImage iconThumbnail <%= model.documents[i].attachment.type %>"></div>
                                 <% } %>
                             </div>
                         </div>
