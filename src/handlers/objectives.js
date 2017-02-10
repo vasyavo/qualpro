@@ -352,19 +352,21 @@ var Objectives = function (db, redis, event) {
                         });
                     });
                 };
-                const series = Object.keys(objective.parent)
-                    .map(parentLevel => {
-                        const parent = objective.parent[parentLevel];
 
-                        if (parent) {
-                            return (cb) => {
-                                updateParentObjective(parent, cb);
-                            };
-                        }
+                const series = [];
+                const objectiveAsJson = _.extend({}, objective.toObject());
+                const level = objectiveAsJson.level;
+                const setParentObjective = objectiveAsJson.parent;
 
-                        return false;
-                    })
-                    .filter(it => it);
+                for (let i = level - 1; i >= 1; i--) {
+                    const nextParent = setParentObjective[i];
+
+                    if (nextParent) {
+                        series.push((cb) => {
+                            updateParentObjective(nextParent, cb);
+                        });
+                    }
+                }
 
                 async.series(series, (err) => {
                     cb(err, objective);
@@ -985,19 +987,21 @@ var Objectives = function (db, redis, event) {
                             });
                         });
                     };
-                    const series = Object.keys(objective.parent)
-                        .map(parentLevel => {
-                            const parent = objective.parent[parentLevel];
 
-                            if (parent) {
-                                return (cb) => {
-                                    updateParentObjective(parent, cb);
-                                };
-                            }
+                    const series = [];
+                    const objectiveAsJson = _.extend({}, objective.toObject());
+                    const level = objectiveAsJson.level;
+                    const setParentObjective = objectiveAsJson.parent;
 
-                            return false;
-                        })
-                        .filter(it => it);
+                    for (let i = level - 1; i >= 1; i--) {
+                        const nextParent = setParentObjective[i];
+
+                        if (nextParent) {
+                            series.push((cb) => {
+                                updateParentObjective(nextParent, cb);
+                            });
+                        }
+                    }
 
                     async.series(series, (err) => {
                         if (err) {
