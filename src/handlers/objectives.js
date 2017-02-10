@@ -615,12 +615,22 @@ var Objectives = function (db, redis, event) {
                     const isDistribution = hasForm && body.formType === 'distribution';
 
                     // skip in case with visibility form
-                    if ((!hasForm || isDistribution) && TestUtils.isObjectivePublished(objective)) {
-                        ActivityLog.emit('objective:published', {
-                            actionOriginator: userId,
-                            accessRoleLevel,
-                            body: objective.toJSON(),
-                        });
+                    if (!hasForm || isDistribution) {
+                        if (TestUtils.isObjectiveDraft(objective)) {
+                            ActivityLog.emit('objective:draft-created', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: objective.toJSON(),
+                            });
+                        }
+
+                        if (TestUtils.isObjectivePublished(objective)) {
+                            ActivityLog.emit('objective:published', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: objective.toJSON(),
+                            });
+                        }
                     }
 
                     const id = objective.get('_id');
