@@ -105,10 +105,8 @@
       "plan": "heroku-redis:premium-1"
     }
   ],
+  "image": "heroku/nodejs",
   "buildpacks": [
-    {
-      "url": "heroku/nodejs"
-    },
     {
       "url": "https://github.com/rhinobuccaneers/heroku-buildpack-multi"
     }
