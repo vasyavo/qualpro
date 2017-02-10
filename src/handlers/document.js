@@ -417,7 +417,10 @@ const Documents = function (db, redis, event) {
             if(filesOnly) {
                 matchObj.$match.type = 'file';
             } else {
-                matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
+                // fix to allow search by nested files
+                if (!search) {
+                    matchObj.$match.parent = typeof parentId === 'string' ? ObjectId(parentId) : parentId;
+                }
             }
         }
         
@@ -426,16 +429,22 @@ const Documents = function (db, redis, event) {
     
         // search sor web only
         if (search) {
-            let regExpObject = {
-                $match: {
+            const searchArr = search.split(' ')
+                .filter(elem => elem)
+                .map(elem => {
+                    return {
                     title: {
-                        $regex  : search,
+                        $regex  : elem,
                         $options: 'xi'
                     }
                 }
-            };
-            
-            pipeLine.push(regExpObject);
+                });
+    
+            pipeLine.push({
+                $match: {
+                    $or: searchArr
+                }
+            });
         }
         
         
