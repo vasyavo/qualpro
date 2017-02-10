@@ -29,11 +29,31 @@ module.exports = function * (options) {
         ...setAdmin,
     ]);
 
-    const setCountry = Array.isArray(body.country) ? body.country : [];
-    const setRegion = Array.isArray(body.region) ? body.region : [];
-    const setSubRegion = Array.isArray(body.subRegion) ? body.subRegion : [];
-    const setOutlet = Array.isArray(body.outlet) ? body.outlet : [];
-    const setBranch = Array.isArray(body.branch) ? body.branch : [];
+    // Report may store prop as {ObjectId} or {ObjectId[]}
+    const location = [
+        body.country,
+        body.region,
+        body.subRegion,
+        body.outlet,
+        body.branch,
+        body.retailSegment,
+    ];
+    const {
+        setCountry,
+        setRegion,
+        setSubRegion,
+        setOutlet,
+        setBranch,
+        setRetailSegment,
+    } = location.map(item => {
+        if (Array.isArray(item)) {
+            return item;
+        } else if (_.isString(item)) {
+            return [item];
+        }
+
+        return [];
+    });
 
     const setEveryoneInLocation = yield getEveryoneInLocation({
         exclude: setPersonnel,
@@ -65,7 +85,7 @@ module.exports = function * (options) {
         country: setCountry,
         region: setRegion,
         subRegion: setSubRegion,
-        retailSegment: body.retailSegment,
+        retailSegment: setRetailSegment,
         outlet: setOutlet,
         branch: setBranch,
     });
