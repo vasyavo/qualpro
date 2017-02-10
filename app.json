@@ -6,10 +6,9 @@
   ],
   "repository": "https://github.com/rhinobuccaneers/qualpro.git",
   "success_url": "/",
-  "scripts": {
-  },
   "env": {
     "WEB_CONCURRENCY": {
+      "required": false,
       "description": "The number of processes to run."
     },
     "NODE_ENV": {
@@ -94,30 +93,22 @@
   },
   "formation": {
     "web": {
-      "quantity": 3,
-      "size": "standard-2x"
+      "quantity": 1,
+      "size": "Standard-2X"
     }
   },
   "addons": [
     {
-      "plan": "mongolab:shared-cluster-1",
-      "options": {
-        "version": "3.2.11"
-      }
+      "plan": "papertrail:forsta"
     },
     {
-      "plan": "papertrail:fixa"
-    },
-    {
-      "plan": "heroku-redis:premium-0"
+      "plan": "heroku-redis:premium-1"
     }
   ],
+  "image": "heroku/nodejs",
   "buildpacks": [
     {
-      "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://bitbucket.org/cf-utilities/cf-buildpack-multi.git"
+      "url": "https://github.com/rhinobuccaneers/heroku-buildpack-multi"
     }
   ]
 }
