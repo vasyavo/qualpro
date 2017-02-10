@@ -1,4 +1,4 @@
-const middleware = require('absctract-scheduler');
+const middleware = require('abstract-scheduler');
 const logger = require('./../../utils/logger');
 const config = require('./../../config');
 const SchedulerModel = require('./model');
