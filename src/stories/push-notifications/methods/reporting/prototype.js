@@ -48,11 +48,9 @@ module.exports = function * (options) {
     } = location.map(item => {
         if (Array.isArray(item)) {
             return item;
-        } else if (_.isString(item)) {
-            return [item];
         }
 
-        return [];
+        return [item];
     });
 
     const setEveryoneInLocation = yield getEveryoneInLocation({
