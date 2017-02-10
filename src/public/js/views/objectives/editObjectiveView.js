@@ -949,7 +949,7 @@ define([
             var creationsOptions = {
                 withoutTabs       : true,
                 parrentContentType: this.contentType,
-                objectiveType     : this.changed.objectiveType,
+                objectiveType     : this.changed.objectiveType || this.model.get('objectiveType'),
                 translation       : this.translation.assignToPersonnel
             };
             var createdByLevel = this.model.get('createdBy').user.accessRole.level;
