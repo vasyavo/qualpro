@@ -146,9 +146,28 @@ var Contract = function (db, redis, event) {
                 documents: {
                     _id        : 1,
                     title      : 1,
+                    attachment : 1,
                     contentType: 1,
                     createdBy  : {
                         date: 1
+                    }
+                }
+            }
+        }));
+    
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from           : 'files',
+            key            : 'documents.attachment',
+            isArray        : false,
+            addProjection  : ['_id', 'contentType'],
+            includeSiblings: {
+                documents: {
+                    _id        : 1,
+                    title      : 1,
+                    contentType: 1,
+                    createdBy  : {
+                        date: 1,
+                        user: 1
                     }
                 }
             }
@@ -856,14 +875,14 @@ var Contract = function (db, redis, event) {
                         personnelIds.push(el.createdBy.user._id);
                     });
                     personnelIds.push(model.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(model.documents, '_id'));
+                    fileIds = _.union(fileIds, _.map(model.documents, 'attachment._id'));
 
                     return model;
                 });
 
                 personnelIds = _.uniqBy(personnelIds, 'id');
                 options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
+                options.data[CONTENT_TYPES.FILES] = fileIds;
 
                 getImagesHelper.getImages(options, function (err, result) {
                     var fieldNames = {};
@@ -877,7 +896,7 @@ var Contract = function (db, redis, event) {
                         imgsObject: result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
+                    fieldNames[CONTENT_TYPES.FILES] = [['documents.attachment']];
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {

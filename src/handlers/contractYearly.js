@@ -129,9 +129,28 @@ var Contract = function (db, redis, event) {
                 documents: {
                     _id        : 1,
                     title      : 1,
+                    attachment : 1,
                     contentType: 1,
                     createdBy  : {
                         date: 1
+                    }
+                }
+            }
+        }));
+    
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from           : 'files',
+            key            : 'documents.attachment',
+            isArray        : false,
+            addProjection  : ['_id', 'contentType'],
+            includeSiblings: {
+                documents: {
+                    _id        : 1,
+                    title      : 1,
+                    contentType: 1,
+                    createdBy  : {
+                        date: 1,
+                        user: 1
                     }
                 }
             }
@@ -827,9 +846,9 @@ var Contract = function (db, redis, event) {
 
                             const documentsId = model.documents
                                 .filter((item) => {
-                                    return item && item._id;
+                                    return item && item.attachment && item.attachment._id;
                                 })
-                                .map((item) => (item._id));
+                                .map((item) => (item.attachment._id));
 
                             fileIds.push(...documentsId);
 
@@ -856,7 +875,7 @@ var Contract = function (db, redis, event) {
                     };
 
                     options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                    options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
+                    options.data[CONTENT_TYPES.FILES] = fileIds;
 
                     async.waterfall([
 
@@ -871,7 +890,7 @@ var Contract = function (db, redis, event) {
                             };
 
                             fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                            fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
+                            fieldNames[CONTENT_TYPES.FILES] = [['documents.attachment']];
 
                             getImagesHelper.setIntoResult(setOptions, (data) => {
                                 // fixme incorrect error callback format
