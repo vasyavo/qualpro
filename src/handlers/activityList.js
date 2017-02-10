@@ -1,6 +1,7 @@
 var Personnel = function(db, redis, event) {
     var mongoose = require('mongoose');
     var CONSTANTS = require('../constants/mainConstants');
+    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -503,6 +504,30 @@ var Personnel = function(db, redis, event) {
             from : 'outlets',
             key : 'outlet'
         }));
+
+        pipeLine.push({
+            $lookup: {
+                from: 'objectives',
+                localField: 'itemId',
+                foreignField: '_id',
+                as: 'itemModel'
+            }
+        });
+
+        pipeLine.push({
+            $unwind: {
+                path                      : '$itemModel',
+                preserveNullAndEmptyArrays: true
+            }
+        });
+
+        pipeLine.push({
+            $match: {
+                'itemModel.status': {
+                    $ne: OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT
+                }
+            }
+        });
 
         pipeLine.push({
             $group : {
