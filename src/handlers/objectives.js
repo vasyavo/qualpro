@@ -552,7 +552,7 @@ const createSubObjective = (options, callback) => {
                 ];
 
                 if (parentObjective.level && everyAdmin.indexOf(parentObjective.level) > -1) {
-                    objectivePayload.parent[parentObjective.get('level')] = parentObjective.get('_id');
+                    objectivePayload.parent[parentObjective.level] = parentObjective._id;
                 }
             }
 
