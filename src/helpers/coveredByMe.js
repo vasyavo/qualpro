@@ -1,21 +1,21 @@
 module.exports = (PersonnelModel, myId, cb) => {
     const pipeLine = [{
         $match: {
-            'vacation.cover': myId
-        }
+            'vacation.cover': myId,
+        },
     }, {
         $group: {
             _id: null,
             ids: {
-                $addToSet: '$_id'
-            }
-        }
+                $addToSet: '$_id',
+            },
+        },
     }];
 
     const aggregation = PersonnelModel.aggregate(pipeLine);
 
     aggregation.options = {
-        allowDiskUse: true
+        allowDiskUse: true,
     };
 
     aggregation.exec((err, response) => {

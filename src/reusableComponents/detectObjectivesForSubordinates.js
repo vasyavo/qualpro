@@ -1,17 +1,10 @@
-const _ = require('underscore');
+const _ = require('lodash');
+const toString = require('./../utils/toString');
 
 module.exports = (data, subordinatesId, currentUserId) => {
     return data.map((objective) => {
-        let assignedToId;
-        let createdById;
-
-        if (_.isObject(objective.assignedTo[0])) {
-            assignedToId = objective.assignedTo[0]._id.toString();
-        }
-
-        if (_.isObject(objective.createdBy.user)) {
-            createdById = objective.createdBy.user._id.toString();
-        }
+        const assignedToId = toString(objective, 'assignedTo[0]._id');
+        const createdById = toString(objective, 'createdBy.user._id');
 
         if (subordinatesId.indexOf(assignedToId) > -1 && createdById !== currentUserId) {
             objective.myCC = true;

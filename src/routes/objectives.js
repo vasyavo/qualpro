@@ -13,12 +13,11 @@ module.exports = function (db, redis, event) {
     router.use(checkAuth);
 
     router.post('/subObjective', multipartMiddleware, onLeaveMiddleware, handler.createSubObjective);
-    router.post('/duplicate', onLeaveMiddleware, handler.duplicateObjective);
     router.post('/', multipartMiddleware, onLeaveMiddleware, handler.create);
     router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, onLeaveMiddleware, handler.update);
     router.patch('/:id([0-9a-fA-F]{24})', multipartMiddleware, onLeaveMiddleware, handler.update);
-    
-    router.get('/personnelFroSelection', handler.getPersonnelFroSelection);
+
+    router.get('/personnelFroSelection', handler.getPersonnelForSelection);
     router.get('/url/:imageName', handler.getUrl); //TODO: remove this, only for testing
 
     router.get('/', handler.getAll);
