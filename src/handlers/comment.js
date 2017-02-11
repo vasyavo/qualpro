@@ -202,7 +202,7 @@ var Comment = function (db, redis, event) {
                             body: updatedContextModel.toJSON(),
                         };
 
-                        if (context === CONTENT_TYPES.OBJECTIVES && updatedContextModel.status !== CONSTANTS.OBJECTIVE_STATUSES.DRAFT) {
+                        if (context === CONTENT_TYPES.OBJECTIVES) {
                             ActivityLog.emit('objective:comment-added', eventPayload);
                         }
 
