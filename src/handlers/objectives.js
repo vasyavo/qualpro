@@ -1844,10 +1844,7 @@ class ObjectiveHandler {
 
                         response.data = detectObjectivesForSubordinates(response.data, setSubordinateStringId, userId);
 
-                        callback(null, {
-                            status: 200,
-                            body: response,
-                        });
+                        callback(null, response);
                     });
                 });
             });
