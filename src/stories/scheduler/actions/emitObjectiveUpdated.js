@@ -1,14 +1,9 @@
 const async = require('async');
-const _ = require('lodash');
 const logger = require('./../../../utils/logger');
 const ObjectiveModel = require('./../../../types/objective/model');
 const FileModel = require('./../../../types/file/model');
 const TestUtils = require('./../../push-notifications/utils/TestUtils');
 const ActivityLog = require('./../../push-notifications/activityLog');
-
-const getObjectiveContext =  (objective) => {
-    return objective.context === 'objectives'? 'objective': 'in-store-task'
-};
 
 module.exports = (args, callback) => {
     const {
@@ -60,7 +55,9 @@ module.exports = (args, callback) => {
 
             cb(null, true);
 
-            ActivityLog.emit(`${getObjectiveContext(objective)}:updated`, {
+            const eventContext = TestUtils.getObjectiveEventContext(objective);
+
+            ActivityLog.emit(`${eventContext}:updated`, {
                 actionOriginator,
                 accessRoleLevel,
                 body: objective,
