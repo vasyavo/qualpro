@@ -9,7 +9,9 @@ const isHighAdmin = {
 
 const setIsSubsetCountry = {
     $gt: [{
-        $setIntersection: ['$$personnel.country', '$$setCountry'],
+        $size: {
+            $setIntersection: ['$$personnel.country', '$$setCountry'],
+        },
     }, 0],
 };
 const inCountry = {
@@ -26,7 +28,9 @@ const inCountry = {
 
 const setIntersectionRegion = {
     $gt: [{
-        $setIntersection: ['$$personnel.region', '$$setRegion'],
+        $size: {
+            $setIntersection: ['$$personnel.region', '$$setRegion'],
+        },
     }, 0],
 };
 const includedToRegion = {
@@ -46,7 +50,9 @@ const includedToRegion = {
 
 const setIntersectionSubRegion = {
     $gt: [{
-        $setIntersection: ['$$personnel.subRegion', '$$setSubRegion'],
+        $size: {
+            $setIntersection: ['$$personnel.subRegion', '$$setSubRegion'],
+        },
     }, 0],
 };
 const includedToSubRegion = {
@@ -67,12 +73,16 @@ const includedToSubRegion = {
 
 const setIntersectionOutlet = {
     $gt: [{
-        $setIntersection: ['$$personnel.outlet', '$$setOutlet'],
+        $size: {
+            $setIntersection: ['$$personnel.outlet', '$$setOutlet'],
+        },
     }, 0],
 };
 const setIntersectionBranch = {
     $gt: [{
-        $setIntersection: ['$$personnel.branch', '$$setBranch'],
+        $size: {
+            $setIntersection: ['$$personnel.branch', '$$setBranch'],
+        },
     }, 0],
 };
 
