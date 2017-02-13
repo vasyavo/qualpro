@@ -94,7 +94,9 @@ module.exports = function * (options) {
 
     return {
         payload,
-        actionOriginator: _.uniq([actionOriginator, contentAuthor]).pop(),
+        actionOriginator,
+        contentAuthor,
+        setHighPriority: _.uniq([actionOriginator, contentAuthor]),
         setOriginator: setOriginator.filter((originator) => (originator !== actionOriginator)),
         setAssignee: setAssignee.filter((assignee) => (assignee !== actionOriginator)),
         setSupervisor: setSupervisor.filter((supervisor) => (supervisor !== actionOriginator)),
