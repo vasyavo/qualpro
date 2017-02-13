@@ -72,12 +72,12 @@ define([
             self.model.set({
                 before: {
                     description: this.description,
-                    files      : before.files[0]
+                    files      : before.files
                 }
             });
 
             var afterPart = this.model.get('after');
-            var file = afterPart.files[0];
+            var file = afterPart.files;
             afterPart.files = file;
 
             this.model.set('after', afterPart);
