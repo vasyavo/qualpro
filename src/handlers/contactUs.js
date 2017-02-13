@@ -85,6 +85,8 @@ var ContactUs = function(db, redis, event) {
 
     this.getAll = function(req, res, next) {
         function generateSearchCondition(query) {
+            const  match = {};
+            
             var searchVariants = [
                 'type',
                 'status',
@@ -95,12 +97,15 @@ var ContactUs = function(db, redis, event) {
                 'country'
             ];
             const aggregateHelper = new AggregationHelper({});
-            var match = {
-                createdAt : {
-                    $gte : new Date(query.startDate),
-                    $lte : new Date(query.endDate)
-                },
-            };
+           
+    
+            if (match.createdAt) {
+                match.createdAt = {
+                    $gte: new Date(query.startDate),
+                    $lte: new Date(query.endDate)
+                };
+            }
+            
             const filterSearch = query.globalSearch && aggregateHelper.getSearchMatch([
                     'type',
                     'description',
