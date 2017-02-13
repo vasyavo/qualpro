@@ -987,6 +987,80 @@ const getAllPipeline = (options) => {
     return pipeline;
 };
 
+const updateChildObjective = (options) => {
+    const {
+        setObjectiveId,
+        assignedTo,
+    } = options;
+    const query = {
+        _id: {
+            $in: setObjectiveId,
+        },
+    };
+
+    ObjectiveModel.update(query, {
+        $set: {
+            'createdBy.user': ObjectId(assignedTo[0]),
+        },
+    }, {
+        multi: true,
+        runValidators: true,
+    }, (err) => {
+        if (err) {
+            logger.error(err);
+            return;
+        }
+    });
+};
+
+const updateObjectiveByAssigneeLocation = (objective, cb) => {
+    const objectiveLevel = objective.get('level');
+    const objectiveId = objective.get('_id');
+    const query = {
+        [`parent.${objectiveLevel}`]: objectiveId,
+    };
+
+    ObjectiveModel.find(query)
+        .lean()
+        .exec((err, setObjective) => {
+            if (err) {
+                return cb(err);
+            }
+
+            if (setObjective) {
+                PersonnelModel.findById(objective.assignedTo[0])
+                    .lean()
+                    .exec((err, personnel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        ObjectiveModel.findByIdAndUpdate(objectiveId, {
+                            $set: {
+                                country: personnel.country,
+                                region: personnel.region,
+                                subRegion: personnel.subRegion,
+                                branch: personnel.branch,
+                            },
+                        }, {
+                            runValidators: true,
+                        }, (err) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            updateChildObjective({
+                                setObjectiveId: setObjective.map(item => item._id),
+                                assignedTo: objective.assignedTo,
+                            });
+                        });
+                    });
+            }
+
+            cb(null, objective);
+        });
+};
+
 class ObjectiveHandler {
 
     getUrl(req, res) {
@@ -1363,49 +1437,54 @@ class ObjectiveHandler {
                     delete $set.description;
                 }
 
-                ObjectiveModel.findOne({
-                    _id: objectiveId,
-                }, (err, model) => {
-                    if (err) {
-                        return cb(err);
-                    }
+                async.waterfall([
 
-                    store.setPreviousState(model.toJSON());
+                    (cb) => {
+                        ObjectiveModel.findOne({ _id: objectiveId })
+                            .lean()
+                            .exec(cb);
+                    },
 
-                    if (_.includes([
-                        OBJECTIVE_STATUSES.FAIL,
-                        OBJECTIVE_STATUSES.CLOSED,
-                    ], model.status)) {
-                        const error = new Error(`You could not update task with status: "${model.status}"`);
-                        error.status = 400;
+                    (objective, cb) => {
+                        store.setPreviousState(objective);
 
-                        return cb(error);
-                    }
+                        if (_.includes([
+                            OBJECTIVE_STATUSES.FAIL,
+                            OBJECTIVE_STATUSES.CLOSED,
+                        ], objective.status)) {
+                            const error = new Error(`You could not update task with status: "${objective.status}"`);
+                            error.status = 400;
 
-                    if (model.status === OBJECTIVE_STATUSES.OVER_DUE && toString(model, 'createdBy.user') !== userId) {
-                        const error = new Error(`You could not update task with status: "${model.status}"`);
-
-                        error.status = 400;
-                        return cb(error);
-                    }
-
-                    ObjectiveModel.findOneAndUpdate({
-                        _id: objectiveId,
-                    }, fullUpdate, {
-                        new: true,
-                        runValidators: true,
-                    }, (err, objective) => {
-                        if (err) {
-                            return cb(err);
+                            return cb(error);
                         }
 
+                        if (objective.status === OBJECTIVE_STATUSES.OVER_DUE && toString(objective, 'createdBy.user') !== userId) {
+                            const error = new Error(`You could not update task with status: "${objective.status}"`);
+
+                            error.status = 400;
+                            return cb(error);
+                        }
+
+                        cb(null);
+                    },
+
+                    (cb) => {
+                        const opts = {
+                            new: true,
+                            runValidators: true,
+                        };
+
+                        ObjectiveModel.findOneAndUpdate({ _id: objectiveId }, fullUpdate, opts, cb);
+                    },
+
+                    (objective, cb) => {
                         if ($set.cover) {
                             updateCover(objective);
                         }
 
                         if (objective.status === OBJECTIVE_STATUSES.CLOSED
-                        && objective.objectiveType !== 'individual'
-                        && objective.level === ACL_CONSTANTS.MASTER_ADMIN) {
+                            && objective.objectiveType !== 'individual'
+                            && objective.level === ACL_CONSTANTS.MASTER_ADMIN) {
                             ObjectiveModel.update({
                                 'parent.1': objective._id,
                             }, {
@@ -1414,6 +1493,7 @@ class ObjectiveHandler {
                                 },
                             }, {
                                 multi: true,
+                                runValidators: true,
                             }, (err, result) => {
                                 if (err) {
                                     logger.error(err);
@@ -1424,13 +1504,10 @@ class ObjectiveHandler {
                             });
                         }
 
-                        store.setNextState(objective.toJSON());
-                        store.difference();
-                        store.publish();
-
                         cb(null, objective);
-                    });
-                });
+                    },
+
+                ], cb);
             };
 
             const uploadFiles = (cb) => {
@@ -1524,75 +1601,14 @@ class ObjectiveHandler {
             }
 
             if ($set.assignedTo && $set.assignedTo[0]) {
-                const updateChildObjective = (options) => {
-                    const {
-                        nextObjectiveIds,
-                        assignedTo,
-                    } = options;
-                    const query = {
-                        _id: {
-                            $in: nextObjectiveIds,
-                        },
-                    };
-
-                    ObjectiveModel.update(query, {
-                        $set: {
-                            'createdBy.user': ObjectId(assignedTo[0]),
-                        },
-                    }, (err) => {
-                        if (err) {
-                            logger.error(err);
-                            return;
-                        }
-                    });
-                };
-
-                const updateObjectiveByAssigneeLocation = (objective, cb) => {
-                    const objectiveLevel = objective.get('level');
-                    const objectiveId = objective.get('_id');
-                    const query = {
-                        [`parent.${objectiveLevel}`]: objectiveId,
-                    };
-
-                    ObjectiveModel.find(query, (err, setObjective) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        if (setObjective) {
-                            PersonnelModel.findById($set.assignedTo[0], (err, personnel) => {
-                                if (err) {
-                                    return cb(err);
-                                }
-
-                                ObjectiveModel.findByIdAndUpdate(objectiveId, {
-                                    $set: {
-                                        country: personnel.country,
-                                        region: personnel.region,
-                                        subRegion: personnel.subRegion,
-                                        branch: personnel.branch,
-                                    },
-                                }, (err) => {
-                                    if (err) {
-                                        return cb(err);
-                                    }
-
-                                    updateChildObjective({
-                                        nextObjectiveIds: setObjective.map(item => item._id),
-                                        assignedTo: $set.assignedTo,
-                                    });
-                                });
-                            });
-                        }
-
-                        cb(null, objective);
-                    });
-                };
-
                 waterfall.push(updateObjectiveByAssigneeLocation);
             }
 
             const getResultAndSend = (objective, cb) => {
+                store.setNextState(objective.toJSON());
+                store.difference();
+                store.publish();
+
                 const id = objective.get('_id');
 
                 getByIdAggr({

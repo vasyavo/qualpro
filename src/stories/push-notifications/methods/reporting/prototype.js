@@ -38,14 +38,14 @@ module.exports = function * (options) {
         body.branch,
         body.retailSegment,
     ];
-    const {
+    const [
         setCountry,
         setRegion,
         setSubRegion,
         setOutlet,
         setBranch,
         setRetailSegment,
-    } = location.map(item => {
+    ] = location.map(item => {
         if (Array.isArray(item)) {
             return item;
         }
