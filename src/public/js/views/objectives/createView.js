@@ -623,11 +623,12 @@ define([
                 var jsonPersonnels = personnelCollection.toJSON();
                 var personnelsIds = _.pluck(jsonPersonnels, '_id');
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
-                var smCvMzLevels = [4, 5, 6, 7];
+                var smCvMzLevels = [5, 6, 7];
 
                 self.fileForVFWithoutBranches = {};
                 self.visibilityFormAjax = null;
-                self.assigneWithoutBranches = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+                self.assigneWithoutBranches = jsonPersonnels[0].accessRole.level === 4 && jsonPersonnels[0].branch.length !== 0 ? false : smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+
                 self.branchesForVisibility = [];
                 self.outletsForVisibility = [];
                 self.dontShowDistributionForm = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
