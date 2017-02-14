@@ -627,7 +627,8 @@ define([
 
                 self.fileForVFWithoutBranches = {};
                 self.visibilityFormAjax = null;
-                self.assigneWithoutBranches = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+                self.assigneWithoutBranches = jsonPersonnels[0].accessRole.level === 4 && jsonPersonnels[0].branch.length !== 0 ? false : smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+
                 self.branchesForVisibility = [];
                 self.outletsForVisibility = [];
                 self.dontShowDistributionForm = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
