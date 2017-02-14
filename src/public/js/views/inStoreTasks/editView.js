@@ -711,12 +711,11 @@ define([
             var descriptionIdToHide = 'description' + anotherLanguage + 'Container';
             var titleIdToHide = 'title' + anotherLanguage;
             var jsonModel = this.model.toJSON();
-            var defaultDateEnd = jsonModel.dateEnd ? moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate() : new Date(dateEnd);
+            var dateStart = jsonModel.dateStart ? moment(jsonModel.dateStart, 'DD.MM.YYYY').toDate() : new Date();
+            var dateEnd = jsonModel.dateEnd ? moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate() : new Date();
             var formString;
             var defaultPriority;
             var self = this;
-            var dateStart = new Date();
-            var dateEnd;
             var $startDate;
             var $endDate;
             var startDateObj;
@@ -778,7 +777,6 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateStart, 'DD.MM.YYYY').toDate(),
                 onClose    : function (selectedDate) {
@@ -791,8 +789,7 @@ define([
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
-                defaultDate: defaultDateEnd,
+                defaultDate: moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate(),
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }
