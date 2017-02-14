@@ -623,7 +623,7 @@ define([
                 var jsonPersonnels = personnelCollection.toJSON();
                 var personnelsIds = _.pluck(jsonPersonnels, '_id');
                 var personnelsNames = _.pluck(jsonPersonnels, 'fullName').join(', ');
-                var smCvMzLevels = [5, 6, 7];
+                var smCvMzLevels = [4, 5, 6, 7];
 
                 self.fileForVFWithoutBranches = {};
                 self.visibilityFormAjax = null;
