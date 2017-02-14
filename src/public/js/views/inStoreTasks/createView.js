@@ -82,9 +82,10 @@ define([
         },
 
         openForm: function () {
+            var $curEl = this.$el;
             var description = {
-                en: CKEDITOR.instances.editor1.document.getBody().getText(),
-                ar: CKEDITOR.instances.editor2.document.getBody().getText()
+                en: _.unescape($curEl.find('.objectivesTextarea[data-property="en"]').val()),
+                ar: _.unescape($curEl.find('.objectivesTextarea[data-property="ar"]').val())
             };
             var self = this;
 
@@ -125,8 +126,8 @@ define([
                 dateEnd      : endDate,
                 location     : $curEl.find('#personnelLocation').attr('data-location'),
                 description  : {
-                    en: CKEDITOR.instances.editor1.document.getBody().getText(),
-                    ar: CKEDITOR.instances.editor2.document.getBody().getText()
+                    en: $curEl.find('.objectivesTextarea[data-property="en"]').val(),
+                    ar: $curEl.find('.objectivesTextarea[data-property="ar"]').val()
                 },
                 country      : this.locations.country,
                 region       : this.locations.region,

@@ -134,6 +134,7 @@ define([
             var form;
             var description;
             var self = this;
+            var $curEl = this.$el;
 
             if (this.objectiveType !== 'individual' && this.objectiveType !== 'country') {
                 return;
@@ -146,8 +147,8 @@ define([
             }
 
             description = {
-                en: CKEDITOR.instances.editor1.document.getBody().getText(),
-                ar: CKEDITOR.instances.editor2.document.getBody().getText()
+                en: _.unescape($curEl.find('.objectivesTextarea[data-property="en"]').val()),
+                ar: _.unescape($curEl.find('.objectivesTextarea[data-property="ar"]').val())
             };
 
             if (this.assigneWithoutBranches) {
