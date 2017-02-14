@@ -52,17 +52,17 @@ errorDescriptions[ERROR_MSG.INVALID_CREDENTIALS] = {
 
 errorDescriptions[ERROR_MSG.ACCOUNT_IS_NOT_CONFIRMED] = {
     en: 'Your account is not confirmed. Please check your email or phone.',
-    ar: 'Your account is not confirmed. Please check your email or phone.'
+    ar: 'لم يتم تأكيد حسابك. يرجى التحقق من بريدك الالكتروني أو الهاتف.'
 };
 
 errorDescriptions[ERROR_MSG.ACCOUNT_IS_BLOCKED] = {
     en: 'Your account is blocked. Please contact with administration.',
-    ar: 'Your account is blocked. Please contact with administration.'
+    ar: 'تم حظر الحساب الخاص بك. يرجى الاتصال بمسئول النظام.'
 };
 
 errorDescriptions[ERROR_MSG.FORBIDDEN_LOGIN_TO_CMS] = {
     en: 'You can not login to CMS.',
-    ar: 'You can not login to CMS.'
+    ar: 'هذا النظام     لا يمكنك الدخول إلى.'
 };
 
 errorDescriptions[ERROR_MSG.FORBIDDEN_LOGIN_FROM_APP] = {
@@ -73,7 +73,7 @@ errorDescriptions[ERROR_MSG.FORBIDDEN_LOGIN_FROM_APP] = {
 
 errorDescriptions[ERROR_MSG.USER_LOCATION_IS_NOT_SPECIFIED] = {
     en: 'You have no location. Please contact with administration.',
-    ar: 'You have no location. Please contact with administration.'
+    ar: 'متصلة، يرجى التواصل بمسئول النظام  ليس لديك أي مواقع.'
 };
 
 errorDescriptions[ERROR_MSG.USER_NOT_FOUND] = {
@@ -92,8 +92,8 @@ errorDescriptions[ERROR_MSG.INCORRECT_VERIFICATION_CODE] = {
 };
 
 errorDescriptions[ERROR_MSG.INCORRECT_USERNAME_OR_PASSWORD] = {
-    en: 'The username or password is incorrect. Please try again',
-    ar: 'The username or password is incorrect. Please try again'
+    en: 'The username or password is incorrect. Please try again.',
+    ar: 'اسم المستخدم أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.'
 };
 
 module.exports = errorDescriptions;

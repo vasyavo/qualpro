@@ -5,8 +5,8 @@ var MonthlyHandler = require('../handlers/monthly');
 var BiYearlyHandler = require('../handlers/biYearly');
 
 module.exports = function(db, redis, event) {
-    var monthlyHandler = new MonthlyHandler(db);
-    var biYearlyHandler = new BiYearlyHandler(db);
+    var monthlyHandler = new MonthlyHandler(db, event);
+    var biYearlyHandler = new BiYearlyHandler(db, event);
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

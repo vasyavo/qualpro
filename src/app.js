@@ -1,7 +1,6 @@
 require('./utils/polyfills');
 
 const http = require('http');
-const async = require('async');
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -42,23 +41,24 @@ const setCacheControl = (req, res, next) => {
 app.use(compress());
 app.engine('html', consolidate.swig);
 app.set('view engine', 'html');
-app.set('views', __dirname + '/views');
+app.set('views', path.join(__dirname, '/views'));
 app.use(morgan('dev'));
 app.use(bodyParser.json({
     strict: false,
     limit: '10mb',
 }));
 app.use(bodyParser.urlencoded({
-    extended: false
+    extended: false,
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(require('./utils/sessionMiddleware'));
+
 app.use(cookieParser('CRMkey'));
 app.use(setCacheControl);
 app.get('/info', require('./utils/isApiAvailable'));
 
-require('./routes/index')(app, mongo, eventEmitter);
+require('./routes')(app, mongo, eventEmitter);
 
 const server = http.createServer(app);
 const io = require('./helpers/socket')({

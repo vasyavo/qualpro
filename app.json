@@ -4,16 +4,12 @@
   "keywords": [
     "productivity"
   ],
-  "website": "",
   "repository": "https://github.com/rhinobuccaneers/qualpro.git",
-  "logo": "",
   "success_url": "/",
-  "scripts": {
-  },
   "env": {
     "WEB_CONCURRENCY": {
-      "description": "The number of processes to run.",
-      "value": "5"
+      "required": false,
+      "description": "The number of processes to run."
     },
     "NODE_ENV": {
       "required": true,
@@ -31,7 +27,7 @@
     },
     "MONGODB_URI": {
       "required": false,
-      "description": "MongoDB uri",
+      "description": "MongoDB URI",
       "value": "Not specified."
     },
     "SENDGRID_APIKEY": {
@@ -73,34 +69,46 @@
       "required": true,
       "description": "AWS secret access key",
       "value": "Not specified."
+    },
+    "FCM_API_KEY": {
+      "required": true,
+      "description": "Firebase Cloud Messaging API key",
+      "value": "Not specified."
+    },
+    "PUBNUB_PUBLISH_KEY": {
+      "required": true,
+      "description": "PubNub publish key",
+      "value": "Not specified."
+    },
+    "PUBNUB_SUBSCRIBE_KEY": {
+      "required": true,
+      "description": "PubNub subscribe key",
+      "value": "Not specified."
+    },
+    "SCHEDULER_HOST": {
+      "required": true,
+      "description": "URL to Abstract Scheduler",
+      "value": "Not specified."
     }
   },
   "formation": {
     "web": {
-      "quantity": 3,
-      "size": "standard-2x"
+      "quantity": 1,
+      "size": "Standard-2X"
     }
   },
   "addons": [
     {
-      "plan": "mongolab:shared-cluster-1",
-      "options": {
-        "version": "3.2.11"
-      }
+      "plan": "papertrail:forsta"
     },
     {
-      "plan": "papertrail:fixa"
-    },
-    {
-      "plan": "heroku-redis:premium-0"
+      "plan": "heroku-redis:premium-1"
     }
   ],
+  "image": "heroku/nodejs",
   "buildpacks": [
     {
-      "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://bitbucket.org/cf-utilities/cf-buildpack-multi.git"
+      "url": "https://github.com/rhinobuccaneers/heroku-buildpack-multi"
     }
   ]
 }

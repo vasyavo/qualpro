@@ -243,7 +243,7 @@ var InStoreReports = function() {
                 (inStoreTaskModel, cb) => {
                     if (TestUtils.isInStoreTaskDraft(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:draft-created', {
-                            originatorId: userId,
+                            actionOriginator: userId,
                             accessRoleLevel,
                             body: inStoreTaskModel.toJSON(),
                         });
@@ -251,7 +251,7 @@ var InStoreReports = function() {
 
                     if (TestUtils.isInStoreTaskPublished(inStoreTaskModel)) {
                         ActivityLog.emit('in-store-task:published', {
-                            originatorId: userId,
+                            actionOriginator: userId,
                             accessRoleLevel,
                             body: inStoreTaskModel.toJSON(),
                         });
@@ -1397,6 +1397,7 @@ var InStoreReports = function() {
             var uId = req.session.uId;
             var currentUserLevel = req.session.level;
             let myCC = filter.myCC;
+            let cover = filter.cover;
             let arrayOfSubordinateUsersId = [];
 
             var searchFieldsArray = [
@@ -1435,12 +1436,19 @@ var InStoreReports = function() {
 
             delete filter.globalSearch;
             delete filter.myCC;
-
+           
+            
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.INSTORETASKS,
                 filter     : query.filter || {},
                 personnel  : personnel
             });
+    
+            if (cover || isMobile) {
+                delete queryObject.region;
+                delete queryObject.subRegion;
+                delete queryObject.branch;
+            }
 
             if (query.personnelTasks) {
                 $defProjection.context = 1;
@@ -2193,6 +2201,14 @@ var InStoreReports = function() {
                     }
                 })
             });
+
+            pipeLine.push(...aggregateHelper.aggregationPartMaker({
+                from : 'visibilityForms',
+                key : 'form._id',
+                as : 'additionalFormData',
+                isArray : false,
+                addProjection : ['_id', 'after']
+            }));
 
             aggregation = ObjectiveModel.aggregate(pipeLine);
 

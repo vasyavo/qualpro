@@ -1,4 +1,5 @@
 'use strict';
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 var BranchHandler = function (db, redis, event) {
     var async = require('async');
@@ -251,12 +252,10 @@ var BranchHandler = function (db, redis, event) {
                     return next(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.BRANCH,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : result._id,
-                    itemType  : CONTENT_TYPES.BRANCH
+                ActivityLog.emit('branch:created', {
+                    actionOriginator: req.session.uId,
+                    accessRoleLevel : req.session.level,
+                    body            : result.toJSON()
                 });
 
                 BranchModel.findById(result._id)
@@ -354,18 +353,31 @@ var BranchHandler = function (db, redis, event) {
                             return next(err);
                         }
 
-                        idsToArchive.forEach(function (id) {
-                            event.emit('activityChange', {
-                                module    : ACL_MODULES.BRANCH,
-                                actionType: type,
-                                createdBy : req.body.editedBy,
-                                itemId    : id,
-                                itemType  : CONTENT_TYPES.BRANCH
+                        async.each(idsToArchive, (id, eCb)=>{
+                            BranchModel.findById(id)
+                                .lean()
+                                .exec((err, resp)=>{
+                                    if (err){
+                                        return eCb(err)
+                                    }
 
-                            });
+                                    const bodyObject = {
+                                        actionOriginator: req.session.uId,
+                                        accessRoleLevel : req.session.level,
+                                        body            : resp.toJSON()
+                                    };
+
+                                    ActivityLog.emit('branch:archived', bodyObject);
+
+                                    eCb();
+
+                                })
+                        }, (err)=>{
+                            if (err) {
+                                return next(err);
+                            }
+                            res.status(200).send();
                         });
-
-                        res.status(200).send();
                     });
                 } else {
                     idsToArchive.forEach(function (id) {
@@ -966,12 +978,11 @@ var BranchHandler = function (db, redis, event) {
                     if (err) {
                         return next(err);
                     }
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.BRANCH,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : body.editedBy,
-                        itemId    : id,
-                        itemType  : CONTENT_TYPES.BRANCH
+
+                    ActivityLog.emit('branch:update', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body            : result.toJSON()
                     });
 
                     if (result) {

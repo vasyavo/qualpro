@@ -148,7 +148,7 @@ define([
 
                     branchModel.afterFileContainer = '';
                     branchModel.afterFileName = 'No File';
-                    branchModel.afterDescription = '';
+                    branchModel.afterDescription = item.after.description;
 
                     var afterFile = item.after.files[0];
                     if (afterFile) {
@@ -162,7 +162,6 @@ define([
 
                         branchModel.afterFileContainer = afterFileContainer;
                         branchModel.afterFileName = afterFile.originalName;
-                        branchModel.afterDescription = item.after.description;
                     }
 
                     return item;

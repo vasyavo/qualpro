@@ -1,14 +1,9 @@
 const async = require('async');
-const _ = require('lodash');
 const logger = require('./../../../utils/logger');
 const ObjectiveModel = require('./../../../types/objective/model');
 const FileModel = require('./../../../types/file/model');
 const TestUtils = require('./../../push-notifications/utils/TestUtils');
 const ActivityLog = require('./../../push-notifications/activityLog');
-
-const getObjectiveContext = (objective) => {
-    return objective.context === 'objectives' ? 'objective' : 'in-store-task';
-};
 
 module.exports = (args, callback) => {
     const {
@@ -60,21 +55,19 @@ module.exports = (args, callback) => {
 
             cb(null, true);
 
-            const arrayOfParentObjectiveId = _(objective.parent)
-                .values()
-                .compact()
-                .value();
+            const isSubObjective = TestUtils.isSubObjective(objective);
+            const eventContext = TestUtils.getObjectiveEventContext(objective);
 
             if (TestUtils.isObjectiveDraft(objective)) {
-                if (arrayOfParentObjectiveId.length) {
+                if (isSubObjective) {
                     ActivityLog.emit('sub-objective:draft-created', {
-                        originatorId: actionOriginator,
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });
                 } else {
-                    ActivityLog.emit(`${getObjectiveContext(objective)}:draft-created`, {
-                        originatorId: actionOriginator,
+                    ActivityLog.emit(`${eventContext}:draft-created`, {
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });
@@ -82,15 +75,15 @@ module.exports = (args, callback) => {
             }
 
             if (TestUtils.isObjectivePublished(objective)) {
-                if (arrayOfParentObjectiveId.length) {
+                if (isSubObjective) {
                     ActivityLog.emit('sub-objective:published', {
-                        originatorId: actionOriginator,
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });
                 } else {
-                    ActivityLog.emit(`${getObjectiveContext(objective)}:published`, {
-                        originatorId: actionOriginator,
+                    ActivityLog.emit(`${eventContext}:published`, {
+                        actionOriginator,
                         accessRoleLevel,
                         body: objective,
                     });

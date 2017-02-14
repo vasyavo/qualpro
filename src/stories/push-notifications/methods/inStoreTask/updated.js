@@ -18,13 +18,13 @@ module.exports = (options) => {
 
         const {
             payload,
-            actionOriginator,
+            setHighPriority,
             setAssignee,
             setSupervisor,
         } = yield prototype(extendedOptions);
 
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: setHighPriority,
             subject: {
                 en: 'In-store task updated',
                 ar: '',

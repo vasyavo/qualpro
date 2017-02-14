@@ -1,20 +1,19 @@
 const fs = require('fs');
+const AWS = require('aws-sdk');
 
 var imageUploader = function (awsConfig) {
-    "use strict";
-
-    var AWS = require('aws-sdk');
-
     AWS.config.update({
         region: awsConfig.region,
         accessKeyId        : awsConfig.accessKeyId,
-        secretAccessKey    : awsConfig.secretAccessKey
+        secretAccessKey: awsConfig.secretAccessKey
     });
 
-    var amazonS3 = awsConfig;
-    var s3 = new AWS.S3({httpOptions: {timeout: 50000}});
-    var defaultACL = 'authenticated-read';
-    var s3policy = require('s3policy');
+    const s3 = new AWS.S3({
+        httpOptions: {
+            timeout: 50000,
+        },
+    });
+    const defaultACL = 'authenticated-read';
 
     function encodeFromBase64(dataString, callback) {
         if (!dataString) {
@@ -86,46 +85,45 @@ var imageUploader = function (awsConfig) {
     };
 
     function uploadFromFile(fileData, bucket, callback) {
-        var imageNameWithExt = `${fileData.name}.${fileData.extension}`;
-        bucket = awsConfig.bucketName;
+        const bucketName = awsConfig.bucketName;
+        const fileName = `${fileData.name}.${fileData.extension}`;
 
-        var readStream = fs.createReadStream(fileData.tempPath);
+        const readStream = fs.createReadStream(fileData.tempPath);
 
-        readStream.on('error', function (err) {
+        readStream.on('error', (err) => {
             if (err) {
-                callback(err);
+                return callback(err);
             }
         });
 
-        readStream.on('open', function () {
-            putObjectToAWS(bucket, imageNameWithExt, readStream, fileData.type, function (err, imageUrl) {
+        readStream.on('open', () => {
+            putObjectToAWS(bucketName, fileName, readStream, fileData.type, (err, imageUrl) => {
                 if (callback && (typeof callback === 'function')) {
-                    callback(err, imageNameWithExt);
+                    callback(err, fileName);
                 }
             });
         });
-    };
+    }
 
     function uploadFile(fileData, bucket, callback) {
-        var imageNameWithExt = `${fileData.name}.${fileData.extension}`;
+        const bucketName = awsConfig.bucketName;
+        const fileName = `${fileData.name}.${fileData.extension}`;
 
-        bucket = awsConfig.bucketName;
-
-        putObjectToAWS(bucket, imageNameWithExt, fileData.data, fileData.type, function (err, imageUrl) {
+        putObjectToAWS(bucketName, fileName, fileData.data, fileData.type, (err) => {
             if (callback && (typeof callback === 'function')) {
-                callback(err, imageNameWithExt);
+                callback(err, fileName);
             }
         });
-    };
+    }
 
     function putObjectToAWS(bucket, key, body, contentType, callback) {
         s3.putObject({
-            Bucket     : bucket,
-            Key        : key,
-            Body       : body,
-            ACL        : defaultACL,
-            ContentType: contentType
-        }, function (err, data) {
+            Bucket: bucket,
+            Key: `files/${key}`,
+            Body: body,
+            ACL: defaultACL,
+            ContentType: contentType,
+        }, (err, data) => {
             if (callback && (typeof callback === 'function')) {
                 callback(err, data);
             }
@@ -164,9 +162,8 @@ var imageUploader = function (awsConfig) {
         var operation = 'getObject';
         var options = {
             Bucket: awsConfig.bucketName,
-            //Bucket: bucket,
-            Key: name,
-            Expires: 60 * 60 * 24
+            Key: `files/${name}`,
+            Expires: 60 * 60 * 24,
         };
 
         return s3.getSignedUrl(operation, options);

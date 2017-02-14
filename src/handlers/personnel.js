@@ -1,5 +1,7 @@
 'use strict';
 
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 const PasswordManager = require('./../helpers/passwordManager');
 
 const Personnel = function (db, redis, event) {
@@ -1113,6 +1115,7 @@ const Personnel = function (db, redis, event) {
     this.create = function(req, res, next) {
         const body = req.body;
         const accessLevel = req.session.level;
+        const uId = req.session.uId;
 
         function queryRun(body, callback) {
             var phone = body.phoneNumber;
@@ -1216,12 +1219,10 @@ const Personnel = function (db, redis, event) {
                 (personnel, cb) => {
                     const personnelId = personnel._id;
 
-                    event.emit('activityChange', {
-                        module : ACL_MODULES.PERSONNEL,
-                        actionType : ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId : personnelId,
-                        itemType : CONTENT_TYPES.PERSONNEL
+                    ActivityLog.emit('personnel:created', {
+                        actionOriginator: uId,
+                        accessRoleLevel : accessLevel,
+                        body: personnel.toJSON(),
                     });
 
                     cb(null, {id : personnelId});
@@ -1500,14 +1501,21 @@ const Personnel = function (db, redis, event) {
                 };
 
                 async.eachSeries(idsToArchive, function(item, callback) {
-                    event.emit('activityChange', {
-                        module : 6,
-                        actionType : type,
-                        createdBy : req.body.editedBy,
-                        itemId : item,
-                        itemType : CONTENT_TYPES.PERSONNEL
+                    PersonnelModel.findById(item, (err, model)=>{
+                        if (err) {
+                            return callback(err)
+                        }
+
+                        ActivityLog.emit('personnel:archived', {
+                            actionOriginator: uId,
+                            accessRoleLevel : req.session.level,
+                            body: model.toJSON()
+                        });
+
+                        callback();
                     });
-                    callback();
+
+
 
                 }, function(err) {
                     if (err) {
@@ -3244,10 +3252,11 @@ const Personnel = function (db, redis, event) {
         const accessLevel = req.session.level;
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
+        let coveredUsers = [];
+        let coverUserId;
         let generatedPassword;
 
         function queryRun(body, callback) {
-            let coveredUserId;
 
             convertDomainsToObjectIdArray(body);
 
@@ -3326,6 +3335,7 @@ const Personnel = function (db, redis, event) {
             let phone;
             let isPhoneValid;
 
+
             if (body.phoneNumber) {
                 phone = body.phoneNumber;
                 isPhoneValid = phone === '' || false;
@@ -3373,7 +3383,6 @@ const Personnel = function (db, redis, event) {
 
             function updateUsers(model, cb) {
                 var currentUserIdNew = model._id;
-                var coverUserId;
                 var coverBeforeUserId;
 
                 var parallelTasks = {
@@ -3398,6 +3407,7 @@ const Personnel = function (db, redis, event) {
                 coverUserId = body.vacation ? body.vacation.cover : null;
                 coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
 
+
                 if (coverBeforeUserId && body.vacation) {
                     parallelTasks.coverBeforeUser = (parallelCb) => {
                         PersonnelModel
@@ -3409,9 +3419,7 @@ const Personnel = function (db, redis, event) {
                                 }
 
                                 if (!personnel.temp) {
-                                    event.emit('notOnLeave', {
-                                        coveredUserId : coverBeforeUserId.toString()
-                                    });
+                                    coveredUsers.push(coverBeforeUserId);
 
                                     return parallelCb(null, {});
                                 }
@@ -3422,12 +3430,6 @@ const Personnel = function (db, redis, event) {
                                     if (err) {
                                         return parallelCb(err);
                                     }
-
-                                    coveredUserId = model._id;
-
-                                    event.emit('notOnLeave', {
-                                        coveredUserId
-                                    });
 
                                     parallelCb(null, model);
                                 });
@@ -3445,11 +3447,9 @@ const Personnel = function (db, redis, event) {
                                     return parallelCb(err);
                                 }
 
-                                if (!personnel.temp) {
-                                    event.emit('notOnLeave', {
-                                        coveredUserId : coverUserId.toString()
-                                    });
+                                coveredUsers.push(coverUserId);
 
+                                if (!personnel.temp) {
                                     return parallelCb(null, {});
                                 }
 
@@ -3464,12 +3464,6 @@ const Personnel = function (db, redis, event) {
                                     if (err) {
                                         return parallelCb(err);
                                     }
-
-                                    coveredUserId = personnel._id;
-
-                                    event.emit('notOnLeave', {
-                                        coveredUserId : coveredUserId
-                                    });
 
                                     parallelCb(null, personnel);
                                 });
@@ -3495,12 +3489,6 @@ const Personnel = function (db, redis, event) {
                 personnelFindByIdAndPopulate(options, (err, personnel) => {
                     if (err) {
                         return cb(err);
-                    }
-
-                    if (body.vacation) {
-                        event.emit('notOnLeave', {
-                            userOnLeave : personnelId
-                        });
                     }
 
                     cb(null, personnel);
@@ -3569,13 +3557,36 @@ const Personnel = function (db, redis, event) {
                 res.status(200).send(personnel);
             };
 
-            if (!body.currentLanguage && !body.newPass) {
-                event.emit('activityChange', {
-                    module : ACL_MODULES.PERSONNEL,
-                    actionType : ACTIVITY_TYPES.UPDATED,
-                    createdBy : personnel.editedBy,
-                    itemId : personnelId,
-                    itemType : CONTENT_TYPES.PERSONNEL
+            if (!body.currentLanguage && !body.newPass && !body.vacation && !body.manager) {
+                ActivityLog.emit('personnel:updated', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                });
+            }
+            if (body.vacation) {
+                ActivityLog.emit('personnel:on-leave', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                    coveredUsers
+                });
+            }
+            if (coverUserId) {
+                ActivityLog.emit('personnel:cover', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                    coveredUsers
+                });
+            }
+            if (body.manager) {
+                coveredUsers.push(personnel.manager);
+                ActivityLog.emit('personnel:assigned', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                    coveredUsers
                 });
             }
 

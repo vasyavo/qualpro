@@ -493,8 +493,9 @@ define([
                 translation: this.translation
             });
             var self = this;
-            var dateStart = new Date();
+            var dateStart;
             var dateEnd;
+            var actuallyDate = new Date();
             var $startDate;
             var $endDate;
             var $curEl;
@@ -549,7 +550,7 @@ define([
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
-                defaultDate: new Date(dateStart),
+                defaultDate: new Date(actuallyDate),
                 onClose    : function (selectedDate) {
                     $endDate.datepicker('option', 'minDate', selectedDate);
                 }

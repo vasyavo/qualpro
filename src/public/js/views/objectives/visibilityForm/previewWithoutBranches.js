@@ -30,6 +30,11 @@ define(function (require) {
             });
             this.model.fetch({
                 success: function () {
+                    var afterPart = that.model.get('after');
+                    if (afterPart.description) {
+                        that.trigger('after-part-filled');
+                    }
+
                     that.render();
                     that.defineUiElements();
                 },
@@ -97,6 +102,8 @@ define(function (require) {
             var afterFileData = this.getAfterFileData();
 
             if (!afterFileData.afterDescription && this.assigneId === App.currentUser._id) {
+                that.templateOptions.editAfter = true;
+            } else if (!afterFileData.afterDescription && Object.keys(App.currentUser.covered).indexOf(this.assigneId) !== -1) {
                 that.templateOptions.editAfter = true;
             }
 

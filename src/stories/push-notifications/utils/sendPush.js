@@ -62,7 +62,7 @@ const sendPush = (groups, callback) => {
                         fcmClient.send({
                             registration_ids: [deviceId],
                             data: readyPayload,
-                            priority: 'high'
+                            priority: 'high',
                         }, (err, data) => {
                             if (err) {
                                 logger.error(`[push-service:${deviceId}] Something went wrong in the end of request:`, record);
@@ -84,7 +84,7 @@ const sendPush = (groups, callback) => {
                                             return null;
                                         }
 
-                                        logger.info(`[push-service] Session terminated:`, record);
+                                        logger.info('[push-service] Session terminated:', record);
                                     });
                                 }
 
@@ -99,7 +99,7 @@ const sendPush = (groups, callback) => {
                 },
 
             ], itCallback);
-        }
+        };
     };
     const itGroup = (group, itCallback) => {
         const {
@@ -120,4 +120,4 @@ const sendPush = (groups, callback) => {
     async.each(groups, itGroup, callback);
 };
 
-module.exports = Bluebird.promisify(sendPush);;
+module.exports = Bluebird.promisify(sendPush);

@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "abstract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git",
     "async": "2.1.2",
     "aws-sdk": "2.2.42",
     "bcryptjs": "2.2.2",
@@ -95,16 +96,16 @@
     "supertest-session": "1.0.0"
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test HEROKU_APP_ENV=production mocha --require co-mocha src/server.spec.js",
-    "test:consumer-survey": "cross-env NODE_ENV=test mocha --require co-mocha src/stories/consumer-survey/testSetup.spec.js",
     "start": "node src/server.js",
-    "dev": "cross-env NODE_ENV=development node src/server.js",
-    "debug": "cross-env NODE_ENV=development node-debug --save-live-edit src/server.js",
+    "test": "cross-env NODE_ENV=test mocha --require co-mocha src/server.spec.js",
+    "dev": "cross-env NODE_ENV=development DEBUG_DEV=true node src/server.js",
+    "debug": "cross-env NODE_ENV=development DEBUG_DEV=true node-debug --save-live-edit src/server.js",
     "postinstall": "chmod +x postinstall.sh && ./postinstall.sh",
     "commit": "git-cz",
     "coverage": "nyc npm run test",
     "docs": "./API_documentation/update_docs.sh",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "service:scheduler": "cd ./node_modules/abstract-scheduler && cross-env NODE_ENV=development npm start"
   },
   "pre-push": [
     "test",
@@ -112,7 +113,9 @@
   ],
   "engines": {
     "node": "6.5.0",
-    "npm": "3.10.3"
+    "npm": "3.10.3",
+    "redis": "3.2",
+    "mongodb": "3.4.1"
   },
   "config": {
     "commitizen": {

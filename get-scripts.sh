@@ -3,7 +3,7 @@
 curl="/usr/bin/curl"
 
 # Get additional scripts
-HEROKU_APP_ENV=${HEROKU_APP_ENV:="production"}
+HEROKU_APP_ENV=${HEROKU_APP_ENV:="staging"}
 TOKEN="52d4d7de06e3b8563f0aac24602e217c66395d6c"
 OWNER="rhinobuccaneers"
 REPO="qualpro-scripts"

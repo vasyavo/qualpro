@@ -55,7 +55,7 @@ define([
         events: {
             'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
-            'input #title, #titleAr'     : 'changeTitle',
+            'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
             'click #unlinkForm'          : 'showUnlinkPopUp',
             //events for duplicate
@@ -401,11 +401,20 @@ define([
         changeDate: function (e) {
             var $el = $(e.target);
             var id = $el.attr('id');
-            var val = $el.val();
+            var val = moment($el.val(), 'DD.MM.YYYY');
 
-            val = moment(val, 'DD.MM.YYYY').toISOString();
+            var value = val.toISOString();
 
-            id === 'dateStart' ? this.changed.dateStart = val : this.changed.dateEnd = val;
+            if (id === 'dateStart'){
+                this.changed.dateStart = value;
+                if (val.diff(moment(this.model.get('dateEnd'), 'DD.MM.YYYY')) > 0){
+                    this.changed.dateEnd = value;
+                }
+            } else {
+                this.changed.dateEnd = value;
+            }
+
+
         },
 
         changeDesc: function (e) {
@@ -545,10 +554,6 @@ define([
                         var VFData = null;
                         var files = [];
 
-                        context.branchesForVisibility.map(function (item) {
-
-                        });
-
                         if (visibilityFormAjax) {
                             VFData = context.visibilityFormAjax.data;
                         }
@@ -584,7 +589,7 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var form = odel.get('form');
+                    var form = model.get('form');
                     var formId = form._id;
                     var formType = form.contentType;
 
@@ -944,7 +949,7 @@ define([
             var creationsOptions = {
                 withoutTabs       : true,
                 parrentContentType: this.contentType,
-                objectiveType     : this.changed.objectiveType,
+                objectiveType     : this.changed.objectiveType || this.model.get('objectiveType'),
                 translation       : this.translation.assignToPersonnel
             };
             var createdByLevel = this.model.get('createdBy').user.accessRole.level;

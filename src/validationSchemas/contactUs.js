@@ -7,7 +7,10 @@ const CONSTANTS = require('../constants/mainConstants');
 const TYPES = [
     'Application Related Issue',
     'Future Application Ideas',
-    'Others'
+    'Others',
+    'Sales Feedback',
+    'Trade Feedback',
+    'Consumers Feedback',
 ];
 const STATUSES = [
     'new',
@@ -89,12 +92,12 @@ const getAll = Joi.object().keys({
         position : Joi.object().keys({
             values : Joi.array().items(customJoi.objectId().toObjectId())
         }),
-        startDate : Joi.date().default(startOfYear, 'start of a year date'),
-        endDate : Joi.date().default(currentDate, 'current date')
+        startDate : Joi.date(),
+        endDate : Joi.date()
     }).rename('personnel', 'createdBy').default(() => {
         return {
-            startDate : startOfYear(),
-            endDate : currentDate()
+            startDate : Joi.date(),
+            endDate : Joi.date()
         }
     }, 'default filter')
 });

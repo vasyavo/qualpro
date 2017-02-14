@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const nconf = require('nconf');
 const cluster = require('cluster');
+
 const config = {};
 
 // for example NODE_ENV is development
@@ -20,9 +21,10 @@ config.workingDirectory = path.join(__dirname, '../../');
 
 const host = process.env.HOST;
 
-config.port = parseInt(process.env.PORT) || 3000;
+config.port = parseInt(process.env.PORT, 10) || 3000;
 config.host = host || 'localhost';
-config.localhost = host ? host : `https://${config.host}:${config.port}`;
+config.localhost = host || `https://${config.host}:${config.port}`;
+config.debug = process.env.DEBUG_DEV || false;
 
 /* Database configurations */
 config.mongodbUri = process.env.MONGODB_URI;
@@ -36,7 +38,7 @@ config.redisSessionDb = process.env.REDIS_SESSION_DB || 7;
 const twilio = {
     accountSid: process.env.SMS_ACCOUNT_SID,
     authToken: process.env.SMS_AUTH_TOKEN,
-    number: process.env.SMS_NUMBER
+    number: process.env.SMS_NUMBER,
 };
 
 config.twilio = twilio;
@@ -50,11 +52,11 @@ const awsS3Config = {
     region: process.env.AWS_S3_REGION,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    imageUrlDurationSec: 60 * 60 * 24 * 365 * 10
+    imageUrlDurationSec: 60 * 60 * 24 * 365 * 10,
 };
 
 config.aws = {
-    s3: awsS3Config
+    s3: awsS3Config,
 };
 
 // path to file with credentials
@@ -74,7 +76,7 @@ if (fs.existsSync(config.awsCredentialsPath)) {
         accessKeyId,
         secretAccessKey,
         bucketName: nconf.get('AWS_S3_BUCKET'),
-        region: nconf.get('AWS_S3_REGION')
+        region: nconf.get('AWS_S3_REGION'),
     });
 
     process.env.AWS_ACCESS_KEY_ID = accessKeyId;

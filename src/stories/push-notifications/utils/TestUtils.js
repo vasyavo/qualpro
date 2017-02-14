@@ -1,4 +1,7 @@
-const OTHER_CONSTANTS = require('./../../../public/js/constants/otherConstants.js');
+const _ = require('lodash');
+const contentTypes = require('./../../../public/js/constants/contentType');
+const OTHER_CONSTANTS = require('./../../../public/js/constants/otherConstants');
+
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
 /*
@@ -38,7 +41,7 @@ const isInStoreTaskPublished = (state) => {
  * @returns {Boolean}
  * */
 const isObjectiveStatusChanged = (state) => {
-    return state.hasOwnProperty('status');
+    return Object.hasOwnProperty.apply(state, ['status']);
 };
 
 /*
@@ -46,7 +49,39 @@ const isObjectiveStatusChanged = (state) => {
  * @returns {Boolean}
  * */
 const isObjectiveAssigneeChanged = (state) => {
-    return state.hasOwnProperty('assignedTo');
+    return Object.hasOwnProperty.apply(state, ['assignedTo']);
+};
+
+/*
+ * @param state {Object} Objective
+ * @returns {Boolean}
+ * */
+const isSubObjective = (state) => {
+    return !!_(state.parent)
+        .values()
+        .compact()
+        .values()
+        .length;
+};
+
+
+/*
+ * @param state {Object} Objective
+ * @returns {Boolean}
+ * */
+const getObjectiveEventContext = (state) => {
+    switch (state.context) {
+        case contentTypes.OBJECTIVES:
+            if (isSubObjective(state)) {
+                return 'sub-objective';
+            }
+
+            return 'objective';
+        case contentTypes.INSTORETASKS:
+            return 'in-store-task';
+        default:
+            return 'objective';
+    }
 };
 
 module.exports = {
@@ -56,4 +91,6 @@ module.exports = {
     isObjectiveAssigneeChanged,
     isInStoreTaskDraft,
     isInStoreTaskPublished,
+    isSubObjective,
+    getObjectiveEventContext,
 };

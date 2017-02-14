@@ -20,6 +20,7 @@ const DomainModel = require('./../types/domain/model');
 const NoteModel = require('./../types/note/model');
 const ShelfSharesModel = require('./../types/shelfShare/model');
 const PriceSurveyModel = require('./../types/priceSurvey/model');
+const ContactUsModel = require('./../types/contactUs/model');
 const NotificationModel = require('./../types/notification/model');
 const BranchModel = require('./../types/branch/model');
 const OutletModel = require('./../types/outlet/model');
@@ -7936,29 +7937,42 @@ const Filters = function(db, redis) {
         });
         let pipeLine = [];
         let aggregation;
-        let personnelFilter;
-        let positionFilter;
-        let aggregateHelper;
         const TYPES = [
             {
                 _id : 'Application Related Issue',
-                name : {
-                    en : 'Application Related Issue',
-                    ar : ''
+                name: {
+                    en: 'Application Related Issue',
+                    ar: ''
                 }
-            },
-            {
+            }, {
                 _id : 'Future Application Ideas',
-                name : {
-                    en : 'Future Application Ideas',
-                    ar : ''
+                name: {
+                    en: 'Future Application Ideas',
+                    ar: ''
                 }
-            },
-            {
+            }, {
+                _id : 'Sales Feedback',
+                name: {
+                    en: 'Sales Feedback',
+                    ar: ''
+                }
+            }, {
+                _id : 'Trade Feedback',
+                name: {
+                    en: 'Trade Feedback',
+                    ar: ''
+                }
+            }, {
+                _id : 'Consumers Feedback',
+                name: {
+                    en: 'Consumers Feedback',
+                    ar: ''
+                }
+            }, {
                 _id : 'Others',
-                name : {
-                    en : 'Others',
-                    ar : ''
+                name: {
+                    en: 'Others',
+                    ar: ''
                 }
             }
         ];
@@ -7979,83 +7993,94 @@ const Filters = function(db, redis) {
             }
         ];
 
+
         if (filter.personnel) {
-            personnelFilter = filter.personnel;
-            delete filter.personnel;
+            pipeLine.push({
+                $match : {
+                    'createdBy' : filter.personnel
+                }
+            });
         }
+        
+        pipeLine.push({
+            $lookup: {
+                from : 'personnels',
+                localField : 'createdBy',
+                foreignField : '_id',
+                as: 'createdBy'
+            }
+        }, {
+            $unwind: {
+                path                      : '$createdBy',
+                preserveNullAndEmptyArrays: true
+            }
+        },{
+            $unwind: {
+                path                      : '$createdBy.country',
+                preserveNullAndEmptyArrays: true
+            }
+        });
 
         if (filter.position) {
-            positionFilter = filter.position;
-            delete filter.position;
-        }
-
-        aggregateHelper = new AggregationHelper($defProjection, filter);
-
-        if (personnelFilter) {
             pipeLine.push({
                 $match : {
-                    'createdBy.user' : personnelFilter
+                    'createdBy.position' : filter.position
                 }
             });
         }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country',
-            isArray : false
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            addProjection : ['position', 'firstName', 'lastName'],
-            isArray : false,
-            includeSiblings : {
-                createdBy : {
-                    date : 1
-                }
-            }
-        }));
-
-        if (positionFilter) {
+        
+        if (filter.country) {
             pipeLine.push({
                 $match : {
-                    'createdBy.user.position' : positionFilter
+                    'createdBy.country' : filter.country
                 }
             });
         }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'createdBy.user.position',
-            isArray : false,
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        position : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
+        
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        name : {
-                            en : {$concat : ['$createdBy.user.firstName.en', ' ', '$createdBy.user.lastName.en']},
-                            ar : {$concat : ['$createdBy.user.firstName.ar', ' ', '$createdBy.user.lastName.ar']}
-                        }
-                    }
+            $lookup: {
+                from : 'domains',
+                localField : 'createdBy.country',
+                foreignField : '_id',
+                as: 'country'
+            }
+        }, {
+            $unwind: {
+                path                      : '$country',
+                preserveNullAndEmptyArrays: true
+            }
+        });
+        
+        pipeLine.push({
+            $lookup: {
+                from : 'positions',
+                localField : 'createdBy.position',
+                foreignField : '_id',
+                as: 'position'
+            }
+        }, {
+            $unwind: {
+                path                      : '$position',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $project: {
+                country  : {
+                    _id : 1,
+                    name: 1
                 },
-                position : {$arrayElemAt : ['$createdBy.user.position', 0]}
-            })
+                position : {
+                    _id : 1,
+                    name: 1
+                },
+                personnel: {
+                        _id : '$createdBy._id',
+                        name: {
+                            en: {$concat: ['$createdBy.firstName.en', ' ', '$createdBy.lastName.en']},
+                            ar: {$concat: ['$createdBy.firstName.ar', ' ', '$createdBy.lastName.ar']}
+                    }
+                }
+            }
         });
 
         pipeLine.push({
@@ -8063,11 +8088,11 @@ const Filters = function(db, redis) {
                 _id : null,
                 country : {$addToSet : '$country'},
                 position : {$addToSet : '$position'},
-                personnel : {$addToSet : '$createdBy.user'}
+                personnel : {$addToSet : '$personnel'}
             }
         });
 
-        aggregation = PriceSurveyModel.aggregate(pipeLine);
+        aggregation = ContactUsModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse : true
@@ -8087,8 +8112,20 @@ const Filters = function(db, redis) {
                 position : result.position || [],
                 personnel : result.personnel || []
             };
-
-            res.status(200).send(result);
+    
+            redisFilters({
+                currentSelected : currentSelected,
+                filterExists : filterExists,
+                filtersObject : result,
+                personnelId : req.personnelModel._id,
+                contentType : CONTENT_TYPES.CONTACT_US
+            }, function(err, response) {
+                if (err) {
+                    return next(err);
+                }
+        
+                res.status(200).send(response);
+            });
         });
     };
 

@@ -1,7 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const multipart = require('connect-multiparty');
-const multipartMiddleware = multipart();
 const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
@@ -13,21 +11,17 @@ const config = require('./../config');
 const express = require('express');
 
 module.exports = function(app, db, event) {
-    var logWriter = require('../helpers/logWriter');
     var redis = require('../helpers/redisClient');
 
     app.set('csrfProtection', csrfProtection);
 
     require('../helpers/eventEmiter')(db, redis, event, app);
 
-    var LocalFs = require('../helpers/localFs');
-
     var DocsHandler = require('../handlers/docs');
     var ModuleslHandler = require('../handlers/modules');
     var modulesHandler = new ModuleslHandler(db);
     var docsHandler = new DocsHandler(db);
 
-    var brandingAndDisplayRouter = require('./brandingAndDisplay')(db, redis, event);
     var brandingActivityRouter = require('./brandingActivity')(db, redis, event);
     var brandingActivityItems = require('./brandingActivityItems')(db, redis, event);
     var personnelRouter = require('./personnel')(db, app, event, redis);
@@ -85,29 +79,26 @@ module.exports = function(app, db, event) {
     app.use(require('./../utils/rememberMeMiddleware'));
 
 
-    app.get('/', csrfProtection, function(req, res, next) {
-        //ToDo remove (res.cookie) this one after test sms
-        //res.cookie('lang', 'ae');
+    app.get('/', csrfProtection, (req, res, next) => {
         res.render('index.html', {
-            csrfToken : req.csrfToken(),
+            csrfToken: req.csrfToken(),
             pubnubSubscribeKey: config.pubnub.subscribeKey,
         });
     });
 
     // endpoint for handling api documents
-    app.get('/docs', function(req, res, next) {
-        res.render(process.cwd() + '/API_documentation/qualPro_API.html');
+    app.get('/docs', (req, res, next) => {
+        res.render(path.join(process.cwd(), '/API_documentation/qualPro_API.html').normalize());
     });
 
     app.get('/modules', checkAuth, modulesHandler.getAll);
 
-    app.post('/scheduler', require('./../stories/scheduler'));
-    /*app.use(require('./../utils/validTimeZone'));*/
+    app.post('/scheduler', require('./../stories/scheduler/middleware'));
 
     app.use(require('./../stories/user-registration'));
 
     app.use('/activityList', activityList);
-    app.use('/brandingAndDisplayNew', brandingAndDisplayRouter);
+    app.use('/brandingAndDisplayNew', require('./brandingAndDisplay'));
     app.use('/brandingActivity', brandingActivityRouter);
     app.use('/brandingActivityItems', brandingActivityItems);
     app.use('/personnel', personnelRouter);

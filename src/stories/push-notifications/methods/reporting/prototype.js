@@ -28,13 +28,38 @@ module.exports = function * (options) {
         supervisor,
         ...setAdmin,
     ]);
+
+    // Report may store prop as {ObjectId} or {ObjectId[]}
+    const location = [
+        body.country,
+        body.region,
+        body.subRegion,
+        body.outlet,
+        body.branch,
+        body.retailSegment,
+    ];
+    const [
+        setCountry,
+        setRegion,
+        setSubRegion,
+        setOutlet,
+        setBranch,
+        setRetailSegment,
+    ] = location.map(item => {
+        if (Array.isArray(item)) {
+            return item;
+        }
+
+        return [item];
+    });
+
     const setEveryoneInLocation = yield getEveryoneInLocation({
         exclude: setPersonnel,
-        setCountry: Array.isArray(body.country) ? body.country : [],
-        setRegion: Array.isArray(body.region) ? body.region : [],
-        setSubRegion: Array.isArray(body.subRegion) ? body.subRegion : [],
-        setOutlet: Array.isArray(body.outlet) ? body.outlet : [],
-        setBranch: Array.isArray(body.branch) ? body.branch : [],
+        setCountry,
+        setRegion,
+        setSubRegion,
+        setOutlet,
+        setBranch,
     });
     const newActivity = new ActivityModel();
 
@@ -55,12 +80,12 @@ module.exports = function * (options) {
             ...setPersonnel,
             ...setEveryoneInLocation,
         ],
-        country: body.country,
-        region: body.region,
-        subRegion: body.subRegion,
-        retailSegment: body.retailSegment,
-        outlet: body.outlet,
-        branch: body.branch,
+        country: setCountry,
+        region: setRegion,
+        subRegion: setSubRegion,
+        retailSegment: setRetailSegment,
+        outlet: setOutlet,
+        branch: setBranch,
     });
 
     yield newActivity.save();

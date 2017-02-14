@@ -142,6 +142,10 @@ schemasByRole[CONTENT_TYPES.CONTACT_US][ACL_ROLES.COUNTRY_UPLOADER] = {
     update: schemas.contactUs.update
 };
 
+schemasByRole[CONTENT_TYPES.CONTACT_US][ACL_ROLES.TRADE_MARKETER] = {
+    create: schemas.contactUs.create,
+};
+
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY] = {};
 
 schemasByRole[CONTENT_TYPES.BRANDING_AND_DISPLAY][ACL_ROLES.SUPER_ADMIN] = {
