@@ -4,6 +4,101 @@ var schemas = require('../validationSchemas');
 
 var schemasByRole = {};
 
+schemasByRole[CONTENT_TYPES.DOCUMENTS] = {};
+
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.SUPER_ADMIN] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.MASTER_ADMIN] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.COUNTRY_ADMIN] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.AREA_MANAGER] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.AREA_IN_CHARGE] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.SALES_MAN] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.MERCHANDISER] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.CASH_VAN] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.MASTER_UPLOADER] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.COUNTRY_UPLOADER] = {
+    move   : schemas.document.move,
+    archive: schemas.document.archive,
+    remove : schemas.document.remove,
+    sync   : schemas.document.sync,
+    create : schemas.document.create,
+    read   : schemas.document.getAll,
+    update : schemas.document.update
+};
+
+// =============== CONTACT_US ========================================
+
 schemasByRole[CONTENT_TYPES.CONTACT_US] = {};
 
 schemasByRole[CONTENT_TYPES.CONTACT_US][ACL_ROLES.SUPER_ADMIN] = {

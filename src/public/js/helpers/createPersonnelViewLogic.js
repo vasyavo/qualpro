@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'helpers/contentTypesHelper',

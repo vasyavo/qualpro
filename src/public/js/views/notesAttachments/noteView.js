@@ -1,7 +1,8 @@
 define([
+    'backbone',
     'text!templates/Notes/noteTemplate.html'
 
-], function (NoteTemplate) {
+], function (Backbone, NoteTemplate) {
     var NoteView = Backbone.View.extend({
 
         initialize: function () {

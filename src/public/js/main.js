@@ -21,7 +21,7 @@ require.config({
         imageCrop            : './libs/Jcrop/js/jquery.Jcrop.min',
         jqueryui             : './libs/jquery-ui/jquery-ui.min',
         Underscore           : './libs/underscore/underscore-min',
-        Backbone : './libs/backbone/backbone-min',
+        backbone : './libs/backbone/backbone-min',
         'backbone.radio' : './libs/backbone.radio/build/backbone.radio',
         templates            : '../templates',
         text                 : './libs/requirejs-text/text',
@@ -46,8 +46,8 @@ require.config({
     shim : {
         jqueryui : ['jQuery'],
         imageCrop: ['jQuery'],
-        Backbone : ['Underscore', 'jQuery'],
-        app      : ['Backbone', 'jqueryui', 'imageCrop'],
+        backbone : ['Underscore', 'jQuery'],
+        app      : ['backbone', 'jqueryui', 'imageCrop'],
         d3       : {
             exports: 'd3'
         },
@@ -72,7 +72,7 @@ require.config({
 });
 
 require([
-    'Backbone',
+    'backbone',
     'jQuery',
     'app',
     'minigrid'

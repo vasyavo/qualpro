@@ -1,5 +1,5 @@
 ﻿define([
-    'Backbone',
+    'backbone',
     'underscore',
     'text!templates/domain/listTable.html'
 ], function (Backbone, _, listTemplate) {

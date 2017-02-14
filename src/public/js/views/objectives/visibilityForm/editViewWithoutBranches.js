@@ -2,7 +2,7 @@ define(function (require) {
 
     var $ = require('jQuery');
     var _ = require('Underscore');
-    var Backbone = require('Backbone');
+    var Backbone = require('backbone');
     var CONSTANTS = require('constants/otherConstants');
     var ERROR_MESSAGES = require('constants/otherConstants');
     var Template = require('text!templates/objectives/visibilityForm/editWithoutBranches.html');

@@ -1,0 +1,49 @@
+<div class="form-holder personnelInfo promotionView documentsView largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.preViewTitle %></span>
+    </div>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap"></div>
+    </div>
+    <div id="main" class="competitorBrandingPreview documentsPreview">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell">
+                                <span data-translation="title"><%- translation.title %></span>
+                            </div>
+                            <div class="cell">
+                                <span><%- title %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right">
+                <div class="scrollable">
+                    <div id="attachments" class="attachmentsBlock">
+                        <div class="attachmentsHeader">
+                            <span class="attachmentsDescription fontBold" data-translation="attachments"><%- translation.attachments %></span>
+                        </div>
+                        <div class="promotionFilesBlock documentsFilesBlock">
+                            <div id="objectiveFileThumbnail" class="fileThumbnail masonryThumbnailsWrapper documentsAttachFile">
+                                <div class="fileThumbnailItem brandItem masonryThumbnail">
+                                    <div class="thumbnail_js thumbnailBody">
+                                        <% if (attachment.preview) { %>
+                                        <img src="<%= attachment.preview %>">
+                                        <% } else {%>
+                                        <div class="iconThumbnail <%= attachment.type %>"></div>
+                                        <% } %>
+                                        <div class="objectivesFileName fontMicro"><%- attachment.originalName || attachment.name %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

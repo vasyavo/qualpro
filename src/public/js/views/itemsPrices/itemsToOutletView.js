@@ -2,7 +2,7 @@
 define([
     'jQuery',
     'Underscore',
-    'Backbone',
+    'backbone',
     'text!templates/itemsPrices/itemsToOutlet/main.html',
     'text!templates/itemsPrices/itemsToOutlet/header.html',
     'text!templates/itemsPrices/itemsToOutlet/list.html',

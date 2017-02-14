@@ -1,5 +1,5 @@
 ﻿define([
-        'Backbone',
+        'backbone',
         'Underscore',
         'text!templates/competitorsList/list/list.html'
     ],

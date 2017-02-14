@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'text!templates/forgotPassword/forgotPassword.html',
     'custom',

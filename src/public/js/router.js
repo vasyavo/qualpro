@@ -1,7 +1,8 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'Underscore',
+    'lodash',
     'moment',
     'views/main/main',
     'views/login/login',
@@ -10,10 +11,12 @@ define([
     'dataService',
     'custom',
     'constants/contentType',
-    'js-cookie'
-], function (Backbone, $, _, moment, mainView, LoginView, CreateSuperAdminView,
-             forgotPassView, dataService, custom, CONSTANTS, Cookies) {
-    'use strict';
+    'js-cookie',
+    'views/documents/list',
+    'views/documents/topBar'
+], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
+             forgotPassView, dataService, custom, CONSTANTS, Cookies,
+             DocumentsListView, DocumentsTopBarView) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -26,6 +29,8 @@ define([
             home : 'any',
             'login(/:confirmed)' : 'login',
             forgotPass : 'forgotPass',
+            'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
+            'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -49,6 +54,75 @@ define([
             });
 
             custom.applyDefaults();
+        },
+
+        documentsHomePage : function (filter) {
+            this.showDocumentsView(null, filter);
+        },
+
+        showDocumentsView : function (folder, filter) {
+            var that = this;
+
+            this.checkLogin(function (success) {
+                if (!success) {
+                    return that.redirectTo();
+                }
+
+                if (that.view) {
+                    that.view.undelegateEvents();
+                }
+
+                if (that.wrapperView) {
+                    that.wrapperView.undelegateEvents();
+                }
+
+                if (!that.wrapperView) {
+                    that.main('documents');
+                }
+
+                var $loader = $('#alaliLogo');
+                if (!$loader.hasClass('smallLogo')) {
+                    $loader.addClass('animated');
+                    $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+                }
+
+                var currentLanguage = App.currentUser.currentLanguage;
+                require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {
+                    var rootPath = CONSTANTS.DOCUMENTS + '/folder';
+                    var documentsCollection = new collection();
+
+                    delete documentsCollection.state.search;
+
+                    if (folder) {
+                        documentsCollection.url = rootPath + '/' + folder;
+                        documentsCollection.folder = folder;
+                    } else {
+                        documentsCollection.url = rootPath;
+                        documentsCollection.folder = null;
+                    }
+
+                    if (filter) {
+                        filter = JSON.parse(filter);
+                        documentsCollection.url = documentsCollection.url + '?' + $.param(filter);
+                    }
+
+                    var documentsTopBarView = new DocumentsTopBarView({
+                        translation : translation,
+                        collection : documentsCollection,
+                        archived : lodash.get(filter, 'archived')
+                    });
+                    $('#topBarHolder').html(documentsTopBarView.render().$el);
+
+                    var documentsListView = new DocumentsListView({
+                        collection : documentsCollection,
+                        translation : translation
+                    });
+
+                    $('#contentHolder').html(documentsListView.render().$el);
+
+                    documentsCollection.getFirstPage();
+                });
+            });
         },
 
         redirectTo: function () {
@@ -601,7 +675,6 @@ define([
                     });
                 }
             });
-
         },
 
         changeTopBarView: function (topBarView) {

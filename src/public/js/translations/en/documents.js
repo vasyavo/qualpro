@@ -14,16 +14,21 @@ define([
         action     : 'Action',
         disable    : 'Disable',
         unDisable  : 'Un Disable',
+        delete : 'Delete',
+        copyButton : 'Copy',
+        cutButton : 'Cut',
+        pasteButton : 'Paste',
         // list
 
         // create
         createTitle : 'Create Document',
+        createFolderTitle : 'Create Folder',
         titleInput  : 'Input title',
         title       : 'Title',
         createBtn   : 'Create',
         cancelBtn   : 'Cancel',
-        attachments : 'Attachments',
-        attachFiles : 'Attach Files',
+        attachments : 'Attachment',
+        attachFiles : 'Attach File',
         // edit
         editTitle   : 'Edit Document',
         saveBtn     : 'Save',

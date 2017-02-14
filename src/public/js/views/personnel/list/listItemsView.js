@@ -1,5 +1,5 @@
 ﻿define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'Underscore',
     'text!templates/personnel/list/list.html',

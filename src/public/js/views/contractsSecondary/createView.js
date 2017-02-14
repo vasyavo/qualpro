@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/contractsSecondary/create.html',
@@ -19,7 +19,7 @@ define([
     'models/branch',
     'helpers/implementShowHideArabicInputIn',
     'views/filter/dropDownView',
-    'views/documents/createView',
+    'views/documents/createFile',
     'constants/otherConstants',
     'moment',
     'dataService',
@@ -31,7 +31,6 @@ define([
              CountryModel, RegionModel, SubRegionModel, RetailSegmentModel, OutletModel, BranchModel,
              implementShowHideArabicInputIn, DropDownView, NewDocView, CONSTANTS, moment, dataService,
              validation, DisplayTypeCollection, CONTENT_TYPES) {
-    'use strict';
 
     var CreateView = BaseView.extend({
         contentType : CONTENT_TYPES.CONTRACTSSECONDARY,
@@ -53,25 +52,24 @@ define([
 
             this.makeRender();
 
-            dataService.getData('documents', {}, function (err, response) {
+            dataService.getData('documents/files', {}, function (err, response) {
+                if (err) {
+                    return App.render({type: 'error', message: err.message});
+                }
+
                 var documents = response.data;
                 var attachments;
 
                 attachments = _.map(documents, function (document) {
                     var title = document.title;
-                    var attachments = document.attachments;
+                    var attachments = document.attachment;
                     var attach = attachments;
 
                     attach.originalName = title;
                     attach['document'] = document._id;
 
                     return attach;
-
                 });
-
-                if (err) {
-                    return App.render({type: 'error', message: err.message});
-                }
 
                 self.files.setAndUpdateModels(attachments, false);
                 self.render();
@@ -118,7 +116,7 @@ define([
                 parent: true,
                 models: this.files.getSelected({selected: true}),
                 json  : true
-            }), '_id');
+            }), 'document');
 
             this.body.attachments = attachments.length ? attachments : null;
 
@@ -241,13 +239,23 @@ define([
                 translation: this.translation
             });
 
-            this.newDocumentView.on('contract', function (options) {
+            this.newDocumentView.on('file:saved', function (savedData) {
+                var fileModel = new FileModel(savedData.attachment);
+
+                fileModel.set('selected', true);
+                fileModel.set('uploaded', true);
+                fileModel.set('document', savedData._id);
+
+                var options = {
+                    title : savedData.title,
+                    inputModel : fileModel
+                };
+
                 var inputModel = options.inputModel;
                 inputModel.set('originalName', options.title);
                 fileInput = this.$el.find('#' + inputModel.cid);
                 self.files.add(inputModel);
 
-                self.formData.append(options.title, fileInput[0].files[0]);
                 var model = inputModel.toJSON();
                 model['cid'] = inputModel.cid;
                 model['name'] = options.title;

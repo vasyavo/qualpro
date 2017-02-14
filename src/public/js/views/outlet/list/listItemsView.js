@@ -1,5 +1,5 @@
 ﻿define([
-        'Backbone',
+        'backbone',
         'underscore',
         'text!templates/outlet/list/listTable.html'
     ],

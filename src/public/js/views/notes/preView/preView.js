@@ -1,5 +1,5 @@
 define([
-        'Backbone',
+        'backbone',
         'Underscore',
         'jQuery',
         'text!templates/notes/preView/preView.html',

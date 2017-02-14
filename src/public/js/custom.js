@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'async',
     'dataService',

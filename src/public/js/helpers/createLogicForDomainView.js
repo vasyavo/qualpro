@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'helpers/contentTypesHelper',
     'helpers/breadcrumbsNavigator',
     'views/breadcrumb/breadcrumbs',

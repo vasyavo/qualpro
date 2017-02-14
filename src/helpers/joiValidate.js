@@ -23,8 +23,9 @@ function getSchemaByAccessRole(level, contentType, method, callback) {
 
 function validate(body, schema, callback) {
     Joi.validate(body, schema, {
-        allowUnknown : true,
-        abortEarly : false
+        allowUnknown: true,
+        abortEarly  : false,
+        convert     : true
     }, callback);
 }
 

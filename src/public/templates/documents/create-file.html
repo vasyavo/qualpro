@@ -1,6 +1,6 @@
 <div class="form-holder personnelInfo largeHeightPreview">
     <div class="title">
-        <span class="titleDescription" data-translation="createTitle"><%=translation.createTitle%></span>
+        <span class="titleDescription"><%- translation.createTitle %></span>
     </div>
     <div class="promotionForm documentForm">
         <div class="blockObjective scrollingForm">
@@ -9,17 +9,14 @@
                     <div class="table">
                         <div class="row">
                             <div class="cell alignTop">
-                                <span data-translation="title"><%=translation.title%></span>
+                                <span><%- translation.title %></span>
                             </div>
                             <div class="cell mandatory">
                                 <input type="text"
-                                       id="titleDd"
+                                       id="title"
                                        class="objectivesInput"
-                                       value=""
-                                       required
                                        maxlength="32"
-                                       data-translation="titleInput"
-                                       placeholder="<%=translation.titleInput%>"/>
+                                       placeholder="<%- translation.titleInput %>"/>
                             </div>
                         </div>
                     </div>
@@ -29,15 +26,19 @@
                 <div class="scrollable">
                     <div id="attachments" class="attachmentsBlock">
                         <div class="attachmentsHeader">
-                            <span class="attachmentsDescription fontBold mandatory" data-translation="attachments"><%=translation.attachments%></span>
-                            <span id="attachFile" class="greyBtn right" data-translation="attachFiles"><%=translation.attachFiles%></span>
+                            <span class="attachmentsDescription fontBold mandatory"><%- translation.attachments %></span>
+                            <span id="attach-file" class="greyBtn right"><%- translation.attachFiles %></span>
                         </div>
                         <div class="formBlock borderBottom objectivesPaddingBlock">
                             <div id="formThumbnail"></div>
                         </div>
+                        <input id="file-input" type="file" accept="<%- allowedFileTypes %>" hidden="hidden">
                         <div class="promotionFilesBlock borderBottom documentFilesBlock">
-                            <form action="" method="post" id="mainForm"></form>
-                            <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock"></div>
+                            <div id="fileThumbnail" class="fileThumbnail objectivesPaddingBlock">
+                                <div class="fileThumbnailItem brandItem masonryThumbnail hidden">
+                                    <div id="file-holder" class="thumbnail_js thumbnailBody"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -45,3 +46,4 @@
         </div>
     </div>
 </div>
+

@@ -1,8 +1,9 @@
 ﻿define([
+        'backbone',
         'text!templates/domain/listTable.html'
     ],
 
-    function (listTemplate) {
+    function (Backbone, listTemplate) {
         var CountryListItemView = Backbone.View.extend({
             el      : '#listTable',
             template: _.template(listTemplate),
