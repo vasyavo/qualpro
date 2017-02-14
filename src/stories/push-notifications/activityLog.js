@@ -116,4 +116,7 @@ activityLog.on('competitor-list:item-unarchived', require('./methods/competitorL
 
 activityLog.on('notifications:sent', require('./methods/notifications/sent'));
 
+activityLog.on('contact-us:published', require('./methods/contactUs/published'));
+activityLog.on('contact-us:updated', require('./methods/contactUs/updated'));
+
 module.exports = activityLog;

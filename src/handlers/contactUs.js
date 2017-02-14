@@ -1,4 +1,6 @@
-'use strict';
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const logger = require('./../utils/logger');
+const extractBody = require('./../utils/extractBody');
 
 var ContactUs = function(db, redis, event) {
     var async = require('async');
@@ -16,6 +18,10 @@ var ContactUs = function(db, redis, event) {
     var AggregationHelper = require('../helpers/aggregationCreater');
 
     this.create = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files;
             var model;
@@ -26,7 +32,7 @@ var ContactUs = function(db, redis, event) {
                     return callback();
                 }
 
-                fileHandler.uploadFile(body.createdBy, files, CONTENT_TYPES.CONTACT_US, function(err, filesIds) {
+                fileHandler.uploadFile(body.createdBy, files, CONTENT_TYPES.CONTACT_US, (err, filesIds) => {
                     if (err) {
                         return callback(err);
                     }
@@ -45,42 +51,38 @@ var ContactUs = function(db, redis, event) {
 
             async.series([
                 uploadFiles,
-                saveContactUs
-            ], function(err, result) {
+                saveContactUs,
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
+                ActivityLog.emit('contact-us:published', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: result.toJSON(),
+                });
+
                 res.status(201).send(result);
             });
         }
-            var body;
-            var error;
+        const body = extractBody(req.body);
 
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
+        body.createdBy = req.session.uId;
+
+        joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'create', (err, saveData) => {
+            if (err) {
+                const error = new Error();
+
+                error.status = 400;
+                error.message = err.name;
+                error.details = err.details;
+
+                return next(error);
             }
 
-            body.createdBy = req.session.uId;
-
-            joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'create', function(err, saveData) {
-                if (err) {
-                    error = new Error();
-                    error.status = 400;
-                    error.message = err.name;
-                    error.details = err.details;
-
-                    return next(error);
-                }
-
-                queryRun(saveData);
-            });
+            queryRun(saveData);
+        });
     };
 
     this.getAll = function(req, res, next) {
@@ -302,11 +304,10 @@ var ContactUs = function(db, redis, event) {
             });
         }
 
-        var error;
-
         joiValidate(req.query, req.session.level, CONTENT_TYPES.CONTACT_US, 'read', function(err, query) {
             if (err) {
-                error = new Error();
+                const error = new Error();
+
                 error.status = 400;
                 error.message = err.name;
                 error.details = err.details;
@@ -445,26 +446,34 @@ var ContactUs = function(db, redis, event) {
     };
 
     this.updateById = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(id, body) {
-            ContactUsModel.findByIdAndUpdate(id, body, {
-                new : true
-            })
-                .exec(function(err, result) {
+            ContactUsModel.findByIdAndUpdate(id, body, { new : true })
+                .exec((err, result) => {
                     if (err) {
                         return next(err);
                     }
+
+                    ActivityLog.emit('contact-us:updated', {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: result.toJSON(),
+                    });
 
                     res.send(200, result);
                 });
         }
 
-        var id = req.params.id;
-        var body = req.body;
-        var error;
+        const id = req.params.id;
+        const body = req.body;
 
-        joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'update', function(err, body) {
+        joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'update', (err, body) => {
             if (err) {
-                error = new Error();
+                const error = new Error();
+
                 error.status = 400;
                 error.message = err.name;
                 error.details = err.details;
@@ -474,7 +483,7 @@ var ContactUs = function(db, redis, event) {
 
             queryRun(id, body);
         });
-    }
+    };
 };
 
 module.exports = ContactUs;
