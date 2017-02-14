@@ -18,7 +18,7 @@ module.exports = (options) => {
 
         const {
             payload,
-            actionOriginator,
+            setHighPriority,
             setOriginator,
             setAssignee,
             setSupervisor,
@@ -26,7 +26,7 @@ module.exports = (options) => {
 
         const groups = [{
             recipients: [
-                actionOriginator,
+                ...setHighPriority,
                 ...setOriginator,
                 ...setAssignee,
                 ...setSupervisor,

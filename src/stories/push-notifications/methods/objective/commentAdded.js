@@ -18,14 +18,14 @@ module.exports = (options) => {
 
         const {
             payload,
-            actionOriginator,
+            setHighPriority,
             setOriginator,
             setAssignee,
             setSupervisor,
         } = yield prototype(extendedOptions);
 
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: setHighPriority,
             subject: {
                 en: 'Comment sent',
                 ar: '',

@@ -1129,11 +1129,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                             body: result.toJSON(),
                         };
 
-                        if (body.send) {
-                            ActivityLog.emit('marketing:al-alali-questionnaire:published', eventPayload);
-                        } else {
-                            ActivityLog.emit('marketing:al-alali-questionnaire:updated', eventPayload);
-                        }
+                        ActivityLog.emit('marketing:al-alali-questionnaire:updated', eventPayload);
 
                         waterfallCb(null, result._id);
                     });

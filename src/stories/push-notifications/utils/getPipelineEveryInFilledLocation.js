@@ -133,7 +133,7 @@ module.exports = (options) => {
         pipeline.push({
             $project: {
                 setPersonnel: {
-                    $setDifference: ['$setAdmin', '$setPersonnel'],
+                    $setDifference: ['$setPersonnel', '$setAdmin'],
                 },
                 setAdmin: 1,
             },

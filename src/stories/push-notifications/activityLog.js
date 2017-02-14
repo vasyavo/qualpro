@@ -15,6 +15,10 @@ activityLog.on('objective:distribution-form:updated', require('./methods/objecti
 activityLog.on('sub-objective:draft-created', require('./methods/objective/sub/draftCreated'));
 activityLog.on('sub-objective:published', require('./methods/objective/sub/published'));
 
+activityLog.on('sub-objective:updated', require('./methods/objective/updated')); // todo: change event handler
+activityLog.on('sub-objective:status-updated', require('./methods/objective/updated')); // todo: change event handler
+activityLog.on('sub-objective:reassigned', require('./methods/objective/updated')); // todo: change event handler
+
 activityLog.on('in-store-task:draft-created', require('./methods/inStoreTask/draftCreated'));
 activityLog.on('in-store-task:published', require('./methods/inStoreTask/published'));
 
