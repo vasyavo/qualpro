@@ -456,14 +456,6 @@ var Contract = function (db, redis, event) {
                             return cb(err);
                         }
 
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.CONTRACT_YEARLY_AND_VISIBILITY,
-                            actionType: ACTIVITY_TYPES.CREATED,
-                            createdBy : body.createdBy,
-                            itemId    : model._id,
-                            itemType  : CONTENT_TYPES.CONTRACTSYEARLY
-                        });
-
                         return cb(null, model);
                     });
                 },
