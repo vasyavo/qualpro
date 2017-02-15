@@ -13,9 +13,6 @@ exports.up = function(db, next) {
             db.collection('documents').update({}, {
                 $rename: {
                     attachments: 'attachment',
-                    contentType: 'before_props.contentType',
-                    originalName: 'before_props.originalName',
-                    preview: 'before_props.preview',
                 },
             }, {
                 multi: true,
@@ -57,9 +54,6 @@ exports.down = function(db, next) {
             db.collection('documents').update({}, {
                 $rename: {
                     attachment: 'attachments',
-                    'before_props.contentType': 'contentType',
-                    'before_props.originalName': 'originalName',
-                    'before_props.preview': 'preview',
                 },
             }, {
                 multi: true,
