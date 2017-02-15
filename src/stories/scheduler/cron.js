@@ -147,14 +147,15 @@ const contractsYearlyExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, contract) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(20, id, contentType);
+            if (contract) {
+                const payload = createAction(contract);
+
+                ActivityLog.emit('contracts:yearly:expired', payload);
             }
 
             callback(null);
@@ -186,14 +187,15 @@ const contractSecondaryExpired = () => {
             $set: {
                 status: PROMOTION_STATUSES.EXPIRED,
             },
-        }, (err, model) => {
+        }, (err, contract) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(22, id, contentType);
+            if (contract) {
+                const payload = createAction(contract);
+
+                ActivityLog.emit('contracts:secondary:expired', payload);
             }
 
             callback(null);

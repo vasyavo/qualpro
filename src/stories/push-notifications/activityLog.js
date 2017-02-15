@@ -122,4 +122,14 @@ activityLog.on('contact-us:updated', require('./methods/contactUs/updated'));
 activityLog.on('documents:file-uploaded', require('./methods/documents/fileUploaded'));
 activityLog.on('documents:folder-created', require('./methods/documents/folderCreated'));
 
+activityLog.on('contracts:yearly:draft-created', require('./methods/contracts/yearly/draftCreated'));
+activityLog.on('contracts:yearly:published', require('./methods/contracts/yearly/published'));
+activityLog.on('contracts:yearly:updated', require('./methods/contracts/yearly/updated'));
+activityLog.on('contracts:yearly:expired', require('./methods/contracts/yearly/expired'));
+
+activityLog.on('contracts:secondary:draft-created', require('./methods/contracts/secondary/draftCreated'));
+activityLog.on('contracts:secondary:published', require('./methods/contracts/secondary/published'));
+activityLog.on('contracts:secondary:updated', require('./methods/contracts/secondary/updated'));
+activityLog.on('contracts:secondary:expired', require('./methods/contracts/secondary/expired'));
+
 module.exports = activityLog;

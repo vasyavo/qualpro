@@ -1,3 +1,5 @@
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
 var Contract = function (db, redis, event) {
     'use strict';
 
@@ -404,9 +406,11 @@ var Contract = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
-            var session = req.session;
-            var userId = session.uId;
             var model;
             var saveContractsYearly = body.saveContractsYearly;
 
@@ -465,6 +469,18 @@ var Contract = function (db, redis, event) {
                 },
 
                 function (contractsYearlyModel, cb) {
+                    const eventPayload = {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: contractsYearlyModel.toJSON(),
+                    };
+
+                    if (contractsYearlyModel.get('status') === PROMOTION_STATUSES.DRAFT) {
+                        ActivityLog.emit('contracts:yearly:draft-created', eventPayload);
+                    } else {
+                        ActivityLog.emit('contracts:yearly:published', eventPayload);
+                    }
+
                     var id = contractsYearlyModel.get('_id');
 
                     self.getByIdAggr({id: id, isMobile: req.isMobile}, function (err, result) {
@@ -519,9 +535,11 @@ var Contract = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(updateObject) {
-            var session = req.session;
-            var userId = session.uId;
             var saveContractsYearly = updateObject.saveContractsYearly;
             var contractYearlyId = req.params.id;
             var fullUpdate = {
@@ -571,12 +589,11 @@ var Contract = function (db, redis, event) {
                             if (err) {
                                 return cb(err);
                             }
-                            event.emit('activityChange', {
-                                module    : 20,
-                                actionType: ACTIVITY_TYPES.UPDATED,
-                                createdBy : updateObject.editedBy,
-                                itemId    : contractYearlyId,
-                                itemType  : CONTENT_TYPES.CONTRACTSYEARLY
+
+                            ActivityLog.emit('contracts:yearly:updated', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: contractModel.toJSON(),
                             });
 
                             return cb(null, contractModel.get('_id'));
