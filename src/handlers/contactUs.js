@@ -22,66 +22,63 @@ var ContactUs = function(db, redis, event) {
         const userId = session.uId;
         const accessRoleLevel = session.level;
 
-        function queryRun(body) {
-            var files = req.files;
-            var model;
-            var fileIds;
-
-            function uploadFiles(callback) {
-                if (!files && !files.length) {
-                    return callback();
-                }
-
-                fileHandler.uploadFile(body.createdBy, files, CONTENT_TYPES.CONTACT_US, (err, filesIds) => {
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    fileIds = filesIds || [];
-                    callback();
-                });
-            }
-
-            function saveContactUs(callback) {
-                body.attachments = fileIds;
-
-                model = new ContactUsModel(body);
-                model.save(callback);
-            }
+        const queryRun = (body, callback) => {
+            const files = req.files;
 
             async.series([
-                uploadFiles,
-                saveContactUs,
-            ], (err, result) => {
-                if (err) {
-                    return next(err);
-                }
 
-                ActivityLog.emit('contact-us:published', {
-                    actionOriginator: userId,
-                    accessRoleLevel,
-                    body: result.toJSON(),
-                });
+                (cb) => {
+                    if (!files && !files.length) {
+                        return cb();
+                    }
 
-                res.status(201).send(result);
-            });
-        }
-        const body = extractBody(req.body);
+                    fileHandler.uploadFile(body.createdBy, files, CONTENT_TYPES.CONTACT_US, (err, setFileId) => {
+                        if (err) {
+                            return cb(err);
+                        }
 
-        body.createdBy = req.session.uId;
+                        cb(setFileId);
+                    });
+                },
 
-        joiValidate(body, req.session.level, CONTENT_TYPES.CONTACT_US, 'create', (err, saveData) => {
+                (setFileId, cb) => {
+                    body.attachments = setFileId;
+
+                    const model = new ContactUsModel();
+
+                    model.set(body);
+                    model.save((err, model) => {
+                        cb(err, model);
+                    });
+                },
+
+            ], callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                const body = extractBody(req.body);
+
+                body.createdBy = userId;
+
+                joiValidate(body, accessRoleLevel, CONTENT_TYPES.CONTACT_US, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
-                const error = new Error();
-
-                error.status = 400;
-                error.message = err.name;
-                error.details = err.details;
-
-                return next(error);
+                return next(err);
             }
 
-            queryRun(saveData);
+            ActivityLog.emit('contact-us:published', {
+                actionOriginator: userId,
+                accessRoleLevel,
+                body: result.toJSON(),
+            });
+
+            res.status(201).send(result);
         });
     };
 
