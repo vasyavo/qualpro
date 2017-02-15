@@ -161,7 +161,7 @@ var planogramsHandler = function(db, redis, event) {
             ActivityLog.emit('planogram:created', {
                 actionOriginator: userId,
                 accessRoleLevel,
-                body: result.toJSON(),
+                body: result
             });
 
             res.status(201).send(result);
