@@ -78,7 +78,7 @@ const QuestionnaryHandler = function (db, redis, event) {
                 ActivityLog.emit('marketing:al-alali-questionnaire:item-published', {
                     actionOriginator,
                     accessRoleLevel,
-                    body: questionnaire.toJSON(),
+                    body: questionnaire,
                 });
             });
     };

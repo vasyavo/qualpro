@@ -364,7 +364,7 @@ var BranchHandler = function (db, redis, event) {
                                     const bodyObject = {
                                         actionOriginator: req.session.uId,
                                         accessRoleLevel : req.session.level,
-                                        body            : resp.toJSON()
+                                        body            : resp
                                     };
 
                                     ActivityLog.emit('branch:archived', bodyObject);
