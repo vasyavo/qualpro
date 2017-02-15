@@ -194,7 +194,21 @@ module.exports = (req, res, next) => {
         isArray : false
     }));
 
-    //todo add personnells filter
+    pipeLine.push({
+        $project: aggregationHelper.getProjection({
+            personnel: {
+                _id : '$_id',
+                name: {
+                    en: {
+                        $concat: ['$firstName.en', ' ', '$lastName.en']
+                    },
+                    ar: {
+                        $concat: ['$firstName.ar', ' ', '$lastName.ar']
+                    }
+                }
+            }
+        })
+    });
 
     pipeLine.push({
         $group : {
@@ -205,7 +219,8 @@ module.exports = (req, res, next) => {
             branch : {$addToSet : '$branch'},
             position : {$addToSet : '$position'},
             retailSegment : {$addToSet : '$retailSegment'},
-            outlet : {$addToSet : '$outlet'}
+            outlet : {$addToSet : '$outlet'},
+            personnel : {$addToSet : '$personnel'}
         }
     });
 

@@ -103,7 +103,7 @@ activityLog.on('planogram:updated', require('./methods/planograms/updated'));
 activityLog.on('planogram:archived', require('./methods/planograms/archived'));
 activityLog.on('planogram:unarchived', require('./methods/planograms/unarchived'));
 
-activityLog.on('note:published', require('./methods/notes/created'));
+activityLog.on('note:created', require('./methods/notes/created'));
 activityLog.on('note:updated', require('./methods/notes/updated'));
 activityLog.on('note:archived', require('./methods/notes/archived'));
 activityLog.on('note:unarchived', require('./methods/notes/unarchived'));
@@ -115,5 +115,8 @@ activityLog.on('competitor-list:item-archived', require('./methods/competitorLis
 activityLog.on('competitor-list:item-unarchived', require('./methods/competitorList/itemUnarchived'));
 
 activityLog.on('notifications:sent', require('./methods/notifications/sent'));
+
+activityLog.on('contact-us:published', require('./methods/contactUs/published'));
+activityLog.on('contact-us:updated', require('./methods/contactUs/updated'));
 
 module.exports = activityLog;

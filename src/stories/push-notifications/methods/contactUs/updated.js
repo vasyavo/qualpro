@@ -1,4 +1,5 @@
 const co = require('co');
+const _ = require('lodash');
 const dispatch = require('./../../utils/dispatch');
 const aclModules = require('./../../../../constants/aclModulesNames');
 const activityTypes = require('./../../../../constants/activityTypes');
@@ -7,9 +8,10 @@ const prototype = require('./prototype');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.NOTE;
-        const contentType = contentTypes.NOTES;
+        const moduleId = aclModules.CONTACT_US;
+        const contentType = contentTypes.CONTACT_US;
         const actionType = activityTypes.UPDATED;
+
         const extendedOptions = Object.assign({}, options, {
             moduleId,
             contentType,
@@ -18,13 +20,17 @@ module.exports = (options) => {
 
         const {
             payload,
-            actionOriginator,
+            highPriority,
+            setAdmin,
         } = yield prototype(extendedOptions);
 
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: _.uniq([
+                ...highPriority,
+                ...setAdmin,
+            ]),
             subject: {
-                en: 'Note updated',
+                en: 'Contact Us updated',
                 ar: '',
             },
             payload,
