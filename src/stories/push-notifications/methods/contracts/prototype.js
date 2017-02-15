@@ -14,11 +14,28 @@ module.exports = function * (options) {
 
     const actionOriginator = toString(options, 'actionOriginator');
     const contentAuthor = toString(options, 'body.createdBy.user');
-    const setCountry = [body.country];
-    const setRegion = [body.region];
-    const setSubRegion = [body.subRegion];
-    const setOutlet = [body.outlet];
-    const setBranch = [body.branch];
+    const location = [
+        body.country,
+        body.region,
+        body.subRegion,
+        body.outlet,
+        body.branch,
+        body.retailSegment,
+    ];
+    const [
+        setCountry,
+        setRegion,
+        setSubRegion,
+        setOutlet,
+        setBranch,
+        setRetailSegment,
+    ] = location.map(item => {
+        if (Array.isArray(item)) {
+            return item;
+        }
+
+        return [item];
+    });
 
     const setEveryoneInLocation = yield getEveryoneInLocation({
         exclude: [],
@@ -46,12 +63,12 @@ module.exports = function * (options) {
         accessRoleLevel,
         assignedTo: [],
         personnels: setEveryoneInLocation,
-        country: body.country,
-        region: body.region,
-        subRegion: body.subRegion,
-        retailSegment: body.retailSegment,
-        outlet: body.outlet,
-        branch: body.branch,
+        country: setCountry,
+        region: setRegion,
+        subRegion: setSubRegion,
+        retailSegment: setRetailSegment,
+        outlet: setOutlet,
+        branch: setBranch,
     });
 
     yield newActivity.save();

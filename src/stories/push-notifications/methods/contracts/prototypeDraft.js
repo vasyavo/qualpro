@@ -13,6 +13,28 @@ module.exports = function * (options) {
     } = options;
 
     const actionOriginator = toString(options, 'actionOriginator');
+    const location = [
+        body.country,
+        body.region,
+        body.subRegion,
+        body.outlet,
+        body.branch,
+        body.retailSegment,
+    ];
+    const [
+        setCountry,
+        setRegion,
+        setSubRegion,
+        setOutlet,
+        setBranch,
+        setRetailSegment,
+    ] = location.map(item => {
+        if (Array.isArray(item)) {
+            return item;
+        }
+
+        return [item];
+    });
 
     const newActivity = new ActivityModel();
 
@@ -33,12 +55,12 @@ module.exports = function * (options) {
             actionOriginator,
         ],
         assignedTo: [],
-        country: [body.country],
-        region: [body.region],
-        subRegion: [body.subRegion],
-        retailSegment: [body.retailSegment],
-        outlet: [body.outlet],
-        branch: [body.branch],
+        country: setCountry,
+        region: setRegion,
+        subRegion: setSubRegion,
+        retailSegment: setRetailSegment,
+        outlet: setOutlet,
+        branch: setBranch,
     });
 
     yield newActivity.save();
