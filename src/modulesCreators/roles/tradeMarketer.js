@@ -308,7 +308,7 @@ module.exports = [
             upload: false,
             edit  : false,
             write : false,
-            read  : false
+            read  : true
         },
         mobile: {
             upload: false,
@@ -323,7 +323,7 @@ module.exports = [
             upload: false,
             edit  : false,
             write : false,
-            read  : false
+            read  : true
         },
         mobile: {
             upload: false,

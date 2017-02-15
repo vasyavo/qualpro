@@ -764,7 +764,8 @@ var Contract = function (db, redis, event) {
                     'AREA_IN_CHARGE',
                     'SALES_MAN',
                     'MERCHANDISER',
-                    'CASH_VAN'
+                    'CASH_VAN',
+                    'TRADE_MARKETER'
                 ]).values().value(), req.session.level)) {
                 queryObject.type = queryObject.type || {};
                 queryObject.type.$nin = ['yearly'];
