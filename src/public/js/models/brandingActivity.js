@@ -1,9 +1,10 @@
-define([
-    'models/parrent',
-    'validation',
-    'constants/contentType',
-    'constants/otherConstants'
-], function (parent, validation, CONTENT_TYPES, CONSTANTS) {
+define(function(require) {
+    var _ = require('underscore');
+    var parent = require('models/parrent');
+    var validation = require('validation');
+    var CONTENT_TYPES = require('constants/contentType');
+    var CONSTANTS = require('constants/otherConstants');
+
     var Model = parent.extend({
         defaults      : {},
         attachmentsKey: 'attachments',
