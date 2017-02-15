@@ -227,7 +227,7 @@ define([
                         cb(true);
                     };
 
-                    var form = this.model.get('form');
+                    var form = model.get('form');
                     var formId = form._id;
                     var formType = form.contentType;
 
