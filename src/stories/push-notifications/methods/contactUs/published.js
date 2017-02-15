@@ -7,9 +7,10 @@ const prototype = require('./prototype');
 
 module.exports = (options) => {
     co(function * () {
-        const moduleId = aclModules.NOTE;
-        const contentType = contentTypes.NOTES;
-        const actionType = activityTypes.UPDATED;
+        const moduleId = aclModules.CONTACT_US;
+        const contentType = contentTypes.CONTACT_US;
+        const actionType = activityTypes.CREATED;
+
         const extendedOptions = Object.assign({}, options, {
             moduleId,
             contentType,
@@ -18,13 +19,21 @@ module.exports = (options) => {
 
         const {
             payload,
-            actionOriginator,
+            highPriority,
+            setAdmin,
         } = yield prototype(extendedOptions);
 
         const groups = [{
-            recipients: [actionOriginator],
+            recipients: highPriority,
             subject: {
-                en: 'Note updated',
+                en: 'Contact Us published',
+                ar: '',
+            },
+            payload,
+        }, {
+            recipients: setAdmin,
+            subject: {
+                en: 'Contact Us received',
                 ar: '',
             },
             payload,
