@@ -97,6 +97,16 @@ schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.COUNTRY_UPLOADER] = {
     update : schemas.document.update
 };
 
+schemasByRole[CONTENT_TYPES.DOCUMENTS][ACL_ROLES.TRADE_MARKETER] = {
+    move: schemas.document.move,
+    archive: schemas.document.archive,
+    remove: schemas.document.remove,
+    sync: schemas.document.sync,
+    create: schemas.document.create,
+    read: schemas.document.getAll,
+    update: schemas.document.update,
+};
+
 // =============== CONTACT_US ========================================
 
 schemasByRole[CONTENT_TYPES.CONTACT_US] = {};
