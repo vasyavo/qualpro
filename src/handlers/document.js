@@ -3,6 +3,7 @@ const _ = require('lodash');
 const mongoose = require('mongoose');
 
 const logger = require('../utils/logger');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const ACL_MODULES = require('../constants/aclModulesNames');
 const CONTENT_TYPES = require('../public/js/constants/contentType');
@@ -602,37 +603,39 @@ const Documents = function () {
         const id = typeof parent === 'string' ? ObjectId(parent) : parent;
 
         async.waterfall([
+
             (cb) => {
-                DocumentModel.distinct('_id', { breadcrumbs: { $in: [id] } }, (err, ids) => {
+                DocumentModel.distinct('_id', { breadcrumbs: { $in: [id] } }, (err, setId) => {
                     if (err) {
                         return cb(err);
                     }
 
-                    cb(null, ids);
+                    cb(null, setId);
                 });
             },
 
-            (ids, cb) => {
-                if (!ids || !ids.length) {
+            (setId, cb) => {
+                if (!setId || !setId.length) {
                     return cb(null, []);
                 }
 
-                DocumentModel.update({ _id: { $in: ids } }, updateObj, (err) => {
+                DocumentModel.update({ _id: { $in: setId } }, updateObj, (err) => {
                     if (err) {
                         return cb(err);
                     }
 
-                    cb(null, ids);
+                    cb(null, setId);
                 });
             },
-        ], (err, modified) => {
+
+        ], (err, setModifiedId) => {
             if (err) {
                 return callback(err);
             }
 
-            modified.push(id);
+            setModifiedId.push(id);
 
-            callback(null, modified);
+            callback(null, setModifiedId);
         });
     };
 
@@ -1072,8 +1075,11 @@ const Documents = function () {
     // ============== METHODS ==================
 
     this.create = function (req, res, next) {
-        function queryRun(body) {
-            const userId = req.session && req.session.uId;
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (body, callback) => {
             const {
                 title,
                 attachment,
@@ -1099,7 +1105,7 @@ const Documents = function () {
                 (breadcrumbs, cb) => {
                     const options = {
                         title: _.escape(title),
-                        attachment: type == 'file' ? attachment : null,
+                        attachment: type === 'file' ? attachment : null,
                         editedBy: createdBy,
                         parent,
                         type,
@@ -1107,7 +1113,7 @@ const Documents = function () {
                         createdBy,
                     };
 
-                    DocumentModel.create(options, function (err, model) {
+                    DocumentModel.create(options, (err, model) => {
                         if (err) {
                             return cb(err);
                         }
@@ -1117,39 +1123,58 @@ const Documents = function () {
                 },
 
                 (model, cb) => {
+                    const isFile = model.type === 'file';
+                    const eventPayload = {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: model.toJSON(),
+                    };
+
+                    if (isFile) {
+                        ActivityLog.emit('documents:file-uploaded', eventPayload);
+                    } else {
+                        ActivityLog.emit('documents:folder-created', eventPayload);
+                    }
+
                     getById(model._id, cb);
                 },
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
 
-                res.status(201).send(result);
-            });
-        }
+            ], callback);
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+        async.waterafall([
+
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.DOCUMENT, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                joiValidate(req.body, accessRoleLevel, CONTENT_TYPES.DOCUMENTS, 'create', (err, body) => {
+                    if (err) {
+                        return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                    }
+
+                    cb(null, body);
+                });
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                return errorSender.forbidden(next);
-            }
-
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'create', function (err, body) {
-                if (err) {
-                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
-                }
-
-                queryRun(body);
-            });
+            res.status(201).send(result);
         });
     };
 
     this.update = function (req, res, next) {
-        function queryRun(body) {
-            const userId = req.session && req.session.uId;
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (body, callback) => {
             const id = req.params.id;
             const isMobile = req.isMobile;
             const {
@@ -1161,6 +1186,7 @@ const Documents = function () {
             };
 
             async.waterfall([
+
                 (cb) => {
                     const findObj = {
                         _id: id,
@@ -1174,7 +1200,7 @@ const Documents = function () {
                         new: true,
                     };
 
-                    DocumentModel.findOneAndUpdate(findObj, updateObj, opt, function (err, model) {
+                    DocumentModel.findOneAndUpdate(findObj, updateObj, opt, (err, model) => {
                         if (err) {
                             return cb(err);
                         }
@@ -1186,55 +1212,63 @@ const Documents = function () {
                         const id = model._id;
 
                         if (model.type === 'folder') {
-                            updateAllChildDocuments(id, { editedBy }, (err, modified) => {
+                            return updateAllChildDocuments(id, { editedBy }, (err, modified) => {
                                 if (err) {
-                                    return logger.error(`Document: updating child documents error: ${err}`);
+                                    logger.error(`Document: updating child documents error: ${err}`);
+
+                                    return cb(err);
                                 }
 
                                 cb(null, modified);
-                                // ToDo: push notification only for current user
                             });
-                        } else {
-                            cb(null, [id]);
-                            // ToDo: push notification only for current user
                         }
+
+                        cb(null, [id]);
                     });
                 },
 
-                (modified, cb) => {
+                (setModifiedId, cb) => {
+                    ActivityLog.emit('documents:changes-applied', {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        items: setModifiedId,
+                    });
+
                     if (isMobile) {
                         // get all changed docs for mobile
-
-                        getChangedForMobile(modified, cb);
-                    } else {
-                        getById(id, cb);
+                        return getChangedForMobile(setModifiedId, cb);
                     }
+
+                    getById(id, cb);
                 },
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
 
-                res.status(200).send(result);
-            });
-        }
+            ], callback);
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+        async.waterafall([
+
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.DOCUMENT, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                joiValidate(req.body, accessRoleLevel, CONTENT_TYPES.DOCUMENTS, 'update', (err, body) => {
+                    if (err) {
+                        return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                    }
+
+                    cb(null, body);
+                });
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                return errorSender.forbidden(next);
-            }
-
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'update', function (err, body) {
-                if (err) {
-                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
-                }
-
-                queryRun(body);
-            });
+            res.status(200).send(result);
         });
     };
 

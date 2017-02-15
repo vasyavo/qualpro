@@ -119,4 +119,7 @@ activityLog.on('notifications:sent', require('./methods/notifications/sent'));
 activityLog.on('contact-us:published', require('./methods/contactUs/published'));
 activityLog.on('contact-us:updated', require('./methods/contactUs/updated'));
 
+activityLog.on('documents:file-uploaded', require('./methods/documents/fileUploaded'));
+activityLog.on('documents:folder-created', require('./methods/documents/folderCreated'));
+
 module.exports = activityLog;
