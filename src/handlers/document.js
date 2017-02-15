@@ -1142,7 +1142,7 @@ const Documents = function () {
             ], callback);
         };
 
-        async.waterafall([
+        async.waterfall([
 
             (cb) => {
                 access.getWriteAccess(req, ACL_MODULES.DOCUMENT, cb);
@@ -1245,7 +1245,7 @@ const Documents = function () {
             ], callback);
         };
 
-        async.waterafall([
+        async.waterfall([
 
             (cb) => {
                 access.getWriteAccess(req, ACL_MODULES.DOCUMENT, cb);
