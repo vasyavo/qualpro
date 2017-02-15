@@ -21,11 +21,12 @@ module.exports = (options) => {
             payload,
             actionOriginator,
         } = yield prototype(extendedOptions);
+        const isYearly = extendedOptions.body.type === 'yearly';
 
         const groups = [{
             recipients: [actionOriginator],
             subject: {
-                en: 'Yearly Contract saved',
+                en: `${isYearly ? 'Yearly' : 'Visibility'} Contract saved`,
                 ar: '',
             },
             payload,
