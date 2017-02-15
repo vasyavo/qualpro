@@ -127,6 +127,8 @@ const getPipeline = (options) => {
                 },
             },
         },
+    }, {
+        setAdmin: '$setAdmin._id',
     }];
 };
 
