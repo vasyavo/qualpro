@@ -10,7 +10,7 @@ exports.up = function(db, next) {
     async.series([
 
         (cb) => {
-            db.documents.update({}, {
+            db.collection('documents').update({}, {
                 $rename: {
                     attachments: 'attachment',
                     contentType: 'before_props.contentType',
@@ -23,7 +23,7 @@ exports.up = function(db, next) {
         },
 
         (cb) => {
-            db.documents.update({}, {
+            db.collection('documents').update({}, {
                 $set: {
                     type: 'file',
                     parent: null,
@@ -36,7 +36,7 @@ exports.up = function(db, next) {
         },
 
         (cb) => {
-            db.documents.update({}, {
+            db.collection('documents').update({}, {
                 $unset: {
                     contentType: null,
                     originalName: null,
@@ -54,7 +54,7 @@ exports.down = function(db, next) {
     async.waterfall([
 
         (cb) => {
-            db.documents.update({}, {
+            db.collection('documents').update({}, {
                 $rename: {
                     attachment: 'attachments',
                     'before_props.contentType': 'contentType',
@@ -67,7 +67,7 @@ exports.down = function(db, next) {
         },
 
         (cb) => {
-            db.documents.update({}, {
+            db.collection('documents').update({}, {
                 $unset: {
                     type: null,
                     parent: null,
