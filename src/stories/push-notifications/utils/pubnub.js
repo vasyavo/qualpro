@@ -24,7 +24,7 @@ class PubNubClient {
         const payload = {
             message,
             channel,
-            sendByPost: false,
+            sendByPost: true,
             storeInHistory: false,
         };
 
