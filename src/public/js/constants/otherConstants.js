@@ -671,6 +671,14 @@
             }
         },
 
+        DELETED: {
+            _id : 'Deleted',
+            name: {
+                en: 'Deleted',
+                ar: 'تم حذف'
+            }
+        },
+
         COMMENTED: {
             _id : 'New comment was added',
             name: {
