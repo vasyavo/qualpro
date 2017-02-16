@@ -99,5 +99,7 @@ config.pubnub = {
     subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY,
 };
 
+config.cookieAge = process.env.COOKIE_AGE || 365 * 24 * 60 * 60 * 1000;  // One year
+
 // import this file at begin of server.js
 module.exports = config;
