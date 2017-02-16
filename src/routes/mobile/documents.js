@@ -7,10 +7,10 @@ const router = express.Router();
 const DocumentHandler = require('../../handlers/document');
 const access = require('../../helpers/access');
 
-module.exports = function (db, redis, event) {
+module.exports = function () {
     'use strict';
     
-    const handler = new DocumentHandler(db, redis, event);
+    const handler = new DocumentHandler();
     const checkAuth = access.checkAuth;
 
     router.use(checkAuth);

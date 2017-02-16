@@ -4,8 +4,8 @@ var access = require('../helpers/access');
 
 var Handler = require('../handlers/currency');
 
-module.exports = function (db, redis, event) {
-    var handler = new Handler(db);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

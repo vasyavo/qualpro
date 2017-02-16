@@ -1,4 +1,4 @@
-var Domain = function (db) {
+var Domain = function () {
     var async = require('async');
     var CurrencyModel = require('./../types/currency/model');
 

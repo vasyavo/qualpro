@@ -8,10 +8,10 @@ var AccessRoleHandler = require('../handlers/accessRole');
 
 var access = require('../helpers/access');
 
-module.exports = function (db, redis, event) {
+module.exports = function () {
     'use strict';
 
-    var handler = new AccessRoleHandler(db);
+    var handler = new AccessRoleHandler();
     var checkAuth = access.checkAuth;
 
     /**

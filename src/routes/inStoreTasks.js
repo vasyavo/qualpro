@@ -10,8 +10,8 @@ var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 const onLeaveMiddleware = require('../utils/onLeaveMiddleware');
 
-module.exports = function (db, redis, event) {
-    var handler = new objectivesHandler(db, redis, event);
+module.exports = function () {
+    var handler = new objectivesHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

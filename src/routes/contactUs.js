@@ -11,7 +11,7 @@ const ACL_MODULES = require('./../constants/aclModulesNames');
 
 module.exports = function(db, redis, event) {
     const handler = new ContactUsHandler(db, redis, event);
-    const access = require('./../helpers/access')(db);
+    const access = require('./../helpers/access')();
     const checkAuth = require('./../helpers/access').checkAuth;
 
     router.use(checkAuth);

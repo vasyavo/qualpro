@@ -7,12 +7,11 @@ const access = require('../../helpers/access');
 const multipart = require('connect-multiparty');
 const multipartMiddleware = multipart();
 
-const ACL_MODULES = require('./../constants/aclModulesNames');
+const ACL_MODULES = require('./../../constants/aclModulesNames');
 
-module.exports = function (db, redis, event) {
-    const handler = new ContactUsHandler(db, redis, event);
-    const access = require('./../helpers/access')(db);
-    const checkAuth = require('./../helpers/access').checkAuth;
+module.exports = function () {
+    const handler = new ContactUsHandler();
+    const checkAuth = access.checkAuth;
 
     router.use(checkAuth);
 

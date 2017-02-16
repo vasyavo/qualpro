@@ -1,4 +1,4 @@
-var Position = function (db) {
+var Position = function () {
     var CONSTANTS = require('../constants/mainConstants');
     var PositionModel = require('./../types/position/model');
 

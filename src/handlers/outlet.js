@@ -1,6 +1,6 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var OutletHandler = function (db, redis, event) {
+var OutletHandler = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var _ = require('lodash');
@@ -9,14 +9,14 @@ var OutletHandler = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var OutletModel = require('./../types/outlet/model');
     var BranchesModel = require('./../types/branch/model');
     var DomainModel = require('./../types/domain/model');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/archiver');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var archiver = new Archiver(OutletModel);
     var BranchModel = require('./../types/branch/model');
     var PersonnelModel = require('./../types/personnel/model');
@@ -858,7 +858,7 @@ var OutletHandler = function (db, redis, event) {
                         return next(err);
                     }
 
-                    event.emit('customer:update', {
+                    ActivityLog.emit('customer:update', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body            : result.toJSON()

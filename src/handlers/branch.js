@@ -1,7 +1,7 @@
 'use strict';
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var BranchHandler = function (db, redis, event) {
+var BranchHandler = function () {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
@@ -13,7 +13,7 @@ var BranchHandler = function (db, redis, event) {
     var DomainModel = require('./../types/domain/model');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/archiver');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var archiver = new Archiver(BranchModel);
     var populateByType = require('../helpers/populateByType');
     var PersonnelModel = require('./../types/personnel/model');
@@ -22,7 +22,7 @@ var BranchHandler = function (db, redis, event) {
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
+    var getImagesHelper = new GetImageHelper();
     var SomeEvents = require('../helpers/someEvents');
     var someEvents = new SomeEvents();
 
@@ -381,14 +381,7 @@ var BranchHandler = function (db, redis, event) {
                     });
                 } else {
                     idsToArchive.forEach(function (id) {
-                        event.emit('activityChange', {
-                            module    : ACL_MODULES.BRANCH,
-                            actionType: type,
-                            createdBy : req.body.editedBy,
-                            itemId    : id,
-                            itemType  : CONTENT_TYPES.BRANCH
 
-                        });
                     });
 
                     res.status(200).send();

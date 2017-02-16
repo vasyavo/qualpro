@@ -1,13 +1,13 @@
 const async = require('async');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var ShelfShareHandler = function (db, redis, event) {
+var ShelfShareHandler = function () {
     var _ = require('underscore');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var CONSTANTS = require('../constants/mainConstants');
     var FilterMapper = require('../helpers/filterMapper');
     var bodyValidator = require('../helpers/bodyValidator');

@@ -6,7 +6,7 @@ const extractBody = require('./../utils/extractBody');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const logger = require('./../utils/logger');
 
-var Note = function (db, redis, event) {
+var Note = function () {
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
@@ -17,14 +17,14 @@ var Note = function (db, redis, event) {
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var Archiver = require('../helpers/archiver');
     var archiver = new Archiver(NoteModel);
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
 
-    const fileHandler = new FileHandler(db);
+    const fileHandler = new FileHandler();
 
     var self = this;
     

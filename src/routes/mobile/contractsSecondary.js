@@ -7,10 +7,10 @@ var router = express.Router();
 var ContractHandler = require('../../handlers/contractSecondary');
 var access = require('../../helpers/access');
 
-module.exports = function (db, redis, event) {
+module.exports = function () {
     'use strict';
 
-    var handler = new ContractHandler(db, redis, event);
+    var handler = new ContractHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

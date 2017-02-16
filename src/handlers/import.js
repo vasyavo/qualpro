@@ -1,5 +1,5 @@
-var ImportHandler = function (db) {
-    var xlsxDataImporter = require('../helpers/xlsxDataImporter')(db);
+var ImportHandler = function () {
+    var xlsxDataImporter = require('../helpers/xlsxDataImporter')();
 
     this.importFromFolderPart2 = function (req, res, next) {
         xlsxDataImporter.importFromFile('import/ItemsAlalali.xlsx', function (success) {

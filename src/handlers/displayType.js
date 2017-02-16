@@ -1,8 +1,8 @@
-var Category = function (db, event) {
+var Category = function () {
     var CONSTANTS = require('../constants/mainConstants');
     var DisplayTypeModel = require('./../types/displayType/model');
 
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
 
     this.getAll = function (req, res, next) {
         var isMobile = req.isMobile;

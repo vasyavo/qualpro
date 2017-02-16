@@ -1,12 +1,12 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var Rating = function (db, event) {
+var Rating = function () {
     var _ = require('underscore');
     var async = require('async');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
 
     var MonthlyModel = require('./../types/monthly/model');
     var PersonnelModel = require('./../types/personnel/model');
