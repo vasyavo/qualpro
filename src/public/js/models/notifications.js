@@ -24,9 +24,6 @@ define([
             validate: function (attrs) {
                 var errors = [];
 
-                if(this.translatedFields.country){
-                    validation.checkDomainNameField(errors, true, attrs.country, this.translatedFields.country);
-                }
                 if(this.translatedFields.description){
                     validation.checkDescriptionField(errors, true, attrs.description, this.translatedFields.description);
                 }
