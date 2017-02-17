@@ -444,6 +444,7 @@ const Notifications = function (db, redis, event) {
                 filterSearch   : filterSearch,
                 isMobile       : isMobile,
                 withAttachments: true,
+                personnelId    : personnel._id,
                 forSync        : true
             });
 
