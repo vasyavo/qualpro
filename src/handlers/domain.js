@@ -198,13 +198,13 @@ var Domain = function () {
 
                             switch (options.contentType) {
                                 case ('country') :
-                                    ActivityLog.emit('country:created', bodyObject);
+                                    ActivityLog.emit('country:archived', bodyObject);
                                     break;
                                 case ('region') :
-                                    ActivityLog.emit('region:created', bodyObject);
+                                    ActivityLog.emit('region:archived', bodyObject);
                                     break;
                                 case ('subRegion') :
-                                    ActivityLog.emit('sub-region:created', bodyObject);
+                                    ActivityLog.emit('sub-region:archived', bodyObject);
                                     break;
                             }
                             eCb();

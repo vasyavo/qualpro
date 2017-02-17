@@ -104,7 +104,7 @@ var OutletHandler = function () {
                     return next(error);
                 }
 
-                ActivityLog.emit('customer:create', {
+                ActivityLog.emit('customer:created', {
                     actionOriginator: req.session.uId,
                     accessRoleLevel : req.session.level,
                     body            : model.toJSON()
@@ -858,7 +858,7 @@ var OutletHandler = function () {
                         return next(err);
                     }
 
-                    ActivityLog.emit('customer:update', {
+                    ActivityLog.emit('customer:updated', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body            : result.toJSON()

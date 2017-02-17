@@ -8,7 +8,7 @@ const BranchModel = require('./../../../types/branch/model');
  * @returns {Array}
  * */
 
-module.exports = function * ({type, itemId}) {
+module.exports = function * ({contentType, itemId}) {
 
     let ModelType;
     let pipeline = [{
@@ -17,15 +17,15 @@ module.exports = function * ({type, itemId}) {
         }
     }];
 
-    switch (type) {
+    switch (contentType) {
         case ('branch') :
             ModelType = BranchModel;
 
             pipeline.push({
                 $lookup: {
-                    from      : 'branches',
+                    from      : 'domains',
                     localField: 'subRegion',
-                    foreign   : '_id',
+                    foreignField   : '_id',
                     as        : 'subRegion'
                 }
             });
@@ -33,7 +33,8 @@ module.exports = function * ({type, itemId}) {
                 $project: {
                     subRegion: {$arrayElemAt: ['$subRegion', 0]},
                     branch   : '$_id'
-                },
+                }});
+            pipeline.push({
                 $project: {
                     branch   : 1,
                     subRegion: '$subRegion._id',
@@ -43,9 +44,9 @@ module.exports = function * ({type, itemId}) {
         case ('subRegion') :
             pipeline.push({
                 $lookup: {
-                    from      : 'Domains',
+                    from      : 'domains',
                     localField: 'parent',
-                    foreign   : '_id',
+                    foreignField   : '_id',
                     as        : 'region'
                 }
             });
@@ -54,7 +55,9 @@ module.exports = function * ({type, itemId}) {
                     region: {$arrayElemAt: ['$region', 0]},
                     subRegion : {$ifNull : ['$subRegion', '$_id']},
                     branch  : 1
-                },
+                }
+            });
+            pipeline.push({
                 $project: {
                     subRegion: 1,
                     branch   : 1,
@@ -63,35 +66,41 @@ module.exports = function * ({type, itemId}) {
                 }
             });
         case ('region') :
+            console.log(ModelType);
             ModelType = ModelType || DomainModel;
             pipeline.push({
                 $lookup: {
-                    from      : 'Domains',
+                    from      : 'domains',
                     localField: 'parent',
-                    foreign   : '_id',
+                    foreignField   : '_id',
                     as        : 'country'
                 }
             });
             pipeline.push({
-                $project: {
-                    country : {$arrayElemAt: ['$country', 0]},
-                    region  : {$ifNull : ['$region', '$_id']},
-                    subRegion: 1,
-                    branch   : 1
-                },
+                    $project: {
+                        country  : {$arrayElemAt: ['$country', 0]},
+                        region   : {$ifNull: ['$region', '$_id']},
+                        subRegion: 1,
+                        branch   : 1
+                    }
+                });
+            pipeline.push({
                 $project: {
                     country  : '$country._id',
-                    region   : 1,
-                    subRegion: 1,
-                    branch   : 1
+                    region   : '$region',
+                    subRegion: '$subRegion',
+                    branch   : '$branch'
                 }
             });
             break;
     }
 
-    const data = yield ModelType.aggregate(pipeline).exec();
+    let data;
 
-    return data && data[0];
-}
-;
+    if (ModelType) {
+        data = yield ModelType.aggregate(pipeline).exec();
+    }
+
+    return data && data[0] || {};
+};
 
