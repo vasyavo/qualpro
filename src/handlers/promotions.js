@@ -2,12 +2,12 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 const ReportUtils = require('./../stories/test-utils').ReportUtils;
 
-var Promotions = function (db, redis, event) {
+var Promotions = function () {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var VALIDATION = require('../public/js/constants/validation.js');
@@ -19,9 +19,9 @@ var Promotions = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
+    var getImagesHelper = new GetImageHelper();
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
 
     var self = this;

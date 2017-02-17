@@ -1,19 +1,18 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
-const logger = require('./../utils/logger');
 const extractBody = require('./../utils/extractBody');
 
-var ContactUs = function(db, redis, event) {
+var ContactUs = function() {
     var async = require('async');
     var _ = require('lodash');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var mongoose = require('mongoose');
     var ObjectId = mongoose.Types.ObjectId;
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ContactUsModel = require('./../types/contactUs/model');
     var CountryModel = require('./../types/origin/model');
     var FileModel = require('./../types/file/model');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var joiValidate = require('../helpers/joiValidate');
     var AggregationHelper = require('../helpers/aggregationCreater');
 
@@ -25,11 +24,11 @@ var ContactUs = function(db, redis, event) {
         const queryRun = (body, callback) => {
             const files = req.files;
 
-            async.series([
+            async.waterfall([
 
                 (cb) => {
                     if (!files && !files.length) {
-                        return cb();
+                        return cb(null, []);
                     }
 
                     fileHandler.uploadFile(body.createdBy, files, CONTENT_TYPES.CONTACT_US, (err, setFileId) => {
@@ -37,7 +36,7 @@ var ContactUs = function(db, redis, event) {
                             return cb(err);
                         }
 
-                        cb(setFileId);
+                        cb(null, setFileId);
                     });
                 },
 
@@ -62,7 +61,19 @@ var ContactUs = function(db, redis, event) {
 
                 body.createdBy = userId;
 
-                joiValidate(body, accessRoleLevel, CONTENT_TYPES.CONTACT_US, 'create', cb);
+                joiValidate(body, accessRoleLevel, CONTENT_TYPES.CONTACT_US, 'create', (err, body) => {
+                    if (err) {
+                        const error = new Error();
+
+                        error.status = 400;
+                        error.message = err.name;
+                        error.details = err.details;
+
+                        return next(error);
+                    }
+
+                    cb(null, body);
+                });
             },
 
             queryRun,

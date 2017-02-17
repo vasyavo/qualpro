@@ -5,10 +5,10 @@ var access = require('../helpers/access');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
-module.exports = function (db, redis, event) {
+module.exports = function () {
     'use strict';
 
-    var handler = new ContractHandler(db, redis, event);
+    var handler = new ContractHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

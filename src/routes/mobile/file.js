@@ -11,8 +11,8 @@ var Handler = require('../../handlers/file');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
-module.exports = function (db) {
-    var handler = new Handler(db);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

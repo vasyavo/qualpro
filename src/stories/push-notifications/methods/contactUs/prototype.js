@@ -74,7 +74,7 @@ const getPipeline = (options) => {
                 $cond: {
                     // if publisher is Master Admin which haven't assigned country
                     if: {
-                        $eq: ['$contentAuthor.accessRole.level', 1],
+                        $eq: ['$contentAuthor.accessRole.level', accessRoles.MASTER_ADMIN],
                     },
                     then: {
                         $filter: {
@@ -110,7 +110,7 @@ const getPipeline = (options) => {
                                         }, {
                                             $gt: [{
                                                 $size: {
-                                                    $setIntersection: ['$$item.county', '$contentAuthor.country'],
+                                                    $setIntersection: ['$$item.country', '$contentAuthor.country'],
                                                 },
                                             }, 0],
                                         }],
@@ -128,7 +128,9 @@ const getPipeline = (options) => {
             },
         },
     }, {
-        setAdmin: '$setAdmin._id',
+        $project: {
+            setAdmin: '$setAdmin._id',
+        },
     }];
 };
 

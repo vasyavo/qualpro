@@ -4,9 +4,9 @@ const CompetitorBranding = require('../handlers/competitorBranding');
 
 const ACL_MODULES = require('./../constants/aclModulesNames');
 
-module.exports = function (db, redis, event) {
-    const access = require('./../helpers/access')(db);
-    const handler = new CompetitorBranding(db, redis, event);
+module.exports = function () {
+    const access = require('./../helpers/access')();
+    const handler = new CompetitorBranding();
     const checkAuth = require('./../helpers/access').checkAuth;
 
     router.use(checkAuth);

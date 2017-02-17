@@ -15,7 +15,6 @@ mongoose.Schemas = mongoose.Schemas || {}; // important thing
 const config = require('./config');
 const mongo = require('./utils/mongo');
 const logger = require('./utils/logger');
-const eventEmitter = require('./utils/eventEmitter');
 const PubNubClient = require('./stories/push-notifications/utils/pubnub');
 
 process.on('unhandledRejection', (reason, p) => {
@@ -58,7 +57,7 @@ app.use(cookieParser('CRMkey'));
 app.use(setCacheControl);
 app.get('/info', require('./utils/isApiAvailable'));
 
-require('./routes')(app, mongo, eventEmitter);
+require('./routes')(app, mongo);
 
 const server = http.createServer(app);
 const io = require('./helpers/socket')({

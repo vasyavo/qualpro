@@ -1,7 +1,7 @@
 'use strict';
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var Domain = function (db, redis, event) {
+var Domain = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var _ = require('underscore');
@@ -15,17 +15,17 @@ var Domain = function (db, redis, event) {
     var SessionModel = require('./../types/session/model');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var xssFilters = require('xss-filters');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/domainArchiver');
     var logWriter = require('../helpers/logWriter.js');
-    var archiver = new Archiver(DomainModel, BranchModel, event);
+    var archiver = new Archiver(DomainModel, BranchModel);
     var populateByType = require('../helpers/populateByType');
     var contentTypes = require('../public/js/helpers/contentTypesHelper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var bodyValidator = require('../helpers/bodyValidator');
     var cutOccupiedDomains = require('../helpers/cutOccupiedDomains');
     var objectId = mongoose.Types.ObjectId;
@@ -198,13 +198,13 @@ var Domain = function (db, redis, event) {
 
                             switch (options.contentType) {
                                 case ('country') :
-                                    ActivityLog.emit('country:created', bodyObject);
+                                    ActivityLog.emit('country:archived', bodyObject);
                                     break;
                                 case ('region') :
-                                    ActivityLog.emit('region:created', bodyObject);
+                                    ActivityLog.emit('region:archived', bodyObject);
                                     break;
                                 case ('subRegion') :
-                                    ActivityLog.emit('sub-region:created', bodyObject);
+                                    ActivityLog.emit('sub-region:archived', bodyObject);
                                     break;
                             }
                             eCb();
@@ -239,7 +239,7 @@ var Domain = function (db, redis, event) {
         function queryRun() {
             var id = req.params.id;
 
-            db.model(modelAndSchemaName, schema)
+            BranchModel
                 .findById(id)
                 .populate('currency')
                 .exec(function (err, result) {

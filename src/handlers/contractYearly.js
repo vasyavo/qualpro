@@ -1,6 +1,6 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var Contract = function (db, redis, event) {
+var Contract = function () {
     'use strict';
 
     var async = require('async');
@@ -18,11 +18,11 @@ var Contract = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var DocumentHandler = require('../handlers/document');
-    var documentHandler = new DocumentHandler(db);
+    var documentHandler = new DocumentHandler();
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
 
     var self = this;

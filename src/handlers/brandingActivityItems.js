@@ -2,7 +2,7 @@ const async = require('async');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 
-const MarketingCampaignsHandler = function(db, redis, event) {
+const MarketingCampaignsHandler = function() {
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
@@ -14,10 +14,10 @@ const MarketingCampaignsHandler = function(db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var CommentHandler = require('./comment');
-    var commentHandler = new CommentHandler(db);
+    var commentHandler = new CommentHandler();
     var commentCreator = commentHandler.commentCreator;
 
     var $defProjection = {

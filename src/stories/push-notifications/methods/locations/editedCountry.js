@@ -9,7 +9,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.COUNTRY;
         const contentType = contentTypes.COUNTRY;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.UPDATED;
 
         const extendedOptions = Object.assign({}, options, {
             moduleId,

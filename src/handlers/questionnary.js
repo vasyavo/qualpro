@@ -20,8 +20,8 @@ const access = require('../helpers/access')();
 const GetImageHelper = require('../helpers/getImages');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-const QuestionnaryHandler = function (db, redis, event) {
-    const getImagesHelper = new GetImageHelper(db);
+const QuestionnaryHandler = function () {
+    const getImagesHelper = new GetImageHelper();
     const $defProjection = {
         _id: 1,
         title: 1,

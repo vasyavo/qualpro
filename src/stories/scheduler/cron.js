@@ -3,9 +3,7 @@ const nodeScheduler = require('node-schedule');
 const moment = require('moment');
 const CONTENT_TYPES = require('../../public/js/constants/contentType');
 const OTHER_CONSTANTS = require('../../public/js/constants/otherConstants');
-const ACTIVITY_TYPES = require('../../constants/activityTypes');
 const logger = require('./../../utils/logger');
-const event = require('./../../utils/eventEmitter');
 const ActivityLog = require('./../push-notifications/activityLog');
 const PERSONNEL_STATUSES = require('./../../public/js/constants/personnelStatuses');
 const PersonnelModel = require('./../../types/personnel/model');
@@ -30,19 +28,6 @@ const getPipeline = (query) => {
             },
         },
     }];
-};
-
-const triggerEvent = (mid, id, itemType) => {
-    event.emit('activityChange', {
-        module: mid,
-        actionType: ACTIVITY_TYPES.UPDATED,
-        createdBy: {
-            user: null,
-            date: new Date(),
-        },
-        itemId: id,
-        itemType,
-    });
 };
 
 const createAction = (model) => {
@@ -107,14 +92,15 @@ const personnelInactive = () => {
             $set: {
                 status: PERSONNEL_STATUSES.INACTIVE._id,
             },
-        }, (err, model) => {
+        }, (err, personnel) => {
             if (err) {
                 return callback(err);
             }
 
-            if (model) {
-                // todo: replace with new ActivityLog
-                triggerEvent(20, id, contentType);
+            if (personnel) {
+                const payload = createAction(personnel);
+
+                ActivityLog.emit('personnel:updated', payload);
             }
 
             callback(null);

@@ -18,7 +18,7 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 const archiver = new Archiver(ItemModel);
 const objectId = mongoose.Types.ObjectId;
 
-const Item = function (db, event) {
+const Item = function () {
     const self = this;
 
     var $defProjection = {

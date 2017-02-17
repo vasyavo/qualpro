@@ -3,8 +3,10 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const PasswordManager = require('./../helpers/passwordManager');
+const redis = require('./../helpers/redisClient');
+const ObjectiveModel = require('./../types/personnel/model');
 
-const Personnel = function (db, redis, event) {
+const Personnel = function () {
     const mongoose = require('mongoose');
     const ACL_CONSTANTS = require('../constants/aclRolesNames');
     const ACL_MODULES = require('../constants/aclModulesNames');
@@ -18,7 +20,7 @@ const Personnel = function (db, redis, event) {
     const validator = require('validator');
     const bcrypt = require('bcryptjs');
     const crypto = require('crypto');
-    const access = require('../helpers/access')(db);
+    const access = require('../helpers/access')();
     const generator = require('../helpers/randomPass.js');
     const errorSender = require('../utils/errorSender');
     const mailer = require('../helpers/mailer');
@@ -26,7 +28,7 @@ const Personnel = function (db, redis, event) {
     const FilterMapper = require('../helpers/filterMapper');
     const async = require('async');
     const GetImagesHelper = require('../helpers/getImages');
-    const getImagesHelper = new GetImagesHelper(db);
+    const getImagesHelper = new GetImagesHelper();
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
     const CountryModel = require('./../types/domain/model');
@@ -3155,7 +3157,7 @@ const Personnel = function (db, redis, event) {
                 id : ObjectId(uId)
             });
 
-            db.collection('objectives').aggregate(pipeLine, function(err, response) {
+            ObjectiveModel.aggregate(pipeLine, function(err, response) {
                 var idsPersonnel = [];
                 var idsFile = [];
                 var options = {

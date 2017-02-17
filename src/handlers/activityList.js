@@ -1,11 +1,13 @@
-var Personnel = function(db, redis, event) {
+const redis = require('./../helpers/redisClient');
+
+var Personnel = function() {
     var mongoose = require('mongoose');
     var CONSTANTS = require('../constants/mainConstants');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var FilterMapper = require('../helpers/filterMapper');
     var async = require('async');
     const ActivityListModel = require('./../types/activityList/model');
@@ -13,7 +15,7 @@ var Personnel = function(db, redis, event) {
     var ObjectId = mongoose.Types.ObjectId;
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
+    var getImagesHelper = new GetImageHelper();
     var _ = require('lodash');
     var logWriter = require('../helpers/logWriter.js');
     var MAIN_CONSTANTS = require('../constants/mainConstants.js');

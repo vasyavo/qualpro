@@ -1,17 +1,17 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var RetailSegmentHandler = function (db, redis, event) {
+var RetailSegmentHandler = function () {
     var async = require('async');
     var _ = require('underscore');
     var lodash = require('lodash');
     var mongoose = require('mongoose');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var RetailSegmentModel = require('./../types/retailSegment/model');
     var DomainModel = require('./../types/domain/model');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -106,7 +106,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-                ActivityLog.emit('trade-channel:create', {
+                ActivityLog.emit('trade-channel:created', {
                     actionOriginator: req.session.uId,
                     accessRoleLevel : req.session.level,
                     body            : model.toJSON()
@@ -918,7 +918,7 @@ var RetailSegmentHandler = function (db, redis, event) {
                     if (err) {
                         return next(err);
                     }
-                    ActivityLog.emit('trade-channel:update', {
+                    ActivityLog.emit('trade-channel:updated', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body            : result.toJSON()

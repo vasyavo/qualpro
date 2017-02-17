@@ -8,8 +8,8 @@ var positionHandler = require('../handlers/position');
 
 var access = require('../helpers/access');
 
-module.exports = function (db, redis, event) {
-    var handler = new positionHandler(db);
+module.exports = function () {
+    var handler = new positionHandler();
     var checkAuth = access.checkAuth;
 
 

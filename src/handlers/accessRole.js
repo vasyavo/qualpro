@@ -1,4 +1,4 @@
-var AccessRole = function (db) {
+var AccessRole = function () {
     var CONSTANTS = require('../constants/mainConstants');
     var ACL_ROLES = require('../constants/aclRolesNames');
     var AccessRoleModel = require('./../types/accessRole/model');

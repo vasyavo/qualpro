@@ -1,6 +1,6 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var BrandingActivity = function (db, redis, event) {
+var BrandingActivity = function () {
     var _ = require('lodash');
     var async = require('async');
     var mongoose = require('mongoose');
@@ -10,13 +10,13 @@ var BrandingActivity = function (db, redis, event) {
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
+    var getImagesHelper = new GetImageHelper();
     var FilterMapper = require('../helpers/filterMapper');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var BrandingActivityModel = require('../types/brandingActivity/model');
     var FileModel = require('./../types/file/model');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;

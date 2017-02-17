@@ -22,7 +22,14 @@ module.exports = function * (options) {
     let getLocations = {};
 
     if (location){
-        getEveryone = yield getEveryoneInLocation(location);
+        getEveryone = yield getEveryoneInLocation({
+            exclude      : location.exclude || [],
+            setCountry   : location.setCountry || [],
+            setRegion    : location.setRegion || [],
+            setSubRegion : location.setSubRegion || [],
+            setOutlet    : location.setOutlet || [],
+            setBranch    : location.setBranch || [],
+        });
 
         getLocations = yield getParentLocations({
             itemId : itemId || body._id,

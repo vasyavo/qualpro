@@ -7,8 +7,8 @@ var router = express.Router();
 var personnelHandler = require('../../handlers/personnel');
 var access = require('../../helpers/access');
 
-module.exports = function (db, app, event, redis) {
-    var handler = new personnelHandler(db, redis, event);
+module.exports = function () {
+    var handler = new personnelHandler();
     var checkAuth = access.checkAuth;
 
     /**
