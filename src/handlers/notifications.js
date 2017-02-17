@@ -440,6 +440,7 @@ const Notifications = function () {
                 filterSearch   : filterSearch,
                 isMobile       : isMobile,
                 withAttachments: true,
+                personnelId    : personnel._id,
                 forSync        : true
             });
 

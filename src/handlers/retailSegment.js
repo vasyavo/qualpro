@@ -106,7 +106,7 @@ var RetailSegmentHandler = function () {
                 if (error) {
                     return next(error);
                 }
-                ActivityLog.emit('trade-channel:create', {
+                ActivityLog.emit('trade-channel:created', {
                     actionOriginator: req.session.uId,
                     accessRoleLevel : req.session.level,
                     body            : model.toJSON()
@@ -918,7 +918,7 @@ var RetailSegmentHandler = function () {
                     if (err) {
                         return next(err);
                     }
-                    ActivityLog.emit('trade-channel:update', {
+                    ActivityLog.emit('trade-channel:updated', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body            : result.toJSON()

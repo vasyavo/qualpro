@@ -972,7 +972,7 @@ var BranchHandler = function () {
                         return next(err);
                     }
 
-                    ActivityLog.emit('branch:update', {
+                    ActivityLog.emit('branch:updated', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
                         body            : result.toJSON()
