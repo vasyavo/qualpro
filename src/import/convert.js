@@ -11,6 +11,7 @@ const PasswordManager = require('./../helpers/passwordManager');
 mongoose.Schemas = mongoose.Schemas || {};
 const config = require('./../config');
 const mongo = require('./../utils/mongo');
+const logger = require('./../utils/logger');
 const types = require('./../types/index');
 const LocationModel = require('./../types/domain/model');
 const RetailSegmentModel = require('./../types/retailSegment/model');
@@ -30,7 +31,7 @@ const ItemModel = require('./../types/item/model');
 const CompetitorItemModel = require('./../types/competitorItem/model');
 
 const whereSheets = `${config.workingDirectory}/src/import/`;
-const timestamp = 'Nov_21_2016';
+const timestamp = 'Feb_18_2017';
 
 const fetchCurrency = (callback) => {
     CurrencyModel.find({}).select('_id name').lean().exec(callback);
@@ -206,6 +207,11 @@ const patchRecord = (options, callback) => {
                 databaseModel.set(patch);
                 return databaseModel.save((err) => {
                     if (err) {
+                        if (err.code === 11000) {
+                            logger.error(err, query, patch);
+                            return cb(null);
+                        }
+
                         return cb(err);
                     }
 
@@ -216,6 +222,11 @@ const patchRecord = (options, callback) => {
             existingModel.set(patch);
             existingModel.save((err) => {
                 if (err) {
+                    if (err.code === 11000) {
+                        logger.error(err, query, patch);
+                        return cb(null);
+                    }
+
                     return cb(err);
                 }
 
@@ -1046,7 +1057,7 @@ function importPersonnel(callback) {
                 if (position) {
                     parallelJobs.position = (cb) => {
                         const query = {
-                            'name.en': position
+                            'name.en': position.toUpperCase(),
                         };
 
                         PositionModel.findOne(query).select('_id').lean().exec(cb)
