@@ -143,7 +143,15 @@ const readCsv = (name, cb) => {
         cb(null, array)
     });
 
-    createReadStream(filePath).pipe(converter);
+    fs.lstat(filePath, (err) => {
+        if (err) {
+            logger.info(`Skip... ${name}`);
+            return cb(null, []);
+        }
+
+        logger.info(`Loading... ${name}`);
+        createReadStream(filePath).pipe(converter);
+    });
 };
 
 const trimObjectValues = (obj) => {
