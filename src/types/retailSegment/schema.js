@@ -31,6 +31,10 @@ const schema = new Schema({
     }]
 }, { collection: 'retailSegments' });
 
-schema.index({ name: 1, type: 1 }, { unique: true });
+schema.index({
+    name: 1,
+}, {
+    unique: true,
+});
 
 module.exports = schema;

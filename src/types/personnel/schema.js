@@ -76,4 +76,19 @@ schema.virtual('fullName').get(function() {
 
 schema.set('toJSON', { virtuals: true });
 
+schema.index({
+    firstName: 1,
+    lastName: 1,
+    email: 1,
+    phoneNumber: 1,
+    position: 1,
+    accessRole: 1,
+    country: 1,
+    region: 1,
+    subRegion: 1,
+    branch: 1,
+}, {
+    unique: true,
+});
+
 module.exports = schema;

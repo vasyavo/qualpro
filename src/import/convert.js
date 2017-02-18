@@ -725,7 +725,6 @@ function importOutlet(callback) {
             async.mapLimit(data, 10, (sourceObj, mapCb) => {
                 const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
-                    ID: obj.ID,
                     name: {
                         en: obj['Name (EN)'],
                         ar: obj['Name (AR)']
@@ -755,7 +754,6 @@ function importRetailSegment(callback) {
             async.mapLimit(data, 10, (sourceObj, mapCb) => {
                 const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
-                    ID: obj.ID,
                     name: {
                         en: obj['Name (EN)'],
                         ar: obj['Name (AR)']
@@ -861,7 +859,6 @@ function importBranch(callback) {
             async.mapLimit(data, 300, (sourceObj, mapCb) => {
                 const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
-                    ID: obj.ID,
                     name: {
                         en: obj['Name (EN)'],
                         ar: obj['Name (AR)']
