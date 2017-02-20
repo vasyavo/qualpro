@@ -961,11 +961,11 @@ function importPersonnel(callback) {
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     firstName: {
-                        en: obj['First Name (EN)'],
+                        en: obj['First Name (EN)'].toUpperCase(),
                         ar: obj['First Name (AR)']
                     },
                     lastName: {
-                        en: obj['Last Name (EN)'],
+                        en: obj['Last Name (EN)'].toUpperCase(),
                         ar: obj['Last Name (AR)']
                     },
                     email: obj['Email'],
