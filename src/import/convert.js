@@ -968,7 +968,7 @@ function importPersonnel(callback) {
                         en: obj['Last Name (EN)'].toUpperCase(),
                         ar: obj['Last Name (AR)']
                     },
-                    email: obj['Email'],
+                    email: obj['Email'].toLowerCase(),
                     phoneNumber: obj['PhoneNumber'],
                     xlsManager: obj.Manager
                 });
@@ -1111,6 +1111,8 @@ function importPersonnel(callback) {
 
                     if (patch.email) {
                         query.email = patch.email;
+                    } else if (patch.phoneNumber) {
+                        query.phoneNumber = patch.phoneNumber;
                     } else {
                         query['firstName.en'] = patch.firstName.en;
                         query['lastName.en'] = patch.lastName.en;
