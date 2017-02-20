@@ -23,45 +23,45 @@ const schema = new Schema({
     },
     imageSrc: {
         type: String,
-        required: true,
+        required: false,
         default: defaultAvatar,
     },
     firstName: {
         type: {
             en: {
                 type: String,
-                required: true,
+                required: false,
                 default: '',
             },
             ar: {
                 type: String,
-                required: true,
+                required: false,
                 default: '',
             },
         },
-        required: true,
+        required: false,
     },
     lastName: {
         type: {
             en: {
                 type: String,
-                required: true,
+                required: false,
                 default: '',
             },
             ar: {
                 type: String,
-                required: true,
+                required: false,
                 default: '',
             },
         },
-        required: true,
+        required: false,
     },
     country: {
         type: [{
             type: ObjectId,
             ref: CONTENT_TYPES.DOMAIN,
         }],
-        required: true,
+        required: false,
         default: [],
     },
     region: {
@@ -69,7 +69,7 @@ const schema = new Schema({
             type: ObjectId,
             ref: CONTENT_TYPES.DOMAIN,
         }],
-        required: true,
+        required: false,
         default: [],
     },
     subRegion: {
@@ -77,7 +77,7 @@ const schema = new Schema({
             type: ObjectId,
             ref: CONTENT_TYPES.DOMAIN,
         }],
-        required: true,
+        required: false,
         default: [],
     },
     branch: {
@@ -85,7 +85,7 @@ const schema = new Schema({
             type: ObjectId,
             ref: CONTENT_TYPES.BRANCH,
         }],
-        required: true,
+        required: false,
         default: [],
     },
     email: {
@@ -98,29 +98,29 @@ const schema = new Schema({
     },
     super: {
         type: Boolean,
-        required: true,
+        required: false,
         default: false,
     },
     manager: {
         type: ObjectId,
-        required: true,
+        required: false,
         ref: CONTENT_TYPES.PERSONNEL,
         default: null,
     },
     xlsManager: {
         type: Number,
-        required: true,
+        required: false,
         default: null,
     },
     position: {
         type: ObjectId,
-        required: true,
+        required: false,
         ref: CONTENT_TYPES.POSITION,
         default: null,
     },
     accessRole: {
         type: ObjectId,
-        required: true,
+        required: false,
         ref: CONTENT_TYPES.ROLE,
         default: null,
     },
@@ -138,12 +138,12 @@ const schema = new Schema({
     },
     archived: {
         type: Boolean,
-        required: true,
+        required: false,
         default: false,
     },
     whoCanRW: {
         type: String,
-        required: true,
+        required: false,
         enum: ['owner', 'group', 'everyOne'],
         default: 'everyOne',
     },
@@ -151,7 +151,7 @@ const schema = new Schema({
         type: {
             owner: {
                 type: ObjectId,
-                required: true,
+                required: false,
                 ref: CONTENT_TYPES.PERSONNEL,
                 default: null,
             },
@@ -161,7 +161,7 @@ const schema = new Schema({
                     ref: CONTENT_TYPES.PERSONNEL,
                     default: null,
                 }],
-                required: true,
+                required: false,
                 default: [],
             },
             group: {
@@ -170,48 +170,47 @@ const schema = new Schema({
                     ref: CONTENT_TYPES.OUTLET,
                     default: null,
                 }],
-                required: true,
+                required: false,
                 default: [],
             },
         },
-        required: true,
+        required: false,
     },
     description: {
         type: String,
-        required: true,
-        default: '',
+        required: false,
     },
     createdBy: {
         type: {
             user: {
                 type: ObjectId,
-                required: true,
+                required: false,
                 ref: CONTENT_TYPES.PERSONNEL,
                 default: null,
             },
             date: {
                 type: Date,
-                required: true,
+                required: false,
                 default: Date.now(),
             },
         },
-        required: true,
+        required: false,
     },
     editedBy: {
         type: {
             user: {
                 type: ObjectId,
-                required: true,
+                required: false,
                 ref: CONTENT_TYPES.PERSONNEL,
                 default: null,
             },
             date: {
                 type: Date,
-                required: true,
+                required: false,
                 default: Date.now(),
             },
         },
-        required: true,
+        required: false,
     },
     forgotToken: {
         type: String,
@@ -221,26 +220,26 @@ const schema = new Schema({
         type: {
             onLeave: {
                 type: Boolean,
-                required: true,
+                required: false,
                 default: false,
             },
             cover: {
                 type: ObjectId,
-                required: true,
+                required: false,
                 ref: CONTENT_TYPES.PERSONNEL,
                 default: null,
             },
         },
-        required: true,
+        required: false,
     },
     temp: {
         type: Boolean,
-        required: true,
+        required: false,
         default: false,
     },
     status: {
         type: String,
-        required: true,
+        required: false,
         enum: ['login', 'archived', 'sendPass', 'neverLogin', 'onLeave', 'temp', 'inactive'],
         default: 'sendPass',
     },
@@ -263,7 +262,7 @@ const schema = new Schema({
     },
     currentLanguage: {
         type: String,
-        required: true,
+        required: false,
         enum: ['en', 'ar'],
         default: 'en',
     },
@@ -286,7 +285,15 @@ schema.index({
     'firstName.en': 1,
     'lastName.en': 1,
 }, { unique: true });
-schema.index({ email: 1 }, { unique: true });
-schema.index({ phoneNumber: 1 }, { unique: true });
+schema.index({
+    'firstName.en': 1,
+    'lastName.en': 1,
+    email: 1,
+}, { unique: true });
+schema.index({
+    'firstName.en': 1,
+    'lastName.en': 1,
+    phoneNumber: 1,
+}, { unique: true });
 
 module.exports = schema;
