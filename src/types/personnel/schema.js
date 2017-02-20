@@ -230,6 +230,10 @@ const schema = new Schema({
                 default: null,
             },
         },
+        default: {
+            onLeave: false,
+            cover: null,
+        },
         required: false,
     },
     temp: {
