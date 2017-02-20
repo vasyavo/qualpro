@@ -1519,6 +1519,10 @@ const Personnel = function () {
     };
 
     this.archive = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun() {
             var idsToArchive = req.body.ids.objectID();
             var archived = req.body.archived === 'false' ? false : !!req.body.archived;
@@ -1548,27 +1552,20 @@ const Personnel = function () {
                     date : Date.now()
                 };
 
-                async.eachSeries(idsToArchive, function(item, callback) {
-                    PersonnelModel.findById(item, (err, model)=>{
+                async.eachSeries(idsToArchive, (item, callback) => {
+                    PersonnelModel.findById(item, (err, model) => {
                         if (err) {
-                            return callback(err)
+                            return callback(err);
                         }
 
-                        ActivityLog.emit('personnel:archived', {
-                            actionOriginator: uId,
-                            accessRoleLevel : req.session.level,
-                            body: model.toJSON()
+                        ActivityLog.emit(`personnel:${archived ? 'archived' : 'unarchived'}`, {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: model.toJSON(),
                         });
 
                         callback();
                     });
-
-
-
-                }, function(err) {
-                    if (err) {
-                        logWriter.log('personnel archived', err);
-                    }
                 });
 
                 if (archived) {
