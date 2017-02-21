@@ -760,7 +760,11 @@ var Note = function () {
                 (done, cb) => {
                     callback();
 
-                    NoteModel.find({ _id: setIdToArchive }).lean().exec(cb);
+                    NoteModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -774,12 +778,7 @@ var Note = function () {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([
