@@ -1523,72 +1523,64 @@ const Personnel = function () {
         const userId = session.uId;
         const accessRoleLevel = session.level;
 
-        function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var uId = req.session.uId;
-            var options = [
-                {
-                    idsToArchive : idsToArchive,
-                    keyForCondition : '_id',
-                    archived : archived,
-                    topArchived : archived,
-                    model : PersonnelModel
-                }
-            ];
+        const queryRun = (callback) => {
+            const setIdToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            const options = [{
+                idsToArchive: setIdToArchive,
+                keyForCondition: '_id',
+                archived,
+                topArchived: archived,
+                model: PersonnelModel,
+            }];
+            const activityType = archived ? 'archived' : 'unarchived';
 
-            archiver.archive(uId, options, function(err) {
-                var type = ACTIVITY_TYPES.ARCHIVED;
+            async.waterfall([
 
-                if (err) {
-                    return next(err);
-                }
-                if (!req.body.archived) {
-                    type = ACTIVITY_TYPES.UNARCHIVED;
-                }
+                (cb) => {
+                    archiver.archive(userId, options, cb);
+                },
 
-                req.body.editedBy = {
-                    user : req.session.uId,
-                    date : Date.now()
-                };
+                (done, cb) => {
+                    callback();
 
-                async.eachSeries(idsToArchive, (item, callback) => {
-                    PersonnelModel.findById(item, (err, model) => {
-                        if (err) {
-                            return callback(err);
-                        }
+                    PersonnelModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
+                },
 
-                        ActivityLog.emit(`personnel:${archived ? 'archived' : 'unarchived'}`, {
+                (setPersonnel, cb) => {
+                    async.each(setPersonnel, (personnel, eachCb) => {
+                        ActivityLog.emit(`personnel:${activityType}`, {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body: model.toJSON(),
+                            body: personnel,
                         });
+                        eachCb();
+                    }, cb);
+                },
 
-                        callback();
-                    });
-                });
+            ]);
+        };
 
-                if (archived) {
-                    someEvents.personnelArchived({
-                        ids : idsToArchive,
-                        Session : SessionModel
-                    });
-                }
+        async.waterfall([
 
-                res.status(200).send();
-            });
-        }
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, cb);
+            },
 
-        access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
+            (personnel, allowed, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err) => {
             if (err) {
                 return next(err);
             }
-    
-            if (!allowed) {
-                return errorSender.forbidden(next);
-            }
 
-            queryRun();
+            res.status(200).send({});
         });
     };
 
