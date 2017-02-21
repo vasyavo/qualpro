@@ -44,7 +44,7 @@ define([
                 }
             });
 
-            this.collection = new ItemsPricesCollection({location: true, filter: options.filter}, {parse: true});
+            this.collection = new ItemsPricesCollection({location: true, filter: options.filter, count: -1}, {parse: true});
 
             this.collection.bind('reset', function () {
                 this.renderLists();
