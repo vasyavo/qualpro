@@ -6,126 +6,186 @@ const async = require('async');
 require('mongodb');
 
 exports.up = function(db, next) {
-    async.waterfall([
+    async.series([
 
         (cb) => {
-            db.collection('variants').findOne({
-                'name.en': 'BASBOUSAH',
-            }, cb);
-        },
+            async.waterfall([
 
-        (variant, cb) => {
-            db.collection('items').update({
-                variant: null,
-                'name.en': 'BASBOUSAH MIX',
-            }, {
-                $set: {
-                    variant: variant._id,
+                (cb) => {
+                    db.collection('variants').findOne({
+                        'name.en': 'BASBOUSAH',
+                    }, cb);
                 },
-            }, {
-                multi: true,
-            }, cb);
-        },
 
-        (updateRes, cb) => {
-            db.collection('variants').findOne({
-                'name.en': 'CAKE',
-            }, cb);
-        },
+                (variant, cb) => {
+                    if (!variant) {
+                        return cb(null);
+                    }
 
-        (variant, cb) => {
-            db.collection('items').update({
-                variant: null,
-                'name.en': 'PANCAKE MIX',
-            }, {
-                $set: {
-                    variant: variant._id,
+                    db.collection('items').update({
+                        variant: null,
+                        'name.en': 'BASBOUSAH MIX',
+                    }, {
+                        $set: {
+                            variant: variant._id,
+                        },
+                    }, {
+                        multi: true,
+                    }, cb);
                 },
-            }, {
-                multi: true,
-            }, cb);
+
+            ], cb);
         },
 
-        (updateRes, cb) => {
-            db.collection('variants').findOne({
-                'name.en': 'DUMPLING',
-            }, cb);
-        },
+        (cb) => {
+            async.waterfall([
 
-        (variant, cb) => {
-            db.collection('items').update({
-                variant: null,
-                'name.en': 'DUMPLING MIX',
-            }, {
-                $set: {
-                    variant: variant._id,
+                (cb) => {
+                    db.collection('variants').findOne({
+                        'name.en': 'CAKE',
+                    }, cb);
                 },
-            }, {
-                multi: true,
-            }, cb);
+
+                (variant, cb) => {
+                    if (!variant) {
+                        return cb(null);
+                    }
+
+                    db.collection('items').update({
+                        variant: null,
+                        'name.en': 'PANCAKE MIX',
+                    }, {
+                        $set: {
+                            variant: variant._id,
+                        },
+                    }, {
+                        multi: true,
+                    }, cb);
+                },
+
+            ], cb);
+        },
+
+        (cb) => {
+            async.waterfall([
+
+                (cb) => {
+                    db.collection('variants').findOne({
+                        'name.en': 'DUMPLING',
+                    }, cb);
+                },
+
+                (variant, cb) => {
+                    if (!variant) {
+                        return cb(null);
+                    }
+
+                    db.collection('items').update({
+                        variant: null,
+                        'name.en': 'DUMPLING MIX',
+                    }, {
+                        $set: {
+                            variant: variant._id,
+                        },
+                    }, {
+                        multi: true,
+                    }, cb);
+                },
+
+            ], cb);
         },
 
     ], next);
 };
 
 exports.down = function(db, next) {
-    async.waterfall([
+    async.series([
 
         (cb) => {
-            db.collection('variants').findOne({
-                'name.en': 'BASBOUSAH',
-            }, cb);
-        },
+            async.waterfall([
 
-        (variant, cb) => {
-            db.collection('items').update({
-                variant: variant._id,
-                'name.en': 'BASBOUSAH MIX',
-            }, {
-                $set: {
-                    variant: null,
+                (cb) => {
+                    db.collection('variants').findOne({
+                        'name.en': 'BASBOUSAH',
+                    }, cb);
                 },
-            }, {
-                multi: true,
-            }, cb);
-        },
 
-        (updateRes, cb) => {
-            db.collection('variants').findOne({
-                'name.en': 'CAKE',
-            }, cb);
-        },
+                (variant, cb) => {
+                    if (!variant) {
+                        return cb(null);
+                    }
 
-        (variant, cb) => {
-            db.collection('items').update({
-                variant: variant._id,
-                'name.en': 'PANCAKE MIX',
-            }, {
-                $set: {
-                    variant: null,
+                    db.collection('items').update({
+                        variant: variant._id,
+                        'name.en': 'BASBOUSAH MIX',
+                    }, {
+                        $set: {
+                            variant: null,
+                        },
+                    }, {
+                        multi: true,
+                    }, cb);
                 },
-            }, {
-                multi: true,
-            }, cb);
+
+            ], cb);
         },
 
-        (updateRes, cb) => {
-            db.collection('variants').findOne({
-                'name.en': 'DUMPLING',
-            }, cb);
-        },
+        (cb) => {
+            async.waterfall([
 
-        (variant, cb) => {
-            db.collection('items').update({
-                variant: variant._id,
-                'name.en': 'DUMPLING MIX',
-            }, {
-                $set: {
-                    variant: null,
+                (cb) => {
+                    db.collection('variants').findOne({
+                        'name.en': 'CAKE',
+                    }, cb);
                 },
-            }, {
-                multi: true,
-            }, cb);
+
+                (variant, cb) => {
+                    if (!variant) {
+                        return cb(null);
+                    }
+
+                    db.collection('items').update({
+                        variant: variant._id,
+                        'name.en': 'PANCAKE MIX',
+                    }, {
+                        $set: {
+                            variant: null,
+                        },
+                    }, {
+                        multi: true,
+                    }, cb);
+                },
+
+            ], cb);
+        },
+
+        (cb) => {
+            async.waterfall([
+
+                (cb) => {
+                    db.collection('variants').findOne({
+                        'name.en': 'DUMPLING',
+                    }, cb);
+                },
+
+                (variant, cb) => {
+                    if (!variant) {
+                        return cb(null);
+                    }
+
+                    db.collection('items').update({
+                        variant: variant._id,
+                        'name.en': 'DUMPLING MIX',
+                    }, {
+                        $set: {
+                            variant: null,
+                        },
+                    }, {
+                        multi: true,
+                    }, cb);
+                },
+
+            ], cb);
         },
 
     ], next);
