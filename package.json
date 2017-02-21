@@ -106,7 +106,9 @@
     "coverage": "nyc npm run test",
     "docs": "./API_documentation/update_docs.sh",
     "lint": "eslint src/",
-    "service:scheduler": "cd ./node_modules/abstract-scheduler && cross-env NODE_ENV=development npm start"
+    "service:scheduler": "cd ./node_modules/abstract-scheduler && cross-env NODE_ENV=development npm start",
+    "migrations:up": "chmod +x migrations.sh && ./migrations.sh up",
+    "migrations:down": "chmod +x migrations.sh && ./migrations.sh down"
   },
   "pre-push": [
     "test",
