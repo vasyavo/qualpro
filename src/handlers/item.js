@@ -1143,7 +1143,11 @@ const Item = function () {
                 (done, cb) => {
                     callback();
 
-                    ItemModel.find({ _id: setIdToArchive }).lean().exec(cb);
+                    ItemModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -1157,12 +1161,7 @@ const Item = function () {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([
