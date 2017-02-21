@@ -839,7 +839,11 @@ var CompetitorItem = function () {
                 (done, cb) => {
                     callback();
 
-                    CompetitorItem.find({ _id: setIdToArchive }).lean().exec(cb);
+                    CompetitorItem.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -853,12 +857,7 @@ var CompetitorItem = function () {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([

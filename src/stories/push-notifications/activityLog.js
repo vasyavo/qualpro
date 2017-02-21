@@ -38,6 +38,7 @@ activityLog.on('personnel:assigned', require('./methods/personnel/assigned'));
 activityLog.on('personnel:bi-yearly', require('./methods/personnel/evaluatedYearly'));
 activityLog.on('personnel:monthly', require('./methods/personnel/evaluated'));
 activityLog.on('personnel:archived', require('./methods/personnel/archived'));
+activityLog.on('personnel:unarchived', require('./methods/personnel/unarchived'));
 
 activityLog.on('country:created', require('./methods/locations/createdCountry'));
 activityLog.on('country:updated', require('./methods/locations/editedCountry'));

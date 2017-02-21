@@ -329,7 +329,11 @@ var planogramsHandler = function() {
                 (done, cb) => {
                     callback();
 
-                    PlanogramModel.find({ _id: setIdToArchive }).lean().exec(cb);
+                    PlanogramModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -343,12 +347,7 @@ var planogramsHandler = function() {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([

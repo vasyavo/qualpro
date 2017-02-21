@@ -184,6 +184,23 @@ async.series([
     importItem,
     importCompetitorItem,
     importBranch,
+    // port to upper case
+    (cb) => {
+        PersonnelModel.find({}).select('_id firstName.en lastName.en').exec((err, docs) => {
+            if (err) {
+                return cb(err);
+            }
+
+            async.each(docs, (doc, eachCb) => {
+                PersonnelModel.update({ _id: doc._id }, {
+                    $set: {
+                        'firstName.en': doc.firstName.en.toUpperCase(),
+                        'lastName.en': doc.lastName.en.toUpperCase(),
+                    },
+                }, eachCb);
+            }, cb);
+        });
+    },
     importPersonnel
 
 ], (err) => {
@@ -950,6 +967,156 @@ const setStandardPasswordToYopmail = (patch) => {
     return patch;
 };
 
+const pathPersonnel = (options, callback) => {
+    const {
+        patch,
+    } = options;
+    const query = {};
+
+    async.parallel([
+
+        (cb) => {
+            if (patch.email) {
+                const query = {
+                    $or: [{
+                        'firstName.en': patch.firstName.en,
+                        'lastName.en': patch.lastName.en,
+                        email: patch.email,
+                    }, {
+                        // vise verse first name and last name
+                        'firstName.en': patch.lastName.en,
+                        'lastName.en': patch.firstName.en,
+                        email: patch.email,
+                    }],
+                };
+
+                return PersonnelModel.findOne(query).exec(cb);
+            }
+
+            cb(null);
+        },
+
+        (cb) => {
+            if (patch.phoneNumber) {
+                const query = {
+                    $or: [{
+                        'firstName.en': patch.firstName.en,
+                        'lastName.en': patch.lastName.en,
+                        phoneNumber: patch.phoneNumber,
+                    }, {
+                        // vise verse first name and last name
+                        'firstName.en': patch.lastName.en,
+                        'lastName.en': patch.firstName.en,
+                        phoneNumber: patch.phoneNumber,
+                    }],
+                };
+
+                return PersonnelModel.findOne(query).exec(cb);
+            }
+
+            cb(null);
+        },
+
+        (cb) => {
+            if (!patch.email && !patch.phoneNumber) {
+                const query = {
+                    $or: [{
+                        'firstName.en': patch.firstName.en,
+                        'lastName.en': patch.lastName.en,
+                    }, {
+                        // vise verse first name and last name
+                        'firstName.en': patch.lastName.en,
+                        'lastName.en': patch.firstName.en,
+                    }],
+                };
+
+                return PersonnelModel.findOne(query).exec(cb);
+            }
+
+            cb(null);
+        },
+
+    ], (err, setResult) => {
+        if (err) {
+            return callback(null);
+        }
+
+        const setPersonnel = setResult.filter(personnel => personnel);
+
+        if (setPersonnel.length) {
+            const existingPersonnel = setPersonnel.pop();
+
+            patch.$addToSet = {};
+
+            if (patch.country) {
+                patch.$addToSet.country = {
+                    $each: patch.country,
+                };
+
+                delete patch.country;
+            }
+
+            if (patch.region) {
+                patch.$addToSet.region = {
+                    $each: patch.region,
+                };
+
+                delete patch.region;
+            }
+
+            if (patch.subRegion) {
+                patch.$addToSet.subRegion = {
+                    $each: patch.subRegion,
+                };
+
+                delete patch.subRegion;
+            }
+
+            if (patch.branch) {
+                patch.$addToSet.branch = {
+                    $each: patch.branch,
+                };
+
+                delete patch.branch;
+            }
+
+            existingPersonnel.set(patch);
+
+            return existingPersonnel.save((err) => {
+                if (err) {
+                    logger.error(err, query, patch);
+
+                    if (err.code === 11000) {
+                        return callback(null);
+                    }
+
+                    return callback(null);
+                }
+
+                callback(null, existingPersonnel);
+            });
+        }
+
+        const newPersonnel = new PersonnelModel();
+
+        newPersonnel.set(patch);
+
+        return newPersonnel.save((err) => {
+            if (err) {
+                logger.error(err, query, patch);
+
+                if (err.code === 11000) {
+                    return callback(null);
+                }
+
+                return callback(null);
+            }
+
+            callback(null, newPersonnel);
+        });
+    });
+};
+
 function importPersonnel(callback) {
     async.waterfall([
 
@@ -962,15 +1129,15 @@ function importPersonnel(callback) {
                     ID: obj.ID,
                     firstName: {
                         en: obj['First Name (EN)'].toUpperCase(),
-                        ar: obj['First Name (AR)']
+                        ar: obj['First Name (AR)'],
                     },
                     lastName: {
                         en: obj['Last Name (EN)'].toUpperCase(),
-                        ar: obj['Last Name (AR)']
+                        ar: obj['Last Name (AR)'],
                     },
-                    email: obj['Email'].toLowerCase(),
-                    phoneNumber: obj['PhoneNumber'],
-                    xlsManager: obj.Manager
+                    email: obj.Email.toLowerCase(),
+                    phoneNumber: obj.PhoneNumber,
+                    xlsManager: obj.Manager,
                 });
 
                 const dateJoined = obj['Date of joining'];
@@ -987,11 +1154,11 @@ function importPersonnel(callback) {
                     patch.email.toLowerCase();
                 }
 
-                const country = obj['Country'];
-                const region = obj['Region'];
+                const country = obj.Country;
+                const region = obj.Region;
                 const subRegion = obj['Sub-Region'];
-                const branch = obj['Branch'];
-                const position = obj['Position'];
+                const branch = obj.Branch;
+                const position = obj.Position;
                 const accessRole = obj['Access role'];
 
                 const parallelJobs = {};
@@ -1003,12 +1170,12 @@ function importPersonnel(callback) {
                             .map((item) => (item.trim()));
                         const query = {
                             'name.en': {
-                                $in: countries
+                                $in: countries,
                             },
-                            type: 'country'
+                            type: 'country',
                         };
 
-                        LocationModel.find(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb);
                     };
                 }
 
@@ -1019,13 +1186,13 @@ function importPersonnel(callback) {
                             .map((item) => (item.trim()));
                         const query = {
                             'name.en': {
-                                $in: regions
+                                $in: regions,
                             },
-                            type: 'region'
+                            type: 'region',
                         };
 
-                        LocationModel.find(query).select('_id').lean().exec(cb)
-                    }
+                        LocationModel.find(query).select('_id').lean().exec(cb);
+                    };
                 }
 
                 if (subRegion) {
@@ -1035,12 +1202,12 @@ function importPersonnel(callback) {
                             .map((item) => (item.trim()));
                         const query = {
                             'name.en': {
-                                $in: subRegions
+                                $in: subRegions,
                             },
-                            type: 'subRegion'
+                            type: 'subRegion',
                         };
 
-                        LocationModel.find(query).select('_id').lean().exec(cb)
+                        LocationModel.find(query).select('_id').lean().exec(cb);
                     };
                 }
 
@@ -1051,12 +1218,12 @@ function importPersonnel(callback) {
                             .map((item) => (item.trim()));
                         const query = {
                             'name.en': {
-                                $in: branches
-                            }
+                                $in: branches,
+                            },
                         };
 
-                        BranchModel.find(query).select('_id').lean().exec(cb)
-                    }
+                        BranchModel.find(query).select('_id').lean().exec(cb);
+                    };
                 }
 
                 if (position) {
@@ -1065,17 +1232,17 @@ function importPersonnel(callback) {
                             'name.en': position.toUpperCase(),
                         };
 
-                        PositionModel.findOne(query).select('_id').lean().exec(cb)
+                        PositionModel.findOne(query).select('_id').lean().exec(cb);
                     };
                 }
 
                 if (accessRole) {
                     parallelJobs.accessRole = (cb) => {
                         const query = {
-                            'name.en': accessRole
+                            'name.en': accessRole,
                         };
 
-                        AccessRoleModel.findOne(query).select('_id').lean().exec(cb)
+                        AccessRoleModel.findOne(query).select('_id').lean().exec(cb);
                     };
                 }
 
@@ -1107,43 +1274,29 @@ function importPersonnel(callback) {
 
                     setStandardPasswordToYopmail(patch);
 
-                    const query = {};
-
-                    if (patch.email) {
-                        query.email = patch.email;
-                    } else if (patch.phoneNumber) {
-                        query.phoneNumber = patch.phoneNumber;
-                    } else {
-                        query['firstName.en'] = patch.firstName.en;
-                        query['lastName.en'] = patch.lastName.en;
-                    }
-
-                    patchRecord({
-                        query,
-                        patch,
-                        model: PersonnelModel
-                    }, mapCb);
+                    pathPersonnel({ patch }, mapCb);
                 });
             }, cb);
         },
 
         (collection, cb) => {
-            async.mapLimit(collection, 10, (model, mapCb) => {
+            async.mapLimit(_.compact(collection), 10, (model, mapCb) => {
                 // I want to find domain which has current ID as xlsParent
                 const query = {
-                    xlsManager: model.get('ID')
+                    xlsManager: model.get('ID'),
                 };
                 // And update his relation to parent with current Mongo ID
                 const patch = {
-                    manager: model.get('_id')
+                    manager: model.get('_id'),
+                    xlsManager: null,
                 };
 
                 PersonnelModel.update(query, patch, {
                     new: true,
-                    multi: true
+                    multi: true,
                 }, mapCb);
-            }, cb)
-        }
+            }, cb);
+        },
 
     ], callback);
 }
