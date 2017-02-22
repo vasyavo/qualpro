@@ -28,7 +28,7 @@ const $defProjection = {
     createdBy: 1,
     creationDate: 1,
     updateDate: 1,
-    position: 1
+    position: 1,
 };
 
 module.exports = (req, res, next) => {
@@ -44,17 +44,17 @@ module.exports = (req, res, next) => {
         const queryFilter = query.filter || {};
 
         const sort = query.sort || {
-                lastDate: -1
-            };
+            lastDate: -1,
+        };
 
         delete queryFilter.globalSearch;
 
         const queryObject = filterMapper.mapFilter({
             contentType: CONTENT_TYPES.CONSUMER_SURVEY,
-            filter: queryFilter
+            filter: queryFilter,
         });
 
-        for (let key in sort) {
+        for (const key in sort) {
             sort[key] = parseInt(sort[key], 10);
         }
 
@@ -62,68 +62,190 @@ module.exports = (req, res, next) => {
 
         queryObject.$and = [{
             // standard synchronization behaviour
-            $or : [{
+            $or: [{
                 'editedBy.date': {
-                    $gt: lastLogOut
-                }
+                    $gt: lastLogOut,
+                },
             }, {
                 'createdBy.date': {
-                    $gt: lastLogOut
-                }
-            }]
+                    $gt: lastLogOut,
+                },
+            }],
         }, {
-            status: {$ne: 'draft'}
+            status: { $ne: 'draft' },
         }];
 
         const pipeline = [];
 
         pipeline.push({
-            $match: queryObject
+            $match: queryObject,
         });
 
+        pipeline.push({
+            $addFields: {
+                personnel: {
+                    $cond: {
+                        if: {
+                            $ifNull: ['$personnel', false],
+                        },
+                        then: '$personnel',
+                        else: [],
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                setConsumerSurvey: {
+                    $push: '$$ROOT',
+                },
+            },
+        });
+
+        const $project = {
+            result: {
+                $filter: {
+                    input: '$setConsumerSurvey',
+                    as: 'consumerSurvey',
+                    cond: {
+                        $or: [
+                            {
+                                $eq: [
+                                    '$$consumerSurvey.createdBy.user',
+                                    personnel._id,
+                                ],
+                            },
+                            {
+                                $and: [
+                                    {
+                                        $ne: [
+                                            '$$consumerSurvey.createdBy.user',
+                                            personnel._id,
+                                        ],
+                                    },
+                                    {
+                                        $ne: [
+                                            {
+                                                $filter: {
+                                                    input: '$$consumerSurvey.personnel',
+                                                    as: 'personnel',
+                                                    cond: {
+                                                        $eq: [
+                                                            '$$personnel',
+                                                            personnel._id,
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            [],
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                $and: [
+                                    {
+                                        $ne: [
+                                            '$$consumerSurvey.createdBy.user',
+                                            personnel._id,
+                                        ],
+                                    },
+                                    {
+                                        $eq: [
+                                            {
+                                                $size: '$$consumerSurvey.personnel',
+                                            },
+                                            0,
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            },
+        };
+
+        const locations = ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'];
+
+        locations.forEach((location) => {
+            if (personnel[location]) {
+                $project.result.$filter.cond.$or[2].$and.push({
+                    $or: [
+                        {
+                            $eq: [`$$consumerSurvey.${location}`, null],
+                        },
+                        {
+                            $ne: [
+                                {
+                                    $setIntersection: [`$$consumerSurvey.${location}`, personnel[location]],
+                                },
+                                [],
+                            ],
+                        },
+                    ],
+                });
+            }
+        });
+
+        pipeline.push({
+            $project,
+        });
+
+        pipeline.push({
+            $unwind: '$result',
+        });
+
+        pipeline.push({
+            $replaceRoot: {
+                newRoot: '$result',
+            },
+        });
+
+        if (isMobile) {
+            pipeline.push({
+                $project: Object.assign({}, $defProjection, {
+                    creationDate: '$createdBy.date',
+                    updateDate: '$editedBy.date',
+                }),
+            });
+        }
+
+        pipeline.push({
+            $project: Object.assign({}, $defProjection, {
+                lastDate: {
+                    $ifNull: [
+                        '$editedBy.date',
+                        '$createdBy.date',
+                    ],
+                },
+            }),
+        });
+
+        pipeline.push({
+            $sort: sort,
+        });
+
+        pipeline.push(...aggregateHelper.setTotal());
+
+        pipeline.push({
+            $skip: skip,
+        });
+
+        pipeline.push({
+            $limit: limit,
+        });
+
+        pipeline.push(...aggregateHelper.groupForUi());
+
         async.waterfall([
-
             (cb) => {
-                if (isMobile) {
-                    pipeline.push({
-                        $project: Object.assign({}, $defProjection, {
-                            creationDate: '$createdBy.date',
-                            updateDate: '$editedBy.date'
-                        })
-                    });
-                }
-
-                pipeline.push({
-                    $project: Object.assign({}, $defProjection, {
-                        lastDate: {
-                            $ifNull: [
-                                '$editedBy.date',
-                                '$createdBy.date'
-                            ]
-                        }
-                    })
-                });
-
-                pipeline.push({
-                    $sort: sort
-                });
-
-                pipeline.push(...aggregateHelper.setTotal());
-
-                pipeline.push({
-                    $skip: skip
-                });
-
-                pipeline.push({
-                    $limit: limit
-                });
-
-                pipeline.push(...aggregateHelper.groupForUi());
-
                 const aggregation = ConsumersSurveyModel.aggregate(pipeline);
 
                 aggregation.options = {
-                    allowDiskUse: true
+                    allowDiskUse: true,
                 };
 
                 aggregation.exec(cb);
@@ -134,9 +256,9 @@ module.exports = (req, res, next) => {
                     personnel,
                     accessRoleLevel,
                     result,
-                    isMobile
+                    isMobile,
                 }, cb);
-            }
+            },
 
         ], callback);
     }
@@ -147,7 +269,7 @@ module.exports = (req, res, next) => {
 
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
-        }
+        },
 
     ], (err, body) => {
         if (err) {
@@ -156,8 +278,7 @@ module.exports = (req, res, next) => {
 
         return next({
             status: 200,
-            body
+            body,
         });
     });
-
 };
