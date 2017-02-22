@@ -88,6 +88,7 @@ exports.up = function(db, next) {
                             'firstName.en': personnel.firstName.en,
                             'lastName.en': personnel.lastName.en,
                             country: [country._id],
+                            archived: false,
                             // only personnels from first Qatar mass upload
                             'createdBy.date': {
                                 $gt: dateQatarMassUpload,
