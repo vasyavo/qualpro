@@ -89,10 +89,15 @@ exports.up = function(db, next) {
                             'lastName.en': personnel.lastName.en,
                             country: [country._id],
                             archived: false,
-                            // only personnels from first Qatar mass upload
-                            'createdBy.date': {
-                                $gt: dateQatarMassUpload,
-                            },
+                            /*
+                            * would be a great to update only personnels
+                            * from first Qatar mass upload
+                            * but some of them without "createdBy.date"
+                            *
+                            * "createdBy.date": {
+                            *    $gt: ISODate("2017-02-18T21:00:00.000+0000"),
+                            * },
+                            * */
                         };
                         const update = {
                             branch: branches.map(branch => branch._id),
