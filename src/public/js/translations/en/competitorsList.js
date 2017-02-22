@@ -25,7 +25,7 @@ define([
         competitorItem   : 'Competitor Item',
         action           : 'Action',
         disable          : 'Disable',
-        unDisable        : 'Un Disable',
+        unDisable        : 'Enable',
         englishName      : 'English Name',
         arabicName       : 'Arabic Name',
         addLogo          : 'Add logo',

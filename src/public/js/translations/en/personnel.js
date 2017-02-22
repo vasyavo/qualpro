@@ -16,7 +16,7 @@ define([
         sendByEmail                  : 'Send by email',
         sendBySMS                    : 'Send by SMS',
         disable                      : 'Disable',
-        unDisable                    : 'Un Disable',
+        unDisable                    : 'Enable',
         // list
         firstName                    : 'First Name',
         lastName                     : 'Last Name',
