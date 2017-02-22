@@ -21,7 +21,7 @@ define([
         manageItem     : 'Manage Items and Prices',
         action         : 'Action',
         disable        : 'Disable',
-        unDisable      : 'Un Disable',
+        unDisable      : 'Enable',
         packing        : 'Weight',
         product        : 'Product',
         archive        : 'Archive',

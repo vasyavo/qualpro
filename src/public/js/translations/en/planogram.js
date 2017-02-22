@@ -12,7 +12,7 @@ define([
         selectAll           : 'Select all',
         action              : 'Action',
         disable             : 'Disable',
-        unDisable           : 'Un Disable',
+        unDisable           : 'Enable',
         saveBtn             : 'Save',
         cancelBtn           : 'Cancel',
         okBtn               : 'Ok',

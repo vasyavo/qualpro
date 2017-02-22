@@ -2,20 +2,25 @@ const twilio = require('twilio');
 const handlebars = require('handlebars');
 const config = require('./../config');
 const logger = require('./../utils/logger');
-const accountSid = config.twilio.accountSid;
-const authToken = config.twilio.authToken;
+const SMS_CONST = require('../constants/responses').SMS;
+
+const {
+    accountSid,
+    authToken,
+} = config.twilio;
 const phoneNumber = config.twilio.number;
 
-const SMS_CONST = require('../constants/responses').SMS;
 const client = new twilio.RestClient(accountSid, authToken);
 
 const sendSMS = (message, cb) => {
-    client.messages.create(message, (err, message) => {
+    client.messages.create(message, (err, output) => {
         if (err) {
-            logger.error(`Message wasn't sent. ${err.message} : ${err.moreInfo}`);
-        } else {
-            logger.info(`SMS sent. SID: ${message.sid}. Message sent on: ${message.dateCreated}`);
+            logger.error(`{SMS Service} Message rejected ${message}, ${err.message} : ${err.moreInfo}`);
+
+            return cb(err);
         }
+
+        logger.info(`{SMS Service} Message sent: ${message}. Response: ${output}.`);
 
         cb(err, message);
     });
@@ -26,12 +31,12 @@ const forgotPassword = (options, res, cb) => {
     const template = SMS_CONST.FORGOT_PASS;
 
     const body = handlebars.compile(template)({
-        resetCode
+        resetCode,
     });
     const message = {
         to: options.phoneNumber,
         from: phoneNumber,
-        body: body
+        body,
     };
 
     sendSMS(message, cb);
@@ -46,12 +51,12 @@ const sendNewPassword = (options, cb) => {
     const template = SMS_CONST.NEW_PASSWORD[currentLanguage];
     const body = handlebars.compile(template)({
         url,
-        password
+        password,
     });
     const message = {
         to: options.phoneNumber,
         from: phoneNumber,
-        body: body
+        body,
     };
 
     sendSMS(message, cb);
@@ -60,5 +65,5 @@ const sendNewPassword = (options, cb) => {
 module.exports = {
     sendSMS,
     forgotPassword,
-    sendNewPassword
+    sendNewPassword,
 };

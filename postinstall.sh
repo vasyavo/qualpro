@@ -15,5 +15,6 @@ chmod +x ./get-scripts.sh
 # Make database migration
 if [ ! -z $CI ] ; then
     echo "Making database migration:"
-    node ./node_modules/mongodb-migrate -runmm -c ./ -dbc "{\"connectionString\": \"${MONGODB_URI}\"}" up
+    chmod +x ./migrations.sh
+    ./migrations.sh up
 fi

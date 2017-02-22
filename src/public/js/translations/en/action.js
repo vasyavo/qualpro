@@ -4,7 +4,7 @@ define([
     return _.extend({}, {
         action   : 'Action',
         disable  : 'Disable',
-        unDisable: 'Un Disable',
+        unDisable: 'Enable',
         edit     : 'Edit'
     });
 });
