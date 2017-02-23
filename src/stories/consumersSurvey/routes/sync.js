@@ -7,6 +7,7 @@ const AggregationHelper = require('../../../helpers/aggregationCreater');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
 const filterRetrievedResultOnGetAll = require('../reusable-components/filterRetrievedResultOnGetAll');
 const access = require('../../../helpers/access')();
+const filterByPersonnelAndLocation = require('../reusable-components/filterByPersonnelAndLocation');
 
 const $defProjection = {
     _id: 1,
@@ -81,137 +82,14 @@ module.exports = (req, res, next) => {
             $match: queryObject,
         });
 
-        pipeline.push({
-            $addFields: {
-                personnel: {
-                    $cond: {
-                        if: {
-                            $ifNull: ['$personnel', false],
-                        },
-                        then: '$personnel',
-                        else: [],
-                    },
-                },
-            },
-        });
+        pipeline.push(...filterByPersonnelAndLocation(personnel, personnel._id));
 
         pipeline.push({
-            $group: {
-                _id: null,
-                setConsumerSurvey: {
-                    $push: '$$ROOT',
-                },
-            },
+            $project: Object.assign({}, $defProjection, {
+                creationDate: '$createdBy.date',
+                updateDate: '$editedBy.date',
+            }),
         });
-
-        const $project = {
-            result: {
-                $filter: {
-                    input: '$setConsumerSurvey',
-                    as: 'consumerSurvey',
-                    cond: {
-                        $or: [
-                            {
-                                $eq: [
-                                    '$$consumerSurvey.createdBy.user',
-                                    personnel._id,
-                                ],
-                            },
-                            {
-                                $and: [
-                                    {
-                                        $ne: [
-                                            '$$consumerSurvey.createdBy.user',
-                                            personnel._id,
-                                        ],
-                                    },
-                                    {
-                                        $ne: [
-                                            {
-                                                $filter: {
-                                                    input: '$$consumerSurvey.personnel',
-                                                    as: 'personnel',
-                                                    cond: {
-                                                        $eq: [
-                                                            '$$personnel',
-                                                            personnel._id,
-                                                        ],
-                                                    },
-                                                },
-                                            },
-                                            [],
-                                        ],
-                                    },
-                                ],
-                            },
-                            {
-                                $and: [
-                                    {
-                                        $ne: [
-                                            '$$consumerSurvey.createdBy.user',
-                                            personnel._id,
-                                        ],
-                                    },
-                                    {
-                                        $eq: [
-                                            {
-                                                $size: '$$consumerSurvey.personnel',
-                                            },
-                                            0,
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                },
-            },
-        };
-
-        const locations = ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'];
-
-        locations.forEach((location) => {
-            if (personnel[location]) {
-                $project.result.$filter.cond.$or[2].$and.push({
-                    $or: [
-                        {
-                            $eq: [`$$consumerSurvey.${location}`, null],
-                        },
-                        {
-                            $ne: [
-                                {
-                                    $setIntersection: [`$$consumerSurvey.${location}`, personnel[location]],
-                                },
-                                [],
-                            ],
-                        },
-                    ],
-                });
-            }
-        });
-
-        pipeline.push({
-            $project,
-        });
-
-        pipeline.push({
-            $unwind: '$result',
-        });
-
-        pipeline.push({
-            $replaceRoot: {
-                newRoot: '$result',
-            },
-        });
-
-        if (isMobile) {
-            pipeline.push({
-                $project: Object.assign({}, $defProjection, {
-                    creationDate: '$createdBy.date',
-                    updateDate: '$editedBy.date',
-                }),
-            });
-        }
 
         pipeline.push({
             $project: Object.assign({}, $defProjection, {
