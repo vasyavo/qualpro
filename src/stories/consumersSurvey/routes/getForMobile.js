@@ -39,13 +39,7 @@ module.exports = (req, res, next) => {
         const skip = (page - 1) * limit;
         const filterMapper = new FilterMapper();
         const queryFilter = query.filter || {};
-        const filterSearch = queryFilter.globalSearch || '';
         const pipeline = [];
-
-        const searchFieldsArray = [
-            'title.en',
-            'title.ar',
-        ];
 
         const sort = query.sort || {
             lastDate: -1,
@@ -56,47 +50,16 @@ module.exports = (req, res, next) => {
             filter: queryFilter,
         });
 
-        if (queryObject.globalSearch) {
-            delete queryObject.globalSearch;
-        }
+        // user sees only ongoing questionnaire via mobile app
+        const currentDate = new Date();
 
-        for (const key in sort) {
-            sort[key] = parseInt(sort[key], 10);
-        }
+        queryObject.dueDate = {
+            $gt: currentDate,
+        };
 
-        let positionFilter;
-
-        if (queryObject.position) {
-            positionFilter = queryObject.position;
-            delete queryObject.position;
-        }
-
-        let personnelFilter;
-
-        if (queryObject.personnel) {
-            personnelFilter = queryObject.personnel;
-            delete queryObject.personnel;
-        }
-
-        let publisherFilter;
-
-        if (queryObject.publisher) {
-            publisherFilter = queryObject.publisher;
-            delete queryObject.publisher;
-        }
-
-        pipeline.push({
-            $match: {
-                $or: [
-                    {
-                        'createdBy.user': personnel._id,
-                        status: { $in: ['draft', 'expired'] },
-                    }, {
-                        status: { $nin: ['draft', 'expired'] },
-                    },
-                ],
-            },
-        });
+        queryObject.status = {
+            $nin: ['draft'],
+        };
 
         const aggregateHelper = new AggregationHelper($defProjection);
 
@@ -106,22 +69,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push(...filterByPersonnelAndLocation(personnel, personnel._id));
 
-        if (personnelFilter) {
-            pipeline.push({
-                $match: {
-                    personnels: personnelFilter,
-                },
-            });
-        }
-
-        if (publisherFilter) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user': publisherFilter,
-                },
-            });
-        }
-
         pipeline.push(...aggregateHelper.aggregationPartMaker({
             from: 'personnels',
             key: 'createdBy.user',
@@ -129,21 +76,6 @@ module.exports = (req, res, next) => {
             addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
             includeSiblings: { createdBy: { date: 1 } },
         }));
-
-        if (positionFilter) {
-            pipeline.push({
-                $match: {
-                    $or: [
-                        {
-                            position: positionFilter,
-                        },
-                        {
-                            'createdBy.user.position': positionFilter,
-                        },
-                    ],
-                },
-            });
-        }
 
         pipeline.push(...aggregateHelper.aggregationPartMaker({
             from: 'accessRoles',
@@ -180,10 +112,51 @@ module.exports = (req, res, next) => {
             },
         }));
 
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'personnels',
+            key: 'editedBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: { editedBy: { date: 1 } },
+        }));
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'editedBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'editedBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
         pipeline.push(...aggregateHelper.endOfPipeLine({
-            isMobile: false,
-            filterSearch,
-            searchFieldsArray,
+            isMobile: true,
             skip,
             limit,
             sort,
@@ -203,7 +176,7 @@ module.exports = (req, res, next) => {
 
             (result, cb) => {
                 filterRetrievedResultOnGetAll({
-                    isMobile: false,
+                    isMobile: true,
                     personnel,
                     result,
                 }, cb);

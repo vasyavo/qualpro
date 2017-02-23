@@ -49,7 +49,7 @@ module.exports = (options, cb) => {
     const body = result && result[0] ?
         result[0] : { data: [], total: 0 };
 
-    /*if (accessRoleLevel !== 1) {
+    /* if (accessRoleLevel !== 1) {
         body.data = body.data.filter((question) => {
             const creator = question.createdBy.user;
 
@@ -67,7 +67,7 @@ module.exports = (options, cb) => {
         });
 
         body.total = body.data.length;
-    }*/
+    } */
 
     cb(null, body);
 };
