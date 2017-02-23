@@ -7,7 +7,7 @@ module.exports = session({
     key: 'qualPro_main',
     secret: 'gE7FkGtEdF32d4f6h8j0jge4547hTThGFyJHPkJkjkGH7JUUIkj0HKh',
     cookie: {
-        maxAge: config.cookieAge,
+        maxAge: config.session.age,
         httpOnly: true,
         secure: false,
     },
