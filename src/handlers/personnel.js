@@ -1423,7 +1423,6 @@ const Personnel = function () {
                     session.rememberMe = true;
                 } else {
                     delete session.rememberMe;
-                    session.cookie.expires = false;
                 }
 
                 const currentLanguage = personnel.currentLanguage || 'en';

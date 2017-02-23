@@ -1,19 +1,29 @@
 const fs = require('fs');
 const Converter = require('csvtojson').Converter;
 const config = require('./../../../config');
-const whereSheets = `${config.workingDirectory}/src/import/`;
-const timestamp = 'Nov_21_2016';
+const logger = require('./../../../utils/logger');
+
 const createReadStream = fs.createReadStream;
 
-const readCsv = (name, cb) => {
+const readCsv = (path, cb) => {
     const converter = new Converter({});
-    const filePath = `${whereSheets}${timestamp}/${name}.csv`;
-
-    converter.on('end_parsed', (array) => {
-        cb(null, array)
-    });
+    const filePath = `${config.workingDirectory}/${path}`;
 
     createReadStream(filePath).pipe(converter);
+
+    converter.on('end_parsed', (array) => {
+        cb(null, array);
+    });
+
+    fs.lstat(filePath, (err) => {
+        if (err) {
+            logger.info(`Skip... ${path}`);
+            return cb(null, []);
+        }
+
+        logger.info(`Loading... ${path}`);
+        createReadStream(filePath).pipe(converter);
+    });
 };
 
 module.exports = readCsv;
