@@ -34,6 +34,6 @@ module.exports = (options) => {
             payload,
         }];
 
-        yield dispatch(groups);
+        yield dispatch(groups, { moduleId });
     });
 };

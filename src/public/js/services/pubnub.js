@@ -10,10 +10,18 @@ define(function(require) {
     // badge number in Activity List
     client.addListener({
         message: function(data) {
-            var badge = data.message.badge;
+            var nextState = data.message.badgesState;
+            var previousState = App.badgesState || {};
 
-            App.badge = badge;
-            App.setMenuCount(1, badge);
+            Object.keys(nextState).forEach(function(prop) {
+                if (nextState[prop] !== previousState[prop]) {
+                    var count = nextState[prop];
+
+                    App.setMenuCount(prop, count);
+                }
+            });
+
+            App.badgesState = nextState;
         },
     });
 
