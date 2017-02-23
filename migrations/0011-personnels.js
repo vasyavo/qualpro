@@ -108,7 +108,9 @@ exports.up = function(db, next) {
                             setBranch: update.branch.map(objectId => objectId.toString()),
                         });
 
-                        db.collection('personnels').update(query, update, cb);
+                        db.collection('personnels').update(query, {
+                            $set: update,
+                        }, cb);
                     },
 
                 ], eachCb);
