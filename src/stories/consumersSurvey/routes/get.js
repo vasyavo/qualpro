@@ -54,6 +54,7 @@ module.exports = (req, res, next) => {
         const queryObject = filterMapper.mapFilter({
             contentType: CONTENT_TYPES.CONSUMER_SURVEY,
             filter: queryFilter,
+            personnel,
         });
 
         if (queryObject.globalSearch) {
@@ -100,11 +101,7 @@ module.exports = (req, res, next) => {
 
         const aggregateHelper = new AggregationHelper($defProjection);
 
-        pipeline.push({
-            $match: queryObject,
-        });
-
-        pipeline.push(...filterByPersonnelAndLocation(personnel, personnel._id));
+        pipeline.push(...filterByPersonnelAndLocation(queryObject, personnel._id));
 
         if (personnelFilter) {
             pipeline.push({
