@@ -5,8 +5,11 @@
     <form id="mainVisForm" class="visibilityContainer flexRow inStoreForm">
         <div class="banner_inner bannerFullWidth">
             <div class="beforeTitle fontBold fontDefault borderBottom"><%= translation.before %></div>
+            <% if ( (outlets && outlets.length > 1) || (outlets && outlets.length === 1 && outlets[0] && outlets[0].branches && outlets[0].branches.length > 1 ) ) { %>
             <input type="checkbox" id="apply-to-all">
             <span>apply file to all branches</span>
+            <% } %>
+
             <div class="scrollable partType beforeEdit">
                 <% _.each(outlets, function(outlet) { %>
                 <div class="banner_inner_top">

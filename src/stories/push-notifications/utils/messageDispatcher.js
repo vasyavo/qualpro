@@ -1,7 +1,8 @@
 const async = require('async');
 const Bluebird = require('bluebird');
 const PubNubClient = require('./pubnub');
-const addAction = require('./../utils/addAction');
+const { dispatch } = require('./../../badges/store');
+const { add } = require('./../../badges/actions');
 
 class MessageDispatcher {
 
@@ -12,8 +13,9 @@ class MessageDispatcher {
      * @param {String} groups.subject.en
      * @param {String} groups.subject.ar
      * @param {Object} groups.payload
+     * @param {Object} options
      * */
-    static sendMessage(groups, callback) {
+    static sendMessage(groups, options, callback) {
         /*
          * @param {Object} action
          * @param {Object} action.payload
@@ -22,11 +24,16 @@ class MessageDispatcher {
             return (recipient, itCallback) => {
                 async.waterfall([
 
-                    async.apply(addAction, recipient),
+                    (cb) => {
+                        dispatch(add({
+                            moduleId: options.moduleId,
+                            userId: recipient,
+                        }), cb);
+                    },
 
-                    (numberOfNewActivities, cb) => {
+                    (state, cb) => {
                         const payload = Object.assign({}, action.payload, {
-                            badge: numberOfNewActivities,
+                            badgesState: state,
                         });
 
                         PubNubClient.publish({

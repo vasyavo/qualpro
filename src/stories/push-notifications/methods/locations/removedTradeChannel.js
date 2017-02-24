@@ -42,6 +42,6 @@ module.exports = (options) => {
             }];
         }
 
-        yield dispatch(groups);
+        yield dispatch(groups, { moduleId });
     });
 };

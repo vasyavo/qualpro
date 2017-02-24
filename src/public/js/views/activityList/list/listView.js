@@ -1,19 +1,16 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/activityList/list/header.html',
-    'models/activityList',
-    'views/personnel/preView/preView',
-    'views/activityList/list/listItemsView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'models/personnel',
-    'constants/validation',
-    'dataService',
-    'moment'
-], function (Backbone, $, _, headerTemplate, Model, personPreView, ListItemsView, filterView,
-             paginator, personnelModel, REGEXP, dataService, moment) {
+define(function(require) {
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var $ = require('jQuery');
+    var headerTemplate = require('text!templates/activityList/list/header.html');
+    var personPreView = require('views/personnel/preView/preView');
+    var ListItemsView = require('views/activityList/list/listItemsView');
+    var paginator = require('views/paginator');
+    var personnelModel = require('models/personnel');
+    var REGEXP = require('constants/validation');
+    var dataService = require('dataService');
+    var moment = require('moment');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: 'activityList',
@@ -37,10 +34,9 @@ define([
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
 
             options.contentType = this.contentType;
-            App.badge = 0;
-            App.setMenuCount(1, App.badge);
 
-            dataService.deleteData('/activityList/badge', {}, function () {});
+            BadgeStore.cleanupActivityList();
+
             this.makeRender(options);
         },
 

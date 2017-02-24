@@ -344,7 +344,7 @@ var OutletHandler = function () {
         var pipeObject;
 
         pipeLine.push({
-            $match: isMobile ? _.pick(queryObject, 'subRegion', 'retailSegment', 'archived') : _.pick(queryObject, 'subRegions', 'retailSegments', 'archived')
+            $match: isMobile ? _.pick(queryObject, 'subRegion', 'retailSegment', 'archived') : _.pick(queryObject, 'archived'),
         });
 
         if (translated && translated.length === 1) {

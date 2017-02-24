@@ -133,16 +133,8 @@ define([
                             text : "Save",
                             class: "btn",
                             click: function () {
-                                var checked = self.$el.find('input:not(#checkAll):checked');
-                                var ids = [];
-
-                                checked.each(function (index, checkbox) {
-                                    ids.push($(checkbox).attr('id'));
-                                });
-
-                                self.trigger('elementsSelected', ids);
+                                self.trigger('elementsSelected', self.selected);
                                 self.$el.closest('.edit-dialog').remove();
-
                             }
                         }
                     }
