@@ -1,21 +1,18 @@
-const {
-    ADD_ACTIVITY_LIST,
-    CLEANUP_ACTIVITY_LIST,
-} = require('./actionTypes');
-
-
 const add = ({
     userId,
-    // moduleId,
+    moduleId,
 }) => ({
-    type: ADD_ACTIVITY_LIST,
+    type: `ADD_${moduleId}`,
     payload: {
         address: `badges:${userId}`,
     },
 });
 
-const cleanup = ({ userId }) => ({
-    type: CLEANUP_ACTIVITY_LIST,
+const cleanup = ({
+    userId,
+    moduleId,
+}) => ({
+    type: `CLEANUP_${moduleId}`,
     payload: {
         address: `badges:${userId}`,
     },

@@ -1,9 +1,9 @@
-const redis = require('./../helpers/redisClient');
 const {
     rehydrate,
     dispatch,
 } = require('./../stories/badges/store');
 const cleanupBadges = require('./../stories/badges/actions').cleanup;
+const PubNubClient = require('./../stories/push-notifications/utils/pubnub');
 
 var Personnel = function() {
     var mongoose = require('mongoose');
@@ -25,7 +25,6 @@ var Personnel = function() {
     var logWriter = require('../helpers/logWriter.js');
     var MAIN_CONSTANTS = require('../constants/mainConstants.js');
     var MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity.js');
-    const redisActionPrefix = MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING;
     var $defProjection = {
         _id : 1,
         module : 1,
@@ -684,13 +683,8 @@ var Personnel = function() {
     };
 
     this.deleteBadge = (req, res, next) => {
-        const queryRun = (callback) => {
-            const userId = req.session.uId;
-
-            dispatch(cleanupBadges({
-                userId,
-            }), callback);
-        };
+        const userId = req.session.uId;
+        const moduleId = req.body.moduleId;
 
         async.waterfall([
 
@@ -699,7 +693,19 @@ var Personnel = function() {
             },
 
             (allowed, personnel, cb) => {
-                queryRun(cb);
+                dispatch(cleanupBadges({
+                    userId,
+                    moduleId,
+                }), cb);
+            },
+
+            (state, cb) => {
+                PubNubClient.publish({
+                    channel: userId,
+                    message: {
+                        badgesState: state,
+                    },
+                }, cb);
             },
 
         ], (err) => {

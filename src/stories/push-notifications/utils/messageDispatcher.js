@@ -26,7 +26,7 @@ class MessageDispatcher {
 
                     (cb) => {
                         dispatch(add({
-                            // moduleId: options.moduleId,
+                            moduleId: options.moduleId,
                             userId: recipient,
                         }), cb);
                     },

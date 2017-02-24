@@ -7,24 +7,6 @@ define(function(require) {
         ssl: true,
     });
 
-    // badge number in Activity List
-    client.addListener({
-        message: function(data) {
-            var nextState = data.message.badgesState;
-            var previousState = App.badgesState || {};
-
-            Object.keys(nextState).forEach(function(prop) {
-                if (nextState[prop] !== previousState[prop]) {
-                    var count = nextState[prop];
-
-                    App.setMenuCount(prop, count);
-                }
-            });
-
-            App.badgesState = nextState;
-        },
-    });
-
     function subscribe(options) {
         var userId = options.userId;
 
