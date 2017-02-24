@@ -37,9 +37,6 @@ define([
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
 
             options.contentType = this.contentType;
-            App.badge = 0;
-            App.setMenuCount(1, App.badge);
-
             dataService.deleteData('/activityList/badge', {}, function () {});
             this.makeRender(options);
         },

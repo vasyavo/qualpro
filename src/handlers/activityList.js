@@ -1,4 +1,9 @@
 const redis = require('./../helpers/redisClient');
+const {
+    rehydrate,
+    dispatch,
+} = require('./../stories/badges/store');
+const cleanupBadges = require('./../stories/badges/actions').cleanup;
 
 var Personnel = function() {
     var mongoose = require('mongoose');
@@ -652,19 +657,9 @@ var Personnel = function() {
     this.getBadge = (req, res, next) => {
         const queryRun = (callback) => {
             const userId = req.session.uId;
-            const actionKey = `${redisActionPrefix}:${userId}`;
+            const address = `badges:${userId}`;
 
-            redis.cacheStore.readFromStorage(actionKey, (err, number) => {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!number) {
-                    number = 0;
-                }
-
-                callback(null, {badge : number});
-            });
+            rehydrate(address, callback);
         };
 
         async.waterfall([
@@ -675,27 +670,26 @@ var Personnel = function() {
 
             (allowed, personnel, cb) => {
                 queryRun(cb);
-            }
+            },
 
-        ], (err, body) => {
+        ], (err, state) => {
             if (err) {
                 return next(err);
             }
 
-            res.status(200).send(body);
+            res.status(200).send({
+                badgesState: state,
+            });
         });
     };
 
     this.deleteBadge = (req, res, next) => {
         const queryRun = (callback) => {
             const userId = req.session.uId;
-            const actionKey = `${redisActionPrefix}:${userId}`;
 
-            redis.cacheStore.removeFromStorage(actionKey);
-
-            callback(null, {
-                message : 'OK Delete'
-            });
+            dispatch(cleanupBadges({
+                userId,
+            }), callback);
         };
 
         async.waterfall([
@@ -706,14 +700,16 @@ var Personnel = function() {
 
             (allowed, personnel, cb) => {
                 queryRun(cb);
-            }
+            },
 
-        ], (err, body) => {
+        ], (err) => {
             if (err) {
                 return next(err);
             }
 
-            res.status(200).send(body);
+            res.status(200).send({
+                message: 'OK Delete',
+            });
         });
     };
 
