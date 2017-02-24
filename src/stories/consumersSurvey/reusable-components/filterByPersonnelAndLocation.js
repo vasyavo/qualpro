@@ -102,7 +102,7 @@ module.exports = function (filter, personnelId) {
                     {
                         $ne: [
                             {
-                                $setIntersection: [`$$consumerSurvey.${location}`, filter[location]],
+                                $setIntersection: [`$$consumerSurvey.${location}`, filter[location] && filter[location].$in ? filter[location].$in : filter[location]],
                             },
                             [],
                         ],
