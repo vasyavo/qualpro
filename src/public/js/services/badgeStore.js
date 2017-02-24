@@ -45,10 +45,24 @@ define(function(require) {
         });
     };
 
+    var cleanupCustomer = function() {
+        request({
+            moduleId: 4
+        });
+    };
+
+    var cleanupTradeChannel = function() {
+        request({
+            moduleId: 4
+        });
+    };
+
     return {
         state,
         cleanupActivityList,
-        cleanupCountries
+        cleanupCountries,
+        cleanupCustomer,
+        cleanupTradeChannel
     };
 
 });

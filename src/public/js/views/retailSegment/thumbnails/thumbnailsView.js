@@ -1,19 +1,14 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/retailSegment/thumbnails/thumbnailsView.html',
-    'views/thumbnails',
-    'dataService',
-    'views/domain/createView',
-    'views/domain/editView',
-    'views/domain/preView/preView',
-    'text!templates/domain/newThumbnail.html'
-],
-
-function (Backbone, $, _, thumbnailsTemplate, thumbnails, dataService,
-          createView, EditView, PreView, newThumbnail) {
-    'use strict';
+define(function (require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var thumbnailsTemplate = require('text!templates/retailSegment/thumbnails/thumbnailsView.html');
+    var thumbnails = require('views/thumbnails');
+    var dataService = require('dataService');
+    var createView = require('views/domain/createView');
+    var EditView = require('views/domain/editView');
+    var PreView = require('views/domain/preView/preView');
+    var newThumbnail = require('text!templates/domain/newThumbnail.html');
+    var BadgeStore = require('services/badgeStore');
 
     var View = thumbnails.extend({
         el         : '#contentHolder',
@@ -44,8 +39,9 @@ function (Backbone, $, _, thumbnailsTemplate, thumbnails, dataService,
             this.listLength = this.collection.totalRecords;
             this.page = options.collection.page;
 
+            BadgeStore.cleanupTradeChannel();
+
             this.makeRender(options);
-            //this.render();
         },
 
         render: function () {

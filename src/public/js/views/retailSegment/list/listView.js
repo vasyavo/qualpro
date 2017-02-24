@@ -1,19 +1,14 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/retailSegment/list/listItemsView',
-    'views/domain/preView/preView',
-    'views/domain/createView',
-    'views/domain/editView',
-    'text!templates/retailSegment/list/listHeader.html',
-    'text!templates/domain/newRow.html'
-],
-
-function (Backbone, $, _, paginator, ListItemsView, PreView,
-          CreateView, EditView, headerTemplate, newRow) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var ListItemsView = require('views/retailSegment/list/listItemsView');
+    var PreView = require('views/domain/preView/preView');
+    var CreateView = require('views/domain/createView');
+    var EditView = require('views/domain/editView');
+    var headerTemplate = require('text!templates/retailSegment/list/listHeader.html');
+    var newRow = require('text!templates/domain/newRow.html');
+    var BadgeStore = require('serices/badgeStore');
 
     var View = paginator.extend({
         el         : '#contentHolder',
@@ -39,9 +34,10 @@ function (Backbone, $, _, paginator, ListItemsView, PreView,
             this.listLength = this.collection.totalRecords;
             this.page = options.collection.page;
             this.singleSelect = options.singleSelect;
-            this.makeRender(options);
 
-            //this.render();
+            BadgeStore.cleanupTradeChannel();
+
+            this.makeRender(options);
         },
 
         listRowClick: function (e) {
