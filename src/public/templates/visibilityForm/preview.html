@@ -5,22 +5,22 @@
     var fileType;
     var fileTypeAfter;
 
-    if (model.before.files && model.before.files.contentType){
-        fileType = model.before.files.contentType.substr(0, 5);
+    if (model.before.files && model.before.files[0] && model.before.files[0].contentType){
+        fileType = model.before.files[0].contentType.substr(0, 5);
         if(fileType==='video'){
-            container = model.before.files.url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files.url+'"></video>' : '';
+            container = model.before.files && model.before.files[0].url ? '<video class="showPreview before" width="400" controls><source src="'+model.before.files[0].url+'"></video>' : '';
         } else {
-            container = model.before.files.url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files.url+'">' : '';
+            container = model.before.files && model.before.files[0].url ? '<img class="imgResponsive showPreview before" src="'+ model.before.files[0].url+'">' : '';
         }
     }
 
-    if (model.after.files && model.after.files.contentType){
-        fileTypeAfter = model.after.files.contentType.substr(0, 5);
+    if (model.after.files && model.after.files[0] && model.after.files[0].contentType){
+        fileTypeAfter = model.after.files[0].contentType.substr(0, 5);
 
         if(fileTypeAfter==='video'){
-            containerAfter = model.after.files.url ? '<video class="showPreview after" width="400" controls><source src="'+model.after.files.url+'"></video>' : '';
+            containerAfter = model.after.files && model.after.files[0].url ? '<video class="showPreview after" width="400" controls><source src="'+model.after.files[0].url+'"></video>' : '';
         } else {
-            containerAfter = model.after.files.url ? '<img class="imgResponsive showPreview after" src="' + model.after.files.url + '">' : '';
+            containerAfter = model.after.files && model.after.files[0].url ? '<img class="imgResponsive showPreview after" src="' + model.after.files[0].url + '">' : '';
         }
     }
     %>
@@ -37,7 +37,7 @@
                 <div class="bannerBig">
                     <div id="imageMy" class="bannerImage"><%= container %></div>
                     <div class="bannerDescription picSquare bannerIcon">
-                        <span class="fontMedium"><%= (model.before.files) ? model.before.files.originalName : '' %></span>
+                        <span class="fontMedium"><%= (model.before.files && model.before.files[0]) ? model.before.files[0].originalName : '' %></span>
                     </div>
                 </div>
                 <div class="banner_textBlock">
@@ -56,7 +56,7 @@
                 <div class="bannerBig">
                     <div id="imageAfter"><%= containerAfter %></div>
                     <div class="bannerDescription picSquare bannerIcon">
-                        <span class="fontMedium"><%= (model.after.files) ? model.after.files.originalName : '' %></span>
+                        <span class="fontMedium"><%= (model.after.files && model.after.files[0]) ? model.after.files[0].originalName : '' %></span>
                     </div>
                 </div>
                 <div class="banner_textBlock afterTextBlock">

@@ -1,26 +1,29 @@
-const FileHandler = require('../handlers/file');
-const getAwsLinks = require('../reusableComponents/getAwsLinkForAttachmentsFromModel');
+const _ = require('lodash');
+const async = require('async');
+const mongoose = require('mongoose');
+const FileHandler = require('./../handlers/file');
+const getAwsLinks = require('./../reusableComponents/getAwsLinkForAttachmentsFromModel');
+const ACL_MODULES = require('./../constants/aclModulesNames');
+const CONTENT_TYPES = require('./../public/js/constants/contentType');
+const CONSTANTS = require('./../constants/mainConstants');
+const AggregationHelper = require('./../helpers/aggregationCreater');
+const GetImageHelper = require('./../helpers/getImages');
+const FilterMapper = require('./../helpers/filterMapper');
+const NotificationModel = require('./../types/notification/model');
+const AccessManager = require('./../helpers/access')();
+const bodyValidator = require('./../helpers/bodyValidator');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const extractBody = require('./../utils/extractBody');
+const redis = require('./../helpers/redisClient');
 
-var Notifications = function (db, redis, event) {
-    var _ = require('lodash');
-    var async = require('async');
-    var mongoose = require('mongoose');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var CONSTANTS = require('../constants/mainConstants');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
-    var FilterMapper = require('../helpers/filterMapper');
-    var NotificationModel = require('./../types/notification/model');
-    var DomainModel = require('./../types/domain/model');
-    var access = require('../helpers/access')(db);
-    var bodyValidator = require('../helpers/bodyValidator');
-    var ObjectId = mongoose.Types.ObjectId;
-    var self = this;
+const getImagesHelper = new GetImageHelper();
+const ObjectId = mongoose.Types.ObjectId;
 
-    const fileHandler = new FileHandler(db);
+const Notifications = function () {
+
+    const self = this;
+
+    const fileHandler = new FileHandler();
 
     let $defProjection = {
         _id          : 1,
@@ -84,10 +87,6 @@ var Notifications = function (db, redis, event) {
                 if (indexToDelete !== -1) {
                     personnelIds.splice(indexToDelete, 1);
                 }
-                event.emit('notificationChange', {
-                    itemKey: 'notificationCount',
-                    itemIds: personnelIds
-                });
                 return callback(null, notificationObject);
             });
     }
@@ -441,6 +440,7 @@ var Notifications = function (db, redis, event) {
                 filterSearch   : filterSearch,
                 isMobile       : isMobile,
                 withAttachments: true,
+                personnelId    : personnel._id,
                 forSync        : true
             });
 
@@ -513,7 +513,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed, personnel) {
+        AccessManager.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -623,7 +623,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed, personnel) {
+        AccessManager.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -638,33 +638,42 @@ var Notifications = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            const userId = req.session.uId;
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (body, callback) => {
             const createdBy = {
                 user: ObjectId(userId),
-                date: new Date()
+                date: new Date(),
             };
 
             if (body.description) {
                 body.description = {
                     en: _.unescape(body.description.en),
-                    ar: _.unescape(body.description.ar)
+                    ar: _.unescape(body.description.ar),
                 };
             }
 
-            for (var key in body) {
-                if (typeof(body[key]) === 'string' && body[key]) {
-                    body[key] = _.compact(body[key].split(','));
-                    body[key] = body[key].objectID();
-                } else if (body[key] === '') {
+            Object.keys(body).forEach(key => {
+                const itValue = body[key];
+
+                if (_.isString(itValue)) {
+                    const parts = itValue.split(',');
+                    const compactParts = _.compact(parts);
+
+                    body[key] = compactParts.objectID();
+                } else if (itValue === '') {
+                    // glitch for props such as description which is an object
                     body[key] = [];
                 }
-            }
+            });
 
             body.createdBy = createdBy;
 
             async.waterfall([
+
                 (cb) => {
                     const files = req.files;
 
@@ -672,51 +681,40 @@ var Notifications = function (db, redis, event) {
                         return cb(null, []);
                     }
 
-                    fileHandler.uploadFile(userId, files, 'notification', cb);
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.NOTIFICATIONS, cb);
                 },
 
-                (arrayOfFilesId, cb) => {
-                    body.attachments = arrayOfFilesId;
+                (setFileId, cb) => {
+                    body.attachments = setFileId;
 
-                    const model = new NotificationModel(body);
-                    model.save(body, (err, model, numAffected) => {
-                        // tip: do not remove numAffected
-                        if  (err) {
-                            return cb(err);
-                        }
+                    const notification = new NotificationModel();
 
-                        cb(null, model);
+                    notification.set(body);
+                    notification.save(body, (err, model) => {
+                        cb(err, model);
                     });
                 },
 
-                (model, cb) => {
-                    event.emit('activityChange', {
-                        module: ACL_MODULES.NOTIFICATION,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy: model.createdBy,
-                        itemId: model._id,
-                        itemType: CONTENT_TYPES.NOTIFICATIONS
+                (notification, cb) => {
+                    ActivityLog.emit('notifications:sent', {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: notification.toJSON(),
                     });
 
                     const aggregateHelper = new AggregationHelper($defProjection);
-
                     const queryObject = {
-                        _id: model._id
+                        _id: notification._id,
                     };
-
                     const pipeLine = getAllPipeLine({
-                        aggregateHelper: aggregateHelper,
-                        queryObject: queryObject,
-                        afterCreate: true
+                        aggregateHelper,
+                        queryObject,
+                        afterCreate: true,
                     });
 
-                    let aggregation = NotificationModel.aggregate(pipeLine);
-
-                    aggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    aggregation.exec(cb);
+                    NotificationModel.aggregate(pipeLine)
+                        .allowDiskUse(true)
+                        .exec(cb);
                 },
 
                 (response, cb) => {
@@ -727,88 +725,106 @@ var Notifications = function (db, redis, event) {
                         if (response.description) {
                             response.desciption = {
                                 ar: _.unescape(response.description.ar),
-                                en: _.unescape(response.description.en)
+                                en: _.unescape(response.description.en),
                             };
                         }
                     }
 
                     redisNotifications({
-                        currentUserId     : userId,
+                        currentUserId: userId,
                         notificationObject: response,
-                        contentType       : CONTENT_TYPES.NOTIFICATIONS
+                        contentType: CONTENT_TYPES.NOTIFICATIONS,
                     }, cb);
                 },
 
-                (responseFromRedis, cb) => {
-                    let idsPersonnel;
-                    let options = {
-                        data: {}
-                    };
+                (cache, cb) => {
+                    if (!Object.keys(cache).length) {
+                        return cb(null, cache);
+                    }
 
-                    if (responseFromRedis.description) {
-                        responseFromRedis.description = {
-                            en: _.unescape(responseFromRedis.description.en),
-                            ar: _.unescape(responseFromRedis.description.ar)
+                    if (cache.description) {
+                        cache.description = {
+                            en: _.unescape(cache.description.en),
+                            ar: _.unescape(cache.description.ar),
                         };
                     }
 
-                    if (!Object.keys(responseFromRedis).length) {
-                        return cb(null, responseFromRedis);
-                    }
-
-                    idsPersonnel = _.union([responseFromRedis.createdBy.user._id], _.map(responseFromRedis.recipients, '_id'));
-                    idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                    options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
+                    const setPersonnelId = _.uniqBy([
+                        _.get(cache, 'createdBy.user._id'),
+                        ..._.map(cache.recipients, '_id'),
+                    ], 'id');
+                    const options = {
+                        data: {
+                            [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
+                        },
+                    };
 
                     getImagesHelper.getImages(options, (err, resultFromImageHelper) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        cb(null, resultFromImageHelper, responseFromRedis);
+                        cb(null, {
+                            resultFromImageHelper,
+                            cache,
+                        });
                     });
                 },
-            ], (err, resultFromImageHelper, responseFromRedis) => {
+
+            ], (err, options) => {
                 if (err) {
                     return next(err);
                 }
 
-                if (!responseFromRedis) {
-                    return next({
+                const {
+                    resultFromImageHelper,
+                    cache,
+                } = options;
+
+                if (!cache) {
+                    return callback(null, {
                         status: 200,
-                        body: resultFromImageHelper
+                        body: resultFromImageHelper,
                     });
                 }
 
-                let fieldNames = {};
-                let setOptions = {
-                    response  : responseFromRedis,
-                    imgsObject: resultFromImageHelper
+                const setOptions = {
+                    response: cache,
+                    imgsObject: resultFromImageHelper,
+                    fields: {
+                        [CONTENT_TYPES.PERSONNEL]: [['recipients'], 'createdBy.user'],
+                    },
                 };
 
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['recipients'], 'createdBy.user'];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    next({status: 200, body: response});
+                getImagesHelper.setIntoResult(setOptions, (response) => {
+                    callback(null, {
+                        status: 200,
+                        body: response,
+                    });
                 });
             });
-        }
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed) {
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getWriteAccess(req, ACL_MODULES.NOTIFICATION, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.NOTIFICATIONS, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            const body = JSON.parse(req.body.data);
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.NOTIFICATIONS, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            next(result);
         });
     };
 
@@ -835,7 +851,7 @@ var Notifications = function (db, redis, event) {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed) {
+        AccessManager.getReadAccess(req, ACL_MODULES.NOTIFICATION, function (err, allowed) {
             if (err) {
                 return next(err);
             }

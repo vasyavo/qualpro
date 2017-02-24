@@ -1,10 +1,12 @@
-var Rating = function (db) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var Rating = function () {
     var _ = require('underscore');
     var async = require('async');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
 
     var MonthlyModel = require('./../types/monthly/model');
     var PersonnelModel = require('./../types/personnel/model');
@@ -429,6 +431,13 @@ var Rating = function (db) {
                         return callback(err);
                     }
 
+                    ActivityLog.emit('personnel:monthly', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body: personnel,
+                    });
+
+
                     model = model.toObject();
                     model.avgRating = personnel.avgRating[type];
 
@@ -582,6 +591,12 @@ var Rating = function (db) {
                         if (err) {
                             return next(err);
                         }
+
+                        ActivityLog.emit('personnel:monthly', {
+                            actionOriginator: req.session.uId,
+                            accessRoleLevel : req.session.level,
+                            body: personnel,
+                        });
 
                         result = result.toObject();
                         result.avgRating = personnel.avgRating[type];

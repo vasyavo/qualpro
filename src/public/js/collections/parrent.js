@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'js-cookie',
     'constants/otherConstants',
     'constants/contentType'

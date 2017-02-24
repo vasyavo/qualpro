@@ -53,6 +53,7 @@ define([
         render: function () {
             var type = this.fileModel.get('type');
             var options;
+
             if (['word_icon', 'excel_icon'].indexOf(type) !== -1) {
                 options = {
                     url         : this.fileUrl,

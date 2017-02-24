@@ -1,6 +1,7 @@
-"use strict";
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const logger = require('./../utils/logger');
 
-var CompetitorItem = function (db, redis, event) {
+var CompetitorItem = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('underscore');
@@ -8,7 +9,7 @@ var CompetitorItem = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var CompetitorItem = require('./../types/competitorItem/model');
@@ -245,7 +246,11 @@ var CompetitorItem = function (db, redis, event) {
         return pipeLine;
     }
 
-    this.create = function (req, res, next) {
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var name = body.name;
             var createdBy = {
@@ -268,12 +273,11 @@ var CompetitorItem = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.COMPETITOR_LIST,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.COMPETITORITEM
+
+                ActivityLog.emit('competitor-list:item-created', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: model.toJSON(),
                 });
 
                 modelFindById(model._id, function (err, model) {
@@ -750,6 +754,10 @@ var CompetitorItem = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var id = req.params.id;
 
@@ -764,13 +772,13 @@ var CompetitorItem = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.COMPETITOR_LIST,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : body.editedBy,
-                    itemId    : id,
-                    itemType  : CONTENT_TYPES.COMPETITORITEM
+
+                ActivityLog.emit('competitor-list:item-updated', {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: model.toJSON(),
                 });
+
                 modelFindById(model._id, function (err, model) {
                     if (err) {
                         return next(err);
@@ -805,66 +813,69 @@ var CompetitorItem = function (db, redis, event) {
         });
     };
 
-    this.archive = function (req, res, next) {
-        function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var uId = req.session.uId;
-            var type = ACTIVITY_TYPES.ARCHIVED;
-            var editedBy = {
-                user: req.session.uId,
-                date: Date.now()
-            };
-            var options = [
-                {
-                    idsToArchive   : idsToArchive,
-                    keyForCondition: '_id',
-                    archived       : archived,
-                    topArchived    : archived,
-                    model          : CompetitorItem
-                }
-            ];
-            if (!archived) {
-                type = ACTIVITY_TYPES.UNARCHIVED;
-            }
-            archiver.archive(uId, options, function (err) {
-                if (err) {
-                    return next(err);
-                }
+    this.archive = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
 
-                async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.COMPETITOR_LIST,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.COMPETITORITEM
-                    });
+        const queryRun = (callback) => {
+            const setIdToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            const options = [{
+                idsToArchive: setIdToArchive,
+                keyForCondition: '_id',
+                archived,
+                topArchived: archived,
+                model: CompetitorItem,
+            }];
+            const activityType = archived ? 'archived' : 'unarchived';
+
+            async.waterfall([
+
+                (cb) => {
+                    archiver.archive(userId, options, cb);
+                },
+
+                (done, cb) => {
                     callback();
 
-                }, function (err) {
-                    if (err) {
-                        logWriter.log('items archived', err);
-                    }
-                });
+                    CompetitorItem.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
+                },
 
+                (setItem, cb) => {
+                    async.each(setItem, (item, eachCb) => {
+                        ActivityLog.emit(`competitor-list:item-${activityType}`, {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: item,
+                        });
+                        eachCb();
+                    }, cb);
+                },
 
-                res.status(200).send();
-            });
-        }
+            ]);
+        };
 
-        access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
+        async.waterfall([
+
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_LIST, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun();
+            res.status(200).send({});
         });
     };
 };

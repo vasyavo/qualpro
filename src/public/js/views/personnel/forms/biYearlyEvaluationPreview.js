@@ -1,5 +1,5 @@
 define([
-        'Backbone',
+        'backbone',
         'jQuery',
         'text!templates/personnel/form/biYearlyEvaluationFormTemplate.html',
         'helpers/createBiYearlyWorkflow',

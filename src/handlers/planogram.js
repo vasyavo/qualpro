@@ -1,17 +1,18 @@
-const BsonObjectId = require('bson-objectid');
 const RetailSegmentModel = require('./../types/retailSegment/model');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const logger = require('./../utils/logger');
 
-var planogramsHandler = function(db, redis, event) {
+var planogramsHandler = function() {
     var async = require('async');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var _ = require('lodash');
     var PlanogramModel = require('./../types/planogram/model');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var logWriter = require('../helpers/logWriter.js');
     var FilterMapper = require('../helpers/filterMapper');
@@ -20,7 +21,7 @@ var planogramsHandler = function(db, redis, event) {
     var populateByType = require('../helpers/populateByType');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var bodyValidator = require('../helpers/bodyValidator');
     var ObjectId = mongoose.Types.ObjectId;
     var self = this;
@@ -38,10 +39,12 @@ var planogramsHandler = function(db, redis, event) {
     };
 
     this.create = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body, callback) {
             const files = req.files ? req.files : null;
-            const session = req.session;
-            const userId = session.uId;
             const configurationId = body.configuration;
 
             async.waterfall([
@@ -155,12 +158,10 @@ var planogramsHandler = function(db, redis, event) {
                 return next(err);
             }
 
-            event.emit('activityChange', {
-                module : ACL_MODULES.PLANOGRAM,
-                actionType : ACTIVITY_TYPES.CREATED,
-                createdBy : result.createdBy,
-                itemId : result._id,
-                itemType : CONTENT_TYPES.PLANOGRAM
+            ActivityLog.emit('planogram:created', {
+                actionOriginator: userId,
+                accessRoleLevel,
+                body: result
             });
 
             res.status(201).send(result);
@@ -302,65 +303,69 @@ var planogramsHandler = function(db, redis, event) {
         });
     };
 
-    this.archive = function(req, res, next) {
-        function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var uId = req.session.uId;
-            var editedBy = {
-                user : req.session.uId,
-                date : Date.now()
-            };
-            var type = ACTIVITY_TYPES.ARCHIVED;
-            var options = [
-                {
-                    idsToArchive : idsToArchive,
-                    keyForCondition : '_id',
-                    archived : archived,
-                    model : PlanogramModel
-                }
-            ];
-            if (!archived) {
-                type = ACTIVITY_TYPES.UNARCHIVED;
-            }
+    this.archive = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
 
-            archiver.archive(uId, options, function(err) {
-                if (err) {
-                    return next(err);
-                }
-                async.eachSeries(idsToArchive, function(item, callback) {
-                    event.emit('activityChange', {
-                        module : ACL_MODULES.PLANOGRAM,
-                        actionType : type,
-                        createdBy : editedBy,
-                        itemId : item,
-                        itemType : CONTENT_TYPES.PLANOGRAM
-                    });
+        const queryRun = (callback) => {
+            const setIdToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            const options = [{
+                idsToArchive: setIdToArchive,
+                keyForCondition: '_id',
+                archived,
+                topArchived: archived,
+                model: PlanogramModel,
+            }];
+            const activityType = archived ? 'archived' : 'unarchived';
+
+            async.waterfall([
+
+                (cb) => {
+                    archiver.archive(userId, options, cb);
+                },
+
+                (done, cb) => {
                     callback();
 
-                }, function(err) {
-                    if (err) {
-                        logWriter.log('planogram archived error', err);
-                    }
-                });
+                    PlanogramModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
+                },
 
+                (setItem, cb) => {
+                    async.each(setItem, (item, eachCb) => {
+                        ActivityLog.emit(`planogram:${activityType}`, {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: item,
+                        });
+                        eachCb();
+                    }, cb);
+                },
 
-                res.status(200).send();
-            });
-        }
+            ]);
+        };
 
-        access.getArchiveAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
+        async.waterfall([
+
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.PLANOGRAM, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun();
+            res.status(200).send({});
         });
     };
 
@@ -823,6 +828,10 @@ var planogramsHandler = function(db, redis, event) {
     };
 
     this.update = function(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
             var files = req.files.inputImg.name ? req.files : null;
             var userId = req.session.uId;
@@ -855,12 +864,10 @@ var planogramsHandler = function(db, redis, event) {
                                 return callback(err);
                             }
 
-                            event.emit('activityChange', {
-                                module : ACL_MODULES.PLANOGRAM,
-                                actionType : ACTIVITY_TYPES.UPDATED,
-                                createdBy : body.editedBy,
-                                itemId : id,
-                                itemType : CONTENT_TYPES.PLANOGRAM
+                            ActivityLog.emit(`planogram:updated`, {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: model.toJSON(),
                             });
 
                             callback(null, model);

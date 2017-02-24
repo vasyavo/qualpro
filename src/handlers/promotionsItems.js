@@ -1,7 +1,7 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 
-var Promotions = function (db, redis, event) {
+var Promotions = function () {
     var async = require('async');
     var _ = require('lodash');
     var logger = require('../utils/logger');
@@ -16,10 +16,10 @@ var Promotions = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var CommentHandler = require('./comment');
-    var commentHandler = new CommentHandler(db);
+    var commentHandler = new CommentHandler();
     var commentCreator = commentHandler.commentCreator;
 
     var $defProjection = {
@@ -481,7 +481,7 @@ var Promotions = function (db, redis, event) {
         const queryRun = (body, callback) => {
             const createdBy = {
                 user: userId,
-                date: new Date(),
+                date: new Date()
             };
 
             body.createdBy = createdBy;

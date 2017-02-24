@@ -1,7 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const multipart = require('connect-multiparty');
-const multipartMiddleware = multipart();
 const mongoose = require('mongoose');
 const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
@@ -12,101 +10,86 @@ const addRequestId = require('express-request-id')();
 const config = require('./../config');
 const express = require('express');
 
-module.exports = function(app, db, event) {
-    var logWriter = require('../helpers/logWriter');
+module.exports = function(app) {
     var redis = require('../helpers/redisClient');
 
     app.set('csrfProtection', csrfProtection);
 
-    require('../helpers/eventEmiter')(db, redis, event, app);
-
-    var LocalFs = require('../helpers/localFs');
-
-    var DocsHandler = require('../handlers/docs');
     var ModuleslHandler = require('../handlers/modules');
-    var modulesHandler = new ModuleslHandler(db);
-    var docsHandler = new DocsHandler(db);
+    var modulesHandler = new ModuleslHandler();
 
-    var brandingActivityRouter = require('./brandingActivity')(db, redis, event);
-    var brandingActivityItems = require('./brandingActivityItems')(db, redis, event);
-    var personnelRouter = require('./personnel')(db, app, event, redis);
-    var mobileRouter = require('./mobile')(db, app, redis, event);
-    var notificationsRouter = require('./notifications')(db, redis, event);
-    var currencyRouter = require('./currency')(db, redis, event);
-    var fileRouter = require('./file')(db, redis, event);
-    var objectivesRouter = require('./objectives')(db, redis, event);
-    var inStoreeTasksRouter = require('./inStoreTasks')(db, redis, event);
-    var domainRouter = require('./domain')(db, redis, event);
-    var promotionsItems = require('./promotionsItems')(db, redis, event);
-    var retailSegmentRouter = require('./retailSegment')(db, redis, event);
-    var outletRouter = require('./outlet')(db, redis, event);
-    var branchRouter = require('./branch')(db, redis, event);
-    var positionRouter = require('./position')(db, redis, event);
-    var ratingRouter = require('./rating')(db, redis, event);
-    var filtersRouter = require('./filters')(db, app, redis);
-    var importRouter = require('./import')(db, redis, event);
-    var planogramRouter = require('./planogram')(db, redis, event);
-    var questionnaryRouter = require('./questionnary')(db, redis, event);
-    var shelfShareRouter = require('./shelfShares')(db, redis, event);
+    var brandingActivityRouter = require('./brandingActivity')();
+    var brandingActivityItems = require('./brandingActivityItems')();
+    var personnelRouter = require('./personnel')();
+    var mobileRouter = require('./mobile')();
+    var notificationsRouter = require('./notifications')();
+    var currencyRouter = require('./currency')();
+    var fileRouter = require('./file')();
+    var objectivesRouter = require('./objectives')();
+    var inStoreeTasksRouter = require('./inStoreTasks')();
+    var domainRouter = require('./domain')();
+    var promotionsItems = require('./promotionsItems')();
+    var retailSegmentRouter = require('./retailSegment')();
+    var outletRouter = require('./outlet')();
+    var branchRouter = require('./branch')();
+    var positionRouter = require('./position')();
+    var ratingRouter = require('./rating')();
+    var filtersRouter = require('./filters')();
+    var importRouter = require('./import')();
+    var planogramRouter = require('./planogram')();
+    var questionnaryRouter = require('./questionnary')();
+    var shelfShareRouter = require('./shelfShares')();
 
-    var categoryRouter = require('./category')(db, event);
-    var variantRouter = require('./variant')(db, redis, event);
-    var itemRouter = require('./item')(db, redis, event);
-    var commentRouter = require('./comment')(db, redis, event);
+    var categoryRouter = require('./category')();
+    var variantRouter = require('./variant')();
+    var itemRouter = require('./item')();
+    var commentRouter = require('./comment')();
 
-    var brandRouter = require('./brand')(db, redis, event);
-    var competitorItemRouter = require('./competitorItem')(db, redis, event);
-    var competitorVariantRouter = require('./competitorVariant')(db, redis, event);
-    var competitorBranding = require('./competitorBranding')(db, redis, event);
-    var competitorPromotion = require('./competitorPromotion')(db, redis, event);
-    var achievementForm = require('./achievementForm')(db, redis, event);
-    var newProductLaunch = require('./newProductLaunch')(db, redis, event);
-    var activityList = require('./activityList')(db, redis, event);
-    var originRouter = require('./origin')(db, redis, event);
-    var contactUs = require('./contactUs')(db, redis, event);
+    var brandRouter = require('./brand')();
+    var competitorItemRouter = require('./competitorItem')();
+    var competitorVariantRouter = require('./competitorVariant')();
+    var competitorBranding = require('./competitorBranding')();
+    var competitorPromotion = require('./competitorPromotion')();
+    var achievementForm = require('./achievementForm')();
+    var newProductLaunch = require('./newProductLaunch')();
+    var activityList = require('./activityList')();
+    var originRouter = require('./origin')();
+    var contactUs = require('./contactUs')();
 
-    var contractsYearlyRouter = require('./contractsYearly')(db, redis, event);
-    var contractsSecondaryRouter = require('./contractsSecondary')(db, redis, event);
-    var documentsRouter = require('./documents')(db, redis, event);
-    var noteRouter = require('./note')(db, redis, event);
+    var contractsYearlyRouter = require('./contractsYearly')();
+    var contractsSecondaryRouter = require('./contractsSecondary')();
+    var documentsRouter = require('./documents')();
+    var noteRouter = require('./note')();
 
-    var formRouter = require('./form')(db, redis, event);
-    var accessRoleRouter = require('./accessRole')(db, redis, event);
+    var formRouter = require('./form')();
+    var accessRoleRouter = require('./accessRole')();
 
-    var promotionsRouter = require('./promotions')(db, redis, event);
+    var promotionsRouter = require('./promotions')();
 
-    var itemHistoryRouter = require('./itemHistory')(db, redis, event);
+    var itemHistoryRouter = require('./itemHistory')();
 
-    var displayTypeRouter = require('./displayType')(db, redis, event);
+    var displayTypeRouter = require('./displayType')();
 
     app.use(addRequestId);
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
 
-    app.get('/', csrfProtection, function(req, res, next) {
-        //ToDo remove (res.cookie) this one after test sms
-        //res.cookie('lang', 'ae');
+    app.get('/', csrfProtection, (req, res, next) => {
         res.render('index.html', {
-            csrfToken : req.csrfToken(),
+            csrfToken: req.csrfToken(),
             pubnubSubscribeKey: config.pubnub.subscribeKey,
         });
     });
 
-    app.use('/js/backbone.js', (req, res) => {
-        let pathToFile = path.join(config.workingDirectory, 'src/public/js/libs/backbone/backbone-min.js').normalize();
-        res.sendfile(pathToFile);
-    });
-
     // endpoint for handling api documents
-    app.get('/docs', function(req, res, next) {
-        res.render(process.cwd() + '/API_documentation/qualPro_API.html');
+    app.get('/docs', (req, res, next) => {
+        res.render(path.join(process.cwd(), '/API_documentation/qualPro_API.html').normalize());
     });
 
     app.get('/modules', checkAuth, modulesHandler.getAll);
 
-    app.post('/scheduler', require('./../stories/scheduler'));
-    /*app.use(require('./../utils/validTimeZone'));*/
+    app.post('/scheduler', require('./../stories/scheduler/middleware'));
 
     app.use(require('./../stories/user-registration'));
 
@@ -132,7 +115,6 @@ module.exports = function(app, db, event) {
     app.use('/questionnary', questionnaryRouter);
     app.use('/consumersSurvey', require('../stories/consumersSurvey/router'));
     app.use('/shelfShares', shelfShareRouter);
-    app.use('/docs/db', docsHandler.getDb);
     app.use('/position', positionRouter);
     app.use('/rating', ratingRouter);
     app.use('/filters', filtersRouter);
@@ -175,7 +157,7 @@ module.exports = function(app, db, event) {
         var ids = breadcrumb.ids;
         var type = breadcrumb.type;
         var BreadcrumbsHelper = require('../helpers/breadcrumbsHelper');
-        var breadcrumbsHelper = new BreadcrumbsHelper(db);
+        var breadcrumbsHelper = new BreadcrumbsHelper();
 
         breadcrumbsHelper.getBreadcrumbs({
             ids : ids,

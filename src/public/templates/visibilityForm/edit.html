@@ -1,6 +1,6 @@
 <div class="dialogCategotyWrap visibilityContainer inStoreForm">
     <%
-    var files = [model.before.files] || [];
+    var files = model.before.files || [];
     var fileType;
     var container;
     %>
@@ -23,7 +23,7 @@
                         container = file.url ? '<img class="imgResponsive" src="'+ file.url+'" id="loadedImage">' : '';
                     }
                 %>
-                <div class="bannerBig" id="<%= files._id %>">
+                <div class="bannerBig" id="<%= file._id %>">
                     <div class="close left arrowLeft" id="removeFile"></div>
                     <div id="imageMy" class="bannerImage"><%= container %></div>
 

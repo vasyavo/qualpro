@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'populate'
 ], function (Backbone, $, populate) {

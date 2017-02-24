@@ -1,4 +1,6 @@
-var dataImporter = function (db) {
+const db = require('./../utils/mongo');
+
+var dataImporter = function () {
     var saveNextCollection;
     var xlsxDataReader = require('./xlsxDataReader');
     var async = require('async');

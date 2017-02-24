@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'Underscore',
     'text!templates/activityList/list/header.html',
@@ -12,7 +12,6 @@ define([
     'constants/validation',
     'dataService',
     'moment'
-
 ], function (Backbone, $, _, headerTemplate, Model, personPreView, ListItemsView, filterView,
              paginator, personnelModel, REGEXP, dataService, moment) {
 
@@ -165,18 +164,6 @@ define([
                 personnelName.push(modelJSON.createdBy.user.firstName.currentLanguage + ' ' + modelJSON.createdBy.user.lastName.currentLanguage);
 
                 filter = {
-                    country: {
-                        type  : 'ObjectId',
-                        values: countryIds,
-                        names : countryNames
-                    },
-
-                    branch: {
-                        type  : 'ObjectId',
-                        values: branchIds,
-                        names : branchNames
-                    },
-
                     'createdBy.user': {
                         type  : 'ObjectId',
                         values: [modelJSON.createdBy.user._id],
@@ -189,6 +176,22 @@ define([
                         names : ['Fixed Period']
                     }
                 };
+
+                if (countryIds.length && countryNames.length) {
+                    filter.country = {
+                        type  : 'ObjectId',
+                        values: countryIds,
+                        names : countryNames
+                    };
+                }
+
+                if (branchIds.length && branchNames.length) {
+                    filter.branch = {
+                        type  : 'ObjectId',
+                        values: branchIds,
+                        names : branchNames
+                    };
+                }
 
                 dataService.getData(modelType + '/' + (model.get('itemId') || model.get('_id')), {}, function (err, response) {
                     if (err) {

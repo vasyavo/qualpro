@@ -7,8 +7,8 @@ var router = express.Router();
 var promotionsHandler = require('../../handlers/promotions');
 var access = require('../../helpers/access');
 
-module.exports = function (db) {
-    var handler = new promotionsHandler(db);
+module.exports = function () {
+    var handler = new promotionsHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

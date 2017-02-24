@@ -1,8 +1,12 @@
 'use strict';
 
-const PasswordManager = require('./../helpers/passwordManager');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-const Personnel = function (db, redis, event) {
+const PasswordManager = require('./../helpers/passwordManager');
+const redis = require('./../helpers/redisClient');
+const ObjectiveModel = require('./../types/personnel/model');
+
+const Personnel = function () {
     const mongoose = require('mongoose');
     const ACL_CONSTANTS = require('../constants/aclRolesNames');
     const ACL_MODULES = require('../constants/aclModulesNames');
@@ -16,7 +20,7 @@ const Personnel = function (db, redis, event) {
     const validator = require('validator');
     const bcrypt = require('bcryptjs');
     const crypto = require('crypto');
-    const access = require('../helpers/access')(db);
+    const access = require('../helpers/access')();
     const generator = require('../helpers/randomPass.js');
     const errorSender = require('../utils/errorSender');
     const mailer = require('../helpers/mailer');
@@ -24,7 +28,7 @@ const Personnel = function (db, redis, event) {
     const FilterMapper = require('../helpers/filterMapper');
     const async = require('async');
     const GetImagesHelper = require('../helpers/getImages');
-    const getImagesHelper = new GetImagesHelper(db);
+    const getImagesHelper = new GetImagesHelper();
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
     const CountryModel = require('./../types/domain/model');
@@ -1113,6 +1117,7 @@ const Personnel = function (db, redis, event) {
     this.create = function(req, res, next) {
         const body = req.body;
         const accessLevel = req.session.level;
+        const uId = req.session.uId;
 
         function queryRun(body, callback) {
             var phone = body.phoneNumber;
@@ -1216,12 +1221,10 @@ const Personnel = function (db, redis, event) {
                 (personnel, cb) => {
                     const personnelId = personnel._id;
 
-                    event.emit('activityChange', {
-                        module : ACL_MODULES.PERSONNEL,
-                        actionType : ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId : personnelId,
-                        itemType : CONTENT_TYPES.PERSONNEL
+                    ActivityLog.emit('personnel:created', {
+                        actionOriginator: uId,
+                        accessRoleLevel : accessLevel,
+                        body: personnel.toJSON(),
                     });
 
                     cb(null, {id : personnelId});
@@ -1254,167 +1257,213 @@ const Personnel = function (db, redis, event) {
     };
 
     this.login = function(req, res, next) {
-        var session = req.session;
-        var body = req.body;
-        var login = body.login;
-        var pass = body.pass;
-        var query;
-        var isEmailValid;
-        var isPhoneValid;
+        const session = req.session;
+        const body = req.body;
 
-        var lastAccess;
-        var error;
-
-        var currentLanguage;
-        var notAllowedLevelsCMS = [
-            ACL_CONSTANTS.SALES_MAN,
-            ACL_CONSTANTS.MERCHANDISER,
-            ACL_CONSTANTS.CASH_VAN
-        ];
-        var notAllowedLevelsMobile = [
-            ACL_CONSTANTS.MASTER_UPLOADER,
-            ACL_CONSTANTS.COUNTRY_UPLOADER
-        ];
-
-        var locationsByLevel = {
-            2 : 'country',
-            3 : 'region',
-            4 : 'subRegion',
-            5 : 'branch',
-            6 : 'branch',
-            7 : 'branch',
-            9 : 'country'
-        };
+        let login = body.login;
+        const password = body.pass;
 
         if (login && login.charAt(0) === '+') {
             login = login.substring(1);
         }
+
+        let isEmailValid;
+        let isPhoneValid;
 
         if (login) {
             isEmailValid = REGEXP.EMAIL_REGEXP.test(login);
             isPhoneValid = REGEXP.PHONE_REGEXP.test(login);
         }
 
-        if (!login || !pass || (!isEmailValid && !isPhoneValid)) {
-            return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD)
+        if (!login || !password || (!isEmailValid && !isPhoneValid)) {
+            return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD);
         }
 
         login = validator.escape(login);
         login = xssFilters.inHTMLData(login);
         login = login.toLowerCase();
 
-        query = PersonnelModel
-            .findOne({
-                $or : [{email : login}, {phoneNumber : login}]
-            })
-            .populate([{
-                path : 'accessRole',
-                select : 'level name'
-            }, {
-                path : 'position',
-                select : 'name'
-            }]);
+        const genericPipeline = [{
+            $project: {
+                email: 1,
+                mobileNumber: 1,
+                pass: 1,
+                super: 1,
+                confirmed: 1,
+                archived: 1,
+                vacation: 1,
+                accessRole: 1,
+                position: 1,
+            },
+        }, {
+            $lookup: {
+                from: 'accessRoles',
+                localField: 'accessRole',
+                foreignField: '_id',
+                as: 'accessRole',
+            },
+        }, {
+            $unwind: {
+                path: '$accessRole',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $lookup: {
+                from: 'position',
+                localField: 'positions',
+                foreignField: '_id',
+                as: 'position',
+            },
+        }, {
+            $unwind: {
+                path: '$position',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $project: {
+                email: 1,
+                mobileNumber: 1,
+                pass: 1,
+                super: 1,
+                confirmed: 1,
+                archived: 1,
+                vacation: 1,
+                'accessRole.level': 1,
+                'accessRole.name': 1,
+                'position.name': 1,
+            },
+        }];
 
-        query.exec(function(err, personnel) {
-            var level;
-            var locationField;
-            var $setObject;
+        async.waterfall([
 
+            (cb) => {
+                const pipeline = [{
+                    $match: {
+                        $or: [{
+                            email: login,
+                        }, {
+                            phoneNumber: login,
+                        }],
+                    },
+                }, ...genericPipeline];
+
+                PersonnelModel.aggregate(pipeline).exec(cb);
+            },
+
+            (result, cb) => {
+                const personnel = result.length ?
+                    result.slice().pop() : {};
+
+                if (!personnel || !bcrypt.compareSync(password, personnel.pass)) {
+                    return errorSender.notAuthorized(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD);
+                }
+
+                if (!personnel.confirmed && !personnel.super) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.ACCOUNT_IS_NOT_CONFIRMED);
+                }
+
+                if (personnel.archived) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.ACCOUNT_IS_BLOCKED);
+                }
+
+                const level = personnel.accessRole ? personnel.accessRole.level : null;
+
+
+                const notAllowedLevelsCMS = [
+                    ACL_CONSTANTS.SALES_MAN,
+                    ACL_CONSTANTS.MERCHANDISER,
+                    ACL_CONSTANTS.CASH_VAN,
+                ];
+                const notAllowedLevelsMobile = [
+                    ACL_CONSTANTS.MASTER_UPLOADER,
+                    ACL_CONSTANTS.COUNTRY_UPLOADER,
+                ];
+
+                if (notAllowedLevelsCMS.indexOf(level) !== -1 && !req.isMobile) {
+                    return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_TO_CMS);
+                } else if (notAllowedLevelsMobile.indexOf(level) !== -1 && req.isMobile) {
+                    return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_FROM_APP);
+                }
+
+                const locationsByLevel = {
+                    2: 'country',
+                    3: 'region',
+                    4: 'subRegion',
+                    5: 'branch',
+                    6: 'branch',
+                    7: 'branch',
+                    9: 'country',
+                };
+
+                const locationField = locationsByLevel[level];
+
+                if (locationField && personnel[locationField] && !personnel[locationField].length) {
+                    return errorSender.forbidden(next, ERROR_MESSAGES.USER_LOCATION_IS_NOT_SPECIFIED);
+                }
+
+                const onLeave = personnel.vacation.onLeave;
+
+                session.loggedIn = true;
+                session.uId = personnel._id;
+                session.onLeave = onLeave;
+
+                if (personnel.accessRole) {
+                    session.level = personnel.accessRole.level;
+                } else {
+                    session.level = null;
+                }
+
+                session.uName = personnel.login;
+
+                const lastAccess = new Date();
+
+                session.lastAccess = lastAccess;
+
+                if (body.rememberMe === 'true') {
+                    session.rememberMe = true;
+                } else {
+                    delete session.rememberMe;
+                    session.cookie.expires = false;
+                }
+
+                const currentLanguage = personnel.currentLanguage || 'en';
+
+                res.cookie('currentLanguage', currentLanguage);
+
+                const $set = {
+                    beforeAccess: personnel.lastAccess,
+                    lastAccess,
+                };
+
+                if (personnel.status !== PERSONNEL_STATUSES.ONLEAVE._id) {
+                    $set.status = PERSONNEL_STATUSES.LOGIN._id;
+                }
+
+                PersonnelModel.findByIdAndUpdate(personnel._id, { $set })
+                    .select({ _id: 1 })
+                    .lean()
+                    .exec(cb);
+            },
+
+            (personnel, cb) => {
+                const pipeline = [{
+                    $match: {
+                        _id: personnel._id,
+                    },
+                }, ...genericPipeline];
+
+                PersonnelModel.aggregate(pipeline).exec(cb);
+            },
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-    
-            if (!personnel || !bcrypt.compareSync(pass, personnel.pass)) {
-                return errorSender.notAuthorized(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD);
-            }
-    
-            if (!personnel.confirmed && !personnel.super) {
-                return errorSender.badRequest(next, ERROR_MESSAGES.ACCOUNT_IS_NOT_CONFIRMED);
-            }
-    
-            /* if (personnel.vacation.onLeave && (personnel.accessRole.level > 4)) {
-             error = new Error('You cannot access the app while being on leave');
-             error.status = 400;
-     
-             return next(error);
-             }*/
-    
-            if (personnel.archived) {
-                return errorSender.badRequest(next, ERROR_MESSAGES.ACCOUNT_IS_BLOCKED);
-            }
-    
-            level = personnel.accessRole ? personnel.accessRole.level : null;
 
-            if (notAllowedLevelsCMS.indexOf(level) !== -1 && !req.isMobile) {
-                return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_TO_CMS);
-            } else if (notAllowedLevelsMobile.indexOf(level) !== -1 && req.isMobile) {
-                return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_FROM_APP);
-            }
+            const personnel = result.length ?
+                result.slice().pop() : {};
 
-            locationField = locationsByLevel[level];
-
-            if (locationField && personnel[locationField] && !personnel[locationField].length) {
-                return errorSender.forbidden(next, ERROR_MESSAGES.USER_LOCATION_IS_NOT_SPECIFIED);
-            }
-
-            let onLeave = personnel.vacation.onLeave;
-
-            session.loggedIn = true;
-            session.uId = personnel._id;
-            session.onLeave = onLeave;
-
-            if (personnel.accessRole) {
-                session.level = personnel.accessRole.level;
-            } else {
-                session.level = null;
-            }
-
-            session.uName = personnel.login;
-            lastAccess = new Date();
-            session.lastAccess = lastAccess;
-
-            if (body.rememberMe === 'true') {
-                session.rememberMe = true;
-            } else {
-                delete session.rememberMe;
-                session.cookie.expires = false;
-            }
-
-            currentLanguage = personnel.currentLanguage || 'en';
-            res.cookie('currentLanguage', currentLanguage);
-
-            $setObject = {
-                beforeAccess : personnel.lastAccess,
-                lastAccess : lastAccess
-            };
-
-            if (personnel.status !== PERSONNEL_STATUSES.ONLEAVE._id) {
-                $setObject.status = PERSONNEL_STATUSES.LOGIN._id
-            }
-
-            PersonnelModel.findByIdAndUpdate(personnel._id, {
-                $set : $setObject
-            }, {
-                select : {
-                    _id : 1,
-                    accessRole : 1,
-                    position : 1,
-                    firstName : 1,
-                    lastName : 1,
-                    lastAccess : 1,
-                    beforeAccess : 1
-                }
-            }, function(err, result) {
-                if (err) {
-                    return next(err);
-                }
-
-                result.accessRole = personnel.accessRole;
-                result.position = personnel.position;
-
-                res.status(200).send(result);
-            });
-
+            res.status(200).send(personnel);
         });
     };
 
@@ -1470,72 +1519,68 @@ const Personnel = function (db, redis, event) {
     };
 
     this.archive = function(req, res, next) {
-        function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var uId = req.session.uId;
-            var options = [
-                {
-                    idsToArchive : idsToArchive,
-                    keyForCondition : '_id',
-                    archived : archived,
-                    topArchived : archived,
-                    model : PersonnelModel
-                }
-            ];
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
 
-            archiver.archive(uId, options, function(err) {
-                var type = ACTIVITY_TYPES.ARCHIVED;
+        const queryRun = (callback) => {
+            const setIdToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            const options = [{
+                idsToArchive: setIdToArchive,
+                keyForCondition: '_id',
+                archived,
+                topArchived: archived,
+                model: PersonnelModel,
+            }];
+            const activityType = archived ? 'archived' : 'unarchived';
 
-                if (err) {
-                    return next(err);
-                }
-                if (!req.body.archived) {
-                    type = ACTIVITY_TYPES.UNARCHIVED;
-                }
+            async.waterfall([
 
-                req.body.editedBy = {
-                    user : req.session.uId,
-                    date : Date.now()
-                };
+                (cb) => {
+                    archiver.archive(userId, options, cb);
+                },
 
-                async.eachSeries(idsToArchive, function(item, callback) {
-                    event.emit('activityChange', {
-                        module : 6,
-                        actionType : type,
-                        createdBy : req.body.editedBy,
-                        itemId : item,
-                        itemType : CONTENT_TYPES.PERSONNEL
-                    });
+                (done, cb) => {
                     callback();
 
-                }, function(err) {
-                    if (err) {
-                        logWriter.log('personnel archived', err);
-                    }
-                });
+                    PersonnelModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
+                },
 
-                if (archived) {
-                    someEvents.personnelArchived({
-                        ids : idsToArchive,
-                        Session : SessionModel
-                    });
-                }
+                (setPersonnel, cb) => {
+                    async.each(setPersonnel, (personnel, eachCb) => {
+                        ActivityLog.emit(`personnel:${activityType}`, {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: personnel,
+                        });
+                        eachCb();
+                    }, cb);
+                },
 
-                res.status(200).send();
-            });
-        }
+            ]);
+        };
 
-        access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
+        async.waterfall([
+
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.PERSONNEL, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err) => {
             if (err) {
                 return next(err);
             }
-    
-            if (!allowed) {
-                return errorSender.forbidden(next);
-            }
 
-            queryRun();
+            res.status(200).send({});
         });
     };
 
@@ -3147,7 +3192,7 @@ const Personnel = function (db, redis, event) {
                 id : ObjectId(uId)
             });
 
-            db.collection('objectives').aggregate(pipeLine, function(err, response) {
+            ObjectiveModel.aggregate(pipeLine, function(err, response) {
                 var idsPersonnel = [];
                 var idsFile = [];
                 var options = {
@@ -3244,10 +3289,11 @@ const Personnel = function (db, redis, event) {
         const accessLevel = req.session.level;
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
+        let coveredUsers = [];
+        let coverUserId;
         let generatedPassword;
 
         function queryRun(body, callback) {
-            let coveredUserId;
 
             convertDomainsToObjectIdArray(body);
 
@@ -3326,6 +3372,7 @@ const Personnel = function (db, redis, event) {
             let phone;
             let isPhoneValid;
 
+
             if (body.phoneNumber) {
                 phone = body.phoneNumber;
                 isPhoneValid = phone === '' || false;
@@ -3373,7 +3420,6 @@ const Personnel = function (db, redis, event) {
 
             function updateUsers(model, cb) {
                 var currentUserIdNew = model._id;
-                var coverUserId;
                 var coverBeforeUserId;
 
                 var parallelTasks = {
@@ -3398,6 +3444,7 @@ const Personnel = function (db, redis, event) {
                 coverUserId = body.vacation ? body.vacation.cover : null;
                 coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
 
+
                 if (coverBeforeUserId && body.vacation) {
                     parallelTasks.coverBeforeUser = (parallelCb) => {
                         PersonnelModel
@@ -3409,9 +3456,7 @@ const Personnel = function (db, redis, event) {
                                 }
 
                                 if (!personnel.temp) {
-                                    event.emit('notOnLeave', {
-                                        coveredUserId : coverBeforeUserId.toString()
-                                    });
+                                    coveredUsers.push(coverBeforeUserId);
 
                                     return parallelCb(null, {});
                                 }
@@ -3422,12 +3467,6 @@ const Personnel = function (db, redis, event) {
                                     if (err) {
                                         return parallelCb(err);
                                     }
-
-                                    coveredUserId = model._id;
-
-                                    event.emit('notOnLeave', {
-                                        coveredUserId
-                                    });
 
                                     parallelCb(null, model);
                                 });
@@ -3445,11 +3484,9 @@ const Personnel = function (db, redis, event) {
                                     return parallelCb(err);
                                 }
 
-                                if (!personnel.temp) {
-                                    event.emit('notOnLeave', {
-                                        coveredUserId : coverUserId.toString()
-                                    });
+                                coveredUsers.push(coverUserId);
 
+                                if (!personnel.temp) {
                                     return parallelCb(null, {});
                                 }
 
@@ -3464,12 +3501,6 @@ const Personnel = function (db, redis, event) {
                                     if (err) {
                                         return parallelCb(err);
                                     }
-
-                                    coveredUserId = personnel._id;
-
-                                    event.emit('notOnLeave', {
-                                        coveredUserId : coveredUserId
-                                    });
 
                                     parallelCb(null, personnel);
                                 });
@@ -3495,12 +3526,6 @@ const Personnel = function (db, redis, event) {
                 personnelFindByIdAndPopulate(options, (err, personnel) => {
                     if (err) {
                         return cb(err);
-                    }
-
-                    if (body.vacation) {
-                        event.emit('notOnLeave', {
-                            userOnLeave : personnelId
-                        });
                     }
 
                     cb(null, personnel);
@@ -3569,13 +3594,36 @@ const Personnel = function (db, redis, event) {
                 res.status(200).send(personnel);
             };
 
-            if (!body.currentLanguage && !body.newPass) {
-                event.emit('activityChange', {
-                    module : ACL_MODULES.PERSONNEL,
-                    actionType : ACTIVITY_TYPES.UPDATED,
-                    createdBy : personnel.editedBy,
-                    itemId : personnelId,
-                    itemType : CONTENT_TYPES.PERSONNEL
+            if (!body.currentLanguage && !body.newPass && !body.vacation && !body.manager) {
+                ActivityLog.emit('personnel:updated', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                });
+            }
+            if (body.vacation) {
+                ActivityLog.emit('personnel:on-leave', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                    coveredUsers
+                });
+            }
+            if (coverUserId) {
+                ActivityLog.emit('personnel:cover', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                    coveredUsers
+                });
+            }
+            if (body.manager) {
+                coveredUsers.push(personnel.manager);
+                ActivityLog.emit('personnel:assigned', {
+                    actionOriginator: currentUserId,
+                    accessRoleLevel : accessLevel,
+                    body: personnel,
+                    coveredUsers
                 });
             }
 

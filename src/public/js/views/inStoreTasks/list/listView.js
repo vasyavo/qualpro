@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'jQuery',
     'Underscore',
     'text!templates/inStoreTasks/list/list.html',

@@ -3,7 +3,7 @@
 <div class="filterBar">
 </div>
 <div id="viewBar" class="promotionView contractsSecondary">
-    <% if (((level <= 3) || (level >= 8)) && App.currentUser.workAccess) { %>
+    <% if (((level <= 3) || (level >= 8)) && App.currentUser.workAccess && level != 10) { %>
     <span id="createBtn" class="promotionBtn contractsSecondaryBtn" data-translation="newContract"><%=translation.newContract%></span>
     <% } %>
     <div id="paginationHolder" class="paginationHolder">

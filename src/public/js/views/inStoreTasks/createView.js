@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/inStoreTasks/create.html',
@@ -82,9 +82,10 @@ define([
         },
 
         openForm: function () {
+            var $curEl = this.$el;
             var description = {
-                en: CKEDITOR.instances.editor1.document.getBody().getText(),
-                ar: CKEDITOR.instances.editor2.document.getBody().getText()
+                en: _.unescape($curEl.find('.objectivesTextarea[data-property="en"]').val()),
+                ar: _.unescape($curEl.find('.objectivesTextarea[data-property="ar"]').val())
             };
             var self = this;
 
@@ -125,8 +126,8 @@ define([
                 dateEnd      : endDate,
                 location     : $curEl.find('#personnelLocation').attr('data-location'),
                 description  : {
-                    en: CKEDITOR.instances.editor1.document.getBody().getText(),
-                    ar: CKEDITOR.instances.editor2.document.getBody().getText()
+                    en: $curEl.find('.objectivesTextarea[data-property="en"]').val(),
+                    ar: $curEl.find('.objectivesTextarea[data-property="ar"]').val()
                 },
                 country      : this.locations.country,
                 region       : this.locations.region,
@@ -214,8 +215,6 @@ define([
                 },
 
                 function (model, files, cb) {
-                    var formId;
-
                     if (!context.visibilityFormAjax) {
                         return cb(null, model);
                     }
@@ -228,7 +227,10 @@ define([
                         cb(true);
                     };
 
-                    formId = model.get('form')._id;
+                    var form = model.get('form');
+                    var formId = form._id;
+                    var formType = form.contentType;
+
                     context.visibilityFormAjax.url = 'form/visibility/before/' + formId;
 
                     delete context.visibilityFormAjax.model;
@@ -244,7 +246,12 @@ define([
                         }
                     });
 
-                    $.ajax(context.visibilityFormAjax);
+                    if (formType === 'visibility') {
+                        $.ajax(context.visibilityFormAjax);
+                    }
+                    else {
+                        cb(null, model);
+                    }
                 }
 
             ], function (err, model) {

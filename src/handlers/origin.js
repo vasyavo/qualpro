@@ -1,4 +1,4 @@
-var OriginHandler = function (db) {
+var OriginHandler = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');

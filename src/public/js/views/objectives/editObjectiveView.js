@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/objectives/edit.html',
@@ -589,9 +589,16 @@ define([
                 },
 
                 function (model, files, cb) {
+                    var formId;
+                    var formType;
                     var form = model.get('form');
-                    var formId = form._id;
-                    var formType = form.contentType;
+
+                    if (!form) {
+                        return cb(null, model);
+                    }
+
+                    formId = form._id;
+                    formType = form.contentType;
 
                     if (!context.visibilityFormAjax && !context.VFWithoutBranchesChanged) {
                         if (formType === 'visibility') {
@@ -949,7 +956,7 @@ define([
             var creationsOptions = {
                 withoutTabs       : true,
                 parrentContentType: this.contentType,
-                objectiveType     : this.changed.objectiveType,
+                objectiveType     : this.changed.objectiveType || this.model.get('objectiveType'),
                 translation       : this.translation.assignToPersonnel
             };
             var createdByLevel = this.model.get('createdBy').user.accessRole.level;

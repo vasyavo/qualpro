@@ -1,9 +1,10 @@
 define([
+    'backbone',
     'text!templates/Notes/attachTemplate.html',
     'text!templates/Notes/addAttachments.html',
     'common'
 
-], function (AttachTemplate, addAttachTemplate, common) {
+], function (Backbone, AttachTemplate, addAttachTemplate, common) {
     var AttachView = Backbone.View.extend({
 
         initialize: function (options) {

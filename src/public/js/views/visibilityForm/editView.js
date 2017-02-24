@@ -80,7 +80,7 @@ define([
             this.editBefore = targetClass.hasClass('beforeEdit');
             this.filesIdToDeleted.push(fileId);
             if (filesInModelFromInput) {
-                this.model.set('files', []);
+                this.model.set('files', [{}]);
             }
 
             $targetImg.html('');
@@ -144,7 +144,7 @@ define([
                 } else if (context.filesIdToDeleted.length) {
                     var description = context.model.get('before');
                     description = description.description;
-                    context.model.set('before', {files: {}, description: description});
+                    context.model.set('before', {files: [{}], description: description});
                     data = new FormData();
                     data.append('data', JSON.stringify({isNewFile: []}));
                     data.append('before', 'true');
@@ -182,15 +182,15 @@ define([
             }
 
             if (this.editAfter) {
-                this.model.set('filesAfter', {
+                this.model.set('filesAfter', [{
                     url        : res,
                     contentType: type.substr(5, 5)
-                });
+                }]);
             } else {
-                this.model.set('files', {
+                this.model.set('files', [{
                     url        : res,
                     contentType: type.substr(5, 5)
-                });
+                }]);
             }
 
             this.$el.find('#imageMy').html(container);
@@ -240,8 +240,8 @@ define([
             var savedFiles = this.model.get('files');
             var savedAfterFiles = this.model.get('filesAfter');
             var descriptionAfter = this.model.get('descriptionAfter');
-            var files = savedFiles ? savedFiles : before.files || {};
-            var filesAfter = savedAfterFiles ? savedAfterFiles : after.files || {};
+            var files = savedFiles ? savedFiles : before.files || [{}];
+            var filesAfter = savedAfterFiles ? savedAfterFiles : after.files || [{}];
 
             if (this.editAfter) {
                 descriptionAfter = descriptionAfter ? descriptionAfter : after.description || '';
@@ -249,14 +249,14 @@ define([
                 this.model.set({
                     after: {
                         description: descriptionAfter,
-                        files      : filesAfter[0]
+                        files      : filesAfter
                     }
                 });
 
                 this.model.set({
                     before: {
                         description: this.description,
-                        files      : before.files[0]
+                        files      : before.files
                     }
                 });
 
@@ -270,7 +270,7 @@ define([
                 this.model.set({
                     before: {
                         description: this.description,
-                        files      : files[0] ? files[0] : files
+                        files      : files
                     }
                 });
 
@@ -296,7 +296,7 @@ define([
                     cancel: {
                         text : self.translation.cancelBtn,
                         click: function () {
-                            self.model.set('files', []);
+                            // self.model.set('files', []);
                         }
                     }
                 }

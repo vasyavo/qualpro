@@ -1,657 +1,1242 @@
-'use strict';
-
-const detectObjectivesForSubordinates = require('../reusableComponents/detectObjectivesForSubordinates');
+const async = require('async');
+const mongoose = require('mongoose');
+const _ = require('lodash');
+const extractBody = require('./../utils/extractBody');
+const detectObjectivesForSubordinates = require('./../reusableComponents/detectObjectivesForSubordinates');
 const TestUtils = require('./../stories/push-notifications/utils/TestUtils');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
+const logger = require('./../utils/logger');
+const toString = require('./../utils/toString');
+const mongo = require('./../utils/mongo');
 
-var Objectives = function (db, redis, event) {
-    var async = require('async');
-    var _ = require('underscore');
-    var lodash = require('lodash');
-    var mongoose = require('mongoose');
-    var ACL_CONSTANTS = require('../constants/aclRolesNames');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var VALIDATION = require('../public/js/constants/validation.js');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
-    var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var CONSTANTS = require('../constants/mainConstants');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
-    var ObjectiveModel = require('./../types/objective/model');
-    var PersonnelModel = require('./../types/personnel/model');
-    var ObjectiveHistoryModel = require('./../types/objectiveHistory/model');
-    var FilterMapper = require('../helpers/filterMapper');
-    var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var access = require('../helpers/access')(db);
-    var ObjectId = mongoose.Types.ObjectId;
-    var FileModel = require('./../types/file/model');
-    var DistributionFormHandler = require('../handlers/distributionForm');
-    var VisibilityFormHandler = require('../handlers/visibilityForm');
-    var distributionFormHandler = new DistributionFormHandler(db);
-    var visibilityFormHandler = new VisibilityFormHandler(db);
-    var bodyValidator = require('../helpers/bodyValidator');
-    var coveredByMe = require('../helpers/coveredByMe');
-    var logWriter = require('../helpers/logWriter');
-    var self = this;
+const ACL_CONSTANTS = require('./../constants/aclRolesNames');
+const ACL_MODULES = require('./../constants/aclModulesNames');
+const CONTENT_TYPES = require('./../public/js/constants/contentType');
+const OTHER_CONSTANTS = require('./../public/js/constants/otherConstants');
+const CONSTANTS = require('./../constants/mainConstants');
 
-    var $defProjection = {
-        _id              : 1,
-        title            : 1,
-        companyObjective : 1,
-        description      : 1,
-        objectiveType    : 1,
-        priority         : 1,
-        status           : 1,
-        assignedTo       : 1,
-        complete         : 1,
-        parent           : 1,
-        level            : 1,
-        countSubTasks    : 1,
-        completedSubTasks: 1,
-        dateStart        : 1,
-        dateEnd          : 1,
-        dateClosed       : 1,
-        comments         : 1,
-        attachments      : 1,
-        editedBy         : 1,
-        createdBy        : 1,
-        country          : 1,
-        region           : 1,
-        subRegion        : 1,
-        retailSegment    : 1,
-        outlet           : 1,
-        branch           : 1,
-        location         : 1,
-        form             : 1,
-        efforts          : 1,
-        context          : 1,
-        creationDate     : 1,
-        updateDate       : 1,
-        archived         : 1
-    };
+const AccessManager = require('./../helpers/access')();
+const AggregationHelper = require('./../helpers/aggregationCreater');
+const GetImage = require('./../helpers/getImages');
+const FilterMapper = require('./../helpers/filterMapper');
+const bodyValidator = require('./../helpers/bodyValidator');
+const coveredByMe = require('./../helpers/coveredByMe');
 
-    function createSubObjective(options, callback) {
-        options = options || {};
-        var parentId = options.parentId;
-        var files = options.files;
-        var assignedToIds = options.assignedToIds;
-        var createdById = options.createdById;
-        var isMobile = options.isMobile;
-        var companyObjective;
-        var description;
-        var parent;
-        var title;
-        var model;
-        var subObjective;
-        var createdBy;
-        var dateStart;
-        var dateEnd;
-        var priority;
-        var newAttachments;
-        var newCountSubTasks;
-        var newProgress;
-        var parentIds;
-        var level = options.level;
-        var saveObjective = options.saveObjective;
-        var attachments = options.attachments || [];
-        var error;
-        var formType = options.formType;
-        var newObjectiveId;
-        const accessRoleLevel = options.level;
+const ObjectiveModel = require('./../types/objective/model');
+const ObjectiveHistoryModel = require('./../types/objectiveHistory/model');
+const PersonnelModel = require('./../types/personnel/model');
+const FileModel = require('./../types/file/model');
 
-        if (!parentId || !createdById) {
-            error = new Error('Not enough params');
-            error.status = 400;
-            return callback(error);
-        }
+const FileHandler = require('./../handlers/file');
+const DistributionFormHandler = require('./../handlers/distributionForm');
+const VisibilityFormHandler = require('./../handlers/visibilityForm');
 
-        if (!assignedToIds.length) {
-            error = new Error('Not enough params');
-            error.status = 400;
-            return callback(error);
-        }
+const getImage = new GetImage();
+const fileHandler = new FileHandler();
+const distributionFormHandler = new DistributionFormHandler(mongo);
+const visibilityFormHandler = new VisibilityFormHandler(mongo);
+const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+const ObjectId = mongoose.Types.ObjectId;
 
-        async.waterfall([
+const $defProjection = {
+    _id: 1,
+    title: 1,
+    companyObjective: 1,
+    description: 1,
+    objectiveType: 1,
+    priority: 1,
+    status: 1,
+    assignedTo: 1,
+    complete: 1,
+    parent: 1,
+    level: 1,
+    countSubTasks: 1,
+    completedSubTasks: 1,
+    dateStart: 1,
+    dateEnd: 1,
+    dateClosed: 1,
+    comments: 1,
+    attachments: 1,
+    editedBy: 1,
+    createdBy: 1,
+    country: 1,
+    region: 1,
+    subRegion: 1,
+    retailSegment: 1,
+    outlet: 1,
+    branch: 1,
+    location: 1,
+    form: 1,
+    efforts: 1,
+    context: 1,
+    creationDate: 1,
+    updateDate: 1,
+    archived: 1,
+};
 
-            function (cb) {
-                if (!files) {
-                    return cb(null, []);
-                }
+const getByIdAggr = (options, callback) => {
+    const id = options.id;
+    const isMobile = options.isMobile || false;
 
-                // TODO: change bucket from constants
-                fileHandler.uploadFile(createdById, files, 'objectives', function (err, filesIds) {
-                    if (err) {
-                        return cb(err, null);
-                    }
+    const aggregateHelper = new AggregationHelper($defProjection);
+    const pipeline = [];
 
-                    cb(null, filesIds);
-                });
+    pipeline.push({
+        $match: { _id: id },
+    });
+
+    if (isMobile) {
+        pipeline.push({
+            $project: aggregateHelper.getProjection({
+                parent: {
+                    level1: '$parent.1',
+                    level2: '$parent.2',
+                    level3: '$parent.3',
+                    level4: '$parent.4',
+                },
+            }),
+        });
+    }
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'personnels',
+        key: 'assignedTo',
+        addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'files',
+        key: 'attachments',
+        addProjection: ['contentType', 'originalName', 'createdBy'],
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'domains',
+        key: 'country',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'domains',
+        key: 'region',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'domains',
+        key: 'subRegion',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'retailSegments',
+        key: 'retailSegment',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'outlets',
+        key: 'outlet',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'branches',
+        key: 'branch',
+        addProjection: ['_id', 'name', 'outlet'],
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'personnels',
+        key: 'createdBy.user',
+        isArray: false,
+        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+        includeSiblings: { createdBy: { date: 1 } },
+    }));
+
+    pipeline.push({
+        $unwind: {
+            path: '$assignedTo',
+            preserveNullAndEmptyArrays: true,
+        },
+    });
+
+    if (!isMobile) {
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'assignedTo.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                assignedTo: {
+                    _id: 1,
+                    position: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
             },
+        }));
 
-            function (filesIds, cb) {
-                ObjectiveModel
-                    .findById(parentId, function (err, parentObjectiveModel) {
-                        var error;
-
-                        if (err) {
-                            return cb(err, null);
-                        }
-
-                        if (!parentObjectiveModel) {
-                            error = new Error('Objective not found');
-                            error.status = 400;
-
-                            return cb(error, null);
-                        }
-
-                        companyObjective = options.companyObjective || parentObjectiveModel.companyObjective;
-                        description = options.description;
-                        parent = parentObjectiveModel.parent;
-                        title = options.title;
-                        createdBy = {
-                            user: createdById,
-                            date: new Date()
-                        };
-                        dateStart = options.dateStart || parentObjectiveModel.dateStart;
-                        dateEnd = options.dateEnd || parentObjectiveModel.dateEnd;
-                        priority = options.priority || parentObjectiveModel.priority;
-                        attachments = attachments.objectID();
-                        newAttachments = attachments.concat(filesIds);
-
-                        cb(null, parentObjectiveModel);
-                    });
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'assignedTo.position',
+            isArray: false,
+            includeSiblings: {
+                assignedTo: {
+                    _id: 1,
+                    accessRole: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
             },
+        }));
+    }
 
-            function (parentObjectiveModel, cb) {
-                subObjective = {
-                    objectiveType: parentObjectiveModel.objectiveType,
-                    priority     : priority,
-                    status       : saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS,
-                    assignedTo   : assignedToIds || [],
-                    level        : level,
-                    dateStart    : dateStart,
-                    dateEnd      : dateEnd,
-                    createdBy    : createdBy,
-                    editedBy     : createdBy,
-                    attachments  : newAttachments,
-                    location     : options.location,
-                    country      : options.country,
-                    region       : options.region,
-                    subRegion    : options.subRegion,
-                    retailSegment: options.retailSegment,
-                    outlet       : options.outlet,
-                    branch       : options.branch
-                };
+    pipeline.push({
+        $group: aggregateHelper.getGroupObject({
+            assignedTo: { $addToSet: '$assignedTo' },
+        }),
+    });
 
-                if (!formType && parentObjectiveModel.form) {
-                    subObjective.form = parentObjectiveModel.form;
-                }
-
-                if (title && (title.en || title.ar)) {
-                    subObjective.title = {
-                        en: _.escape(title.en),
-                        ar: _.escape(title.ar)
-                    };
-                }
-
-                if (description && (description.en || description.ar)) {
-                    subObjective.description = {
-                        en: _.escape(description.en),
-                        ar: _.escape(description.ar)
-                    };
-                }
-
-                if (parent) {
-                    subObjective.parent = {
-                        1: parent['1'] || null,
-                        2: parent['2'] || null,
-                        3: parent['3'] || null,
-                        4: parent['4'] || null
-                    };
-                    /*
-                    * less then or equals to Area in Charge manager without Trade Marketer
-                    * */
-                    const everyAdmin = [
-                        ACL_CONSTANTS.MASTER_ADMIN,
-                        ACL_CONSTANTS.COUNTRY_ADMIN,
-                        ACL_CONSTANTS.AREA_MANAGER,
-                        ACL_CONSTANTS.AREA_IN_CHARGE,
-                        ACL_CONSTANTS.SALES_MAN,
-                    ];
-
-                    if (parentObjectiveModel.level && everyAdmin.indexOf(parentObjectiveModel.level) > -1) {
-                        subObjective.parent[parentObjectiveModel.get('level')] = parentObjectiveModel.get('_id');
-                    }
-                }
-
-                if (companyObjective && subObjective.parent && (companyObjective.en || companyObjective.ar)) {
-                    subObjective.companyObjective = {
-                        en: _.escape(companyObjective.en),
-                        ar: _.escape(companyObjective.ar)
-                    };
-                }
-
-                cb(null, subObjective, parentObjectiveModel);
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'accessRoles',
+        key: 'createdBy.user.accessRole',
+        isArray: false,
+        addProjection: ['_id', 'name', 'level'],
+        includeSiblings: {
+            createdBy: {
+                date: 1,
+                user: {
+                    _id: 1,
+                    position: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
             },
+        },
+    }));
 
-            function (saveData, parentObjectiveModel, cb) {
-                model = new ObjectiveModel(saveData);
-                model.save(function (err, objective) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    newObjectiveId = objective._id;
-
-                    cb(null, objective);
-                });
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'positions',
+        key: 'createdBy.user.position',
+        isArray: false,
+        includeSiblings: {
+            createdBy: {
+                date: 1,
+                user: {
+                    _id: 1,
+                    accessRole: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
             },
+        },
+    }));
 
-            function (objectiveModel, cb) {
-                const hasForm = formType;
-                const isDistribution = hasForm && formType === 'distribution';
+    if (isMobile) {
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'personnels',
+            key: 'editedBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: { editedBy: { date: 1 } },
+        }));
 
-                // skip in case with visibility form
-                if (!hasForm || isDistribution) {
-                    if (TestUtils.isObjectiveDraft(objectiveModel)) {
-                        ActivityLog.emit('sub-objective:draft-created', {
-                            actionOriginator: createdById,
-                            accessRoleLevel,
-                            body: objectiveModel.toJSON(),
-                        });
-                    }
-
-                    if (TestUtils.isObjectivePublished(objectiveModel)) {
-                        ActivityLog.emit('sub-objective:published', {
-                            actionOriginator: createdById,
-                            accessRoleLevel,
-                            body: objectiveModel.toJSON(),
-                        });
-                    }
-                }
-
-                if (formType === 'distribution') {
-                    const data = {
-                        objective: objectiveModel.get('_id')
-                    };
-
-                    return distributionFormHandler.createForm(createdById, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                if (formType === 'visibility') {
-                    const data = {
-                        objective: objectiveModel.get('_id'),
-                        createdBy,
-                    };
-
-                    return visibilityFormHandler.createForm(createdById, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                cb(null, objectiveModel);
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'editedBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
             },
+        }));
 
-            function (objectiveModel, cb) {
-                if (!formType) {
-                    return cb(null, objectiveModel);
-                }
-
-                objectiveModel.save(function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null, objectiveModel);
-                });
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'editedBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
             },
+        }));
+    }
 
-            function (objectiveModel, cb) {
-                var nextParent;
-                var objectiveModelClone = _.extend({}, objectiveModel.toObject());
-                var level = objectiveModelClone.level;
-                var parents = objectiveModelClone.parent;
+    if (isMobile) {
+        pipeline.push({
+            $project: aggregateHelper.getProjection({
+                creationDate: '$createdBy.date',
+            }),
+        });
+    }
 
-                var seriesTasks = [];
-
-                function updateParentObjective(id, seriesCb) {
-                    async.waterfall([
-                        (cb) => {
-                            ObjectiveModel.findById(id, function (err, parentModel) {
-                                if (err) {
-                                    return cb(err);
-                                }
-
-                                if (!parentModel) {
-                                    return cb('Parent objective not found');
-                                }
-
-                                cb(null, parentModel);
-                            });
-                        },
-
-                        (parentModel, cb) => {
-                            var query = {
-                                level: parseInt(parentModel.level, 10) + 1
-                            };
-
-                            query['parent.' + parentModel.level] = parentModel._id;
-
-                            ObjectiveModel.find(query, function (err, childModels) {
-                                var complete;
-
-                                parentModel.countSubTasks = _.filter(childModels, function (model) {
-                                    return model.status !== 'draft';
-                                }).length;
-                                parentModel.completedSubTasks = _.filter(childModels, function (model) {
-                                    return model.status === 'completed';
-                                }).length;
-
-                                complete = Math.floor(parentModel.completedSubTasks * 100 / parentModel.countSubTasks);
-
-                                if (isNaN(complete) || !isFinite(complete)) {
-                                    parentModel.complete = 0;
-                                } else {
-                                    parentModel.complete = complete;
-                                }
-
-                                if (parentModel.complete >= 100 && parentModel.status === OBJECTIVE_STATUSES.RE_OPENED) {
-                                    parentModel.status = OBJECTIVE_STATUSES.CLOSED;
-                                }
-
-                                if (parentModel.complete < 100 && parentModel.status === OBJECTIVE_STATUSES.CLOSED) {
-                                    parentModel.status = OBJECTIVE_STATUSES.RE_OPENED;
-                                }
-
-                                cb(null, parentModel);
-                            });
-                        }
-
-                    ], (err, parentModel) => {
-                        if (err) {
-                            return seriesCb(err);
-                        }
-
-                        parentModel.save(function (err) {
-                            if (err) {
-                                return seriesCb(err);
-                            }
-                            event.emit('activityChange', {
-                                module    : 7,
-                                actionType: ACTIVITY_TYPES.UPDATED,
-                                createdBy : createdBy,
-                                itemId    : parentModel._id,
-                                itemType  : CONTENT_TYPES.OBJECTIVES
-                            });
-                            seriesCb(null);
-                        });
-                    });
-                }
-
-                for (var i = level - 1; i >= 1; i--) {
-                    nextParent = parents[i];
-                    if (nextParent) {
-                        seriesTasks.push(
-                            async.apply(updateParentObjective, nextParent)
-                        );
-                    }
-                }
-
-                async.series(seriesTasks, function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null);
-                });
+    pipeline.push({
+        $project: aggregateHelper.getProjection({
+            assignedTo: {
+                $filter: {
+                    input: '$assignedTo',
+                    as: 'oneItem',
+                    cond: { $ne: ['$$oneItem', null] },
+                },
             },
+        }),
+    });
 
-            function (cb) {
-                newObjectiveId = typeof newObjectiveId === 'string' ? ObjectId(newObjectiveId) : newObjectiveId;
-
-                self.getByIdAggr({id: newObjectiveId, isMobile: isMobile}, function (err, result) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    return cb(null, result);
-                });
-
-            }
-
-        ], function (err, parentCollection) {
-
+    ObjectiveModel.aggregate(pipeline)
+        .allowDiskUse(true)
+        .exec((err, response) => {
             if (err) {
                 return callback(err);
             }
 
-            callback(null, parentCollection);
+            const objective = response[0];
+
+            if (!objective || !Object.keys(objective).length) {
+                return callback(null, objective);
+            }
+
+            const setFileId = _.map(objective.attachments, '_id');
+            const setPersonnelId = [
+                _.get(objective, 'createdBy.user._id'),
+                ..._.map(objective.assignedTo, '_id'),
+            ];
+
+            const options = {
+                data: {
+                    [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
+                    [CONTENT_TYPES.FILES]: setFileId,
+                },
+            };
+
+            getImage.getImages(options, (err, result) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                const setOptions = {
+                    response: objective,
+                    imgsObject: result,
+                    fields: {
+                        [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
+                        [CONTENT_TYPES.FILES]: [['attachments']],
+                    },
+                };
+
+                getImage.setIntoResult(setOptions, (model) => {
+                    if (model) {
+                        if (model.title) {
+                            model.title = {
+                                en: model.title.en ? _.unescape(model.title.en) : '',
+                                ar: model.title.ar ? _.unescape(model.title.ar) : '',
+                            };
+                        }
+                        if (model.description) {
+                            model.description = {
+                                en: model.description.en ? _.unescape(model.description.en) : '',
+                                ar: model.description.ar ? _.unescape(model.description.ar) : '',
+                            };
+                        }
+                        if (model.companyObjective) {
+                            model.companyObjective = {
+                                en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                                ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
+                            };
+                        }
+                    }
+                    callback(null, model);
+                });
+            });
+        });
+};
+
+const updateParents = (objective, callback) => {
+    const updateParentObjective = (id, cb) => {
+        async.waterfall([
+
+            (cb) => {
+                ObjectiveModel.findById(id, (err, parentObjective) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!parentObjective) {
+                        const error = new Error('Parent objective not found.');
+
+                        error.status = 400;
+                        return cb(error);
+                    }
+
+                    cb(null, parentObjective);
+                });
+            },
+
+            (parentObjective, cb) => {
+                const parentModelLevel = parseInt(parentObjective.level, 10);
+                const query = {
+                    level: parentModelLevel + 1,
+                    [`parent.${parentModelLevel}`]: parentObjective._id,
+                };
+
+                ObjectiveModel.find(query, (err, children) => {
+                    const actualStatus = parentObjective.status;
+                    const countSubTasks = children.filter(child => child.status !== 'draft').length;
+                    const completedSubTasks = children.filter(child => child.status === 'completed').length;
+                    const complete = Math.floor((completedSubTasks * 100) / countSubTasks);
+                    const changes = {
+                        countSubTasks,
+                        completedSubTasks,
+                        complete,
+                    };
+
+                    if (complete >= 100 && actualStatus === OBJECTIVE_STATUSES.RE_OPENED) {
+                        changes.status = OBJECTIVE_STATUSES.CLOSED;
+                    }
+
+                    if (complete < 100 && actualStatus === OBJECTIVE_STATUSES.CLOSED) {
+                        changes.status = OBJECTIVE_STATUSES.RE_OPENED;
+                    }
+
+                    parentObjective.set(changes);
+
+                    cb(null, parentObjective);
+                });
+            },
+
+        ], (err, parentObjective) => {
+            if (err) {
+                return cb(err);
+            }
+
+            parentObjective.save((err) => {
+                if (err) {
+                    return cb(err);
+                }
+
+                cb(null);
+            });
+        });
+    };
+
+    const series = [];
+    const objectiveAsJson = _.assignIn({}, objective.toObject());
+    const level = objectiveAsJson.level;
+    const setParentObjective = objectiveAsJson.parent;
+
+    for (let i = level - 1; i >= 1; i--) {
+        const nextParent = setParentObjective[i];
+
+        if (nextParent) {
+            series.push((cb) => {
+                updateParentObjective(nextParent, cb);
+            });
+        }
+    }
+
+    async.series(series, (err) => {
+        if (err) {
+            logger.error(err);
+            return;
+        }
+    });
+
+    callback(null, objective);
+};
+
+const createSubObjective = (options, callback) => {
+    const {
+        parentId,
+        files,
+        createdBy,
+        isMobile,
+    } = options;
+    const saveObjective = options.saveObjective;
+    const accessRoleLevel = options.level;
+    const actionOriginator = options.createdBy.user;
+
+    async.waterfall([
+
+        (cb) => {
+            ObjectiveModel.findById(parentId)
+                .lean()
+                .exec((err, parentObjective) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!parentObjective) {
+                        const error = new Error('Parent objective not found.');
+
+                        error.status = 400;
+                        return cb(error);
+                    }
+
+                    cb(null, parentObjective);
+                });
+        },
+
+        (parentObjective, cb) => {
+            const attachments = [...options.attachments];
+            const objectivePayload = {
+                title: options.title,
+                description: options.description,
+                parent: parentObjective.parent,
+                priority: options.priority || parentObjective.priority,
+                objectiveType: parentObjective.objectiveType,
+                companyObjective: options.companyObjective || parentObjective.companyObjective,
+                status: saveObjective ?
+                    OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS,
+                assignedTo: options.assignedTo,
+                level: accessRoleLevel,
+                createdBy,
+                editedBy: createdBy,
+                attachments,
+                location: options.location,
+                country: options.country,
+                region: options.region,
+                subRegion: options.subRegion,
+                retailSegment: options.retailSegment,
+                outlet: options.outlet,
+                branch: options.branch,
+                dateStart: options.dateStart || parentObjective.dateStart,
+                dateEnd: options.dateEnd || parentObjective.dateEnd,
+            };
+
+            // attach form like in parent objective to sub objective
+            // if it not defined
+            if (!options.formType && parentObjective.form) {
+                objectivePayload.form = parentObjective.form;
+            }
+
+            if (options.title) {
+                objectivePayload.title = {
+                    en: _.escape(_.get(options, 'title.en') || ''),
+                    ar: _.escape(_.get(options, 'title.ar') || ''),
+                };
+            }
+
+            if (options.description) {
+                objectivePayload.description = {
+                    en: _.escape(_.get(options, 'description.en') || ''),
+                    ar: _.escape(_.get(options, 'description.ar') || ''),
+                };
+            }
+
+            if (parentObjective.parent) {
+                objectivePayload.parent = {
+                    1: parentObjective.parent['1'] || null,
+                    2: parentObjective.parent['2'] || null,
+                    3: parentObjective.parent['3'] || null,
+                    4: parentObjective.parent['4'] || null,
+                };
+                /*
+                 * less then or equals to Area in Charge manager without Trade Marketer
+                 * */
+                const everyAdmin = [
+                    ACL_CONSTANTS.MASTER_ADMIN,
+                    ACL_CONSTANTS.COUNTRY_ADMIN,
+                    ACL_CONSTANTS.AREA_MANAGER,
+                    ACL_CONSTANTS.AREA_IN_CHARGE,
+                    ACL_CONSTANTS.SALES_MAN,
+                ];
+
+                if (parentObjective.level && everyAdmin.indexOf(parentObjective.level) > -1) {
+                    objectivePayload.parent[parentObjective.level] = parentObjective._id;
+                }
+            }
+
+            if (parentObjective.companyObjective) {
+                objectivePayload.companyObjective = parentObjective.companyObjective;
+            }
+
+            if (options.companyObjective) {
+                objectivePayload.companyObjective = {
+                    en: _.escape(_.get(options, 'companyObjective.en') || ''),
+                    ar: _.escape(_.get(options, 'companyObjective.ar') || ''),
+                };
+            }
+
+            async.waterfall([
+
+                (cb) => {
+                    if (!files) {
+                        return cb(null, []);
+                    }
+
+                    fileHandler.uploadFile(actionOriginator, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
+                        if (err) {
+                            return cb(err, null);
+                        }
+
+                        attachments.push(
+                            ...setFileId
+                        );
+
+                        cb(null);
+                    });
+                },
+
+                (cb) => {
+                    const objective = new ObjectiveModel();
+
+                    objective.set(objectivePayload);
+                    objective.save((err, objective) => {
+                        cb(err, objective);
+                    });
+                },
+
+                (objective, cb) => {
+                    if (options.formType === 'distribution') {
+                        const data = {
+                            objective: objective.get('_id'),
+                        };
+
+                        return distributionFormHandler.createForm(actionOriginator, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            objective.form = {
+                                _id: formModel.get('_id'),
+                                contentType: options.formType,
+                            };
+
+                            cb(null, objective);
+                        });
+                    }
+
+                    if (options.formType === 'visibility') {
+                        const data = {
+                            objective: objective.get('_id'),
+                            createdBy,
+                        };
+
+                        return visibilityFormHandler.createForm(actionOriginator, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            objective.form = {
+                                _id: formModel.get('_id'),
+                                contentType: options.formType,
+                            };
+
+                            cb(null, objective);
+                        });
+                    }
+                },
+
+                (objective, cb) => {
+                    if (!options.formType) {
+                        return cb(null, objective);
+                    }
+
+                    objective.save((err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, objective);
+                    });
+                },
+
+                updateParents,
+
+                (objective, cb) => {
+                    const isNotVisibility = options.formType !== 'visibility';
+
+                    if (isNotVisibility) {
+                        const eventPayload = {
+                            actionOriginator,
+                            accessRoleLevel,
+                            body: objective.toJSON(),
+                        };
+
+                        if (TestUtils.isObjectiveDraft(objective)) {
+                            ActivityLog.emit('sub-objective:draft-created', eventPayload);
+                        }
+
+                        if (TestUtils.isObjectivePublished(objective)) {
+                            ActivityLog.emit('sub-objective:published', eventPayload);
+                        }
+                    }
+
+                    const id = objective.get('_id');
+
+                    getByIdAggr({
+                        id,
+                        isMobile,
+                    }, cb);
+                },
+
+            ], cb);
+        },
+
+    ], callback);
+};
+
+const getAllPipeline = (options) => {
+    const subordinates = options.subordinates;
+    const personnel = options.personnel;
+    const aggregateHelper = options.aggregateHelper;
+    const queryObject = options.queryObject;
+    const parentIds = options.parentIds;
+    const positionFilter = options.positionFilter;
+    const searchFieldsArray = options.searchFieldsArray;
+    const filterSearch = options.filterSearch;
+    const skip = options.skip;
+    const limit = options.limit;
+    const isMobile = options.isMobile;
+    const coveredIds = options.coveredIds;
+    const pipeline = [];
+    const currentUserLevel = options.currentUserLevel;
+
+    if (parentIds && parentIds.length) {
+        pipeline.push({
+            $match: {
+                $and: [{
+                    $or: [
+                        { 'parent.1': { $in: parentIds } },
+                        { 'parent.2': { $in: parentIds } },
+                        { 'parent.3': { $in: parentIds } },
+                        { 'parent.4': { $in: parentIds } },
+                    ],
+                }, {
+                    _id: { $nin: parentIds },
+                }],
+            },
+        });
+    } else {
+        if (queryObject) {
+            pipeline.push({
+                $match: queryObject,
+            });
+        }
+
+        if (isMobile && currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+            const allowedAccessRoles = [
+                ACL_CONSTANTS.COUNTRY_ADMIN,
+                ACL_CONSTANTS.AREA_MANAGER,
+                ACL_CONSTANTS.AREA_IN_CHARGE,
+            ];
+
+            if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
+                // get objectives that assigned to subordinate users
+                pipeline.push({
+                    $match: {
+                        $or: [
+                            { assignedTo: { $in: subordinates } },
+                            { assignedTo: { $in: coveredIds } },
+                            { 'createdBy.user': { $in: coveredIds } },
+                        ],
+                    },
+                });
+            }
+        }
+
+        // prevent retrieving objectives with status === draft if user not creator
+        pipeline.push({
+            $match: {
+                $or: [{
+                    status: { $ne: OBJECTIVE_STATUSES.DRAFT },
+                }, {
+                    status: { $eq: OBJECTIVE_STATUSES.DRAFT },
+                    'createdBy.user': { $eq: personnel },
+                }],
+            },
         });
     }
 
-    this.getUrl = function (req, res, next) {
-        var imageName = req.params.imageName;
-        var url = fileHandler.computeUrl(imageName);
+    if (!isMobile) {
+        pipeline.push({
+            $match: {
+                $or: [
+                    { archived: false },
+                    { archived: { $exists: false } },
+                ],
+            },
+        });
+    }
 
-        res.status(200).send(url);
+    if (isMobile) {
+        pipeline.push({
+            $project: aggregateHelper.getProjection({
+                parent: {
+                    level1: '$parent.1',
+                    level2: '$parent.2',
+                    level3: '$parent.3',
+                    level4: '$parent.4',
+                },
+            }),
+        });
+    }
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'personnels',
+        key: 'assignedTo',
+        addProjection: ['position', 'accessRole', 'firstName', 'lastName'],
+        isArray: true,
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'files',
+        key: 'attachments',
+        addProjection: ['contentType', 'originalName', 'createdBy'],
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'domains',
+        key: 'country',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'domains',
+        key: 'region',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'domains',
+        key: 'subRegion',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'retailSegments',
+        key: 'retailSegment',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'outlets',
+        key: 'outlet',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'branches',
+        key: 'branch',
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'personnels',
+        key: 'createdBy.user',
+        isArray: false,
+        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+        includeSiblings: { createdBy: { date: 1 } },
+    }));
+
+    pipeline.push({
+        $unwind: {
+            path: '$assignedTo',
+            preserveNullAndEmptyArrays: true,
+        },
+    });
+
+    if (positionFilter) {
+        pipeline.push({
+            $match: positionFilter,
+        });
+    }
+
+    if (!isMobile) {
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'assignedTo.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                assignedTo: {
+                    _id: 1,
+                    position: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
+            },
+        }));
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'assignedTo.position',
+            isArray: false,
+            includeSiblings: {
+                assignedTo: {
+                    _id: 1,
+                    accessRole: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
+            },
+        }));
+    }
+
+    pipeline.push({
+        $group: aggregateHelper.getGroupObject({
+            assignedTo: { $addToSet: '$assignedTo' },
+        }),
+    });
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'accessRoles',
+        key: 'createdBy.user.accessRole',
+        isArray: false,
+        addProjection: ['_id', 'name', 'level'],
+        includeSiblings: {
+            createdBy: {
+                date: 1,
+                user: {
+                    _id: 1,
+                    position: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
+            },
+        },
+    }));
+
+    pipeline.push(...aggregateHelper.aggregationPartMaker({
+        from: 'positions',
+        key: 'createdBy.user.position',
+        isArray: false,
+        includeSiblings: {
+            createdBy: {
+                date: 1,
+                user: {
+                    _id: 1,
+                    accessRole: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
+            },
+        },
+    }));
+
+    if (isMobile) {
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'personnels',
+            key: 'editedBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: { editedBy: { date: 1 } },
+        }));
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'editedBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'editedBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+    }
+
+    pipeline.push({
+        $project: aggregateHelper.getProjection({
+            assignedTo: {
+                $filter: {
+                    input: '$assignedTo',
+                    as: 'oneItem',
+                    cond: { $ne: ['$$oneItem', null] },
+                },
+            },
+        }),
+    });
+
+    pipeline.push(...aggregateHelper.endOfPipeLine({
+        isMobile,
+        searchFieldsArray,
+        filterSearch,
+        skip,
+        limit,
+        creationDate: true,
+    }));
+
+    return pipeline;
+};
+
+const updateChildObjective = (options) => {
+    const {
+        setObjectiveId,
+        assignedTo,
+    } = options;
+    const query = {
+        _id: {
+            $in: setObjectiveId,
+        },
     };
 
-    this.removeFileFromObjective = function (req, res, next) {
-        var body = req.body;
-        var session = req.session;
-        var userId = session.uId;
-        var fileId = body.fileId;
-        var objectiveId = body.objectiveId;
-        var error;
-        var fileName;
+    ObjectiveModel.update(query, {
+        $set: {
+            'createdBy.user': ObjectId(assignedTo[0]),
+        },
+    }, {
+        multi: true,
+        runValidators: true,
+    }, (err) => {
+        if (err) {
+            logger.error(err);
+            return;
+        }
+    });
+};
+
+const updateObjectiveByAssigneeLocation = (objective, cb) => {
+    const objectiveLevel = objective.get('level');
+    const objectiveId = objective.get('_id');
+    const query = {
+        [`parent.${objectiveLevel}`]: objectiveId,
+    };
+
+    ObjectiveModel.find(query)
+        .lean()
+        .exec((err, setObjective) => {
+            if (err) {
+                return cb(err);
+            }
+
+            if (setObjective) {
+                PersonnelModel.findById(objective.assignedTo[0])
+                    .lean()
+                    .exec((err, personnel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        ObjectiveModel.findByIdAndUpdate(objectiveId, {
+                            $set: {
+                                country: personnel.country,
+                                region: personnel.region,
+                                subRegion: personnel.subRegion,
+                                branch: personnel.branch,
+                            },
+                        }, {
+                            runValidators: true,
+                        }, (err) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            updateChildObjective({
+                                setObjectiveId: setObjective.map(item => item._id),
+                                assignedTo: objective.assignedTo,
+                            });
+                        });
+                    });
+            }
+
+            cb(null, objective);
+        });
+};
+
+class ObjectiveHandler {
+
+    getUrl(req, res) {
+        const imageName = req.params.imageName;
+        const url = fileHandler.computeUrl(imageName);
+
+        res.status(200).send(url);
+    }
+
+    removeFileFromObjective(req, res, next) {
+        const body = req.body;
+        const session = req.session;
+        const userId = session.uId;
+        const fileId = body.fileId;
+        const objectiveId = body.objectiveId;
 
         if (!objectiveId || !fileId) {
-            error = new Error('Not enough params');
+            const error = new Error('Not enough params');
+
             error.status = 400;
             return next(error);
         }
 
         async.waterfall([
 
-            function (cb) {
-                FileModel.findById(fileId, function (err, fileModel) {
+            (cb) => {
+                FileModel.findById(fileId, (err, fileModel) => {
                     if (err) {
                         return cb(err, null);
                     }
 
                     if (!fileModel) {
-                        error = new Error('File not found');
+                        const error = new Error('File not found');
+
                         error.status = 400;
                         return cb(err, null);
                     }
 
-                    fileName = fileModel.get('name');
+                    const fileName = fileModel.get('name');
 
                     if (userId === fileModel.get('createdBy.user').toString()) {
-                        return cb(null, true);
+                        return cb(null, {
+                            removeFile: true,
+                            fileName,
+                        });
                     }
 
-                    cb(null, false);
+                    cb(null, {
+                        removeFile: false,
+                    });
                 });
             },
 
-            function (removeFile, cb) {
-                ObjectiveModel.update(objectiveId, {$pull: {attachments: ObjectId(fileId)}}, function (err) {
+            (options, cb) => {
+                const {
+                removeFile,
+                fileName,
+            } = options;
+
+                ObjectiveModel.update(objectiveId, {
+                    $pull: {
+                        attachments: ObjectId(fileId),
+                    },
+                }, (err) => {
                     if (err) {
                         return cb(err);
                     }
 
                     if (removeFile) {
-                        fileHandler.deleteFile(fileName, 'objectives', function (err) {
+                        return fileHandler.deleteFile(fileName, CONTENT_TYPES.OBJECTIVES, (err) => {
                             if (err) {
                                 return cb(err);
                             }
+
+                            cb();
                         });
                     }
 
                     cb();
                 });
-            }
+            },
 
-        ], function (err) {
+        ], (err) => {
             if (err) {
                 return next(err);
             }
 
             res.status(200).send();
         });
-    };
+    }
 
-    this.create = function (req, res, next) {
+    create(req, res, next) {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
+        const isMobile = req.isMobile;
 
-        function queryRun(body) {
-            var files = req.files;
-            var model;
-            var saveObjective;
-            var objective;
-            var error;
+        const queryRun = (body, callback) => {
+            const files = req.files;
             const createdBy = {
                 user: userId,
-                date: new Date()
+                date: new Date(),
             };
 
-            saveObjective = body.saveObjective;
+            const saveObjective = body.saveObjective;
 
             if (!body.assignedTo || !body.assignedTo.length) {
-                error = new Error('You must assign person to task');
+                const error = new Error('You must assign person to task');
+
                 error.status = 400;
                 return next(error);
             }
 
             async.waterfall([
 
-                function (cb) {
+                (cb) => {
                     if (!files) {
                         return cb(null, []);
                     }
 
-                    //TODO: change bucket from constants
-                    fileHandler.uploadFile(userId, files, 'objectives', function (err, filesIds) {
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        cb(null, filesIds);
+                        cb(null, setFileId);
                     });
                 },
 
-                function (filesIds, cb) {
-                    var status = saveObjective ? OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
+                (setFileId, cb) => {
+                    const status = saveObjective ?
+                    OBJECTIVE_STATUSES.DRAFT : OBJECTIVE_STATUSES.IN_PROGRESS;
 
                     body.title = {
-                        en: body.title.en ? _.escape(body.title.en) : '',
-                        ar: body.title.ar ? _.escape(body.title.ar) : ''
+                        en: _.escape(_.get(body, 'title.en') || ''),
+                        ar: _.escape(_.get(body, 'title.ar') || ''),
                     };
                     body.description = {
-                        en: body.description.en ? _.escape(body.description.en) : '',
-                        ar: body.description.ar ? _.escape(body.description.ar) : ''
+                        en: _.escape(_.get(body, 'description.en') || ''),
+                        ar: _.escape(_.get(body, 'description.ar') || ''),
                     };
 
-                    objective = {
+                    const data = {
                         objectiveType: body.objectiveType,
-                        priority     : body.priority,
-                        status       : status,
-                        assignedTo   : body.assignedTo,
-                        level        : session.level,
-                        dateStart    : body.dateStart,
-                        dateEnd      : body.dateEnd,
-                        country      : body.country,
-                        region       : body.region,
-                        subRegion    : body.subRegion,
+                        priority: body.priority,
+                        status,
+                        assignedTo: body.assignedTo,
+                        level: session.level,
+                        dateStart: body.dateStart,
+                        dateEnd: body.dateEnd,
+                        country: body.country,
+                        region: body.region,
+                        subRegion: body.subRegion,
                         retailSegment: body.retailSegment,
-                        outlet       : body.outlet,
-                        branch       : body.branch,
-                        location     : body.location,
-                        attachments  : filesIds,
-                        createdBy    : createdBy,
-                        editedBy     : createdBy,
-                        title        : body.title,
-                        description  : body.description
+                        outlet: body.outlet,
+                        branch: body.branch,
+                        location: body.location,
+                        attachments: setFileId,
+                        createdBy,
+                        editedBy: createdBy,
+                        title: body.title,
+                        description: body.description,
                     };
 
-                    model = new ObjectiveModel(objective);
-                    model.save(function (err, model) {
-                        if (err) {
-                            return cb(err);
-                        }
+                    const objective = new ObjectiveModel();
 
-                        if (model) {
-                            if (model.title) {
-                                model.title = {
-                                    en: model.title.en ? _.unescape(model.title.en) : '',
-                                    ar: model.title.ar ? _.unescape(model.title.ar) : ''
-                                }
-                            }
-                            if (model.description) {
-                                model.description = {
-                                    en: model.description.en ? _.unescape(model.description.en) : '',
-                                    ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                                }
-                            }
-                        }
-
-                        cb(null, model);
+                    objective.set(data);
+                    objective.save((err, model) => {
+                        cb(err, model);
                     });
                 },
 
-                (objectiveModel, cb) => {
-                    const hasForm = body.hasOwnProperty('formType');
-                    const isDistribution = body.hasOwnProperty('formType') && body.formType === 'distribution';
-
-                    // skip in case with visibility form
-                    if (!hasForm || isDistribution) {
-                        if (TestUtils.isObjectiveDraft(model)) {
-                            ActivityLog.emit('objective:draft-created', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: model.toJSON(),
-                            });
-                        }
-
-                        if (TestUtils.isObjectivePublished(model)) {
-                            ActivityLog.emit('objective:published', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: model.toJSON(),
-                            });
-                        }
-                    }
-
+                (objective, cb) => {
                     if (body.formType === 'distribution') {
                         const data = {
-                            objective: objectiveModel.get('_id')
+                            objective: objective.get('_id'),
                         };
 
                         return distributionFormHandler.createForm(userId, data, (err, formModel) => {
@@ -659,18 +1244,18 @@ var Objectives = function (db, redis, event) {
                                 return cb(err);
                             }
 
-                            objectiveModel.form = {
+                            objective.form = {
                                 _id: formModel.get('_id'),
-                                contentType: body.formType
+                                contentType: body.formType,
                             };
 
-                            cb(null, objectiveModel);
+                            cb(null, objective);
                         });
                     }
 
                     if (body.formType === 'visibility') {
                         const data = {
-                            objective: objectiveModel.get('_id'),
+                            objective: objective.get('_id'),
                             createdBy,
                         };
 
@@ -679,83 +1264,86 @@ var Objectives = function (db, redis, event) {
                                 return cb(err);
                             }
 
-                            objectiveModel.form = {
+                            objective.form = {
                                 _id: formModel.get('_id'),
-                                contentType: body.formType
+                                contentType: body.formType,
                             };
 
-                            cb(null, objectiveModel);
+                            cb(null, objective);
                         });
                     }
 
-                    cb(null, objectiveModel);
+                    cb(null, objective);
                 },
 
-                function (objectiveModel, cb) {
+                (objective, cb) => {
                     if (!body.formType) {
-                        return cb(null, objectiveModel);
+                        return cb(null, objective);
                     }
 
-                    objectiveModel.save(function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, objectiveModel);
+                    objective.save((err) => {
+                        cb(err, objective);
                     });
                 },
 
-                function (objectiveModel, cb) {
-                    var id = objectiveModel.get('_id');
+                (objective, cb) => {
+                    const hasForm = _.has(body, 'formType');
+                    const isDistribution = hasForm && body.formType === 'distribution';
 
-                    self.getByIdAggr({id: id, isMobile: req.isMobile}, cb);
-                }
+                // skip in case with visibility form
+                    if (!hasForm || isDistribution) {
+                        if (TestUtils.isObjectiveDraft(objective)) {
+                            ActivityLog.emit('objective:draft-created', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: objective.toJSON(),
+                            });
+                        }
 
-            ], function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+                        if (TestUtils.isObjectivePublished(objective)) {
+                            ActivityLog.emit('objective:published', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: objective.toJSON(),
+                            });
+                        }
+                    }
 
-                res.status(201).send(result);
-            });
+                    const id = objective.get('_id');
 
-        }
+                    getByIdAggr({
+                        id,
+                        isMobile,
+                    }, cb);
+                },
 
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body;
+            ], callback);
+        };
 
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getWriteAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.OBJECTIVES, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(201).send(result);
         });
-    };
+    }
 
-    this.update = function (req, res, next) {
+    update(req, res, next) {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
@@ -763,1135 +1351,559 @@ var Objectives = function (db, redis, event) {
             actionOriginator: userId,
             accessRoleLevel,
         });
+        const files = req.files;
+        const body = extractBody(req.body);
+        const objectiveId = req.params.id;
+        const attachments = body.attachments;
 
-        function queryRun(updateObject, body) {
-            var files = req.files;
-            var attachments = body.attachments;
-            var session = req.session;
-            var userId = session.uId;
-            var objectiveId = req.params.id;
-            var description = updateObject.description;
-            var title = updateObject.title;
-
-            var fullUpdate = {
-                $set: updateObject
+        const queryRun = ($set, callback) => {
+            const fullUpdate = {
+                $set,
             };
-            var waterFallTasks = [];
 
-            function updateCover(objective) {
+            const updateCover = (objective) => {
                 PersonnelModel.findOne({
-                    'vacation.cover': ObjectId(userId),
-                    $or             : [
-                        {
-                            _id               : ObjectId(objective.assignedTo),
-                            'vacation.onLeave': true
-                        },
-                        {
-                            _id               : ObjectId(objective.createdBy.user),
-                            'vacation.onLeave': true
-                        }
-                    ]
-                }, function (err, personnel) {
-                    var history;
-                    var objectiveHistory;
-
+                    $and: [{
+                        'vacation.cover': ObjectId(userId),
+                    }, {
+                        $or: [{
+                            _id: {
+                                $in: objective.assignedTo,
+                            },
+                            'vacation.onLeave': true,
+                        }, {
+                            _id: ObjectId(objective.createdBy.user),
+                            'vacation.onLeave': true,
+                        }],
+                    }],
+                }, (err, personnel) => {
                     if (err) {
-                        //TODO: need logger
-                        return console.log(err);
+                        logger.error('Query on objective\'s cover fails', err);
+                        return;
                     }
+
                     if (!personnel) {
-                        //TODO: need logger
-                        return console.log('personnel  not found');
+                        logger.error('Cover personnel not found');
+                        return;
                     }
 
-                    history = {
+                    const objectiveHistory = new ObjectiveHistoryModel({
                         objective: ObjectId(objective._id),
-                        person   : ObjectId(userId)
-                    };
+                        person: ObjectId(userId),
+                    });
 
-                    objectiveHistory = new ObjectiveHistoryModel(history);
-
-                    objectiveHistory.save(function (err) {
+                    objectiveHistory.save((err) => {
                         if (err) {
-                            // TODO: need logger
-                            return console.log(err);
+                            logger.error('Objective\'s history doesn\'t saved', err);
+                            return;
                         }
                     });
                 });
-            }
+            };
 
-            function uploadFiles(waterFallCb) {
-                fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, function (err, filesIds) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    waterFallCb(null, filesIds);
-                });
-            }
-
-            function updateObjective(filesIds, waterFallCb) {
-                if (typeof filesIds === 'function') {
-                    waterFallCb = filesIds;
+            const updateObjective = (setFileId, cb) => {
+                if ($set.status && $set.status !== OBJECTIVE_STATUSES.CLOSED) {
+                    $set.complete = $set.status === OBJECTIVE_STATUSES.COMPLETED ? 100 : 0;
                 }
 
-                if (updateObject.status && updateObject.status !== OBJECTIVE_STATUSES.CLOSED) {
-                    updateObject.complete = updateObject.status === OBJECTIVE_STATUSES.COMPLETED ? 100 : 0;
-                }
-
-                updateObject.editedBy = {
+                $set.editedBy = {
                     user: ObjectId(userId),
-                    date: new Date()
+                    date: new Date(),
                 };
 
                 if (attachments && attachments.length) {
-                    attachments = attachments.objectID();
-
-                    updateObject.attachments = attachments.concat(filesIds);
+                    $set.attachments = attachments.objectID().concat(setFileId);
                 } else {
-                    delete updateObject.attachments;
+                    delete $set.attachments;
 
                     fullUpdate.$addToSet = {
                         attachments: {
-                            $each: filesIds
-                        }
+                            $each: setFileId,
+                        },
                     };
                 }
 
-                if (updateObject.title) {
-                    delete updateObject.title;
+                if ($set.title) {
+                    $set['title.en'] = _.escape(_.get($set, 'title.en') || '');
+                    $set['title.ar'] = _.escape(_.get($set, 'title.ar') || '');
 
-                    updateObject['title.en'] = _.escape(title.en || '');
-                    updateObject['title.ar'] = _.escape(title.ar || '');
+                    delete $set.title;
                 }
 
-                if (description) {
-                    delete updateObject.description;
+                if ($set.description) {
+                    $set['description.en'] = _.escape(_.get($set, 'description.en') || '');
+                    $set['description.ar'] = _.escape(_.get($set, 'description.ar') || '');
 
-                    updateObject['description.en'] = _.escape(description.en || '');
-                    updateObject['description.ar'] = _.escape(description.ar || '');
+                    delete $set.description;
                 }
 
-                ObjectiveModel.findOne({_id: objectiveId}, function(err, model) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
+                async.waterfall([
 
-                    store.setPreviousState(model.toJSON());
+                    (cb) => {
+                        ObjectiveModel.findOne({ _id: objectiveId })
+                            .lean()
+                            .exec(cb);
+                    },
 
-                    if (lodash.includes([
+                    (objective, cb) => {
+                        store.setPreviousState(objective);
+
+                        if (_.includes([
                             OBJECTIVE_STATUSES.FAIL,
-                            OBJECTIVE_STATUSES.CLOSED
-                        ], model.status)) {
+                            OBJECTIVE_STATUSES.CLOSED,
+                        ], objective.status)) {
+                            const error = new Error(`You could not update task with status: "${objective.status}"`);
+                            error.status = 400;
 
-                        const error = new Error(`You could not update task with status: "${model.status}"`);
-                        error.status = 400;
-
-                        return waterFallCb(error);
-                    }
-
-                    if (model.status === OBJECTIVE_STATUSES.OVER_DUE && model.createdBy.user.toString() !== userId) {
-                        const error = new Error(`You could not update task with status: "${model.status}"`);
-                        error.status = 400;
-
-                        return waterFallCb(error);
-                    }
-
-                    ObjectiveModel.findOneAndUpdate({_id: objectiveId}, fullUpdate, {new: true}, function (err, objectiveModel) {
-                        if (err) {
-                            return waterFallCb(err);
+                            return cb(error);
                         }
 
-                        if (body.cover) {
-                            updateCover(objectiveModel);
+                        if (objective.status === OBJECTIVE_STATUSES.OVER_DUE && toString(objective, 'createdBy.user') !== userId) {
+                            const error = new Error(`You could not update task with status: "${objective.status}"`);
+
+                            error.status = 400;
+                            return cb(error);
                         }
 
-                        if (objectiveModel.status === OBJECTIVE_STATUSES.CLOSED
-                            && objectiveModel.objectiveType !== 'individual'
-                            && objectiveModel.level === ACL_CONSTANTS.MASTER_ADMIN) {
-                            ObjectiveModel
-                                .update({
-                                    'parent.1': objectiveModel._id
-                                }, {
-                                    $set: {'archived': true}
-                                }, {
-                                    multi: true
-                                }, function (err, result) {
-                                    if (err) {
-                                        console.log(err);
-                                    }
+                        cb(null);
+                    },
 
-                                    console.dir(result);
-                                });
-                        }
-
-                        store.setNextState(objectiveModel.toJSON());
-                        store.difference();
-                        store.publish();
-
-                        waterFallCb(null, objectiveModel);
-                    });
-                });
-            }
-
-            function createForms(objectiveModel, cb) {
-                if (updateObject.formType === 'distribution') {
-                    /* TODO fill description from task if AM or AincM will link forms */
-                    const data = {
-                        objective: objectiveModel.get('_id'),
-                        description: '',
-                    };
-
-                    return distributionFormHandler.createForm(userId, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: updateObject.formType
+                    (cb) => {
+                        const opts = {
+                            new: true,
+                            runValidators: true,
                         };
 
-                        cb(null, objectiveModel);
-                    });
-                }
+                        ObjectiveModel.findOneAndUpdate({ _id: objectiveId }, fullUpdate, opts, cb);
+                    },
 
-                if (updateObject.formType === 'visibility') {
-                    const data = {
-                        objective: objectiveModel.get('_id'),
-                        createdBy: {
-                            userId,
-                            date: objectiveModel.createdBy.date,
-                        },
-                    };
-
-                    return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
-                        if (err) {
-                            return cb(err);
+                    (objective, cb) => {
+                        if ($set.cover) {
+                            updateCover(objective);
                         }
 
-                        objectiveModel.form = {
-                            _id: formModel.get('_id'),
-                            contentType: updateObject.formType
-                        };
-
-                        cb(null, objectiveModel);
-                    });
-                }
-
-                cb(null, objectiveModel);
-            }
-
-            function updateObjectiveWithForm(objectiveModel, waterFallCb) {
-                if (!updateObject.formType) {
-                    return waterFallCb(null, objectiveModel);
-                }
-
-                objectiveModel.save(function (err) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    waterFallCb(null, objectiveModel);
-                });
-            }
-
-            function consoleLogENV(message) {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(message);
-                }
-            }
-
-            function updateParents(objectiveModel, waterFallCb) {
-                var nextParent;
-                var objectiveModelClone = _.extend({}, objectiveModel.toObject());
-                var level = objectiveModelClone.level;
-                var parents = objectiveModelClone.parent;
-
-                var seriesTasks = [];
-
-                function updateParentObjective(id, seriesCb) {
-                    async.waterfall([
-                        function (waterFallCB) {
-                            ObjectiveModel.findById(id, function (err, parentModel) {
-                                if (err) {
-                                    return waterFallCb(err);
-                                }
-
-                                if (!parentModel) {
-                                    return waterFallCB('Parent objective not found');
-                                }
-
-                                waterFallCB(null, parentModel);
-                            });
-                        },
-
-                        (parentObjective, cb) => {
-                            const parentModelLevel = parseInt(parentObjective.level, 10);
-                            const query = {
-                                level: parentModelLevel + 1,
-                                [`parent.${parentModelLevel}`]: parentObjective._id,
-                            };
-
-                            ObjectiveModel.find(query, (err, childModels) => {
-                                const currentStatusOfParentObjective = parentObjective.status;
-
-                                const countSubTasks = childModels.filter((model) => (model.status !== 'draft')).length;
-                                const completedSubTasks = childModels.filter((model) => (model.status === 'completed')).length;
-                                const complete = Math.floor(completedSubTasks * 100 / countSubTasks);
-                                const changes = {
-                                    countSubTasks,
-                                    completedSubTasks,
-                                    complete,
-                                };
-
-                                if (complete >= 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.RE_OPENED) {
-                                    changes.status = OBJECTIVE_STATUSES.CLOSED;
-                                }
-
-                                if (complete < 100 && currentStatusOfParentObjective === OBJECTIVE_STATUSES.CLOSED) {
-                                    changes.status = OBJECTIVE_STATUSES.RE_OPENED;
-                                }
-
-                                parentObjective.set(changes);
-
-                                cb(null, parentObjective);
-                            });
-                        }
-
-                    ], function (err, parentModel) {
-                        if (err) {
-                            return seriesCb(err);
-                        }
-
-                        parentModel.save(function (err) {
-                            if (err) {
-                                return seriesCb(err);
-                            }
-
-                            seriesCb(null);
-                        });
-                    });
-                }
-
-                for (var i = level - 1; i >= 1; i--) {
-                    nextParent = parents[i];
-                    if (nextParent) {
-                        seriesTasks.push(
-                            async.apply(updateParentObjective, nextParent)
-                        );
-                    }
-                }
-
-                async.series(seriesTasks, function (err) {
-                    if (err) {
-                        logWriter.log(err);
-                        return consoleLogENV(err);
-                    }
-                });
-
-                waterFallCb(null, objectiveModel);
-            }
-
-            function updateChildObjective(options) {
-                var nextObjectiveIds;
-                var assignedTo;
-
-                options = options || {};
-                nextObjectiveIds = options.nextObjectiveIds;
-                assignedTo = options.assignedTo;
-
-                ObjectiveModel.update({_id: {$in: nextObjectiveIds}}, {$set: {'createdBy.user': ObjectId(assignedTo[0])}}, function (err) {
-                    if (err) {
-                        return consoleLogENV(err);
-                    }
-                });
-            }
-
-            function updateObjectiveByAssigneeLocation(objectiveModel, waterFallCb) {
-                var level;
-                var objectiveModelId;
-                var query = {};
-
-                level = objectiveModel.get('level');
-                objectiveModelId = objectiveModel.get('_id');
-                query['parent.' + level] = objectiveModelId;
-
-                ObjectiveModel.find(query, function (err, models) {
-                    if (err) {
-                        return waterFallCb(err);
-                    }
-
-                    if (models) {
-                        PersonnelModel.findById(updateObject.assignedTo[0], function (err, personnel) {
-                            if (err) {
-                                return waterFallCb(err);
-                            }
-
-                            ObjectiveModel.findByIdAndUpdate(objectiveModelId, {
+                        if (objective.status === OBJECTIVE_STATUSES.CLOSED
+                            && objective.objectiveType !== 'individual'
+                            && objective.level === ACL_CONSTANTS.MASTER_ADMIN) {
+                            ObjectiveModel.update({
+                                'parent.1': objective._id,
+                            }, {
                                 $set: {
-                                    country  : personnel.country,
-                                    region   : personnel.region,
-                                    subRegion: personnel.subRegion,
-                                    branch   : personnel.branch
-                                }
-                            }, function (err) {
+                                    archived: true,
+                                },
+                            }, {
+                                multi: true,
+                                runValidators: true,
+                            }, (err, result) => {
                                 if (err) {
-                                    return waterFallCb(err);
+                                    logger.error(err);
+                                    return;
                                 }
 
-                                updateChildObjective({
-                                    nextObjectiveIds: _.pluck(models, '_id'),
-                                    assignedTo      : updateObject.assignedTo
-                                });
+                                logger.info(result);
                             });
-                        });
-                    }
-
-                    waterFallCb(null, objectiveModel);
-                });
-            }
-
-            function getResultAndSend(objectiveModel, waterFallCb) {
-                var id = objectiveModel.get('_id');
-
-                self.getByIdAggr({id: id, isMobile: req.isMobile}, waterFallCb);
-            }
-
-            if (files) {
-                waterFallTasks.unshift(uploadFiles);
-            }
-
-            waterFallTasks.push(updateObjective);
-
-            if (updateObject.formType) {
-                waterFallTasks.push(createForms);
-
-                waterFallTasks.push(updateObjectiveWithForm);
-            }
-
-            if (updateObject.status && updateObject.status !== OBJECTIVE_STATUSES.CLOSED) {
-                waterFallTasks.push(updateParents);
-            }
-
-            if (updateObject.assignedTo && updateObject.assignedTo[0]) {
-                waterFallTasks.push(updateObjectiveByAssigneeLocation);
-            }
-
-            waterFallTasks.push(getResultAndSend);
-
-            async.waterfall(waterFallTasks, function (err, model) {
-                if (err) {
-                    return next(err);
-                }
-                if (model) {
-                    if (model.title) {
-                        model.title = {
-                            en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : ''
                         }
-                    }
-                    if (model.description) {
-                        model.description = {
-                            en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                        }
-                    }
-                }
 
-                res.status(200).send(model);
-            });
-        }
+                        cb(null, objective);
+                    },
 
-        access.getEditAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body;
-            var updateObject;
-
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-
-                updateObject = body.changed;
-
-                if (typeof updateObject === 'string') {
-                    updateObject = JSON.parse(updateObject);
-                }
-
-                if (typeof body.attachments === 'string') {
-                    body.attachments = JSON.parse(body.attachments);
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(updateObject, req.session.level, CONTENT_TYPES.OBJECTIVES, 'update', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData, body);
-            });
-        });
-    };
-
-    this.duplicateObjective = function (req, res, next) {
-        function queryRun() {
-            var objectiveId = body.id;
-            var session = req.session;
-
-            ObjectiveModel
-                .findById(objectiveId, function (err, objective) {
-                    var error;
-                    var options;
-                    var objectiveJSON;
-
-                    if (err) {
-                        return next(err);
-                    }
-
-                    if (!objective) {
-                        error = new Error('Objective not found');
-                        error.status = 400;
-
-                        return next(error);
-                    }
-
-                    objectiveJSON = objective.toJSON();
-
-                    options = {
-                        objectiveType   : objectiveJSON.objectiveType,
-                        priority        : objectiveJSON.priority,
-                        status          : OBJECTIVE_STATUSES.DRAFT,
-                        //assignedTo: body.assignedTo,
-                        level           : session.level,
-                        //dateStart: body.dateStart,
-                        //dateEnd: body.dateEnd,
-                        //country: body.country,
-                        //region: body.region,
-                        //subRegion: body.subRegion,
-                        //retailSegment: body.retailSegment,
-                        //outlet: body.outlet,
-                        //branch: body.branch,
-                        //location: body.location,
-                        createdBy       : {
-                            user: session.uId,
-                            date: Date.now()
-                        },
-                        title           : objectiveJSON.title,
-                        description     : objectiveJSON.description,
-                        companyObjective: objectiveJSON.companyObjective
-                    };
-
-                    options.description.en = _.unescape(options.description.en);
-                    options.description.ar = _.unescape(options.description.ar);
-
-                    req.body = options;
-
-                    self.create(req, res, next);
-                });
-        }
-
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-                if (err) {
-                    return next(err);
-                }
-                if (!allowed) {
-                    err = new Error();
-                    err.status = 403;
-
-                    return next(err);
-                }
-
-                queryRun();
-            }
-        );
-    };
-
-    this.createSubObjective = function (req, res, next) {
-        const session = req.session;
-        const accessRoleLevel = session.level;
-
-        function queryRun(body) {
-            var files = req.files;
-            var userId = req.session.uId;
-            var level = req.session.level;
-            var parentId = body.parentId;
-            var error;
-            var options = {
-                parentId        : parentId,
-                assignedToIds   : body.assignedTo,
-                createdById     : userId,
-                saveObjective   : body.saveObjective,
-                companyObjective: body.companyObjective,
-                description     : body.description,
-                title           : body.title,
-                dateStart       : body.dateStart,
-                dateEnd         : body.dateEnd,
-                priority        : body.priority,
-                attachments     : body.attachments,
-                files           : files,
-                objectiveType   : body.objectiveType,
-                location        : body.location,
-                country         : body.country,
-                region          : body.region,
-                subRegion       : body.subRegion,
-                retailSegment   : body.retailSegment,
-                outlet          : body.outlet,
-                branch          : body.branch,
-                level           : level,
-                formType        : body.formType,
-                form            : body.form,
-                isMobile        : req.isMobile
+                ], cb);
             };
 
-            if (!body.assignedTo || !body.assignedTo.length) {
-                error = new Error('You must assign person to task');
-                error.status = 400;
-                return next(error);
-            }
-
-            createSubObjective(options, function (err, parent) {
-                if (err) {
-                    return next(err);
-                }
-                if (!parent) {
-                    return res.status(200).send();
-                }
-                res.status(200).send(parent);
-            });
-        }
-
-        access.getWriteAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            var body;
-
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                body = JSON.parse(req.body.data);
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.OBJECTIVES, 'createSubObjective', function (err, saveData) {
-                if (err) {
-                    return next(err);
+            const uploadFiles = (cb) => {
+                if (!files) {
+                    return cb(null, []);
                 }
 
-                queryRun(saveData);
-            });
-        });
-    };
+                fileHandler.uploadFile(userId, files, CONTENT_TYPES.OBJECTIVES, (err, setFileId) => {
+                    if (err) {
+                        return cb(err);
+                    }
 
-    function getAllPipeline(options) {
-        const subordinates = options.subordinates;
-        const personnel = options.personnel;
-        var aggregateHelper = options.aggregateHelper;
-        var queryObject = options.queryObject;
-        var parentIds = options.parentIds;
-        var positionFilter = options.positionFilter;
-        var searchFieldsArray = options.searchFieldsArray;
-        var filterSearch = options.filterSearch;
-        var skip = options.skip;
-        var limit = options.limit;
-        var isMobile = options.isMobile;
-        var forSync = options.forSync;
-        var coveredIds = options.coveredIds;
-        var pipeLine = [];
-        var currentUserLevel = options.currentUserLevel;
-
-        if (parentIds && parentIds.length) {
-            pipeLine.push({
-                $match: {
-                    $and: [
-                        {
-                            $or: [
-                                {
-                                    'parent.1': {$in: parentIds}
-                                },
-                                {
-                                    'parent.2': {$in: parentIds}
-                                },
-                                {
-                                    'parent.3': {$in: parentIds}
-                                },
-                                {
-                                    'parent.4': {$in: parentIds}
-                                }
-                            ]
-                        },
-                        {
-                            _id: {$nin: parentIds}
-                        }
-                    ]
-                }
-            });
-
-        } else {
-            if (queryObject) {
-                pipeLine.push({
-                    $match: queryObject
+                    cb(null, setFileId);
                 });
-            }
+            };
 
-            if (isMobile && currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
-                const allowedAccessRoles = [
-                    ACL_CONSTANTS.COUNTRY_ADMIN,
-                    ACL_CONSTANTS.AREA_MANAGER,
-                    ACL_CONSTANTS.AREA_IN_CHARGE
-                ];
+            const waterfall = [
+                uploadFiles,
+                updateObjective,
+            ];
 
-                if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
-                    //get objectives that assigned to subordinate users
-                    pipeLine.push({
-                        $match: {
-                            $or: [
-                                {
-                                    assignedTo: {$in: subordinates},
-                                }, {
-                                    assignedTo: {$in: coveredIds},
-                                }, {
-                                    'createdBy.user': {$in: coveredIds}
-                                }
-                            ]
-                        }
-                    });
-                }
-            }
-    
-            // prevent retrieving objectives with status === draft if user not creator
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            status: {$ne: OBJECTIVE_STATUSES.DRAFT}
-                        },{
-                            status    : {$eq: OBJECTIVE_STATUSES.DRAFT},
-                            'createdBy.user': {$eq: personnel}
-                        }
-                    ]
-                }
-            });
-        }
+            if ($set.formType) {
+                const createForms = (objective, cb) => {
+                    if ($set.formType === 'distribution') {
+                    /* TODO fill description from task if AM or AincM will link forms */
+                        const data = {
+                            objective: objective.get('_id'),
+                            description: '',
+                        };
 
-        if (!isMobile) {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {archived: false},
-                        {archived: {$exists: false}}
-                    ]
-                }
-            });
-        }
-
-        if (isMobile) {
-            pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    parent: {
-                        level1: '$parent.1',
-                        level2: '$parent.2',
-                        level3: '$parent.3',
-                        level4: '$parent.4'
-                    }
-                })
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'personnels',
-            key          : 'assignedTo',
-            addProjection: ['position', 'accessRole', 'firstName', 'lastName'],
-            isArray      : true
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy']
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key : 'country'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key : 'region'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key : 'subRegion'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'retailSegments',
-            key : 'retailSegment'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
-            key : 'outlet'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'branches',
-            key : 'branch'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
-        }));
-
-        pipeLine.push({
-            $unwind: {
-                path                      : '$assignedTo',
-                preserveNullAndEmptyArrays: true
-            }
-        });
-
-        if (positionFilter) {
-            pipeLine.push({
-                $match: positionFilter
-            });
-        }
-
-        if (!isMobile) {
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'assignedTo.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    assignedTo: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'assignedTo.position',
-                isArray        : false,
-                includeSiblings: {
-                    assignedTo: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }));
-        }
-
-        pipeLine.push({
-            $group: aggregateHelper.getGroupObject({
-                assignedTo: {$addToSet: '$assignedTo'}
-            })
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
-        }));
-
-        if (isMobile) {
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
-                            position : 1,
-                            firstName: 1,
-                            lastName : 1
-                        }
-                    }
-                }
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
-                            firstName : 1,
-                            lastName  : 1
-                        }
-                    }
-                }
-            }));
-
-            /*pipeLine.push({
-             $project: aggregateHelper.getProjection({
-             creationDate: '$createdBy.date',
-             updateDate  : '$editedBy.date'
-             })
-             });*/
-        }
-
-        pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                assignedTo: {
-                    $filter: {
-                        input: '$assignedTo',
-                        as   : 'oneItem',
-                        cond : {$ne: ['$$oneItem', null]}
-                    }
-                }
-            })
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit,
-            creationDate     : true
-        }));
-
-        return pipeLine;
-    }
-
-    this.getAllForSync = function (req, res, next) {
-        function queryRun() {
-            const query = req.query;
-            const lastLogOut = new Date(query.lastLogOut);
-            const currentUserLevel = req.session.level;
-            let arrayOfSubordinateUsersId = [];
-            let queryObject = {};
-            let aggregateHelper;
-            let pipeLine;
-
-            queryObject.context = CONTENT_TYPES.OBJECTIVES;
-
-            aggregateHelper = new AggregationHelper($defProjection);
-
-            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
-
-            async.waterfall([
-                (cb) => {
-                    PersonnelModel.distinct('_id', {manager: req.session.uId})
-                        .exec((err, subordinateIds) => {
+                        return distributionFormHandler.createForm(userId, data, (err, formModel) => {
                             if (err) {
                                 return cb(err);
                             }
 
-                            arrayOfSubordinateUsersId = subordinateIds;
+                            objective.form = {
+                                _id: formModel.get('_id'),
+                                contentType: $set.formType,
+                            };
 
-                            cb(null)
+                            cb(null, objective);
                         });
+                    }
+
+                    if ($set.formType === 'visibility') {
+                        const data = {
+                            objective: objective.get('_id'),
+                            createdBy: {
+                                user: userId,
+                                date: objective.createdBy.date,
+                            },
+                        };
+
+                        return visibilityFormHandler.createForm(userId, data, (err, formModel) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            objective.form = {
+                                _id: formModel.get('_id'),
+                                contentType: $set.formType,
+                            };
+
+                            cb(null, objective);
+                        });
+                    }
+
+                    cb(null, objective);
+                };
+
+                const updateObjectiveWithForm = (objective, cb) => {
+                    if (!$set.formType) {
+                        return cb(null, objective);
+                    }
+
+                    objective.save((err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, objective);
+                    });
+                };
+
+                waterfall.push(createForms);
+                waterfall.push(updateObjectiveWithForm);
+            }
+
+            if ($set.status && $set.status !== OBJECTIVE_STATUSES.CLOSED) {
+                waterfall.push(updateParents);
+            }
+
+            if ($set.assignedTo && $set.assignedTo[0]) {
+                waterfall.push(updateObjectiveByAssigneeLocation);
+            }
+
+            const getResultAndSend = (objective, cb) => {
+                store.setNextState(objective.toJSON());
+                store.difference();
+                store.publish();
+
+                const id = objective.get('_id');
+
+                getByIdAggr({
+                    id,
+                    isMobile: req.isMobile,
+                }, cb);
+            };
+
+            waterfall.push(getResultAndSend);
+
+            async.waterfall(waterfall, callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getEditAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                bodyValidator.validateBody(body.changed, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'update', cb);
+            },
+
+            queryRun,
+
+        ], (err, model) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(model);
+        });
+    }
+
+    createSubObjective(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (body, callback) => {
+            const files = req.files;
+            const parentId = body.parentId;
+
+            if (!body.assignedTo || !body.assignedTo.length) {
+                const error = new Error('Should be at least one assignee.');
+
+                error.status = 400;
+                return callback(error);
+            }
+
+            if (!parentId) {
+                const error = new Error('Parent ID is required.');
+
+                error.status = 400;
+                return callback(error);
+            }
+
+            const createdBy = {
+                user: userId,
+                date: new Date(),
+            };
+            const options = Object.assign({}, {
+                parentId,
+                assignedTo: body.assignedTo,
+                createdBy,
+                saveObjective: body.saveObjective,
+                companyObjective: body.companyObjective,
+                description: body.description,
+                title: body.title,
+                dateStart: body.dateStart,
+                dateEnd: body.dateEnd,
+                priority: body.priority,
+                attachments: body.attachments,
+                files,
+                objectiveType: body.objectiveType,
+                location: body.location,
+                country: body.country,
+                region: body.region,
+                subRegion: body.subRegion,
+                retailSegment: body.retailSegment,
+                outlet: body.outlet,
+                branch: body.branch,
+                level: accessRoleLevel,
+                formType: body.formType,
+                form: body.form,
+                isMobile: req.isMobile,
+            });
+
+            createSubObjective(options, callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getWriteAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (personnel, allowed, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.OBJECTIVES, 'createSubObjective', cb);
+            },
+
+            queryRun,
+
+        ], (err, parent) => {
+            if (err) {
+                return next(err);
+            }
+
+            if (!parent) {
+                return res.status(200).send();
+            }
+
+            res.status(200).send(parent);
+        });
+    }
+
+    getAllForSync(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (callback) => {
+            const query = req.query;
+            const lastLogOut = new Date(query.lastLogOut);
+            const queryObject = {
+                context: CONTENT_TYPES.OBJECTIVES,
+            };
+
+            const aggregateHelper = new AggregationHelper($defProjection);
+
+            aggregateHelper.setSyncQuery(queryObject, lastLogOut);
+
+            const setSubordinateObjectId = [];
+
+            async.waterfall([
+
+                (cb) => {
+                    PersonnelModel.distinct('_id', {
+                        manager: userId,
+                    }).exec((err, setAvailableSubordinateId) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        setSubordinateObjectId.push(...setAvailableSubordinateId);
+
+                        cb(null);
+                    });
                 },
 
                 (cb) => {
-                    coveredByMe(PersonnelModel, ObjectId(req.session.uId), cb);
+                    coveredByMe(PersonnelModel, ObjectId(userId), cb);
                 },
 
                 (coveredIds, cb) => {
-                    pipeLine = getAllPipeline({
-                        aggregateHelper : aggregateHelper,
-                        queryObject     : queryObject,
-                        isMobile        : true,
-                        forSync         : true,
-                        personnel       : ObjectId(req.session.uId),
-                        coveredIds      : coveredIds,
-                        currentUserLevel: currentUserLevel,
-                        subordinates    : arrayOfSubordinateUsersId
+                    const pipeLine = getAllPipeline({
+                        aggregateHelper,
+                        queryObject,
+                        isMobile: true,
+                        forSync: true,
+                        personnel: ObjectId(userId),
+                        coveredIds,
+                        currentUserLevel: accessRoleLevel,
+                        subordinates: setSubordinateObjectId,
                     });
 
-                    ObjectiveModel.aggregate(pipeLine).allowDiskUse(true).exec((err, response) => {
-                        if (err) {
-                            return next(err);
-                        }
+                    ObjectiveModel.aggregate(pipeLine)
+                        .allowDiskUse(true)
+                        .exec((err, response) => {
+                            if (err) {
+                                return next(err);
+                            }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                            response = response && response[0] ?
+                                response[0] : { data: [], total: 0 };
 
-                        cb(null, response);
-                    });
-                }
+                            cb(null, response);
+                        });
+                },
+
             ], (err, response) => {
-                var idsPersonnel = [];
-                var idsFile = [];
-                var options = {
-                    data: {}
-                };
-
                 if (err) {
                     return next(err);
                 }
 
-                response.data = _.map(response.data, (model) => {
+
+                const setPersonnelId = [];
+                const setFileId = [];
+
+                response.data = response.data.map((model) => {
                     if (model.title) {
                         model.title = {
                             en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : ''
+                            ar: model.title.ar ? _.unescape(model.title.ar) : '',
                         };
                     }
 
                     if (model.description) {
                         model.description = {
                             en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : ''
+                            ar: model.description.ar ? _.unescape(model.description.ar) : '',
                         };
                     }
 
                     if (model.companyObjective) {
                         model.companyObjective = {
                             en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
+                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                         };
                     }
 
-                    idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                    idsPersonnel.push(model.createdBy.user._id);
-                    idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
+                    setFileId.push(..._.map(model.attachments, '_id'));
+                    setPersonnelId.push(
+                        _.get(model, 'createdBy.user._id'),
+                        ..._.map(model.assignedTo, '_id')
+                    );
 
                     return model;
                 });
 
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                options.data[CONTENT_TYPES.FILES] = idsFile;
 
-                getImagesHelper.getImages(options, (err, result) => {
-                    var fieldNames = {};
-                    var setOptions;
+                const options = {
+                    data: {
+                        [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
+                        [CONTENT_TYPES.FILES]: setFileId,
+                    },
+                };
+
+                getImage.getImages(options, (err, result) => {
                     if (err) {
-                        return next(err);
+                        return callback(err);
                     }
 
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
+                    const setOptions = {
+                        response,
+                        imgsObject: result,
+                        fields: {
+                            [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
+                            [CONTENT_TYPES.FILES]: [['attachments']],
+                        },
                     };
 
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
+                    getImage.setIntoResult(setOptions, (response) => {
+                        const setSubordinateStringId = setSubordinateObjectId.map((ObjectId) => {
                             return ObjectId.toString();
                         });
-                        const currentUserId = req.session.uId;
 
-                        response.data = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
+                        response.data = detectObjectivesForSubordinates(response.data, setSubordinateStringId, userId);
 
-                        next({status: 200, body: response});
-                    })
+                        callback(null, response);
+                    });
                 });
             });
-        }
+        };
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, (err, allowed) => {
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getReadAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err, response) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun();
+            next({
+                status: 200,
+                body: response,
+            });
         });
-    };
+    }
 
-    this.getAll = function (req, res, next) {
-        function queryRun(personnel) {
-            var query = req.query;
-            var filter = query.filter || {};
-            var page = query.page || 1;
-            var limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
-            var aggregateHelper;
-            var filterMapper = new FilterMapper();
-            var filterSearch = filter.globalSearch || '';
-            var queryObject;
-            var isMobile = req.isMobile;
-            var positionFilter = {};
-            var uId = req.session.uId;
-            var currentUserLevel = req.session.level;
-            let arrayOfSubordinateUsersId = [];
+    getAll(req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
 
-            var searchFieldsArray = [
+        const queryRun = (personnel, callback) => {
+            const query = req.query;
+            const filter = query.filter || {};
+            const page = query.page || 1;
+            const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
+            const skip = (page - 1) * limit;
+            const filterMapper = new FilterMapper();
+            const filterSearch = filter.globalSearch || '';
+            const isMobile = req.isMobile;
+
+            const searchFieldsArray = [
                 'myCC',
                 'title.en',
                 'title.ar',
@@ -1924,22 +1936,21 @@ var Objectives = function (db, redis, event) {
                 'assignedTo.firstName.ar',
                 'assignedTo.lastName.ar',
                 'assignedTo.position.name.ar',
-                'assignedTo.position.name.en'
+                'assignedTo.position.name.en',
             ];
 
-            var cover = filter.cover;
-            var myCC = filter.myCC;
+            const cover = filter.cover;
+            const myCC = filter.myCC;
 
             delete filter.cover;
             delete filter.globalSearch;
             delete filter.myCC;
 
-            queryObject = filterMapper
-                .mapFilter({
-                    contentType: CONTENT_TYPES.OBJECTIVES,
-                    filter     : filter,
-                    personnel  : personnel
-                });
+            const queryObject = filterMapper.mapFilter({
+                contentType: CONTENT_TYPES.OBJECTIVES,
+                filter,
+                personnel,
+            });
 
             if (cover || isMobile) {
                 delete queryObject.region;
@@ -1947,303 +1958,301 @@ var Objectives = function (db, redis, event) {
                 delete queryObject.branch;
             }
 
-            aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+
+            const positionFilter = {};
 
             if (queryObject.position && queryObject.position.$in) {
-                positionFilter = {
-                    $or: [
-                        {
-                            'assignedTo.position': queryObject.position
-                        },
-                        {
-                            'createdBy.user.position': queryObject.position
-                        }
-                    ]
-                };
+                positionFilter.$or = [
+                    { 'assignedTo.position': queryObject.position },
+                    { 'createdBy.user.position': queryObject.position },
+                ];
 
                 delete queryObject.position;
             }
 
             queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
+            const setSubordinateId = [];
+
             async.waterfall([
+
                 // if request with myCC, then Appends to queryObject _id of user that subordinate to current user.
                 (cb) => {
                     if (myCC || isMobile) {
-                        PersonnelModel.distinct('_id', {manager: req.session.uId}).exec((err, subordinateIds) => {
+                        return PersonnelModel.distinct('_id', {
+                            manager: userId,
+                        }).exec((err, setAvailableSubordinateId) => {
                             if (err) {
                                 return cb(err);
                             }
 
-                            arrayOfSubordinateUsersId = subordinateIds;
+                            setSubordinateId.push(...setAvailableSubordinateId);
 
-                            cb(null)
+                            cb(null);
                         });
-                    } else {
-                        cb(null);
                     }
+
+                    cb(null);
                 },
-                function (cb) {
+
+                (cb) => {
                     if (myCC) {
-                        queryObject.$and[0]['assignedTo'].$in = arrayOfSubordinateUsersId;
+                        _.set(queryObject, '$and[0].assignedTo.$in', setSubordinateId);
                     }
 
-                    coveredByMe(PersonnelModel, ObjectId(uId), cb);
+                    coveredByMe(PersonnelModel, ObjectId(userId), cb);
                 },
 
-                function (coveredIds, cb) {
-                    var pipeLine;
-    
-                    pipeLine = getAllPipeline({
-                        aggregateHelper  : aggregateHelper,
-                        queryObject      : queryObject,
-                        positionFilter   : positionFilter,
-                        isMobile         : isMobile,
-                        searchFieldsArray: searchFieldsArray,
-                        filterSearch     : filterSearch,
-                        skip             : skip,
-                        limit            : limit,
-                        personnel        : ObjectId(uId),
-                        coveredIds       : coveredIds,
-                        subordinates     : arrayOfSubordinateUsersId,
-                        currentUserLevel : currentUserLevel
+                (coveredIds, cb) => {
+                    const pipeline = getAllPipeline({
+                        aggregateHelper,
+                        queryObject,
+                        positionFilter,
+                        isMobile,
+                        searchFieldsArray,
+                        filterSearch,
+                        skip,
+                        limit,
+                        personnel: ObjectId(userId),
+                        coveredIds,
+                        subordinates: setSubordinateId,
+                        currentUserLevel: accessRoleLevel,
                     });
 
-                    ObjectiveModel.aggregate(pipeLine).allowDiskUse(true).exec(function (err, response) {
-                        if (err) {
-                            return cb(err, null);
-                        }
+                    ObjectiveModel.aggregate(pipeline)
+                        .allowDiskUse(true)
+                        .exec((err, response) => {
+                            if (err) {
+                                return cb(err);
+                            }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                            response = response && response[0]
+                                ? response[0] : { data: [], total: 0 };
 
-                        cb(null, response);
-                    });
+                            cb(null, response);
+                        });
                 },
 
-                function (response, cb) {
-                    var mobilePipeLine;
-
+                (response, cb) => {
                     if (!isMobile) {
                         return cb(null, response);
                     }
 
-                    mobilePipeLine = getAllPipeline({
-                        aggregateHelper  : aggregateHelper,
-                        parentIds        : isMobile ? _.pluck(response.data, '_id') : [],
-                        positionFilter   : positionFilter,
-                        isMobile         : isMobile,
-                        searchFieldsArray: searchFieldsArray,
-                        filterSearch     : filterSearch,
-                        skip             : skip,
-                        limit            : limit,
-                        currentUserLevel : currentUserLevel
+                    const mobilePipeLine = getAllPipeline({
+                        aggregateHelper,
+                        parentIds: isMobile ? _.map(response.data, '_id') : [],
+                        positionFilter,
+                        isMobile,
+                        searchFieldsArray,
+                        filterSearch,
+                        skip,
+                        limit,
+                        currentUserLevel: accessRoleLevel,
                     });
 
-                    ObjectiveModel.aggregate(mobilePipeLine).allowDiskUse(true).exec(function (err, responseMobile) {
-                        if (err) {
-                            return cb(err, null);
-                        }
+                    ObjectiveModel.aggregate(mobilePipeLine)
+                        .allowDiskUse(true)
+                        .exec((err, responseMobile) => {
+                            if (err) {
+                                return cb(err, null);
+                            }
 
-                        responseMobile = responseMobile && responseMobile[0] ? responseMobile[0] : {data: [], total: 0};
+                            responseMobile = responseMobile && responseMobile[0] ?
+                                responseMobile[0] : { data: [], total: 0 };
 
-                        response.data = response.data.concat(responseMobile.data);
-                        response.total += responseMobile.total;
+                            response.data = response.data.concat(responseMobile.data);
+                            response.total += responseMobile.total;
 
-                        cb(null, response);
-                    });
-                }
-            ], function (err, response) {
-                var idsPersonnel = [];
-                var idsFile = [];
-                var options = {
-                    data: {}
-                };
+                            cb(null, response);
+                        });
+                },
 
+            ], (err, response) => {
                 if (err) {
-                    return next(err);
+                    return callback(err);
                 }
 
-                response.data = _.map(response.data, function (model) {
+                const setFileId = [];
+                const setPersonnelId = [];
+
+                response.data = response.data.map((model) => {
                     if (model.title) {
                         model.title = {
                             en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : ''
+                            ar: model.title.ar ? _.unescape(model.title.ar) : '',
                         };
                     }
                     if (model.description) {
                         model.description = {
                             en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : ''
+                            ar: model.description.ar ? _.unescape(model.description.ar) : '',
                         };
                     }
                     if (model.companyObjective) {
                         model.companyObjective = {
                             en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
+                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                         };
                     }
 
-                    idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                    idsPersonnel.push(model.createdBy.user._id);
-                    idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
+                    setFileId.push(..._.map(model.attachments, '_id'));
+                    setPersonnelId.push(
+                        _.get(model, 'createdBy.user._id'),
+                        ..._.map(model.assignedTo, '_id')
+                    );
 
                     return model;
                 });
 
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                options.data[CONTENT_TYPES.FILES] = idsFile;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
-                            return ObjectId.toString();
-                        });
-                        const currentUserId = req.session.uId;
-
-                        response.data = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
-
-                        next({status: 200, body: response});
-                    })
-                });
-            });
-        }
-
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed, personnel) {
-            if (err) {
-                return next(err);
-            }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            queryRun(personnel);
-        });
-    };
-
-    this.getById = function (req, res, next) {
-        function queryRun() {
-            var id = req.params.id;
-            var error;
-
-            if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
-                error.status = 400;
-                return next(error);
-            }
-
-            self.getByIdAggr({id: ObjectId(id), isMobile: req.isMobile}, function (err, result) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.status(200).send(result);
-            });
-        }
-
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
-            if (err) {
-                return next(err);
-            }
-
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            queryRun();
-        });
-    };
-
-    this.getPersonnelFroSelection = function (req, res, next) {
-        function queryRun(personnel) {
-            var query = req.query;
-            var page = query.page || 1;
-            var limit = parseInt(query.count) || parseInt(CONSTANTS.LIST_COUNT);
-            var skip = (page - 1) * limit;
-
-            var language = req.cookies.currentLanguage;
-            var translateFields = ['firstName', 'lastName'];
-            var translated = (query.filter && query.filter.translated) ? query.filter.translated.values : [];
-
-            var filterMapper = new FilterMapper();
-            var filter = query.filter || {};
-            var objectiveType = filter.objectiveType && filter.objectiveType.values || query.objectiveType ? query.objectiveType || filter.objectiveType.values[0] : null;
-            var filterSearch = filter.globalSearch || '';
-            var currentUserId = req.session.uId;
-
-            var queryObject;
-            var queryObjectAfterLookup = {};
-            var key;
-
-            var $personnelDefProjection = {
-                _id            : 1,
-                position       : 1,
-                avgRating      : 1,
-                manager        : 1,
-                lastAccess     : 1,
-                firstName      : 1,
-                lastName       : 1,
-                email          : 1,
-                phoneNumber    : 1,
-                accessRole     : 1,
-                createdBy      : 1,
-                vacation       : 1,
-                status         : 1,
-                region         : 1,
-                subRegion      : 1,
-                retailSegment  : 1,
-                outlet         : 1,
-                branch         : 1,
-                country        : 1,
-                currentLanguage: 1,
-                super          : 1,
-                archived       : 1,
-                temp           : 1,
-                confirmed      : 1,
-                translated     : 1
-            };
-
-            var sort = query.sort || {
-                    'editedBy.date': 1
+                const options = {
+                    data: {
+                        [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
+                        [CONTENT_TYPES.FILES]: setFileId,
+                    },
                 };
 
-            var aggregateHelper;
+                getImage.getImages(options, (err, result) => {
+                    if (err) {
+                        return callback(err);
+                    }
 
-            for (key in sort) {
-                sort[key] = parseInt(sort[key], 10);
+                    const setOptions = {
+                        response,
+                        imgsObject: result,
+                        fields: {
+                            [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
+                            [CONTENT_TYPES.FILES]: [['attachments']],
+                        },
+                    };
+
+                    getImage.setIntoResult(setOptions, (response) => {
+                        const subordinatesId = setSubordinateId.map((ObjectId) => {
+                            return ObjectId.toString();
+                        });
+
+                        response.data = detectObjectivesForSubordinates(response.data, subordinatesId, userId);
+
+                        callback(null, response);
+                    });
+                });
+            });
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getReadAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
+            },
+
+        ], (err, response) => {
+            if (err) {
+                return next(err);
             }
+
+            next({
+                status: 200,
+                body: response,
+            });
+        });
+    }
+
+    getById(req, res, next) {
+        const queryRun = (callback) => {
+            const id = req.params.id;
+
+            getByIdAggr({
+                id: ObjectId(id),
+                isMobile: req.isMobile,
+            }, callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getReadAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err, result) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(result);
+        });
+    }
+
+    getPersonnelForSelection(req, res, next) {
+        const queryRun = (personnel, callback) => {
+            const query = req.query;
+            const page = query.page || 1;
+            const limit = parseInt(query.count, 10) || CONSTANTS.LIST_COUNT;
+            const skip = (page - 1) * limit;
+            const language = req.cookies.currentLanguage;
+            const translateFields = ['firstName', 'lastName'];
+            const translated = (query.filter && query.filter.translated) ?
+                query.filter.translated.values : [];
+            const filterMapper = new FilterMapper();
+            const filter = query.filter || {};
+            const objectiveType = (filter.objectiveType && filter.objectiveType.values) || query.objectiveType ?
+                query.objectiveType || filter.objectiveType.values[0] : null;
+            const filterSearch = filter.globalSearch || '';
+            const currentUserId = req.session.uId;
+            const queryObjectAfterLookup = {};
+            const $personnelDefProjection = {
+                _id: 1,
+                position: 1,
+                avgRating: 1,
+                manager: 1,
+                lastAccess: 1,
+                firstName: 1,
+                lastName: 1,
+                email: 1,
+                phoneNumber: 1,
+                accessRole: 1,
+                createdBy: 1,
+                vacation: 1,
+                status: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                country: 1,
+                currentLanguage: 1,
+                super: 1,
+                archived: 1,
+                temp: 1,
+                confirmed: 1,
+                translated: 1,
+            };
+
+            const sort = query.sort || {
+                'editedBy.date': 1,
+            };
+
+            _.forOwn(sort, (value, prop) => {
+                sort[prop] = parseInt(value, 10);
+            });
 
             delete filter.globalSearch;
             delete filter.objectiveType;
 
-            queryObject = filterMapper.mapFilter({
+            const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.OBJECTIVES,
-                filter     : filter,
-                context    : 'objectivesAssign',
-                personnel  : personnel
+                filter,
+                context: 'objectivesAssign',
+                personnel,
             });
-
-            aggregateHelper = new AggregationHelper($personnelDefProjection, queryObject);
+            const aggregateHelper = new AggregationHelper($personnelDefProjection, queryObject);
 
             if (queryObject.retailSegment) {
                 queryObjectAfterLookup.retailSegment = queryObject.retailSegment;
@@ -2260,49 +2269,44 @@ var Objectives = function (db, redis, event) {
                 delete queryObject.assignLevel;
             }
 
-            if (!queryObject.hasOwnProperty('archived')) {
+            if (!_.has(queryObject, 'archived')) {
                 queryObject.archived = false;
             }
 
             async.waterfall([
-                function (waterfallCb) {
-                    PersonnelModel.aggregate([
-                        {
-                            $match: {
-                                _id: ObjectId(currentUserId)
-                            }
+
+                (cb) => {
+                    PersonnelModel.aggregate([{
+                        $match: {
+                            _id: ObjectId(currentUserId),
                         },
-                        {
-                            $lookup: {
-                                from        : 'accessRoles',
-                                localField  : 'accessRole',
-                                foreignField: '_id',
-                                as          : 'accessRole'
-                            }
+                    }, {
+                        $lookup: {
+                            from: 'accessRoles',
+                            localField: 'accessRole',
+                            foreignField: '_id',
+                            as: 'accessRole',
                         },
-                        {
-                            $project: {
-                                accessRole: {$arrayElemAt: ['$accessRole', 0]},
-                                country   : 1,
-                                region    : 1,
-                                subRegion : 1
-                            }
-                        }
-                    ]).exec(function (err, personnels) {
+                    }, {
+                        $project: {
+                            accessRole: { $arrayElemAt: ['$accessRole', 0] },
+                            country: 1,
+                            region: 1,
+                            subRegion: 1,
+                        },
+                    }]).exec((err, personnels) => {
                         if (err) {
-                            return waterfallCb(err);
+                            return cb(err);
                         }
 
-                        waterfallCb(null, personnels[0]);
+                        cb(null, personnels[0]);
                     });
                 },
-                function (personnel, waterfallCb) {
-                    var pipeLine = [];
-                    var aggregation;
-                    var domainsArray = ['country', 'region', 'subRegion'];
-                    var personnelLocations = _.pick(personnel, 'country', 'region', 'subRegion');
-                    var personnelLocationKey;
-                    var searchFieldsArray = [
+
+                (personnel, cb) => {
+                    const domainsArray = ['country', 'region', 'subRegion'];
+                    const personnelLocations = _.pick(personnel, 'country', 'region', 'subRegion');
+                    const searchFieldsArray = [
                         'firstName.en',
                         'firstName.ar',
                         'lastName.en',
@@ -2324,823 +2328,516 @@ var Objectives = function (db, redis, event) {
                         'accessRole.name.en',
                         'accessRole.name.ar',
                         'position.name.en',
-                        'position.name.ar'
+                        'position.name.ar',
                     ];
 
-                    for (personnelLocationKey in
-                        personnelLocations) {
+                /* eslint-disable no-restricted-syntax */
+                    for (const personnelLocationKey in personnelLocations) {
                         if (!personnelLocations[personnelLocationKey][0]) {
                             delete personnelLocations[personnelLocationKey];
                         }
                     }
+                /* eslint-enable no-restricted-syntax */
 
                     queryObject.super = {
-                        $ne: true
+                        $ne: true,
                     };
 
                     queryObject._id = {
-                        $ne: ObjectId(currentUserId)
+                        $ne: ObjectId(currentUserId),
                     };
 
-                    pipeLine.push({
-                        $match: queryObject
+                    const pipeline = [];
+
+                    pipeline.push({
+                        $match: queryObject,
                     });
 
                     if (translated.length === 1) {
-                        pipeLine.push({
+                        pipeline.push({
                             $project: aggregateHelper.getProjection({
-                                translated: aggregateHelper.translatedCond(language, translateFields, translated[0])
-                            })
+                                translated: aggregateHelper.translatedCond(language, translateFields, translated[0]),
+                            }),
                         });
 
-                        pipeLine.push({
+                        pipeline.push({
                             $match: {
-                                translated: true
-                            }
+                                translated: true,
+                            },
                         });
                     }
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from   : 'positions',
-                        key    : 'position',
-                        isArray: false
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'positions',
+                        key: 'position',
+                        isArray: false,
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from         : 'accessRoles',
-                        key          : 'accessRole',
-                        isArray      : false,
-                        addProjection: 'level'
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'accessRoles',
+                        key: 'accessRole',
+                        isArray: false,
+                        addProjection: 'level',
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from             : 'branches',
-                        key              : 'branch',
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'branches',
+                        key: 'branch',
                         addMainProjection: ['retailSegment', 'outlet'],
-                        addProjection: ['outlet']
+                        addProjection: ['outlet'],
                     }));
 
                     if (objectiveType && objectiveType !== 'individual') {
                         if (personnel.accessRole.level <= 2) {
                             queryObjectAfterLookup['accessRole.level'] = {
-                                $eq: personnel.accessRole.level + 1
+                                $eq: personnel.accessRole.level + 1,
                             };
                         }
                     } else {
                         queryObjectAfterLookup.$and = [
-                            {'accessRole.level': {$gte: personnel.accessRole.level}},
-                            {'accessRole.level': {$lt: 8}}
+                        { 'accessRole.level': { $gte: personnel.accessRole.level } },
+                        { 'accessRole.level': { $lt: 8 } },
                         ];
                     }
 
-                    for (personnelLocationKey in personnelLocations) {
-                        queryObjectAfterLookup[personnelLocationKey] = {
-                            $in: personnelLocations[personnelLocationKey]
+                    _.forOwn(personnelLocations, (value, key) => {
+                        queryObjectAfterLookup[key] = {
+                            $in: value,
                         };
-                    }
-
-                    pipeLine.push({
-                        $match: queryObjectAfterLookup
                     });
 
-                    domainsArray.forEach(function (element) {
-                        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+                    pipeline.push({
+                        $match: queryObjectAfterLookup,
+                    });
+
+                    domainsArray.forEach((element) => {
+                        pipeline.push(...aggregateHelper.aggregationPartMaker({
                             from: 'domains',
-                            key : element
+                            key: element,
                         }));
                     });
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
                         from: 'retailSegments',
-                        key : 'retailSegment'
+                        key: 'retailSegment',
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
                         from: 'outlets',
-                        key : 'outlet'
+                        key: 'outlet',
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'personnels',
-                        key            : 'createdBy.user',
-                        isArray        : false,
-                        mameFields     : ['firstName', 'lastName'],
-                        includeSiblings: {createdBy: {date: 1}}
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'personnels',
+                        key: 'createdBy.user',
+                        isArray: false,
+                        mameFields: ['firstName', 'lastName'],
+                        includeSiblings: { createdBy: { date: 1 } },
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from         : 'personnels',
-                        key          : 'manager',
-                        isArray      : false,
-                        addProjection: ['_id', 'firstName', 'lastName']
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'personnels',
+                        key: 'manager',
+                        isArray: false,
+                        addProjection: ['_id', 'firstName', 'lastName'],
                     }));
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from           : 'personnels',
-                        key            : 'vacation.cover',
-                        isArray        : false,
-                        addProjection  : ['_id', 'firstName', 'lastName'],
-                        includeSiblings: {vacation: {onLeave: 1}}
+                    pipeline.push(...aggregateHelper.aggregationPartMaker({
+                        from: 'personnels',
+                        key: 'vacation.cover',
+                        isArray: false,
+                        addProjection: ['_id', 'firstName', 'lastName'],
+                        includeSiblings: { vacation: { onLeave: 1 } },
                     }));
 
-                    pipeLine.push({
-                        $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
+                    pipeline.push({
+                        $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch),
                     });
 
-                    pipeLine.push({
-                        $sort: sort
+                    pipeline.push({
+                        $sort: sort,
                     });
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
+                    pipeline.push(...aggregateHelper.setTotal());
 
                     if (limit && limit !== -1) {
-                        pipeLine.push({
-                            $skip: skip
+                        pipeline.push({
+                            $skip: skip,
                         });
 
-                        pipeLine.push({
-                            $limit: limit
+                        pipeline.push({
+                            $limit: limit,
                         });
                     }
 
-                    pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
+                    pipeline.push(...aggregateHelper.groupForUi());
 
-                    aggregation = PersonnelModel.aggregate(pipeLine);
-
-                    aggregation.options = {
-                        allowDiskUse: true
-                    };
-
-                    aggregation.exec(function (err, response) {
+                    PersonnelModel.aggregate(pipeline)
+                    .allowDiskUse(true)
+                    .exec((err, result) => {
                         if (err) {
-                            return waterfallCb(err);
+                            return cb(err);
                         }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                        const data = result && result[0] ?
+                            result[0] : { data: [], total: 0 };
 
-                        waterfallCb(null, response);
+                        cb(null, data);
                     });
-                }
-            ], function (err, response) {
-                if (err) {
-                    return next(err);
-                }
+                },
 
-                next({status: 200, body: response});
-            });
-        }
+            ], callback);
+        };
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed, personnel) {
+        async.waterfall([
+
+            (cb) => {
+                AccessManager.getReadAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(personnel, cb);
+            },
+
+        ], (err, response) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun(personnel);
-        });
-    };
-
-    this.getByIdAggr = function (options, callback) {
-        var aggregateHelper;
-        var pipeLine = [];
-        var aggregation;
-        var id = options.id || '';
-        var isMobile = options.isMobile || false;
-        var pipeObject;
-
-        aggregateHelper = new AggregationHelper($defProjection);
-
-        pipeLine.push({
-            $match: {_id: id}
-        });
-
-        if (isMobile) {
-            pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    parent: {
-                        level1: '$parent.1',
-                        level2: '$parent.2',
-                        level3: '$parent.3',
-                        level4: '$parent.4'
-                    }
-                })
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'personnels',
-            key          : 'assignedTo',
-            addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole'])
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from         : 'files',
-            key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy']
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key : 'country'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key : 'region'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key : 'subRegion'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'retailSegments',
-            key : 'retailSegment'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
-            key : 'outlet'
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'branches',
-            key : 'branch',
-            addProjection : ['_id', 'name', 'outlet']
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
-        }));
-
-        pipeLine.push({
-            $unwind: {
-                path                      : '$assignedTo',
-                preserveNullAndEmptyArrays: true
-            }
-        });
-
-        if (!isMobile) {
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'assignedTo.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    assignedTo: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'assignedTo.position',
-                isArray        : false,
-                includeSiblings: {
-                    assignedTo: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }));
-        }
-
-        pipeLine.push({
-            $group: aggregateHelper.getGroupObject({
-                assignedTo: {$addToSet: '$assignedTo'}
-            })
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
-        }));
-
-        if (isMobile) {
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings: {editedBy: {date: 1}}
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
-                            position : 1,
-                            firstName: 1,
-                            lastName : 1
-                        }
-                    }
-                }
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
-                            firstName : 1,
-                            lastName  : 1
-                        }
-                    }
-                }
-            }));
-        }
-
-        pipeObject = {
-            $project: aggregateHelper.getProjection({
-                assignedTo: {
-                    $filter: {
-                        input: '$assignedTo',
-                        as   : 'oneItem',
-                        cond : {$ne: ['$$oneItem', null]}
-                    }
-                }
-            })
-        };
-
-        if (isMobile) {
-            pipeLine.push({
-                $project: aggregateHelper.getProjection({
-                    creationDate: '$createdBy.date'
-                })
-            });
-        }
-
-        pipeLine.push(pipeObject);
-
-        aggregation = ObjectiveModel.aggregate(pipeLine);
-
-        aggregation.options = {
-            allowDiskUse: true
-        };
-
-        aggregation.exec(function (err, response) {
-            var idsPersonnel;
-            var idsFile;
-            var response = response[0];
-            var options = {
-                data: {}
-            };
-            if (err) {
-                return callback(err);
-            }
-            if (!response || !Object.keys(response).length) {
-                return callback(null, response);
-            }
-            idsFile = _.map(response.attachments, '_id');
-            idsPersonnel = _.union([response.createdBy.user._id], _.map(response.assignedTo, '_id'));
-            idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
-            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-            options.data[CONTENT_TYPES.FILES] = idsFile;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (model) {
-                    if (model) {
-                        if (model.title) {
-                            model.title = {
-                                en: model.title.en ? _.unescape(model.title.en) : '',
-                                ar: model.title.ar ? _.unescape(model.title.ar) : ''
-                            };
-                        }
-                        if (model.description) {
-                            model.description = {
-                                en: model.description.en ? _.unescape(model.description.en) : '',
-                                ar: model.description.ar ? _.unescape(model.description.ar) : ''
-                            };
-                        }
-                        if (model.companyObjective) {
-                            model.companyObjective = {
-                                en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                                ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
-                            };
-                        }
-                    }
-                    callback(null, model);
-                })
+            next({
+                status: 200,
+                body: response,
             });
         });
-    };
+    }
 
-    this.deleteByIds = function (req, res, next) {
-        var ids = req.body.ids;
-        var errorFlag = false;
-        var data = [];
-        var func;
+    deleteByIds(req, res, next) {
+        const setId = req.body.ids;
 
-        function getParallelFunction(id) {
-            return function (callback) {
-                ObjectiveModel.findByIdAndRemove(id, function (error, result) {
-                    if (error) {
-                        return callback(error);
-                    }
-                    return callback(null, result);
+        const parallel = [];
+
+        setId.forEach(id => {
+            if (id.length === 24) {
+                parallel.push((cb) => {
+                    ObjectiveModel.findByIdAndRemove(id, (error, result) => {
+                        if (error) {
+                            return cb(error);
+                        }
+
+                        return cb(null, result);
+                    });
                 });
-            };
-        }
-
-        for (var i = 0; i < ids.length; i++) {
-            if (ids[i].length === 24) {
-                func = getParallelFunction(ids[i]);
-                data.push(func);
-            } else {
-                errorFlag = new Error('Incorrect input');
-            }
-        }
-
-        async.parallel(data, function (err, result) {
-            if (err) {
-                res.status(400).send(err);
-            } else if (errorFlag) {
-                res.status(400).send({error: 'Incorrect input'});
-            } else {
-                res.status(200).send(result);
             }
         });
 
-    };
+        if (setId.length !== parallel.length) {
+            const error = new Error('Incorrect ID.');
 
-    this.getByIdHistory = function (req, res, next) {
-        function queryRun() {
-            var id = ObjectId(req.params.id);
-            var pipeline = [];
-            var $lookup1 = {
-                from        : 'personnels',
-                localField  : 'person',
-                foreignField: '_id',
-                as          : 'person'
-            };
-            var $lookup2 = {
-                from        : 'objectives',
-                localField  : 'objective',
-                foreignField: '_id',
-                as          : 'objective'
-            };
+            error.status = 400;
+            return next(error);
+        }
 
-            var aggregation;
+        async.parallel(parallel, (err, result) => {
+            if (err) {
+                return next(err);
+            }
 
-            pipeline.push({
-                $match: {person: id}
-            });
+            res.status(200).send(result);
+        });
+    }
 
-            pipeline.push({
+    getByIdHistory(req, res, next) {
+        const queryRun = (callback) => {
+            const id = ObjectId(req.params.id);
+            const pipeline = [{
+                $match: { person: id },
+            }, {
                 $project: {
-                    _id      : 1,
+                    _id: 1,
                     objective: 1,
-                    person   : 1
-                }
-            });
-
-            pipeline.push({$lookup: $lookup1});
-            pipeline.push({$lookup: $lookup2});
-
-            pipeline.push({
+                    person: 1,
+                },
+            }, {
+                $lookup: {
+                    from: 'personnels',
+                    localField: 'person',
+                    foreignField: '_id',
+                    as: 'person',
+                },
+            }, {
+                $lookup: {
+                    from: 'objectives',
+                    localField: 'objective',
+                    foreignField: '_id',
+                    as: 'objective',
+                },
+            }, {
                 $project: {
-                    _id      : 1,
-                    objective: {$arrayElemAt: ['$objective', 0]},
-                    person   : {$arrayElemAt: ['$person', 0]}
-                }
-            });
-
-            pipeline.push({
+                    _id: 1,
+                    objective: { $arrayElemAt: ['$objective', 0] },
+                    person: { $arrayElemAt: ['$person', 0] },
+                },
+            }, {
                 $project: {
-                    _id      : 1,
+                    _id: 1,
                     objective: {
-                        _id   : '$objective._id',
-                        title : '$objective.title',
-                        status: '$objective.status'
+                        _id: '$objective._id',
+                        title: '$objective.title',
+                        status: '$objective.status',
                     },
-                    person   : {
-                        _id      : '$person._id',
+                    person: {
+                        _id: '$person._id',
                         firstName: '$person.firstName',
-                        lastName : '$person.lastName'
-                    }
-                }
-            });
+                        lastName: '$person.lastName',
+                    },
+                },
+            }];
 
-            aggregation = ObjectiveHistoryModel.aggregate(pipeline);
-            aggregation.exec(function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+            ObjectiveHistoryModel.aggregate(pipeline)
+                .allowDiskUse(true)
+                .exec(callback);
+        };
 
-                res.status(200).send(result);
-            });
-        }
+        async.waterfall([
 
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+            (cb) => {
+                AccessManager.getReadAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
-            }
-
-            queryRun();
+            res.status(200).send(result);
         });
-    };
+    }
 
-    this.getByIdForObjectiveTreePreview = function (req, res, next) {
-        function queryRun() {
-            var id = req.params.id;
-            var aggregateHelper;
-            var pipeLine = [];
-            var isMobile = req.isMobile;
-            var aggregation;
-            var error;
+    getByIdForObjectiveTreePreview(req, res, next) {
+        const queryRun = (callback) => {
+            const id = ObjectId(req.params.id);
+            const isMobile = req.isMobile;
 
-            if (!VALIDATION.OBJECT_ID.test(id)) {
-                error = new Error('Invalid parameter id');
-                error.status = 400;
-                return next(error);
-            }
+            const aggregateHelper = new AggregationHelper($defProjection);
+            const pipeline = [];
 
-            id = ObjectId(id);
-
-            aggregateHelper = new AggregationHelper($defProjection);
-
-            pipeLine.push({
+            pipeline.push({
                 $match: {
                     $or: [
-                        {_id: id},
-                        {'parent.1': id},
-                        {'parent.2': id},
-                        {'parent.3': id},
-                        {'parent.4': id}
-                    ]
-                }
+                    { _id: id },
+                    { 'parent.1': id },
+                    { 'parent.2': id },
+                    { 'parent.3': id },
+                    { 'parent.4': id },
+                    ],
+                },
             });
 
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from         : 'personnels',
-                key          : 'assignedTo',
-                addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole', 'imageSrc'])
+            pipeline.push(...aggregateHelper.aggregationPartMaker({
+                from: 'personnels',
+                key: 'assignedTo',
+                addProjection: ['firstName', 'lastName']
+                    .concat(isMobile ? [] : ['position', 'accessRole', 'imageSrc']),
             }));
 
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'createdBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole', 'imageSrc']),
-                includeSiblings: {createdBy: {date: 1}}
+            pipeline.push(...aggregateHelper.aggregationPartMaker({
+                from: 'personnels',
+                key: 'createdBy.user',
+                isArray: false,
+                addProjection: ['_id', 'firstName', 'lastName']
+                    .concat(isMobile ? [] : ['position', 'accessRole', 'imageSrc']),
+                includeSiblings: {
+                    createdBy: {
+                        date: 1,
+                    },
+                },
             }));
 
-            pipeLine.push({
+            pipeline.push({
                 $unwind: {
-                    path                      : '$assignedTo',
-                    preserveNullAndEmptyArrays: true
-                }
+                    path: '$assignedTo',
+                    preserveNullAndEmptyArrays: true,
+                },
             });
 
             if (!isMobile) {
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'accessRoles',
-                    key            : 'assignedTo.accessRole',
-                    isArray        : false,
-                    addProjection  : ['_id', 'name', 'level'],
+                pipeline.push(...aggregateHelper.aggregationPartMaker({
+                    from: 'accessRoles',
+                    key: 'assignedTo.accessRole',
+                    isArray: false,
+                    addProjection: ['_id', 'name', 'level'],
                     includeSiblings: {
                         assignedTo: {
-                            _id      : 1,
-                            position : 1,
+                            _id: 1,
+                            position: 1,
                             firstName: 1,
-                            lastName : 1,
-                            imageSrc : 1
-                        }
-                    }
+                            lastName: 1,
+                            imageSrc: 1,
+                        },
+                    },
                 }));
 
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'positions',
-                    key            : 'assignedTo.position',
-                    isArray        : false,
+                pipeline.push(...aggregateHelper.aggregationPartMaker({
+                    from: 'positions',
+                    key: 'assignedTo.position',
+                    isArray: false,
                     includeSiblings: {
                         assignedTo: {
-                            _id       : 1,
+                            _id: 1,
                             accessRole: 1,
-                            firstName : 1,
-                            lastName  : 1,
-                            imageSrc  : 1
-                        }
-                    }
+                            firstName: 1,
+                            lastName: 1,
+                            imageSrc: 1,
+                        },
+                    },
                 }));
             }
 
-            pipeLine.push({
+            pipeline.push({
                 $group: aggregateHelper.getGroupObject({
-                    assignedTo: {$addToSet: '$assignedTo'}
-                })
+                    assignedTo: {
+                        $addToSet: '$assignedTo',
+                    },
+                }),
             });
 
             if (!isMobile) {
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'accessRoles',
-                    key            : 'createdBy.user.accessRole',
-                    isArray        : false,
-                    addProjection  : ['_id', 'name', 'level'],
+                pipeline.push(...aggregateHelper.aggregationPartMaker({
+                    from: 'accessRoles',
+                    key: 'createdBy.user.accessRole',
+                    isArray: false,
+                    addProjection: ['_id', 'name', 'level'],
                     includeSiblings: {
                         createdBy: {
                             date: 1,
                             user: {
-                                _id      : 1,
-                                position : 1,
+                                _id: 1,
+                                position: 1,
                                 firstName: 1,
-                                lastName : 1,
-                                imageSrc : 1
-                            }
-                        }
-                    }
+                                lastName: 1,
+                                imageSrc: 1,
+                            },
+                        },
+                    },
                 }));
 
-                pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from           : 'positions',
-                    key            : 'createdBy.user.position',
-                    isArray        : false,
+                pipeline.push(...aggregateHelper.aggregationPartMaker({
+                    from: 'positions',
+                    key: 'createdBy.user.position',
+                    isArray: false,
                     includeSiblings: {
                         createdBy: {
                             date: 1,
                             user: {
-                                _id       : 1,
+                                _id: 1,
                                 accessRole: 1,
-                                firstName : 1,
-                                lastName  : 1,
-                                imageSrc  : 1
-                            }
-                        }
-                    }
+                                firstName: 1,
+                                lastName: 1,
+                                imageSrc: 1,
+                            },
+                        },
+                    },
                 }));
             }
 
-            pipeLine.push({
+            pipeline.push({
                 $project: aggregateHelper.getProjection({
                     assignedTo: {
                         $filter: {
                             input: '$assignedTo',
-                            as   : 'oneItem',
-                            cond : {$ne: ['$$oneItem', null]}
-                        }
-                    }
-                })
+                            as: 'oneItem',
+                            cond: {
+                                $ne: ['$$oneItem', null],
+                            },
+                        },
+                    },
+                }),
             });
 
-            pipeLine.push({
+            pipeline.push({
                 $project: aggregateHelper.getProjection({
                     parentNew: {
                         $cond: {
-                            if  : {$eq: ['$level', 1]},
+                            if: { $eq: ['$level', 1] },
                             then: 0,
                             else: {
                                 $cond: {
-                                    if  : {$eq: ['$level', 2]},
+                                    if: { $eq: ['$level', 2] },
                                     then: '$parent.1',
                                     else: {
                                         $cond: {
-                                            if  : {$eq: ['$level', 3]},
+                                            if: { $eq: ['$level', 3] },
                                             then: '$parent.2',
                                             else: {
                                                 $cond: {
-                                                    if  : {$eq: ['$level', 4]},
+                                                    if: { $eq: ['$level', 4] },
                                                     then: '$parent.3',
-                                                    else: 0
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                                    else: 0,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
-                    child    : []
-                })
+                    child: [],
+                }),
             });
 
-            pipeLine.push({
+            pipeline.push({
                 $group: {
-                    _id     : '$level',
+                    _id: '$level',
                     subTasks: {
-                        $addToSet: '$$ROOT'
-                    }
-                }
+                        $addToSet: '$$ROOT',
+                    },
+                },
             });
 
-            aggregation = ObjectiveModel.aggregate(pipeLine);
+            ObjectiveModel.aggregate(pipeline)
+                .allowDiskUse(true)
+                .exec(callback);
+        };
 
-            aggregation.options = {
-                allowDiskUse: true
-            };
+        async.waterfall([
 
-            aggregation.exec(function (err, result) {
-                if (err) {
-                    return next(err);
-                }
+            (cb) => {
+                AccessManager.getReadAccess(req, ACL_MODULES.OBJECTIVE, cb);
+            },
 
-                if (result.length) {
-                    result.map(function (model) {
-                        var subTasks = model.subTasks;
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            },
 
-                        subTasks.map(function (task) {
-                            task.description = {
-                                ar: _.unescape(task.description.ar),
-                                en: _.unescape(task.description.en)
-                            };
-                        });
-                    });
-                }
-
-                next({status: 200, body: result});
-            });
-        }
-
-        access.getReadAccess(req, ACL_MODULES.OBJECTIVE, function (err, allowed) {
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
 
-                return next(err);
+            if (result.length) {
+                result.forEach((item) => {
+                    const subTasks = item.subTasks;
+
+                    subTasks.forEach((task) => {
+                        task.description = {
+                            en: _.unescape(_.get(task, 'description.en') || ''),
+                            ar: _.unescape(_.get(task, 'description.ar') || ''),
+                        };
+                    });
+                });
             }
 
-            queryRun();
+            next({
+                status: 200,
+                body: result,
+            });
         });
-    };
-};
+    }
 
-module.exports = Objectives;
+}
+
+module.exports = ObjectiveHandler;

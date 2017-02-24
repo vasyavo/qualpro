@@ -31,8 +31,9 @@ const FilterMapper = require('../helpers/filterMapper');
 const FILTERS_CONSTANTS = require('../public/js/constants/filters');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const logger = require('./../utils/logger');
+const redis = require('./../helpers/redisClient');
 
-const Filters = function(db, redis) {
+const Filters = function() {
     const self = this;
 
     const $defProjection = {

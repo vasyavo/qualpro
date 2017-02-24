@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'socketio',
     'models/personnel',
     'constants/errorMessages'

@@ -1,6 +1,7 @@
 'use strict';
+const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var Domain = function (db, redis, event) {
+var Domain = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var _ = require('underscore');
@@ -14,16 +15,17 @@ var Domain = function (db, redis, event) {
     var SessionModel = require('./../types/session/model');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var xssFilters = require('xss-filters');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/domainArchiver');
-    var archiver = new Archiver(DomainModel, BranchModel, event);
+    var logWriter = require('../helpers/logWriter.js');
+    var archiver = new Archiver(DomainModel, BranchModel);
     var populateByType = require('../helpers/populateByType');
     var contentTypes = require('../public/js/helpers/contentTypesHelper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var bodyValidator = require('../helpers/bodyValidator');
     var cutOccupiedDomains = require('../helpers/cutOccupiedDomains');
     var objectId = mongoose.Types.ObjectId;
@@ -81,14 +83,24 @@ var Domain = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-                event.emit('activityChange', {
-                    module     : moduleNumber,
-                    actionType : ACTIVITY_TYPES.CREATED,
-                    createdBy  : body.editedBy,
-                    itemType   : CONTENT_TYPES.DOMAIN,
-                    itemId     : result._id,
-                    itemDetails: body.type
-                });
+                const bodyObject = {
+                    actionOriginator : req.session.uId,
+                    accessRoleLevel : req.session.level,
+                    body : result.toJSON()
+                };
+
+                switch (body.type) {
+                    case ('country') :
+                        ActivityLog.emit('country:created', bodyObject);
+                        break;
+                    case ('region') :
+                        ActivityLog.emit('region:created', bodyObject);
+                        break;
+                    case ('subRegion') :
+                        ActivityLog.emit('sub-region:created', bodyObject);
+                        break;
+               }
+
 
                 if (result && result.name) {
                     result.name = {
@@ -162,12 +174,7 @@ var Domain = function (db, redis, event) {
                     user: req.session.uId,
                     date: new Date()
                 };
-                var moduleNumber = ACL_MODULES.COUNTRY;
-                if (options.contentType === 'region') {
-                    moduleNumber = ACL_MODULES.REGION;
-                } else if (options.contentType === 'subRegion') {
-                    moduleNumber = ACL_MODULES.SUB_REGION;
-                }
+
                 if (err) {
                     return next(err);
                 }
@@ -175,14 +182,37 @@ var Domain = function (db, redis, event) {
                 if (!req.body.archived) {
                     type = ACTIVITY_TYPES.UNARCHIVED;
                 }
-                idsToArchive.forEach(function (id) {
-                    event.emit('activityChange', {
-                        module    : moduleNumber,
-                        actionType: type,
-                        createdBy : createdBy,
-                        itemType  : CONTENT_TYPES.DOMAIN,
-                        itemId    : id
-                    });
+                async.each(idsToArchive, (id, eCb)=>{
+                    DomainModel.findById(id)
+                        .lean()
+                        .exec((err, resp)=>{
+                            if (err){
+                                return eCb(err)
+                            }
+
+                            const bodyObject = {
+                                actionOriginator: req.session.uId,
+                                accessRoleLevel : req.session.level,
+                                body            : resp
+                            };
+
+                            switch (options.contentType) {
+                                case ('country') :
+                                    ActivityLog.emit('country:archived', bodyObject);
+                                    break;
+                                case ('region') :
+                                    ActivityLog.emit('region:archived', bodyObject);
+                                    break;
+                                case ('subRegion') :
+                                    ActivityLog.emit('sub-region:archived', bodyObject);
+                                    break;
+                            }
+                            eCb();
+                        })
+                }, (err)=>{
+                    if (err) {
+                        logWriter.log('planogram archived error', err);
+                    }
                 });
 
                 res.status(200).send();
@@ -209,7 +239,7 @@ var Domain = function (db, redis, event) {
         function queryRun() {
             var id = req.params.id;
 
-            db.model(modelAndSchemaName, schema)
+            BranchModel
                 .findById(id)
                 .populate('currency')
                 .exec(function (err, result) {
@@ -812,14 +842,23 @@ var Domain = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-                event.emit('activityChange', {
-                    module     : moduleNumber,
-                    actionType : ACTIVITY_TYPES.UPDATED,
-                    createdBy  : body.editedBy,
-                    itemId     : id,
-                    itemType   : CONTENT_TYPES.DOMAIN,
-                    itemDetails: body.type
-                });
+                const bodyObject = {
+                    actionOriginator: req.session.uId,
+                    accessRoleLevel : req.session.level,
+                    body            : result.toJSON()
+                };
+
+                switch (body.type) {
+                    case ('country') :
+                        ActivityLog.emit('country:updated', bodyObject);
+                        break;
+                    case ('region') :
+                        ActivityLog.emit('region:updated', bodyObject);
+                        break;
+                    case ('subRegion') :
+                        ActivityLog.emit('sub-region:updated', bodyObject);
+                        break;
+                }
 
                 if (result && result.name) {
                     result.name = {

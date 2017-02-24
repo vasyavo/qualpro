@@ -1,5 +1,5 @@
 define([
-        'Backbone',
+        'backbone',
         'text!templates/personnel/form/ratingTextTemplate.html'
     ],
     function (Backbone, template) {

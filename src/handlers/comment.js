@@ -1,8 +1,18 @@
 const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
 const InStoreTaskUtils = require('./../stories/test-utils').InStoreTaskUtils;
 const ActivityLog = require('./../stories/push-notifications/activityLog');
+const CommentModel = require('./../types/comment/model');
+const ObjectiveModel = require('./../types/objective/model');
+const CompetitorBrandingModel = require('./../types/competitorBranding/model');
+const PromotionModel = require('./../types/promotion/model');
+const PromotionItemModel = require('./../types/promotionItem/model');
+const MarketingCampaignModel = require('./../types/brandingActivity/model');
+const MarketingCampaignItemModel = require('./../types/brandingActivityItem/model');
+const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
+const ContactUsModel = require('../types/contactUs/model');
+const redis = require('./../helpers/redisClient');
 
-var Comment = function (db, redis, event) {
+var Comment = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('lodash');
@@ -12,19 +22,11 @@ var Comment = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
-    const CommentModel = require('./../types/comment/model');
-    const ObjectiveModel = require('./../types/objective/model');
-    const CompetitorBrandingModel = require('./../types/competitorBranding/model');
-    var CompetitorBrandingItemModel = require('./../types/brandingActivityItem/model'); // TODO should be double checked
-    const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
-    const PromotionsItemsModel = require('./../types/promotionItem/model');
-    const ContactUsModel = require('../types/contactUs/model');
-    var PromotionsModel = require('./../types/promotion/model');
+    var getImagesHelper = new GetImagesHelper();
     var FilesModel = require('./../types/file/model');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var access = require('../helpers/access')(db);
+    var fileHandler = new FileHandler();
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var self = this;
     var ObjectId = mongoose.Types.ObjectId;
@@ -117,13 +119,12 @@ var Comment = function (db, redis, event) {
             let mid;
 
             switch (context) {
-                // fixme: should be double checked
-                case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
-                    mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
+                case CONTENT_TYPES.BRANDING_ACTIVITY:
+                    ContextModel = MarketingCampaignModel;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
+                    ContextModel = MarketingCampaignItemModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
                     break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
@@ -134,13 +135,13 @@ var Comment = function (db, redis, event) {
                     ContextModel = CompetitorPromotionModel;
                     mid = ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY;
                     break;
-                case CONTENT_TYPES.PROMOTIONSITEMS:
-                    ContextModel = PromotionsItemsModel;
-                    mid = ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS;
-                    break;
                 case CONTENT_TYPES.PROMOTIONS:
-                    ContextModel = PromotionsModel;
+                    ContextModel = PromotionModel;
                     mid = ACL_MODULES.AL_ALALI_PROMO_EVALUATION;
+                    break;
+                case CONTENT_TYPES.PROMOTIONSITEMS:
+                    ContextModel = PromotionItemModel;
+                    mid = ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS;
                     break;
                 case CONTENT_TYPES.OBJECTIVES:
                     ContextModel = ObjectiveModel;
@@ -166,8 +167,52 @@ var Comment = function (db, redis, event) {
 
             async.waterfall([
 
-                (waterfallCb) => {
-                    self.commentCreator(saveObj, waterfallCb);
+                (cb) => {
+                    self.commentCreator(saveObj, cb);
+                },
+
+                (comment, cb) => {
+                    ContextModel.findByIdAndUpdate(saveObj.objectiveId, {
+                        $push: {
+                            comments: comment._id,
+                        },
+                        $set: {
+                            editedBy: {
+                                user: ObjectId(userId),
+                                date: new Date(),
+                            },
+                        },
+                    }, {
+                        new: true,
+                        runValidators: true,
+                    }, (err, updatedContextModel) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        if (!updatedContextModel) {
+                            const error = new Error('Context document not found');
+
+                            error.status = 400;
+                            return cb(error);
+                        }
+
+                        const eventPayload = {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: updatedContextModel.toJSON(),
+                        };
+
+                        if (context === CONTENT_TYPES.OBJECTIVES) {
+                            ActivityLog.emit('objective:comment-added', eventPayload);
+                        }
+
+                        if (context === CONTENT_TYPES.INSTORETASKS) {
+                            ActivityLog.emit('in-store-task:comment-added', eventPayload);
+                        }
+
+                        cb(null, comment);
+                    });
                 },
 
                 (comment, waterfallCb) => {
@@ -283,43 +328,6 @@ var Comment = function (db, redis, event) {
                                 waterfallCb(null, response);
                             })
                         });
-                    });
-                },
-
-                (comment, waterfallCb) => {
-                    ContextModel.findByIdAndUpdate(saveObj.objectiveId, {
-                        $push: {comments: comment._id},
-                        $set : {
-                            editedBy: {
-                                user: ObjectId(userId),
-                                date: new Date()
-                            }
-                        }
-                    }, {
-                        new: true,
-                        runValidators: true,
-                    }, (err, updatedContextModel) => {
-                        if (err) {
-                            return waterfallCb(err);
-                        }
-
-                        if (context === CONTENT_TYPES.OBJECTIVES) {
-                            ActivityLog.emit('objective:comment-added', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: updatedContextModel.toJSON(),
-                            })
-                        }
-
-                        if (context === CONTENT_TYPES.INSTORETASKS) {
-                            ActivityLog.emit('in-store-task:comment-added', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: updatedContextModel.toJSON(),
-                            })
-                        }
-
-                        waterfallCb(null, comment);
                     });
                 },
 
@@ -816,7 +824,7 @@ var Comment = function (db, redis, event) {
 
             switch (context) {
                 case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
+                    ContextModel = MarketingCampaignItemModel;
                     break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
                     ContextModel = CompetitorBrandingModel;
@@ -825,13 +833,13 @@ var Comment = function (db, redis, event) {
                     ContextModel = CompetitorPromotionModel;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
-                    ContextModel = CompetitorBrandingItemModel;
+                    ContextModel = MarketingCampaignItemModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:
-                    ContextModel = PromotionsItemsModel;
+                    ContextModel = PromotionItemModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONS:
-                    ContextModel = PromotionsModel;
+                    ContextModel = PromotionModel;
                     break;
                 default:
                     ContextModel = ObjectiveModel;

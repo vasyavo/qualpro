@@ -1,4 +1,5 @@
 ﻿define([
+        'backbone',
         'text!templates/domain/listTable.html'
     ],
 

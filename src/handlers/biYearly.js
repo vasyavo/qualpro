@@ -1,11 +1,13 @@
-var BiYearlyHandler = function (db) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var BiYearlyHandler = function () {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var ACL_ROLES = require('../constants/aclRolesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var BiYearlyModel = require('./../types/biYearly/model');
     var PersonnelModel = require('./../types/personnel/model');
     var bodyValidator = require('../helpers/bodyValidator');
@@ -324,6 +326,12 @@ var BiYearlyHandler = function (db) {
                     model = model.toObject();
                     model.avgRating = personnel.avgRating[CONTENT_TYPES.BIYEARLY];
 
+                    ActivityLog.emit('personnel:bi-yearly', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body: personnel,
+                    });
+
                     callback(null, model);
                 });
             }
@@ -490,6 +498,12 @@ var BiYearlyHandler = function (db) {
 
                         result = result.toObject();
                         result.avgRating = personnel.avgRating[CONTENT_TYPES.BIYEARLY];
+
+                        ActivityLog.emit('personnel:bi-yearly', {
+                            actionOriginator: req.session.uId,
+                            accessRoleLevel : req.session.level,
+                            body: personnel,
+                        });
 
                         res.status(200).send(result);
                     });

@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/objectives/create.html',
@@ -134,6 +134,7 @@ define([
             var form;
             var description;
             var self = this;
+            var $curEl = this.$el;
 
             if (this.objectiveType !== 'individual' && this.objectiveType !== 'country') {
                 return;
@@ -146,8 +147,8 @@ define([
             }
 
             description = {
-                en: CKEDITOR.instances.editor1.document.getBody().getText(),
-                ar: CKEDITOR.instances.editor2.document.getBody().getText()
+                en: _.unescape($curEl.find('.objectivesTextarea[data-property="en"]').val()),
+                ar: _.unescape($curEl.find('.objectivesTextarea[data-property="ar"]').val())
             };
 
             if (this.assigneWithoutBranches) {
@@ -627,7 +628,8 @@ define([
 
                 self.fileForVFWithoutBranches = {};
                 self.visibilityFormAjax = null;
-                self.assigneWithoutBranches = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+                self.assigneWithoutBranches = jsonPersonnels[0].accessRole.level === 4 && jsonPersonnels[0].branch.length !== 0 ? false : smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+
                 self.branchesForVisibility = [];
                 self.outletsForVisibility = [];
                 self.dontShowDistributionForm = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;

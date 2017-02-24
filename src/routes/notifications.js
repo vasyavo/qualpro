@@ -6,8 +6,8 @@ var access = require('../helpers/access');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
-module.exports = function (db, redis, event) {
-    var handler = new NotificationsHandler(db, redis, event);
+module.exports = function () {
+    var handler = new NotificationsHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

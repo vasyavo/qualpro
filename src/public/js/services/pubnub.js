@@ -25,9 +25,18 @@ define(function(require) {
         });
     }
 
+    function unsubscribe(options) {
+        var userId = options.userId;
+
+        client.unsubscribe({
+            channels: [userId]
+        })
+    }
+
     return {
         client: client,
         subscribe: subscribe,
+        unsubscribe: unsubscribe
     };
 
 });

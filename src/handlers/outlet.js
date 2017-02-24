@@ -1,4 +1,6 @@
-var OutletHandler = function (db, redis, event) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var OutletHandler = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var _ = require('lodash');
@@ -7,14 +9,14 @@ var OutletHandler = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var OutletModel = require('./../types/outlet/model');
     var BranchesModel = require('./../types/branch/model');
     var DomainModel = require('./../types/domain/model');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/archiver');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var archiver = new Archiver(OutletModel);
     var BranchModel = require('./../types/branch/model');
     var PersonnelModel = require('./../types/personnel/model');
@@ -102,12 +104,10 @@ var OutletHandler = function (db, redis, event) {
                     return next(error);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.CUSTOMER,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.OUTLET
+                ActivityLog.emit('customer:created', {
+                    actionOriginator: req.session.uId,
+                    accessRoleLevel : req.session.level,
+                    body            : model.toJSON()
                 });
 
                 if (model && model.name) {
@@ -197,19 +197,27 @@ var OutletHandler = function (db, redis, event) {
                     return next(err);
                 }
 
-                async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.CUSTOMER,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.OUTLET
-                    });
-                    callback();
+                async.each(idsToArchive, (id, eCb)=>{
+                    OutletModel.findById(id)
+                        .lean()
+                        .exec((err, resp)=>{
+                            if (err){
+                                return eCb(err)
+                            }
 
-                }, function (err) {
+                            const bodyObject = {
+                                actionOriginator: req.session.uId,
+                                accessRoleLevel : req.session.level,
+                                body            : resp
+                            };
+
+                            ActivityLog.emit('customer:archived', bodyObject);
+
+                            eCb();
+                        })
+                }, (err)=>{
                     if (err) {
-                        logWriter.log('outlet archived error', err);
+                        logWriter.log('customer archived error', err);
                     }
                 });
 
@@ -850,12 +858,10 @@ var OutletHandler = function (db, redis, event) {
                         return next(err);
                     }
 
-                    event.emit('activityChange', {
-                        module    : 4,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : body.editedBy,
-                        itemId    : id,
-                        itemType  : CONTENT_TYPES.OUTLET
+                    ActivityLog.emit('customer:updated', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body            : result.toJSON()
                     });
 
                     if (result && result.name) {

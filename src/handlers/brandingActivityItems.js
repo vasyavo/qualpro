@@ -1,5 +1,8 @@
-var Promotions = function (db, redis, event) {
-    var async = require('async');
+const async = require('async');
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+const extractBody = require('./../utils/extractBody');
+
+const MarketingCampaignsHandler = function() {
     var _ = require('lodash');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
@@ -11,10 +14,10 @@ var Promotions = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var CommentHandler = require('./comment');
-    var commentHandler = new CommentHandler(db);
+    var commentHandler = new CommentHandler();
     var commentCreator = commentHandler.commentCreator;
 
     var $defProjection = {
@@ -319,100 +322,107 @@ var Promotions = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
-        function queryRun(body) {
-            var createdBy = {
-                user: req.session.uId,
-                date: new Date()
+    this.create = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
+        const queryRun = (body, callback) => {
+            const createdBy = {
+                user: userId,
+                date: new Date(),
             };
+
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
-            async.waterfall([
-                function (callback) {
-                    BrandingActivityModel.findByIdAndUpdate(body.brandingAndDisplay, {
-                        $addToSet: {personnel: ObjectId(body.createdBy.user)}
-                    }, function (err) {
-                        if (err) {
-                            callback(err);
-                        } else {
-                            callback();
-                        }
-                    });
+            BrandingActivityModel.findByIdAndUpdate(body.brandingAndDisplay, {
+                $addToSet: {
+                    personnel: ObjectId(createdBy.user),
                 },
-                function (callback) {
-                    BrandingActivityItemModel.create(body, callback);
-                },
-                function (model, callback) {
-                    var saveObj = {
-                        text       : body.commentText,
-                        objectiveId: model._id,
-                        userId     : req.session.uId,
-                        files      : req.files,
-                        createdBy  : createdBy,
-                    };
-
-                    commentCreator(saveObj, function (err, comment) {
-                        if (err) {
-                            return callback(err);
-                        }
-
-                        callback(null, model, comment);
-                    });
-                },
-                function (model, comment, callback) {
-                    BrandingActivityItemModel.findByIdAndUpdate(model._id, {$addToSet: {comments: comment._id}}, {new: true}, callback);
-                }
-            ], function (err, result) {
+            }, (err, report) => {
                 if (err) {
-                    return next(err);
+                    return callback(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : result.get('createdBy'),
-                    itemId    : result.brandingAndDisplay,
-                    itemType  : CONTENT_TYPES.BRANDINGANDDISPLAY
-                });
+                async.waterfall([
 
-                res.status(200).send(result);
+                    (cb) => {
+                        BrandingActivityItemModel.create(body, cb);
+                    },
+
+                    (model, cb) => {
+                        const saveObj = {
+                            text: body.commentText,
+                            objectiveId: model._id,
+                            userId: req.session.uId,
+                            files: req.files,
+                            createdBy,
+                        };
+
+                        commentCreator(saveObj, (err, comment) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            cb(null, {
+                                model,
+                                comment,
+                            });
+                        });
+                    },
+
+                    (options, cb) => {
+                        const {
+                            model,
+                            comment,
+                        } = options;
+
+                        BrandingActivityItemModel.findByIdAndUpdate(model._id, {
+                            $addToSet: {
+                                comments: comment._id,
+                            },
+                        }, {
+                            new: true,
+                        }, cb);
+                    },
+
+                    (publishedItem, cb) => {
+                        ActivityLog.emit('marketing:al-alali-marketing-campaigns:item-published', {
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            body: report.toJSON(),
+                        });
+
+                        cb(null, publishedItem);
+                    },
+
+                ], callback);
             });
-        }
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS, function (err, allowed) {
-            var body;
+        async.waterfall([
 
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
+
+                bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            try {
-                if (req.body.data) {
-                    body = JSON.parse(req.body.data);
-                } else {
-                    body = req.body;
-                }
-            } catch (err) {
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
-            });
+            res.status(200).send(result);
         });
     };
 };
 
-module.exports = Promotions;
+module.exports = MarketingCampaignsHandler;

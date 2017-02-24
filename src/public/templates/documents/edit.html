@@ -1,6 +1,5 @@
-<div class="form-holder personnelInfo promotionEdit documentsEdit largeHeightPreview">
 <div class="title">
-    <span class="titleDescription" data-translation="editTitle"><%=translation.editTitle%></span>
+    <span class="titleDescription"><%- translation.editTitle %></span>
 </div>
 <div class="promotionForm documentsForm">
     <div class="blockObjective scrollingForm">
@@ -9,23 +8,19 @@
                 <div class="table">
                     <div class="row">
                         <div class="cell alignTop">
-                            <span data-translation="title"><%=translation.title%></span>
+                            <span><%- translation.title %></span>
                         </div>
                         <div class="cell mandatory">
                             <input type="text"
-                                   id="titleDd"
+                                   id="title"
                                    class="objectivesInput"
-                                   value="<%= jsonModel.title %>"
-                                   required
+                                   value="<%= title %>"
                                    maxlength="32"
-                                   data-translation="titleInput"
-                                   placeholder="<%=translation.titleInput%>"/>
+                                   placeholder="<%- translation.titleInput %>"/>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <form action="" method="post" id="mainForm"></form>
     </div>
-</div>
 </div>

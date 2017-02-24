@@ -2,7 +2,7 @@
 define([
     'jQuery',
     'Underscore',
-    'Backbone',
+    'backbone',
     'text!templates/itemsPrices/itemsToOutlet/main.html',
     'text!templates/itemsPrices/itemsToOutlet/header.html',
     'text!templates/itemsPrices/itemsToOutlet/list.html',
@@ -44,7 +44,7 @@ define([
                 }
             });
 
-            this.collection = new ItemsPricesCollection({location: true, filter: options.filter}, {parse: true});
+            this.collection = new ItemsPricesCollection({location: true, filter: options.filter, count: -1}, {parse: true});
 
             this.collection.bind('reset', function () {
                 this.renderLists();

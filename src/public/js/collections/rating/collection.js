@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'models/rating'
 ], function (Backbone,Model) {
     var Collection = Backbone.Collection.extend({

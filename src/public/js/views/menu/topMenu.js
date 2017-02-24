@@ -1,20 +1,18 @@
-define([
-    'Backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/menu/topMenu.html',
-    'text!templates/menu/shortDescription.html',
-    'views/personnel/preView/preView',
-    'views/personnel/editView',
-    'models/personnel',
-    'js-cookie',
-    'constants/errorMessages',
-    'moment',
-    'dataService',
-    'constants/aclRoleIndexes'
-], function (Backbone, $, _, template, shortDescriptionTemplate, personnelPreView,
-             EditView, PersonnelModel, Cookies, ERROR_MESSAGES, moment, dataService, ACL_ROLE_INDEXES) {
-    'use strict';
+define(function(require) {
+    var _ = require('Underscore');
+    var Backbone = require('backbone');
+    var $ = require('jQuery');
+    var template = require('text!templates/menu/topMenu.html');
+    var shortDescriptionTemplate = require('text!templates/menu/shortDescription.html');
+    var personnelPreView = require('views/personnel/preView/preView');
+    var EditView = require('views/personnel/editView');
+    var PersonnelModel = require('models/personnel');
+    var Cookies = require('js-cookie');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var moment = require('moment');
+    var dataService = require('dataService');
+    var ACL_ROLE_INDEXES = require('constants/aclRoleIndexes');
+    var PubNubClient = require('services/pubnub');
 
     var TopMenuView = Backbone.View.extend({
         tagName            : 'ul',
@@ -42,12 +40,14 @@ define([
             var self = this;
 
             $.get('/logout', function () {
+                var userId = App.currentUser._id;
+
+                PubNubClient.unsubscribe({
+                    userId: userId
+                });
                 App.socket.emit('logout');
-
                 delete App.currentUser;
-
                 self.changeStyle('en');
-
                 Backbone.history.navigate('/login', {trigger: true});
             });
         },

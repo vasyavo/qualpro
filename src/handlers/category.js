@@ -1,4 +1,4 @@
-var Category = function (db, event) {
+var Category = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var ACL_MODULES = require('../constants/aclModulesNames');
@@ -8,9 +8,9 @@ var Category = function (db, event) {
     var ItemModel = require('./../types/item/model');
 
     var xssFilters = require('xss-filters');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var Archiver = require('../helpers/archiver');
-    var archiver = new Archiver(db, event);
+    var archiver = new Archiver();
     var objectId = mongoose.Types.ObjectId;
     var bodyValidator = require('../helpers/bodyValidator');
 

@@ -691,8 +691,7 @@ define([
                         'status'        : {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed'],
-                            options: {$nin: 'true'}
+                            names  : ['Closed']
                         }
                     }]
                 }

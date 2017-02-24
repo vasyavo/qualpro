@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/questionnary/preview.html',
@@ -93,8 +93,9 @@ define([
             var arcs;
             var sum = 0;
             var outerArc;
+            var $questionsDiagram = this.$el.find('#questionsDiagram');
 
-            this.$el.find('#questionsDiagram').html('');
+            $questionsDiagram.html('');
 
             if (['fullAnswer', 'multiChoice'].indexOf(question.type._id) !== -1) {
                 return false;
@@ -118,7 +119,7 @@ define([
                 percentArray.push((optionCount * 100 / sum).toFixed(2));
             });
 
-            svg = d3.select('div#questionsDiagram').append('svg').attr({
+            svg = d3.select($questionsDiagram[0]).append('svg').attr({
                 width : '160px',
                 height: '160px'
             }).style({

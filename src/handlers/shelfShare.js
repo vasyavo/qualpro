@@ -1,12 +1,13 @@
+const async = require('async');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var ShelfShareHandler = function (db, redis, event) {
+var ShelfShareHandler = function () {
     var _ = require('underscore');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var CONSTANTS = require('../constants/mainConstants');
     var FilterMapper = require('../helpers/filterMapper');
     var bodyValidator = require('../helpers/bodyValidator');
@@ -768,18 +769,18 @@ var ShelfShareHandler = function (db, redis, event) {
         });
     };
 
-    this.create = function (req, res, next) {
+    this.create = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
 
-        function queryRun(body) {
-            body.createdBy = {
+        const queryRun = (body, callback) => {
+            const createdBy = {
                 user: userId,
-                date: new Date()
+                date: new Date(),
             };
             if (body.brands && body.brands.length) {
-                body.brands.forEach(function (brand) {
+                body.brands.forEach((brand) => {
                     if (brand.length) {
                         brand.length = _.escape(brand.length);
                     }
@@ -792,42 +793,40 @@ var ShelfShareHandler = function (db, redis, event) {
                 body.totalBrandsLength = _.escape(body.totalBrandsLength);
             }
 
-            ShelfShareModel.create(body, function (err, model) {
-                if (err) {
-                    return next(err);
-                }
+            body.createdBy = createdBy;
 
-                ActivityLog.emit('reporting:shelf-share:published', {
-                    actionOriginator: userId,
-                    accessRoleLevel,
-                    body : model.toJSON()
-                });
+            const report = new ShelfShareModel();
 
-                res.status(200).send(model);
+            report.set(body);
+            report.save((err, model) => {
+                callback(err, model);
             });
-        }
+        };
 
-        access.getWriteAccess(req, ACL_MODULES.SHELF_SHARES, function (err, allowed) {
-            var body = req.body;
+        async.waterfall([
 
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.SHELF_SHARES, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(req.body, accessRoleLevel, CONTENT_TYPES.SHELFSHARES, 'create', cb);
+            },
+
+            queryRun,
+
+        ], (err, model) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                err = new Error();
-                err.status = 403;
-
-                return next(err);
-            }
-
-            bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.SHELFSHARES, 'create', function (err, saveData) {
-                if (err) {
-                    return next(err);
-                }
-
-                queryRun(saveData);
+            ActivityLog.emit('reporting:shelf-share:published', {
+                actionOriginator: userId,
+                accessRoleLevel,
+                body: model.toJSON(),
             });
+
+            res.status(200).send(model);
         });
     };
 

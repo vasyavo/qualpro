@@ -1,5 +1,5 @@
 define([
-        'Backbone',
+        'backbone',
         'validation',
         'constants/otherConstants',
         'dataService'

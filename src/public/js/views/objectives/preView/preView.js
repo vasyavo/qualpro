@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/objectives/preview.html',
@@ -417,8 +417,9 @@ define([
                 } else {
                     var assigneAccessRole = modelJSON.assignedTo[0].accessRole.level;
                     var userAccessRolesWithBranches = [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN];
+                    var withoutBranches = assigneAccessRole === 4 && branchesForVisibility.length !== 0 ? false : userAccessRolesWithBranches.indexOf(assigneAccessRole) === -1;
 
-                    if (userAccessRolesWithBranches.indexOf(assigneAccessRole) === -1) {
+                    if (withoutBranches) {
                         this.visibilityForm = new VisibilityFormWithoutBranches({
                             assigneId : modelJSON.assignedTo[0]._id,
                             formId : id,

@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/objectives/subObjective.html',
@@ -185,7 +185,7 @@ define([
             var description;
             var self = this;
 
-            if (modelJSON.objectiveType !== 'country' && (!this.assign || this.assignOnAreaInchargeManager) ) {
+            if (!this.assign || this.assignOnAreaInchargeManager) {
                 return;
             }
 

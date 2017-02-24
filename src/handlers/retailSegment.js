@@ -1,15 +1,17 @@
-var RetailSegmentHandler = function (db, redis, event) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var RetailSegmentHandler = function () {
     var async = require('async');
     var _ = require('underscore');
     var lodash = require('lodash');
     var mongoose = require('mongoose');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var RetailSegmentModel = require('./../types/retailSegment/model');
     var DomainModel = require('./../types/domain/model');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
@@ -104,12 +106,10 @@ var RetailSegmentHandler = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.TRADE_CHANNEL,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.RETAILSEGMENT
+                ActivityLog.emit('trade-channel:created', {
+                    actionOriginator: req.session.uId,
+                    accessRoleLevel : req.session.level,
+                    body            : model.toJSON()
                 });
 
                 if (model && model.name) {
@@ -212,19 +212,28 @@ var RetailSegmentHandler = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-                async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.TRADE_CHANNEL,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.RETAILSEGMENT
-                    });
-                    callback();
+                async.each(idsToArchive, (id, eCb)=> {
+                    RetailSegmentModel.findById(id)
+                        .lean()
+                        .exec((err, resp)=> {
+                            if (err) {
+                                return eCb(err)
+                            }
 
-                }, function (err) {
+                            const bodyObject = {
+                                actionOriginator: req.session.uId,
+                                accessRoleLevel : req.session.level,
+                                body            : resp
+                            };
+
+                            ActivityLog.emit('trade-channel:archived', bodyObject);
+
+                            eCb();
+
+                        })
+                }, (err)=> {
                     if (err) {
-                        logWriter.log('planogram archived error', err);
+                        logWriter.log('trade channel archived error', err);
                     }
                 });
                 if (archived) {
@@ -909,12 +918,10 @@ var RetailSegmentHandler = function (db, redis, event) {
                     if (err) {
                         return next(err);
                     }
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.TRADE_CHANNEL,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : body.editedBy,
-                        itemId    : id,
-                        itemType  : CONTENT_TYPES.RETAILSEGMENT
+                    ActivityLog.emit('trade-channel:updated', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel : req.session.level,
+                        body            : result.toJSON()
                     });
 
                     if (result && result.name) {

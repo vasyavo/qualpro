@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/contractsYearly/preView/preView.html',
@@ -15,7 +15,7 @@ define([
     'helpers/implementShowHideArabicInputIn',
     'dataService',
     'constants/contentType',
-    'views/documents/preView/preView'
+    'views/documents/preview'
 ], function (Backbone, _, $, PreviewTemplate, FileTemplate,
              FileCollection, FileModel, Model, DocumentsModel, BaseView, populate, CONSTANTS,
              LEVEL_CONFIG, implementShowHideArabicInputIn, dataService, CONTENT_TYPES, PreView) {
@@ -35,7 +35,6 @@ define([
         },
 
         initialize: function (options) {
-
             this.activityList = options.activityList;
             this.translation = options.translation;
             this.model = options.model;
@@ -172,6 +171,12 @@ define([
                         });
                 });
             }
+
+            jsonModel.attachments = jsonModel.attachments.map(function (document) {
+                document.type = document.attachment.type;
+
+                return document;
+            });
 
             this.setSelectedFiles(jsonModel.attachments);
 

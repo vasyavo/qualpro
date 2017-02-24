@@ -1,4 +1,4 @@
-define(['Backbone',
+define(['backbone',
         'jQuery',
         'Underscore',
         'dataService',

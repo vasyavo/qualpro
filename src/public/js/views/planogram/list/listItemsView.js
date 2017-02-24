@@ -1,5 +1,5 @@
 define([
-        'Backbone',
+        'backbone',
         'Underscore',
         'text!templates/planogram/list/list.html'
     ],

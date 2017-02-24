@@ -317,7 +317,7 @@
                                    href="javascript:;">
                                     <%= translation.select %>
                                 </a>-->
-                                <span class="suspervisor hoverFullText"><%= model.manager ? model.manager.firstName.currentLanguage + model.manager.lastName.currentLanguage : 'Not assigned' %></span>
+                                <span class="suspervisor hoverFullText"><%= model.manager && model.manager.firstName && model.manager.lastName ? model.manager.firstName.currentLanguage + model.manager.lastName.currentLanguage : 'Not assigned' %></span>
                             </div>
                         </div>
                     </div>

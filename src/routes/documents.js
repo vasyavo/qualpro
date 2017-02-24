@@ -1,24 +1,27 @@
-var express = require('express');
-var router = express.Router();
-var DocumentHandler = require('../handlers/document');
-var access = require('../helpers/access');
-var multipart = require('connect-multiparty');
-var multipartMiddleware = multipart();
+const express = require('express');
+const router = express.Router();
+const DocumentHandler = require('../handlers/document');
+const access = require('../helpers/access');
 
-module.exports = function (db, redis, event) {
+module.exports = function () {
     'use strict';
-
-    var handler = new DocumentHandler(db, redis, event);
-    var checkAuth = access.checkAuth;
+    
+    const handler = new DocumentHandler();
+    const checkAuth = access.checkAuth;
 
     router.use(checkAuth);
-
-    router.post('/', multipartMiddleware, handler.create);
-    router.put('/remove', handler.archive);
-    router.get('/', handler.getAll);
+    
+    router.post('/', handler.create);
+    
+    router.put('/:id([0-9a-fA-F]{24})', handler.update);
+    
+    router.patch('/delete', handler.delete);
+    router.patch('/archive', handler.archive);
+    router.patch('/move', handler.move);
+    
+    router.get('/folder/:id([0-9a-fA-F]{24})?', handler.getFolderContent);
+    router.get('/files', handler.getRawFiles);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
-    router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
-    router.patch('/:id([0-9a-fA-F]{24})', handler.update);
 
     return router;
 };

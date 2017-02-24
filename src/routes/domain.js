@@ -9,8 +9,8 @@ var access = require('../helpers/access');
 var Handler = require('../handlers/domain');
 
 
-module.exports = function (db, redis, event) {
-    var handler = new Handler(db, redis, event);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     function midMiddleware(req, res, next) {

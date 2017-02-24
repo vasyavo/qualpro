@@ -15,13 +15,7 @@ const actionAnswerLeaved = (options) => {
     const personnelId = options.personnelId;
     const answerId = options.answerId;
 
-    eventEmitter.emit('activityChange', {
-        module: ACL_MODULES.CONSUMER_SURVEY,
-        actionType: ACTIVITY_TYPES.CREATED,
-        createdBy: personnelId,
-        itemId: answerId,
-        itemType: CONTENT_TYPES.CONSUMER_SURVEY_ANSWER
-    });
+
 };
 
 module.exports = wrap(function * (req, res, next) {

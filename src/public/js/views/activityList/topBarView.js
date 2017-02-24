@@ -1,7 +1,7 @@
 'use strict';
 
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'text!templates/activityList/topBarTemplate.html',

@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var async = require('async');
 
-var BreadcrumbsHelper = function (db) {
+var BreadcrumbsHelper = function () {
 
     //region variables
 

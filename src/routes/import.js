@@ -3,8 +3,8 @@ var router = express.Router();
 var Handler = require('../handlers/import');
 var access = require('../helpers/access');
 
-module.exports = function (db, redis, event) {
-    var handler = new Handler(db);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     router.get('/importFromFolderPart1', checkAuth, handler.importFromFolderPart1);

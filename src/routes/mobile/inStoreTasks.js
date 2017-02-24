@@ -12,8 +12,8 @@ var Handler = require('../../handlers/inStoreTasks');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
-module.exports = function (db, redis, event) {
-    var handler = new Handler(db, redis, event);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

@@ -1,4 +1,6 @@
-var Contract = function (db, redis, event) {
+const ActivityLog = require('./../stories/push-notifications/activityLog');
+
+var Contract = function () {
     'use strict';
 
     var async = require('async');
@@ -15,11 +17,11 @@ var Contract = function (db, redis, event) {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var DocumentHandler = require('../handlers/document');
-    var documentHandler = new DocumentHandler(db);
+    var documentHandler = new DocumentHandler();
     var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
 
     var self = this;
@@ -121,7 +123,7 @@ var Contract = function (db, redis, event) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'documents',
             key          : 'documents',
-            addProjection: ['createdBy', 'title', 'contentType']
+            addProjection: ['createdBy', 'title', 'attachment']
         }));
 
         pipeLine.push({
@@ -146,9 +148,28 @@ var Contract = function (db, redis, event) {
                 documents: {
                     _id        : 1,
                     title      : 1,
+                    attachment : 1,
                     contentType: 1,
                     createdBy  : {
                         date: 1
+                    }
+                }
+            }
+        }));
+    
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from           : 'files',
+            key            : 'documents.attachment',
+            isArray        : false,
+            addProjection  : ['_id', 'contentType'],
+            includeSiblings: {
+                documents: {
+                    _id        : 1,
+                    title      : 1,
+                    contentType: 1,
+                    createdBy  : {
+                        date: 1,
+                        user: 1
                     }
                 }
             }
@@ -399,13 +420,11 @@ var Contract = function (db, redis, event) {
     };
 
     this.create = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(body) {
-            var files = req.files;
-            var filesPresence = Object.keys(files).length;
-            var attachPresence = body.attachments;
-            var both = attachPresence && filesPresence;
-            var session = req.session;
-            var userId = session.uId;
             var model;
             var saveContractsSecondary = body.saveContractsSecondary;
             var functions = [];
@@ -419,23 +438,8 @@ var Contract = function (db, redis, event) {
                     }
                 }
             });
-
-            function create(cback) {
-                if (!filesPresence) {
-                    return cback(null, null);
-                }
-                documentHandler.createDocIfNewContract(userId, files, function (err, documentId) {
-                    if (err) {
-                        return cback(err);
-                    }
-
-                    return cback(null, documentId);
-                });
-            }
-
-            functions.push(create);
-
-            function save(documentId, cback) {
+            
+            function save(cb) {
                 var activity = body.activity;
                 var description = body.description;
                 var promotion = body.promotion;
@@ -446,10 +450,8 @@ var Contract = function (db, redis, event) {
                     user: userId,
                     date: new Date()
                 };
-
-                if (!filesPresence) {
-                    documentId = body.attachments.objectID();
-                }
+    
+                const documents = body.attachments.objectID();
                 if (description) {
                     if (description.en) {
                         description.en = _.escape(description.en);
@@ -476,32 +478,33 @@ var Contract = function (db, redis, event) {
                     body.salesTarget = _.escape(salesTarget);
                 }
 
-                body.documents = both ? _.union(documentId, body.attachments.objectID()) : documentId;
+                body.documents = documents;
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
                 body.status = saveContractsSecondary ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
                 delete body.attachments;
 
                 model = new ContractSecondaryModel(body);
-                model.save(function (err, model) {
-                    if (err) {
-                        return cback(err);
-                    }
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.CONTRACT_SECONDARY,
-                        actionType: ACTIVITY_TYPES.CREATED,
-                        createdBy : body.createdBy,
-                        itemId    : model._id,
-                        itemType  : CONTENT_TYPES.CONTRACTSSECONDARY
-                    });
-
-                    return cback(null, model);
+                model.save((err, model) => {
+                    cb(err, model);
                 });
             }
 
             functions.push(save);
 
             function get(contractsSecondaryModel, cback) {
+                const eventPayload = {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: contractsSecondaryModel.toJSON(),
+                };
+
+                if (contractsSecondaryModel.get('status') === PROMOTION_STATUSES.DRAFT) {
+                    ActivityLog.emit('contracts:secondary:draft-created', eventPayload);
+                } else {
+                    ActivityLog.emit('contracts:secondary:published', eventPayload);
+                }
+
                 var id = contractsSecondaryModel.get('_id');
 
                 self.getByIdAggr({id: id, isMobile: req.isMobile}, function (err, result) {
@@ -556,13 +559,11 @@ var Contract = function (db, redis, event) {
     };
 
     this.update = function (req, res, next) {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+
         function queryRun(updateObject) {
-            var files = req.files;
-            var filesPresence = Object.keys(files).length;
-            var attachPresence = updateObject.attachments;
-            var both = attachPresence && filesPresence;
-            var session = req.session;
-            var userId = session.uId;
             var saveContractsSecondary = updateObject.saveContractsSecondary;
             var contractSecondaryId = req.params.id;
             var fullUpdate = {
@@ -580,22 +581,7 @@ var Contract = function (db, redis, event) {
             });
 
             async.waterfall([
-
                     function (cb) {
-                        if (!filesPresence) {
-                            return cb(null, null);
-                        }
-
-                        documentHandler.createDocIfNewContract(userId, files, function (err, documentId) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            cb(null, documentId);
-                        });
-                    },
-
-                    function (documentId, cb) {
                         var activity = updateObject.activity;
                         var description = updateObject.description;
                         var promotion = updateObject.promotion;
@@ -632,16 +618,10 @@ var Contract = function (db, redis, event) {
                         if (salesTarget) {
                             updateObject.salesTarget = _.escape(salesTarget);
                         }
-                        if (!filesPresence && attachPresence) {
-                            documentId = updateObject.attachments.objectID();
-                        }
-
-                        if (documentId) {
-                            updateObject.documents = both ? _.union(documentId, updateObject.attachments.objectID()) : documentId;
-                        }
-                        if (filesPresence && !both) {
+                        
+                        if (updateObject.attachments && updateObject.attachments.length) {
                             fullUpdate.$addToSet = {};
-                            fullUpdate.$addToSet.documents = {$each: updateObject.documents};
+                            fullUpdate.$addToSet.documents = {$each: updateObject.attachments.objectID()};
                             delete updateObject.documents;
                         }
                         updateObject.status = saveContractsSecondary ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
@@ -651,12 +631,11 @@ var Contract = function (db, redis, event) {
                             if (err) {
                                 return cb(err);
                             }
-                            event.emit('activityChange', {
-                                module    : ACL_MODULES.CONTRACT_SECONDARY,
-                                actionType: ACTIVITY_TYPES.UPDATED,
-                                createdBy : updateObject.editedBy,
-                                itemId    : contractSecondaryId,
-                                itemType  : CONTENT_TYPES.CONTRACTSSECONDARY
+
+                            ActivityLog.emit('contracts:secondary:updated', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: contractModel.toJSON(),
                             });
 
                             cb(null, contractModel.get('_id'));
@@ -902,14 +881,14 @@ var Contract = function (db, redis, event) {
                         personnelIds.push(el.createdBy.user._id);
                     });
                     personnelIds.push(model.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(model.documents, '_id'));
+                    fileIds = _.union(fileIds, _.map(model.documents, 'attachment._id'));
 
                     return model;
                 });
 
                 personnelIds = _.uniqBy(personnelIds, 'id');
                 options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
+                options.data[CONTENT_TYPES.FILES] = fileIds;
 
                 getImagesHelper.getImages(options, function (err, result) {
                     var fieldNames = {};
@@ -923,7 +902,7 @@ var Contract = function (db, redis, event) {
                         imgsObject: result
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
+                    fieldNames[CONTENT_TYPES.FILES] = [['documents.attachment']];
                     setOptions.fields = fieldNames;
 
                     getImagesHelper.setIntoResult(setOptions, function (response) {
@@ -1017,7 +996,7 @@ var Contract = function (db, redis, event) {
             from         : 'documents',
             key          : 'documents',
             as           : 'documents',
-            addProjection: ['createdBy', 'title', 'contentType']
+            addProjection: ['createdBy', 'title', 'attachment', 'contentType']
         }));
 
         pipeLine.push({
@@ -1037,8 +1016,27 @@ var Contract = function (db, redis, event) {
                     _id        : 1,
                     title      : 1,
                     contentType: 1,
-                    createdBy  : {
+                    attachment : 1,
+                    createdBy: {
                         date: 1
+                    }
+                }
+            }
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from           : 'files',
+            key            : 'documents.attachment',
+            isArray        : false,
+            addProjection  : ['_id', 'contentType'],
+            includeSiblings: {
+                documents: {
+                    _id        : 1,
+                    title      : 1,
+                    contentType: 1,
+                    createdBy  : {
+                        date: 1,
+                        user: 1
                     }
                 }
             }
@@ -1120,11 +1118,11 @@ var Contract = function (db, redis, event) {
                 personnelIds.push(el.createdBy.user._id);
             });
             personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.documents, '_id');
+            fileIds = _.map(response.documents, 'attachment._id');
 
             personnelIds = _.uniqBy(personnelIds, 'id');
             options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
+            options.data[CONTENT_TYPES.FILES] = fileIds;
 
             getImagesHelper.getImages(options, function (err, result) {
                 var fieldNames = {};
@@ -1138,7 +1136,7 @@ var Contract = function (db, redis, event) {
                     imgsObject: result
                 };
                 fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
+                fieldNames[CONTENT_TYPES.FILES] = [['documents.attachment']];
                 setOptions.fields = fieldNames;
 
                 getImagesHelper.setIntoResult(setOptions, function (response) {

@@ -9,10 +9,10 @@
 
 Project powered by Javascript & Node.js 6.5.0:
 - ECMAScript 2015
-- Backbone, AMD
+- Backbone / Marionette, AMD
 - Express 4
-- MongoDB 3.2.10, Redis
-- AWS S3, Twillio, SendGrid
+- MongoDB 3.4.1, Redis 3.2
+- AWS S3, Twillio, SendGrid, PubNub
 
 ## Development process
 
@@ -90,8 +90,9 @@ Ask credentials in your administrator.
  - `UPLOADER_TYPE` - Currently available only with AmazonS3.
  - `SCHEDULER_HOST`
  - `WEB_CONCURRENCY` - defaults to `1`.
+ - `COOKIE_AGE` - Max cookie age, defaults to `3153600000` (1 year).
 
-##### Twilio credentials are:
+##### Twilio:
  - `SMS_ACCOUNT_SID`
  - `SMS_AUTH_TOKEN`
  - `SMS_NUMBER`
@@ -107,7 +108,17 @@ Ask credentials in your administrator.
  
 ##### Firebase Cloud Messaging
  - `FCM_API_KEY`
+ 
+##### PubNub
+ - `PUBNUB_PUBLISH_KEY`
+ - `PUBNUB_SUBSCRIBE_KEY`
 
-##### Heroku:
+##### Datastore:
  - `REDIS_URL` or `REDISGREEN_URL` Redis url
+
+##### Database:
  - `MONGODB_URI` MongoDB url passed by mLab addon
+ 
+##### Foxtrapp apps
+
+ - `SCHEDULER_HOST`

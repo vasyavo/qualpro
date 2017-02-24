@@ -1,10 +1,10 @@
-var Variant = function (db, redis, event) {
+var Variant = function () {
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CompetitorVariantModel = require('./../types/competitorVariant/model');
     var CompetitorItemModel = require('./../types/competitorItem/model');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var xssFilters = require('xss-filters');
@@ -47,13 +47,7 @@ var Variant = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.COMPETITOR_LIST,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.COMPETITORVARIANT
-                });
+
                 res.status(201).send(model);
             });
         }
@@ -239,13 +233,7 @@ var Variant = function (db, redis, event) {
                     return next(err);
                 }
 
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.COMPETITOR_LIST,
-                    actionType: ACTIVITY_TYPES.UPDATED,
-                    createdBy : body.editedBy,
-                    itemId    : id,
-                    itemType  : CONTENT_TYPES.COMPETITORVARIANT
-                });
+
 
                 res.status(200).send(result);
             });
@@ -311,13 +299,7 @@ var Variant = function (db, redis, event) {
 
 
                 async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.COMPETITOR_LIST,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.COMPETITORVARIANT
-                    });
+
                     callback();
 
                 }, function (err) {

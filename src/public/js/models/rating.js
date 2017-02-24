@@ -1,5 +1,5 @@
 define([
-    'Backbone',
+    'backbone',
     'moment',
     'validation'
 ], function (Backbone, moment, validation) {

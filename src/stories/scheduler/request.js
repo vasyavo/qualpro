@@ -3,9 +3,9 @@ const request = require('request');
 const config = require('../../config');
 
 const circuit = levee.createBreaker(request, {
-    maxFailures : 5,
-    timeout : 60000,
-    resetTimeout : 30000
+    maxFailures: 5,
+    timeout: 60000,
+    resetTimeout: 30000,
 });
 
 const circuitRequest = (requestOptions, callback) => {
@@ -25,7 +25,16 @@ const circuitRequest = (requestOptions, callback) => {
 const post = (opts, callback) => {
     const requestOptions = Object.assign({
         method: 'POST',
-        url : `${config.schedulerHost}/tasks`
+        url: `${config.schedulerHost}/tasks`,
+    }, opts);
+
+    circuitRequest(requestOptions, callback);
+};
+
+const del = (opts, callback) => {
+    const requestOptions = Object.assign({
+        method: 'DELETE',
+        url: `${config.schedulerHost}/tasks`,
     }, opts);
 
     circuitRequest(requestOptions, callback);
@@ -33,5 +42,6 @@ const post = (opts, callback) => {
 
 module.exports = {
     post,
+    del,
     circuitRequest,
 };

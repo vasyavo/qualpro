@@ -3,8 +3,8 @@ var router = express.Router();
 var notificationsHandler = require('../../handlers/notifications');
 var access = require('../../helpers/access');
 
-module.exports = function (db) {
-    var handler = new notificationsHandler(db);
+module.exports = function () {
+    var handler = new notificationsHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

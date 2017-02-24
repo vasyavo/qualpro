@@ -1,6 +1,6 @@
 // TODO: Remove itemsPrices collection (after renaming of itemsPrises to items in whole project), because it is a duplicate of item collection
 define([
-    'Backbone',
+    'backbone',
     'Underscore',
     'jQuery',
     'collections/parrent',
