@@ -4464,8 +4464,11 @@ input[type=number]::-webkit-outer-spin-button {
   height: calc(100% - 20px);
   width: 240px;
   float: left;
-  margin: 10px 20px 10px 10px;
+  margin: 10px 20px 10px 0;
   border: 1px solid #cfd8dc;
+}
+.leftMenuHolder .mCSB_container {
+  left: -5px!important;
 }
 .leftMenuHolder .parentLeft {
   height: 43px;
@@ -4498,21 +4501,37 @@ input[type=number]::-webkit-outer-spin-button {
   align-items: center;
   font-size: 0.875em;
 }
-.leftMenuHolder li[data-count]:after {
-  content: attr(data-count);
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  height: 20px;
-  min-width: 20px;
-  padding: 0 4px;
-  border-radius: 5px;
-  background-color: #f44336;
-  color: #ffffff;
-  line-height: 20px;
-  text-align: center;
-  font-size: 14px;
-}
+.leftMenuHolder li[data-count]:not(.parent-left):after {
+   content: attr(data-count);
+   position: absolute;
+   top: 11px;
+   right: 10px;
+   height: 20px;
+   min-width: 20px;
+   padding: 0 4px;
+   border-radius: 5px;
+   background: transparent;
+   border: 1px solid #f44336;
+   color: #f44336;
+   line-height: 20px;
+   text-align: center;
+   font-size: 14px;
+ }
+.leftMenuHolder li[data-count]:first-child:after {
+   content: attr(data-count);
+   position: absolute;
+   top: 11px;
+   right: 10px;
+   height: 20px;
+   min-width: 20px;
+   padding: 0 4px;
+   border-radius: 5px;
+   background-color: #f44336;
+   color: #ffffff;
+   line-height: 20px;
+   text-align: center;
+   font-size: 14px;
+ }
 .leftMenuHolder .childMenu {
   color: #546e7a;
 }
