@@ -7,6 +7,7 @@ const CompetitorBrandingModel = require('./../types/competitorBranding/model');
 const PromotionModel = require('./../types/promotion/model');
 const PromotionItemModel = require('./../types/promotionItem/model');
 const MarketingCampaignModel = require('./../types/brandingActivity/model');
+const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
 const MarketingCampaignItemModel = require('./../types/brandingActivityItem/model');
 const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
 const ContactUsModel = require('../types/contactUs/model');
@@ -122,6 +123,10 @@ var Comment = function () {
                 case CONTENT_TYPES.BRANDING_ACTIVITY:
                     ContextModel = MarketingCampaignModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY;
+                    break;
+                case CONTENT_TYPES.BRANDING_AND_DISPLAY:
+                    ContextModel = BrandingAndDisplayModel;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
                     ContextModel = MarketingCampaignItemModel;
