@@ -58,7 +58,7 @@ activityLog.on('branch:archived', require('./methods/locations/removedBranch'));
 
 activityLog.on('trade-channel:created', require('./methods/locations/createdTradeChannel'));
 activityLog.on('trade-channel:updated', require('./methods/locations/editedTradeChannel'));
-activityLog.on('trade-channel:archived', require('./methods/locations/removedRegion'));
+activityLog.on('trade-channel:archived', require('./methods/locations/removedTradeChannel'));
 
 activityLog.on('customer:created', require('./methods/locations/createdCustomer'));
 activityLog.on('customer:updated', require('./methods/locations/editedCustomer'));
