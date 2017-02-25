@@ -1,18 +1,15 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/notifications/createView',
-    'views/notifications/preView/preView',
-    'constants/contentType',
-    'text!templates/notifications/list/list.html',
-    'text!templates/notifications/list/newRow.html',
-    'dataService',
-    'models/notifications'
-], function (Backbone, $, _, paginator, createView, PreView, CONTENT_TYPES, template, newRow,
-             dataService, Model) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var createView = require('views/notifications/createView');
+    var PreView = require('views/notifications/preView/preView');
+    var CONTENT_TYPES = require('constants/contentType');
+    var template = require('text!templates/notifications/list/list.html');
+    var newRow = require('text!templates/notifications/list/newRow.html');
+    var dataService = require('dataService');
+    var Model = require('models/notifications');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.NOTIFICATIONS,
@@ -35,6 +32,8 @@ define([
             this.listLength = this.collection.totalRecords;
             this.translation = options.translation;
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupNotifications();
 
             this.makeRender(options);
         },

@@ -105,6 +105,12 @@ const defaultState = {
     [aclModules.CONTACT_US]: 0,
 };
 
+const getActivityCounter = (state, { moduleId }) => {
+    const diff = state[aclModules.ACTIVITY_LIST] - state[moduleId];
+
+    return diff < 0 ? 0 : diff;
+};
+
 module.exports = (previousState, action) => {
     const state = previousState || defaultState;
     const {
@@ -127,7 +133,8 @@ module.exports = (previousState, action) => {
 
     switch (type) {
         case CLEANUP_ACTIVITY_LIST:
-            return Object.assign({}, defaultState);
+            baseState[aclModules.ACTIVITY_LIST] = 0;
+            return baseState;
 
         case ADD_COUNTRY:
         case ADD_REGION:
@@ -136,7 +143,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.COUNTRY];
             return baseState;
         case CLEANUP_COUNTRIES:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.COUNTRY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.COUNTRY,
+            });
             baseState[aclModules.LOCATIONS] -= baseState[aclModules.COUNTRY];
             baseState[aclModules.COUNTRY] = 0;
             return baseState;
@@ -147,7 +156,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.CUSTOMER];
             return baseState;
         case CLEANUP_CUSTOMER:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.CUSTOMER];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.CUSTOMER,
+            });
             baseState[aclModules.LOCATIONS] -= baseState[aclModules.CUSTOMER];
             baseState[aclModules.CUSTOMER] = 0;
             return baseState;
@@ -157,7 +168,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.TRADE_CHANNEL];
             return baseState;
         case CLEANUP_TRADE_CHANNEL:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.TRADE_CHANNEL];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.TRADE_CHANNEL,
+            });
             baseState[aclModules.LOCATIONS] -= baseState[aclModules.TRADE_CHANNEL];
             baseState[aclModules.TRADE_CHANNEL] = 0;
             return baseState;
@@ -166,7 +179,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.PERSONNEL];
             return baseState;
         case CLEANUP_PERSONNEL:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.PERSONNEL];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.PERSONNEL,
+            });
             baseState[aclModules.PERSONNEL] = 0;
             return baseState;
 
@@ -174,7 +189,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.OBJECTIVE];
             return baseState;
         case CLEANUP_OBJECTIVE:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.OBJECTIVE];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.OBJECTIVE,
+            });
             baseState[aclModules.OBJECTIVE] = 0;
             return baseState;
 
@@ -182,7 +199,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.IN_STORE_REPORTING];
             return baseState;
         case CLEANUP_IN_STORE_REPORTING:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.IN_STORE_REPORTING];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.IN_STORE_REPORTING,
+            });
             baseState[aclModules.IN_STORE_REPORTING] = 0;
             return baseState;
 
@@ -190,7 +209,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.ITEMS_AND_PRICES];
             return baseState;
         case CLEANUP_ITEMS_AND_PRICES:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.ITEMS_AND_PRICES];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.ITEMS_AND_PRICES,
+            });
             baseState[aclModules.ITEMS_AND_PRICES] = 0;
             return baseState;
 
@@ -198,7 +219,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.PLANOGRAM];
             return baseState;
         case CLEANUP_PLANOGRAM:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.PLANOGRAM];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.PLANOGRAM,
+            });
             baseState[aclModules.PLANOGRAM] = 0;
             return baseState;
 
@@ -206,7 +229,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.COMPETITOR_LIST];
             return baseState;
         case CLEANUP_COMPETITOR_LIST:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.COMPETITOR_LIST];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.COMPETITOR_LIST,
+            });
             baseState[aclModules.COMPETITOR_LIST] = 0;
             return baseState;
 
@@ -215,7 +240,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.COMPETITOR_PROMOTION_ACTIVITY];
             return baseState;
         case CLEANUP_COMPETITOR_PROMOTION_ACTIVITIES:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.COMPETITOR_PROMOTION_ACTIVITY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.COMPETITOR_PROMOTION_ACTIVITY,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.COMPETITOR_PROMOTION_ACTIVITY];
             baseState[aclModules.COMPETITOR_PROMOTION_ACTIVITY] = 0;
             return baseState;
@@ -226,7 +253,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.AL_ALALI_PROMO_EVALUATION];
             return baseState;
         case CLEANUP_PROMO_EVALUATION:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.AL_ALALI_PROMO_EVALUATION];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.AL_ALALI_PROMO_EVALUATION,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.AL_ALALI_PROMO_EVALUATION];
             baseState[aclModules.AL_ALALI_PROMO_EVALUATION] = 0;
             return baseState;
@@ -236,7 +265,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT];
             return baseState;
         case CLEANUP_COMPETITOR_BRANDING_DISPLAY_REPORT:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT];
             baseState[aclModules.COMPETITOR_BRANDING_DISPLAY_REPORT] = 0;
             return baseState;
@@ -246,7 +277,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.ACHIEVEMENT_FORM];
             return baseState;
         case CLEANUP_ACHIEVEMENT_FORM:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.ACHIEVEMENT_FORM];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.ACHIEVEMENT_FORM,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.ACHIEVEMENT_FORM];
             baseState[aclModules.ACHIEVEMENT_FORM] = 0;
             return baseState;
@@ -256,7 +289,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.NEW_PRODUCT_LAUNCH];
             return baseState;
         case CLEANUP_NEW_PRODUCT_LAUNCH:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.NEW_PRODUCT_LAUNCH];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.NEW_PRODUCT_LAUNCH,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.NEW_PRODUCT_LAUNCH];
             baseState[aclModules.NEW_PRODUCT_LAUNCH] = 0;
             return baseState;
@@ -266,7 +301,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.SHELF_SHARES];
             return baseState;
         case CLEANUP_SHELF_SHARES:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.SHELF_SHARES];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.SHELF_SHARES,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.SHELF_SHARES];
             baseState[aclModules.SHELF_SHARES] = 0;
             return baseState;
@@ -276,7 +313,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.PRICE_SURVEY];
             return baseState;
         case CLEANUP_PRICE_SURVEY:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.PRICE_SURVEY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.PRICE_SURVEY,
+            });
             baseState[aclModules.REPORTING] -= baseState[aclModules.PRICE_SURVEY];
             baseState[aclModules.PRICE_SURVEY] = 0;
             return baseState;
@@ -286,7 +325,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.AL_ALALI_QUESTIONNAIRE];
             return baseState;
         case CLEANUP_QUESTIONNAIRE:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.AL_ALALI_QUESTIONNAIRE];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.AL_ALALI_QUESTIONNAIRE,
+            });
             baseState[aclModules.AL_ALALI_MARKETING] -= baseState[aclModules.AL_ALALI_QUESTIONNAIRE];
             baseState[aclModules.AL_ALALI_QUESTIONNAIRE] = 0;
             return baseState;
@@ -296,7 +337,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.AL_ALALI_BRANDING_ACTIVITY];
             return baseState;
         case CLEANUP_MARKETING_CAMPAIGNS:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.AL_ALALI_BRANDING_ACTIVITY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.AL_ALALI_BRANDING_ACTIVITY,
+            });
             baseState[aclModules.AL_ALALI_MARKETING] -= baseState[aclModules.AL_ALALI_BRANDING_ACTIVITY];
             baseState[aclModules.AL_ALALI_BRANDING_ACTIVITY] = 0;
             return baseState;
@@ -306,7 +349,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.CONSUMER_SURVEY];
             return baseState;
         case CLEANUP_CONSUMER_SURVEY:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.CONSUMER_SURVEY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.CONSUMER_SURVEY,
+            });
             baseState[aclModules.AL_ALALI_MARKETING] -= baseState[aclModules.CONSUMER_SURVEY];
             baseState[aclModules.CONSUMER_SURVEY] = 0;
             return baseState;
@@ -315,8 +360,10 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.AL_ALALI_MARKETING];
             ++baseState[aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT];
             return baseState;
-        case CLEANUP_COMPETITOR_BRANDING_DISPLAY_REPORT:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT];
+        case CLEANUP_BRANDING_AND_MONTHLY_DISPLAY:
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT,
+            });
             baseState[aclModules.AL_ALALI_MARKETING] -= baseState[aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT];
             baseState[aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT] = 0;
             return baseState;
@@ -326,7 +373,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.CONTRACT_YEARLY_AND_VISIBILITY];
             return baseState;
         case CLEANUP_CONTRACT_YEARLY_AND_VISIBILITY:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.CONTRACT_YEARLY_AND_VISIBILITY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.CONTRACT_YEARLY_AND_VISIBILITY,
+            });
             baseState[aclModules.CONTRACT] -= baseState[aclModules.CONTRACT_YEARLY_AND_VISIBILITY];
             baseState[aclModules.CONTRACT_YEARLY_AND_VISIBILITY] = 0;
             return baseState;
@@ -336,7 +385,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.CONTRACT_SECONDARY];
             return baseState;
         case CLEANUP_CONTRACT_SECONDARY:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.CONTRACT_SECONDARY];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.CONTRACT_SECONDARY,
+            });
             baseState[aclModules.CONTRACT] -= baseState[aclModules.CONTRACT_SECONDARY];
             baseState[aclModules.CONTRACT_SECONDARY] = 0;
             return baseState;
@@ -345,7 +396,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.NOTE];
             return baseState;
         case CLEANUP_NOTE:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.NOTE];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.NOTE,
+            });
             baseState[aclModules.NOTE] = 0;
             return baseState;
 
@@ -353,7 +406,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.NOTIFICATION];
             return baseState;
         case CLEANUP_NOTIFICATION:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.NOTIFICATION];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.NOTIFICATION,
+            });
             baseState[aclModules.NOTIFICATION] = 0;
             return baseState;
 
@@ -361,7 +416,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.DOCUMENT];
             return baseState;
         case CLEANUP_DOCUMENT:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.DOCUMENT];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.DOCUMENT,
+            });
             baseState[aclModules.DOCUMENT] = 0;
             return baseState;
 
@@ -369,7 +426,9 @@ module.exports = (previousState, action) => {
             ++baseState[aclModules.CONTACT_US];
             return baseState;
         case CLEANUP_CONTACT_US:
-            baseState[aclModules.ACTIVITY_LIST] -= baseState[aclModules.CONTACT_US];
+            baseState[aclModules.ACTIVITY_LIST] = getActivityCounter(baseState, {
+                moduleId: aclModules.CONTACT_US,
+            });
             baseState[aclModules.CONTACT_US] = 0;
             return baseState;
 

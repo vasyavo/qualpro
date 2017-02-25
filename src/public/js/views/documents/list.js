@@ -4,11 +4,14 @@ define(function (require) {
     var Marionette = require('marionette');
     var ChildView = require('views/documents/listItem');
     var Template = require('text!templates/documents/wrapper.html');
+    var BadgeStore = require('services/badgeStore');
 
     return Marionette.CompositeView.extend({
 
         initialize : function (options) {
             this.translation = options.translation;
+
+            BadgeStore.cleanupDocuments();
         },
 
         className : 'thumbnailHolder scrollable',
