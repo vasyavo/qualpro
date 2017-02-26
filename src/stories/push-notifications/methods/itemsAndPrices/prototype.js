@@ -51,6 +51,7 @@ module.exports = function * (options) {
     };
 
     return {
+        actionOriginator,
         payload,
         setEveryoneInCountry,
     };

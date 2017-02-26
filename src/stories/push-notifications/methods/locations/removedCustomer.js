@@ -15,33 +15,34 @@ module.exports = (options) => {
             moduleId,
             contentType,
             actionType,
-            itemId : options.body.subRegions ? options.body.subRegions[0] : null
+            itemId: options.body.subRegions ? options.body.subRegions[0] : null,
         });
 
-        if (options.body && options.body.subRegions){
+        if (options.body && options.body.subRegions) {
             extendedOptions.location = {
-                setSubRegion : options.body.subRegions
-            }
+                setSubRegion: options.body.subRegions,
+            };
         }
 
         const {
+            actionOriginator,
             payload,
             setEveryoneInLocation,
             name,
-            } = yield prototype(extendedOptions);
-        let groups;
+        } = yield prototype(extendedOptions);
 
-        if (setEveryoneInLocation.length){
-            groups = [{
-                recipients: setEveryoneInLocation,
-                subject: {
-                    en: `Sub Region ${name.en} ${actionType}`,
-                    ar: '',
-                },
-                payload,
-            }];
-        }
+        const groups = [{
+            recipients: setEveryoneInLocation,
+            subject: {
+                en: `Sub Region ${name.en} ${actionType}`,
+                ar: '',
+            },
+            payload,
+        }];
 
-        yield dispatch(groups, { moduleId });
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };

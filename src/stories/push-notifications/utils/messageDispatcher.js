@@ -14,6 +14,8 @@ class MessageDispatcher {
      * @param {String} groups.subject.ar
      * @param {Object} groups.payload
      * @param {Object} options
+     * @param {Number} options.moduleId
+     * @param {String} options.actionOriginator
      * */
     static sendMessage(groups, options, callback) {
         /*
@@ -22,6 +24,14 @@ class MessageDispatcher {
          * */
         const itRecipient = (action) => {
             return (recipient, itCallback) => {
+                /*
+                * Badge state developed only for browsers
+                * Recipient shouldn't receive events which were created by himself
+                * */
+                if (recipient === options.actionOriginator) {
+                    return itCallback(null);
+                }
+
                 async.waterfall([
 
                     (cb) => {

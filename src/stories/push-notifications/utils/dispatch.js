@@ -10,6 +10,7 @@ module.exports = function * (groups, options) {
         });
     });
 
-    yield MessageDispatcher.sendMessage(groupsWithUniqueRecipients, options);
+    MessageDispatcher.sendMessage(groupsWithUniqueRecipients, options);
+
     yield sendPush(groupsWithUniqueRecipients);
 };

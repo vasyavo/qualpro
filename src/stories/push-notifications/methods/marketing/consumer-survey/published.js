@@ -18,6 +18,7 @@ module.exports = (options) => {
         });
 
         const {
+            actionOriginator,
             payload,
             setEveryoneInLocation,
         } = yield prototype(extendedOptions);
@@ -31,6 +32,9 @@ module.exports = (options) => {
             payload,
         }];
 
-        yield dispatch(groups, { moduleId });
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };
