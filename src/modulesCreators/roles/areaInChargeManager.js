@@ -534,7 +534,7 @@ module.exports = [
         mobile: {
             upload: false,
             edit: false,
-            write: false,
+            write: true,
             read: true
         }
     },
