@@ -1309,8 +1309,8 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'position',
-                localField: 'positions',
+                from: 'positions',
+                localField: 'position',
                 foreignField: '_id',
                 as: 'position',
             },
@@ -1339,10 +1339,14 @@ const Personnel = function () {
             (cb) => {
                 const pipeline = [{
                     $match: {
-                        $or: [{
-                            email: login,
+                        $and: [{
+                            $or: [{
+                                email: login,
+                            }, {
+                                phoneNumber: login,
+                            }],
                         }, {
-                            phoneNumber: login,
+                            archived: false,
                         }],
                     },
                 }, ...genericPipeline];
@@ -1351,6 +1355,10 @@ const Personnel = function () {
             },
 
             (result, cb) => {
+                if (result.length > 1) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.USERS_WITH_SAME_LOGIN);
+                }
+
                 const personnel = result.length ?
                     result.slice().pop() : {};
 
