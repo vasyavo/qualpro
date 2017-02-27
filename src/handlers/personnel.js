@@ -1911,7 +1911,7 @@ const Personnel = function () {
             if (err) {
                 return next(err);
             }
-    
+
             if (!allowed) {
                 return errorSender.forbidden(next);
             }
