@@ -71,6 +71,7 @@ activityLog.on('reporting:competitor-branding-and-display-report:published', req
 activityLog.on('reporting:competitor-branding-and-display-report:expired', require('./methods/reporting/competitor-branding-and-display-report/expired'));
 activityLog.on('reporting:competitor-promotion-activities:published', require('./methods/reporting/competitor-promotion-activities/published'));
 activityLog.on('reporting:competitor-promotion-activities:expired', require('./methods/reporting/competitor-promotion-activities/expired'));
+activityLog.on('reporting:competitor-promotion-activities:comment-added', require('./methods/reporting/competitor-promotion-activities/commentAdded'));
 activityLog.on('reporting:new-product-launch:published', require('./methods/reporting/new-product-launch/published'));
 activityLog.on('reporting:achievement-form:published', require('./methods/reporting/achievement-form/published'));
 
