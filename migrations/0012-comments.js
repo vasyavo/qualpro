@@ -9,6 +9,18 @@ require('mongodb');
 exports.up = function(db, next) {
     async.waterfall([
         function (cb) {
+            db.collection('positions').findOne({ 'name.en': 'Customer Success' }, cb);
+        },
+        function (position, cb) {
+            db.collection('accessRoles').findOne({level: 1}, function (err, accessRole) {
+                if (err) {
+                    return cb(err);
+                }
+
+                cb(null, position, accessRole);
+            });
+        },
+        function (position, accessRole, cb) {
             db.collection('personnels').insert({
                 email: 'deleted_master@foxtrapp.com',
                 phoneNumber: '0123456789220000222',
@@ -41,8 +53,8 @@ exports.up = function(db, next) {
                 },
                 whoCanRW: 'everyOne',
                 archived: false,
-                accessRole: '5837200e3a90064c13696319',
-                position: '583720173a90064c1369661f',
+                accessRole: accessRole._id,
+                position: position._id,
                 xlsManager: null,
                 manager: null,
                 super: false,
