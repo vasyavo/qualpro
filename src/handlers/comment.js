@@ -216,6 +216,10 @@ var Comment = function () {
                             ActivityLog.emit('in-store-task:comment-added', eventPayload);
                         }
 
+                        if (context === CONTENT_TYPES.COMPETITORPROMOTION) {
+                            ActivityLog.emit('reporting:competitor-promotion-activities:comment-added', eventPayload);
+                        }
+
                         cb(null, comment);
                     });
                 },
