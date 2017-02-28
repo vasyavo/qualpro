@@ -1462,6 +1462,8 @@ const Personnel = function () {
             const personnel = result.length ?
                 result.slice().pop() : {};
 
+            personnel.pass = null;
+
             res.status(200).send(personnel);
         });
     };
