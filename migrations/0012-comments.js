@@ -1,29 +1,43 @@
 /*
- * Wednesday, 15 February, 2017
- * Feature "Documents"
+ * Wednesday, 28 February, 2017
+ * Feature "Comments"
  * */
 const async = require('async');
 
 require('mongodb');
 
+const imageSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWAQMAAAAGz+OhAAAABlBMVEXNy8v///83JiJ6AAABlUlEQVRIx+3UMWrEQAyFYQ0Dcekj+ApbpgjrK6XcbuZocxQfYUoXZhRJtmGfxhAIKUJYNbt8jX+EZXrNv5vEzKszltmQglpDi6zzMxuuTJ/pbdXGX7fvn9uIwlXzn7VQe4trb8PW29hiZxOHC8sXVpK3kZfZ28B1YobX6C3yOvI++bApsAbalNOINdBmOWzOicNh9bQyc/a2SOCD0KoESiXYOuj/CLZFuw2wFuw20rOxBOovmATqKsA0UFYBpoHJmQbOJYJp4FQDmAaOG4Fp4NDQ2DZICcw2mNFsg3kGs8DizAInNA1cnGmgs6KB3jSwepPAOjqTQG83Cfx09i6BN2cfEkjO7hLobZbAzjI3mtxeSuLOFgn0ViUQrY6rbhBt2HSDzppuEGyNrBtECyyBEWwjPc0A1ihpoDMLTM/GFKsGguX9isEKkQaCyW1pIJjdUYtg+x0FMN5vB63snxmwlR4aCMZsG3RmGzxt2s02uKDZBgt8YNk2mA8LO+1XjGOBnY0XNlxYvLCg5odzb4n6udNrXnPOF+LsukzuroMwAAAAAElFTkSuQmCC';
+
 exports.up = function(db, next) {
     async.waterfall([
-        function (cb) {
-            db.collection('positions').findOne({ 'name.en': 'Customer Success' }, cb);
-        },
-        function (position, cb) {
-            db.collection('accessRoles').findOne({level: 1}, function (err, accessRole) {
-                if (err) {
-                    return cb(err);
-                }
 
-                cb(null, position, accessRole);
-            });
+        (cb) => {
+            async.parallel({
+
+                position: (cb) => {
+                    db.collection('positions').findOne({ 'name.en': 'Customer Success' }, cb);
+                },
+
+                accessRole: (cb) => {
+                    db.collection('accessRoles').findOne({ level: 1 }, cb);
+                },
+
+            }, cb);
         },
-        function (position, accessRole, cb) {
+
+        (options, cb) => {
+            const {
+                position,
+                accessRole,
+            } = options;
+
+            if (!position || !accessRole) {
+                return cb('There is not enough data for begin migration');
+            }
+
             db.collection('personnels').insert({
-                email: 'deleted_master@foxtrapp.com',
-                phoneNumber: '0123456789220000222',
+                email: 'qualpro.admin@foxtrapp.com',
+                phoneNumber: '',
                 dateJoined: new Date(),
                 lasMonthEvaluate: null,
                 currentLanguage: 'en',
@@ -43,12 +57,8 @@ exports.up = function(db, next) {
                 },
                 description: '',
                 groups: {
-                    group: [
-
-                    ],
-                    users: [
-
-                    ],
+                    group: [],
+                    users: [],
                     owner: null,
                 },
                 whoCanRW: 'everyOne',
@@ -78,14 +88,15 @@ exports.up = function(db, next) {
                     ar: '',
                     en: 'DELETED',
                 },
-                imageSrc: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWAQMAAAAGz+OhAAAABlBMVEXNy8v///83JiJ6AAABlUlEQVRIx+3UMWrEQAyFYQ0Dcekj+ApbpgjrK6XcbuZocxQfYUoXZhRJtmGfxhAIKUJYNbt8jX+EZXrNv5vEzKszltmQglpDi6zzMxuuTJ/pbdXGX7fvn9uIwlXzn7VQe4trb8PW29hiZxOHC8sXVpK3kZfZ28B1YobX6C3yOvI++bApsAbalNOINdBmOWzOicNh9bQyc/a2SOCD0KoESiXYOuj/CLZFuw2wFuw20rOxBOovmATqKsA0UFYBpoHJmQbOJYJp4FQDmAaOG4Fp4NDQ2DZICcw2mNFsg3kGs8DizAInNA1cnGmgs6KB3jSwepPAOjqTQG83Cfx09i6BN2cfEkjO7hLobZbAzjI3mtxeSuLOFgn0ViUQrY6rbhBt2HSDzppuEGyNrBtECyyBEWwjPc0A1ihpoDMLTM/GFKsGguX9isEKkQaCyW1pIJjdUYtg+x0FMN5vB63snxmwlR4aCMZsG3RmGzxt2s02uKDZBgt8YNk2mA8LO+1XjGOBnY0XNlxYvLCg5odzb4n6udNrXnPOF+LsukzuroMwAAAAAElFTkSuQmCC',
+                imageSrc,
                 confirmed: new Date(),
                 pass: '$2a$10$grfvz6Guu2uc5QUxrJpcJOD6Z6Eqn3NvdxWj8WT.sEj/yFnR9A8pe',
-                lastAccess: new Date(),
+                lastAccess: null,
                 beforeAccess: null,
             }, cb);
         },
-        function (result, cb) {
+
+        (result, cb) => {
             db.collection('comments').update({
                 'createdBy.user': null,
             }, {
@@ -96,6 +107,7 @@ exports.up = function(db, next) {
                 multi: true,
             }, cb);
         },
+
     ], next);
 };
 
