@@ -398,7 +398,7 @@ var RetailSegmentHandler = function () {
         var pipeLine = [];
 
         pipeLine.push({
-            $match: isMobile ? _.pick(queryObject, 'subRegion', 'archived') : _.pick(queryObject, 'subRegions', 'archived')
+            $match: isMobile ? _.pick(queryObject, 'subRegion', 'archived') : _.pick(queryObject, 'archived'),
         });
 
         if (translated && translated.length === 1) {

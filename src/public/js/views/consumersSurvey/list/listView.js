@@ -1,16 +1,14 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'moment',
-    'views/paginator',
-    'views/consumersSurvey/createView',
-    'views/consumersSurvey/preView/preView',
-    'text!templates/consumersSurvey/list/list.html',
-    'text!templates/consumersSurvey/list/newRow.html',
-    'constants/contentType'
-], function (Backbone, $, _, moment, paginator, CreateView, PreView, template, NewRowTemplate, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var moment = require('moment');
+    var paginator = require('views/paginator');
+    var CreateView = require('views/consumersSurvey/createView');
+    var PreView = require('views/consumersSurvey/preView/preView');
+    var template = require('text!templates/consumersSurvey/list/list.html');
+    var NewRowTemplate = require('text!templates/consumersSurvey/list/newRow.html');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.CONSUMER_SURVEY,
@@ -33,6 +31,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupConsumerSurvey();
 
             this.makeRender(options);
         },

@@ -1,20 +1,18 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/competitorsList/list/header.html',
-    'text!templates/competitorsList/list/newRow.html',
-    'views/competitorsList/createView',
-    'views/competitorsList/list/listItemsView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/validation',
-    'constants/personnelStatuses',
-    'dataService',
-    'async',
-    'constants/errorMessages'
-], function (Backbone, $, _, headerTemplate, newRowTemplate, createView, ListItemsView,
-             filterView, paginator, REGEXP, STATUSES, dataService, async, ERROR_MESSAGES) {
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var async = require('async');
+    var headerTemplate = require('text!templates/competitorsList/list/header.html');
+    var newRowTemplate = require('text!templates/competitorsList/list/newRow.html');
+    var createView = require('views/competitorsList/createView');
+    var ListItemsView = require('views/competitorsList/list/listItemsView');
+    var paginator = require('views/paginator');
+    var REGEXP = require('constants/validation');
+    var STATUSES = require('constants/personnelStatuses');
+    var dataService = require('dataService');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var BadgeStore = require('services/badgeStore');
+
     var View = paginator.extend({
         contentType   : 'competitorsList',
         viewType      : 'list',
@@ -44,6 +42,8 @@ define([
             this.page = options.collection.page;
             this.singleSelect = options.singleSelect;
             this.ContentCollection = options.ContentCollection;
+
+            BadgeStore.cleanupCompetitorList();
 
             this.makeRender(options);
 

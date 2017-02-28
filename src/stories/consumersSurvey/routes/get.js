@@ -7,6 +7,7 @@ const AggregationHelper = require('../../../helpers/aggregationCreater');
 const access = require('../../../helpers/access')();
 const filterRetrievedResultOnGetAll = require('../reusable-components/filterRetrievedResultOnGetAll');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
+const filterByPersonnelAndLocation = require('../reusable-components/filterByPersonnelAndLocation');
 
 const $defProjection = {
     _id: 1,
@@ -27,15 +28,13 @@ const $defProjection = {
     createdBy: 1,
     creationDate: 1,
     updateDate: 1,
-    position: 1
+    position: 1,
 };
 
 module.exports = (req, res, next) => {
     function queryRun(personnel, callback) {
-        const isMobile = req.isMobile;
         const query = req.query;
         const page = query.page || 1;
-        const accessRoleLevel = req.session.level;
         const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
         const skip = (page - 1) * limit;
         const filterMapper = new FilterMapper();
@@ -49,19 +48,20 @@ module.exports = (req, res, next) => {
         ];
 
         const sort = query.sort || {
-                lastDate: -1
-            };
+            lastDate: -1,
+        };
 
         const queryObject = filterMapper.mapFilter({
             contentType: CONTENT_TYPES.CONSUMER_SURVEY,
-            filter: queryFilter
+            filter: queryFilter,
+            personnel,
         });
 
         if (queryObject.globalSearch) {
             delete queryObject.globalSearch;
         }
 
-        for (let key in sort) {
+        for (const key in sort) {
             sort[key] = parseInt(sort[key], 10);
         }
 
@@ -86,175 +86,113 @@ module.exports = (req, res, next) => {
             delete queryObject.publisher;
         }
 
-        if (isMobile) {
-            // user sees only ongoing questionnaire via mobile app
-            const currentDate = new Date();
+        pipeline.push({
+            $match: {
+                $or: [
+                    {
+                        'createdBy.user': personnel._id,
+                        status: { $in: ['draft', 'expired'] },
+                    }, {
+                        status: { $nin: ['draft', 'expired'] },
+                    },
+                ],
+            },
+        });
 
-            queryObject.dueDate = {
-                $gt: currentDate
-            };
+        const aggregateHelper = new AggregationHelper($defProjection);
+
+        pipeline.push(...filterByPersonnelAndLocation(queryObject, personnel._id));
+
+        if (personnelFilter) {
+            pipeline.push({
+                $match: {
+                    personnels: personnelFilter,
+                },
+            });
         }
 
-        if (isMobile) {
-            queryObject.status = {
-                $nin : ['draft']
-            }
-        } else{
+        if (publisherFilter) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': publisherFilter,
+                },
+            });
+        }
+
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: { createdBy: { date: 1 } },
+        }));
+
+        if (positionFilter) {
             pipeline.push({
                 $match: {
                     $or: [
                         {
-                            'createdBy.user': personnel._id,
-                            status          : {$in: ['draft', 'expired']}
-                        }, {
-                            status: {$nin: ['draft', 'expired']}
-                        }
-                    ]
-                }
+                            position: positionFilter,
+                        },
+                        {
+                            'createdBy.user.position': positionFilter,
+                        },
+                    ],
+                },
             });
         }
 
-        const aggregateHelper = new AggregationHelper($defProjection);
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'createdBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
 
-        pipeline.push({
-            $match: queryObject
-        });
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'createdBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeline.push(...aggregateHelper.endOfPipeLine({
+            isMobile: false,
+            filterSearch,
+            searchFieldsArray,
+            skip,
+            limit,
+            sort,
+        }));
 
         async.waterfall([
 
             (cb) => {
-                if (personnelFilter) {
-                    pipeline.push({
-                        $match: {
-                            personnels: personnelFilter
-                        }
-                    });
-                }
-
-                if (publisherFilter) {
-                    pipeline.push({
-                        $match: {
-                            'createdBy.user': publisherFilter
-                        }
-                    });
-                }
-
-                pipeline.push(...aggregateHelper.aggregationPartMaker({
-                    from: 'personnels',
-                    key: 'createdBy.user',
-                    isArray: false,
-                    addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                    includeSiblings: { createdBy: { date: 1 } }
-                }));
-
-                if (positionFilter) {
-                    pipeline.push({
-                        $match: {
-                            $or: [
-                                {
-                                    position: positionFilter
-                                },
-                                {
-                                    'createdBy.user.position': positionFilter
-                                }
-                            ]
-                        }
-                    });
-                }
-
-                pipeline.push(...aggregateHelper.aggregationPartMaker({
-                    from: 'accessRoles',
-                    key: 'createdBy.user.accessRole',
-                    isArray: false,
-                    addProjection: ['_id', 'name', 'level'],
-                    includeSiblings: {
-                        createdBy: {
-                            date: 1,
-                            user: {
-                                _id: 1,
-                                position: 1,
-                                firstName: 1,
-                                lastName: 1
-                            }
-                        }
-                    }
-                }));
-
-                pipeline.push(...aggregateHelper.aggregationPartMaker({
-                    from: 'positions',
-                    key: 'createdBy.user.position',
-                    isArray: false,
-                    includeSiblings: {
-                        createdBy: {
-                            date: 1,
-                            user: {
-                                _id: 1,
-                                accessRole: 1,
-                                firstName: 1,
-                                lastName: 1
-                            }
-                        }
-                    }
-                }));
-
-                if (isMobile) {
-                    pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'personnels',
-                        key: 'editedBy.user',
-                        isArray: false,
-                        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                        includeSiblings: { editedBy: { date: 1 } }
-                    }));
-
-                    pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'accessRoles',
-                        key: 'editedBy.user.accessRole',
-                        isArray: false,
-                        addProjection: ['_id', 'name', 'level'],
-                        includeSiblings: {
-                            editedBy: {
-                                date: 1,
-                                user: {
-                                    _id: 1,
-                                    position: 1,
-                                    firstName: 1,
-                                    lastName: 1
-                                }
-                            }
-                        }
-                    }));
-
-                    pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'positions',
-                        key: 'editedBy.user.position',
-                        isArray: false,
-                        includeSiblings: {
-                            editedBy: {
-                                date: 1,
-                                user: {
-                                    _id: 1,
-                                    accessRole: 1,
-                                    firstName: 1,
-                                    lastName: 1
-                                }
-                            }
-                        }
-                    }));
-                }
-
-                pipeline.push(...aggregateHelper.endOfPipeLine({
-                    isMobile,
-                    filterSearch,
-                    searchFieldsArray,
-                    skip,
-                    limit,
-                    sort
-                }));
-
                 const aggregation = ConsumersSurveyModel.aggregate(pipeline);
 
                 aggregation.options = {
-                    allowDiskUse: true
+                    allowDiskUse: true,
                 };
 
                 aggregation.exec(cb);
@@ -262,12 +200,11 @@ module.exports = (req, res, next) => {
 
             (result, cb) => {
                 filterRetrievedResultOnGetAll({
-                    isMobile,
+                    isMobile: false,
                     personnel,
-                    //accessRoleLevel,
-                    result
+                    result,
                 }, cb);
-            }
+            },
 
         ], callback);
     }
@@ -278,7 +215,7 @@ module.exports = (req, res, next) => {
 
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
-        }
+        },
 
     ], (err, body) => {
         if (err) {
@@ -287,7 +224,7 @@ module.exports = (req, res, next) => {
 
         return next({
             status: 200,
-            body
+            body,
         });
     });
 };

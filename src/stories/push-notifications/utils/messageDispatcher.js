@@ -1,7 +1,8 @@
 const async = require('async');
 const Bluebird = require('bluebird');
 const PubNubClient = require('./pubnub');
-const addAction = require('./../utils/addAction');
+const { dispatch } = require('./../../badges/store');
+const { add } = require('./../../badges/actions');
 
 class MessageDispatcher {
 
@@ -12,21 +13,37 @@ class MessageDispatcher {
      * @param {String} groups.subject.en
      * @param {String} groups.subject.ar
      * @param {Object} groups.payload
+     * @param {Object} options
+     * @param {Number} options.moduleId
+     * @param {String} options.actionOriginator
      * */
-    static sendMessage(groups, callback) {
+    static sendMessage(groups, options, callback) {
         /*
          * @param {Object} action
          * @param {Object} action.payload
          * */
         const itRecipient = (action) => {
             return (recipient, itCallback) => {
+                /*
+                * Badge state developed only for browsers
+                * Recipient shouldn't receive events which were created by himself
+                * */
+                if (recipient === options.actionOriginator) {
+                    return itCallback(null);
+                }
+
                 async.waterfall([
 
-                    async.apply(addAction, recipient),
+                    (cb) => {
+                        dispatch(add({
+                            moduleId: options.moduleId,
+                            userId: recipient,
+                        }), cb);
+                    },
 
-                    (numberOfNewActivities, cb) => {
+                    (state, cb) => {
                         const payload = Object.assign({}, action.payload, {
-                            badge: numberOfNewActivities,
+                            badgesState: state,
                         });
 
                         PubNubClient.publish({

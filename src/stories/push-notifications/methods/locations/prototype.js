@@ -13,30 +13,30 @@ module.exports = function * (options) {
         accessRoleLevel,
         body,
         location,
-        itemId
-        } = options;
+        itemId,
+    } = options;
 
     const actionOriginator = toString(options, 'actionOriginator');
 
     let getEveryone = [];
     let getLocations = {};
 
-    if (location){
+    if (location) {
         getEveryone = yield getEveryoneInLocation({
-            exclude      : location.exclude || [],
-            setCountry   : location.setCountry || [],
-            setRegion    : location.setRegion || [],
-            setSubRegion : location.setSubRegion || [],
-            setOutlet    : location.setOutlet || [],
-            setBranch    : location.setBranch || [],
+            exclude: location.exclude || [],
+            setCountry: location.setCountry || [],
+            setRegion: location.setRegion || [],
+            setSubRegion: location.setSubRegion || [],
+            setOutlet: location.setOutlet || [],
+            setBranch: location.setBranch || [],
         });
 
         getLocations = yield getParentLocations({
-            itemId : itemId || body._id,
-            contentType
+            itemId: itemId || body._id,
+            contentType,
         });
 
-        if (body.subRegions && body.subRegions.length){
+        if (body.subRegions && body.subRegions.length) {
             getLocations.subRegion = body.subRegions;
         }
     }
@@ -50,7 +50,7 @@ module.exports = function * (options) {
         itemId: body._id,
         itemName: {
             en: body.name.en,
-            ar: body.name.ar
+            ar: body.name.ar,
         },
         createdBy: {
             user: actionOriginator,
@@ -62,7 +62,7 @@ module.exports = function * (options) {
         subRegion: getLocations.subRegion || [],
         retailSegment: getLocations.retailSegment || [],
         outlet: getLocations.outlet || [],
-        branch: getLocations.branch || []
+        branch: getLocations.branch || [],
     });
 
     const result = yield newActivity.save();
@@ -72,8 +72,9 @@ module.exports = function * (options) {
     };
 
     return {
+        actionOriginator,
         payload,
-        setEveryoneInLocation : getEveryone,
-        name : result.itemName
+        setEveryoneInLocation: getEveryone,
+        name: result.itemName,
     };
 };

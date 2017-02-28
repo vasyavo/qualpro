@@ -1,13 +1,12 @@
-define([
-        'views/domain/list'
-    ],
+define(function(require) {
+    var ListView = require('views/domain/list');
 
-    function (ListView) {
-        var View = ListView.extend({
-            contentType : 'country',
-            childContent: 'region'
-        });
+    var View = ListView.extend({
 
-        return View;
+        contentType : 'country',
+        childContent: 'region',
+
     });
 
+    return View;
+});

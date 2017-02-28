@@ -1,22 +1,14 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/contractsSecondary/list/list.html',
-    'views/contractsSecondary/createView',
-    'text!templates/contractsSecondary/list/newRow.html',
-    'views/contractsSecondary/editView',
-    'views/contractsSecondary/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/otherConstants',
-    'constants/filters',
-    'views/fileDialog/fileDialog',
-    'collections/file/collection',
-    'constants/contentType'
-
-], function (Backbone, $, _, template, createView, newRow, EditView, PreView, filterView, paginator, OTHER_CONSTANTS, FILTER_CONSTANTS, FileDialogPreviewView, FileCollection, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/contractsSecondary/list/list.html');
+    var createView = require('views/contractsSecondary/createView');
+    var newRow = require('text!templates/contractsSecondary/list/newRow.html');
+    var EditView = require('views/contractsSecondary/editView');
+    var PreView = require('views/contractsSecondary/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.CONTRACTSSECONDARY,
@@ -38,6 +30,8 @@ define([
             this.translation = options.translation;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupContractsSecondary();
 
             this.makeRender(options);
         },

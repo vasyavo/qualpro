@@ -1,18 +1,14 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/notes/list/list.html',
-    'views/notes/createView',
-    'text!templates/notes/list/newRow.html',
-    'views/notes/editView',
-    'views/notes/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/contentType'
-], function (Backbone, $, _, template, createView, newRow, EditView, PreView,
-             filterView, paginator, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/notes/list/list.html');
+    var createView = require('views/notes/createView');
+    var newRow = require('text!templates/notes/list/newRow.html');
+    var EditView = require('views/notes/editView');
+    var PreView = require('views/notes/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.NOTES,
@@ -37,6 +33,8 @@ define([
             this.translation = options.translation;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupNotes();
 
             this.makeRender(options);
         },

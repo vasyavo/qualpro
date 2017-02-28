@@ -19,10 +19,11 @@ module.exports = (options) => {
         });
 
         const {
+            actionOriginator,
             payload,
             setEveryoneInLocation,
             name,
-            } = yield prototype(extendedOptions);
+        } = yield prototype(extendedOptions);
 
         const groups = [{
             recipients: setEveryoneInLocation,
@@ -33,6 +34,9 @@ module.exports = (options) => {
             payload,
         }];
 
-        yield dispatch(groups);
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };

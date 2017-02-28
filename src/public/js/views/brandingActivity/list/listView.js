@@ -1,16 +1,15 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/brandingActivity/createView',
-    'views/brandingActivity/editView',
-    'views/brandingActivity/preView/preView',
-    'text!templates/brandingActivity/list/list.html',
-    'text!templates/brandingActivity/list/newRow.html',
-    'constants/contentType'
-], function (Backbone, $, _, paginator, createView, editView, PreView, template, newRow, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var createView = require('views/brandingActivity/createView');
+    var editView = require('views/brandingActivity/editView');
+    var PreView = require('views/brandingActivity/preView/preView');
+    var template = require('text!templates/brandingActivity/list/list.html');
+    var newRow = require('text!templates/brandingActivity/list/newRow.html');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
+
     var View = paginator.extend({
         contentType: CONTENT_TYPES.BRANDING_ACTIVITY,
         viewType   : 'list',
@@ -31,6 +30,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupMarketingCampaigns();
 
             this.makeRender(options);
         },

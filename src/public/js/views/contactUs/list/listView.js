@@ -1,112 +1,111 @@
-define([
-        'backbone',
-        'jQuery',
-        'Underscore',
-        'moment',
-        'text!templates/contactUs/list/list.html',
-        'views/contactUs/preView/preView',
-        'views/filter/filtersBarView',
-        'views/paginator',
-        'constants/contentType'
-    ], function (Backbone, $, _, moment, template, PreView, filterView, paginator, CONTENT_TYPES) {
-        'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var moment = require('moment');
+    var template = require('text!templates/contactUs/list/list.html');
+    var PreView = require('views/contactUs/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
-        var View = paginator.extend({
-            contentType: CONTENT_TYPES.CONTACT_US,
-            viewType   : 'list',
-            template   : _.template(template),
+    var View = paginator.extend({
+        contentType: CONTENT_TYPES.CONTACT_US,
+        viewType   : 'list',
+        template   : _.template(template),
 
-            events: {
-                'click .listRow': 'incClicks'
-            },
+        events: {
+            'click .listRow': 'incClicks'
+        },
 
-            initialize: function (options) {
-                this.translation = options.translation;
-                this.filter = options.filter;
-                this.tabName = options.tabName;
-                this.collection = options.collection;
-                this.defaultItemsNumber = this.collection.pageSize;
-                this.listLength = this.collection.totalRecords;
+        initialize: function (options) {
+            this.translation = options.translation;
+            this.filter = options.filter;
+            this.tabName = options.tabName;
+            this.collection = options.collection;
+            this.defaultItemsNumber = this.collection.pageSize;
+            this.listLength = this.collection.totalRecords;
 
-                options.contentType = this.contentType;
+            options.contentType = this.contentType;
 
-                this.makeRender(options);
-            },
+            BadgeStore.cleanupContactUs();
 
-            listRowClick: function (e) {
-                var targetEl = $(e.target);
-                var $targetRow = targetEl.closest('.listRow');
-                var id = $targetRow.attr('data-id');
-                var model = this.collection.get(id);
-                var self = this;
+            this.makeRender(options);
+        },
 
-                e.stopPropagation();
+        listRowClick: function (e) {
+            var targetEl = $(e.target);
+            var $targetRow = targetEl.closest('.listRow');
+            var id = $targetRow.attr('data-id');
+            var model = this.collection.get(id);
+            var self = this;
 
-                this.preView = new PreView({
-                    model      : model,
-                    translation: this.translation
-                });
+            e.stopPropagation();
 
-                this.preView.on('set-status-resolved', function () {
-                    $targetRow.find('.inProgress').html('resolved');
-                });
+            this.preView = new PreView({
+                model      : model,
+                translation: this.translation
+            });
 
-                this.preView.on('update-comments', function (count) {
-                    self.changeCommentCount(count, $targetRow);
-                });
-            },
+            this.preView.on('set-status-resolved', function () {
+                $targetRow.find('.inProgress').html('resolved');
+            });
 
-            changeCommentCount: function (count, $targetRow) {
-                $targetRow.find('.userMassage').text(count);
-            },
+            this.preView.on('update-comments', function (count) {
+                self.changeCommentCount(count, $targetRow);
+            });
+        },
 
-            prepareDataToDisplay : function (data) {
-                _.each(data, (model) => {
-                    model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
+        changeCommentCount: function (count, $targetRow) {
+            $targetRow.find('.userMassage').text(count);
+        },
 
-                   if (model.country && model.country.name ){
-                       model.country.name.currentLanguage = model.country.name[App.currentUser.currentLanguage];
-                   }
+        prepareDataToDisplay : function (data) {
+            _.each(data, (model) => {
+                model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
 
-                    model.createdAt = moment(model.createdAt).format('DD.MM.YYYY');
-                });
-            },
+               if (model.country && model.country.name ){
+                   model.country.name.currentLanguage = model.country.name[App.currentUser.currentLanguage];
+               }
 
-            showMoreContent: function (newModels) {
-                var $currentEl = this.$el;
-                var $holder = $currentEl.find('.reportingWrap');
-                var jsonCollection = newModels.toJSON();
+                model.createdAt = moment(model.createdAt).format('DD.MM.YYYY');
+            });
+        },
 
-                this.prepareDataToDisplay(jsonCollection);
+        showMoreContent: function (newModels) {
+            var $currentEl = this.$el;
+            var $holder = $currentEl.find('.reportingWrap');
+            var jsonCollection = newModels.toJSON();
 
-                this.pageAnimation(this.collection.direction, $holder);
+            this.prepareDataToDisplay(jsonCollection);
 
-                $holder.empty();
-                $holder.html(this.template({
-                    collection : jsonCollection,
-                    translation: this.translation
-                }));
-            },
+            this.pageAnimation(this.collection.direction, $holder);
 
-            render: function () {
-                var $currentEl = this.$el;
-                var jsonCollection = this.collection.toJSON();
-                var $holder;
+            $holder.empty();
+            $holder.html(this.template({
+                collection : jsonCollection,
+                translation: this.translation
+            }));
+        },
 
-                this.prepareDataToDisplay(jsonCollection);
+        render: function () {
+            var $currentEl = this.$el;
+            var jsonCollection = this.collection.toJSON();
+            var $holder;
 
-                $currentEl.html('');
-                $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
+            this.prepareDataToDisplay(jsonCollection);
 
-                $holder = $currentEl.find('.reportingWrap');
-                $holder.append(this.template({
-                    collection : jsonCollection,
-                    translation: this.translation
-                }));
+            $currentEl.html('');
+            $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
 
-                return this;
-            }
-        });
+            $holder = $currentEl.find('.reportingWrap');
+            $holder.append(this.template({
+                collection : jsonCollection,
+                translation: this.translation
+            }));
 
-        return View;
+            return this;
+        }
     });
+
+    return View;
+});

@@ -1,18 +1,16 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/priceSurvey/brandPreview',
-    'text!templates/priceSurvey/list/list.html',
-    'text!templates/priceSurvey/list/categories.html',
-    'text!templates/priceSurvey/list/header.html',
-    'text!templates/priceSurvey/list/body.html',
-    'text!templates/priceSurvey/list/branchData.html',
-    'constants/contentType',
-    'dataService'
-], function (Backbone, $, _, paginator, BrandPreview, template, CategoriesTemplate, HeaderTemplate, BodyTemplate, BranchDataTemplate, CONTENT_TYPES, dataService) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var BrandPreview = require('views/priceSurvey/brandPreview');
+    var template = require('text!templates/shelfShares/list/list.html');
+    var CategoriesTemplate = require('text!templates/shelfShares/list/categories.html');
+    var HeaderTemplate = require('text!templates/shelfShares/list/header.html');
+    var BodyTemplate = require('text!templates/shelfShares/list/body.html');
+    var BranchDataTemplate = require('text!templates/priceSurvey/list/branchData.html');
+    var CONTENT_TYPES = require('constants/contentType');
+    var dataService = require('dataService');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         el         : '#contentHolder',
@@ -39,8 +37,9 @@ define([
 
             options.contentType = this.contentType;
 
-            this.makeRender(options);
+            BadgeStore.cleanupPriceSurvey();
 
+            this.makeRender(options);
         },
 
         listRowClick: function (e) {
