@@ -15,17 +15,18 @@ module.exports = (options) => {
             moduleId,
             contentType,
             actionType,
-            location : {
-                setRegion    : [options.body.parent],
-                setSubRegion  : [options.body._id]
-            }
+            location: {
+                setRegion: [options.body.parent],
+                setSubRegion: [options.body._id],
+            },
         });
 
         const {
+            actionOriginator,
             payload,
             setEveryoneInLocation,
             name,
-            } = yield prototype(extendedOptions);
+        } = yield prototype(extendedOptions);
 
         const groups = [{
             recipients: setEveryoneInLocation,
@@ -36,6 +37,9 @@ module.exports = (options) => {
             payload,
         }];
 
-        yield dispatch(groups);
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };

@@ -122,6 +122,10 @@ define([
                 };
                 var $nameInput;
 
+                if (this.collection.length === 1) {
+                    this.selected.push(this.collection.at(0).get('_id'));
+                }
+
                 var formString = this.template(opt);
                 var self = this;
 
@@ -133,16 +137,8 @@ define([
                             text : "Save",
                             class: "btn",
                             click: function () {
-                                var checked = self.$el.find('input:not(#checkAll):checked');
-                                var ids = [];
-
-                                checked.each(function (index, checkbox) {
-                                    ids.push($(checkbox).attr('id'));
-                                });
-
-                                self.trigger('elementsSelected', ids);
+                                self.trigger('elementsSelected', self.selected);
                                 self.$el.closest('.edit-dialog').remove();
-
                             }
                         }
                     }

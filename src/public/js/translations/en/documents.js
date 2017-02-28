@@ -13,7 +13,7 @@ define([
         selectAll  : 'Select all',
         action     : 'Action',
         disable    : 'Disable',
-        unDisable  : 'Un Disable',
+        unDisable  : 'Enable',
         delete : 'Delete',
         copyButton : 'Copy',
         cutButton : 'Cut',

@@ -11,7 +11,18 @@ router.patch('/:id', require('./routes/put'));
 
 router.post('/answer', require('./routes/postAnswer'));
 
-router.get('/', require('./routes/get'));
+router.get('/', (req, res, next) => {
+    const isMobile = req.isMobile;
+    let rout;
+
+    if (isMobile) {
+        rout = require('./routes/getForMobile');
+    } else {
+        rout = require('./routes/get');
+    }
+
+    rout(req, res, next);
+});
 router.get('/sync', require('./routes/sync'));
 router.get('/answer', require('./routes/getAnswers'));
 router.get('/:id', require('./routes/getOne'));

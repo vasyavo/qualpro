@@ -5,11 +5,25 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 const schema = new Schema({
-    country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, required: true },
-    retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT }],
-    product: { type: ObjectId, ref: CONTENT_TYPES.CATEGORY, required: true },
+    country: {
+        type: ObjectId,
+        required: true,
+        ref: CONTENT_TYPES.DOMAIN,
+    },
+    retailSegment: [{
+        type: ObjectId,
+        ref: CONTENT_TYPES.RETAILSEGMENT,
+    }],
+    product: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.CATEGORY,
+        required: true,
+    },
     displayType: {
-        _id: { type: String, enum: ['floorDisplayId', 'gondolaId', 'thematicStandId', 'shelfId', 'otherId'] },
+        _id: {
+            type: String,
+            enum: ['floorDisplayId', 'gondolaId', 'thematicStandId', 'shelfId', 'otherId'],
+        },
         name: {
             ar: String,
             en: String,
@@ -25,16 +39,40 @@ const schema = new Schema({
             required: true,
         },
     },
-    fileID: { type: ObjectId, ref: CONTENT_TYPES.FILES, default: null, required: true },
-    archived: { type: Boolean, default: false },
+    fileID: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.FILES,
+        default: null,
+    },
+    archived: {
+        type: Boolean,
+        default: false,
+    },
     createdBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() },
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: new Date(),
+        },
     },
     editedBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() },
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: new Date(),
+        },
     },
-}, { collection: 'planograms' });
+}, {
+    autoIndex: false,
+    collection: 'planograms',
+});
 
 module.exports = schema;

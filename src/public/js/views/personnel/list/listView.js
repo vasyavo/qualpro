@@ -1,25 +1,21 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/personnel/list/header.html',
-    'models/personnel',
-    'views/personnel/createView',
-    'views/personnel/list/listItemsView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'views/personnel/preView/preView',
-    'views/personnel/editView',
-    'collections/personnel/collection',
-    'text!templates/personnel/list/newRow.html',
-    'constants/validation',
-    'constants/personnelStatuses',
-    'dataService',
-    'views/personnel/listForSelection',
-    'constants/errorMessages'
-], function (Backbone, $, _, headerTemplate, Model, createView, ListItemsView, filterView, paginator,
-             PreView, EditView, contentCollection, newRow, REGEXP, STATUSES, dataService,
-             PersonnelListForSelectionView, ERROR_MESSAGES) {
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var headerTemplate = require('text!templates/personnel/list/header.html');
+    var Model = require('models/personnel');
+    var createView = require('views/personnel/createView');
+    var ListItemsView = require('views/personnel/list/listItemsView');
+    var paginator = require('views/paginator');
+    var PreView = require('views/personnel/preView/preView');
+    var EditView = require('views/personnel/editView');
+    var newRow = require('text!templates/personnel/list/newRow.html');
+    var REGEXP = require('constants/validation');
+    var STATUSES = require('constants/personnelStatuses');
+    var dataService = require('dataService');
+    var PersonnelListForSelectionView = require('views/personnel/listForSelection');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var BadgeStore = require('services/badgeStore');
+
     var View = paginator.extend({
         EditView   : EditView,
         contentType: 'personnel',
@@ -48,6 +44,8 @@ define([
             this.singleSelect = options.singleSelect;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupPersonnel();
 
             this.makeRender(options);
         },

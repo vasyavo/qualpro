@@ -1,88 +1,82 @@
-define([
-        'backbone',
-        'jQuery',
-        'Underscore',
-        'text!templates/planogram/list/header.html',
-        'text!templates/planogram/list/newRow.html',
-        'views/planogram/list/listItemsView',
-        'views/filter/filtersBarView',
-        'views/paginator',
-        'collections/planogram/collection',
-        'constants/validation',
-        'views/planogram/createView',
-        'constants/contentType'
-    ],
+define(function(require) {
+    var _ = require('underscore');
+    var headerTemplate = require('text!templates/planogram/list/header.html');
+    var newRowTemplate = require('text!templates/planogram/list/newRow.html');
+    var ListItemsView = require('views/planogram/list/listItemsView');
+    var paginator = require('views/paginator');
+    var REGEXP = require('constants/validation');
+    var createView = require('views/planogram/createView');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
-    function (Backbone, $, _, headerTemplate, newRowTemplate, ListItemsView, filterView, paginator,
-              contentCollection, REGEXP, createView, CONTENT_TYPES) {
-        'use strict';
+    var View = paginator.extend({
+        contentType: CONTENT_TYPES.PLANOGRAM,
+        viewType   : 'list',
+        template   : _.template(headerTemplate),
+        templateNew: _.template(newRowTemplate),
 
-        var View = paginator.extend({
-            contentType: CONTENT_TYPES.PLANOGRAM,
-            viewType   : 'list',
-            template   : _.template(headerTemplate),
-            templateNew: _.template(newRowTemplate),
+        CreateView: createView,
 
-            CreateView: createView,
+        //TODO Maybe rewrite logic of display personnel phoneNumber and status in newRow
+        REGEXP: REGEXP,
 
-            //TODO Maybe rewrite logic of display personnel phoneNumber and status in newRow
-            REGEXP: REGEXP,
+        events: {
+            'click .checkboxLabel'        : 'checked',
+            'click input[type="checkbox"]': 'inputClick'
+        },
 
-            events: {
-                'click .checkboxLabel'        : 'checked',
-                'click input[type="checkbox"]': 'inputClick'
-            },
+        initialize: function (options) {
+            this.translation = options.translation;
+            this.filter = options.filter;
+            this.collection = options.collection;
+            this.defaultItemsNumber = this.collection.pageSize;
+            this.listLength = this.collection.totalRecords;
+            this.singleSelect = options.singleSelect;
 
-            initialize: function (options) {
-                this.translation = options.translation;
-                this.filter = options.filter;
-                this.collection = options.collection;
-                this.defaultItemsNumber = this.collection.pageSize;
-                this.listLength = this.collection.totalRecords;
-                this.singleSelect = options.singleSelect;
-                this.makeRender(options);
-            },
+            BadgeStore.cleanupPlanogram();
 
-            render: function () {
-                var $currentEl = this.$el;
+            this.makeRender(options);
+        },
 
-                $currentEl.html('');
-                $currentEl.append(this.template({
-                    translation: this.translation
-                }));
+        render: function () {
+            var $currentEl = this.$el;
 
-                this.$itemsEl = $currentEl.find('.listTable');
+            $currentEl.html('');
+            $currentEl.append(this.template({
+                translation: this.translation
+            }));
 
-                $currentEl.append(new ListItemsView({
-                    el         : this.$itemsEl,
-                    collection : this.collection,
-                    translation: this.translation
-                }).render());
+            this.$itemsEl = $currentEl.find('.listTable');
 
-                return this;
-            },
+            $currentEl.append(new ListItemsView({
+                el         : this.$itemsEl,
+                collection : this.collection,
+                translation: this.translation
+            }).render());
 
-            showMoreContent: function (newModels) {
-                var holder = this.$el;
-                var itemView;
+            return this;
+        },
 
-                holder.find('.listTable').empty();
+        showMoreContent: function (newModels) {
+            var holder = this.$el;
+            var itemView;
 
-                this.trigger('hideActionDd');
+            holder.find('.listTable').empty();
 
-                itemView = new ListItemsView({
-                    el         : this.$itemsEl,
-                    collection : newModels,
-                    translation: this.translation
-                });
+            this.trigger('hideActionDd');
 
-                holder.append(itemView.render());
-                itemView.undelegateEvents();
+            itemView = new ListItemsView({
+                el         : this.$itemsEl,
+                collection : newModels,
+                translation: this.translation
+            });
 
-                holder.find('#checkAll').prop('checked', false);
-            }
-        });
+            holder.append(itemView.render());
+            itemView.undelegateEvents();
 
-        return View;
+            holder.find('#checkAll').prop('checked', false);
+        }
     });
 
+    return View;
+});

@@ -1,22 +1,16 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/contractsYearly/list/list.html',
-    'views/contractsYearly/createView',
-    'text!templates/contractsYearly/list/newRow.html',
-    'views/contractsYearly/editView',
-    'views/contractsYearly/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/otherConstants',
-    'constants/filters',
-    'views/fileDialog/fileDialog',
-    'collections/file/collection',
-    'constants/contentType'
-], function (Backbone, $, _, template, createView, newRow, EditView, PreView, filterView, paginator,
-             OTHER_CONSTANTS, FILTER_CONSTANTS, FileDialogPreviewView, FileCollection, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/contractsYearly/list/list.html');
+    var createView = require('views/contractsYearly/createView');
+    var newRow = require('text!templates/contractsYearly/list/newRow.html');
+    var EditView = require('views/contractsYearly/editView');
+    var PreView = require('views/contractsYearly/preView/preView');
+    var paginator = require('views/paginator');
+    var FileDialogPreviewView = require('views/fileDialog/fileDialog');
+    var FileCollection = require('collections/file/collection');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.CONTRACTSYEARLY,
@@ -40,6 +34,8 @@ define([
             this.listLength = this.collection.totalRecords;
             this.translation = options.translation;
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupContractsYearly();
 
             this.makeRender(options);
         },

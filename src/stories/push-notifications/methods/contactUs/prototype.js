@@ -194,6 +194,7 @@ module.exports = function * (options) {
     };
 
     return {
+        actionOriginator,
         payload,
         highPriority,
         setAdmin: _.difference(setAdmin, highPriority),

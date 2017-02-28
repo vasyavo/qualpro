@@ -1,19 +1,18 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/personnel/thumbnails/thumbnails.html',
-    'views/thumbnails',
-    'views/personnel/preView/preView',
-    'views/personnel/editView',
-    'dataService',
-    'views/personnel/createView',
-    'text!templates/personnel/thumbnails/newThumbnail.html',
-    'constants/personnelStatuses',
-    'views/personnel/listForSelection',
-    'constants/errorMessages'
-], function (Backbone, $, _, thumbnailsTemplate, thumbnails, PreView, EditView, dataService, createView,
-             newThumbnail, STATUSES, PersonnelListForSelectionView, ERROR_MESSAGES) {
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var thumbnailsTemplate = require('text!templates/personnel/thumbnails/thumbnails.html');
+    var thumbnails = require('views/thumbnails');
+    var PreView = require('views/personnel/preView/preView');
+    var EditView = require('views/personnel/editView');
+    var dataService = require('dataService');
+    var createView = require('views/personnel/createView');
+    var newThumbnail = require('text!templates/personnel/thumbnails/newThumbnail.html');
+    var STATUSES = require('constants/personnelStatuses');
+    var PersonnelListForSelectionView = require('views/personnel/listForSelection');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var BadgeStore = require('services/badgeStore');
+
     var View = thumbnails.extend({
         contentType: 'personnel',
         viewType   : 'thumbnails',
@@ -39,6 +38,9 @@ define([
             this.defaultItemsNumber = this.collection.pageSize;
             this.listLength = this.collection.totalRecords;
             this.page = options.collection.page;
+
+            BadgeStore.cleanupPersonnel();
+
             this.makeRender(options);
         },
 

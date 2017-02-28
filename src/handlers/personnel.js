@@ -1431,7 +1431,6 @@ const Personnel = function () {
                     session.rememberMe = true;
                 } else {
                     delete session.rememberMe;
-                    session.cookie.expires = false;
                 }
 
                 const currentLanguage = personnel.currentLanguage || 'en';
@@ -1470,6 +1469,8 @@ const Personnel = function () {
 
             const personnel = result.length ?
                 result.slice().pop() : {};
+
+            personnel.pass = null;
 
             res.status(200).send(personnel);
         });

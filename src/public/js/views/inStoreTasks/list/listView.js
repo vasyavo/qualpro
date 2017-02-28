@@ -1,19 +1,15 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/inStoreTasks/list/list.html',
-    'text!templates/inStoreTasks/list/newRow.html',
-    'views/inStoreTasks/createView',
-    'views/inStoreTasks/editView',
-    'views/inStoreTasks/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/contentType',
-    'dataService'
-], function (Backbone, $, _, template, newRow, createView,
-             EditInStoreTaskView, PreView, filterView, paginator, CONTENT_TYPES, dataService) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/inStoreTasks/list/list.html');
+    var newRow = require('text!templates/inStoreTasks/list/newRow.html');
+    var createView = require('views/inStoreTasks/createView');
+    var EditInStoreTaskView = require('views/inStoreTasks/editView');
+    var PreView = require('views/inStoreTasks/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var dataService = require('dataService');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType    : CONTENT_TYPES.INSTORETASKS,
@@ -38,6 +34,8 @@ define([
             this.translation = options.translation;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupInStoreReporting();
 
             this.makeRender(options);
         },

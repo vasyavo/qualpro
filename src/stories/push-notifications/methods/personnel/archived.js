@@ -18,20 +18,24 @@ module.exports = (options) => {
         });
 
         const {
+            actionOriginator,
             payload,
             setEveryoneInLocation,
             name,
-            } = yield prototype(extendedOptions);
+        } = yield prototype(extendedOptions);
 
         const groups = [{
             recipients: setEveryoneInLocation,
             subject: {
-                en: 'Personnel ' + name.en + ' ' + actionType,
+                en: `Personnel ${name.en} ${actionType}`,
                 ar: '',
             },
             payload,
         }];
 
-        yield dispatch(groups);
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };
