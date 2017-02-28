@@ -242,7 +242,7 @@ const Item = function () {
                     return next(error);
                 }
 
-                ActivityLog.emit('items-and-prices:item-created', {
+                ActivityLog.emit('items-and-prices:item-published', {
                     actionOriginator: userId,
                     accessRoleLevel,
                     body: model.toJSON(),
