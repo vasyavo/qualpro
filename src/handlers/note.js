@@ -348,100 +348,114 @@ var Note = function () {
         const isMobile = req.isMobile;
         const noteId = req.params.id;
 
-        const queryRun = (updateObject) => {
+        const queryRun = (updateObject, callback) => {
+            const setToDelete = updateObject.filesToDelete;
+
             async.waterfall([
 
                 (cb) => {
-                    if (!updateObject.filesToDelete || !updateObject.filesToDelete.length) {
-                        return cb(null);
-                    }
-
-                    async.each(updateObject.filesToDelete, (fileId, cb) => {
-                        FileModel.findByIdAndRemove(fileId, (err, model) => {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            fileHandler.deleteFile(model.get('name'), CONTENT_TYPES.NOTES, cb);
-                        });
-                    }, cb);
-                },
-
-                (cb) => {
-                    const files = req.files;
-
-                    if (!files) {
-                        return cb(null, []);
-                    }
-
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.NOTES, cb);
-                },
-
-                (setFileId, cb) => {
-                    setFileId = setFileId.map((item) => (item.toString()));
-
-                    updateObject.editedBy = {
-                        user: ObjectId(userId),
-                        date: new Date(),
-                    };
-
-                    if (updateObject.title) {
-                        updateObject.title = _.escape(updateObject.title);
-                    }
-                    if (updateObject.theme) {
-                        updateObject.theme = _.escape(updateObject.theme);
-                    }
-                    if (updateObject.description) {
-                        updateObject.description = _.escape(updateObject.description);
-                    }
-
-                    NoteModel.findOne({ _id: noteId }, (err, noteModel) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        if (!noteModel) {
-                            const error = new Error('Note not found');
-                            error.status = 400;
-
-                            return cb(error);
-                        }
-
-                        const attachments = noteModel.get('attachments').map((item) => (item.toString()));
-                        const attachmentsWithoutDeleted = _.without(attachments, ...(updateObject.filesToDelete || []));
-
-                        updateObject.attachments = isMobile ? setFileId : attachmentsWithoutDeleted.concat(setFileId);
-
-                        delete updateObject.filesToDelete;
-
-                        noteModel.update({ $set: updateObject }, (err) => {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            ActivityLog.emit('note:updated', {
-                                actionOriginator: userId,
-                                accessRoleLevel,
-                                body: noteModel.toJSON(),
-                            });
-
-                            cb(null, noteModel.get('_id'));
-                        });
-                    });
-                },
-
-                (id, cb) => {
-                    self.getByIdAggr({
-                        id,
-                        isMobile,
-                    }, cb);
+                    NoteModel.findOne({ _id: noteId }).lean().exec(cb);
                 },
 
                 (note, cb) => {
-                    getAwsLinks(note, cb);
+                    async.waterfall([
+
+                        (cb) => {
+                            if (!note) {
+                                const error = new Error('Note not found');
+
+                                error.status = 400;
+                                return cb(error);
+                            }
+
+                            if (!setToDelete || !setToDelete.length) {
+                                return cb(null);
+                            }
+
+                            async.each(setToDelete, (fileId, eachCb) => {
+                                async.waterfall([
+
+                                    (cb) => {
+                                        FileModel.findByIdAndRemove(fileId, cb);
+                                    },
+
+                                    (file, cb) => {
+                                        if (!file) {
+                                            return cb(null);
+                                        }
+
+                                        const fileName = file.get('name');
+
+                                        fileHandler.deleteFile(fileName, CONTENT_TYPES.NOTES, cb);
+                                    },
+
+                                ], eachCb);
+                            }, cb);
+                        },
+
+                        (cb) => {
+                            const files = req.files;
+
+                            fileHandler.uploadFile(userId, files, CONTENT_TYPES.NOTES, cb);
+                        },
+
+                        (setFileId, cb) => {
+                            const setExistingFileId = note.attachments.map(objectId => objectId.toString());
+                            const createdBy = {
+                                user: ObjectId(userId),
+                                date: new Date(),
+                            };
+                            const attachments = isMobile ? setFileId : [
+                                /*
+                                * in CMS user has possibility to remove several existing attachments
+                                * and add merge with few new
+                                * */
+                                ..._.without(setExistingFileId, ...setToDelete),
+                                ...setFileId.map(objectId => objectId.toString()),
+                            ];
+
+                            const update = {
+                                attachments,
+                                createdBy,
+                                editedBy: createdBy,
+                            };
+
+                            if (updateObject.title) {
+                                update.title = _.escape(updateObject.title);
+                            }
+
+                            if (updateObject.theme) {
+                                update.theme = _.escape(updateObject.theme);
+                            }
+
+                            if (updateObject.description) {
+                                update.description = _.escape(updateObject.description);
+                            }
+
+                            NoteModel.findOneAndUpdate({ _id: noteId }, update, { new: true }, cb);
+                        },
+
+                        (note, cb) => {
+                            ActivityLog.emit('note:updated', {
+                                actionOriginator: userId,
+                                accessRoleLevel,
+                                body: note.toJSON(),
+                            });
+
+                            self.getByIdAggr({
+                                id: note._id,
+                                isMobile,
+                            }, cb);
+                        },
+
+                        (note, cb) => {
+                            getAwsLinks(note, cb);
+                        },
+
+                    ], cb);
                 },
 
-            ]);
+            ], callback);
         };
 
         async.waterfall([
