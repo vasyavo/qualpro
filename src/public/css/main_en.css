@@ -4140,8 +4140,40 @@ input[type=number]::-webkit-outer-spin-button {
 .activeGroup .checked {
   box-shadow: none !important;
 }
+#questionTable tr:nth-last-child(2):not(:nth-child(2)) .openDd .dropDownList {
+   visibility: visible;
+   -webkit-animation-duration: 0.3s;
+   -moz-animation-duration: 0.3s;
+   -o-animation-duration: 0.3s;
+   animation-duration: 0.3s;
+   -webkit-animation-fill-mode: both;
+   -moz-animation-fill-mode: both;
+   -o-animation-fill-mode: both;
+   animation-fill-mode: both;
+   -webkit-animation-name: fadeInDownTwo;
+   -moz-animation-name: fadeInDownTwo;
+   -o-animation-name: fadeInDownTwo;
+   animation-name: fadeInDownTwo;
+   top: auto!important;
+ }
+#questionTable tr:last-child:not(:nth-child(2)) .openDd .dropDownList {
+  visibility: visible;
+  -webkit-animation-duration: 0.3s;
+  -moz-animation-duration: 0.3s;
+  -o-animation-duration: 0.3s;
+  animation-duration: 0.3s;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-name: fadeInDownTwo;
+  -moz-animation-name: fadeInDownTwo;
+  -o-animation-name: fadeInDownTwo;
+  animation-name: fadeInDownTwo;
+  top: auto!important;
+}
 .forPosition {
-  position: fixed;
+  position: absolute;
   width: 100px;
   z-index: 1;
 }
@@ -7269,7 +7301,6 @@ table:not(.ui-datepicker-calendar) tbody tr td {
 }
 table:not(.ui-datepicker-calendar) td,
 table:not(.ui-datepicker-calendar) th {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -11284,4 +11315,7 @@ label[for=searchInputnoCT]::after {
   color: #000;
   cursor: default;
   pointer-events: none;
+}
+.mCSB_container {
+  overflow: initial!important;
 }
