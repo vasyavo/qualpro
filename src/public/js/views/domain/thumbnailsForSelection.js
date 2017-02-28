@@ -122,6 +122,10 @@ define([
                 };
                 var $nameInput;
 
+                if (this.collection.length === 1) {
+                    this.selected.push(this.collection.at(0).get('_id'));
+                }
+
                 var formString = this.template(opt);
                 var self = this;
 
