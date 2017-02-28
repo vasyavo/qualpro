@@ -1323,6 +1323,7 @@ const Personnel = function () {
             $project: {
                 email: 1,
                 mobileNumber: 1,
+                pass: 1,
                 super: 1,
                 confirmed: 1,
                 archived: 1,
@@ -1468,6 +1469,8 @@ const Personnel = function () {
 
             const personnel = result.length ?
                 result.slice().pop() : {};
+
+            personnel.pass = null;
 
             res.status(200).send(personnel);
         });
