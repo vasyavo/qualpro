@@ -96,7 +96,6 @@ var Comment = function () {
             const saveObj = {
                 text: body.commentText,
                 objectiveId: body.objectiveId,
-                userId,
                 files: req.files,
                 createdBy,
                 updatedBy: createdBy,

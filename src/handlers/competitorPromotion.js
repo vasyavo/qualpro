@@ -154,10 +154,17 @@ var CompetitorBranding = function() {
                     if (body.commentText) {
                         body.commentText = _.escape(body.commentText);
                     }
+
+                    const createdBy = {
+                        date: new Date(),
+                        user: userId
+                    };
+
                     var saveObj = {
                         text : body.commentText,
                         objectiveId : model._id,
-                        userId : userId
+                        userId : userId,
+                        createdBy
                     };
 
                     commentCreator(saveObj, CompetitorPromotionModel, function(err, comment) {
