@@ -1323,7 +1323,6 @@ const Personnel = function () {
             $project: {
                 email: 1,
                 mobileNumber: 1,
-                pass: 1,
                 super: 1,
                 confirmed: 1,
                 archived: 1,
