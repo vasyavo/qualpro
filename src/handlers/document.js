@@ -354,10 +354,6 @@ const Documents = function () {
                 return errorSender.badRequest(cb, 'Document not found');
             }
 
-            if (result.deleted) {
-                return errorSender.badRequest(cb, 'Document already deleted');
-            }
-
             cb(null, result);
         });
     };
