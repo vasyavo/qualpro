@@ -598,9 +598,9 @@ module.exports = [
     {
         module: ACL_MODULES.DOCUMENT,
         cms: {
-            archive: false,
-            edit: false,
-            write: false,
+            archive: true,
+            edit: true,
+            write: true,
             read: true
         },
         mobile: {
