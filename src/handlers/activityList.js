@@ -2,513 +2,476 @@ const {
     rehydrate,
     dispatch,
 } = require('./../stories/badges/store');
+
 const cleanupBadges = require('./../stories/badges/actions').cleanup;
 const PubNubClient = require('./../stories/push-notifications/utils/pubnub');
+const mongoose = require('mongoose');
+const CONSTANTS = require('../constants/mainConstants');
+const OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
+const ACL_CONSTANTS = require('../constants/aclRolesNames');
+const ACL_MODULES = require('../constants/aclModulesNames');
+const CONTENT_TYPES = require('../public/js/constants/contentType');
+const access = require('../helpers/access')();
+const FilterMapper = require('../helpers/filterMapper');
+const async = require('async');
+const ActivityListModel = require('./../types/activityList/model');
+const PersonnelModel = require('./../types/personnel/model');
+const AggregationHelper = require('../helpers/aggregationCreater');
+const GetImageHelper = require('../helpers/getImages');
+const _ = require('lodash');
+const MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity');
 
-var Personnel = function() {
-    var mongoose = require('mongoose');
-    var CONSTANTS = require('../constants/mainConstants');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
-    var ACL_CONSTANTS = require('../constants/aclRolesNames');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')();
-    var FilterMapper = require('../helpers/filterMapper');
-    var async = require('async');
-    const ActivityListModel = require('./../types/activityList/model');
-    const PersonnelModel = require('./../types/personnel/model');
-    var ObjectId = mongoose.Types.ObjectId;
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper();
-    var _ = require('lodash');
-    var logWriter = require('../helpers/logWriter.js');
-    var MAIN_CONSTANTS = require('../constants/mainConstants.js');
-    var MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity.js');
-    var $defProjection = {
-        _id : 1,
-        module : 1,
-        actionType : 1,
-        itemType : 1,
-        itemDetails : 1,
-        createdBy : 1,
-        country : 1,
-        region : 1,
-        subRegion : 1,
-        branch : 1,
-        retailSegment : 1,
-        outlet : 1,
-        itemId : 1,
-        itemName : 1,
-        accessRoleLevel : 1,
-        assignedTo : 1,
-        creationDate : 1,
-        personnels : 1,
-        checkPersonnel : 1
+const ObjectId = mongoose.Types.ObjectId;
+
+const Personnel = function() {
+    const getImagesHelper = new GetImageHelper();
+    const $defProjection = {
+        _id: 1,
+        module: 1,
+        actionType: 1,
+        itemType: 1,
+        itemDetails: 1,
+        createdBy: 1,
+        country: 1,
+        region: 1,
+        subRegion: 1,
+        branch: 1,
+        retailSegment: 1,
+        outlet: 1,
+        itemId: 1,
+        itemName: 1,
+        accessRoleLevel: 1,
+        assignedTo: 1,
+        creationDate: 1,
+        personnels: 1,
+        checkPersonnel: 1,
     };
 
 // 11 - virtual role level
-    var levelsByLevel = {
-        1 : _.values(ACL_CONSTANTS),
-        2 : _(ACL_CONSTANTS).pick([
+    const levelsByLevel = {
+        1: _.values(ACL_CONSTANTS),
+        2: _(ACL_CONSTANTS).pick([
             'AREA_MANAGER',
             'AREA_IN_CHARGE',
             'SALES_MAN',
             'MERCHANDISER',
             'CASH_VAN',
-            'VIRTUAL'
+            'VIRTUAL',
         ]).values().value(),
-        3 : _(ACL_CONSTANTS).pick([
+        3: _(ACL_CONSTANTS).pick([
             'AREA_IN_CHARGE',
             'SALES_MAN',
             'MERCHANDISER',
             'MERCHANDISER',
             'CASH_VAN',
-            'VIRTUAL'
+            'VIRTUAL',
         ]).values().value(),
-        4 : _(ACL_CONSTANTS).pick([
+        4: _(ACL_CONSTANTS).pick([
             'SALES_MAN',
             'MERCHANDISER',
             'MERCHANDISER',
             'CASH_VAN',
-            'VIRTUAL'
+            'VIRTUAL',
         ]).values().value(),
-        5 : [ACL_CONSTANTS.VIRTUAL],
-        6 : [ACL_CONSTANTS.VIRTUAL],
-        7 : [ACL_CONSTANTS.VIRTUAL],
-        8 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
-        9 : _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
-        10 : [ACL_CONSTANTS.VIRTUAL]
+        5: [ACL_CONSTANTS.VIRTUAL],
+        6: [ACL_CONSTANTS.VIRTUAL],
+        7: [ACL_CONSTANTS.VIRTUAL],
+        8: _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
+        9: _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
+        10: [ACL_CONSTANTS.VIRTUAL],
     };
 
     function getAllPipelineActivity(options) {
-        var aggregateHelper = options.aggregateHelper;
-        var searchFieldsArray = options.searchFieldsArray;
-        var queryObject = options.queryObject || {};
-        var positionFilter = options.positionFilter;
-        var filterSearch = options.filterSearch;
-        var skip = options.skip;
-        var limit = options.limit;
-        var sort = options.sort;
-        var currentUser = options.currentUser;
-        var isMobile = options.isMobile;
-        var forSync = options.forSync;
-        var pipeLine = [];
-        var regionsMathArray = {};
+        const {
+            aggregateHelper,
+            searchFieldsArray,
+            queryObject,
+            positionFilter,
+            filterSearch,
+            limit,
+            skip,
+            sort,
+            isMobile,
+            currentUser,
+            afterIteMTypeQuery = {},
+        } = options;
 
-        var personnelQuery = [];
-        var planogramQuery;
-        var countryQuery;
-        var questionaryQuery;
-        var usersArray = [currentUser._id];
-        var checkPersonnelCondition = {
-            $cond : {
-                if : {$eq : ['$itemType', CONTENT_TYPES.CONTRACTSSECONDARY]},
-                then : 1,
-                else : {
-                    $cond : {
-                        if : {$eq : ['$itemType', CONTENT_TYPES.CONTRACTSYEARLY]},
-                        then : 1,
-                        else : 0
-                    }
-                }
-            }
-        };
-        var contractsQuery = {
-            $and: [{
-                $or : [
-                    {
-                        $and : [
-                            {
-                                checkPersonnel : 1
-                            }, {
-                                personnels : {
-                                    $in : usersArray
-                                }
-                            }
-                        ]
-                    }, {
-                        checkPersonnel : 0,
-                    }
-                ]
-            }]
-        };
-        var itemsPricesQuery;
-        var competitorItemQuery;
-        var competitorPromoQuery;
-        var priceSurveyQuery;
-        var selfSharesQuery;
-        var newProductLaunchQuery;
-        var notificationQuery;
-
-        var afterIteMTypeQuery = options.afterIteMTypeQuery || {};
-
-        var allowedPersonnelTaskItemTypes = [
-            CONTENT_TYPES.OBJECTIVES,
-            CONTENT_TYPES.INSTORETASKS
-        ];
+        let pipeLine = [];
+        let regionsMathArray = {};
+        let usersArray = [currentUser._id];
 
         if (currentUser.cover && currentUser.cover.length) {
             usersArray = usersArray.concat(currentUser.cover);
         }
 
         pipeLine.push({
-            $match : queryObject
+            $match: Object.assign({}, queryObject, {
+                'createdBy.date': { $gte: (new Date()).addDays(-3) },
+                personnels: currentUser._id
+            }),
         });
 
         pipeLine.push({
-            $match : {
-                creationDate : {$gte : (new Date()).addDays(-3)}
-            }
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings : {createdBy : {date : 1}}
-        }));
-
-        pipeLine.push({
-            $lookup : {
-                from : 'modules',
-                localField : 'module',
-                foreignField : '_id',
-                as : 'module'
-            }
+            $lookup: {
+                from: 'personnels',
+                localField: 'createdBy.user',
+                foreignField: '_id',
+                as: 'createdBy.user',
+            },
         });
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                module : {$arrayElemAt : ['$module', 0]},
-                checkPersonnel : checkPersonnelCondition
-            })
+            $addFields: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        $let: {
+                            vars: {
+                                createdByUser: {
+                                    $arrayElemAt: ['$createdBy.user', 0],
+                                },
+                            },
+                            in: {
+                                _id: '$$createdByUser._id',
+                                name: '$$createdByUser.name',
+                                firstName: '$$createdByUser.firstName',
+                                lastName: '$$createdByUser.lastName',
+                                position: '$$createdByUser.position',
+                                accessRole: '$$createdByUser.accessRole',
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         pipeLine.push({
-            $match : contractsQuery
+            $lookup: {
+                from: 'modules',
+                localField: 'module',
+                foreignField: '_id',
+                as: 'module',
+            },
+        });
+
+        pipeLine.push({
+            $addFields: {
+                module: { $arrayElemAt: ['$module', 0] },
+                checkPersonnel: {
+                    $cond: {
+                        if: {
+                            $or: [
+                                {
+                                    $eq: ['$itemType', CONTENT_TYPES.CONTRACTSSECONDARY],
+                                },
+                                {
+                                    $eq: ['$itemType', CONTENT_TYPES.CONTRACTSYEARLY],
+                                },
+                            ],
+                        },
+                        then: 1,
+                        else: 0,
+                    },
+                },
+            },
+        });
+
+        pipeLine.push({
+            $match: {
+                $or: [
+                    {
+                        $and: [
+                            {
+                                checkPersonnel: 1,
+                            }, {
+                                personnels: {
+                                    $in: usersArray,
+                                },
+                            },
+                        ],
+                    }, {
+                        checkPersonnel: 0,
+                    },
+                ],
+            },
         });
 
         if (positionFilter) {
             pipeLine.push({
-                $match : positionFilter
+                $match: positionFilter,
             });
         }
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'createdBy.user.accessRole',
-            isArray : false,
-            addProjection : ['_id', 'name', 'level'],
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        position : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'createdBy.user.position',
-            isArray : false,
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        accessRole : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
+        pipeLine.push({
+            $lookup: {
+                from: 'accessRoles',
+                localField: 'createdBy.user.accessRole',
+                foreignField: '_id',
+                as: 'createdBy.user.accessRole',
+            },
+        });
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                createdBy : {
-                    user : 1,
-                    date : 1,
-                    diffDate : {
-                        $let : {
-                            vars : {
-                                dateNow : new Date(),
-                                createDate : '$createdBy.date'
+            $addFields: {
+                createdBy: {
+                    user: {
+                        accessRole: {
+                            $let: {
+                                vars: {
+                                    createdByUserAccessRole: {
+                                        $arrayElemAt: ['$createdBy.user.accessRole', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$createdByUserAccessRole._id',
+                                    name: '$$createdByUserAccessRole.name',
+                                    level: '$$createdByUserAccessRole.level',
+                                },
                             },
-                            in : {$subtract : ['$$dateNow', '$$createDate']}
-                        }
-                    }
-                }
-            })
+                        },
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                    date: 1,
+                },
+            },
         });
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                module : {
-                    name : 1,
-                    _id : 1
-                },
-                creationDate : '$createdBy.date'
-
-            })
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'createdBy.user.position',
+            },
         });
 
-        if (!_.includes(_(ACL_CONSTANTS).pick([
-                'MASTER_ADMIN',
-                'MASTER_UPLOADER',
-                'TRADE_MARKETER'
-            ]).values().value(), currentUser.accessRoleLevel)) {
+        pipeLine.push({
+            $addFields: {
+                createdBy: {
+                    user: {
+                        position: {
+                            $let: {
+                                vars: {
+                                    createdByUserPosition: {
+                                        $arrayElemAt: ['$createdBy.user.position', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$createdByUserPosition._id',
+                                    name: '$$createdByUserPosition.name',
+                                },
+                            },
+                        },
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                    date: 1,
+                },
+            },
+        });
 
-            planogramQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$eq : CONTENT_TYPES.PLANOGRAM}
-                }];
+        pipeLine.push({
+            $addFields: {
+                createdBy: {
+                    user: 1,
+                    date: 1,
+                    diffDate: {
+                        $let: {
+                            vars: {
+                                dateNow: new Date(),
+                                createDate: '$createdBy.date',
+                            },
+                            in: { $subtract: ['$$dateNow', '$$createDate'] },
+                        },
+                    },
+                },
+            },
+        });
 
-            itemsPricesQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : [CONTENT_TYPES.ITEM]}
-                }];
+        pipeLine.push({
+            $addFields: {
+                module: {
+                    name: 1,
+                    _id: 1,
+                },
+                creationDate: '$createdBy.date',
+            },
+        });
 
-            competitorItemQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : [CONTENT_TYPES.COMPETITORITEM]}
-                }];
+        if ([ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.MASTER_UPLOADER, ACL_CONSTANTS.TRADE_MARKETER].indexOf(currentUser.accessRoleLevel) === -1) {
+            const $match = {
+                $or: [],
+            };
+            const modulesForFilterByCountryAndType = [
+                CONTENT_TYPES.PLANOGRAM,
+                CONTENT_TYPES.ITEM,
+                CONTENT_TYPES.COMPETITORITEM,
+                CONTENT_TYPES.COMPETITORPROMOTION,
+                CONTENT_TYPES.NEWPRODUCTLAUNCH,
+                CONTENT_TYPES.PRICESURVEY,
+                CONTENT_TYPES.SHELFSHARES,
+                CONTENT_TYPES.QUESTIONNARIES,
+            ];
+            const personnelQuery = [];
 
-            competitorPromoQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : [CONTENT_TYPES.COMPETITORPROMOTION]}
-                }];
+            modulesForFilterByCountryAndType.forEach((module) => {
+                $match.$or.push({
+                    $and: [
+                        {
+                            country: {
+                                $in: currentUser.country,
+                            },
+                        },
+                        {
+                            itemType: { $eq: module },
+                        },
+                    ],
+                });
+            });
 
-            newProductLaunchQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : [CONTENT_TYPES.NEWPRODUCTLAUNCH]}
-                }];
+            $match.$or.push({
+                $and: [
+                    {
+                        country: {
+                            $in: currentUser.country,
+                        },
+                    },
+                    {
+                        itemType: { $in: ['domain', 'retailSegment', 'outlet'] },
+                    },
+                    {
+                        itemDetails: { $in: ['country', 'region', 'subRegion', ''] },
+                    },
+                ],
+            });
 
-            priceSurveyQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : [CONTENT_TYPES.PRICESURVEY]}
-                }];
-
-            selfSharesQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : [CONTENT_TYPES.SHELFSHARES]}
-                }];
-
-            questionaryQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$eq : CONTENT_TYPES.QUESTIONNARIES}
-                }];
-
-            countryQuery = [
-                {
-                    country : {
-                        $in : currentUser.country
-                    }
-                }, {
-                    itemType : {$in : ['domain', 'retailSegment', 'outlet']}
-                }, {
-                    itemDetails : {$in : ['country', 'region', 'subRegion', '']}
-                }];
-
-            notificationQuery = [
-                {
-                    personnels : {
-                        $in : [currentUser._id]
-                    }
-                }, {
-                    itemType : {$eq : CONTENT_TYPES.NOTIFICATIONS}
-                }];
+            $match.$or.push({
+                $and: [
+                    {
+                        personnels: {
+                            $in: [currentUser._id],
+                        },
+                    },
+                    {
+                        itemType: { $eq: CONTENT_TYPES.NOTIFICATIONS },
+                    },
+                ],
+            });
 
             personnelQuery.push({
-                country : {
-                    $in : currentUser.country
+                country: {
+                    $in: currentUser.country,
                 },
-                itemType : {$eq : CONTENT_TYPES.PERSONNEL}
+                itemType: { $eq: CONTENT_TYPES.PERSONNEL },
             });
 
             if (!isMobile) {
                 personnelQuery.push({
-                    accessRoleLevel : {
-                        $in : _.union(levelsByLevel[currentUser.accessRoleLevel], [currentUser.accessRoleLevel])
-                    }
+                    accessRoleLevel: {
+                        $in: _.union(levelsByLevel[currentUser.accessRoleLevel], [currentUser.accessRoleLevel]),
+                    },
                 });
             }
 
-            if (currentUser.accessRoleLevel === 5) {
-                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
-            }
-            if (currentUser.accessRoleLevel === 6) {
-                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
-            }
-            if (currentUser.accessRoleLevel === 7) {
-                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
-            }
-
-            if (currentUser.accessRoleLevel === ACL_CONSTANTS.TRADE_MARKETER) {
-                regionsMathArray = {branch : {$in : currentUser.branch || afterIteMTypeQuery.branch}};
-
-                // prevent send activity with type === objective for trade marketer
-                allowedPersonnelTaskItemTypes = [
-                    CONTENT_TYPES.INSTORETASKS
-                ];
-            }
-
-            if (currentUser.accessRoleLevel === 4) {
-                regionsMathArray = {subRegion : {$in : currentUser.subRegion || afterIteMTypeQuery.subRegion}};
-            }
-            if (currentUser.accessRoleLevel === 3) {
-                regionsMathArray = {region : {$in : currentUser.region || afterIteMTypeQuery.region}};
-            }
-            if (currentUser.accessRoleLevel === 2) {
-                regionsMathArray = {country : {$in : currentUser.country || afterIteMTypeQuery.country}};
-            }
-            if (currentUser.accessRoleLevel === 8) {
-                regionsMathArray = {country : {$in : currentUser.country || afterIteMTypeQuery.country}};
-            }
-
-            pipeLine.push({
-                $match : {
-                    $or : [
-                        {
-                            $and : [
-                                regionsMathArray,
-                                {
-                                    accessRoleLevel : {
-                                        $in : levelsByLevel[currentUser.accessRoleLevel]
-                                    }
-                                }, {
-                                    itemType : {
-                                        $in : allowedPersonnelTaskItemTypes
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            $and : [
-                                regionsMathArray, {
-                                    itemType : {
-                                        $in : [
-                                            CONTENT_TYPES.BRANDINGANDDISPLAY,
-                                            CONTENT_TYPES.PROMOTIONS
-                                        ]
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            $and : countryQuery
-                        },
-                        {
-                            $and : questionaryQuery
-                        },
-                        {
-                            $and : notificationQuery
-                        },
-                        {
-                            $and : itemsPricesQuery
-                        },
-                        {
-                            $and : competitorItemQuery
-                        },
-                        {
-                            $and : competitorPromoQuery
-                        },
-                        {
-                            $and : newProductLaunchQuery
-                        },
-                        {
-                            $and : priceSurveyQuery
-                        },
-                        {
-                            $and : selfSharesQuery
-                        },
-                        {
-                            $and : personnelQuery
-                        },
-                        {
-                            $and : planogramQuery
-                        },
-                        {
-                            assignedTo : {$in : usersArray}
-                        }
-                    ]
-                }
+            $match.$or.push({
+                $and: personnelQuery,
             });
+
+            if (currentUser.accessRoleLevel === MODULE_NAMES.SALES_MAN) {
+                regionsMathArray = { branch: { $in: currentUser.branch || afterIteMTypeQuery.branch } };
+            }
+            if (currentUser.accessRoleLevel === MODULE_NAMES.MERCHANDISER) {
+                regionsMathArray = { branch: { $in: currentUser.branch || afterIteMTypeQuery.branch } };
+            }
+            if (currentUser.accessRoleLevel === MODULE_NAMES.CASH_VAN) {
+                regionsMathArray = { branch: { $in: currentUser.branch || afterIteMTypeQuery.branch } };
+            }
+
+            if (currentUser.accessRoleLevel === MODULE_NAMES.AREA_IN_CHARGE) {
+                regionsMathArray = { subRegion: { $in: currentUser.subRegion || afterIteMTypeQuery.subRegion } };
+            }
+            if (currentUser.accessRoleLevel === MODULE_NAMES.AREA_MANAGER) {
+                regionsMathArray = { region: { $in: currentUser.region || afterIteMTypeQuery.region } };
+            }
+            if (currentUser.accessRoleLevel === MODULE_NAMES.COUNTRY_ADMIN) {
+                regionsMathArray = { country: { $in: currentUser.country || afterIteMTypeQuery.country } };
+            }
+
+            $match.$or.push({
+                $and: [
+                    regionsMathArray,
+                    {
+                        accessRoleLevel: {
+                            $in: levelsByLevel[currentUser.accessRoleLevel],
+                        },
+                    },
+                    {
+                        itemType: {
+                            $in: [CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS],
+                        },
+                    },
+                ],
+            });
+
+            $match.$or.push({
+                $and: [
+                    regionsMathArray, {
+                        itemType: {
+                            $in: [
+                                CONTENT_TYPES.BRANDINGANDDISPLAY,
+                                CONTENT_TYPES.PROMOTIONS,
+                            ],
+                        },
+                    },
+                ],
+            });
+
+            $match.$or.push({
+                assignedTo: { $in: usersArray },
+            });
+
+            pipeLine.push({ $match });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'assignedTo'
+            from: 'personnels',
+            key: 'assignedTo',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country'
+            from: 'domains',
+            key: 'country',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'region'
+            from: 'domains',
+            key: 'region',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'subRegion'
+            from: 'domains',
+            key: 'subRegion',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'branches',
-            key : 'branch',
-            addMainProjection : ['retailSegment', 'outlet']
+            from: 'branches',
+            key: 'branch',
+            addMainProjection: ['retailSegment', 'outlet'],
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'retailSegments',
-            key : 'retailSegment'
+            from: 'retailSegments',
+            key: 'retailSegment',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'outlets',
-            key : 'outlet'
+            from: 'outlets',
+            key: 'outlet',
         }));
 
         pipeLine.push({
@@ -516,54 +479,54 @@ var Personnel = function() {
                 from: 'objectives',
                 localField: 'itemId',
                 foreignField: '_id',
-                as: 'itemModel'
-            }
+                as: 'itemModel',
+            },
         });
 
         pipeLine.push({
             $unwind: {
-                path                      : '$itemModel',
-                preserveNullAndEmptyArrays: true
-            }
+                path: '$itemModel',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         pipeLine.push({
             $match: {
                 'itemModel.status': {
-                    $ne: OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT
-                }
-            }
+                    $ne: OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT,
+                },
+            },
         });
 
         pipeLine.push({
-            $group : {
-                _id : '$_id',
-                createdBy : {$first : '$createdBy'},
-                region : {$first : '$region'},
-                subRegion : {$first : '$subRegion'},
-                retailSegment : {$first : '$retailSegment'},
-                outlet : {$first : '$outlet'},
-                branch : {$first : '$branch'},
-                country : {$first : '$country'},
-                module : {$first : '$module'},
-                creationDate : {$first : '$creationDate'},
-                accessRoleLevel : {$first : '$accessRoleLevel'},
-                actionType : {$first : '$actionType'},
-                assignedTo : {$first : '$assignedTo'},
-                itemDetails : {$first : '$itemDetails'},
-                itemId : {$first : '$itemId'},
-                itemName : {$first : '$itemName'},
-                itemType : {$first : '$itemType'}
-            }
+            $group: {
+                _id: '$_id',
+                createdBy: { $first: '$createdBy' },
+                region: { $first: '$region' },
+                subRegion: { $first: '$subRegion' },
+                retailSegment: { $first: '$retailSegment' },
+                outlet: { $first: '$outlet' },
+                branch: { $first: '$branch' },
+                country: { $first: '$country' },
+                module: { $first: '$module' },
+                creationDate: { $first: '$creationDate' },
+                accessRoleLevel: { $first: '$accessRoleLevel' },
+                actionType: { $first: '$actionType' },
+                assignedTo: { $first: '$assignedTo' },
+                itemDetails: { $first: '$itemDetails' },
+                itemId: { $first: '$itemId' },
+                itemName: { $first: '$itemName' },
+                itemType: { $first: '$itemType' },
+            },
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile : isMobile,
-            searchFieldsArray : searchFieldsArray,
-            filterSearch : filterSearch,
-            skip : skip,
-            limit : limit,
-            sort : sort
+            isMobile,
+            searchFieldsArray,
+            filterSearch,
+            skip,
+            limit,
+            sort,
         }));
 
         return pipeLine;
@@ -571,14 +534,14 @@ var Personnel = function() {
 
     function getCoveredUsers(userObject, waterFallCb) {
         PersonnelModel
-            .find({'vacation.cover' : userObject._id}, {_id : 1})
+            .find({ 'vacation.cover': userObject._id }, { _id: 1 })
             .lean()
-            .exec(function(err, result) {
+            .exec((err, result) => {
                 if (err) {
                     return waterFallCb(err);
                 }
 
-                userObject.cover = _.map(result, function(el) {
+                userObject.cover = _.map(result, (el) => {
                     return el._id;
                 });
 
@@ -587,40 +550,39 @@ var Personnel = function() {
     }
 
     function getUserLocationsAndLevel(userId, waterFallCb) {
-
-        var aggregation = PersonnelModel.aggregate([
+        const aggregation = PersonnelModel.aggregate([
             {
-                $match : {_id : ObjectId(userId)}
+                $match: { _id: ObjectId(userId) },
             },
             {
-                $project : {
-                    country : 1,
-                    region : 1,
-                    subRegion : 1,
-                    branch : 1,
-                    accessRole : 1,
-                    beforeAccess : 1
-                }
+                $project: {
+                    country: 1,
+                    region: 1,
+                    subRegion: 1,
+                    branch: 1,
+                    accessRole: 1,
+                    beforeAccess: 1,
+                },
             }, {
-                $lookup : {
-                    from : 'accessRoles',
-                    localField : 'accessRole',
-                    foreignField : '_id',
-                    as : 'accessRole'
-                }
+                $lookup: {
+                    from: 'accessRoles',
+                    localField: 'accessRole',
+                    foreignField: '_id',
+                    as: 'accessRole',
+                },
             }, {
-                $project : {
-                    country : 1,
-                    region : 1,
-                    subRegion : 1,
-                    branch : 1,
-                    beforeAccess : 1,
-                    accessRoleLevel : {'$arrayElemAt' : ['$accessRole.level', 0]}
-                }
-            }
+                $project: {
+                    country: 1,
+                    region: 1,
+                    subRegion: 1,
+                    branch: 1,
+                    beforeAccess: 1,
+                    accessRoleLevel: { $arrayElemAt: ['$accessRole.level', 0] },
+                },
+            },
         ]);
 
-        aggregation.exec(function(err, result) {
+        aggregation.exec((err, result) => {
             if (err) {
                 return waterFallCb(err);
             }
@@ -636,7 +598,7 @@ var Personnel = function() {
     }
 
     function getUserInfo(userId, cb) {
-        var waterFallTasks = [];
+        const waterFallTasks = [];
 
         waterFallTasks.push(
             async.apply(getUserLocationsAndLevel, userId)
@@ -644,7 +606,7 @@ var Personnel = function() {
 
         waterFallTasks.push(getCoveredUsers);
 
-        async.waterfall(waterFallTasks, function(err, result) {
+        async.waterfall(waterFallTasks, (err, result) => {
             if (err) {
                 return cb(err);
             }
@@ -721,30 +683,30 @@ var Personnel = function() {
 
     this.getAllForSync = function(req, res, next) {
         function queryRun(personnel) {
-            var query = req.query;
-            var isMobile = req.isMobile;
-            var filterMapper = new FilterMapper();
-            var filter = query.filter || {};
-            var lastLogOut = new Date(query.lastLogOut);
-            var key;
-            var aggregation;
-            var pipeLine;
-            var sort = {
-                'createdBy.date' : -1
+            const query = req.query;
+            const isMobile = req.isMobile;
+            const filterMapper = new FilterMapper();
+            const filter = query.filter || {};
+            const lastLogOut = new Date(query.lastLogOut);
+            let key;
+            let aggregation;
+            let pipeLine;
+            const sort = {
+                'createdBy.date': -1,
             };
 
-            var queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.ACTIVITYLIST,
-                filter : filter,
-                personnel : personnel
+            let queryObject = filterMapper.mapFilter({
+                contentType: CONTENT_TYPES.ACTIVITYLIST,
+                filter,
+                personnel,
             });
 
-            var afterIteMTypeQuery = {
-                region : queryObject.region,
-                subRegion : queryObject.subRegion,
-                retailSegment : queryObject.retailSegment,
-                outlet : queryObject.outlet,
-                branch : queryObject.branch
+            const afterIteMTypeQuery = {
+                region: queryObject.region,
+                subRegion: queryObject.subRegion,
+                retailSegment: queryObject.retailSegment,
+                outlet: queryObject.outlet,
+                branch: queryObject.branch,
             };
 
             delete queryObject.region;
@@ -753,84 +715,83 @@ var Personnel = function() {
             delete queryObject.outlet;
             delete queryObject.branch;
 
-            var aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             delete queryObject.archived;
 
             // aggregateHelper.setSyncQuery(queryObject, lastLogOut);
             queryObject = {
-                'createdBy.date' : {$gte : lastLogOut}
+                'createdBy.date': { $gte: lastLogOut },
             };
 
             for (key in sort) {
-                sort[key] = parseInt(sort[key]);
+                sort[key] = parseInt(sort[key], 10);
             }
 
-            getUserInfo(req.session.uId, function(err, currentUser) {
-
+            getUserInfo(req.session.uId, (err, currentUser) => {
                 pipeLine = getAllPipelineActivity({
-                    queryObject : queryObject,
-                    aggregateHelper : aggregateHelper,
-                    sort : sort,
-                    isMobile : isMobile,
-                    currentUser : currentUser,
-                    afterIteMTypeQuery : afterIteMTypeQuery,
-                    forSync : true
+                    queryObject,
+                    aggregateHelper,
+                    sort,
+                    isMobile,
+                    currentUser,
+                    afterIteMTypeQuery,
+                    forSync: true,
                 });
 
                 aggregation = ActivityListModel.aggregate(pipeLine);
 
-                aggregation.exec(function(err, response) {
-                    var idsPersonnel = [];
-                    var options = {
-                        data : {}
+                aggregation.exec((err, response) => {
+                    let idsPersonnel = [];
+                    const options = {
+                        data: {},
                     };
                     if (err) {
                         return next(err);
                     }
                     response = response.length ? response[0] : {
-                        data : [],
-                        total : 0
+                        data: [],
+                        total: 0,
                     };
 
                     if (!response.data.length) {
                         return next({
-                            status : 200,
-                            body : response
+                            status: 200,
+                            body: response,
                         });
                     }
 
-                    _.map(response.data, function(model) {
+                    _.map(response.data, (model) => {
                         idsPersonnel.push(model.createdBy.user._id);
                     });
 
                     idsPersonnel = _.uniqBy(idsPersonnel, 'id');
                     options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
 
-                    getImagesHelper.getImages(options, function(err, result) {
-                        var fieldNames = {};
-                        var setOptions;
+                    getImagesHelper.getImages(options, (err, result) => {
+                        const fieldNames = {};
+                        let setOptions;
                         if (err) {
                             return next(err);
                         }
 
                         setOptions = {
-                            response : response,
-                            imgsObject : result
+                            response,
+                            imgsObject: result,
                         };
                         fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
                         setOptions.fields = fieldNames;
 
-                        getImagesHelper.setIntoResult(setOptions, function(response) {
-                            _.map(response.data, function(element) {
+                        getImagesHelper.setIntoResult(setOptions, (response) => {
+                            _.map(response.data, (element) => {
                                 element.module = MODULE_NAMES[element.module._id];
                             });
 
                             next({
-                                status : 200,
-                                body : response
+                                status: 200,
+                                body: response,
                             });
-                        })
+                        });
                     });
                 });
             });
@@ -842,7 +803,7 @@ var Personnel = function() {
 
             (allowed, personnel) => {
                 queryRun(personnel);
-            }
+            },
 
         ]);
     };
@@ -852,14 +813,14 @@ var Personnel = function() {
             const isMobile = req.isMobile;
             const query = req.query;
             const page = query.page || 1;
-            const limit = parseInt(query.count) || parseInt(CONSTANTS.LIST_COUNT);
+            const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
             const skip = (page - 1) * limit;
             const uid = req.session.uId;
             const filterMapper = new FilterMapper();
             const filter = query.filter || {};
             const filterSearch = filter.globalSearch || '';
             const sort = {
-                'createdBy.date' : -1
+                'createdBy.date': -1,
             };
 
             const searchFieldsArray = [
@@ -869,7 +830,7 @@ var Personnel = function() {
                 'createdBy.user.lastName.ar',
                 'module.name.ar',
                 'module.name.en',
-                'type'
+                'type',
             ];
 
             if (filter.module) {
@@ -881,23 +842,23 @@ var Personnel = function() {
             delete filter.globalSearch;
 
             const queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.ACTIVITYLIST,
-                filter : filter,
-                personnel : activity
+                contentType: CONTENT_TYPES.ACTIVITYLIST,
+                filter,
+                personnel: activity,
             });
 
-            delete  queryObject.archived;
+            delete queryObject.archived;
 
             const positionFilter = {};
 
             if (queryObject.position && queryObject.position.$in) {
-                positionFilter['createdBy.user.position'] = queryObject.position
+                positionFilter['createdBy.user.position'] = queryObject.position;
 
                 delete queryObject.position;
             }
 
-            for (let key in sort) {
-                sort[key] = parseInt(sort[key]);
+            for (const key in sort) {
+                sort[key] = parseInt(sort[key], 10);
             }
 
             async.waterfall([
@@ -916,7 +877,7 @@ var Personnel = function() {
                         sort,
                         currentUser,
                         positionFilter,
-                        isMobile
+                        isMobile,
                     });
 
                     const aggregation = ActivityListModel.aggregate(pipeLine);
@@ -925,18 +886,18 @@ var Personnel = function() {
                 },
 
                 (response, cb) => {
-                    let idsPersonnel = [];
+                    const idsPersonnel = [];
 
                     response = response.length ?
                         response[0] : {
-                            data : [],
-                            total : 0
+                            data: [],
+                            total: 0,
                         };
 
                     if (!response.data.length) {
                         return next({
-                            status : 200,
-                            body : response
+                            status: 200,
+                            body: response,
                         });
                     }
 
@@ -946,14 +907,14 @@ var Personnel = function() {
 
 
                     const options = {
-                        data : {
-                            [CONTENT_TYPES.PERSONNEL]: _.uniqBy(idsPersonnel, 'id')
-                        }
+                        data: {
+                            [CONTENT_TYPES.PERSONNEL]: _.uniqBy(idsPersonnel, 'id'),
+                        },
                     };
 
                     cb(null, {
                         response,
-                        options
+                        options,
                     });
                 },
 
@@ -961,8 +922,8 @@ var Personnel = function() {
                     getImagesHelper.getImages(data.options, (err, result) => {
                         cb(err, {
                             response: data.response,
-                            result
-                        })
+                            result,
+                        });
                     });
                 },
 
@@ -971,8 +932,8 @@ var Personnel = function() {
                         response: data.response,
                         imgsObject: data.result,
                         fields: {
-                            [CONTENT_TYPES.PERSONNEL]: ['createdBy.user']
-                        }
+                            [CONTENT_TYPES.PERSONNEL]: ['createdBy.user'],
+                        },
                     };
 
                     getImagesHelper.setIntoResult(options, (response) => {
@@ -988,7 +949,7 @@ var Personnel = function() {
                     });
 
                     cb(null, response);
-                }
+                },
 
             ], callback);
         }
@@ -999,7 +960,7 @@ var Personnel = function() {
 
             (allowed, personnel, cb) => {
                 queryRun(personnel, cb);
-            }
+            },
 
         ], (err, body) => {
             if (err) {
@@ -1008,7 +969,7 @@ var Personnel = function() {
 
             return next({
                 status: 200,
-                body
+                body,
             });
         });
     };

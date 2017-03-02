@@ -8,7 +8,6 @@ var PersonnelHandler = require('../handlers/personnel');
 
 module.exports = function () {
     var personnelHandler = new PersonnelHandler();
-    var activityListRouter = require('./mobile/activityList')();
     var brandingActivityRouter = require('./mobile/brandingActivity')();
     var brandingActivityItemsRouter = require('./mobile/brandingActivityItems')();
     var domainRouter = require('./mobile/domain')();
@@ -49,7 +48,7 @@ module.exports = function () {
     router.use(require('./../utils/setIsMobileToMiddleware'));
 
     router.use('/personnel', require('./mobile/personnel')());
-    router.use('/activityList', activityListRouter);
+    router.use('/activityList', require('../stories/activityList/router'));
     router.use('/brandingAndDisplay', require('./mobile/brandingAndDisplay'));
     router.use('/brandingActivity', brandingActivityRouter);
     router.use('/brandingActivityItems', brandingActivityItemsRouter);
