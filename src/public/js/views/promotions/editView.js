@@ -479,7 +479,8 @@ define([
                     contentType        : 'region',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 $curEl.find('#regionDd').replaceWith(self.regionDropDown.el);
                 if (!self.duplicate) {
@@ -494,7 +495,8 @@ define([
                     contentType        : 'subRegion',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 $curEl.find('#subRegionDd').replaceWith(self.subRegionDropDown.el);
                 if (!self.duplicate) {
@@ -509,7 +511,8 @@ define([
                     contentType        : 'retailSegment',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 $curEl.find('#retailSegmentDd').replaceWith(self.retailSegmentDropDown.el);
                 if (!self.duplicate) {
@@ -524,7 +527,8 @@ define([
                     contentType        : 'outlet',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 $curEl.find('#outletDd').replaceWith(self.outletDropDown.el);
                 if (!self.duplicate) {
@@ -539,7 +543,8 @@ define([
                     contentType        : 'branch',
                     multiSelect        : true,
                     noSingleSelectEvent: true,
-                    noAutoSelectOne    : true
+                    noAutoSelectOne    : true,
+                    showSelectAll      : true
                 });
                 $curEl.find('#branchDd').replaceWith(self.branchDropDown.el);
                 if (!self.duplicate) {
