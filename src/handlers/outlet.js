@@ -186,7 +186,7 @@ const OutletHandler = function () {
                 branchesOption = {
                     keyForCondition: 'outlet',
                     archived,
-                    model: BranchesModel,
+                    model: OutletModel,
                 };
 
                 if (filter.subRegions) {
