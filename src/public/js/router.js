@@ -687,7 +687,7 @@ define([
         any: function () {
             this.mainView = new mainView();
             this.changeWrapperView(this.mainView);
-            this.goToContent('country');
+            this.goToContent('activityList');
         },
 
         login: function (confirmed) {
