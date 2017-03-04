@@ -4,9 +4,9 @@ var filterHandler = require('../handlers/filters');
 var access = require('../helpers/access');
 const storePersonnelInMiddleware = require('../reusableComponents/storePersonnelInMiddleware');
 
-module.exports = function(db, app, redis) {
-    var handler = new filterHandler(db, redis);
-    var csrfProtection = app.get('csrfProtection');
+module.exports = function() {
+    var handler = new filterHandler();
+    var csrfProtection = require('./../utils/csrfProtection');
     var checkAuth = access.checkAuth;
 
     router.use(storePersonnelInMiddleware);

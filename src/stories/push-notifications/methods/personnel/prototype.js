@@ -11,16 +11,16 @@ module.exports = function * (options) {
 
         accessRoleLevel,
         body,
-        coverUsers
-        } = options;
+        coverUsers,
+    } = options;
 
     const actionOriginator = toString(options, 'actionOriginator');
 
     const getEveryAdminsInCountry = yield getEveryAdminInCountry({
-        actionOriginator
+        actionOriginator,
     });
 
-    if (coverUsers && coverUsers.length){
+    if (coverUsers && coverUsers.length) {
         _.union(getEveryAdminsInCountry, coverUsers);
     }
 
@@ -33,7 +33,7 @@ module.exports = function * (options) {
         itemId: body._id,
         itemName: {
             en: body.firstName.en + body.lastName.en,
-            ar: body.firstName.ar + body.lastName.ar
+            ar: body.firstName.ar + body.lastName.ar,
         },
         createdBy: {
             user: actionOriginator,
@@ -45,7 +45,7 @@ module.exports = function * (options) {
         subRegion: body.subRegion,
         retailSegment: body.retailSegment,
         outlet: body.outlet,
-        branch: body.branch
+        branch: body.branch,
     });
 
     const result = yield newActivity.save();
@@ -57,8 +57,9 @@ module.exports = function * (options) {
     getEveryAdminsInCountry.push(options.actionOriginator);
 
     return {
+        actionOriginator,
         payload,
-        setEveryoneInLocation : getEveryAdminsInCountry,
-        name : result.itemName
+        setEveryoneInLocation: getEveryAdminsInCountry,
+        name: result.itemName,
     };
 };

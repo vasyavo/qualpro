@@ -1,24 +1,16 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/objectives/list/list.html',
-    'text!templates/objectives/list/newRow.html',
-    'views/objectives/createView',
-    'views/objectives/createSubObjectivesView',
-    'views/objectives/editObjectiveView',
-    'views/objectives/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/otherConstants',
-    'constants/filters',
-    'dataService',
-    'constants/contentType',
-    'collections/objectives/collection'
-], function (Backbone, $, _, template, newRow, createView, CreateSubObjectivesView,
-             EditObjectiveView, PreView, filterView, paginator, OTHER_CONSTANTS, FILTER_CONSTANTS, dataService,
-             CONTENT_TYPES, ObjectiveCollection) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/objectives/list/list.html');
+    var newRow = require('text!templates/objectives/list/newRow.html');
+    var createView = require('views/objectives/createView');
+    var CreateSubObjectivesView = require('views/objectives/createSubObjectivesView');
+    var EditObjectiveView = require('views/objectives/editObjectiveView');
+    var PreView = require('views/objectives/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var dataService = require('dataService');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.OBJECTIVES,
@@ -41,6 +33,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupObjective();
 
             this.makeRender(options);
         },

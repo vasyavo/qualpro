@@ -20,8 +20,8 @@ const access = require('../helpers/access')();
 const GetImageHelper = require('../helpers/getImages');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-const QuestionnaryHandler = function (db, redis, event) {
-    const getImagesHelper = new GetImageHelper(db);
+const QuestionnaryHandler = function () {
+    const getImagesHelper = new GetImageHelper();
     const $defProjection = {
         _id: 1,
         title: 1,
@@ -1318,14 +1318,14 @@ const QuestionnaryHandler = function (db, redis, event) {
 
     this.questionnaryAnswer = function (req, res, next) {
         const session = req.session;
-        const userId = session.userId;
+        const userId = session.uId;
         const accessRoleLevel = session.level;
 
         function queryRun(data) {
             const personnelId = ObjectId(req.session.uId);
             const createdBy = {
                 user: personnelId,
-                date: new Date()
+                date: new Date(),
             };
 
             let questionnaryId;
@@ -1333,29 +1333,39 @@ const QuestionnaryHandler = function (db, redis, event) {
             try {
                 questionnaryId = data[0].questionnaryId;
             } catch (e) {
-                let error = new Error('questionnaryId is required');
+                const error = new Error('questionnaryId is required');
+
                 error.status = 400;
-                return next(error)
+                return next(error);
             }
 
-            async.each(data, (item, cb) =>{
-                const options = {
-                    data: item,
-                    createdBy: createdBy,
-                    personnelId: personnelId
-                };
+            async.each(data, (item, eachCb) => {
+                async.waterfall([
 
-                createOrUpdateQuestionnaryAnswer(options, cb)
+                    (cb) => {
+                        const options = {
+                            data: item,
+                            createdBy,
+                            personnelId,
+                        };
+
+                        createOrUpdateQuestionnaryAnswer(options, cb);
+                    },
+
+                    (cb) => {
+                        sendEventThatAnswerIsPublished({
+                            actionOriginator: userId,
+                            accessRoleLevel,
+                            questionnaireId: item.questionnaryId,
+                        });
+                        cb();
+                    },
+
+                ], eachCb);
             }, (err) => {
                 if (err) {
                     return next(err);
                 }
-
-                sendEventThatAnswerIsPublished({
-                    actionOriginator: userId,
-                    accessRoleLevel,
-                    questionnaryId: data.questionnaryId,
-                });
 
                 res.status(200).send({});
             });

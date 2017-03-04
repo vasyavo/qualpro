@@ -1,14 +1,11 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/achievementForm/list/list.html',
-    'views/achievementForm/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/contentType'
-], function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/achievementForm/list/list.html');
+    var PreView = require('views/achievementForm/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.ACHIEVEMENTFORM,
@@ -28,6 +25,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupAchievementForm();
 
             this.makeRender(options);
         },

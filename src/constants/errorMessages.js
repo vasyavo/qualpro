@@ -23,6 +23,7 @@ module.exports = {
     FORBIDDEN_LOGIN_FROM_APP      : 'forbidden_login_from_app',
     USER_LOCATION_IS_NOT_SPECIFIED: 'user_location_is_not_specified',
     USER_NOT_FOUND                : 'user_not_found',
+    USERS_WITH_SAME_LOGIN         : 'users_with_same_login',
     EMAIL_IS_NOT_VALID            : 'email_is_not_valid',
     INCORRECT_VERIFICATION_CODE   : 'incorrect_verification_code',
     INCORRECT_USERNAME_OR_PASSWORD: 'incorrect_username_or_password',

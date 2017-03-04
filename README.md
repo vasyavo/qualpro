@@ -90,6 +90,8 @@ Ask credentials in your administrator.
  - `UPLOADER_TYPE` - Currently available only with AmazonS3.
  - `SCHEDULER_HOST`
  - `WEB_CONCURRENCY` - defaults to `1`.
+ - `SESSION_AGE` - Session age, defaults to `86400000` (1 day).
+ - `SESSION_MAX_AGE` - Max session age, defaults to `3153600000` (1 year).
 
 ##### Twilio:
  - `SMS_ACCOUNT_SID`

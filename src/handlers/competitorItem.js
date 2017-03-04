@@ -1,7 +1,7 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const logger = require('./../utils/logger');
 
-var CompetitorItem = function (db, redis, event) {
+var CompetitorItem = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('underscore');
@@ -9,7 +9,7 @@ var CompetitorItem = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var CompetitorItem = require('./../types/competitorItem/model');
@@ -839,7 +839,11 @@ var CompetitorItem = function (db, redis, event) {
                 (done, cb) => {
                     callback();
 
-                    CompetitorItem.find({ _id: setIdToArchive }).lean().exec(cb);
+                    CompetitorItem.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -853,12 +857,7 @@ var CompetitorItem = function (db, redis, event) {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([

@@ -17,6 +17,7 @@ module.exports = (options) => {
         });
 
         const {
+            actionOriginator,
             payload,
             setHighPriority,
             setOriginator,
@@ -60,6 +61,9 @@ module.exports = (options) => {
             payload,
         }];
 
-        yield dispatch(groups);
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };

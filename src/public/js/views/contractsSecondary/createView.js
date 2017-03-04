@@ -236,6 +236,7 @@ define([
 
             this.newDocumentView = new NewDocView({
                 contract   : true,
+                collection: this.files,
                 translation: this.translation
             });
 

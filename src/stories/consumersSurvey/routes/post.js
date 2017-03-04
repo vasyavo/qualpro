@@ -1,25 +1,22 @@
 const async = require('async');
-const _ = require('underscore');
-const event = require('../../../utils/eventEmitter');
-const AggregationHelper = require('../../../helpers/aggregationCreater');
+const _ = require('lodash');
 const ConsumersSurveyModel = require('../../../types/consumersSurvey/model');
 const bodyValidator = require('../../../helpers/bodyValidator');
 const access = require('../../../helpers/access')();
 const ACL_MODULES = require('../../../constants/aclModulesNames');
 const getByIdAggr = require('../reusable-components/getByIdAggr');
-const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
-const ACTIVITY_TYPES = require('../../../constants/activityTypes');
+const CONTENT_TYPES = require('../../../public/js/constants/contentType');
 const SchedulerModel = require('./../../scheduler/model');
 const requestService = require('../../scheduler/request');
-const config = require('../../../config');
 const ActivityLog = require('./../../push-notifications/activityLog');
+const extractBody = require('./../../../utils/extractBody');
 
 module.exports = (req, res, next) => {
     const session = req.session;
     const userId = session.uId;
     const accessRoleLevel = session.level;
 
-    function queryRun(body) {
+    const queryRun = (body, callback) => {
         async.waterfall([
 
             (cb) => {
@@ -36,96 +33,84 @@ module.exports = (req, res, next) => {
                 }
 
                 if (body.questions && body.questions.length) {
-                    body.questions = _.map(body.questions, (question) => {
-                        if (question.title) {
-                            question.title = {
-                                en: _.escape(question.title.en),
-                                ar: _.escape(question.title.ar),
-                            };
-                        }
-
-                        if (question.type === 'NPS') {
-                            const options = [];
-
-                            for (let i = 1; i <= 10; i++) {
-                                options.push({
-                                    en: i,
-                                    ar: i,
-                                });
+                    body.questions = body.questions
+                        .filter(question => question)
+                        .map(question => {
+                            if (question.title) {
+                                question.title = {
+                                    en: _.escape(question.title.en),
+                                    ar: _.escape(question.title.ar),
+                                };
                             }
 
-                            question.options = options;
-                        }
+                            if (question.type === 'NPS') {
+                                const options = [];
 
-                        if (question.options && question.options.length) {
-                            question.options = _.map(question.options, (option) => {
-                                if (option) {
-                                    return {
+                                for (let i = 1; i <= 10; i++) {
+                                    options.push({
+                                        en: i,
+                                        ar: i,
+                                    });
+                                }
+
+                                question.options = options;
+                            }
+
+                            if (question.options && question.options.length) {
+                                question.options = question.options
+                                    .filter(option => option)
+                                    .map(option => ({
                                         en: _.escape(option.en),
                                         ar: _.escape(option.ar),
-                                    };
-                                }
-                            });
-                        }
-                        return question;
-                    });
+                                    }));
+                            }
+                            return question;
+                        });
                 }
 
-                body.status = 'draft';
+                body.status = body.send ? 'active' : 'draft';
                 body.dueDate = new Date(body.dueDate);
                 body.startDate = new Date(body.startDate);
                 body.createdBy = createdBy;
                 body.editedBy = createdBy;
 
-                if (body.send) {
-                    body.status = 'active';
-                }
+                const survey = new ConsumersSurveyModel();
 
-                ConsumersSurveyModel.create(body, (err, survey) => {
+                survey.set(body);
+                survey.save((err, survey) => {
                     cb(err, survey);
                 });
             },
 
             (survey, cb) => {
+                const eventPayload = {
+                    actionOriginator: userId,
+                    accessRoleLevel,
+                    body: survey.toJSON(),
+                };
+
                 if (body.status === 'draft') {
+                    ActivityLog.emit('marketing:consumer-survey:draft-created', eventPayload);
+                } else {
+                    ActivityLog.emit('marketing:consumer-survey:published', eventPayload);
+
                     requestService.post({
                         json: {
-                            date: body.startDate,
+                            date: body.dueDate,
                         },
                     }, (err, response) => {
                         if (!err) {
                             const taskSchedulerModel = new SchedulerModel();
+
                             taskSchedulerModel.set({
                                 scheduleId: response.id,
                                 documentId: survey._id,
-                                functionName: 'setConsumerSurveyStatusActive',
+                                functionName: 'setConsumerSurveyStatusCompleted',
                             });
                             taskSchedulerModel.save();
                         }
                     });
-                } else {
-                    ActivityLog.emit('marketing:consumer-survey:published', {
-                        actionOriginator: userId,
-                        accessRoleLevel,
-                        body: survey.toJSON(),
-                    });
                 }
-
-                requestService.post({
-                    json: {
-                        date: body.dueDate,
-                    },
-                }, (err, response) => {
-                    if (!err) {
-                        const taskSchedulerModel = new SchedulerModel();
-                        taskSchedulerModel.set({
-                            scheduleId: response.id,
-                            documentId: survey._id,
-                            functionName: 'setConsumerSurveyStatusCompleted',
-                        });
-                        taskSchedulerModel.save();
-                    }
-                });
 
                 cb(null, survey._id);
             },
@@ -134,42 +119,31 @@ module.exports = (req, res, next) => {
                 getByIdAggr({ id }, cb);
             },
 
-        ], (err, result) => {
-            if (err) {
-                return next(err);
-            }
+        ], callback);
+    };
 
-            next({
-                status: 200,
-                body: result,
-            });
-        });
-    }
+    async.waterfall([
 
-    access.getWriteAccess(req, ACL_MODULES.CONSUMER_SURVEY, function (err) {
+        (cb) => {
+            access.getWriteAccess(req, ACL_MODULES.CONSUMER_SURVEY, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            const body = extractBody(req.body);
+
+            bodyValidator.validateBody(body, accessRoleLevel, CONTENT_TYPES.CONSUMER_SURVEY, 'create', cb);
+        },
+
+        queryRun,
+
+    ], (err, result) => {
         if (err) {
             return next(err);
         }
 
-        let body;
-
-        try {
-            if (req.body.data) {
-                body = JSON.parse(req.body.data);
-            } else {
-                body = req.body;
-            }
-        } catch (err) {
-            return next(err);
-        }
-
-        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.CONSUMER_SURVEY, 'create', function (err, saveData) {
-            if (err) {
-                return next(err);
-            }
-
-            queryRun(saveData);
+        next({
+            status: 200,
+            body: result,
         });
     });
-
 };

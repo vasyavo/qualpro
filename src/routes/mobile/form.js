@@ -12,9 +12,9 @@ var VisibilityFormHandler = require('../../handlers/visibilityForm');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
-module.exports = function (db, redis, event) {
-    var distributionFormHandler = new DistributionFormHandler(db, redis, event);
-    var visibilityFormHandler = new VisibilityFormHandler(db, redis, event);
+module.exports = function () {
+    var distributionFormHandler = new DistributionFormHandler();
+    var visibilityFormHandler = new VisibilityFormHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

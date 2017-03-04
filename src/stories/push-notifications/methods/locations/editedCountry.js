@@ -9,22 +9,23 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.COUNTRY;
         const contentType = contentTypes.COUNTRY;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.UPDATED;
 
         const extendedOptions = Object.assign({}, options, {
             moduleId,
             contentType,
             actionType,
-            location : {
-                setCountry : [options.body._id]
-            }
+            location: {
+                setCountry: [options.body._id],
+            },
         });
 
         const {
+            actionOriginator,
             payload,
             setEveryoneInLocation,
             name,
-            } = yield prototype(extendedOptions);
+        } = yield prototype(extendedOptions);
 
         const groups = [{
             recipients: setEveryoneInLocation,
@@ -35,6 +36,9 @@ module.exports = (options) => {
             payload,
         }];
 
-        yield dispatch(groups);
+        yield dispatch(groups, {
+            actionOriginator,
+            moduleId,
+        });
     });
 };

@@ -2,8 +2,9 @@ const extractBody = require('./../utils/extractBody');
 const ObjectiveModel = require('./../types/objective/model');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const logger = require('./../utils/logger');
+const redis = require('./../helpers/redisClient');
 
-var DistributionForm = function (db, redis, event) {
+var DistributionForm = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var CONSTANTS = require('../constants/mainConstants');
@@ -17,7 +18,7 @@ var DistributionForm = function (db, redis, event) {
     var xssFilters = require('xss-filters');
     var objectId = mongoose.Types.ObjectId;
     var bodyValidator = require('../helpers/bodyValidator');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var self = this;
 
     this.createForm = function (userId, body, callback) {

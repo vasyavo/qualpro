@@ -5,10 +5,9 @@ var access = require('../helpers/access');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
-module.exports = function (db, redis, event) {
-    'use strict';
+module.exports = function () {
 
-    var handler = new ContractHandler(db, redis, event);
+    var handler = new ContractHandler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);
@@ -16,8 +15,6 @@ module.exports = function (db, redis, event) {
     router.post('/', multipartMiddleware, handler.create);
     router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, handler.update);
     router.patch('/:id([0-9a-fA-F]{24})', handler.update);
-
-    //router.put('/remove', handler.archive);
 
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 

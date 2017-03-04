@@ -1,17 +1,15 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/shelfShares/brandPreview',
-    'text!templates/shelfShares/list/list.html',
-    'text!templates/shelfShares/list/categories.html',
-    'text!templates/shelfShares/list/header.html',
-    'text!templates/shelfShares/list/body.html',
-    'constants/contentType',
-    'dataService'
-], function (Backbone, $, _, paginator, BrandPreview, template, CategoriesTemplate, HeaderTemplate, BodyTemplate, contentTypes, dataService) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var BrandPreview = require('views/shelfShares/brandPreview');
+    var template = require('text!templates/shelfShares/list/list.html');
+    var CategoriesTemplate = require('text!templates/shelfShares/list/categories.html');
+    var HeaderTemplate = require('text!templates/shelfShares/list/header.html');
+    var BodyTemplate = require('text!templates/shelfShares/list/body.html');
+    var contentTypes = require('constants/contentType');
+    var dataService = require('dataService');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         el         : '#contentHolder',
@@ -36,6 +34,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupShelfShares();
 
             this.makeRender(options);
         },

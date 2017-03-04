@@ -1,20 +1,18 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/itemsPrices/list/header.html',
-    'views/itemsPrices/createView',
-    'views/itemsPrices/list/listItemsView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'collections/itemsPrices/collection',
-    'constants/validation',
-    'constants/personnelStatuses',
-    'dataService',
-    'async',
-    'constants/errorMessages'
-], function (Backbone, $, _, headerTemplate, createView, ListItemsView,
-             filterView, paginator, contentCollection, REGEXP, STATUSES, dataService, async, ERROR_MESSAGES) {
+define(function(require) {
+    var async = require('async');
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var headerTemplate = require('text!templates/itemsPrices/list/header.html');
+    var createView = require('views/itemsPrices/createView');
+    var ListItemsView = require('views/itemsPrices/list/listItemsView');
+    var paginator = require('views/paginator');
+    var contentCollection = require('collections/itemsPrices/collection');
+    var REGEXP = require('constants/validation');
+    var STATUSES = require('constants/personnelStatuses');
+    var dataService = require('dataService');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var BadgeStore = require('services/badgeStore');
+
     var View = paginator.extend({
         contentType: 'itemsPrices',
         viewType   : 'list',
@@ -40,6 +38,8 @@ define([
             this.listLength = this.collection.totalRecords;
             this.page = options.collection.page;
             this.singleSelect = options.singleSelect;
+
+            BadgeStore.cleanupItemAndPrices();
 
             this.makeRender(options);
             this.inputEvent = _.debounce(

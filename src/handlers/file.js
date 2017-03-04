@@ -11,6 +11,7 @@ const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
 const FileModel = require('./../types/file/model');
 const NEED_PROCESSING_TYPES = _.union(OTHER_CONSTANTS.IMAGE_CONTENT_TYPES, OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, OTHER_CONSTANTS.OTHER_FORMATS);
 const ObjectId = mongoose.Types.ObjectId;
+const mime = require('mime');
 
 module.exports = function() {
     var fileUploaderConfig;
@@ -243,12 +244,15 @@ module.exports = function() {
         }
 
         async.each(series, (file, eachCb) => {
+            const fileType = mime.lookup(file.path);
+            const extension = mime.extension(fileType);
+
             const fileOptions = {
-                type            : file.type,
-                extension       : file.originalFilename.substr(file.originalFilename.lastIndexOf('.') + 1),
+                type: fileType,
+                extension,
                 originalFilename: file.originalFilename,
-                tempPath        : file.path,
-                name            : createFileName()
+                tempPath: file.path,
+                name: createFileName(),
             };
             let newFile;
 

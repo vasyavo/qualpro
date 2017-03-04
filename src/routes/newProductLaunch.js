@@ -8,9 +8,9 @@ const access = require('../helpers/access');
 const ACL_MODULES = require('./../constants/aclModulesNames');
 
 
-module.exports = function (db, redis, event) {
-    const handler = new NewProductLaunch(db, redis, event);
-    const access = require('./../helpers/access')(db);
+module.exports = function () {
+    const handler = new NewProductLaunch();
+    const access = require('./../helpers/access')();
     const checkAuth = require('./../helpers/access').checkAuth;
 
     router.use(checkAuth);

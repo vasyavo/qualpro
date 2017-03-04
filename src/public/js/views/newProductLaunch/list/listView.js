@@ -1,14 +1,11 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'text!templates/newProductLaunch/list/list.html',
-    'views/newProductLaunch/preView/preView',
-    'views/filter/filtersBarView',
-    'views/paginator',
-    'constants/contentType'
-], function (Backbone, $, _, template, PreView, filterView, paginator, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var template = require('text!templates/newProductLaunch/list/list.html');
+    var PreView = require('views/newProductLaunch/preView/preView');
+    var paginator = require('views/paginator');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
@@ -28,6 +25,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupNewProductLaunch();
 
             this.makeRender(options);
         },

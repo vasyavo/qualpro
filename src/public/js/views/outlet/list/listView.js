@@ -1,19 +1,14 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/outlet/list/listItemsView',
-    'views/domain/preView/preView',
-    'views/domain/createView',
-    'views/domain/editView',
-    'text!templates/outlet/list/listHeader.html',
-    'text!templates/domain/newRow.html'
-],
-
-function (Backbone, $, _, paginator, ListItemsView, PreView,
-          CreateView, EditView, headerTemplate, newRow) {
-    'use strict';
+define(function (require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var ListItemsView = require('views/outlet/list/listItemsView');
+    var PreView = require('views/domain/preView/preView');
+    var CreateView = require('views/domain/createView');
+    var EditView = require('views/domain/editView');
+    var headerTemplate = require('text!templates/outlet/list/listHeader.html');
+    var newRow = require('text!templates/domain/newRow.html');
+    var BadgeStore = require('serices/badgeStore');
 
     var View = paginator.extend({
         el         : '#contentHolder',
@@ -42,9 +37,9 @@ function (Backbone, $, _, paginator, ListItemsView, PreView,
 
             options.contentType = this.contentType;
 
-            this.makeRender(options);
+            BadgeStore.cleanupCustomer();
 
-            //this.render();
+            this.makeRender(options);
         },
 
         listRowClick: function (e) {

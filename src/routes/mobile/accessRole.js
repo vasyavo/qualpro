@@ -8,8 +8,8 @@ var access = require('../../helpers/access');
 
 var Handler = require('../../handlers/accessRole');
 
-module.exports = function (db, redis) {
-    var handler = new Handler(db, redis);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

@@ -1,4 +1,4 @@
-var BranchHandler = function (db, redis, event) {
+var BranchHandler = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var _ = require('underscore');
@@ -7,7 +7,7 @@ var BranchHandler = function (db, redis, event) {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var BrandModel = require('./../types/brand/model');
     var CompetitorItemModel = require('./../types/competitorItem/model');
     var CompetitorVariantModel = require('./../types/competitorVariant/model');
@@ -47,14 +47,6 @@ var BranchHandler = function (db, redis, event) {
                 if (error) {
                     return next(error);
                 }
-
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.COMPETITOR_LIST,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : createdBy,
-                    itemId    : model._id,
-                    itemType  : CONTENT_TYPES.BRAND
-                });
 
                 res.status(201).send(model);
 
@@ -125,22 +117,6 @@ var BranchHandler = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-
-                async.eachSeries(idsToArchive, function (item, callback) {
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.COMPETITOR_LIST,
-                        actionType: type,
-                        createdBy : editedBy,
-                        itemId    : item,
-                        itemType  : CONTENT_TYPES.BRAND
-                    });
-                    callback();
-
-                }, function (err) {
-                    if (err) {
-                        logWriter.log('brand archived', err);
-                    }
-                });
 
                 res.status(200).send();
             });
@@ -385,13 +361,6 @@ var BranchHandler = function (db, redis, event) {
                     if (err) {
                         return next(err);
                     }
-                    event.emit('activityChange', {
-                        module    : ACL_MODULES.COMPETITOR_LIST,
-                        actionType: ACTIVITY_TYPES.UPDATED,
-                        createdBy : body.editedBy,
-                        itemId    : id,
-                        itemType  : CONTENT_TYPES.BRAND
-                    });
 
                     res.status(200).send(result);
                 });

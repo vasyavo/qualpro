@@ -3,12 +3,12 @@ const async = require('async');
 const passwordGenerator = require('generate-password');
 
 const generatePassword = () => {
-   return passwordGenerator.generate({
-       length: 10,
-       numbers: true,
-       uppercase : true,
-       strict: true
-   });
+    return passwordGenerator.generate({
+        length: 6,
+        numbers: true,
+        uppercase: true,
+        strict: true,
+    });
 };
 
 const encryptPasswordSync = (password) => {
@@ -23,7 +23,7 @@ const encryptPassword = (password, callback) => {
 
         async.apply(bcrypt.genSalt, 10),
 
-        async.apply(bcrypt.hash, password)
+        async.apply(bcrypt.hash, password),
 
     ], callback);
 };
@@ -31,5 +31,5 @@ const encryptPassword = (password, callback) => {
 module.exports = {
     generatePassword,
     encryptPasswordSync,
-    encryptPassword
+    encryptPassword,
 };

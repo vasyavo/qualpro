@@ -209,7 +209,13 @@ define([
 
             ids.forEach(function (id) {
                 var model = self.collection.get(id);
-                var name = model.get('name');
+                var name;
+
+                if (!model) {
+                    return false;
+                }
+
+                name = model.get('name');
 
                 model.set({selected: true});
                 if (options.auto) {

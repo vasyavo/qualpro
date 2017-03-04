@@ -2,8 +2,9 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const ObjectiveModel = require('./../types/objective/model');
 const SchedulerModel = require('./../stories/scheduler/model');
 const SchedulerRequest = require('./../stories/scheduler/request');
+const redis = require('./../helpers/redisClient');
 
-var VisibilityForm = function (db, redis, event) {
+var VisibilityForm = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('lodash');
@@ -15,10 +16,10 @@ var VisibilityForm = function (db, redis, event) {
     var AggregationHelper = require('../helpers/aggregationCreater');
     var VisibilityFormModel = require('./../types/visibilityForm/model');
     var objectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var FileHandler = require('../handlers/file');
     var validator = require('validator');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var bodyValidator = require('../helpers/bodyValidator');
     var errorSender = require('../utils/errorSender');
     var self = this;
@@ -70,14 +71,6 @@ var VisibilityForm = function (db, redis, event) {
                 if (err) {
                     return next(err);
                 }
-
-                event.emit('activityChange', {
-                    module    : ACL_MODULES.VISIBILITY_FORM,
-                    actionType: ACTIVITY_TYPES.CREATED,
-                    createdBy : result.get('createdBy'),
-                    itemId    : result._id,
-                    itemType  : CONTENT_TYPES.VISIBILITYFORM
-                });
 
                 if (req.isMobile) {
                     VisibilityFormModel.populate(result, {

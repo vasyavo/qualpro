@@ -1,12 +1,12 @@
 'use strict';
 
-var ItemHistory = function (db, event) {
+var ItemHistory = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONSTANTS = require('../constants/mainConstants');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var ItemHistoryModel = require('./../types/itemHistory/model');
     var ItemModel = require('./../types/item/model');
     var _ = require('underscore');

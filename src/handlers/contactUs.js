@@ -1,18 +1,18 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 
-var ContactUs = function(db, redis, event) {
+var ContactUs = function() {
     var async = require('async');
     var _ = require('lodash');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var mongoose = require('mongoose');
     var ObjectId = mongoose.Types.ObjectId;
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var ContactUsModel = require('./../types/contactUs/model');
     var CountryModel = require('./../types/origin/model');
     var FileModel = require('./../types/file/model');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var joiValidate = require('../helpers/joiValidate');
     var AggregationHelper = require('../helpers/aggregationCreater');
 

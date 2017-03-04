@@ -18,7 +18,7 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 const archiver = new Archiver(ItemModel);
 const objectId = mongoose.Types.ObjectId;
 
-const Item = function (db, event) {
+const Item = function () {
     const self = this;
 
     var $defProjection = {
@@ -242,7 +242,7 @@ const Item = function (db, event) {
                     return next(error);
                 }
 
-                ActivityLog.emit('items-and-prices:item-created', {
+                ActivityLog.emit('items-and-prices:item-published', {
                     actionOriginator: userId,
                     accessRoleLevel,
                     body: model.toJSON(),
@@ -1143,7 +1143,11 @@ const Item = function (db, event) {
                 (done, cb) => {
                     callback();
 
-                    ItemModel.find({ _id: setIdToArchive }).lean().exec(cb);
+                    ItemModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -1157,12 +1161,7 @@ const Item = function (db, event) {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([

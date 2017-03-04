@@ -6,7 +6,6 @@ const getAwsLinks = require('./../reusableComponents/getAwsLinkForAttachmentsFro
 const ACL_MODULES = require('./../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../public/js/constants/contentType');
 const CONSTANTS = require('./../constants/mainConstants');
-const ACTIVITY_TYPES = require('./../constants/activityTypes');
 const AggregationHelper = require('./../helpers/aggregationCreater');
 const GetImageHelper = require('./../helpers/getImages');
 const FilterMapper = require('./../helpers/filterMapper');
@@ -15,15 +14,16 @@ const AccessManager = require('./../helpers/access')();
 const bodyValidator = require('./../helpers/bodyValidator');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
+const redis = require('./../helpers/redisClient');
 
 const getImagesHelper = new GetImageHelper();
 const ObjectId = mongoose.Types.ObjectId;
 
-const Notifications = function (db, redis, event) {
+const Notifications = function () {
 
     const self = this;
 
-    const fileHandler = new FileHandler(db);
+    const fileHandler = new FileHandler();
 
     let $defProjection = {
         _id          : 1,
@@ -87,10 +87,6 @@ const Notifications = function (db, redis, event) {
                 if (indexToDelete !== -1) {
                     personnelIds.splice(indexToDelete, 1);
                 }
-                event.emit('notificationChange', {
-                    itemKey: 'notificationCount',
-                    itemIds: personnelIds
-                });
                 return callback(null, notificationObject);
             });
     }
@@ -444,6 +440,7 @@ const Notifications = function (db, redis, event) {
                 filterSearch   : filterSearch,
                 isMobile       : isMobile,
                 withAttachments: true,
+                personnelId    : personnel._id,
                 forSync        : true
             });
 

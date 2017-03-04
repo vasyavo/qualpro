@@ -39,7 +39,14 @@ const schema = Schema({
 
 schema.pre('save', updateArraysInRetSegmentAndOutlet);
 
-schema.index({ name: 1, outlet: 1, retailSegment: 1, subRegion: 1 }, { unique: true });
+schema.index({
+    name: 1,
+    outlet: 1,
+    retailSegment: 1,
+    subRegion: 1,
+}, {
+    unique: true,
+});
 
 function updateArraysInRetSegmentAndOutlet(next) {
     //todo check if it fires on update. If yes, check next properties

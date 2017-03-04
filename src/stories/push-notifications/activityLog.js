@@ -38,24 +38,32 @@ activityLog.on('personnel:assigned', require('./methods/personnel/assigned'));
 activityLog.on('personnel:bi-yearly', require('./methods/personnel/evaluatedYearly'));
 activityLog.on('personnel:monthly', require('./methods/personnel/evaluated'));
 activityLog.on('personnel:archived', require('./methods/personnel/archived'));
+activityLog.on('personnel:unarchived', require('./methods/personnel/unarchived'));
 
 activityLog.on('country:created', require('./methods/locations/createdCountry'));
 activityLog.on('country:updated', require('./methods/locations/editedCountry'));
+activityLog.on('country:archived', require('./methods/locations/removedCountry'));
+
 activityLog.on('region:created', require('./methods/locations/createdRegion'));
 activityLog.on('region:updated', require('./methods/locations/editedRegion'));
+activityLog.on('region:archived', require('./methods/locations/removedRegion'));
+
 activityLog.on('sub-region:created', require('./methods/locations/createdSubRegion'));
 activityLog.on('sub-region:updated', require('./methods/locations/editedSubRegion'));
-activityLog.on('branch:created', require('./methods/locations/createdBranch'));
-activityLog.on('branch:edited', require('./methods/locations/editedBranch'));
-activityLog.on('trade-channel:created', require('./methods/locations/createdTradeChannel'));
-activityLog.on('trade-channel:edited', require('./methods/locations/editedTradeChannel'));
-activityLog.on('branch:removed', require('./methods/locations/removedBranch'));
-activityLog.on('customer:created', require('./methods/locations/createdCustomer'));
-activityLog.on('customer:edited', require('./methods/locations/editedCustomer'));
+activityLog.on('sub-region:archived', require('./methods/locations/removedSubRegion'));
 
-activityLog.on('sub-region:removed', require('./methods/locations/removedSubRegion'));
-activityLog.on('trade-channel:removed', require('./methods/locations/removedRegion'));
-activityLog.on('country:removed', require('./methods/locations/removedCountry'));
+activityLog.on('branch:created', require('./methods/locations/createdBranch'));
+activityLog.on('branch:updated', require('./methods/locations/editedBranch'));
+activityLog.on('branch:archived', require('./methods/locations/removedBranch'));
+
+activityLog.on('trade-channel:created', require('./methods/locations/createdTradeChannel'));
+activityLog.on('trade-channel:updated', require('./methods/locations/editedTradeChannel'));
+activityLog.on('trade-channel:archived', require('./methods/locations/removedTradeChannel'));
+
+activityLog.on('customer:created', require('./methods/locations/createdCustomer'));
+activityLog.on('customer:updated', require('./methods/locations/editedCustomer'));
+activityLog.on('customer:archived', require('./methods/locations/removedCustomer'));
+
 
 activityLog.on('reporting:price-survey:published', require('./methods/reporting/price-survey/published'));
 activityLog.on('reporting:shelf-share:published', require('./methods/reporting/shelf-share/published'));
@@ -63,6 +71,7 @@ activityLog.on('reporting:competitor-branding-and-display-report:published', req
 activityLog.on('reporting:competitor-branding-and-display-report:expired', require('./methods/reporting/competitor-branding-and-display-report/expired'));
 activityLog.on('reporting:competitor-promotion-activities:published', require('./methods/reporting/competitor-promotion-activities/published'));
 activityLog.on('reporting:competitor-promotion-activities:expired', require('./methods/reporting/competitor-promotion-activities/expired'));
+activityLog.on('reporting:competitor-promotion-activities:comment-added', require('./methods/reporting/competitor-promotion-activities/commentAdded'));
 activityLog.on('reporting:new-product-launch:published', require('./methods/reporting/new-product-launch/published'));
 activityLog.on('reporting:achievement-form:published', require('./methods/reporting/achievement-form/published'));
 
@@ -73,7 +82,7 @@ activityLog.on('reporting:al-alali-promo-evaluation:expired', require('./methods
 activityLog.on('reporting:al-alali-promo-evaluation:item-published', require('./methods/reporting/al-alali-promo-evaluation/itemPublished'));
 activityLog.on('reporting:al-alali-promo-evaluation:item-expired', require('./methods/reporting/al-alali-promo-evaluation/itemExpired'));
 
-activityLog.on('marketing:al-alali-branding-and-display-report:published', require('./methods/marketing/al-alali-branding-and-display-report/published'));
+activityLog.on('marketing:al-alali-branding-and-monthly-display:published', require('./methods/marketing/al-alali-branding-and-monthly-display/published'));
 
 activityLog.on('marketing:al-alali-marketing-campaigns:draft-created', require('./methods/marketing/al-alali-marketing-campaigns/draftCreated'));
 activityLog.on('marketing:al-alali-marketing-campaigns:published', require('./methods/marketing/al-alali-marketing-campaigns/published'));

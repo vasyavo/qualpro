@@ -59,6 +59,7 @@ define([
         sendNotification: function (cb) {
             var self = this;
             var $curEl = this.$el;
+            var errors;
 
             var recipientsCountry = $curEl.find('#countryDd').attr('data-id');
 
@@ -94,8 +95,14 @@ define([
 
             this.model.setFieldsNames(this.translation);
 
-            self.$el.find('#mainForm').submit();
-            cb();
+            errors = this.model.validate(this.body);
+
+            if (errors && errors.length) {
+                App.renderErrors(errors);
+            } else {
+                self.$el.find('#mainForm').submit();
+                cb();
+            }
         },
 
         formSubmit: function (e) {

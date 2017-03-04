@@ -1,18 +1,19 @@
 const RetailSegmentModel = require('./../types/retailSegment/model');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const logger = require('./../utils/logger');
+const extractBody = require('./../utils/extractBody');
 
-var planogramsHandler = function(db, redis, event) {
+var planogramsHandler = function() {
     var async = require('async');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
+    var fileHandler = new FileHandler();
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var _ = require('lodash');
     var PlanogramModel = require('./../types/planogram/model');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var logWriter = require('../helpers/logWriter.js');
     var FilterMapper = require('../helpers/filterMapper');
@@ -21,7 +22,7 @@ var planogramsHandler = function(db, redis, event) {
     var populateByType = require('../helpers/populateByType');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var bodyValidator = require('../helpers/bodyValidator');
     var ObjectId = mongoose.Types.ObjectId;
     var self = this;
@@ -38,13 +39,13 @@ var planogramsHandler = function(db, redis, event) {
         displayType : 1
     };
 
-    this.create = function(req, res, next) {
+    this.create = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
 
-        function queryRun(body, callback) {
-            const files = req.files ? req.files : null;
+        const queryRun = (body, callback) => {
+            const files = req.files;
             const configurationId = body.configuration;
 
             async.waterfall([
@@ -55,114 +56,98 @@ var planogramsHandler = function(db, redis, event) {
                 },
 
                 // pick configuraiton name from result set and upload attached picture
-                function(retailSegment, cb) {
-                    const configurationName = retailSegment.configurations.filter((item) => {
-                        return `${item._id}` === configurationId;
-                    }).map((item) => {
-                        return item.configuration;
-                    }).pop();
+                (retailSegment, cb) => {
+                    async.parallel({
 
-                    if (!configurationName) {
-                        return cb('No such configuration found.');
-                    }
+                        configurationName: (cb) => {
+                            const configurationName = retailSegment.configurations.filter((item) => {
+                                return `${item._id}` === configurationId;
+                            }).map((item) => {
+                                return item.configuration;
+                            }).pop();
 
-                    if (!files) {
-                        return cb(null, []);
-                    }
+                            if (!configurationName) {
+                                return cb('No such configuration found.');
+                            }
 
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, (err, fileId) => {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, {
-                            fileId: fileId.pop(),
-                            configurationName
-                        });
-                    });
+                            cb(null, configurationName);
+                        },
+
+                        setFileId: (cb) => {
+                            fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, cb);
+                        },
+
+                    }, cb);
                 },
-                function(options, cb) {
-                    const configurationName = options.configurationName;
-                    const fileId = options.fileId;
+
+                (options, cb) => {
+                    const {
+                        configurationName,
+                        setFileId,
+                    } = options;
+                    const fileId = setFileId.slice().pop();
                     const createdBy = {
-                        user : ObjectId(userId),
-                        date : new Date()
+                        user: ObjectId(userId),
+                        date: new Date(),
                     };
 
                     const dataToSave = Object.assign({}, body, {
-                        fileID: fileId,
                         configuration: {
-                            _id : configurationId,
-                            name : configurationName
+                            _id: configurationId,
+                            name: configurationName,
                         },
                         createdBy,
-                        editedBy: createdBy
+                        editedBy: createdBy,
                     });
 
-                    const model = new PlanogramModel();
+                    if (fileId) {
+                        dataToSave.fileID = fileId;
+                    }
 
-                    model.set(dataToSave);
+                    const planogram = new PlanogramModel();
 
-                    model.save((err, model, numAffected) => {
-                        // tip: do not remove numAffected
-                        if  (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, model);
+                    planogram.set(dataToSave);
+                    planogram.save((err, model) => {
+                        cb(err, model);
                     });
                 },
-                function(planogramModel, cb) {
-                    var id = planogramModel.get('_id');
+
+                (planogramModel, cb) => {
+                    ActivityLog.emit('planogram:published', {
+                        actionOriginator: userId,
+                        accessRoleLevel,
+                        body: planogramModel.toJSON(),
+                    });
+
+                    const id = planogramModel.get('_id');
 
                     self.getByIdAggr({
-                        id : id,
-                        isMobile : req.isMobile
+                        id,
+                        isMobile: req.isMobile,
                     }, cb);
-                }
+                },
 
             ], callback);
-        }
+        };
 
         async.waterfall([
 
-            async.apply(access.getWriteAccess, req, ACL_MODULES.PLANOGRAM),
-
-            (allowed, entity, cb) => {
-                let body = req.body;
-
-                try {
-                    if (req.body.data) {
-                        body = JSON.parse(req.body.data);
-                    } else {
-                        body = req.body;
-                    }
-                } catch (err) {
-                    return cb(err);
-                }
-
-                cb(null, body);
+            (cb) => {
+                access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, cb);
             },
 
-            (body, cb) => {
-                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', (err, saveData) => {
-                    if (err) {
-                        return cb(err);
-                    }
+            (allowed, personnel, cb) => {
+                const body = extractBody(req.body);
 
-                    queryRun(saveData, cb);
-                });
-            }
+                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', cb);
+            },
 
-        ], function(err, result) {
+            queryRun,
+
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
-
-            ActivityLog.emit('planogram:created', {
-                actionOriginator: userId,
-                accessRoleLevel,
-                body: result
-            });
 
             res.status(201).send(result);
         });
@@ -329,7 +314,11 @@ var planogramsHandler = function(db, redis, event) {
                 (done, cb) => {
                     callback();
 
-                    PlanogramModel.find({ _id: setIdToArchive }).lean().exec(cb);
+                    PlanogramModel.find({
+                        _id: {
+                            $in: setIdToArchive,
+                        },
+                    }).lean().exec(cb);
                 },
 
                 (setItem, cb) => {
@@ -343,12 +332,7 @@ var planogramsHandler = function(db, redis, event) {
                     }, cb);
                 },
 
-            ], (err) => {
-                if (err) {
-                    logger.error(err);
-                    return;
-                }
-            });
+            ]);
         };
 
         async.waterfall([

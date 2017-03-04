@@ -7,11 +7,13 @@ const CompetitorBrandingModel = require('./../types/competitorBranding/model');
 const PromotionModel = require('./../types/promotion/model');
 const PromotionItemModel = require('./../types/promotionItem/model');
 const MarketingCampaignModel = require('./../types/brandingActivity/model');
+const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
 const MarketingCampaignItemModel = require('./../types/brandingActivityItem/model');
 const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
 const ContactUsModel = require('../types/contactUs/model');
+const redis = require('./../helpers/redisClient');
 
-var Comment = function (db, redis, event) {
+var Comment = function () {
     var mongoose = require('mongoose');
     var async = require('async');
     var _ = require('lodash');
@@ -21,11 +23,11 @@ var Comment = function (db, redis, event) {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var FilesModel = require('./../types/file/model');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var access = require('../helpers/access')(db);
+    var fileHandler = new FileHandler();
+    var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
     var self = this;
     var ObjectId = mongoose.Types.ObjectId;
@@ -94,8 +96,8 @@ var Comment = function (db, redis, event) {
             const saveObj = {
                 text: body.commentText,
                 objectiveId: body.objectiveId,
-                userId,
                 files: req.files,
+                userId,
                 createdBy,
                 updatedBy: createdBy,
             };
@@ -121,6 +123,10 @@ var Comment = function (db, redis, event) {
                 case CONTENT_TYPES.BRANDING_ACTIVITY:
                     ContextModel = MarketingCampaignModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY;
+                    break;
+                case CONTENT_TYPES.BRANDING_AND_DISPLAY:
+                    ContextModel = BrandingAndDisplayModel;
+                    mid = ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT;
                     break;
                 case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
                     ContextModel = MarketingCampaignItemModel;
@@ -208,6 +214,10 @@ var Comment = function (db, redis, event) {
 
                         if (context === CONTENT_TYPES.INSTORETASKS) {
                             ActivityLog.emit('in-store-task:comment-added', eventPayload);
+                        }
+
+                        if (context === CONTENT_TYPES.COMPETITORPROMOTION) {
+                            ActivityLog.emit('reporting:competitor-promotion-activities:comment-added', eventPayload);
                         }
 
                         cb(null, comment);

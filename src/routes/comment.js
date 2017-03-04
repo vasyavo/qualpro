@@ -10,8 +10,8 @@ var multipartMiddleware = multipart();
 
 var Handler = require('../handlers/comment');
 
-module.exports = function (db, redis, event) {
-    var handler = new Handler(db, redis, event);
+module.exports = function () {
+    var handler = new Handler();
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);

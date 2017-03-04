@@ -1,15 +1,13 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'views/paginator',
-    'views/questionnary/createView',
-    'views/questionnary/preView/preView',
-    'text!templates/questionnary/list/list.html',
-    'text!templates/questionnary/list/newRow.html',
-    'constants/contentType'
-], function (Backbone, $, _, paginator, CreateView, PreView, template, NewRowTemplate, CONTENT_TYPES) {
-    'use strict';
+define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var paginator = require('views/paginator');
+    var CreateView = require('views/questionnary/createView');
+    var PreView = require('views/questionnary/preView/preView');
+    var template = require('text!templates/questionnary/list/list.html');
+    var NewRowTemplate = require('text!templates/questionnary/list/newRow.html');
+    var CONTENT_TYPES = require('constants/contentType');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         contentType: CONTENT_TYPES.QUESTIONNARIES,
@@ -32,6 +30,8 @@ define([
             this.listLength = this.collection.totalRecords;
 
             options.contentType = this.contentType;
+
+            BadgeStore.cleanupQuestionnaire();
 
             this.makeRender(options);
         },

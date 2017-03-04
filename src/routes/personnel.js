@@ -7,9 +7,9 @@ var router = express.Router();
 var PersonnelHandler = require('../handlers/personnel');
 var access = require('../helpers/access');
 
-module.exports = function (db, app, event, redis) {
-    var handler = new PersonnelHandler(db, redis, event);
-    var csrfProtection = app.get('csrfProtection');
+module.exports = function () {
+    var handler = new PersonnelHandler();
+    var csrfProtection = require('./../utils/csrfProtection');
     var checkAuth = access.checkAuth;
 
     /**

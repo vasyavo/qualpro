@@ -1,11 +1,18 @@
-var Personnel = function(db, redis, event) {
+const {
+    rehydrate,
+    dispatch,
+} = require('./../stories/badges/store');
+const cleanupBadges = require('./../stories/badges/actions').cleanup;
+const PubNubClient = require('./../stories/push-notifications/utils/pubnub');
+
+var Personnel = function() {
     var mongoose = require('mongoose');
     var CONSTANTS = require('../constants/mainConstants');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var access = require('../helpers/access')(db);
+    var access = require('../helpers/access')();
     var FilterMapper = require('../helpers/filterMapper');
     var async = require('async');
     const ActivityListModel = require('./../types/activityList/model');
@@ -13,12 +20,11 @@ var Personnel = function(db, redis, event) {
     var ObjectId = mongoose.Types.ObjectId;
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper(db);
+    var getImagesHelper = new GetImageHelper();
     var _ = require('lodash');
     var logWriter = require('../helpers/logWriter.js');
     var MAIN_CONSTANTS = require('../constants/mainConstants.js');
     var MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity.js');
-    const redisActionPrefix = MAIN_CONSTANTS.REDIS_ACTIONS_TEMPLATE_STRING;
     var $defProjection = {
         _id : 1,
         module : 1,
@@ -650,19 +656,9 @@ var Personnel = function(db, redis, event) {
     this.getBadge = (req, res, next) => {
         const queryRun = (callback) => {
             const userId = req.session.uId;
-            const actionKey = `${redisActionPrefix}:${userId}`;
+            const address = `badges:${userId}`;
 
-            redis.cacheStore.readFromStorage(actionKey, (err, number) => {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!number) {
-                    number = 0;
-                }
-
-                callback(null, {badge : number});
-            });
+            rehydrate(address, callback);
         };
 
         async.waterfall([
@@ -673,28 +669,22 @@ var Personnel = function(db, redis, event) {
 
             (allowed, personnel, cb) => {
                 queryRun(cb);
-            }
+            },
 
-        ], (err, body) => {
+        ], (err, state) => {
             if (err) {
                 return next(err);
             }
 
-            res.status(200).send(body);
+            res.status(200).send({
+                badgesState: state,
+            });
         });
     };
 
     this.deleteBadge = (req, res, next) => {
-        const queryRun = (callback) => {
-            const userId = req.session.uId;
-            const actionKey = `${redisActionPrefix}:${userId}`;
-
-            redis.cacheStore.removeFromStorage(actionKey);
-
-            callback(null, {
-                message : 'OK Delete'
-            });
-        };
+        const userId = req.session.uId;
+        const moduleId = req.body.moduleId;
 
         async.waterfall([
 
@@ -703,15 +693,29 @@ var Personnel = function(db, redis, event) {
             },
 
             (allowed, personnel, cb) => {
-                queryRun(cb);
-            }
+                dispatch(cleanupBadges({
+                    userId,
+                    moduleId,
+                }), cb);
+            },
 
-        ], (err, body) => {
+            (state, cb) => {
+                PubNubClient.publish({
+                    channel: userId,
+                    message: {
+                        badgesState: state,
+                    },
+                }, cb);
+            },
+
+        ], (err) => {
             if (err) {
                 return next(err);
             }
 
-            res.status(200).send(body);
+            res.status(200).send({
+                message: 'OK Delete',
+            });
         });
     };
 

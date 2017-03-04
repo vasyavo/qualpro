@@ -161,6 +161,12 @@ define([
                     }
                 });
 
+                const emptyLocations = _.difference(types, PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel]);
+
+                emptyLocations.forEach((location) => {
+                    updateData[location] = [];
+                });
+
                 for (var i = parentProperties.length - 1; i >= 0; i--) {
                     propertyName = parentProperties[i];
                     obj = updateData[propertyName];

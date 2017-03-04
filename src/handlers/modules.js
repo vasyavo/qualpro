@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-var Module = function (db) {
+var Module = function () {
     this.getAll = function (req, res, next) {
         var ModuleModel = require('./../types/module/model');
         var AccessRoleModel = require('./../types/accessRole/model');

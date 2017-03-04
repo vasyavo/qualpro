@@ -67,7 +67,7 @@ const create = (req, res, next) => {
                     return cb(err);
                 }
 
-                ActivityLog.emit('marketing:al-alali-branding-and-display-report:published', {
+                ActivityLog.emit('marketing:al-alali-branding-and-monthly-display:published', {
                     actionOriginator: userId,
                     accessRoleLevel,
                     body: report.toJSON(),

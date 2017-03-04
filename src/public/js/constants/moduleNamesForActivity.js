@@ -330,6 +330,15 @@
                 href: CONSTANTS.BRANDING_ACTIVITY_ITEMS
             },
 
+            45: {
+                _id: 45,
+                name: {
+                    en: 'al alali Branding & Monthly display',
+                    ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'
+                },
+                href: CONSTANTS.BRANDING_AND_DISPLAY,
+            },
+
             41: {
                 _id : 41,
                 name: {

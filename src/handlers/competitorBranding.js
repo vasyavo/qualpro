@@ -1,6 +1,6 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var CompetitorBranding = function(db, redis, event) {
+var CompetitorBranding = function() {
     const logger = require('../utils/logger');
     var async = require('async');
     var _ = require('lodash');
@@ -11,11 +11,11 @@ var CompetitorBranding = function(db, redis, event) {
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper(db);
+    var getImagesHelper = new GetImagesHelper();
     var CompetitorBrandingModel = require('./../types/competitorBranding/model');
     var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler(db);
-    var access = require('../helpers/access')(db);
+    var fileHandler = new FileHandler();
+    var access = require('../helpers/access')();
     var FilterMapper = require('../helpers/filterMapper');
     var ObjectId = mongoose.Types.ObjectId;
     var FileModel = require('./../types/file/model');
