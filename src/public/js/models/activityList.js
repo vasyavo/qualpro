@@ -1,11 +1,12 @@
-define([
-    'models/parrent',
-    'validation',
-    'moment',
-    'locales',
-    'constants/contentType',
-    'constants/otherConstants'
-], function (parent, validation, moment, locales, CONTENT_TYPES, CONSTANTS) {
+define(function(require) {
+    var _ = require('underscore');
+    var parent = require('models/parrent');
+    var validation = require('validation');
+    var moment = require('moment');
+    var locales = require('locales');
+    var CONTENT_TYPES = require('constants/contentType');
+    var CONSTANTS = require('constants/otherConstants');
+
     var Model = parent.extend({
         defaults: {
             createdBy  : '',
@@ -24,7 +25,6 @@ define([
             'module.name',
             'country.name'
         ],
-
 
         urlRoot: function () {
             return CONTENT_TYPES.ACTIVITYLIST;

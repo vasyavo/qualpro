@@ -60,7 +60,7 @@ module.exports = (options) => {
         const groups = [{
             recipients: personnels,
             subject: {
-                en: 'Branding & Display report published',
+                en: 'Al Alali Branding & Monthly display published',
                 ar: '',
             },
             payload,

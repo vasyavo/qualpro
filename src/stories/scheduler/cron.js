@@ -539,7 +539,7 @@ class Scheduler {
             questionnaireExpired,
         ];
 
-        this.subscribe(jobs, '0 * * * *'); // every hour
+        this.subscribe(jobs, '0 0 * * *'); // every midnight
 
         logger.info('Scheduler started');
     }
