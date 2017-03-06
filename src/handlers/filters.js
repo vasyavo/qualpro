@@ -2208,9 +2208,6 @@ const Filters = function() {
         }
 
         const filterMapper = new FilterMapper();
-        const currentSelected = query.current;
-        const filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
-
         const filter = filterMapper.mapFilter({
             filter: queryFilter,
             personnel: req.personnelModel,
@@ -2222,21 +2219,25 @@ const Filters = function() {
             $and: [],
         };
 
+        const getSearchReference = (string) => {
+            return { $regex: string, $options: 'i' };
+        };
+
         if (globalSearch && globalSearch.length > 0) {
             $matchPersonnel.$and.push({
                 $or: [
-                    { 'createdBy.firstName.en': { $regex: globalSearch } },
-                    { 'createdBy.firstName.ar': { $regex: globalSearch } },
-                    { 'createdBy.lastName.en': { $regex: globalSearch } },
-                    { 'createdBy.lastName.ar': { $regex: globalSearch } },
+                    { 'createdBy.firstName.en': getSearchReference(globalSearch) },
+                    { 'createdBy.firstName.ar': getSearchReference(globalSearch) },
+                    { 'createdBy.lastName.en': getSearchReference(globalSearch) },
+                    { 'createdBy.lastName.ar': getSearchReference(globalSearch) },
                 ],
             });
+        }
 
-            if (filter.position) {
-                $matchPersonnel.$and.push({
-                    position: filter.position,
-                });
-            }
+        if (filter.position) {
+            $matchPersonnel.$and.push({
+                position: filter.position,
+            });
         }
 
         const isSearch = $matchPersonnel.$and.length > 0;
@@ -2799,19 +2800,7 @@ const Filters = function() {
                     module: [],
                 };
 
-            redisFilters({
-                currentSelected,
-                filterExists,
-                filtersObject: filters,
-                personnelId: req.personnelModel._id,
-                contentType: CONTENT_TYPES.ACTIVITYLIST,
-            }, (err, response) => {
-                if (err) {
-                    return next(err);
-                }
-
-                res.status(200).send(response);
-            });
+            res.status(200).send(filters);
         });
     };
 
