@@ -285,10 +285,10 @@ define([
                 var keyAttr = $element.attr('data-key');
                 var languageAttr = $element.attr('data-language');
 
-                if (languageAttr) {
+                if (languageAttr && value) {
                     dataObject[keyAttr] = dataObject[keyAttr] || {};
                     dataObject[keyAttr][languageAttr] = value;
-                } else if (keyAttr) {
+                } else if (keyAttr && value) {
                     dataObject[keyAttr] = value;
                 }
             });
