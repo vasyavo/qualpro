@@ -115,7 +115,7 @@ define(function (require) {
                     save  : {
                         text : that.translation.saveBtn,
                         class: 'btn saveBtn',
-                        click: function () {
+                        click: _.debounce(function () {
                             var formData = new FormData();
                             formData.append('file', that.file);
 
@@ -129,7 +129,7 @@ define(function (require) {
                             }
 
                             that.model.saveFile(formData, data);
-                        }
+                        }, 2000),
                     },
                     cancel: {
                         text: that.translation.cancelBtn,
