@@ -1355,7 +1355,7 @@ const Personnel = function () {
             },
 
             (result, cb) => {
-                if (result.length > 1) {
+                if (result.length !== 1) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.USERS_WITH_SAME_LOGIN);
                 }
 
