@@ -1437,16 +1437,16 @@ const Personnel = function () {
 
                 res.cookie('currentLanguage', currentLanguage);
 
-                const $set = {
+                const update = {
                     beforeAccess: personnel.lastAccess,
                     lastAccess,
                 };
 
                 if (personnel.status !== PERSONNEL_STATUSES.ONLEAVE._id) {
-                    $set.status = PERSONNEL_STATUSES.LOGIN._id;
+                    update.status = PERSONNEL_STATUSES.LOGIN._id;
                 }
 
-                PersonnelModel.findByIdAndUpdate(personnel._id, { $set })
+                PersonnelModel.findByIdAndUpdate(personnel._id, update, { new: true })
                     .select({ _id: 1 })
                     .lean()
                     .exec(cb);
