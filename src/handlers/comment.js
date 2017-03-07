@@ -97,6 +97,7 @@ var Comment = function () {
                 text: body.commentText,
                 objectiveId: body.objectiveId,
                 files: req.files,
+                userId,
                 createdBy,
                 updatedBy: createdBy,
             };

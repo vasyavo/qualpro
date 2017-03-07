@@ -3,10 +3,10 @@ define(function(require) {
     var $ = require('jQuery');
     var paginator = require('views/paginator');
     var BrandPreview = require('views/priceSurvey/brandPreview');
-    var template = require('text!templates/shelfShares/list/list.html');
-    var CategoriesTemplate = require('text!templates/shelfShares/list/categories.html');
-    var HeaderTemplate = require('text!templates/shelfShares/list/header.html');
-    var BodyTemplate = require('text!templates/shelfShares/list/body.html');
+    var template = require('text!templates/priceSurvey/list/list.html');
+    var CategoriesTemplate = require('text!templates/priceSurvey/list/categories.html');
+    var HeaderTemplate = require('text!templates/priceSurvey/list/header.html');
+    var BodyTemplate = require('text!templates/priceSurvey/list/body.html');
     var BranchDataTemplate = require('text!templates/priceSurvey/list/branchData.html');
     var CONTENT_TYPES = require('constants/contentType');
     var dataService = require('dataService');
