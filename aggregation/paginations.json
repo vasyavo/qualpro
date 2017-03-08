@@ -1,0 +1,98 @@
+[
+  {
+    "$group": {
+      "_id": null,
+      "setActivity": {
+        "$push": "$_id"
+      },
+      "total": {
+        "$sum": 1
+      }
+    }
+  },
+  {
+    "$project": {
+      "setActivity": {
+        "$let": {
+          "vars": {
+            "skip": 20,
+            "limit": 25
+          },
+          "in": {
+            "$cond": {
+              "if": {
+                "$gte": [
+                  "$total",
+                  { "$add": ["$$skip", "$$limit"] }
+                ]
+              },
+              "then": { "$slice": ["$setActivity", "$$skip", "$$limit"] },
+              "else": {
+                "$cond": {
+                  "if": {
+                    "$gte": [
+                      "$total",
+                      "$$skip"
+                    ]
+                  },
+                  "then": {
+                    "$slice": ["$setActivity", "$$skip", { "$subtract": ["$total", "$$skip"] }]
+                  },
+                  "else": "$setActivity"
+                }
+              }
+            }
+          }
+        }
+      },
+      "total": 1
+    }
+  },
+  {
+    "$unwind": "$setActivity"
+  },
+  {
+    "$lookup": {
+      "from": "activityLists",
+      "localField": "setActivity",
+      "foreignField": "_id",
+      "as": "activity"
+    }
+  },
+  {
+    "$project": {
+      "activity": {
+        "$let": {
+          "vars": {
+            "fields": { "$arrayElemAt": ["$activity", 0] }
+          },
+          "in": {
+            "total": "$total",
+            "_id": "$$fields._id",
+            "module": "$$fields.module",
+            "accessRoleLevel": "$$fields.accessRoleLevel",
+            "createdBy": "$$fields.createdBy",
+            "personnels": "$$fields.personnels",
+            "creationDate": "$$fields.creationDate",
+            "actionType": "$$fields.actionType",
+            "itemType": "$$fields.itemType",
+            "itemDetails": "$$fields.itemDetails",
+            "assignedTo": "$$fields.assignedTo",
+            "outlet": "$$fields.outlet",
+            "retailSegment": "$$fields.retailSegment",
+            "branch": "$$fields.branch",
+            "subRegion": "$$fields.subRegion",
+            "region": "$$fields.region",
+            "country": "$$fields.country",
+            "itemName": "$$fields.itemName"
+          }
+        }
+      }
+    }
+  },
+  {
+    "$replaceRoot": {
+      "newRoot": "$activity"
+    }
+  }
+]

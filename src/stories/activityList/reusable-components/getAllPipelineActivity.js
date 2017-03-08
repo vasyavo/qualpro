@@ -1,69 +1,54 @@
 const _ = require('lodash');
 const ACL_CONSTANTS = require('../../../constants/aclRolesNames');
-const CONTENT_TYPES = require('../../../public/js/constants/contentType');
-const MODULE_NAMES = require('../../../public/js/constants/moduleNamesForActivity');
-const OTHER_CONSTANTS = require('../../../public/js/constants/otherConstants');
-
-const levelsByLevel = {
-    1: _.values(ACL_CONSTANTS),
-    2: _(ACL_CONSTANTS).pick([
-        'AREA_MANAGER',
-        'AREA_IN_CHARGE',
-        'SALES_MAN',
-        'MERCHANDISER',
-        'CASH_VAN',
-        'VIRTUAL',
-    ]).values().value(),
-    3: _(ACL_CONSTANTS).pick([
-        'AREA_IN_CHARGE',
-        'SALES_MAN',
-        'MERCHANDISER',
-        'MERCHANDISER',
-        'CASH_VAN',
-        'VIRTUAL',
-    ]).values().value(),
-    4: _(ACL_CONSTANTS).pick([
-        'SALES_MAN',
-        'MERCHANDISER',
-        'MERCHANDISER',
-        'CASH_VAN',
-        'VIRTUAL',
-    ]).values().value(),
-    5: [ACL_CONSTANTS.VIRTUAL],
-    6: [ACL_CONSTANTS.VIRTUAL],
-    7: [ACL_CONSTANTS.VIRTUAL],
-    8: _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
-    9: _(ACL_CONSTANTS).omit(['SUPER_ADMIN', 'COUNTRY_UPLOADER']).values().value(),
-    10: [ACL_CONSTANTS.VIRTUAL],
-};
 
 module.exports = (options) => {
     const {
-        aggregateHelper,
-        searchFieldsArray,
         queryObject,
         positionFilter,
         filterSearch,
         limit,
         skip,
-        sort,
-        isMobile,
         currentUser,
-        afterIteMTypeQuery = {},
     } = options;
 
-    let pipeLine = [];
-    let regionsMathArray = {};
-    let usersArray = [currentUser._id];
+    const pipeLine = [];
+    const locations = ['country', 'region', 'subRegion', 'branch'];
 
-    if (currentUser.cover && currentUser.cover.length) {
-        usersArray = usersArray.concat(currentUser.cover);
+    const $generalMatch = Object.assign({}, queryObject, {
+        'createdBy.date': { $gte: new Date((new Date()).setMonth((new Date()).getMonth() - 2)) },
+    });
+
+    if ([ACL_CONSTANTS.MASTER_ADMIN,
+        ACL_CONSTANTS.MASTER_UPLOADER,
+        ACL_CONSTANTS.TRADE_MARKETER,
+        ACL_CONSTANTS.COUNTRY_ADMIN,
+        ACL_CONSTANTS.COUNTRY_UPLOADER,
+        ACL_CONSTANTS.AREA_MANAGER,
+        ACL_CONSTANTS.AREA_IN_CHARGE,
+    ].indexOf(currentUser.accessRoleLevel) === -1) {
+        // if user user not admin
+        $generalMatch.personnels = currentUser._id;
+    } else {
+        // if user user some of admin
+        locations.forEach((location) => {
+            if (currentUser[location] && currentUser[location].length && !$generalMatch[location]) {
+                $generalMatch.$or = [
+                    {
+                        [location]: { $in: currentUser[location] },
+                    },
+                    {
+                        [location]: { $eq: [] },
+                    },
+                    {
+                        [location]: { $eq: null },
+                    },
+                ];
+            }
+        });
     }
 
     pipeLine.push({
-        $match: Object.assign({}, queryObject, {
-            'createdBy.date': { $gte: (new Date()).addDays(-3) },
-        }),
+        $match: $generalMatch,
     });
 
     pipeLine.push({
@@ -76,33 +61,7 @@ module.exports = (options) => {
     });
 
     pipeLine.push({
-        $lookup: {
-            from: 'modules',
-            localField: 'module',
-            foreignField: '_id',
-            as: 'module',
-        },
-    });
-
-    pipeLine.push({
         $addFields: {
-            module: { $arrayElemAt: ['$module', 0] },
-            checkPersonnel: {
-                $cond: {
-                    if: {
-                        $or: [
-                            {
-                                $eq: ['$itemType', CONTENT_TYPES.CONTRACTSSECONDARY],
-                            },
-                            {
-                                $eq: ['$itemType', CONTENT_TYPES.CONTRACTSYEARLY],
-                            },
-                        ],
-                    },
-                    then: 1,
-                    else: 0,
-                },
-            },
             createdBy: {
                 date: '$createdBy.date',
                 user: {
@@ -128,26 +87,6 @@ module.exports = (options) => {
         },
     });
 
-    pipeLine.push({
-        $match: {
-            $or: [
-                {
-                    $and: [
-                        {
-                            checkPersonnel: 1,
-                        }, {
-                            personnels: {
-                                $in: usersArray,
-                            },
-                        },
-                    ],
-                }, {
-                    checkPersonnel: 0,
-                },
-            ],
-        },
-    });
-
     if (queryObject.position && queryObject.position.$in) {
         pipeLine.push({
             $match: positionFilter,
@@ -155,11 +94,140 @@ module.exports = (options) => {
     }
 
     pipeLine.push({
+        $group: {
+            _id: null,
+            setActivity: { $push: '$_id' },
+            total: { $sum: 1 },
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            setActivity: {
+                $let: {
+                    vars: {
+                        skip,
+                        limit,
+                    },
+                    in: {
+                        $cond: {
+                            if: {
+                                $gte: [
+                                    '$total',
+                                    { $add: ['$$skip', '$$limit'] },
+                                ],
+                            },
+                            then: { $slice: ['$setActivity', '$$skip', '$$limit'] },
+                            else: {
+                                $cond: {
+                                    if: {
+                                        $gte: [
+                                            '$total',
+                                            '$$skip',
+                                        ],
+                                    },
+                                    then: {
+                                        $slice: ['$setActivity', '$$skip', { $subtract: ['$total', '$$skip'] }],
+                                    },
+                                    else: '$setActivity',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            total: 1,
+        },
+    });
+
+    pipeLine.push({
+        $unwind: '$setActivity',
+    });
+
+    pipeLine.push({
         $lookup: {
-            from: 'accessRoles',
-            localField: 'createdBy.user.accessRole',
+            from: 'activityLists',
+            localField: 'setActivity',
             foreignField: '_id',
-            as: 'createdBy.user.accessRole',
+            as: 'activity',
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            activity: {
+                $let: {
+                    vars: {
+                        fields: { $arrayElemAt: ['$activity', 0] },
+                    },
+                    in: {
+                        total: '$total',
+                        _id: '$$fields._id',
+                        module: '$$fields.module',
+                        accessRoleLevel: '$$fields.accessRoleLevel',
+                        createdBy: '$$fields.createdBy',
+                        personnels: '$$fields.personnels',
+                        creationDate: '$$fields.creationDate',
+                        actionType: '$$fields.actionType',
+                        itemType: '$$fields.itemType',
+                        itemDetails: '$$fields.itemDetails',
+                        assignedTo: '$$fields.assignedTo',
+                        outlet: '$$fields.outlet',
+                        retailSegment: '$$fields.retailSegment',
+                        branch: '$$fields.branch',
+                        subRegion: '$$fields.subRegion',
+                        region: '$$fields.region',
+                        country: '$$fields.country',
+                        itemName: '$$fields.itemName',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeLine.push({
+        $replaceRoot: {
+            newRoot: '$activity',
+        },
+    });
+
+    pipeLine.push({
+        $lookup: {
+            from: 'personnels',
+            localField: 'createdBy.user',
+            foreignField: '_id',
+            as: 'createdBy.user',
+        },
+    });
+
+    pipeLine.push({
+        $addFields: {
+            'createdBy.user': {
+                $let: {
+                    vars: {
+                        createdByUser: { $arrayElemAt: ['$createdBy.user', 0] },
+                    },
+                    in: {
+                        _id: '$$createdByUser._id',
+                        name: {
+                            $concat: ['$$createdByUser.firstName.en', ' ', '$$createdByUser.lastName.en'],
+                        },
+                        firstName: '$$createdByUser.firstName',
+                        lastName: '$$createdByUser.lastName',
+                        position: '$$createdByUser.position',
+                        accessRole: '$$createdByUser.accessRole',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeLine.push({
+        $lookup: {
+            from: 'modules',
+            localField: 'module',
+            foreignField: '_id',
+            as: 'module',
         },
     });
 
@@ -173,193 +241,13 @@ module.exports = (options) => {
     });
 
     pipeLine.push({
-        $addFields: {
-            createdBy: {
-                user: {
-                    _id: '$createdBy.user._id',
-                    accessRole: {
-                        $let: {
-                            vars: {
-                                createdByUserAccessRole: {
-                                    $arrayElemAt: ['$createdBy.user.accessRole', 0],
-                                },
-                            },
-                            in: {
-                                _id: '$$createdByUserAccessRole._id',
-                                name: '$$createdByUserAccessRole.name',
-                                level: '$$createdByUserAccessRole.level',
-                            },
-                        },
-                    },
-                    position: {
-                        $let: {
-                            vars: {
-                                createdByUserPosition: {
-                                    $arrayElemAt: ['$createdBy.user.position', 0],
-                                },
-                            },
-                            in: {
-                                _id: '$$createdByUserPosition._id',
-                                name: '$$createdByUserPosition.name',
-                            },
-                        },
-                    },
-                    firstName: '$createdBy.user.firstName',
-                    lastName: '$createdBy.user.lastName',
-                },
-                diffDate: {
-                    $let: {
-                        vars: {
-                            dateNow: new Date(),
-                            createDate: '$createdBy.date',
-                        },
-                        in: { $subtract: ['$$dateNow', '$$createDate'] },
-                    },
-                },
-                date: '$createdBy.date',
-            },
-            module: {
-                name: '$module.name',
-                _id: '$module._id',
-            },
-            creationDate: '$createdBy.date',
+        $lookup: {
+            from: 'accessRoles',
+            localField: 'createdBy.user.accessRole',
+            foreignField: '_id',
+            as: 'createdBy.user.accessRole',
         },
     });
-
-    if ([ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.MASTER_UPLOADER, ACL_CONSTANTS.TRADE_MARKETER].indexOf(currentUser.accessRoleLevel) === -1) {
-        const $match = {
-            $or: [],
-        };
-        const modulesForFilterByCountryAndType = [
-            CONTENT_TYPES.PLANOGRAM,
-            CONTENT_TYPES.ITEM,
-            CONTENT_TYPES.COMPETITORITEM,
-            CONTENT_TYPES.COMPETITORPROMOTION,
-            CONTENT_TYPES.NEWPRODUCTLAUNCH,
-            CONTENT_TYPES.PRICESURVEY,
-            CONTENT_TYPES.SHELFSHARES,
-            CONTENT_TYPES.QUESTIONNARIES,
-        ];
-        const personnelQuery = [];
-
-        modulesForFilterByCountryAndType.forEach((module) => {
-            $match.$or.push({
-                $and: [
-                    {
-                        country: {
-                            $in: currentUser.country,
-                        },
-                    },
-                    {
-                        itemType: { $eq: module },
-                    },
-                ],
-            });
-        });
-
-        $match.$or.push({
-            $and: [
-                {
-                    country: {
-                        $in: currentUser.country,
-                    },
-                },
-                {
-                    itemType: { $in: ['domain', 'retailSegment', 'outlet'] },
-                },
-                {
-                    itemDetails: { $in: ['country', 'region', 'subRegion', ''] },
-                },
-            ],
-        });
-
-        $match.$or.push({
-            $and: [
-                {
-                    personnels: {
-                        $in: [currentUser._id],
-                    },
-                },
-                {
-                    itemType: { $eq: CONTENT_TYPES.NOTIFICATIONS },
-                },
-            ],
-        });
-
-        personnelQuery.push({
-            country: {
-                $in: currentUser.country,
-            },
-            itemType: { $eq: CONTENT_TYPES.PERSONNEL },
-        });
-
-        if (!isMobile) {
-            personnelQuery.push({
-                accessRoleLevel: {
-                    $in: _.union(levelsByLevel[currentUser.accessRoleLevel], [currentUser.accessRoleLevel]),
-                },
-            });
-        }
-
-        $match.$or.push({
-            $and: personnelQuery,
-        });
-
-        if (currentUser.accessRoleLevel === MODULE_NAMES.SALES_MAN) {
-            regionsMathArray = { branch: { $in: currentUser.branch || afterIteMTypeQuery.branch } };
-        }
-        if (currentUser.accessRoleLevel === MODULE_NAMES.MERCHANDISER) {
-            regionsMathArray = { branch: { $in: currentUser.branch || afterIteMTypeQuery.branch } };
-        }
-        if (currentUser.accessRoleLevel === MODULE_NAMES.CASH_VAN) {
-            regionsMathArray = { branch: { $in: currentUser.branch || afterIteMTypeQuery.branch } };
-        }
-
-        if (currentUser.accessRoleLevel === MODULE_NAMES.AREA_IN_CHARGE) {
-            regionsMathArray = { subRegion: { $in: currentUser.subRegion || afterIteMTypeQuery.subRegion } };
-        }
-        if (currentUser.accessRoleLevel === MODULE_NAMES.AREA_MANAGER) {
-            regionsMathArray = { region: { $in: currentUser.region || afterIteMTypeQuery.region } };
-        }
-        if (currentUser.accessRoleLevel === MODULE_NAMES.COUNTRY_ADMIN) {
-            regionsMathArray = { country: { $in: currentUser.country || afterIteMTypeQuery.country } };
-        }
-
-        $match.$or.push({
-            $and: [
-                regionsMathArray,
-                {
-                    accessRoleLevel: {
-                        $in: levelsByLevel[currentUser.accessRoleLevel],
-                    },
-                },
-                {
-                    itemType: {
-                        $in: [CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS],
-                    },
-                },
-            ],
-        });
-
-        $match.$or.push({
-            $and: [
-                regionsMathArray, {
-                    itemType: {
-                        $in: [
-                            CONTENT_TYPES.BRANDINGANDDISPLAY,
-                            CONTENT_TYPES.PROMOTIONS,
-                        ],
-                    },
-                },
-            ],
-        });
-
-        $match.$or.push({
-            assignedTo: { $in: usersArray },
-        });
-
-        pipeLine.push({ $match });
-    }
 
     pipeLine.push({
         $lookup: {
@@ -408,6 +296,66 @@ module.exports = (options) => {
 
     pipeLine.push({
         $addFields: {
+            createdBy: {
+                user: {
+                    _id: '$createdBy.user._id',
+                    accessRole: {
+                        $let: {
+                            vars: {
+                                createdByUserAccessRole: {
+                                    $arrayElemAt: ['$createdBy.user.accessRole', 0],
+                                },
+                            },
+                            in: {
+                                _id: '$$createdByUserAccessRole._id',
+                                name: '$$createdByUserAccessRole.name',
+                                level: '$$createdByUserAccessRole.level',
+                            },
+                        },
+                    },
+                    position: {
+                        $let: {
+                            vars: {
+                                createdByUserPosition: {
+                                    $arrayElemAt: ['$createdBy.user.position', 0],
+                                },
+                            },
+                            in: {
+                                _id: '$$createdByUserPosition._id',
+                                name: '$$createdByUserPosition.name',
+                            },
+                        },
+                    },
+                    name: {
+                        $concat: ['$createdBy.user.firstName.en', ' ', '$createdBy.user.lastName.en'],
+                    },
+                    firstName: '$createdBy.user.firstName',
+                    lastName: '$createdBy.user.lastName',
+                },
+                diffDate: {
+                    $let: {
+                        vars: {
+                            dateNow: new Date(),
+                            createDate: '$createdBy.date',
+                        },
+                        in: { $subtract: ['$$dateNow', '$$createDate'] },
+                    },
+                },
+                date: '$createdBy.date',
+            },
+            module: {
+                $let: {
+                    vars: {
+                        moduleModel: {
+                            $arrayElemAt: ['$module', 0],
+                        },
+                    },
+                    in: {
+                        _id: '$$moduleModel._id',
+                        name: '$$moduleModel.name',
+                    },
+                },
+            },
             assignedTo: {
                 $map: {
                     input: '$assignedTo',
@@ -460,8 +408,9 @@ module.exports = (options) => {
                     },
                 },
             },
-            retailSegment: '$branch.retailSegment',
-            outlet: '$branch.outlet',
+            retailSegment: { $arrayElemAt: ['$branch.retailSegment', 0] },
+            outlet: { $arrayElemAt: ['$branch.outlet', 0] },
+            creationDate: '$createdBy.date',
         },
     });
 
@@ -509,37 +458,21 @@ module.exports = (options) => {
     });
 
     pipeLine.push({
-        $lookup: {
-            from: 'objectives',
-            localField: 'itemId',
-            foreignField: '_id',
-            as: 'itemModel',
-        },
-    });
-
-    pipeLine.push({
-        $unwind: {
-            path: '$itemModel',
-            preserveNullAndEmptyArrays: true,
-        },
-    });
-
-    pipeLine.push({
-        $match: {
-            'itemModel.status': {
-                $ne: OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT,
+        $group: {
+            _id: '$total',
+            data: {
+                $push: '$$ROOT',
             },
         },
     });
 
-    pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-        isMobile,
-        searchFieldsArray,
-        filterSearch,
-        skip,
-        limit,
-        sort,
-    }));
+    pipeLine.push({
+        $project: {
+            _id: 0,
+            total: '$_id',
+            data: 1,
+        },
+    });
 
     return pipeLine;
 };
