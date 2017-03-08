@@ -951,6 +951,10 @@ const Documents = function () {
                         return errorSender.badRequest(cb, 'Document not found');
                     }
 
+                    if (model.type === 'folder') {
+                        return errorSender.badRequest(cb, 'Folder can\'t be copied');
+                    }
+
                     const createObj = {
                         title: title || model.title,
                         archived: model.archived,
