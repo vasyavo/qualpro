@@ -96,4 +96,9 @@ errorDescriptions[ERROR_MSG.INCORRECT_USERNAME_OR_PASSWORD] = {
     ar: 'اسم المستخدم أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.'
 };
 
+errorDescriptions[ERROR_MSG.ERROR_ACCESS_DENIED_MESSAGE] = {
+    en: 'You cannot access the app while being on leave.',
+    ar: ' لا يمكنك الوصول إلى التطبيق أثناء إجازة الخاص بك',
+};
+
 module.exports = errorDescriptions;
