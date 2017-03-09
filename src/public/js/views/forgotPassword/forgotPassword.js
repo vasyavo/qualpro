@@ -50,7 +50,7 @@ define([
                 filteredValue = value.replace(/_/g, '');
             }
 
-            if (!filteredValue || filteredValue.length < 15) {
+            if (!filteredValue || filteredValue.length <= 15) {
                 if (isPhone) {
                     this.errors.emptyPhoneInput = ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar;
                 } else {
