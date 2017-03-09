@@ -40,8 +40,15 @@ define([
             var phoneRadio = this.$el.find('#phoneNumberRadio');
             var isPhone = phoneRadio.is(':checked');
             var regexp;
+            var filteredValue;
 
             this.errors = {};
+
+            // input field returns value with mask
+
+            if (isPhone) {
+                filteredValue = value.replace('_', '');
+            }
 
             if (!value) {
                 if (isPhone) {
@@ -59,7 +66,7 @@ define([
                 regexp = CONSTANTS.PHONE_REGEXP;
             }
 
-            if (!regexp.test(target.val())) {
+            if (!regexp.test(filteredValue)) {
                 if (isPhone) {
                     this.errors.incorrectPhoneValue = ERROR_MESSAGES.forgotPassword.incorrectPhoneNumber.en + '<br>' + ERROR_MESSAGES.forgotPassword.incorrectPhoneNumber.ar;
                 } else {
