@@ -50,7 +50,7 @@ module.exports = function () {
 
     router.use('/personnel', require('./mobile/personnel')());
     router.use('/activityList', activityListRouter);
-    router.use('/brandingAndDisplay', require('./mobile/brandingAndMonthlyDisplay'));
+    router.use('/brandingAndMonthlyDisplay', require('./mobile/brandingAndMonthlyDisplay'));
     router.use('/marketingCampaign', brandingActivityRouter);
     router.use('/marketingCampaignItem', brandingActivityItemsRouter);
     router.use('/domain', domainRouter);
