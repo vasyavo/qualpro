@@ -688,18 +688,34 @@
         },
 
         COMMENTED: {
-            _id : 'New comment was added',
+            _id : 'Commented',
             name: {
-                en: 'New comment was added',
+                en: 'Commented',
                 ar: ' تمت إضافة تعليق جديد'
             }
         },
 
-        COMPETITOR_VARIANT: {
-            _id : 'competitorVariant',
+        EXPIRED: {
+            _id : 'Expired',
             name: {
-                en: 'Competitor Variant',
-                ar: 'منوع المنافس'
+                en: 'Expired',
+                ar: 'منتهية الصلاحية'
+            }
+        },
+
+        OVERDUE: {
+            _id : 'Overdue',
+            name: {
+                en: 'Overdue',
+                ar: 'متأخر'
+            }
+        },
+
+        FAILED: {
+            _id : 'Failed',
+            name: {
+                en: 'Failed',
+                ar: 'فشل'
             }
         }
     };

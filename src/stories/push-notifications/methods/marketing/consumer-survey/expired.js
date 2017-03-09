@@ -9,7 +9,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.CONSUMER_SURVEY;
         const contentType = contentTypes.CONSUMER_SURVEY;
-        const actionType = activityTypes.UPDATED;
+        const actionType = activityTypes.EXPIRED;
 
         const extendedOptions = Object.assign({}, options, {
             moduleId,
