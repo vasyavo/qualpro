@@ -1376,7 +1376,6 @@ const Personnel = function () {
 
                 const level = personnel.accessRole ? personnel.accessRole.level : null;
 
-
                 const notAllowedLevelsCMS = [
                     ACL_CONSTANTS.SALES_MAN,
                     ACL_CONSTANTS.MERCHANDISER,
@@ -1444,6 +1443,15 @@ const Personnel = function () {
 
                 if (personnel.status !== PERSONNEL_STATUSES.ONLEAVE._id) {
                     update.status = PERSONNEL_STATUSES.LOGIN._id;
+                }
+
+                // Salesman, Merchandiser and Cash Van ca\'t access app during vacation
+                if (onLeave && [
+                    ACL_CONSTANTS.SALES_MAN,
+                    ACL_CONSTANTS.MERCHANDISER,
+                    ACL_CONSTANTS.CASH_VAN,
+                ].indexOf(level) > -1) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.ERROR_ACCESS_DENIED_MESSAGE);
                 }
 
                 PersonnelModel.findByIdAndUpdate(personnel._id, update, { new: true })
