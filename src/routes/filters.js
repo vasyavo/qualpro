@@ -19,7 +19,7 @@ module.exports = function() {
     router.get('/planogram', checkAuth, handler.planogramFilters);
     router.get('/activityList', handler.activityListFilters);
     router.get('/branch', handler.branchFilters);
-    router.get('/brandingActivity', handler.brandingActivityFilters);
+    router.get('/marketingCampaign', handler.brandingActivityFilters);
     router.get('/brandingActivityCreate', handler.promotionLocationFilters);
     // router.get('/brandingAndDisplayCreate', handler.brandingAndDisplayCreateFilters);
     router.get('/itemsPrices', checkAuth, handler.itemsAndPricesFilters);
@@ -49,7 +49,7 @@ module.exports = function() {
     router.get('/notes', handler.notesFilters);
     router.get('/items/toOutlet', handler.itemsToOutletCountry);
     router.get('/contactUs', checkAuth, handler.contactUsFilters);
-    router.get('/brandingAndDisplayNew', checkAuth, handler.brandingAndDisplayFilters);
+    router.get('/brandingAndMonthlyDisplay', checkAuth, handler.brandingAndDisplayFilters);
 
     return router;
 };

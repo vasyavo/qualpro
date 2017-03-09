@@ -11,7 +11,7 @@ const getEveryAdminInSameCountryAsOriginator = require('./../../../utils/getEver
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.AL_ALALI_BRANDING_DISPLAY_REPORT;
-        const contentType = contentTypes.BRANDINGANDDISPLAY;
+        const contentType = contentTypes.MARKETING_CAMPAIGN;
         const actionType = activityTypes.CREATED;
         const {
             accessRoleLevel,

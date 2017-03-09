@@ -1,6 +1,5 @@
 /*
  * Wednesday, 28 February, 2017
- * Feature "Comments"
  * */
 const async = require('async');
 const CONTENT_TYPES = require('../src/public/js/constants/contentType');
@@ -11,7 +10,7 @@ require('mongodb');
 exports.up = function(db, next) {
     async.waterfall([
         (cb) => {
-            db.collection(CONTENT_TYPES.BRANDING_AND_DISPLAY).aggregate([
+            db.collection(CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY).aggregate([
                 {
                     $lookup: {
                         from: 'branches',
@@ -62,7 +61,7 @@ exports.up = function(db, next) {
             async.eachLimit(result, 10, (item, eachCb) => {
                 logger.inspect(item);
 
-                db.collection(CONTENT_TYPES.BRANDING_AND_DISPLAY).update({ _id: item._id }, {$set: item}, eachCb);
+                db.collection(CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY).update({ _id: item._id }, {$set: item}, eachCb);
             }, cb);
         },
     ], next);

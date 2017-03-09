@@ -44,7 +44,7 @@ allowedParams[CONTENT_TYPES.NOTES] = {
     }
 };
 
-allowedParams[CONTENT_TYPES.BRANDING_ACTIVITY] = {
+allowedParams[CONTENT_TYPES.MARKETING_CAMPAIGN] = {
     0: {
         create: ['category', 'branch', 'displayType', 'dateStart', 'dateEnd', 'attachments', 'description', 'createdBy', 'save'],
         update: ['category', 'branch', 'displayType', 'dateStart', 'dateEnd', 'attachments', 'description', 'editedBy', 'save']
@@ -87,7 +87,7 @@ allowedParams[CONTENT_TYPES.BRANDING_ACTIVITY] = {
     }
 };
 
-allowedParams[CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS] = {
+allowedParams[CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM] = {
     0: {
         create: ['brandingAndDisplay', 'branch', 'commentText']
     },

@@ -8,7 +8,7 @@ const prototype = require('./../al-alali-questionnaire/prototypeItemPublished');
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.AL_ALALI_BRANDING_ACTIVITY;
-        const contentType = contentTypes.BRANDING_ACTIVITY_ITEMS;
+        const contentType = contentTypes.MARKETING_CAMPAIGN_ITEM;
         const actionType = activityTypes.CREATED;
 
         const extendedOptions = Object.assign({}, options, {
