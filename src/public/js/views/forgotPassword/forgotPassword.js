@@ -47,7 +47,7 @@ define([
             // input field returns value with mask
 
             if (isPhone) {
-                filteredValue = value.replace('_', '');
+                filteredValue = value.replace(/_/g, '');
             }
 
             if (!value) {
