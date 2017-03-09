@@ -60,7 +60,7 @@ define(function(require) {
             var id = modelJSON.itemId;
             var missingPreviews = ['branch', 'priceSurvey', 'shelfShares', 'competitorsList', 'country', 'itemsPrices', 'outlet', 'region',
                 'retailSegment', 'subRegion'];
-            var promotionsOrBrandingItems = ['promotionsItems', 'brandingActivityItems'].indexOf(moduleObject.href) !== -1;
+            var promotionsOrBrandingItems = ['promotionsItems', 'marketingCampaignItem'].indexOf(moduleObject.href) !== -1;
             var promotionItems = moduleObject.href === 'promotionsItems';
             var modelType = modelJSON.itemDetails || modelJSON.itemType;
             var countryIds = [];
@@ -85,7 +85,7 @@ define(function(require) {
 
             if (missingPreviews.indexOf(moduleObject ? moduleObject.href : modelType) === -1 || promotionsOrBrandingItems) {
                 if (promotionsOrBrandingItems) {
-                    href = promotionItems ? 'promotions' : 'brandingActivity';
+                    href = promotionItems ? 'promotions' : 'marketingCampaign';
                 }
                 href = href ? href : moduleObject.href;
                 translationUrl = 'translations/' + self.currentLanguage + '/' + href;

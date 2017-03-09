@@ -6,9 +6,9 @@ const ObjectiveModel = require('./../types/objective/model');
 const CompetitorBrandingModel = require('./../types/competitorBranding/model');
 const PromotionModel = require('./../types/promotion/model');
 const PromotionItemModel = require('./../types/promotionItem/model');
-const MarketingCampaignModel = require('./../types/brandingActivity/model');
-const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
-const MarketingCampaignItemModel = require('./../types/brandingActivityItem/model');
+const MarketingCampaignModel = require('./../types/marketingCampaign/model');
+const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDisplay/model');
+const MarketingCampaignItemModel = require('./../types/marketingCampaignItem/model');
 const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
 const ContactUsModel = require('../types/contactUs/model');
 const redis = require('./../helpers/redisClient');
@@ -120,15 +120,15 @@ var Comment = function () {
             let mid;
 
             switch (context) {
-                case CONTENT_TYPES.BRANDING_ACTIVITY:
+                case CONTENT_TYPES.MARKETING_CAMPAIGN:
                     ContextModel = MarketingCampaignModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY;
                     break;
-                case CONTENT_TYPES.BRANDING_AND_DISPLAY:
-                    ContextModel = BrandingAndDisplayModel;
+                case CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY:
+                    ContextModel = BrandingAndMonthlyDisplayModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT;
                     break;
-                case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
+                case CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM:
                     ContextModel = MarketingCampaignItemModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY_ITEMS;
                     break;
@@ -832,7 +832,7 @@ var Comment = function () {
             var isMobile = req.isMobile;
 
             switch (context) {
-                case CONTENT_TYPES.BRANDINGANDDISPLAYITEMS:
+                case CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM:
                     ContextModel = MarketingCampaignItemModel;
                     break;
                 case CONTENT_TYPES.COMPETITORBRANDING:
@@ -841,7 +841,7 @@ var Comment = function () {
                 case CONTENT_TYPES.COMPETITORPROMOTION:
                     ContextModel = CompetitorPromotionModel;
                     break;
-                case CONTENT_TYPES.BRANDING_ACTIVITY_ITEMS:
+                case CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM:
                     ContextModel = MarketingCampaignItemModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:

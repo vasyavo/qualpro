@@ -9,8 +9,8 @@ var PersonnelHandler = require('../handlers/personnel');
 module.exports = function () {
     var personnelHandler = new PersonnelHandler();
     var activityListRouter = require('./mobile/activityList')();
-    var brandingActivityRouter = require('./mobile/brandingActivity')();
-    var brandingActivityItemsRouter = require('./mobile/brandingActivityItems')();
+    var brandingActivityRouter = require('./mobile/marketingCampaign')();
+    var brandingActivityItemsRouter = require('./mobile/marketingCampaignItem')();
     var domainRouter = require('./mobile/domain')();
     var notificationsRouter = require('./mobile/notifications')();
     var notesRouter = require('./mobile/note')();
@@ -50,9 +50,9 @@ module.exports = function () {
 
     router.use('/personnel', require('./mobile/personnel')());
     router.use('/activityList', activityListRouter);
-    router.use('/brandingAndDisplay', require('./mobile/brandingAndDisplay'));
-    router.use('/brandingActivity', brandingActivityRouter);
-    router.use('/brandingActivityItems', brandingActivityItemsRouter);
+    router.use('/brandingAndDisplay', require('./mobile/brandingAndMonthlyDisplay'));
+    router.use('/marketingCampaign', brandingActivityRouter);
+    router.use('/marketingCampaignItem', brandingActivityItemsRouter);
     router.use('/domain', domainRouter);
     router.use('/accessRole', accessRoleRouter);
     router.use('/notifications', notificationsRouter);

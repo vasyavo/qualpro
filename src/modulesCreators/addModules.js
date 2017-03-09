@@ -394,7 +394,7 @@ const modules = [
     {
         _id     : 38,
         name    : {en: 'al alali Marketing Campaigns', ar: 'al alali Marketing Campaigns'}, // todo translation
-        href    : CONSTANTS.BRANDING_ACTIVITY,
+        href    : CONSTANTS.MARKETING_CAMPAIGN,
         sequence: 38,
         parrent : 16,
         visible : true
@@ -406,7 +406,7 @@ const modules = [
             en: 'al alali Branding Activity items',
             ar: '' /*'العلامات التجارية وتقارير العرض للسلع'*/ // todo translation
         },
-        href    : CONSTANTS.BRANDING_ACTIVITY_ITEMS,
+        href    : CONSTANTS.MARKETING_CAMPAIGN_ITEM,
         sequence: 40,
         parrent : 16,
         visible : false
@@ -491,7 +491,7 @@ const modules = [
     {
         _id     : 45,
         name    : {en: 'al alali Branding & Monthly display', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
-        href    : CONSTANTS.BRANDING_AND_DISPLAY,
+        href    : CONSTANTS.BRANDING_AND_MONTHLY_DISPLAY,
         sequence: 45,
         parrent : 16,
         visible : true

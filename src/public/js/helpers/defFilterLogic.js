@@ -112,11 +112,11 @@ define([
             all: priceSurveyAllFilter
         };
 
-        this[CONTENT_TYPES.BRANDING_AND_DISPLAY] = {
+        this[CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY] = {
             all: {}
         };
 
-        this[CONTENT_TYPES.BRANDING_ACTIVITY] = {
+        this[CONTENT_TYPES.MARKETING_CAMPAIGN] = {
             all: {}
         };
 
