@@ -10,7 +10,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.OBJECTIVE;
         const contentType = contentTypes.OBJECTIVES;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.SAVED_AS_DRAFT;
 
         const {
             accessRoleLevel,

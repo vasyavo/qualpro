@@ -3,7 +3,7 @@ const async = require('async');
 const _ = require('underscore');
 const lodash = require('lodash');
 const PersonnelModel = require('./../types/personnel/model');
-const BrandingActivityModel = require('../types/brandingActivity/model');
+const MarketingCampaignModel = require('./../types/marketingCampaign/model');
 const ObjectiveModel = require('./../types/objective/model');
 const ItemModel = require('./../types/item/model');
 const ActivityListModel = require('./../types/activityList/model');
@@ -25,14 +25,14 @@ const NotificationModel = require('./../types/notification/model');
 const BranchModel = require('./../types/branch/model');
 const OutletModel = require('./../types/outlet/model');
 const NewProductLaunchModel = require('./../types/newProductLaunch/model');
-const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDisplay/model');
 const AggregationHelper = require('../helpers/aggregationCreater');
 const FilterMapper = require('../helpers/filterMapper');
 const FILTERS_CONSTANTS = require('../public/js/constants/filters');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const logger = require('./../utils/logger');
 const redis = require('./../helpers/redisClient');
-const aclModuleNames = require('./../constants/aclModulesNames');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const Filters = function() {
     const self = this;
@@ -1550,7 +1550,7 @@ const Filters = function() {
             },
         });
 
-        aggregation = BrandingActivityModel.aggregate(pipeLine);
+        aggregation = MarketingCampaignModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true,
@@ -1593,7 +1593,7 @@ const Filters = function() {
                 filterExists,
                 filtersObject: result,
                 personnelId: req.personnelModel._id,
-                contentType: CONTENT_TYPES.BRANDINGANDDISPLAY,
+                contentType: CONTENT_TYPES.MARKETING_CAMPAIGN,
             }, (err, response) => {
                 if (err) {
                     return next(err);
@@ -2201,23 +2201,43 @@ const Filters = function() {
     this.activityListFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
-
-        // fixme: fix module type => should be 'integer' but get 'string' from UI
-        if (queryFilter.module) {
-            queryFilter.module.type = 'integer';
-        }
-
-        const filterMapper = new FilterMapper();
-        const filter = filterMapper.mapFilter({
-            filter: queryFilter,
-            personnel: req.personnelModel,
-        });
-
         const globalSearch = queryFilter.globalSearch;
-        const periodFilter = queryFilter.time;
         const $matchPersonnel = {
             $and: [],
         };
+
+        const filter = {};
+        const isObjectId = (filter) => {
+            return filter.type === 'ObjectId';
+        };
+
+        if (queryFilter.country && isObjectId(queryFilter.country)) {
+            filter.setCountry = queryFilter.country.values.map(id => ObjectId(id));
+        }
+
+        if (queryFilter.region && isObjectId(queryFilter.region)) {
+            filter.setRegion = queryFilter.region.values.map(id => ObjectId(id));
+        }
+
+        if (queryFilter.subRegion && isObjectId(queryFilter.subRegion)) {
+            filter.setSubRegion = queryFilter.subRegion.values.map(id => ObjectId(id));
+        }
+
+        if (queryFilter.branch && isObjectId(queryFilter.branch)) {
+            filter.setBranch = queryFilter.branch.values.map(id => ObjectId(id));
+        }
+
+        if (queryFilter.module && queryFilter.module) {
+            filter.setModule = queryFilter.module.values.map(id => parseInt(id, 10));
+        }
+
+        if (queryFilter.position && isObjectId(queryFilter.position)) {
+            filter.setPosition = queryFilter.position.values.map(id => ObjectId(id));
+        }
+
+        if (queryFilter.time) {
+            filter.setPeriod = queryFilter.time.values.map(date => new Date(date));
+        }
 
         const getSearchReference = (string) => {
             return { $regex: string, $options: 'i' };
@@ -2234,9 +2254,9 @@ const Filters = function() {
             });
         }
 
-        if (filter.position) {
+        if (filter.setPosition) {
             $matchPersonnel.$and.push({
-                position: filter.position,
+                position: filter.setPosition,
             });
         }
 
@@ -2314,13 +2334,13 @@ const Filters = function() {
             });
         }
 
-        if (periodFilter) {
+        if (filter.setPeriod) {
             pipeline.push({
                 $match: {
                     $and: [{
-                        createdAt: { $gte: new Date(periodFilter.values[0]) },
+                        createdAt: { $gte: new Date(filter.setPeriod[0]) },
                     }, {
-                        createdAt: { $lte: new Date(periodFilter.values[1]) },
+                        createdAt: { $lte: new Date(filter.setPeriod[1]) },
                     }],
                 },
             });
@@ -2330,35 +2350,9 @@ const Filters = function() {
             $and: [],
         };
 
-        const $orLocation = [];
-
-        if (filter.country) {
-            $orLocation.push({ country: filter.country });
-        }
-
-        if (filter.region) {
-            $orLocation.push({ region: filter.region });
-        }
-
-        if (filter.subRegion) {
-            $orLocation.push({ subRegion: filter.subRegion });
-        }
-
-        if ($orLocation.length) {
+        if (filter.setModule) {
             $matchGeneral.$and.push({
-                $or: $orLocation,
-            });
-        }
-
-        if (filter.branch) {
-            $matchGeneral.$and.push({
-                branch: filter.branch,
-            });
-        }
-
-        if (filter.module) {
-            $matchGeneral.$and.push({
-                module: filter.module,
+                module: filter.setModule,
             });
         }
 
@@ -2531,26 +2525,6 @@ const Filters = function() {
                 },
             },
             {
-                $addFields: {
-                    country: {
-                        $let: {
-                            vars: {
-                                setCountry: filter.country ? filter.country.$in : '$country',
-                            },
-                            in: {
-                                $filter: {
-                                    input: '$country',
-                                    as: 'item',
-                                    cond: {
-                                        $setIsSubset: [['$$item'], '$$setCountry'],
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            {
                 $lookup: {
                     from: 'domains',
                     localField: 'country',
@@ -2598,24 +2572,42 @@ const Filters = function() {
                     region: {
                         $let: {
                             vars: {
-                                setCountry: {
+                                setCountry: filter.setCountry && filter.setCountry.length ? filter.setCountry : {
                                     $map: {
                                         input: '$country',
                                         as: 'item',
                                         in: '$$item._id',
                                     },
                                 },
-                                setRegion: filter.region ? filter.region.$in : '$region',
+                                setRegion: filter.setRegion && filter.setRegion.length ? filter.setRegion : [],
                             },
                             in: {
-                                $filter: {
-                                    input: '$region',
-                                    as: 'item',
-                                    cond: {
-                                        $or: [
-                                            { $setIsSubset: [['$$item.parent'], '$$setCountry'] },
-                                            { $setIsSubset: [['$$item._id'], '$$setRegion'] },
-                                        ],
+                                $cond: {
+                                    if: {
+                                        $gt: [{
+                                            $size: '$$setRegion',
+                                        }, 0],
+                                    },
+                                    then: {
+                                        $filter: {
+                                            input: '$region',
+                                            as: 'item',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$item.parent'], '$$setCountry'] },
+                                                    { $setIsSubset: [['$$item._id'], '$$setRegion'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    else: {
+                                        $filter: {
+                                            input: '$region',
+                                            as: 'item',
+                                            cond: {
+                                                $setIsSubset: [['$$item.parent'], '$$setCountry'],
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -2653,24 +2645,42 @@ const Filters = function() {
                     subRegion: {
                         $let: {
                             vars: {
-                                setRegion: {
+                                setRegion: filter.setRegion && filter.setRegion.length ? filter.setRegion : {
                                     $map: {
                                         input: '$region',
                                         as: 'item',
                                         in: '$$item._id',
                                     },
                                 },
-                                setSubRegion: filter.subRegion ? filter.subRegion.$in : '$subRegion',
+                                setSubRegion: filter.setSubRegion && filter.setSubRegion.length ? filter.setSubRegion : [],
                             },
                             in: {
-                                $filter: {
-                                    input: '$subRegion',
-                                    as: 'item',
-                                    cond: {
-                                        $or: [
-                                            { $setIsSubset: [['$$item.parent'], '$$setRegion'] },
-                                            { $setIsSubset: [['$$item._id'], '$$setSubRegion'] },
-                                        ],
+                                $cond: {
+                                    if: {
+                                        $gt: [{
+                                            $size: '$$setSubRegion',
+                                        }, 0],
+                                    },
+                                    then: {
+                                        $filter: {
+                                            input: '$subRegion',
+                                            as: 'item',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$item.parent'], '$$setRegion'] },
+                                                    { $setIsSubset: [['$$item._id'], '$$setSubRegion'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    else: {
+                                        $filter: {
+                                            input: '$subRegion',
+                                            as: 'item',
+                                            cond: {
+                                                $setIsSubset: [['$$item.parent'], '$$setRegion'],
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -2712,13 +2722,35 @@ const Filters = function() {
                                         in: '$$item._id',
                                     },
                                 },
+                                setBranch: filter.setBranch && filter.setBranch.length ? filter.setBranch : [],
                             },
                             in: {
-                                $filter: {
-                                    input: '$branch',
-                                    as: 'item',
-                                    cond: {
-                                        $setIsSubset: [['$$item.subRegion'], '$$setSubRegion'],
+                                $cond: {
+                                    if: {
+                                        $gt: [{
+                                            $size: '$$setBranch',
+                                        }, 0],
+                                    },
+                                    then: {
+                                        $filter: {
+                                            input: '$branch',
+                                            as: 'item',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$item.subRegion'], '$$setSubRegion'] },
+                                                    { $setIsSubset: [['$$item._id'], '$$setBranch'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    else: {
+                                        $filter: {
+                                            input: '$branch',
+                                            as: 'item',
+                                            cond: {
+                                                $setIsSubset: [['$$item.subRegion'], '$$setSubRegion'],
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -2766,7 +2798,6 @@ const Filters = function() {
                     country: [],
                     region: [],
                     subRegion: [],
-                    retailSegment: [],
                     branch: [],
                     position: [],
                     module: [],
@@ -8273,7 +8304,7 @@ const Filters = function() {
             },
         });
 
-        aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+        aggregation = BrandingAndMonthlyDisplayModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true,
@@ -8313,7 +8344,7 @@ const Filters = function() {
                 filterExists,
                 filtersObject: result,
                 personnelId: req.personnelModel._id,
-                contentType: CONTENT_TYPES.BRANDING_AND_DISPLAY,
+                contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
             }, (err, response) => {
                 if (err) {
                     return next(err);

@@ -11,7 +11,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.CONSUMER_SURVEY;
         const contentType = contentTypes.CONSUMER_SURVEY;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.SAVED_AS_DRAFT;
 
         const {
             accessRoleLevel,

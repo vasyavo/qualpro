@@ -400,7 +400,7 @@ function shouldSyncBranch(agent) {
 function shouldGetBrandingActivity(agent) {
     it('should get branding activity (in past branding and display)', function *() {
         const resp = yield agent
-            .get('/mobile/brandingActivity')
+            .get('/mobile/marketingCampaign')
             .expect(200);
 
         const body = resp.body;
@@ -411,7 +411,7 @@ function shouldGetBrandingActivity(agent) {
 function shouldSyncBrandingActivity(agent) {
     it('should sync branding activity (in past branding and display)', function *() {
         const resp = yield agent
-            .get('/mobile/brandingActivity/sync')
+            .get('/mobile/marketingCampaign/sync')
             .expect(200);
 
         const body = resp.body;

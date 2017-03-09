@@ -3,8 +3,8 @@
     function getConstants(CONSTANTS) {
         var filters = {};
 
-        let brandingAndDisplayFilter = {};
-        var brandingActivity = {};
+        let brandingAndMonthlyDisplayFilter = {};
+        var marketingCampaignFilter = {};
         var priceSurveyFilter = {};
         var personnelFilter = {};
         var shelfSharesFilter = {};
@@ -144,7 +144,7 @@
 
         // filter types ['singleSelect', 'multiSelect', 'translated', 'time']
 
-        brandingActivity[CONSTANTS.COUNTRY] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.COUNTRY] = getFilterConstant({
             mandatory  : true,
             filterType : 'multiSelect',
             displayName: {
@@ -152,7 +152,7 @@
                 ar: 'الدولة'
             }
         });
-        brandingActivity[CONSTANTS.CATEGORY] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.CATEGORY] = getFilterConstant({
             mandatory  : true,
             filterType : 'multiSelect',
             displayName: {
@@ -160,7 +160,7 @@
                 ar: 'الفئة'
             }
         });
-        brandingActivity[CONSTANTS.REGION] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.REGION] = getFilterConstant({
             parent     : 'country',
             filterType : 'multiSelect',
             displayName: {
@@ -168,7 +168,7 @@
                 ar: 'المنطقة'
             }
         });
-        brandingActivity[CONSTANTS.SUBREGION] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.SUBREGION] = getFilterConstant({
             parent     : 'region',
             filterType : 'multiSelect',
             displayName: {
@@ -176,49 +176,49 @@
                 ar: 'المنطقة الفرعية:'
             }
         });
-        brandingActivity[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
             filterType : 'multiSelect',
             displayName: {
                 en: 'Trade Channel',
                 ar: 'الفئة التجارية:'
             }
         });
-        brandingActivity[CONSTANTS.OUTLET] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.OUTLET] = getFilterConstant({
             filterType : 'multiSelect',
             displayName: {
                 en: 'Customer',
                 ar: 'العميل'
             }
         });
-        brandingActivity[CONSTANTS.BRANCH] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.BRANCH] = getFilterConstant({
             filterType : 'multiSelect',
             displayName: {
                 en: 'Branch',
                 ar: 'الفرع'
             }
         });
-        brandingActivity.publisher = getFilterConstant({
+        marketingCampaignFilter.publisher = getFilterConstant({
             filterType : 'multiSelect',
             displayName: {
                 en: 'Publisher',
                 ar: 'الناشر'
             }
         });
-        brandingActivity[CONSTANTS.POSITION] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.POSITION] = getFilterConstant({
             filterType : 'multiSelect',
             displayName: {
                 en: 'Position',
                 ar: 'المركز الوظيفي'
             }
         });
-        brandingActivity[CONSTANTS.PERSONNEL] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.PERSONNEL] = getFilterConstant({
             filterType : 'multiSelect',
             displayName: {
                 en: 'Employee',
                 ar: 'الموظف'
             }
         });
-        brandingActivity[CONSTANTS.STATUS] = getFilterConstant({
+        marketingCampaignFilter[CONSTANTS.STATUS] = getFilterConstant({
             type       : 'string',
             filterType : 'multiSelect',
             displayName: {
@@ -226,12 +226,12 @@
                 ar: 'الحالة'
             }
         });
-        brandingActivity.time = getFilterConstant({
+        marketingCampaignFilter.time = getFilterConstant({
             displayName: {en: 'Time', ar: 'الوقت'},
             type       : 'date',
             filterType : 'time'
         });
-        brandingActivity.time.backendKeys = [
+        marketingCampaignFilter.time.backendKeys = [
             {
                 key     : 'createdBy.date',
                 operator: ['$gte', '$lte']
@@ -241,7 +241,7 @@
                 operator: ['$gte', '$lte']
             }
         ];
-        brandingActivity.array = [
+        marketingCampaignFilter.array = [
             CONSTANTS.COUNTRY,
             CONSTANTS.CATEGORY,
             CONSTANTS.REGION,
@@ -974,50 +974,50 @@
         ];
 
         //branding and display filters
-        brandingAndDisplayFilter[CONSTANTS.CATEGORY] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.CATEGORY] = getFilterConstant({
             displayName: {en: 'Product', ar: 'المنتج'},
             mandatory  : false,
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.COUNTRY] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.COUNTRY] = getFilterConstant({
             displayName: {en: 'Country', ar: 'الدولة'},
             mandatory  : true,
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.REGION] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.REGION] = getFilterConstant({
             displayName: {en: 'Region', ar: 'المنطقة'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.SUBREGION] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.SUBREGION] = getFilterConstant({
             displayName: {en: 'Sub-Region', ar: 'المنطقة الفرعية:'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.RETAILSEGMENT] = getFilterConstant({
             displayName: {en: 'Trade Channel', ar: 'الفئة التجارية:'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.OUTLET] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.OUTLET] = getFilterConstant({
             displayName: {en: 'Customer', ar: 'العميل'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.BRANCH] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.BRANCH] = getFilterConstant({
             displayName: {en: 'Branch', ar: 'الفرع'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.PERSONNEL] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.PERSONNEL] = getFilterConstant({
             displayName: {en: 'Employee', ar: 'الموظف'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter[CONSTANTS.POSITION] = getFilterConstant({
+        brandingAndMonthlyDisplayFilter[CONSTANTS.POSITION] = getFilterConstant({
             displayName: {en: 'Position', ar: 'المركز الوظيفي'},
             filterType : 'multiSelect'
         });
-        brandingAndDisplayFilter.time = getFilterConstant({
+        brandingAndMonthlyDisplayFilter.time = getFilterConstant({
             displayName: {en: 'Time', ar: 'الوقت'},
             type       : 'date',
             filterType : 'time'
         });
-        brandingAndDisplayFilter.time.backendKeys = [
+        brandingAndMonthlyDisplayFilter.time.backendKeys = [
             // Comment according to QPCMS-2083 Reporting > Competitor branding > filtering by Fixed period should search by creation date
             // {
             //     key     : 'dateStart',
@@ -1036,7 +1036,7 @@
                 operator: ['$gte', '$lte']
             }
         ];
-        brandingAndDisplayFilter.array = [
+        brandingAndMonthlyDisplayFilter.array = [
             CONSTANTS.CATEGORY,
             CONSTANTS.COUNTRY,
             CONSTANTS.REGION,
@@ -1731,8 +1731,8 @@
             CONSTANTS.STATUS
         ];
 
-        filters[CONSTANTS.BRANDING_AND_DISPLAY] = brandingAndDisplayFilter;
-        filters[CONSTANTS.BRANDING_ACTIVITY] = brandingActivity;
+        filters[CONSTANTS.BRANDING_AND_MONTHLY_DISPLAY] = brandingAndMonthlyDisplayFilter;
+        filters[CONSTANTS.MARKETING_CAMPAIGN] = marketingCampaignFilter;
         filters[CONSTANTS.PERSONNEL] = personnelFilter;
         filters[CONSTANTS.SHELFSHARES] = shelfSharesFilter;
         filters[CONSTANTS.PRICESURVEY] = priceSurveyFilter;
