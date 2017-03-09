@@ -22,7 +22,7 @@ validationFunctionsHelper.englishOrArabic = (value, key) => {
     return !!key;
 };
 
-validationFunctions[CONTENT_TYPE.BRANDING_ACTIVITY] = function(value, key, allowedObject) {
+validationFunctions[CONTENT_TYPE.MARKETING_CAMPAIGN] = function(value, key, allowedObject) {
     if (_.isEqual(key, 'description')) {
         return validationFunctionsHelper.englishOrArabic(value, key);
     }
@@ -30,7 +30,7 @@ validationFunctions[CONTENT_TYPE.BRANDING_ACTIVITY] = function(value, key, allow
     return _.includes(allowedObject, key);
 };
 
-validationFunctions[CONTENT_TYPE.BRANDING_ACTIVITY_ITEMS] = function(value, key, allowedObject) {
+validationFunctions[CONTENT_TYPE.MARKETING_CAMPAIGN_ITEM] = function(value, key, allowedObject) {
     return _.includes(allowedObject, key);
 };
 

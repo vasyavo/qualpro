@@ -13,7 +13,7 @@ const ObjectiveModel = require('./../../types/objective/model');
 const PromotionModel = require('./../../types/promotion/model');
 const PromotionItemModel = require('./../../types/promotionItem/model');
 const CompetitorPromotionModel = require('./../../types/competitorPromotion/model');
-const MarketingCampaignModel = require('./../../types/brandingActivity/model');
+const MarketingCampaignModel = require('./../../types/marketingCampaign/model');
 const CompetitorBrandingAndDisplayModel = require('./../../types/competitorBranding/model');
 const QuestionnaireModel = require('./../../types/questionnaries/model');
 
@@ -311,7 +311,7 @@ const competitorPromotionExpired = () => {
 };
 
 const marketingCampaignExpired = () => {
-    const contentType = CONTENT_TYPES.BRANDING_ACTIVITY;
+    const contentType = CONTENT_TYPES.MARKETING_CAMPAIGN;
     const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     const query = {
         dateEnd: {

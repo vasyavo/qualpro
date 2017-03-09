@@ -427,7 +427,7 @@ var Personnel = function() {
                                 regionsMathArray, {
                                     itemType : {
                                         $in : [
-                                            CONTENT_TYPES.BRANDINGANDDISPLAY,
+                                            CONTENT_TYPES.MARKETING_CAMPAIGN,
                                             CONTENT_TYPES.PROMOTIONS
                                         ]
                                     }

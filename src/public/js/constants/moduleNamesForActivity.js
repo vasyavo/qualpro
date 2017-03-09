@@ -309,7 +309,7 @@
                     en: 'al alali Marketing Campaigns & Display report',
                     ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'
                 },
-                href: CONSTANTS.BRANDING_ACTIVITY
+                href: CONSTANTS.MARKETING_CAMPAIGN
             },
 
             39: {
@@ -327,7 +327,7 @@
                     en: 'al alali Marketing Campaigns & Display items',
                     ar: 'العلامات التجارية وتقارير العرض للسلع'
                 },
-                href: CONSTANTS.BRANDING_ACTIVITY_ITEMS
+                href: CONSTANTS.MARKETING_CAMPAIGN_ITEM
             },
 
             45: {
@@ -336,7 +336,7 @@
                     en: 'al alali Branding & Monthly display',
                     ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'
                 },
-                href: CONSTANTS.BRANDING_AND_DISPLAY,
+                href: CONSTANTS.BRANDING_AND_MONTHLY_DISPLAY,
             },
 
             41: {

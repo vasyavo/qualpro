@@ -3,7 +3,7 @@ const async = require('async');
 const _ = require('underscore');
 const lodash = require('lodash');
 const PersonnelModel = require('./../types/personnel/model');
-const BrandingActivityModel = require('../types/brandingActivity/model');
+const MarketingCampaignModel = require('./../types/marketingCampaign/model');
 const ObjectiveModel = require('./../types/objective/model');
 const ItemModel = require('./../types/item/model');
 const ActivityListModel = require('./../types/activityList/model');
@@ -25,7 +25,7 @@ const NotificationModel = require('./../types/notification/model');
 const BranchModel = require('./../types/branch/model');
 const OutletModel = require('./../types/outlet/model');
 const NewProductLaunchModel = require('./../types/newProductLaunch/model');
-const BrandingAndDisplayModel = require('./../types/brandingAndDisplay/model');
+const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDisplay/model');
 const AggregationHelper = require('../helpers/aggregationCreater');
 const FilterMapper = require('../helpers/filterMapper');
 const FILTERS_CONSTANTS = require('../public/js/constants/filters');
@@ -1550,7 +1550,7 @@ const Filters = function() {
             },
         });
 
-        aggregation = BrandingActivityModel.aggregate(pipeLine);
+        aggregation = MarketingCampaignModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true,
@@ -1593,7 +1593,7 @@ const Filters = function() {
                 filterExists,
                 filtersObject: result,
                 personnelId: req.personnelModel._id,
-                contentType: CONTENT_TYPES.BRANDINGANDDISPLAY,
+                contentType: CONTENT_TYPES.MARKETING_CAMPAIGN,
             }, (err, response) => {
                 if (err) {
                     return next(err);
@@ -8304,7 +8304,7 @@ const Filters = function() {
             },
         });
 
-        aggregation = BrandingAndDisplayModel.aggregate(pipeLine);
+        aggregation = BrandingAndMonthlyDisplayModel.aggregate(pipeLine);
 
         aggregation.options = {
             allowDiskUse: true,
@@ -8344,7 +8344,7 @@ const Filters = function() {
                 filterExists,
                 filtersObject: result,
                 personnelId: req.personnelModel._id,
-                contentType: CONTENT_TYPES.BRANDING_AND_DISPLAY,
+                contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
             }, (err, response) => {
                 if (err) {
                     return next(err);

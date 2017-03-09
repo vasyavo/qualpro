@@ -18,8 +18,8 @@ module.exports = function(app) {
     var ModuleslHandler = require('../handlers/modules');
     var modulesHandler = new ModuleslHandler();
 
-    var brandingActivityRouter = require('./brandingActivity')();
-    var brandingActivityItems = require('./brandingActivityItems')();
+    var marketingCampaignRouter = require('./marketingCampaign')();
+    var marketingCampaignItemRouter = require('./marketingCampaignItem')();
     var personnelRouter = require('./personnel')();
     var mobileRouter = require('./mobile')();
     var notificationsRouter = require('./notifications')();
@@ -94,9 +94,9 @@ module.exports = function(app) {
     app.use(require('./../stories/user-registration'));
 
     app.use('/activityList', activityList);
-    app.use('/brandingAndDisplayNew', require('./brandingAndDisplay'));
-    app.use('/brandingActivity', brandingActivityRouter);
-    app.use('/brandingActivityItems', brandingActivityItems);
+    app.use('/brandingAndMonthlyDisplay', require('./brandingAndMonthlyDisplay'));
+    app.use('/marketingCampaign', marketingCampaignRouter);
+    app.use('/marketingCampaignItem', marketingCampaignItemRouter);
     app.use('/personnel', personnelRouter);
     app.use('/domain', domainRouter);
     app.use('/country', domainRouter);
