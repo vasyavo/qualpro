@@ -248,21 +248,18 @@ const schema = new Schema({
         default: 'sendPass',
     },
     avgRating: {
-        type: {
-            monthly: {
-                type: Number,
-                required: false,
-                min: 1,
-                max: 5,
-            },
-            biYearly: {
-                type: Number,
-                required: false,
-                min: 1,
-                max: 5,
-            },
+        monthly: {
+            type: Number,
+            required: false,
+            min: 1,
+            max: 5,
         },
-        required: false,
+        biYearly: {
+            type: Number,
+            required: false,
+            min: 1,
+            max: 5,
+        },
     },
     currentLanguage: {
         type: String,
