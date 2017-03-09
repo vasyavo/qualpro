@@ -20,6 +20,8 @@ module.exports = (options) => {
         'createdBy.date': queryObject['createdBy.date'] || { $gte: new Date(today.setMonth(today.getMonth() - 2)) },
     });
 
+    $generalMatch.$and = [];
+
     if ([ACL_CONSTANTS.MASTER_ADMIN,
         ACL_CONSTANTS.MASTER_UPLOADER,
         ACL_CONSTANTS.TRADE_MARKETER,
@@ -32,8 +34,6 @@ module.exports = (options) => {
         $generalMatch.personnels = currentUser._id;
     } else {
         // if user user some of admin
-
-        $generalMatch.$and = [];
 
         locations.forEach((location) => {
             if (currentUser[location] && currentUser[location].length && !$generalMatch[location]) {
