@@ -101,8 +101,6 @@ module.exports = (req, res, next) => {
             },
 
             (response, cb) => {
-                const idsPersonnel = [];
-
                 response = response.length ?
                     response[0] : {
                         data: [],
@@ -116,44 +114,7 @@ module.exports = (req, res, next) => {
                     });
                 }
 
-                _.forEach(response.data, (model) => {
-                    idsPersonnel.push(model.createdBy.user._id);
-                });
-
-
-                const options = {
-                    data: {
-                        [CONTENT_TYPES.PERSONNEL]: _.uniqBy(idsPersonnel, 'id'),
-                    },
-                };
-
-                cb(null, {
-                    response,
-                    options,
-                });
-            },
-
-            (data, cb) => {
-                getImagesHelper.getImages(data.options, (err, result) => {
-                    cb(err, {
-                        response: data.response,
-                        result,
-                    });
-                });
-            },
-
-            (data, cb) => {
-                const options = {
-                    response: data.response,
-                    imgsObject: data.result,
-                    fields: {
-                        [CONTENT_TYPES.PERSONNEL]: ['createdBy.user'],
-                    },
-                };
-
-                getImagesHelper.setIntoResult(options, (response) => {
-                    cb(null, response);
-                });
+                cb(null, response);
             },
 
             (response, cb) => {
