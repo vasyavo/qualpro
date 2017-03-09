@@ -8,4 +8,9 @@ module.exports = {
 
     COMPETITOR_VARIANT: 'competitorVariant',
     DELETED: 'Deleted',
+
+    EXPIRED: 'Expired',
+
+    OVERDUE: 'Overdue',
+    FAILED: 'Failed',
 };

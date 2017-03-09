@@ -10,7 +10,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.AL_ALALI_PROMOTIONS_ITEMS;
         const contentType = contentTypes.PROMOTIONSITEMS;
-        const actionType = activityTypes.UPDATED;
+        const actionType = activityTypes.EXPIRED;
         const extendedOptions = Object.assign({}, options, {
             moduleId,
             contentType,
