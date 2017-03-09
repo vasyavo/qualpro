@@ -671,6 +671,14 @@
             }
         },
 
+        SAVED_AS_DRAFT: {
+            _id : 'Saved as draft',
+            name: {
+                en: 'Saved as draft',
+                ar: 'حفظ كمسودة'
+            }
+        },
+
         DELETED: {
             _id : 'Deleted',
             name: {
