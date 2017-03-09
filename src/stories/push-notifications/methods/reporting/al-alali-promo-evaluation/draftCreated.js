@@ -10,7 +10,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.AL_ALALI_PROMO_EVALUATION;
         const contentType = contentTypes.PROMOTIONS;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.SAVED_AS_DRAFT;
 
         const {
             accessRoleLevel,

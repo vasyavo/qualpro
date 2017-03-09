@@ -11,7 +11,7 @@ module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.AL_ALALI_QUESTIONNAIRE;
         const contentType = contentTypes.QUESTIONNARIES;
-        const actionType = activityTypes.CREATED;
+        const actionType = activityTypes.SAVED_AS_DRAFT;
 
         const {
             accessRoleLevel,
