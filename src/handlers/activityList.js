@@ -414,18 +414,19 @@ const Personnel = function() {
                         itemType: {
                             $in: [CONTENT_TYPES.OBJECTIVES, CONTENT_TYPES.INSTORETASKS],
                         },
-                        {
-                            $and : [
-                                regionsMathArray, {
-                                    itemType : {
-                                        $in : [
-                                            CONTENT_TYPES.MARKETING_CAMPAIGN,
-                                            CONTENT_TYPES.PROMOTIONS
-                                        ]
-                                    }
-                                }
-                            ]
-                        },
+                    },
+                    {
+                        $and: [
+                            regionsMathArray,
+                            {
+                                itemType: {
+                                    $in: [
+                                        CONTENT_TYPES.MARKETING_CAMPAIGN,
+                                        CONTENT_TYPES.PROMOTIONS,
+                                    ],
+                                },
+                            },
+                        ],
                     },
                 ],
             });

@@ -2246,10 +2246,8 @@ const Filters = function() {
         if (globalSearch && globalSearch.length > 0) {
             $matchPersonnel.$and.push({
                 $or: [
-                    { 'createdBy.firstName.en': getSearchReference(globalSearch) },
-                    { 'createdBy.firstName.ar': getSearchReference(globalSearch) },
-                    { 'createdBy.lastName.en': getSearchReference(globalSearch) },
-                    { 'createdBy.lastName.ar': getSearchReference(globalSearch) },
+                    { 'createdBy.name.en': getSearchReference(globalSearch) },
+                    { 'createdBy.name.ar': getSearchReference(globalSearch) },
                 ],
             });
         }
@@ -2261,26 +2259,34 @@ const Filters = function() {
         }
 
         const isSearch = $matchPersonnel.$and.length > 0;
+        const today = new Date();
 
-        const pipeline = [{
-            $project: {
-                country: {
-                    $ifNull: ['$country', []],
+        const pipeline = [
+            {
+                $match: {
+                    'createdBy.date': { $gte: new Date(today.setMonth(today.getMonth() - 2)) },
                 },
-                region: {
-                    $ifNull: ['$region', []],
-                },
-                subRegion: {
-                    $ifNull: ['$subRegion', []],
-                },
-                branch: {
-                    $ifNull: ['$branch', []],
-                },
-                createdBy: '$createdBy.user',
-                createdAt: '$createdBy.date',
-                module: 1,
             },
-        }];
+            {
+                $project: {
+                    country: {
+                        $ifNull: ['$country', []],
+                    },
+                    region: {
+                        $ifNull: ['$region', []],
+                    },
+                    subRegion: {
+                        $ifNull: ['$subRegion', []],
+                    },
+                    branch: {
+                        $ifNull: ['$branch', []],
+                    },
+                    createdBy: '$createdBy.user',
+                    createdAt: '$createdBy.date',
+                    module: 1,
+                },
+            },
+        ];
 
         if (isSearch) {
             pipeline.push(...[
@@ -2312,6 +2318,14 @@ const Filters = function() {
                                 in: {
                                     firstName: '$$user.firstName',
                                     lastName: '$$user.lastName',
+                                    name: {
+                                        en: {
+                                            $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'],
+                                        },
+                                        ar: {
+                                            $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'],
+                                        },
+                                    },
                                     position: '$$user.position',
                                 },
                             },

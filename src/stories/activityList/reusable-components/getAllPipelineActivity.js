@@ -1,5 +1,7 @@
 const _ = require('lodash');
 const ACL_CONSTANTS = require('../../../constants/aclRolesNames');
+const ACTIVITY_TYPES = require('../../../constants/activityTypes');
+const ACL_MODULES_NAMES = require('../../../constants/aclModulesNames');
 
 module.exports = (options) => {
     const {
@@ -13,9 +15,10 @@ module.exports = (options) => {
 
     const pipeLine = [];
     const locations = ['country', 'region', 'subRegion', 'branch'];
+    const today = new Date();
 
     const $generalMatch = Object.assign({}, queryObject, {
-        'createdBy.date': { $gte: new Date((new Date()).setMonth((new Date()).getMonth() - 2)) },
+        'createdBy.date': queryObject['createdBy.date'] || { $gte: new Date(today.setMonth(today.getMonth() - 2)) },
     });
 
     if ([ACL_CONSTANTS.MASTER_ADMIN,
@@ -30,22 +33,71 @@ module.exports = (options) => {
         $generalMatch.personnels = currentUser._id;
     } else {
         // if user user some of admin
+
+        $generalMatch.$and = [];
+
         locations.forEach((location) => {
             if (currentUser[location] && currentUser[location].length && !$generalMatch[location]) {
-                $generalMatch.$or = [
-                    {
-                        [location]: { $in: currentUser[location] },
-                    },
-                    {
-                        [location]: { $eq: [] },
-                    },
-                    {
-                        [location]: { $eq: null },
-                    },
-                ];
+                $generalMatch.$and.push({
+                    $or: [
+                        {
+                            [location]: { $in: currentUser[location] },
+                        },
+                        {
+                            [location]: { $eq: [] },
+                        },
+                        {
+                            [location]: { $eq: null },
+                        },
+                    ],
+                });
             }
         });
     }
+
+    $generalMatch.$and.push({
+        $or: [
+            {
+                $and: [
+                    {
+                        actionType: ACTIVITY_TYPES.SAVED_AS_DRAFT,
+                    },
+                    {
+                        'createdBy.user': currentUser._id,
+                    },
+                ],
+            },
+            {
+                actionType: {
+                    $ne: ACTIVITY_TYPES.SAVED_AS_DRAFT,
+                },
+            },
+        ],
+    });
+
+    $generalMatch.$and.push({
+        $or: [
+            {
+                $and: [
+                    {
+                        module: { $in: [ACL_MODULES_NAMES.DOCUMENT, ACL_MODULES_NAMES.NOTE] },
+                    },
+                    {
+                        'createdBy.user': currentUser._id,
+                    },
+                ],
+            },
+            {
+                module: {
+                    $nin: [ACL_MODULES_NAMES.DOCUMENT, ACL_MODULES_NAMES.NOTE],
+                },
+            },
+        ],
+    });
+
+    $generalMatch['createdBy.user'] = {
+        $ne: null,
+    };
 
     pipeLine.push({
         $match: $generalMatch,
@@ -74,7 +126,12 @@ module.exports = (options) => {
                         in: {
                             _id: '$$createdByUser._id',
                             name: {
-                                $concat: ['$$createdByUser.firstName.en', ' ', '$$createdByUser.lastName.en'],
+                                en: {
+                                    $concat: ['$$createdByUser.firstName.en', ' ', '$$createdByUser.lastName.en'],
+                                },
+                                ar: {
+                                    $concat: ['$$createdByUser.firstName.ar', ' ', '$$createdByUser.lastName.ar'],
+                                },
                             },
                             firstName: '$$createdByUser.firstName',
                             lastName: '$$createdByUser.lastName',
@@ -86,6 +143,21 @@ module.exports = (options) => {
             },
         },
     });
+
+    const getSearchReference = (string) => {
+        return { $regex: string, $options: 'i' };
+    };
+
+    if (filterSearch && filterSearch.length > 0) {
+        pipeLine.push({
+            $match: {
+                $or: [
+                    { 'createdBy.user.name.en': getSearchReference(filterSearch) },
+                    { 'createdBy.user.name.ar': getSearchReference(filterSearch) },
+                ],
+            },
+        });
+    }
 
     if (queryObject.position && queryObject.position.$in) {
         pipeLine.push({
@@ -101,44 +173,46 @@ module.exports = (options) => {
         },
     });
 
-    pipeLine.push({
-        $project: {
-            setActivity: {
-                $let: {
-                    vars: {
-                        skip,
-                        limit,
-                    },
-                    in: {
-                        $cond: {
-                            if: {
-                                $gte: [
-                                    '$total',
-                                    { $add: ['$$skip', '$$limit'] },
-                                ],
-                            },
-                            then: { $slice: ['$setActivity', '$$skip', '$$limit'] },
-                            else: {
-                                $cond: {
-                                    if: {
-                                        $gte: [
-                                            '$total',
-                                            '$$skip',
-                                        ],
+    if (skip && limit) {
+        pipeLine.push({
+            $project: {
+                setActivity: {
+                    $let: {
+                        vars: {
+                            skip,
+                            limit,
+                        },
+                        in: {
+                            $cond: {
+                                if: {
+                                    $gte: [
+                                        '$total',
+                                        { $add: ['$$skip', '$$limit'] },
+                                    ],
+                                },
+                                then: { $slice: ['$setActivity', '$$skip', '$$limit'] },
+                                else: {
+                                    $cond: {
+                                        if: {
+                                            $gte: [
+                                                '$total',
+                                                '$$skip',
+                                            ],
+                                        },
+                                        then: {
+                                            $slice: ['$setActivity', '$$skip', { $subtract: ['$total', '$$skip'] }],
+                                        },
+                                        else: '$setActivity',
                                     },
-                                    then: {
-                                        $slice: ['$setActivity', '$$skip', { $subtract: ['$total', '$$skip'] }],
-                                    },
-                                    else: '$setActivity',
                                 },
                             },
                         },
                     },
                 },
+                total: 1,
             },
-            total: 1,
-        },
-    });
+        });
+    }
 
     pipeLine.push({
         $unwind: '$setActivity',
