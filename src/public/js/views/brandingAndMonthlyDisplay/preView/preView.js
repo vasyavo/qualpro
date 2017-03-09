@@ -239,7 +239,7 @@ define([
             this.commentBody = {
                 commentText: this.$el.find('#commentInput').val(),
                 objectiveId: this.model.get('_id'),
-                context    : CONTENT_TYPES.COMPETITORBRANDING
+                context    : CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY
             };
 
             commentModel.setFieldsNames(this.translation);
@@ -372,10 +372,6 @@ define([
                             text : self.translation.okBtn,
                             class: 'btn saveBtn',
                             click: function () {
-                                if (self.model.changedAttributes()) {
-                                    self.trigger('modelChanged', self.model.get('comments').length || '');
-                                }
-
                                 self.undelegateEvents();
                                 self.$el.dialog('close').dialog('destroy').remove();
                             }
