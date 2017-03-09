@@ -47,10 +47,10 @@ define([
             // input field returns value with mask
 
             if (isPhone) {
-                filteredValue = value.replace('_', '');
+                filteredValue = value.replace(/_/g, '');
             }
 
-            if (!value) {
+            if (!filteredValue || filteredValue.length <= 15) {
                 if (isPhone) {
                     this.errors.emptyPhoneInput = ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar;
                 } else {
