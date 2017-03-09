@@ -47,9 +47,6 @@ module.exports = (req, res, next) => {
         const filterMapper = new FilterMapper();
         const filter = query.filter || {};
         const filterSearch = filter.globalSearch || '';
-        const sort = {
-            'createdBy.date': -1,
-        };
 
         const searchFieldsArray = [
             'createdBy.user.firstName.en',
@@ -83,23 +80,16 @@ module.exports = (req, res, next) => {
             delete queryObject.position;
         }
 
-        for (const key in sort) {
-            sort[key] = parseInt(sort[key], 10);
-        }
-
         async.waterfall([
             async.apply(getUserInfo, uid),
 
             (currentUser, cb) => {
-                const aggregateHelper = new AggregationHelper($defProjection, queryObject);
                 const pipeLine = getAllPipelineActivity({
                     queryObject,
-                    aggregateHelper,
                     searchFieldsArray,
                     filterSearch,
                     limit,
                     skip,
-                    sort,
                     currentUser,
                     positionFilter,
                     isMobile,
