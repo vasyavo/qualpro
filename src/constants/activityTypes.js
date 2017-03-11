@@ -4,9 +4,8 @@ module.exports = {
     UNARCHIVED: 'Unarchived',
     CREATED: 'Created',
     SAVED_AS_DRAFT: 'Saved as draft',
-    COMMENTED: 'New comment was added',
+    COMMENTED: 'Commented',
 
-    COMPETITOR_VARIANT: 'competitorVariant',
     DELETED: 'Deleted',
 
     EXPIRED: 'Expired',
