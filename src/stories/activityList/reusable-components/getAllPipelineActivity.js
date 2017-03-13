@@ -248,6 +248,7 @@ module.exports = (options) => {
                         createdBy: '$$fields.createdBy',
                         actionType: '$$fields.actionType',
                         itemType: '$$fields.itemType',
+                        itemId: '$$fields.itemId',
                         itemDetails: '$$fields.itemDetails',
                         assignedTo: '$$fields.assignedTo',
                         country: '$$fields.country',
@@ -318,6 +319,7 @@ module.exports = (options) => {
             itemType: 1,
             itemDetails: 1,
             itemName: 1,
+            itemId: 1,
         },
     });
 

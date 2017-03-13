@@ -1,40 +1,13 @@
 const async = require('async');
-const _ = require('lodash');
 const CONSTANTS = require('../../../constants/mainConstants');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType');
 const access = require('../../../helpers/access')();
 const FilterMapper = require('../../../helpers/filterMapper');
 const ActivityListModel = require('./../../../types/activityList/model');
-const AggregationHelper = require('../../../helpers/aggregationCreater');
 const MODULE_NAMES = require('../../../public/js/constants/moduleNamesForActivity');
 const getUserInfo = require('../reusable-components/getUserInfo');
-const GetImageHelper = require('../../../helpers/getImages');
 const getAllPipelineActivity = require('../reusable-components/getAllPipelineActivity');
-
-const getImagesHelper = new GetImageHelper();
-
-const $defProjection = {
-    _id: 1,
-    module: 1,
-    actionType: 1,
-    itemType: 1,
-    itemDetails: 1,
-    createdBy: 1,
-    country: 1,
-    region: 1,
-    subRegion: 1,
-    branch: 1,
-    retailSegment: 1,
-    outlet: 1,
-    itemId: 1,
-    itemName: 1,
-    accessRoleLevel: 1,
-    assignedTo: 1,
-    creationDate: 1,
-    personnels: 1,
-    checkPersonnel: 1,
-};
 
 module.exports = (req, res, next) => {
     function queryRun(activity, callback) {
