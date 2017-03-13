@@ -33,6 +33,7 @@ const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const logger = require('./../utils/logger');
 const redis = require('./../helpers/redisClient');
 const ObjectId = require('mongoose').Types.ObjectId;
+const aclAcitivityListMatch = require('../stories/activityList/reusable-components/aclMatch');
 
 const Filters = function() {
     const self = this;
@@ -2263,9 +2264,15 @@ const Filters = function() {
 
         const pipeline = [
             {
-                $match: {
+                $match: Object.assign({}, aclAcitivityListMatch({
+                    currentUser: {
+                        accessRoleLevel: req.session.level,
+                        _id: req.session.uid,
+                    },
+                    queryObject: {},
+                }), {
                     'createdBy.date': { $gte: new Date(today.setMonth(today.getMonth() - 2)) },
-                },
+                }),
             },
             {
                 $project: {
