@@ -35,7 +35,8 @@ for (let level in accessRolesData) {
     const roleAccess = accessRolesData[level];
 
     accessRoles.push({
-        roleAccess
+        roleAccess,
+        level,
     });
 }
 

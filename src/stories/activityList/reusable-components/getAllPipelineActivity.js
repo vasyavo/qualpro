@@ -1,6 +1,5 @@
 const ACL_CONSTANTS = require('../../../constants/aclRolesNames');
-const ACTIVITY_TYPES = require('../../../constants/activityTypes');
-const ACL_MODULES_NAMES = require('../../../constants/aclModulesNames');
+const matchByAcl = require('./aclMatch');
 
 module.exports = (options) => {
     const {
@@ -18,9 +17,10 @@ module.exports = (options) => {
 
     const $generalMatch = Object.assign({}, queryObject, {
         'createdBy.date': queryObject['createdBy.date'] || { $gte: new Date(today.setMonth(today.getMonth() - 2)) },
-    });
-
-    $generalMatch.$and = [];
+    }, matchByAcl({
+        currentUser,
+        queryObject,
+    }));
 
     if ([ACL_CONSTANTS.MASTER_ADMIN,
         ACL_CONSTANTS.MASTER_UPLOADER,
@@ -30,11 +30,10 @@ module.exports = (options) => {
         ACL_CONSTANTS.AREA_MANAGER,
         ACL_CONSTANTS.AREA_IN_CHARGE,
     ].indexOf(currentUser.accessRoleLevel) === -1) {
-        // if user user not admin
+        // if user not admin
         $generalMatch.personnels = currentUser._id;
     } else {
-        // if user user some of admin
-
+        // if user some of admin
         locations.forEach((location) => {
             if (currentUser[location] && currentUser[location].length && !$generalMatch[location]) {
                 $generalMatch.$and.push({
@@ -53,46 +52,6 @@ module.exports = (options) => {
             }
         });
     }
-
-    $generalMatch.$and.push({
-        $or: [
-            {
-                $and: [
-                    {
-                        actionType: ACTIVITY_TYPES.SAVED_AS_DRAFT,
-                    },
-                    {
-                        'createdBy.user': currentUser._id,
-                    },
-                ],
-            },
-            {
-                actionType: {
-                    $ne: ACTIVITY_TYPES.SAVED_AS_DRAFT,
-                },
-            },
-        ],
-    });
-
-    $generalMatch.$and.push({
-        $or: [
-            {
-                $and: [
-                    {
-                        module: { $in: [ACL_MODULES_NAMES.DOCUMENT, ACL_MODULES_NAMES.NOTE] },
-                    },
-                    {
-                        'createdBy.user': currentUser._id,
-                    },
-                ],
-            },
-            {
-                module: {
-                    $nin: [ACL_MODULES_NAMES.DOCUMENT, ACL_MODULES_NAMES.NOTE],
-                },
-            },
-        ],
-    });
 
     $generalMatch['createdBy.user'] = {
         $ne: null,
