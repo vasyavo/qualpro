@@ -31,6 +31,7 @@ const FILTERS_CONSTANTS = require('../public/js/constants/filters');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const logger = require('./../utils/logger');
 const redis = require('./../helpers/redisClient');
+const ObjectId = mongoose.Types.ObjectId;
 
 const Filters = function() {
     const self = this;
@@ -7682,6 +7683,14 @@ const Filters = function() {
             $matchGeneral.$and.push({
                 country: {
                     $in: filter.setCountry,
+                },
+            });
+        }
+
+        if (filter.setCategory) {
+            $matchGeneral.$and.push({
+                categories: {
+                    $in: filter.setCategory,
                 },
             });
         }
