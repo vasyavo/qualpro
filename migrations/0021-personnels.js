@@ -29,7 +29,7 @@ exports.up = function(db, next) {
 
                 if (vacation && _.isString(vacation.cover) && vacation.cover.length === 24) {
                     logger.info('Affected personnel:', {
-                        _id: personnel._id,
+                        _id: personnel._id.toString(),
                         'vacation.cover': vacation.cover,
                     });
 
