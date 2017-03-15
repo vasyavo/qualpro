@@ -70,8 +70,9 @@ const getAll = Joi.object().keys({
     sortBy : Joi.string().default('createdAt'),
     filter : Joi.object().keys({
         createdBy : objectIdsCollection,
-        categories : objectIdsCollection,
+        category : objectIdsCollection,
         outlet : objectIdsCollection,
+        retailSegment : objectIdsCollection,
         branch : objectIdsCollection,
         country : Joi.object().keys({
             values : Joi.array().items(customJoi.objectId().toObjectId()).max(1)

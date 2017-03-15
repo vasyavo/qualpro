@@ -93,7 +93,7 @@ module.exports = function(app) {
 
     app.use(require('./../stories/user-registration'));
 
-    app.use('/activityList', activityList);
+    app.use('/activityList', require('../stories/activityList/router'));
     app.use('/brandingAndMonthlyDisplay', require('./brandingAndMonthlyDisplay'));
     app.use('/marketingCampaign', marketingCampaignRouter);
     app.use('/marketingCampaignItem', marketingCampaignItemRouter);

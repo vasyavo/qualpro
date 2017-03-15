@@ -539,7 +539,7 @@ module.exports = [
         module: ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },

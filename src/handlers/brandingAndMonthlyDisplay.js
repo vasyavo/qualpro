@@ -390,8 +390,9 @@ const getAll = (req, res, next) => {
         const searchVariants = [
             'outlet',
             'branch',
-            'categories',
             'createdBy',
+            'category',
+            'retailSegment',
         ];
         const foreignVariants = [
             'position',
@@ -416,6 +417,9 @@ const getAll = (req, res, next) => {
 
         _.forOwn(query, (value, key) => {
             if (_.includes(searchVariants, key)) {
+                // different name in ui and model
+                key = key === 'category' ? 'categories' : key;
+
                 match[key] = {};
                 match[key].$in = value.values;
             }
@@ -509,18 +513,6 @@ const getAll = (req, res, next) => {
             .append([{
                 $unwind: {
                     path: '$countries',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.POSITION}s`,
-                localField: 'createdBy.position',
-                foreignField: '_id',
-                as: 'createdBy.position',
-            })
-            .append([{
-                $unwind: {
-                    path: '$createdBy.position',
                     preserveNullAndEmptyArrays: true,
                 },
             }])
@@ -700,6 +692,18 @@ const getAll = (req, res, next) => {
                 },
             }])
             .append(condition.foreignCondition)
+            .lookup({
+                from: `${CONTENT_TYPES.POSITION}s`,
+                localField: 'createdBy.position',
+                foreignField: '_id',
+                as: 'createdBy.position',
+            })
+            .append([{
+                $unwind: {
+                    path: '$createdBy.position',
+                    preserveNullAndEmptyArrays: true,
+                },
+            }])
             .append(condition.searchCondition)
             .project({
                 createdAt: 1,
