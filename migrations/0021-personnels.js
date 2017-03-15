@@ -1,6 +1,7 @@
 const async = require('async');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+const logger = require('./../src/utils/logger');
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -24,14 +25,19 @@ exports.up = function(db, next) {
 
         (setPersonnel, cb) => {
             async.eachLimit(setPersonnel, 10, (personnel, eachCb) => {
-                const cover = personnel.vacation.cover;
+                const vacation = personnel.vacation;
 
-                if (_.isString(cover) && cover.length === 24) {
+                if (vacation && _.isString(vacation.cover) && vacation.cover.length === 24) {
+                    logger.info('Affected personnel:', {
+                        _id: personnel._id,
+                        'vacation.cover': vacation.cover,
+                    });
+
                     return db.collection('personnels').update({
                         _id: personnel._id,
                     }, {
                         $set: {
-                            'vacation.cover': ObjectId(cover),
+                            'vacation.cover': ObjectId(vacation.cover),
                         },
                     }, eachCb);
                 }
