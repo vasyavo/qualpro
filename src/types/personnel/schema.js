@@ -217,24 +217,15 @@ const schema = new Schema({
         required: false,
     },
     vacation: {
-        type: {
-            onLeave: {
-                type: Boolean,
-                required: false,
-                default: false,
-            },
-            cover: {
-                type: ObjectId,
-                required: false,
-                ref: CONTENT_TYPES.PERSONNEL,
-                default: null,
-            },
+        onLeave: {
+            type: Boolean,
+            default: false,
         },
-        default: {
-            onLeave: false,
-            cover: null,
+        cover: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
         },
-        required: false,
     },
     temp: {
         type: Boolean,
