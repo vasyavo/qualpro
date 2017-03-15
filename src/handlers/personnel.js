@@ -4,7 +4,7 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const PasswordManager = require('./../helpers/passwordManager');
 const redis = require('./../helpers/redisClient');
-const ObjectiveModel = require('./../types/personnel/model');
+const ObjectiveModel = require('./../types/objective/model');
 
 const Personnel = function () {
     const mongoose = require('mongoose');
@@ -49,41 +49,41 @@ const Personnel = function () {
     const config = require('../config');
     const redisClient = require('../helpers/redisClient');
 
-    var $defProjection = {
-        _id : 1,
-        position : 1,
-        avgRating : 1,
-        manager : 1,
-        lastAccess : 1,
-        firstName : 1,
-        lastName : 1,
-        email : 1,
-        phoneNumber : 1,
-        accessRole : 1,
-        createdBy : 1,
-        editedBy : 1,
-        vacation : 1,
-        status : 1,
-        region : 1,
-        subRegion : 1,
-        retailSegment : 1,
-        outlet : 1,
-        branch : 1,
-        country : 1,
-        currentLanguage : 1,
-        super : 1,
-        archived : 1,
-        temp : 1,
-        confirmed : 1,
-        translated : 1,
-        dateJoined : 1,
-        beforeAccess : 1,
-        lasMonthEvaluate : 1,
-        covered : 1,
-        token : 1
+    const $defProjection = {
+        _id: 1,
+        position: 1,
+        avgRating: 1,
+        manager: 1,
+        lastAccess: 1,
+        firstName: 1,
+        lastName: 1,
+        email: 1,
+        phoneNumber: 1,
+        accessRole: 1,
+        createdBy: 1,
+        editedBy: 1,
+        vacation: 1,
+        status: 1,
+        region: 1,
+        subRegion: 1,
+        retailSegment: 1,
+        outlet: 1,
+        branch: 1,
+        country: 1,
+        currentLanguage: 1,
+        super: 1,
+        archived: 1,
+        temp: 1,
+        confirmed: 1,
+        translated: 1,
+        dateJoined: 1,
+        beforeAccess: 1,
+        lasMonthEvaluate: 1,
+        covered: 1,
+        token: 1,
     };
 
-    var convertDomainsToObjectIdArray = function(body) {
+    const convertDomainsToObjectIdArray = function(body) {
         if (body.country) {
             body.country = body.country.objectID();
         }
@@ -109,18 +109,18 @@ const Personnel = function () {
         }
     };
 
-    var unselectable = function(currentLevel, context, instoreObjective) {
-        var obj = {
-            1 : [],
-            2 : ['country'],
-            3 : ['country', 'region'],
-            4 : ['country', 'region', 'subRegion']
+    const unselectable = function(currentLevel, context, instoreObjective) {
+        const obj = {
+            1: [],
+            2: ['country'],
+            3: ['country', 'region'],
+            4: ['country', 'region', 'subRegion'],
         };
-        var index;
-        var value;
+        let index;
+        let value;
 
         if (instoreObjective) {
-            return {$literal : false};
+            return { $literal: false };
         }
 
         if (obj[currentLevel]) {
@@ -130,325 +130,324 @@ const Personnel = function () {
             if (index !== -1) {
                 value = true;
             }
-            return {$literal : value};
+            return { $literal: value };
         }
 
-        return {$literal : false};
+        return { $literal: false };
     };
 
-    var pushCurrentUserCovered = function(pipeLine) {
-
+    const pushCurrentUserCovered = function(pipeLine) {
         pipeLine.push({
-            $lookup : {
-                from : 'personnels',
-                localField : '_id',
-                foreignField : 'vacation.cover',
-                as : 'covered'
-            }
+            $lookup: {
+                from: 'personnels',
+                localField: '_id',
+                foreignField: 'vacation.cover',
+                as: 'covered',
+            },
         });
 
         pipeLine.push({
-            $unwind : {
-                path : '$covered',
-                preserveNullAndEmptyArrays : true
-            }
+            $unwind: {
+                path: '$covered',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         pipeLine.push({
-            $project : {
-                _id : 1,
-                position : 1,
-                avgRating : 1,
-                manager : 1,
-                lastAccess : 1,
-                beforeAccess : 1,
-                firstName : 1,
-                lastName : 1,
-                email : 1,
-                phoneNumber : 1,
-                accessRole : 1,
-                dateJoined : 1,
-                createdBy : 1,
-                covered : {
-                    accessRole : 1,
-                    onLeave : '$covered.vacation.onLeave',
-                    _id : 1
+            $project: {
+                _id: 1,
+                position: 1,
+                avgRating: 1,
+                manager: 1,
+                lastAccess: 1,
+                beforeAccess: 1,
+                firstName: 1,
+                lastName: 1,
+                email: 1,
+                phoneNumber: 1,
+                accessRole: 1,
+                dateJoined: 1,
+                createdBy: 1,
+                covered: {
+                    accessRole: 1,
+                    onLeave: '$covered.vacation.onLeave',
+                    _id: 1,
                 },
-                vacation : 1,
-                status : 1,
-                region : 1,
-                subRegion : 1,
-                retailSegment : 1,
-                outlet : 1,
-                branch : 1,
-                country : 1,
-                currentLanguage : 1,
-                super : 1,
-                archived : 1,
-                temp : 1,
-                confirmed : 1,
-                translated : 1
-            }
+                vacation: 1,
+                status: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                country: 1,
+                currentLanguage: 1,
+                super: 1,
+                archived: 1,
+                temp: 1,
+                confirmed: 1,
+                translated: 1,
+            },
         });
 
         pipeLine.push({
-            $lookup : {
-                from : 'accessRoles',
-                localField : 'covered.accessRole',
-                foreignField : '_id',
-                as : 'covered.accessRole'
-            }
+            $lookup: {
+                from: 'accessRoles',
+                localField: 'covered.accessRole',
+                foreignField: '_id',
+                as: 'covered.accessRole',
+            },
         });
 
         pipeLine.push({
-            $project : {
-                _id : 1,
-                position : 1,
-                avgRating : 1,
-                manager : 1,
-                lastAccess : 1,
-                beforeAccess : 1,
-                firstName : 1,
-                lastName : 1,
-                email : 1,
-                phoneNumber : 1,
-                accessRole : 1,
-                dateJoined : 1,
-                createdBy : 1,
-                covered : {
-                    _id : 1,
-                    accessRoles : {
-                        $arrayElemAt : [
+            $project: {
+                _id: 1,
+                position: 1,
+                avgRating: 1,
+                manager: 1,
+                lastAccess: 1,
+                beforeAccess: 1,
+                firstName: 1,
+                lastName: 1,
+                email: 1,
+                phoneNumber: 1,
+                accessRole: 1,
+                dateJoined: 1,
+                createdBy: 1,
+                covered: {
+                    _id: 1,
+                    accessRoles: {
+                        $arrayElemAt: [
                             '$covered.accessRole',
-                            0
-                        ]
+                            0,
+                        ],
                     },
-                    onLeave : 1
+                    onLeave: 1,
                 },
-                status : 1,
-                vacation : 1,
-                region : 1,
-                subRegion : 1,
-                retailSegment : 1,
-                outlet : 1,
-                branch : 1,
-                country : 1,
-                currentLanguage : 1,
-                super : 1,
-                archived : 1,
-                temp : 1,
-                confirmed : 1,
-                translated : 1
-            }
+                status: 1,
+                vacation: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                country: 1,
+                currentLanguage: 1,
+                super: 1,
+                archived: 1,
+                temp: 1,
+                confirmed: 1,
+                translated: 1,
+            },
         });
 
         pipeLine.push({
-            $project : {
-                _id : 1,
-                position : 1,
-                avgRating : 1,
-                manager : 1,
-                lastAccess : 1,
-                beforeAccess : 1,
-                firstName : 1,
-                lastName : 1,
-                dateJoined : 1,
-                email : 1,
-                phoneNumber : 1,
-                accessRole : 1,
-                createdBy : 1,
-                covered : {
-                    _id : 1,
-                    accessRoles : {
-                        _id : 1,
-                        editedBy : 1,
-                        createdBy : 1,
-                        name : 1,
-                        __v : 1,
-                        level : 1
+            $project: {
+                _id: 1,
+                position: 1,
+                avgRating: 1,
+                manager: 1,
+                lastAccess: 1,
+                beforeAccess: 1,
+                firstName: 1,
+                lastName: 1,
+                dateJoined: 1,
+                email: 1,
+                phoneNumber: 1,
+                accessRole: 1,
+                createdBy: 1,
+                covered: {
+                    _id: 1,
+                    accessRoles: {
+                        _id: 1,
+                        editedBy: 1,
+                        createdBy: 1,
+                        name: 1,
+                        __v: 1,
+                        level: 1,
                     },
-                    onLeave : 1
+                    onLeave: 1,
                 },
-                status : 1,
-                vacation : 1,
-                region : 1,
-                subRegion : 1,
-                retailSegment : 1,
-                outlet : 1,
-                branch : 1,
-                country : 1,
-                currentLanguage : 1,
-                super : 1,
-                archived : 1,
-                temp : 1,
-                confirmed : 1,
-                translated : 1
-            }
+                status: 1,
+                vacation: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                country: 1,
+                currentLanguage: 1,
+                super: 1,
+                archived: 1,
+                temp: 1,
+                confirmed: 1,
+                translated: 1,
+            },
         });
 
         pipeLine.push({
-            $group : {
-                _id : '$_id',
-                position : {
-                    $first : '$position'
+            $group: {
+                _id: '$_id',
+                position: {
+                    $first: '$position',
                 },
-                avgRating : {
-                    $first : '$avgRating'
+                avgRating: {
+                    $first: '$avgRating',
                 },
-                manager : {
-                    $first : '$manager'
+                manager: {
+                    $first: '$manager',
                 },
-                lastAccess : {
-                    $first : '$lastAccess'
+                lastAccess: {
+                    $first: '$lastAccess',
                 },
-                beforeAccess : {
-                    $first : '$beforeAccess'
+                beforeAccess: {
+                    $first: '$beforeAccess',
                 },
-                firstName : {
-                    $first : '$firstName'
+                firstName: {
+                    $first: '$firstName',
                 },
-                lastName : {
-                    $first : '$lastName'
+                lastName: {
+                    $first: '$lastName',
                 },
-                email : {
-                    $first : '$email'
+                email: {
+                    $first: '$email',
                 },
-                phoneNumber : {
-                    $first : '$phoneNumber'
+                phoneNumber: {
+                    $first: '$phoneNumber',
                 },
-                accessRole : {
-                    $first : '$accessRole'
+                accessRole: {
+                    $first: '$accessRole',
                 },
-                dateJoined : {
-                    $first : '$dateJoined'
+                dateJoined: {
+                    $first: '$dateJoined',
                 },
-                createdBy : {
-                    $first : '$createdBy'
+                createdBy: {
+                    $first: '$createdBy',
                 },
-                vacation : {
-                    $first : '$vacation'
+                vacation: {
+                    $first: '$vacation',
                 },
-                status : {
-                    $first : '$status'
+                status: {
+                    $first: '$status',
                 },
-                region : {
-                    $first : '$region'
+                region: {
+                    $first: '$region',
                 },
-                subRegion : {
-                    $first : '$subRegion'
+                subRegion: {
+                    $first: '$subRegion',
                 },
-                retailSegment : {
-                    $first : '$retailSegment'
+                retailSegment: {
+                    $first: '$retailSegment',
                 },
-                outlet : {
-                    $first : '$outlet'
+                outlet: {
+                    $first: '$outlet',
                 },
-                branch : {
-                    $first : '$branch'
+                branch: {
+                    $first: '$branch',
                 },
-                country : {
-                    $first : '$country'
+                country: {
+                    $first: '$country',
                 },
-                currentLanguage : {
-                    $first : '$currentLanguage'
+                currentLanguage: {
+                    $first: '$currentLanguage',
                 },
-                super : {
-                    $first : '$super'
+                super: {
+                    $first: '$super',
                 },
-                archived : {
-                    $first : '$archived'
+                archived: {
+                    $first: '$archived',
                 },
-                temp : {
-                    $first : '$temp'
+                temp: {
+                    $first: '$temp',
                 },
-                confirmed : {
-                    $first : '$confirmed'
+                confirmed: {
+                    $first: '$confirmed',
                 },
-                translated : {
-                    $first : '$translated'
+                translated: {
+                    $first: '$translated',
                 },
-                covered : {
-                    $addToSet : '$covered'
-                }
-            }
+                covered: {
+                    $addToSet: '$covered',
+                },
+            },
         });
 
         return pipeLine;
     };
 
-    var personnelFindByIdAndPopulate = function(options, callback) {
-        var id = options.id || '';
-        var isCurrent = options.isCurrent || false;
-        var queryObject = {_id : ObjectId(id)};
-        var isMobile = options.isMobile || false;
+    const personnelFindByIdAndPopulate = function(options, callback) {
+        const id = options.id || '';
+        const isCurrent = options.isCurrent || false;
+        const queryObject = { _id: ObjectId(id) };
+        const isMobile = options.isMobile || false;
 
-        var aggregateHelper = new AggregationHelper($defProjection);
-        var pipeLine = [];
-        var aggregation;
+        const aggregateHelper = new AggregationHelper($defProjection);
+        let pipeLine = [];
+        let aggregation;
 
-        var domainsArray = ['country', 'region', 'subRegion'];
+        const domainsArray = ['country', 'region', 'subRegion'];
 
         pipeLine.push({
-            $match : queryObject
+            $match: queryObject,
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'position',
-            isArray : false
+            from: 'positions',
+            key: 'position',
+            isArray: false,
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'accessRole',
-            isArray : false,
-            addProjection : 'level'
+            from: 'accessRoles',
+            key: 'accessRole',
+            isArray: false,
+            addProjection: 'level',
         }));
 
-        domainsArray.forEach(function(element) {
+        domainsArray.forEach((element) => {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'domains',
-                key : element
+                from: 'domains',
+                key: element,
             }));
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'branches',
-            key : 'branch',
-            addMainProjection : ['retailSegment', 'outlet']
+            from: 'branches',
+            key: 'branch',
+            addMainProjection: ['retailSegment', 'outlet'],
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'retailSegments',
-            key : 'retailSegment'
+            from: 'retailSegments',
+            key: 'retailSegment',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'outlets',
-            key : 'outlet'
+            from: 'outlets',
+            key: 'outlet',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            nameFields : ['firstName', 'lastName'],
-            includeSiblings : {createdBy : {date : 1}}
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            nameFields: ['firstName', 'lastName'],
+            includeSiblings: { createdBy: { date: 1 } },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'manager',
-            isArray : false,
-            addProjection : ['firstName', 'lastName']
+            from: 'personnels',
+            key: 'manager',
+            isArray: false,
+            addProjection: ['firstName', 'lastName'],
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'vacation.cover',
-            isArray : false,
-            addProjection : ['firstName', 'lastName', 'accessRole', 'vacation'],
-            includeSiblings : {vacation : {onLeave : 1}}
+            from: 'personnels',
+            key: 'vacation.cover',
+            isArray: false,
+            addProjection: ['firstName', 'lastName', 'accessRole', 'vacation'],
+            includeSiblings: { vacation: { onLeave: 1 } },
         }));
 
         if (isCurrent) {
@@ -458,21 +457,21 @@ const Personnel = function () {
         aggregation = PersonnelModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse : true
+            allowDiskUse: true,
         };
 
-        aggregation.exec(function(err, result) {
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
             if (!result || !result.length) {
                 return callback(null, {});
             }
-            var coveredObject = {};
-            var personnel;
-            var ids = [result[0]._id];
-            var options = {
-                data : {}
+            let coveredObject = {};
+            let personnel;
+            const ids = [result[0]._id];
+            const options = {
+                data: {},
             };
             if (isMobile) {
                 coveredObject = [];
@@ -481,37 +480,36 @@ const Personnel = function () {
 
             if (personnel.firstName) {
                 personnel.firstName = {
-                    en : _.unescape(personnel.firstName.en),
-                    ar : _.unescape(personnel.firstName.ar)
-                }
+                    en: _.unescape(personnel.firstName.en),
+                    ar: _.unescape(personnel.firstName.ar),
+                };
             }
             if (personnel.lastName) {
                 personnel.lastName = {
-                    en : _.unescape(personnel.lastName.en),
-                    ar : _.unescape(personnel.lastName.ar)
-                }
+                    en: _.unescape(personnel.lastName.en),
+                    ar: _.unescape(personnel.lastName.ar),
+                };
             }
             if (personnel && personnel.covered && !isMobile) {
-                personnel.covered.forEach(function(value) {
+                personnel.covered.forEach((value) => {
                     if (value.onLeave) {
                         coveredObject[value._id] = value.accessRoles;
                     }
                 });
                 personnel.covered = coveredObject;
-
             }
 
             options.data[CONTENT_TYPES.PERSONNEL] = ids;
 
-            getImagesHelper.getImages(options, function(err, result) {
-                var optionsForImplement = {
-                    response : personnel,
-                    imgsObject : result,
-                    fields : {
-                        personnel : []
-                    }
+            getImagesHelper.getImages(options, (err, result) => {
+                const optionsForImplement = {
+                    response: personnel,
+                    imgsObject: result,
+                    fields: {
+                        personnel: [],
+                    },
                 };
-                getImagesHelper.setIntoResult(optionsForImplement, function(response) {
+                getImagesHelper.setIntoResult(optionsForImplement, (response) => {
                     callback(null, response);
                 });
             });
@@ -520,14 +518,14 @@ const Personnel = function () {
 
     this.getForDD = function(req, res, next) {
         function queryRun() {
-            var query = req.query;
-            var queryObject = query || {};
+            const query = req.query;
+            const queryObject = query || {};
 
             if (queryObject.outlet) {
                 queryObject.outlet = ObjectId(queryObject.outlet);
             }
 
-            PersonnelModel.find(queryObject, '_id firstName lastName fullName phoneNumber email').exec(function(err, result) {
+            PersonnelModel.find(queryObject, '_id firstName lastName fullName phoneNumber email').exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
@@ -535,7 +533,7 @@ const Personnel = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -549,19 +547,19 @@ const Personnel = function () {
 
     this.getForTree = function(req, res, next) {
         function queryRun() {
-            var query = req.query;
-            var currentLevel = req.session.level;
-            var level;
-            var queryObject = query || {};
-            var pipeLine = [];
-            var $matchObject = {};
-            var aggregation;
-            var aggregateHelper = new AggregationHelper($defProjection);
-            var currentLanguage = queryObject.currentLanguage;
-            var pipeArray = [];
-            var element;
-            var error;
-            var instoreObjective = req.query.instoreObjective;
+            const query = req.query;
+            const currentLevel = req.session.level;
+            let level;
+            const queryObject = query || {};
+            const pipeLine = [];
+            const $matchObject = {};
+            let aggregation;
+            const aggregateHelper = new AggregationHelper($defProjection);
+            const currentLanguage = queryObject.currentLanguage;
+            const pipeArray = [];
+            let element;
+            let error;
+            const instoreObjective = req.query.instoreObjective;
 
             if (!queryObject.ids || !(queryObject.ids instanceof Array) || !currentLanguage) {
                 return errorSender.badRequest(next, ERROR_MESSAGES.NOT_ENOUGH_PARAMS);
@@ -573,10 +571,10 @@ const Personnel = function () {
                     PersonnelModel
                         .findById(queryObject.ids[0])
                         .populate([{
-                            path : 'accessRole',
-                            select : 'level'
+                            path: 'accessRole',
+                            select: 'level',
                         }])
-                        .exec(function(err, personnelModel) {
+                        .exec((err, personnelModel) => {
                             if (err) {
                                 return cb(err, null);
                             }
@@ -597,7 +595,7 @@ const Personnel = function () {
                                 return cb(err, null);
                             }
 
-                            if (level ===  ACL_CONSTANTS.AREA_IN_CHARGE && personnelModel.get('branch') && personnelModel.get('branch').length){
+                            if (level === ACL_CONSTANTS.AREA_IN_CHARGE && personnelModel.get('branch') && personnelModel.get('branch').length) {
                                 level = ACL_CONSTANTS.SALES_MAN;
                             }
 
@@ -610,335 +608,335 @@ const Personnel = function () {
                         return cb(null, []);
                     }
 
-                    //show all tree for level > 4
+                    // show all tree for level > 4
                     if (level > ACL_CONSTANTS.SALES_MAN) {
                         level = ACL_CONSTANTS.SALES_MAN;
                     }
 
                     queryObject.ids = queryObject.ids.objectID();
 
-                    $matchObject._id = {$in : queryObject.ids};
+                    $matchObject._id = { $in: queryObject.ids };
 
                     pipeLine.push({
-                        $match : $matchObject
+                        $match: $matchObject,
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$country',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $unwind: {
+                            path: '$country',
+                            preserveNullAndEmptyArrays: true,
+                        },
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$region',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $unwind: {
+                            path: '$region',
+                            preserveNullAndEmptyArrays: true,
+                        },
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$subRegion',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $unwind: {
+                            path: '$subRegion',
+                            preserveNullAndEmptyArrays: true,
+                        },
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$branch',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $unwind: {
+                            path: '$branch',
+                            preserveNullAndEmptyArrays: true,
+                        },
                     });
 
                     pipeLine.push({
-                        $lookup : {
-                            from : 'domains',
-                            localField : 'country',
-                            foreignField : '_id',
-                            as : 'country'
-                        }
+                        $lookup: {
+                            from: 'domains',
+                            localField: 'country',
+                            foreignField: '_id',
+                            as: 'country',
+                        },
                     });
 
                     pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            country : {
-                                _id : {$arrayElemAt : ['$country._id', 0]},
-                                title : {$arrayElemAt : ['$country.name.' + currentLanguage, 0]},
-                                expanded : {$literal : true},
-                                selected : {$literal : false},
-                                unselectable : unselectable(currentLevel, 'country', instoreObjective),
-                                contentType : {$literal : 'country'},
-                                key : {$arrayElemAt : ['$country._id', 0]}
-                            }
-                        })
-                    });
-
-                    pipeLine.push({
-                        $lookup : {
-                            from : 'domains',
-                            localField : 'region',
-                            foreignField : '_id',
-                            as : 'region'
-                        }
-                    });
-
-                    pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            region : {
-                                _id : {$arrayElemAt : ['$region._id', 0]},
-                                title : {$arrayElemAt : ['$region.name.' + currentLanguage, 0]},
-                                expanded : {$literal : true},
-                                selected : {$literal : false},
-                                unselectable : unselectable(currentLevel, 'region', instoreObjective),
-                                contentType : {$literal : 'region'},
-                                key : {$arrayElemAt : ['$region._id', 0]}
-                            }
-                        })
-                    });
-
-                    pipeLine.push({
-                        $lookup : {
-                            from : 'domains',
-                            localField : 'subRegion',
-                            foreignField : '_id',
-                            as : 'subRegion'
-                        }
-                    });
-
-                    pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            subRegion : {
-                                _id : {$arrayElemAt : ['$subRegion._id', 0]},
-                                title : {$arrayElemAt : ['$subRegion.name.' + currentLanguage, 0]},
-                                expanded : {$literal : true},
-                                selected : {$literal : false},
-                                unselectable : unselectable(currentLevel, 'subRegion', instoreObjective),
-                                contentType : {$literal : 'subRegion'},
-                                key : {$arrayElemAt : ['$subRegion._id', 0]}
-                            }
-                        })
-                    });
-
-                    pipeLine.push({
-                        $lookup : {
-                            from : 'branches',
-                            localField : 'branch',
-                            foreignField : '_id',
-                            as : 'branch'
-                        }
-                    });
-
-                    pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            branch : {
-                                _id : {$arrayElemAt : ['$branch._id', 0]},
-                                title : {$arrayElemAt : ['$branch.name.' + currentLanguage, 0]},
-                                expanded : {$literal : true},
-                                selected : {$literal : false},
-                                contentType : {$literal : 'branch'},
-                                key : {$arrayElemAt : ['$branch._id', 0]}
+                        $project: aggregateHelper.getProjection({
+                            country: {
+                                _id: { $arrayElemAt: ['$country._id', 0] },
+                                title: { $arrayElemAt: [`$country.name.${currentLanguage}`, 0] },
+                                expanded: { $literal: true },
+                                selected: { $literal: false },
+                                unselectable: unselectable(currentLevel, 'country', instoreObjective),
+                                contentType: { $literal: 'country' },
+                                key: { $arrayElemAt: ['$country._id', 0] },
                             },
-                            retailSegment : {$arrayElemAt : ['$branch.retailSegment', 0]},
-                            outlet : {$arrayElemAt : ['$branch.outlet', 0]}
-                        })
+                        }),
                     });
 
                     pipeLine.push({
-                        $lookup : {
-                            from : 'retailSegments',
-                            localField : 'retailSegment',
-                            foreignField : '_id',
-                            as : 'retailSegment'
-                        }
+                        $lookup: {
+                            from: 'domains',
+                            localField: 'region',
+                            foreignField: '_id',
+                            as: 'region',
+                        },
                     });
 
                     pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            retailSegment : {
-                                _id : {$arrayElemAt : ['$retailSegment._id', 0]},
-                                title : {$arrayElemAt : ['$retailSegment.name.' + currentLanguage, 0]},
-                                expanded : {$literal : true},
-                                selected : {$literal : false},
-                                contentType : {$literal : 'retailSegment'},
-                                key : {$arrayElemAt : ['$retailSegment._id', 0]}
-                            }
-                        })
+                        $project: aggregateHelper.getProjection({
+                            region: {
+                                _id: { $arrayElemAt: ['$region._id', 0] },
+                                title: { $arrayElemAt: [`$region.name.${currentLanguage}`, 0] },
+                                expanded: { $literal: true },
+                                selected: { $literal: false },
+                                unselectable: unselectable(currentLevel, 'region', instoreObjective),
+                                contentType: { $literal: 'region' },
+                                key: { $arrayElemAt: ['$region._id', 0] },
+                            },
+                        }),
                     });
 
                     pipeLine.push({
-                        $lookup : {
-                            from : 'outlets',
-                            localField : 'outlet',
-                            foreignField : '_id',
-                            as : 'outlet'
-                        }
+                        $lookup: {
+                            from: 'domains',
+                            localField: 'subRegion',
+                            foreignField: '_id',
+                            as: 'subRegion',
+                        },
                     });
 
                     pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            outlet : {
-                                _id : {$arrayElemAt : ['$outlet._id', 0]},
-                                title : {$arrayElemAt : ['$outlet.name.' + currentLanguage, 0]},
-                                expanded : {$literal : true},
-                                selected : {$literal : false},
-                                contentType : {$literal : 'outlet'},
-                                key : {$arrayElemAt : ['$outlet._id', 0]}
-                            }
-                        })
+                        $project: aggregateHelper.getProjection({
+                            subRegion: {
+                                _id: { $arrayElemAt: ['$subRegion._id', 0] },
+                                title: { $arrayElemAt: [`$subRegion.name.${currentLanguage}`, 0] },
+                                expanded: { $literal: true },
+                                selected: { $literal: false },
+                                unselectable: unselectable(currentLevel, 'subRegion', instoreObjective),
+                                contentType: { $literal: 'subRegion' },
+                                key: { $arrayElemAt: ['$subRegion._id', 0] },
+                            },
+                        }),
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$country',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $lookup: {
+                            from: 'branches',
+                            localField: 'branch',
+                            foreignField: '_id',
+                            as: 'branch',
+                        },
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$region',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $project: aggregateHelper.getProjection({
+                            branch: {
+                                _id: { $arrayElemAt: ['$branch._id', 0] },
+                                title: { $arrayElemAt: [`$branch.name.${currentLanguage}`, 0] },
+                                expanded: { $literal: true },
+                                selected: { $literal: false },
+                                contentType: { $literal: 'branch' },
+                                key: { $arrayElemAt: ['$branch._id', 0] },
+                            },
+                            retailSegment: { $arrayElemAt: ['$branch.retailSegment', 0] },
+                            outlet: { $arrayElemAt: ['$branch.outlet', 0] },
+                        }),
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$subRegion',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $lookup: {
+                            from: 'retailSegments',
+                            localField: 'retailSegment',
+                            foreignField: '_id',
+                            as: 'retailSegment',
+                        },
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$retailSegment',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $project: aggregateHelper.getProjection({
+                            retailSegment: {
+                                _id: { $arrayElemAt: ['$retailSegment._id', 0] },
+                                title: { $arrayElemAt: [`$retailSegment.name.${currentLanguage}`, 0] },
+                                expanded: { $literal: true },
+                                selected: { $literal: false },
+                                contentType: { $literal: 'retailSegment' },
+                                key: { $arrayElemAt: ['$retailSegment._id', 0] },
+                            },
+                        }),
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$outlet',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $lookup: {
+                            from: 'outlets',
+                            localField: 'outlet',
+                            foreignField: '_id',
+                            as: 'outlet',
+                        },
                     });
 
                     pipeLine.push({
-                        $unwind : {
-                            path : '$branch',
-                            preserveNullAndEmptyArrays : true
-                        }
+                        $project: aggregateHelper.getProjection({
+                            outlet: {
+                                _id: { $arrayElemAt: ['$outlet._id', 0] },
+                                title: { $arrayElemAt: [`$outlet.name.${currentLanguage}`, 0] },
+                                expanded: { $literal: true },
+                                selected: { $literal: false },
+                                contentType: { $literal: 'outlet' },
+                                key: { $arrayElemAt: ['$outlet._id', 0] },
+                            },
+                        }),
                     });
 
-                    //=============add some conditions for tree===========
+                    pipeLine.push({
+                        $unwind: {
+                            path: '$country',
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    });
+
+                    pipeLine.push({
+                        $unwind: {
+                            path: '$region',
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    });
+
+                    pipeLine.push({
+                        $unwind: {
+                            path: '$subRegion',
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    });
+
+                    pipeLine.push({
+                        $unwind: {
+                            path: '$retailSegment',
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    });
+
+                    pipeLine.push({
+                        $unwind: {
+                            path: '$outlet',
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    });
+
+                    pipeLine.push({
+                        $unwind: {
+                            path: '$branch',
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    });
+
+                    //= ============add some conditions for tree===========
 
                     pipeArray.push({
-                        $group : {
-                            _id : '$country._id',
-                            title : {$first : '$country.title'},
-                            expanded : {$first : '$country.expanded'},
-                            selected : {$first : '$country.selected'},
-                            unselectable : {$first : '$country.unselectable'},
-                            contentType : {$first : '$country.contentType'},
-                            key : {$first : '$country.key'},
-                            children : {
-                                $addToSet : {
-                                    _id : '$region._id',
-                                    title : '$region.title',
-                                    expanded : '$region.expanded',
-                                    selected : '$region.selected',
-                                    unselectable : '$region.unselectable',
-                                    contentType : '$region.contentType',
-                                    key : '$region.key',
-                                    children : '$children'
-                                }
-                            }
-                        }
+                        $group: {
+                            _id: '$country._id',
+                            title: { $first: '$country.title' },
+                            expanded: { $first: '$country.expanded' },
+                            selected: { $first: '$country.selected' },
+                            unselectable: { $first: '$country.unselectable' },
+                            contentType: { $first: '$country.contentType' },
+                            key: { $first: '$country.key' },
+                            children: {
+                                $addToSet: {
+                                    _id: '$region._id',
+                                    title: '$region.title',
+                                    expanded: '$region.expanded',
+                                    selected: '$region.selected',
+                                    unselectable: '$region.unselectable',
+                                    contentType: '$region.contentType',
+                                    key: '$region.key',
+                                    children: '$children',
+                                },
+                            },
+                        },
                     });
 
                     pipeArray.push({
-                        $group : {
-                            _id : '$region._id',
-                            region : {$first : '$region'},
-                            country : {$first : '$country'},
-                            children : {
-                                $addToSet : {
-                                    _id : '$subRegion._id',
-                                    title : '$subRegion.title',
-                                    expanded : '$subRegion.expanded',
-                                    selected : '$subRegion.selected',
-                                    unselectable : '$subRegion.unselectable',
-                                    contentType : '$subRegion.contentType',
-                                    key : '$subRegion.key',
-                                    children : '$children'
-                                }
-                            }
-                        }
+                        $group: {
+                            _id: '$region._id',
+                            region: { $first: '$region' },
+                            country: { $first: '$country' },
+                            children: {
+                                $addToSet: {
+                                    _id: '$subRegion._id',
+                                    title: '$subRegion.title',
+                                    expanded: '$subRegion.expanded',
+                                    selected: '$subRegion.selected',
+                                    unselectable: '$subRegion.unselectable',
+                                    contentType: '$subRegion.contentType',
+                                    key: '$subRegion.key',
+                                    children: '$children',
+                                },
+                            },
+                        },
                     });
 
                     pipeArray.push({
-                        $group : {
-                            _id : '$subRegion._id',
-                            subRegion : {$first : '$subRegion'},
-                            country : {$first : '$country'},
-                            region : {$first : '$region'},
-                            children : {
-                                $addToSet : {
-                                    _id : '$retailSegment._id',
-                                    title : '$retailSegment.title',
-                                    expanded : '$retailSegment.expanded',
-                                    selected : '$retailSegment.selected',
-                                    contentType : '$retailSegment.contentType',
-                                    key : '$retailSegment.key',
-                                    children : '$children'
-                                }
-                            }
-                        }
+                        $group: {
+                            _id: '$subRegion._id',
+                            subRegion: { $first: '$subRegion' },
+                            country: { $first: '$country' },
+                            region: { $first: '$region' },
+                            children: {
+                                $addToSet: {
+                                    _id: '$retailSegment._id',
+                                    title: '$retailSegment.title',
+                                    expanded: '$retailSegment.expanded',
+                                    selected: '$retailSegment.selected',
+                                    contentType: '$retailSegment.contentType',
+                                    key: '$retailSegment.key',
+                                    children: '$children',
+                                },
+                            },
+                        },
                     });
 
                     pipeArray.push({
-                        $group : {
-                            _id : '$retailSegment._id',
-                            retailSegment : {$first : '$retailSegment'},
-                            country : {$first : '$country'},
-                            region : {$first : '$region'},
-                            subRegion : {$first : '$subRegion'},
-                            children : {
-                                $addToSet : {
-                                    _id : '$outlet._id',
-                                    title : '$outlet.title',
-                                    expanded : '$outlet.expanded',
-                                    selected : '$outlet.selected',
-                                    contentType : '$outlet.contentType',
-                                    key : '$outlet.key',
-                                    children : '$children'
-                                }
-                            }
-                        }
+                        $group: {
+                            _id: '$retailSegment._id',
+                            retailSegment: { $first: '$retailSegment' },
+                            country: { $first: '$country' },
+                            region: { $first: '$region' },
+                            subRegion: { $first: '$subRegion' },
+                            children: {
+                                $addToSet: {
+                                    _id: '$outlet._id',
+                                    title: '$outlet.title',
+                                    expanded: '$outlet.expanded',
+                                    selected: '$outlet.selected',
+                                    contentType: '$outlet.contentType',
+                                    key: '$outlet.key',
+                                    children: '$children',
+                                },
+                            },
+                        },
                     });
 
                     pipeArray.push({
-                        $group : {
-                            _id : '$outlet._id',
-                            outlet : {$first : '$outlet'},
-                            country : {$first : '$country'},
-                            region : {$first : '$region'},
-                            subRegion : {$first : '$subRegion'},
-                            retailSegment : {$first : '$retailSegment'},
-                            children : {
-                                $addToSet : {
-                                    _id : '$branch._id',
-                                    title : '$branch.title',
-                                    expanded : '$branch.expanded',
-                                    selected : '$branch.selected',
-                                    contentType : '$branch.contentType',
-                                    key : '$branch.key'
-                                }
-                            }
-                        }
+                        $group: {
+                            _id: '$outlet._id',
+                            outlet: { $first: '$outlet' },
+                            country: { $first: '$country' },
+                            region: { $first: '$region' },
+                            subRegion: { $first: '$subRegion' },
+                            retailSegment: { $first: '$retailSegment' },
+                            children: {
+                                $addToSet: {
+                                    _id: '$branch._id',
+                                    title: '$branch.title',
+                                    expanded: '$branch.expanded',
+                                    selected: '$branch.selected',
+                                    contentType: '$branch.contentType',
+                                    key: '$branch.key',
+                                },
+                            },
+                        },
                     });
 
-                    //==============================
+                    //= =============================
 
                     if (level < ACL_CONSTANTS.SALES_MAN) {
                         for (var i = level - 1; i > 0; i--) {
@@ -961,19 +959,19 @@ const Personnel = function () {
                     aggregation = PersonnelModel.aggregate(pipeLine);
 
                     aggregation.options = {
-                        allowDiskUse : true
+                        allowDiskUse: true,
                     };
 
-                    aggregation.exec(function(err, result) {
+                    aggregation.exec((err, result) => {
                         if (err) {
                             return cb(err);
                         }
 
                         cb(null, result);
                     });
-                }
+                },
 
-            ], function(err, result) {
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
@@ -982,7 +980,7 @@ const Personnel = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -996,7 +994,7 @@ const Personnel = function () {
 
     this.getStatusForDD = function(req, res, next) {
         function queryRun() {
-            PersonnelModel.distinct('status', '_id firstName lastName fullName phoneNumber email').exec(function(err, result) {
+            PersonnelModel.distinct('status', '_id firstName lastName fullName phoneNumber email').exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
@@ -1004,11 +1002,11 @@ const Personnel = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, (err, allowed) => {
             if (err) {
                 return next(err);
             }
-    
+
             if (!allowed) {
                 return errorSender.forbidden(next);
             }
@@ -1036,23 +1034,23 @@ const Personnel = function () {
         email = xssFilters.inHTMLData(email);
 
         const createdBy = {
-            user : req.session.uId,
-            date : new Date()
+            user: req.session.uId,
+            date: new Date(),
         };
         const salt = bcrypt.genSaltSync(10);
         const su = {
-            firstName : {en : 'Super'},
-            lastName : {en : 'Admin'},
-            email : email.toLowerCase(),
-            super : true,
+            firstName: { en: 'Super' },
+            lastName: { en: 'Admin' },
+            email: email.toLowerCase(),
+            super: true,
             createdBy,
-            editedBy : createdBy,
-            token : generator.generate(),
-            status : PERSONNEL_STATUSES.INACTIVE._id,
-            pass : bcrypt.hashSync(password, salt)
+            editedBy: createdBy,
+            token: generator.generate(),
+            status: PERSONNEL_STATUSES.INACTIVE._id,
+            pass: bcrypt.hashSync(password, salt),
         };
 
-        PersonnelModel.findOne({super : true}, (err, result) => {
+        PersonnelModel.findOne({ super: true }, (err, result) => {
             if (err) {
                 return res.status(400).send('Query is invalid');
             }
@@ -1065,13 +1063,13 @@ const Personnel = function () {
 
                 (cb) => {
                     AccessRoleModel.findOne({
-                        level : 0
-                    }, cb)
+                        level: 0,
+                    }, cb);
                 },
 
                 (accessRole, cb) => {
                     if (!accessRole) {
-                        return cb('Super access role not existing.')
+                        return cb('Super access role not existing.');
                     }
 
                     su.accessRole = accessRole._id;
@@ -1088,10 +1086,10 @@ const Personnel = function () {
                 (personnelModel, cb) => {
                     const personnel = personnelModel.toJSON();
                     const options = {
-                        firstName : personnel.firstName,
-                        lastName : personnel.lastName,
-                        password : password,
-                        email : personnel.email
+                        firstName: personnel.firstName,
+                        lastName: personnel.lastName,
+                        password,
+                        email: personnel.email,
                     };
                     const personnelId = personnel._id;
 
@@ -1102,7 +1100,7 @@ const Personnel = function () {
 
                         cb(null, personnelId);
                     });
-                }
+                },
 
             ], (err, personnelId) => {
                 if (err) {
@@ -1120,14 +1118,14 @@ const Personnel = function () {
         const uId = req.session.uId;
 
         function queryRun(body, callback) {
-            var phone = body.phoneNumber;
-            var isPhoneValid = phone === '' || false;
-            var createdBy = {
-                user : req.session.uId,
-                date : new Date()
+            let phone = body.phoneNumber;
+            let isPhoneValid = phone === '' || false;
+            const createdBy = {
+                user: req.session.uId,
+                date: new Date(),
             };
-            var email;
-            var isEmailValid;
+            let email;
+            let isEmailValid;
 
             if (body.personnel) {
                 body.manager = body.personnel;
@@ -1151,7 +1149,7 @@ const Personnel = function () {
                 isPhoneValid = REGEXP.PHONE_REGEXP.test(phone);
             }
 
-            if ((/*!email &&*/ !phone) /*|| !isEmailValid */ || !isPhoneValid) {
+            if ((/*! email &&*/ !phone) /* || !isEmailValid */ || !isPhoneValid) {
                 const error = new Error();
 
                 error.status = 400;
@@ -1169,14 +1167,14 @@ const Personnel = function () {
 
             if (body.firstName) {
                 body.firstName = {
-                    en : _.escape(body.firstName.en),
-                    ar : _.escape(body.firstName.ar)
+                    en: _.escape(body.firstName.en),
+                    ar: _.escape(body.firstName.ar),
                 };
             }
             if (body.lastName) {
                 body.lastName = {
-                    en : _.escape(body.lastName.en),
-                    ar : _.escape(body.lastName.ar)
+                    en: _.escape(body.lastName.en),
+                    ar: _.escape(body.lastName.ar),
                 };
             }
 
@@ -1191,15 +1189,15 @@ const Personnel = function () {
 
                 (cb) => {
                     const query = {
-                        $or : []
+                        $or: [],
                     };
 
                     if (body.email) {
-                        query.$or.push({email : body.email});
+                        query.$or.push({ email: body.email });
                     }
 
                     if (body.phoneNumber) {
-                        query.$or.push({phoneNumber : body.phoneNumber});
+                        query.$or.push({ phoneNumber: body.phoneNumber });
                     }
 
                     PersonnelModel.findOne(query, cb);
@@ -1207,7 +1205,7 @@ const Personnel = function () {
 
                 (personnel, cb) => {
                     if (personnel) {
-                        return res.status(400).send('User with such credentials already exist')
+                        return res.status(400).send('User with such credentials already exist');
                     }
 
                     const personnelModel = new PersonnelModel();
@@ -1223,16 +1221,16 @@ const Personnel = function () {
 
                     ActivityLog.emit('personnel:created', {
                         actionOriginator: uId,
-                        accessRoleLevel : accessLevel,
+                        accessRoleLevel: accessLevel,
                         body: personnel.toJSON(),
                     });
 
-                    cb(null, {id : personnelId});
+                    cb(null, { id: personnelId });
                 },
 
                 (options, cb) => {
                     personnelFindByIdAndPopulate(options, cb);
-                }
+                },
 
             ], callback);
         }
@@ -1242,10 +1240,10 @@ const Personnel = function () {
             async.apply(access.getWriteAccess, req, ACL_MODULES.PERSONNEL),
 
             (allowed, personnel, cb) => {
-                bodyValidator.validateBody(body, accessLevel, CONTENT_TYPES.PERSONNEL, 'create', cb)
+                bodyValidator.validateBody(body, accessLevel, CONTENT_TYPES.PERSONNEL, 'create', cb);
             },
 
-            queryRun
+            queryRun,
 
         ], (err, personnel) => {
             if (err) {
@@ -1485,18 +1483,18 @@ const Personnel = function () {
     };
 
     this.remove = function(req, res, next) {
-        var id = req.params.id;
-        var error;
-        var query;
+        const id = req.params.id;
+        let error;
+        let query;
 
-        //if (req.session.uId === id) {
+        // if (req.session.uId === id) {
         //    error = new Error();
         //    error.status = 400;
         //
         //    return next(error);
-        //}
+        // }
 
-        /*access.getDeleteAccess(req, res, next, mid, function (access) {
+        /* access.getDeleteAccess(req, res, next, mid, function (access) {
          if (!access) {
          error = new Error();
          error.status = 403;
@@ -1504,35 +1502,35 @@ const Personnel = function () {
          return next(error);
          }*/
 
-        query = PersonnelModel.remove({_id : id});
-        query.exec(function(err) {
+        query = PersonnelModel.remove({ _id: id });
+        query.exec((err) => {
             if (err) {
                 return next(err);
             }
 
             res.status(200).send();
         });
-        /*});*/
+        /* });*/
     };
 
     this.deviceId = function(req, res, next) {
-        const {body} = req;
+        const { body } = req;
 
         if (!req.session.loggedIn) {
-            return errorSender.notAuthorized(next)
+            return errorSender.notAuthorized(next);
         }
-    
+
         if (!req.isMobile) {
-            return errorSender.badRequest(next)
+            return errorSender.badRequest(next);
         }
-    
+
         if (!body.deviceId) {
-            return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS)
+            return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
         }
 
         req.session.deviceId = body.deviceId;
 
-        res.status(200).send({message : 'OK Set'});
+        res.status(200).send({ message: 'OK Set' });
     };
 
     this.archive = function(req, res, next) {
@@ -1602,11 +1600,11 @@ const Personnel = function () {
     };
 
     this.getById = function(req, res, next) {
-        var options = {};
+        let options = {};
 
         function queryRun() {
-            var id = req.params.id || req.session.uId;
-            options = {id : id};
+            const id = req.params.id || req.session.uId;
+            options = { id };
 
             options.isMobile = req.isMobile;
 
@@ -1614,7 +1612,7 @@ const Personnel = function () {
                 options.isCurrent = true;
             }
 
-            personnelFindByIdAndPopulate(options, function(err, response) {
+            personnelFindByIdAndPopulate(options, (err, response) => {
                 if (err) {
                     return next(err);
                 }
@@ -1630,12 +1628,12 @@ const Personnel = function () {
                     return next(err);
                 }
 
-                var key = 'notificationCount' + '#' + response._id;
+                const key = `${'notificationCount' + '#'}${response._id}`;
 
                 response.workAccess = (response.accessRole.level < 3) || !response.vacation.onLeave;
 
-                redis.cacheStore.readFromStorage(key, function(err, value) {
-                    var valueJSON;
+                redis.cacheStore.readFromStorage(key, (err, value) => {
+                    let valueJSON;
                     if (err) {
                         return next(err);
                     }
@@ -1653,59 +1651,59 @@ const Personnel = function () {
                         case ACL_CONSTANTS.TRADE_MARKETER:
                             adminMappingTasks = [
                                 function(cb) {
-                                    CountryModel.find({type : 'country'}, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(countries) {
+                                    CountryModel.find({ type: 'country' }, {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((countries) => {
                                         response.country = countries;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
-                                    CountryModel.find({type : 'region'}, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(regions) {
+                                    CountryModel.find({ type: 'region' }, {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((regions) => {
                                         response.region = regions;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
-                                    CountryModel.find({type : 'subRegion'}, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(subRegions) {
+                                    CountryModel.find({ type: 'subRegion' }, {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((subRegions) => {
                                         response.subRegion = subRegions;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     OutletModel.find({}, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(outlets) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((outlets) => {
                                         response.outlet = outlets;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     BranchModel.find({}, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(branches) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((branches) => {
                                         response.branch = branches;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     retailSegmentModel.find({}, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(retailSegments) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((retailSegments) => {
                                         response.retailSegment = retailSegments;
                                         cb();
-                                    })
-                                }
+                                    });
+                                },
                             ];
                             break;
                         case ACL_CONSTANTS.COUNTRY_ADMIN:
@@ -1713,79 +1711,79 @@ const Personnel = function () {
                             adminMappingTasks = [
                                 function(cb) {
                                     CountryModel.find({
-                                        type : 'region',
-                                        parent : countryId
+                                        type: 'region',
+                                        parent: countryId,
 
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(regions) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((regions) => {
                                         response.region = regions;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     CountryModel.find({
-                                        type : 'subRegion',
-                                        parent : {
-                                            $in : _.map(response.region, o => o._id)
-                                        }
+                                        type: 'subRegion',
+                                        parent: {
+                                            $in: _.map(response.region, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(subRegions) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((subRegions) => {
                                         response.subRegion = subRegions;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     retailSegmentModel.find({
-                                        subRegions : {
-                                            $in : _.map(response.subRegion, o => o._id)
-                                        }
+                                        subRegions: {
+                                            $in: _.map(response.subRegion, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(retailSegments) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((retailSegments) => {
                                         response.retailSegment = retailSegments;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     OutletModel.find({
-                                        subRegions : {
-                                            $in : _.map(response.subRegion, o => o._id)
+                                        subRegions: {
+                                            $in: _.map(response.subRegion, o => o._id),
                                         },
-                                        retailSegments : {
-                                            $in : _.map(response.retailSegment, o => o._id)
-                                        }
+                                        retailSegments: {
+                                            $in: _.map(response.retailSegment, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(outlets) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((outlets) => {
                                         response.outlet = outlets;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     BranchModel.find({
-                                        subRegion : {
-                                            $in : _.map(response.subRegion, o => o._id)
+                                        subRegion: {
+                                            $in: _.map(response.subRegion, o => o._id),
                                         },
-                                        retailSegment : {
-                                            $in : _.map(response.retailSegment, o => o._id)
+                                        retailSegment: {
+                                            $in: _.map(response.retailSegment, o => o._id),
                                         },
-                                        outlet : {
-                                            $in : _.map(response.outlet, o => o._id)
-                                        }
+                                        outlet: {
+                                            $in: _.map(response.outlet, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(branches) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((branches) => {
                                         response.branch = branches;
                                         cb();
-                                    })
-                                }
+                                    });
+                                },
                             ];
                             break;
                         case ACL_CONSTANTS.AREA_MANAGER:
@@ -1794,64 +1792,64 @@ const Personnel = function () {
                             adminMappingTasks = [
                                 function(cb) {
                                     CountryModel.find({
-                                        type : 'subRegion',
-                                        parent : regionId
+                                        type: 'subRegion',
+                                        parent: regionId,
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(subRegions) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((subRegions) => {
                                         response.subRegion = subRegions;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     retailSegmentModel.find({
-                                        subRegions : {
-                                            $in : _.map(response.subRegion, o => o._id)
-                                        }
+                                        subRegions: {
+                                            $in: _.map(response.subRegion, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(retailSegments) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((retailSegments) => {
                                         response.retailSegment = retailSegments;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     OutletModel.find({
-                                        subRegions : {
-                                            $in : _.map(response.subRegion, o => o._id)
+                                        subRegions: {
+                                            $in: _.map(response.subRegion, o => o._id),
                                         },
-                                        retailSegments : {
-                                            $in : _.map(response.retailSegment, o => o._id)
-                                        }
+                                        retailSegments: {
+                                            $in: _.map(response.retailSegment, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(outlets) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((outlets) => {
                                         response.outlet = outlets;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     BranchModel.find({
-                                        subRegion : {
-                                            $in : _.map(response.subRegion, o => o._id)
+                                        subRegion: {
+                                            $in: _.map(response.subRegion, o => o._id),
                                         },
-                                        retailSegment : {
-                                            $in : _.map(response.retailSegment, o => o._id)
+                                        retailSegment: {
+                                            $in: _.map(response.retailSegment, o => o._id),
                                         },
-                                        outlet : {
-                                            $in : _.map(response.outlet, o => o._id)
-                                        }
+                                        outlet: {
+                                            $in: _.map(response.outlet, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(branches) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((branches) => {
                                         response.branch = branches;
                                         cb();
-                                    })
-                                }
+                                    });
+                                },
                             ];
                             break;
                         case ACL_CONSTANTS.AREA_IN_CHARGE:
@@ -1860,72 +1858,72 @@ const Personnel = function () {
                             adminMappingTasks = [
                                 function(cb) {
                                     retailSegmentModel.find({
-                                        subRegions : {
-                                            $in : subRegionIds
-                                        }
+                                        subRegions: {
+                                            $in: subRegionIds,
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(retailSegments) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((retailSegments) => {
                                         response.retailSegment = retailSegments;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     OutletModel.find({
-                                        subRegions : {
-                                            $in : subRegionIds
+                                        subRegions: {
+                                            $in: subRegionIds,
                                         },
-                                        retailSegments : {
-                                            $in : _.map(response.retailSegment, o => o._id)
-                                        }
+                                        retailSegments: {
+                                            $in: _.map(response.retailSegment, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(outlets) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((outlets) => {
                                         response.outlet = outlets;
                                         cb();
-                                    })
+                                    });
                                 },
                                 function(cb) {
                                     BranchModel.find({
-                                        subRegion : {
-                                            $in : subRegionIds
+                                        subRegion: {
+                                            $in: subRegionIds,
                                         },
-                                        retailSegment : {
-                                            $in : _.map(response.retailSegment, o => o._id)
+                                        retailSegment: {
+                                            $in: _.map(response.retailSegment, o => o._id),
                                         },
-                                        outlet : {
-                                            $in : _.map(response.outlet, o => o._id)
-                                        }
+                                        outlet: {
+                                            $in: _.map(response.outlet, o => o._id),
+                                        },
                                     }, {
-                                        ID : 1,
-                                        name : 1
-                                    }).then(function(branches) {
+                                        ID: 1,
+                                        name: 1,
+                                    }).then((branches) => {
                                         response.branch = branches;
                                         cb();
-                                    })
-                                }
+                                    });
+                                },
                             ];
                             break;
                         default:
                             break;
                     }
 
-                    async.series(adminMappingTasks, function(err) {
+                    async.series(adminMappingTasks, (err) => {
                         if (err) {
-                            return next(err)
+                            return next(err);
                         }
                         next({
-                            status : 200,
-                            body : response
+                            status: 200,
+                            body: response,
                         });
                     });
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1939,30 +1937,30 @@ const Personnel = function () {
     };
 
     function getAllPipeline(options) {
-        var isMobile = options.isMobile || false;
-        var aggregateHelper = options.aggregateHelper;
-        var queryObject = options.queryObject;
-        var onLeaveId = options.onLeaveId;
-        var translated = options.translated;
-        var translateFields = options.translateFields;
-        var language = options.language;
-        var domainsArray = options.domainsArray;
-        var queryObjectAfterLookup = options.queryObjectAfterLookup;
-        var searchFieldsArray = options.searchFieldsArray;
-        var filterSearch = options.filterSearch;
-        var supervisorFilter = +options.supervisorFilter;
-        var skip = options.skip;
-        var limit = options.limit;
-        var sort = options.sort;
-        var forSync = options.forSync;
-        var pipeLine = [];
-        var accessLevels;
-        var mobileMatch;
-        var queryObjectTemp;
+        const isMobile = options.isMobile || false;
+        const aggregateHelper = options.aggregateHelper;
+        let queryObject = options.queryObject;
+        const onLeaveId = options.onLeaveId;
+        const translated = options.translated;
+        const translateFields = options.translateFields;
+        const language = options.language;
+        const domainsArray = options.domainsArray;
+        const queryObjectAfterLookup = options.queryObjectAfterLookup;
+        const searchFieldsArray = options.searchFieldsArray;
+        const filterSearch = options.filterSearch;
+        const supervisorFilter = +options.supervisorFilter;
+        const skip = options.skip;
+        const limit = options.limit;
+        const sort = options.sort;
+        const forSync = options.forSync;
+        let pipeLine = [];
+        let accessLevels;
+        let mobileMatch;
+        let queryObjectTemp;
 
         if (options.level !== 0) {
             queryObject.super = {
-                $ne : true
+                $ne: true,
             };
         }
 
@@ -1980,66 +1978,66 @@ const Personnel = function () {
 
         if (onLeaveId) {
             pipeLine.push({
-                $match : {
-                    _id : {
-                        $ne : ObjectId(onLeaveId)
-                    }
-                }
+                $match: {
+                    _id: {
+                        $ne: ObjectId(onLeaveId),
+                    },
+                },
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'accessRole',
-            isArray : false,
-            addProjection : 'level'
+            from: 'accessRoles',
+            key: 'accessRole',
+            isArray: false,
+            addProjection: 'level',
         }));
 
         if (!isMobile) {
             if (queryObject.lasMonthEvaluate) {
                 queryObject['accessRole.level'] = {
-                    $nin : [
+                    $nin: [
                         ACL_CONSTANTS.MASTER_UPLOADER,
                         ACL_CONSTANTS.COUNTRY_UPLOADER,
                         ACL_CONSTANTS.MASTER_ADMIN,
-                        ACL_CONSTANTS.COUNTRY_ADMIN
-                    ]
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
+                    ],
                 };
             }
 
             if (queryObject.hasOwnProperty('archived') && (!queryObject.archived || !queryObject.archived.$in[0])) {
                 queryObjectTemp = _.omit(queryObject, '_id', 'status', 'lasMonthEvaluate');
                 queryObject = _.pick(queryObject, '_id', 'status', 'lasMonthEvaluate');
-                queryObject.$or = [queryObjectTemp, {temp : true}];
+                queryObject.$or = [queryObjectTemp, { temp: true }];
             }
 
             pipeLine.push({
-                $match : queryObject
+                $match: queryObject,
             });
         } else {
             pipeLine.push({
-                $match : _.pick(queryObject, '$or', 'super', 'accessRole.level')
+                $match: _.pick(queryObject, '$or', 'super', 'accessRole.level'),
             });
         }
 
         if (isMobile) {
             if (queryObject.country) {
                 mobileMatch = {
-                    $match : {
-                        $or : [
+                    $match: {
+                        $or: [
                             {
-                                country : queryObject.country
+                                country: queryObject.country,
                             },
                             {
-                                country : {$eq : []},
-                                'accessRole.level' : {$in: [ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.TRADE_MARKETER]}
+                                country: { $eq: [] },
+                                'accessRole.level': { $in: [ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.TRADE_MARKETER] },
                             },
                             {
-                                temp : true //TODO, limit by country for mobile
-                            }
-                        ]
+                                temp: true, // TODO, limit by country for mobile
+                            },
+                        ],
 
-                    }
+                    },
                 };
 
                 pipeLine.push(mobileMatch);
@@ -2048,22 +2046,22 @@ const Personnel = function () {
 
         if (translated && translated.length === 1) {
             pipeLine.push({
-                $project : aggregateHelper.getProjection({
-                    translated : aggregateHelper.translatedCond(language, translateFields, translated[0])
-                })
+                $project: aggregateHelper.getProjection({
+                    translated: aggregateHelper.translatedCond(language, translateFields, translated[0]),
+                }),
             });
 
             pipeLine.push({
-                $match : {
-                    translated : true
-                }
+                $match: {
+                    translated: true,
+                },
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'position',
-            isArray : false
+            from: 'positions',
+            key: 'position',
+            isArray: false,
         }));
 
         if (supervisorFilter) {
@@ -2077,14 +2075,14 @@ const Personnel = function () {
                 case ACL_CONSTANTS.AREA_MANAGER:
                     accessLevels = [
                         ACL_CONSTANTS.MASTER_ADMIN,
-                        ACL_CONSTANTS.COUNTRY_ADMIN
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
                     ];
                     break;
                 case ACL_CONSTANTS.AREA_IN_CHARGE:
                     accessLevels = [
                         ACL_CONSTANTS.MASTER_ADMIN,
                         ACL_CONSTANTS.COUNTRY_ADMIN,
-                        ACL_CONSTANTS.AREA_MANAGER
+                        ACL_CONSTANTS.AREA_MANAGER,
                     ];
                     break;
                 case ACL_CONSTANTS.SALES_MAN:
@@ -2094,7 +2092,7 @@ const Personnel = function () {
                         ACL_CONSTANTS.MASTER_ADMIN,
                         ACL_CONSTANTS.COUNTRY_ADMIN,
                         ACL_CONSTANTS.AREA_MANAGER,
-                        ACL_CONSTANTS.AREA_IN_CHARGE
+                        ACL_CONSTANTS.AREA_IN_CHARGE,
                     ];
                     break;
                 case ACL_CONSTANTS.MASTER_UPLOADER:
@@ -2103,289 +2101,289 @@ const Personnel = function () {
                 case ACL_CONSTANTS.COUNTRY_UPLOADER:
                     accessLevels = [
                         ACL_CONSTANTS.MASTER_ADMIN,
-                        ACL_CONSTANTS.COUNTRY_ADMIN
+                        ACL_CONSTANTS.COUNTRY_ADMIN,
                     ];
                     break;
             }
 
             pipeLine.push({
-                $match : {
-                    'accessRole.level' : {$in : accessLevels}
-                }
+                $match: {
+                    'accessRole.level': { $in: accessLevels },
+                },
             });
         }
 
-        domainsArray.forEach(function(element) {
+        domainsArray.forEach((element) => {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'domains',
-                key : element
+                from: 'domains',
+                key: element,
             }));
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'branches',
-            key : 'branch',
-            addMainProjection : ['retailSegment', 'outlet']
+            from: 'branches',
+            key: 'branch',
+            addMainProjection: ['retailSegment', 'outlet'],
         }));
 
         if (!forSync) {
             pipeLine.push({
-                $match : queryObjectAfterLookup
+                $match: queryObjectAfterLookup,
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'retailSegments',
-            key : 'retailSegment'
+            from: 'retailSegments',
+            key: 'retailSegment',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'outlets',
-            key : 'outlet'
+            from: 'outlets',
+            key: 'outlet',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings : {createdBy : {date : 1}}
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: { createdBy: { date: 1 } },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'editedBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings : {editedBy : {date : 1}}
+            from: 'personnels',
+            key: 'editedBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: { editedBy: { date: 1 } },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'createdBy.user.accessRole',
-            isArray : false,
-            addProjection : ['_id', 'name', 'level'],
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        position : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'createdBy.user.position',
-            isArray : false,
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        accessRole : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'editedBy.user.accessRole',
-            isArray : false,
-            addProjection : ['_id', 'name', 'level'],
-            includeSiblings : {
-                editedBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        position : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'editedBy.user.position',
-            isArray : false,
-            includeSiblings : {
-                editedBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        accessRole : 1,
-                        firstName : 1,
-                        lastName : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                avgRating : {
-                    monthly : {
-                        $let : {
-                            vars : {
-                                valAdjusted : {
-                                    $add : [
-                                        '$avgRating.monthly',
-                                        {$cond : [{$gte : ['$avgRating.monthly', 0]}, 0.5, -0.5]}
-                                    ]
-                                }
-                            },
-                            in : {
-                                $subtract : ['$$valAdjusted', {$mod : ['$$valAdjusted', 1]}]
-                            }
-                        }
-                    }
-                }
-            })
-        });
-
-        pipeLine.push({
-            $lookup : {
-                from : 'personnels',
-                localField : 'manager',
-                foreignField : '_id',
-                as : 'manager'
-            }
-        });
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                manager : {$arrayElemAt : ['$manager', 0]}
-            })
-        });
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                manager : {
-                    _id : '$manager._id',
-                    firstName : '$manager.firstName',
-                    lastName : '$manager.lastName'
-                }
-            })
-        });
-
-        pipeLine.push({
-            $lookup : {
-                from : 'personnels',
-                localField : 'vacation.cover',
-                foreignField : '_id',
-                as : 'vacation.cover'
-            }
-        });
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                vacation : {
-                    cover : {$arrayElemAt : ['$vacation.cover', 0]},
-                    onLeave : 1
-                }
-            })
-        });
-
-        pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                vacation : {
-                    cover : {
-                        _id : '$vacation.cover._id',
-                        firstName : '$vacation.cover.firstName',
-                        lastName : '$vacation.cover.lastName'
+            from: 'accessRoles',
+            key: 'createdBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
                     },
-                    onLeave : 1
                 },
-                lastDate : {
-                    $ifNull : [
+            },
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'createdBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'accessRoles',
+            key: 'editedBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'editedBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeLine.push({
+            $project: aggregateHelper.getProjection({
+                avgRating: {
+                    monthly: {
+                        $let: {
+                            vars: {
+                                valAdjusted: {
+                                    $add: [
+                                        '$avgRating.monthly',
+                                        { $cond: [{ $gte: ['$avgRating.monthly', 0] }, 0.5, -0.5] },
+                                    ],
+                                },
+                            },
+                            in: {
+                                $subtract: ['$$valAdjusted', { $mod: ['$$valAdjusted', 1] }],
+                            },
+                        },
+                    },
+                },
+            }),
+        });
+
+        pipeLine.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'manager',
+                foreignField: '_id',
+                as: 'manager',
+            },
+        });
+
+        pipeLine.push({
+            $project: aggregateHelper.getProjection({
+                manager: { $arrayElemAt: ['$manager', 0] },
+            }),
+        });
+
+        pipeLine.push({
+            $project: aggregateHelper.getProjection({
+                manager: {
+                    _id: '$manager._id',
+                    firstName: '$manager.firstName',
+                    lastName: '$manager.lastName',
+                },
+            }),
+        });
+
+        pipeLine.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'vacation.cover',
+                foreignField: '_id',
+                as: 'vacation.cover',
+            },
+        });
+
+        pipeLine.push({
+            $project: aggregateHelper.getProjection({
+                vacation: {
+                    cover: { $arrayElemAt: ['$vacation.cover', 0] },
+                    onLeave: 1,
+                },
+            }),
+        });
+
+        pipeLine.push({
+            $project: aggregateHelper.getProjection({
+                vacation: {
+                    cover: {
+                        _id: '$vacation.cover._id',
+                        firstName: '$vacation.cover.firstName',
+                        lastName: '$vacation.cover.lastName',
+                    },
+                    onLeave: 1,
+                },
+                lastDate: {
+                    $ifNull: [
                         '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }
-            })
+                        '$createdBy.date',
+                    ],
+                },
+            }),
         });
 
         pipeLine.push({
-            $unwind : {
-                path : '$country',
-                preserveNullAndEmptyArrays : true
-            }
+            $unwind: {
+                path: '$country',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         pipeLine.push({
-            $group : {
-                _id : '$_id',
-                position : {$first : '$position'},
-                avgRating : {$first : '$avgRating'},
-                manager : {$first : '$manager'},
-                lastAccess : {$first : '$lastAccess'},
-                beforeAccess : {$first : '$beforeAccess'},
-                firstName : {$first : '$firstName'},
-                lastName : {$first : '$lastName'},
-                email : {$first : '$email'},
-                phoneNumber : {$first : '$phoneNumber'},
-                accessRole : {$first : '$accessRole'},
-                dateJoined : {$first : '$dateJoined'},
-                createdBy : {$first : '$createdBy'},
-                editedBy : {$first : '$editedBy'},
-                vacation : {$first : '$vacation'},
-                status : {$first : '$status'},
-                region : {$first : '$region'},
-                subRegion : {$first : '$subRegion'},
-                retailSegment : {$first : '$retailSegment'},
-                outlet : {$first : '$outlet'},
-                branch : {$first : '$branch'},
-                country : {$addToSet : '$country'},
-                currentLanguage : {$first : '$currentLanguage'},
-                super : {$first : '$super'},
-                archived : {$first : '$archived'},
-                temp : {$first : '$temp'},
-                confirmed : {$first : '$confirmed'},
-                translated : {$first : '$translated'},
-                covered : {$first : '$covered'}
-            }
+            $group: {
+                _id: '$_id',
+                position: { $first: '$position' },
+                avgRating: { $first: '$avgRating' },
+                manager: { $first: '$manager' },
+                lastAccess: { $first: '$lastAccess' },
+                beforeAccess: { $first: '$beforeAccess' },
+                firstName: { $first: '$firstName' },
+                lastName: { $first: '$lastName' },
+                email: { $first: '$email' },
+                phoneNumber: { $first: '$phoneNumber' },
+                accessRole: { $first: '$accessRole' },
+                dateJoined: { $first: '$dateJoined' },
+                createdBy: { $first: '$createdBy' },
+                editedBy: { $first: '$editedBy' },
+                vacation: { $first: '$vacation' },
+                status: { $first: '$status' },
+                region: { $first: '$region' },
+                subRegion: { $first: '$subRegion' },
+                retailSegment: { $first: '$retailSegment' },
+                outlet: { $first: '$outlet' },
+                branch: { $first: '$branch' },
+                country: { $addToSet: '$country' },
+                currentLanguage: { $first: '$currentLanguage' },
+                super: { $first: '$super' },
+                archived: { $first: '$archived' },
+                temp: { $first: '$temp' },
+                confirmed: { $first: '$confirmed' },
+                translated: { $first: '$translated' },
+                covered: { $first: '$covered' },
+            },
         });
 
         if (sort['firstNameUpper.en'] || sort['firstNameUpper.ar']) {
             pipeLine.push({
-                $project : aggregateHelper.getProjection({
-                    firstNameUpper : {
-                        en : {
-                            $toUpper : '$firstName.en'
+                $project: aggregateHelper.getProjection({
+                    firstNameUpper: {
+                        en: {
+                            $toUpper: '$firstName.en',
                         },
-                        ar : {
-                            $toUpper : '$firstName.ar'
-                        }
-                    }
-                })
+                        ar: {
+                            $toUpper: '$firstName.ar',
+                        },
+                    },
+                }),
             });
         }
 
         if (sort['lastNameUpper.en'] || sort['lastNameUpper.ar']) {
             pipeLine.push({
-                $project : aggregateHelper.getProjection({
-                    lastNameUpper : {
-                        en : {
-                            $toUpper : '$lastName.en'
+                $project: aggregateHelper.getProjection({
+                    lastNameUpper: {
+                        en: {
+                            $toUpper: '$lastName.en',
                         },
-                        ar : {
-                            $toUpper : '$lastName.ar'
-                        }
-                    }
-                })
+                        ar: {
+                            $toUpper: '$lastName.ar',
+                        },
+                    },
+                }),
             });
         }
 
-        /*pipeLine.push({
+        /* pipeLine.push({
          $sort: sort
          });
 
@@ -2410,12 +2408,12 @@ const Personnel = function () {
          pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile : isMobile,
-            searchFieldsArray : searchFieldsArray,
-            filterSearch : filterSearch,
-            skip : skip,
-            limit : limit,
-            sort : sort
+            isMobile,
+            searchFieldsArray,
+            filterSearch,
+            skip,
+            limit,
+            sort,
         }));
 
         return pipeLine;
@@ -2436,39 +2434,39 @@ const Personnel = function () {
             (result, cb) => {
                 const response = result && result[0] ?
                     result[0] : {
-                    data : [],
-                    total : 0
-                };
+                        data: [],
+                        total: 0,
+                    };
                 const ids = response.data.map((item) => (item._id));
                 const options = {
-                    data : {
-                        [CONTENT_TYPES.PERSONNEL] : ids
-                    }
+                    data: {
+                        [CONTENT_TYPES.PERSONNEL]: ids,
+                    },
 
                 };
 
                 cb(null, {
                     response,
-                    options
+                    options,
                 });
             },
 
             (data, cb) => {
                 getImagesHelper.getImages(data.options, (err, result) => {
                     cb(err, {
-                        response : data.response,
-                        result
-                    })
+                        response: data.response,
+                        result,
+                    });
                 });
             },
 
             (data, cb) => {
                 const optionsForImplement = {
-                    response : data.response,
-                    imgsObject : data.result,
-                    fields : {
-                        personnel : []
-                    }
+                    response: data.response,
+                    imgsObject: data.result,
+                    fields: {
+                        personnel: [],
+                    },
                 };
 
                 getImagesHelper.setIntoResult(optionsForImplement, (response) => {
@@ -2480,15 +2478,15 @@ const Personnel = function () {
                 response.data = response.data.map((element) => {
                     if (element.firstName) {
                         element.firstName = {
-                            ar : _.unescape(element.firstName.ar),
-                            en : _.unescape(element.firstName.en)
+                            ar: _.unescape(element.firstName.ar),
+                            en: _.unescape(element.firstName.en),
                         };
                     }
 
                     if (element.lastName) {
                         element.lastName = {
-                            ar : _.unescape(element.lastName.ar),
-                            en : _.unescape(element.lastName.en)
+                            ar: _.unescape(element.lastName.ar),
+                            en: _.unescape(element.lastName.en),
                         };
                     }
 
@@ -2538,7 +2536,7 @@ const Personnel = function () {
                 }, (err) => {
                     cb(err, response);
                 });
-            }
+            },
 
         ], callback);
     }
@@ -2552,25 +2550,25 @@ const Personnel = function () {
             const supervisorFilter = query.supervisorFilter;
             const personnelLevel = personnel.accessRole.level;
             const sort = query.sort || {
-                    lastDate : -1
-                };
+                lastDate: -1,
+            };
             const domainsArray = ['country', 'region', 'subRegion'];
 
-            for (let key in sort) {
+            for (const key in sort) {
                 sort[key] = parseInt(sort[key], 10);
-                let splitKey = key.split('.');
+                const splitKey = key.split('.');
 
                 if (splitKey[0] === 'firstName' || splitKey[0] === 'lastName') {
-                    sort[splitKey[0] + 'Upper.' + splitKey[1]] = sort[key];
+                    sort[`${splitKey[0]}Upper.${splitKey[1]}`] = sort[key];
                     delete sort[key];
                 }
             }
 
             const filterMapper = new FilterMapper();
             const queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.PERSONNEL,
+                contentType: CONTENT_TYPES.PERSONNEL,
                 filter,
-                personnel
+                personnel,
             });
 
             if (query._ids) {
@@ -2580,7 +2578,7 @@ const Personnel = function () {
                     });
 
                 queryObject._id = {
-                    $in : ids
+                    $in: ids,
                 };
             }
 
@@ -2592,10 +2590,10 @@ const Personnel = function () {
                 aggregateHelper,
                 domainsArray,
                 queryObject,
-                forSync : true,
+                forSync: true,
                 isMobile,
                 sort,
-                level : req.session.level,
+                level: req.session.level,
 
             });
 
@@ -2603,7 +2601,7 @@ const Personnel = function () {
                 pipeline,
                 personnelLevel,
                 isMobile,
-                personnel
+                personnel,
             }, callback);
         }
 
@@ -2613,7 +2611,7 @@ const Personnel = function () {
 
             (allowed, personnel, cb) => {
                 queryRun(personnel, cb);
-            }
+            },
 
         ], (err, body) => {
             if (err) {
@@ -2621,8 +2619,8 @@ const Personnel = function () {
             }
 
             return next({
-                status : 200,
-                body
+                status: 200,
+                body,
             });
         });
     };
@@ -2643,8 +2641,8 @@ const Personnel = function () {
             const onLeaveId = filter.onLeaveId;
             const queryObjectAfterLookup = {};
             const sort = query.sort || {
-                    lastDate : -1
-                };
+                lastDate: -1,
+            };
             const domainsArray = ['country', 'region', 'subRegion'];
             const searchFieldsArray = [
                 'firstName.en',
@@ -2664,15 +2662,15 @@ const Personnel = function () {
                 'branch.name.en',
                 'branch.name.ar',
                 'email',
-                'phoneNumber'
+                'phoneNumber',
             ];
 
-            for (let key in sort) {
+            for (const key in sort) {
                 sort[key] = parseInt(sort[key], 10);
-                let splitKey = key.split('.');
+                const splitKey = key.split('.');
 
                 if (splitKey[0] === 'firstName' || splitKey[0] === 'lastName') {
-                    sort[splitKey[0] + 'Upper.' + splitKey[1]] = sort[key];
+                    sort[`${splitKey[0]}Upper.${splitKey[1]}`] = sort[key];
                     delete sort[key];
                 }
             }
@@ -2685,9 +2683,9 @@ const Personnel = function () {
 
             const filterMapper = new FilterMapper();
             const queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.PERSONNEL,
+                contentType: CONTENT_TYPES.PERSONNEL,
                 filter,
-                personnel
+                personnel,
             });
 
             if (isMobile) {
@@ -2715,26 +2713,26 @@ const Personnel = function () {
             const onLeave = queryObject.status && queryObject.status.$in && ~queryObject.status.$in.indexOf('onLeave') && queryObject.status.$in.length === 1;
 
             if (queryObject.status && queryObject.status.$in && !onLeave) {
-                let onlineUserIds = onlineUsers.map(el => ObjectId(el));
+                const onlineUserIds = onlineUsers.map(el => ObjectId(el));
                 const onlineStatus = queryObject.status.$in.indexOf('online');
 
                 if (queryObject.status.$in.length === 1 && ~onlineStatus) {
                     queryObject.status = {
-                        $ne : 'onLeave'
+                        $ne: 'onLeave',
                     };
                     queryObject._id = {
-                        $in : onlineUserIds
-                    }
+                        $in: onlineUserIds,
+                    };
                 } else if (!~onlineStatus) {
                     queryObject._id = {
-                        $nin : onlineUserIds
+                        $nin: onlineUserIds,
                     };
                 } else {
                     queryObject.status.$in.splice(onlineStatus, 1);
-                    queryObject.$or = [{_id : {
-                        $in : onlineUserIds
-                    }}, {
-                        status : queryObject.status
+                    queryObject.$or = [{ _id: {
+                        $in: onlineUserIds,
+                    } }, {
+                        status: queryObject.status,
                     }];
 
                     delete queryObject.status;
@@ -2760,30 +2758,30 @@ const Personnel = function () {
                 limit,
                 skip,
                 sort,
-                level : req.session.level,
-                uId : req.session.uId,
+                level: req.session.level,
+                uId: req.session.uId,
                 isMobile,
-                supervisorFilter
+                supervisorFilter,
             });
 
             finalStepToRetrieve({
                 pipeline,
                 personnelLevel,
                 isMobile,
-                personnel
+                personnel,
             }, (err, body) => {
                 if (err) {
                     return callback(err);
                 }
 
-                body.data.forEach((el)=> {
+                body.data.forEach((el) => {
                     if (el.status !== 'onLeave' && ~onlineUsers.indexOf(el._id.toString())) {
                         el.status = 'online';
                     }
                 });
 
                 if (sort && sort.status) {
-                    body.data.sort(function(a, b) {
+                    body.data.sort((a, b) => {
                         function compareField(elA, elB) {
                             if (elA.status > elB.status) {
                                 return 1;
@@ -2798,7 +2796,7 @@ const Personnel = function () {
                         }
 
                         return compareField(b, a);
-                    })
+                    });
                 }
 
                 callback(null, body);
@@ -2806,7 +2804,6 @@ const Personnel = function () {
         }
 
         function defineOnlineUsers(allowed, personnel, callback) {
-
             redisClient.cacheStore.getValuesStorageHash('online', (err, onlineUsers) => {
                 if (err) {
                     return callback(err);
@@ -2814,84 +2811,84 @@ const Personnel = function () {
 
                 callback(null, personnel, onlineUsers);
             });
-        };
+        }
 
         async.waterfall([
 
             async.apply(access.getReadAccess, req, ACL_MODULES.PERSONNEL),
             defineOnlineUsers,
-            queryRun
+            queryRun,
         ], (err, body) => {
             if (err) {
                 return next(err);
             }
 
             return next({
-                status : 200,
-                body
+                status: 200,
+                body,
             });
         });
     };
 
     this.getPersonnelTasks = function(req, res, next) {
         function queryRun(personnel) {
-            var query = req.query;
-            var filter = query.filter || {};
+            const query = req.query;
+            const filter = query.filter || {};
 
-            var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
-            var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+            const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
+            const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
-            var $defProjection = {
-                _id : 1,
-                title : 1,
-                companyObjective : 1,
-                description : 1,
-                objectiveType : 1,
-                priority : 1,
-                status : 1,
-                assignedTo : 1,
-                complete : 1,
-                parent : 1,
-                level : 1,
-                countSubTasks : 1,
-                completedSubTasks : 1,
-                dateStart : 1,
-                dateEnd : 1,
-                dateClosed : 1,
-                comments : 1,
-                attachments : 1,
-                editedBy : 1,
-                createdBy : 1,
-                country : 1,
-                region : 1,
-                subRegion : 1,
-                retailSegment : 1,
-                outlet : 1,
-                branch : 1,
-                location : 1,
-                form : 1,
-                history : 1,
-                efforts : 1,
-                context : 1,
-                creationDate : 1,
-                updateDate : 1
+            const $defProjection = {
+                _id: 1,
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                assignedTo: 1,
+                complete: 1,
+                parent: 1,
+                level: 1,
+                countSubTasks: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                createdBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                history: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
             };
 
-            var page = query.page || 1;
-            var limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
-            var isMobile = req.isMobile;
-            var aggregateHelper;
-            var filterMapper = new FilterMapper();
-            var filterSearch = filter.globalSearch || '';
-            var queryObject;
-            var positionFilter = {};
-            var ids;
-            var uId = req.session.uId;
-            var pipeLine;
-            var typeFilter;
+            const page = query.page || 1;
+            const limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
+            const skip = (page - 1) * limit;
+            const isMobile = req.isMobile;
+            let aggregateHelper;
+            const filterMapper = new FilterMapper();
+            const filterSearch = filter.globalSearch || '';
+            let queryObject;
+            let positionFilter = {};
+            let ids;
+            const uId = req.session.uId;
+            let pipeLine;
+            let typeFilter;
 
-            var searchFieldsArray = [
+            const searchFieldsArray = [
                 'title.en',
                 'title.ar',
                 'description.en',
@@ -2922,225 +2919,225 @@ const Personnel = function () {
                 'assignedTo.firstName.ar',
                 'assignedTo.lastName.ar',
                 'assignedTo.position.name.ar',
-                'assignedTo.position.name.en'
+                'assignedTo.position.name.en',
             ];
             delete filter.globalSearch;
 
             function getAllPipeLine(options) {
-                var aggregateHelper = options.aggregateHelper;
-                var queryObject = options.queryObject;
-                var positionFilter = options.positionFilter;
-                var isMobile = options.isMobile;
-                var skip = options.skip;
-                var limit = options.limit;
-                var id = options.id;
-                var searchFieldsArray = options.searchFieldsArray;
-                var filterSearch = options.filterSearch;
-                var forSync = options.forSync;
+                const aggregateHelper = options.aggregateHelper;
+                const queryObject = options.queryObject;
+                const positionFilter = options.positionFilter;
+                const isMobile = options.isMobile;
+                const skip = options.skip;
+                const limit = options.limit;
+                const id = options.id;
+                const searchFieldsArray = options.searchFieldsArray;
+                const filterSearch = options.filterSearch;
+                const forSync = options.forSync;
 
-                var pipeLine = [];
+                let pipeLine = [];
 
                 pipeLine.push({
-                    $match : queryObject
+                    $match: queryObject,
                 });
 
                 pipeLine.push({
-                    $match : {
-                        $or : [
+                    $match: {
+                        $or: [
                             {
-                                assignedTo : {$nin : [id]}
+                                assignedTo: { $nin: [id] },
                             },
                             {
-                                assignedTo : {$in : [id]},
-                                status : {$nin : [OBJECTIVE_STATUSES.DRAFT]}
-                            }
-                        ]
-                    }
+                                assignedTo: { $in: [id] },
+                                status: { $nin: [OBJECTIVE_STATUSES.DRAFT] },
+                            },
+                        ],
+                    },
                 });
 
                 if (typeFilter) {
                     pipeLine.push({
-                        $match : {
-                            $and : [
+                        $match: {
+                            $and: [
                                 {
-                                    objectiveType : typeFilter
+                                    objectiveType: typeFilter,
                                 },
                                 {
-                                    context : {
-                                        $in : [CONTENT_TYPES.OBJECTIVES]
-                                    }
-                                }
-                            ]
-                        }
+                                    context: {
+                                        $in: [CONTENT_TYPES.OBJECTIVES],
+                                    },
+                                },
+                            ],
+                        },
                     });
                 }
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'personnels',
-                    key : 'assignedTo',
-                    addProjection : ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole'])
+                    from: 'personnels',
+                    key: 'assignedTo',
+                    addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'files',
-                    key : 'attachments',
-                    addProjection : ['contentType', 'originalName', 'createdBy']
+                    from: 'files',
+                    key: 'attachments',
+                    addProjection: ['contentType', 'originalName', 'createdBy'],
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'domains',
-                    key : 'country'
+                    from: 'domains',
+                    key: 'country',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'domains',
-                    key : 'region'
+                    from: 'domains',
+                    key: 'region',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'domains',
-                    key : 'subRegion'
+                    from: 'domains',
+                    key: 'subRegion',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'retailSegments',
-                    key : 'retailSegment'
+                    from: 'retailSegments',
+                    key: 'retailSegment',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'outlets',
-                    key : 'outlet'
+                    from: 'outlets',
+                    key: 'outlet',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'branches',
-                    key : 'branch'
+                    from: 'branches',
+                    key: 'branch',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from : 'personnels',
-                    key : 'createdBy.user',
-                    isArray : false,
-                    addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-                    includeSiblings : {createdBy : {date : 1}}
+                    from: 'personnels',
+                    key: 'createdBy.user',
+                    isArray: false,
+                    addProjection: ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+                    includeSiblings: { createdBy: { date: 1 } },
                 }));
 
                 pipeLine.push({
-                    $unwind : {
-                        path : '$assignedTo',
-                        preserveNullAndEmptyArrays : true
-                    }
+                    $unwind: {
+                        path: '$assignedTo',
+                        preserveNullAndEmptyArrays: true,
+                    },
                 });
 
                 if (positionFilter) {
                     pipeLine.push({
-                        $match : positionFilter
+                        $match: positionFilter,
                     });
                 }
 
                 if (!isMobile) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from : 'accessRoles',
-                        key : 'assignedTo.accessRole',
-                        isArray : false,
-                        addProjection : ['_id', 'name', 'level'],
-                        includeSiblings : {
-                            assignedTo : {
-                                _id : 1,
-                                position : 1,
-                                firstName : 1,
-                                lastName : 1
-                            }
-                        }
+                        from: 'accessRoles',
+                        key: 'assignedTo.accessRole',
+                        isArray: false,
+                        addProjection: ['_id', 'name', 'level'],
+                        includeSiblings: {
+                            assignedTo: {
+                                _id: 1,
+                                position: 1,
+                                firstName: 1,
+                                lastName: 1,
+                            },
+                        },
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from : 'positions',
-                        key : 'assignedTo.position',
-                        isArray : false,
-                        includeSiblings : {
-                            assignedTo : {
-                                _id : 1,
-                                accessRole : 1,
-                                firstName : 1,
-                                lastName : 1
-                            }
-                        }
+                        from: 'positions',
+                        key: 'assignedTo.position',
+                        isArray: false,
+                        includeSiblings: {
+                            assignedTo: {
+                                _id: 1,
+                                accessRole: 1,
+                                firstName: 1,
+                                lastName: 1,
+                            },
+                        },
                     }));
                 }
 
                 pipeLine.push({
-                    $group : aggregateHelper.getGroupObject({
-                        assignedTo : {$addToSet : '$assignedTo'}
-                    })
+                    $group: aggregateHelper.getGroupObject({
+                        assignedTo: { $addToSet: '$assignedTo' },
+                    }),
                 });
 
                 if (!isMobile) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from : 'accessRoles',
-                        key : 'createdBy.user.accessRole',
-                        isArray : false,
-                        addProjection : ['_id', 'name', 'level'],
-                        includeSiblings : {
-                            createdBy : {
-                                date : 1,
-                                user : {
-                                    _id : 1,
-                                    position : 1,
-                                    firstName : 1,
-                                    lastName : 1
-                                }
-                            }
-                        }
+                        from: 'accessRoles',
+                        key: 'createdBy.user.accessRole',
+                        isArray: false,
+                        addProjection: ['_id', 'name', 'level'],
+                        includeSiblings: {
+                            createdBy: {
+                                date: 1,
+                                user: {
+                                    _id: 1,
+                                    position: 1,
+                                    firstName: 1,
+                                    lastName: 1,
+                                },
+                            },
+                        },
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from : 'positions',
-                        key : 'createdBy.user.position',
-                        isArray : false,
-                        includeSiblings : {
-                            createdBy : {
-                                date : 1,
-                                user : {
-                                    _id : 1,
-                                    accessRole : 1,
-                                    firstName : 1,
-                                    lastName : 1
-                                }
-                            }
-                        }
+                        from: 'positions',
+                        key: 'createdBy.user.position',
+                        isArray: false,
+                        includeSiblings: {
+                            createdBy: {
+                                date: 1,
+                                user: {
+                                    _id: 1,
+                                    accessRole: 1,
+                                    firstName: 1,
+                                    lastName: 1,
+                                },
+                            },
+                        },
                     }));
                 }
 
                 pipeLine.push({
-                    $project : aggregateHelper.getProjection({
-                        lastDate : {
-                            $ifNull : [
+                    $project: aggregateHelper.getProjection({
+                        lastDate: {
+                            $ifNull: [
                                 '$editedBy.date',
-                                '$createdBy.date'
-                            ]
-                        }
-                    })
+                                '$createdBy.date',
+                            ],
+                        },
+                    }),
                 });
 
                 pipeLine.push({
-                    $sort : {
-                        lastDate : -1
-                    }
+                    $sort: {
+                        lastDate: -1,
+                    },
                 });
 
                 if (isMobile) {
                     pipeLine.push({
-                        $project : aggregateHelper.getProjection({
-                            creationDate : '$createdBy.date',
-                            updateDate : '$editedBy.date'
-                        })
+                        $project: aggregateHelper.getProjection({
+                            creationDate: '$createdBy.date',
+                            updateDate: '$editedBy.date',
+                        }),
                     });
                 }
 
                 if (!forSync) {
                     pipeLine.push({
-                        $match : aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
+                        $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch),
                     });
                 }
 
@@ -3148,10 +3145,10 @@ const Personnel = function () {
 
                 if (limit && limit !== -1) {
                     pipeLine.push({
-                        $skip : skip
+                        $skip: skip,
                     });
                     pipeLine.push({
-                        $limit : limit
+                        $limit: limit,
                     });
                 }
 
@@ -3161,30 +3158,30 @@ const Personnel = function () {
             }
 
             queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.INSTORETASKS,
-                filter : query.filter || {}
+                contentType: CONTENT_TYPES.INSTORETASKS,
+                filter: query.filter || {},
             });
 
             if (query._ids) {
                 ids = query._ids.split(',');
-                ids = _.map(ids, function(id) {
+                ids = _.map(ids, (id) => {
                     return ObjectId(id);
                 });
                 queryObject._id = {
-                    $in : ids
+                    $in: ids,
                 };
             }
 
             if (queryObject.position && queryObject.position.$in) {
                 positionFilter = {
-                    $or : [
+                    $or: [
                         {
-                            'assignedTo.position' : queryObject.position
+                            'assignedTo.position': queryObject.position,
                         },
                         {
-                            'createdBy.user.position' : queryObject.position
-                        }
-                    ]
+                            'createdBy.user.position': queryObject.position,
+                        },
+                    ],
                 };
 
                 delete queryObject.position;
@@ -3198,56 +3195,56 @@ const Personnel = function () {
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             pipeLine = getAllPipeLine({
-                aggregateHelper : aggregateHelper,
-                queryObject : queryObject,
-                positionFilter : positionFilter,
-                isMobile : isMobile,
-                searchFieldsArray : searchFieldsArray,
-                filterSearch : filterSearch,
-                skip : skip,
-                limit : limit,
-                id : ObjectId(uId)
+                aggregateHelper,
+                queryObject,
+                positionFilter,
+                isMobile,
+                searchFieldsArray,
+                filterSearch,
+                skip,
+                limit,
+                id: ObjectId(uId),
             });
 
-            ObjectiveModel.aggregate(pipeLine, function(err, response) {
-                var idsPersonnel = [];
-                var idsFile = [];
-                var options = {
-                    data : {}
+            ObjectiveModel.aggregate(pipeLine, (err, response) => {
+                let idsPersonnel = [];
+                let idsFile = [];
+                const options = {
+                    data: {},
                 };
                 if (err) {
                     return next(err);
                 }
 
                 response = response && response[0] ? response[0] : {
-                    data : [],
-                    total : 0
+                    data: [],
+                    total: 0,
                 };
 
                 if (!response.data.length) {
                     return next({
-                        status : 200,
-                        body : response
+                        status: 200,
+                        body: response,
                     });
                 }
 
-                response.data = _.map(response.data, function(model) {
+                response.data = _.map(response.data, (model) => {
                     if (model.title) {
                         model.title = {
-                            en : model.title.en ? _.unescape(model.title.en) : '',
-                            ar : model.title.ar ? _.unescape(model.title.ar) : ''
+                            en: model.title.en ? _.unescape(model.title.en) : '',
+                            ar: model.title.ar ? _.unescape(model.title.ar) : '',
                         };
                     }
                     if (model.description) {
                         model.description = {
-                            en : model.description.en ? _.unescape(model.description.en) : '',
-                            ar : model.description.ar ? _.unescape(model.description.ar) : ''
+                            en: model.description.en ? _.unescape(model.description.en) : '',
+                            ar: model.description.ar ? _.unescape(model.description.ar) : '',
                         };
                     }
                     if (model.companyObjective) {
                         model.companyObjective = {
-                            en : model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar : model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : ''
+                            en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                         };
                     }
 
@@ -3262,36 +3259,36 @@ const Personnel = function () {
                 options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
                 options.data[CONTENT_TYPES.FILES] = idsFile;
 
-                getImagesHelper.getImages(options, function(err, result) {
-                    var fieldNames = {};
-                    var setOptions;
+                getImagesHelper.getImages(options, (err, result) => {
+                    const fieldNames = {};
+                    let setOptions;
                     if (err) {
                         return next(err);
                     }
 
                     setOptions = {
-                        response : response,
-                        imgsObject : result
+                        response,
+                        imgsObject: result,
                     };
                     fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
                     fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
                     setOptions.fields = fieldNames;
 
-                    getImagesHelper.setIntoResult(setOptions, function(response) {
+                    getImagesHelper.setIntoResult(setOptions, (response) => {
                         next({
-                            status : 200,
-                            body : response
+                            status: 200,
+                            body: response,
                         });
-                    })
+                    });
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, function(err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PERSONNEL, (err, allowed, personnel) => {
             if (err) {
                 return next(err);
             }
-    
+
             if (!allowed) {
                 return errorSender.forbidden(next);
             }
@@ -3306,30 +3303,29 @@ const Personnel = function () {
         const accessLevel = req.session.level;
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
-        let coveredUsers = [];
+        const coveredUsers = [];
         let coverUserId;
         let generatedPassword;
 
         function queryRun(body, callback) {
-
             convertDomainsToObjectIdArray(body);
 
             if (body.firstName) {
                 body.firstName = {
-                    en : _.escape(body.firstName.en),
-                    ar : _.escape(body.firstName.ar)
-                }
+                    en: _.escape(body.firstName.en),
+                    ar: _.escape(body.firstName.ar),
+                };
             }
             if (body.lastName) {
                 body.lastName = {
-                    en : _.escape(body.lastName.en),
-                    ar : _.escape(body.lastName.ar)
-                }
+                    en: _.escape(body.lastName.en),
+                    ar: _.escape(body.lastName.ar),
+                };
             }
 
             if (body.oldPass || body.newPass) {
                 if (currentUserId !== personnelId) {
-                    const error = new Error(`You can't change not own password`);
+                    const error = new Error('You can\'t change not own password');
 
                     error.status = 400;
                     return callback(error);
@@ -3418,29 +3414,31 @@ const Personnel = function () {
             }
 
             body.editedBy = {
-                user : req.session.uId,
-                date : new Date()
+                user: req.session.uId,
+                date: new Date(),
             };
 
             function updateCover(model, cb) {
-                var id = model._id;
-                var data = {
-                    position : model.position || null,
-                    country : model.country || null,
-                    region : model.region || null,
-                    subRegion : model.subRegion || null,
-                    branch : model.branch || null
+                const id = model._id;
+                const data = {
+                    position: model.position || null,
+                    country: model.country || null,
+                    region: model.region || null,
+                    subRegion: model.subRegion || null,
+                    branch: model.branch || null,
                 };
 
                 PersonnelModel.findByIdAndUpdate(id, data, cb);
             }
 
             function updateUsers(model, cb) {
-                var currentUserIdNew = model._id;
-                var coverBeforeUserId;
+                if (body.vacation && _.isString(body.vacation.cover) && body.vacation.cover.length === 24) {
+                    body.vacation.cover = ObjectId(body.vacation.cover);
+                }
 
-                var parallelTasks = {
-                    currentUser : (parallelCb) => {
+                const currentUserIdNew = model._id;
+                const parallelTasks = {
+                    currentUser: (parallelCb) => {
                         if (body.newPass && body.oldPass) {
                             if (bcrypt.compareSync(body.oldPass, model.pass)) {
                                 const hash = PasswordManager.encryptPasswordSync(body.newPass);
@@ -3454,13 +3452,11 @@ const Personnel = function () {
                             }
                         }
 
-                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, {new : true}, parallelCb);
-                    }
+                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, parallelCb);
+                    },
                 };
-
-                coverUserId = body.vacation ? body.vacation.cover : null;
-                coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
-
+                const coverUserId = body.vacation ? body.vacation.cover : null;
+                const coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
 
                 if (coverBeforeUserId && body.vacation) {
                     parallelTasks.coverBeforeUser = (parallelCb) => {
@@ -3479,7 +3475,7 @@ const Personnel = function () {
                                 }
 
                                 updateCover({
-                                    _id : coverBeforeUserId
+                                    _id: coverBeforeUserId,
                                 }, (err, model) => {
                                     if (err) {
                                         return parallelCb(err);
@@ -3508,12 +3504,12 @@ const Personnel = function () {
                                 }
 
                                 updateCover({
-                                    _id : coverUserId,
-                                    country : model.country,
-                                    region : model.region,
-                                    subRegion : model.subRegion,
-                                    branch : model.branch,
-                                    position : model.position
+                                    _id: coverUserId,
+                                    country: model.country,
+                                    region: model.region,
+                                    subRegion: model.subRegion,
+                                    branch: model.branch,
+                                    position: model.position,
                                 }, (err, personnel) => {
                                     if (err) {
                                         return parallelCb(err);
@@ -3522,7 +3518,6 @@ const Personnel = function () {
                                     parallelCb(null, personnel);
                                 });
                             });
-
                     };
                 }
 
@@ -3536,8 +3531,8 @@ const Personnel = function () {
             }
 
             function getUserForUi(model, cb) {
-                var options = {
-                    id : model._id
+                const options = {
+                    id: model._id,
                 };
 
                 personnelFindByIdAndPopulate(options, (err, personnel) => {
@@ -3557,7 +3552,7 @@ const Personnel = function () {
                     PersonnelModel
                         .findById(personnelId)
                         .lean()
-                        .exec(cb)
+                        .exec(cb);
                 },
 
                 (personnel, cb) => {
@@ -3573,8 +3568,8 @@ const Personnel = function () {
 
                     if ((body.accessRole && oldAccessRole !== body.accessRole) || body.archived) {
                         someEvents.personnelArchived({
-                            ids : personnelId,
-                            Session : SessionModel
+                            ids: personnelId,
+                            Session: SessionModel,
                         });
                     }
 
@@ -3583,7 +3578,7 @@ const Personnel = function () {
 
                 updateUsers,
 
-                getUserForUi
+                getUserForUi,
 
             ], callback);
         }
@@ -3593,10 +3588,10 @@ const Personnel = function () {
             async.apply(access.getEditAccess, req, ACL_MODULES.PERSONNEL),
 
             (allowed, personnel, cb) => {
-                bodyValidator.validateBody(body, accessLevel, CONTENT_TYPES.PERSONNEL, 'update', cb)
+                bodyValidator.validateBody(body, accessLevel, CONTENT_TYPES.PERSONNEL, 'update', cb);
             },
 
-            queryRun
+            queryRun,
 
         ], (err, personnel) => {
             if (err) {
@@ -3614,33 +3609,33 @@ const Personnel = function () {
             if (!body.currentLanguage && !body.newPass && !body.vacation && !body.manager) {
                 ActivityLog.emit('personnel:updated', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel : accessLevel,
+                    accessRoleLevel: accessLevel,
                     body: personnel,
                 });
             }
             if (body.vacation) {
                 ActivityLog.emit('personnel:on-leave', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel : accessLevel,
+                    accessRoleLevel: accessLevel,
                     body: personnel,
-                    coveredUsers
+                    coveredUsers,
                 });
             }
             if (coverUserId) {
                 ActivityLog.emit('personnel:cover', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel : accessLevel,
+                    accessRoleLevel: accessLevel,
                     body: personnel,
-                    coveredUsers
+                    coveredUsers,
                 });
             }
             if (body.manager) {
                 coveredUsers.push(personnel.manager);
                 ActivityLog.emit('personnel:assigned', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel : accessLevel,
+                    accessRoleLevel: accessLevel,
                     body: personnel,
-                    coveredUsers
+                    coveredUsers,
                 });
             }
 
@@ -3650,13 +3645,13 @@ const Personnel = function () {
             }
 
             const messageOptions = {
-                firstName : personnel.firstName,
-                lastName : personnel.lastName,
-                email : personnel.email,
-                phoneNumber : `+${personnel.phoneNumber}`,
-                password : generatedPassword,
-                token : personnel.token,
-                language : currentLanguage
+                firstName: personnel.firstName,
+                lastName: personnel.lastName,
+                email: personnel.email,
+                phoneNumber: `+${personnel.phoneNumber}`,
+                password: generatedPassword,
+                token: personnel.token,
+                language: currentLanguage,
             };
 
             if (body.type === 'email') {
@@ -3668,11 +3663,11 @@ const Personnel = function () {
     };
 
     this.forgotPassword = function(req, res, next) {
-        var body = req.body;
-        var login = body.login;
-        var option = body.ifPhone;
-        var forgotToken;
-        var isValid;
+        const body = req.body;
+        let login = body.login;
+        const option = body.ifPhone;
+        let forgotToken;
+        let isValid;
 
         if (option === 'true') {
             isValid = REGEXP.PHONE_REGEXP.test(login);
@@ -3692,10 +3687,10 @@ const Personnel = function () {
 
         PersonnelModel
             .findOne({
-                $or : [{email : login}, {phoneNumber : login}]
+                $or: [{ email: login }, { phoneNumber: login }],
             })
             .lean()
-            .exec(function(err, result) {
+            .exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
@@ -3706,31 +3701,31 @@ const Personnel = function () {
 
                 PersonnelModel.findOneAndUpdate(
                     {
-                        $or : [{email : login}, {phoneNumber : login}]
+                        $or: [{ email: login }, { phoneNumber: login }],
                     },
                     {
-                        $set : {forgotToken : forgotToken}
+                        $set: { forgotToken },
                     },
                     {
-                        new : true
+                        new: true,
                     },
-                    function(err, result) {
+                    (err, result) => {
                         if (err) {
                             return next(err);
                         }
 
-                        var resultJSON;
-                        var smsOptions;
+                        let resultJSON;
+                        let smsOptions;
 
                         if (result) {
                             if (option === 'true') {
                                 resultJSON = result.toJSON();
                                 smsOptions = {
-                                    phoneNumber : '+' + resultJSON.phoneNumber,
-                                    resetCode : resultJSON.forgotToken
+                                    phoneNumber: `+${resultJSON.phoneNumber}`,
+                                    resetCode: resultJSON.forgotToken,
                                 };
 
-                                smsSender.forgotPassword(smsOptions, res, function(err, message) {
+                                smsSender.forgotPassword(smsOptions, res, (err, message) => {
                                     if (err) {
                                         return next(err);
                                     }
@@ -3745,63 +3740,63 @@ const Personnel = function () {
     };
 
     this.confirm = function(req, res, next) {
-        var token = req.params.token;
+        const token = req.params.token;
 
-        var query = PersonnelModel.findOneAndUpdate({
-            token : token
+        const query = PersonnelModel.findOneAndUpdate({
+            token,
         }, {
-            token : '',
-            status : PERSONNEL_STATUSES.NEVERLOGIN._id,
-            confirmed : new Date()
+            token: '',
+            status: PERSONNEL_STATUSES.NEVERLOGIN._id,
+            confirmed: new Date(),
         });
 
-        query.exec(function(err) {
+        query.exec((err) => {
             if (err) {
                 return next(err);
             }
             res.redirect(302, `${config.localhost}/#login/confirmed`);
         });
     };
-    
+
     this.checkVerifCode = function (req, res, next) {
         const body = req.body;
         const phoneNumber = body.phone;
         const code = body.code;
         const url = `${config.localhost}/passwordChange/${code}`;
-        
+
         PersonnelModel.findOne({
-            phoneNumber: phoneNumber
-        }, function (err, result) {
+            phoneNumber,
+        }, (err, result) => {
             if (err) {
                 return next(err);
             }
-            
+
             if (!result) {
                 return errorSender.badRequest(next, ERROR_MESSAGES.USER_NOT_FOUND);
             }
-            
+
             if (result.forgotToken !== code) {
                 return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_VERIFICATION_CODE);
             }
-            
+
             res.status(200).send(url);
         });
     };
 
     this.changePassword = function(req, res, next) {
-        var forgotToken = req.params.forgotToken;
-        var currentLanguage;
-        var body = req.body;
-        var pass = body.pass;
-        var message;
-        var title;
-        var objToSend;
-        var url;
-        var salt = bcrypt.genSaltSync(10);
+        const forgotToken = req.params.forgotToken;
+        let currentLanguage;
+        const body = req.body;
+        let pass = body.pass;
+        let message;
+        let title;
+        let objToSend;
+        let url;
+        const salt = bcrypt.genSaltSync(10);
 
         pass = bcrypt.hashSync(pass, salt);
 
-        async.waterfall([updatePass, deleteToken], function(err, result) {
+        async.waterfall([updatePass, deleteToken], (err, result) => {
             if (err) {
                 return next(err);
             }
@@ -3813,8 +3808,8 @@ const Personnel = function () {
             message = RESPONSES_CONSTANTS.PASSWORD_CHANGE_SUCCESS[currentLanguage];
             title = RESPONSES_CONSTANTS.PASSWORD_CHANGE_TITLE[currentLanguage];
             objToSend = {
-                message : message,
-                title : title
+                message,
+                title,
             };
             url = `${config.localhost}/passwordChangeNotification/${JSON.stringify(objToSend)}`;
 
@@ -3822,18 +3817,17 @@ const Personnel = function () {
         });
 
         function updatePass(callback) {
-
             PersonnelModel.findOneAndUpdate(
                 {
-                    forgotToken : forgotToken
+                    forgotToken,
                 },
                 {
-                    $set : {pass : pass}
+                    $set: { pass },
                 },
                 {
-                    new : true
+                    new: true,
                 },
-                function(err, result) {
+                (err, result) => {
                     if (err) {
                         return callback(err);
                     }
@@ -3843,7 +3837,7 @@ const Personnel = function () {
         }
 
         function deleteToken(result, callback) {
-            var error;
+            let error;
 
             if (!result) {
                 return errorSender.badRequest(callback);
@@ -3851,15 +3845,15 @@ const Personnel = function () {
 
             PersonnelModel.findOneAndUpdate(
                 {
-                    forgotToken : forgotToken
+                    forgotToken,
                 },
                 {
-                    $set : {forgotToken : ''}
+                    $set: { forgotToken: '' },
                 },
                 {
-                    new : true
+                    new: true,
                 },
-                function(err, result) {
+                (err, result) => {
                     if (err) {
                         return callback(err);
                     }
@@ -3870,7 +3864,7 @@ const Personnel = function () {
     };
 
     this.existSuperAdmin = function(req, res, next) {
-        PersonnelModel.findOne({super : true}, function(err, user) {
+        PersonnelModel.findOne({ super: true }, (err, user) => {
             if (err) {
                 return next(err);
             }
@@ -3885,7 +3879,7 @@ const Personnel = function () {
 
     this.logout = function(req, res, next) {
         if (req.session) {
-            req.session.destroy(function(err) {
+            req.session.destroy((err) => {
                 if (err) {
                     return next(err);
                 }
@@ -3897,7 +3891,7 @@ const Personnel = function () {
         }
 
         res.clearCookie();
-    }
+    };
 };
 
 module.exports = Personnel;
