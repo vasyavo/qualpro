@@ -10,7 +10,7 @@ require('mongodb');
 // $lookup don't work with cover in String type
 
 exports.up = function(db, next) {
-    async.series([
+    async.waterfall([
 
         (cb) => {
             db.collection('personnels').find({
