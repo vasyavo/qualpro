@@ -293,7 +293,7 @@ define([
                             });
                         }
                     } else {
-                        if (context.visibilityFormAjax.model.get('files').length) {
+                        if (context.visibilityFormAjax && context.visibilityFormAjax.model.get('files').length) {
                             $.ajax({
                                 url : '/file',
                                 method : 'POST',
@@ -356,7 +356,7 @@ define([
                         }
                     } else {
                         var branches = context.branchesForVisibility;
-                        if (context.visibilityFormAjax.model.get('applyFileToAll')) {
+                        if (context.visibilityFormAjax && context.visibilityFormAjax.model.get('applyFileToAll')) {
                             requestPayload = {
                                 before: {
                                     files: []
@@ -470,6 +470,14 @@ define([
 
             this.linkFormView.on('formLinked', function (modelJSON) {
                 self.linkedForm = modelJSON;
+
+                // bandage: AM to AinM choose visibility form and publish objective without open form
+                if (modelJSON._id === 'visibility') {
+                    self.visibilityFormAjax = {
+                        model: new Backbone.Model(Object.assign({}, modelJSON, { files: [] }))
+                    };
+                }
+                // bandage: end
 
                 self.$el.find('#formThumbnail').append(self.formTemplate({
                     name       : modelJSON.name[self.currentLanguage],
@@ -628,7 +636,12 @@ define([
 
                 self.fileForVFWithoutBranches = {};
                 self.visibilityFormAjax = null;
-                self.assigneWithoutBranches = jsonPersonnels[0].accessRole.level === 4 && jsonPersonnels[0].branch.length !== 0 ? false : smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+
+                if (jsonPersonnels[0].accessRole.level === 4 && jsonPersonnels[0].branch.length !== 0) {
+                    self.assigneWithoutBranches = false;
+                } else {
+                    self.assigneWithoutBranches = smCvMzLevels.indexOf(jsonPersonnels[0].accessRole.level) === -1;
+                }
 
                 self.branchesForVisibility = [];
                 self.outletsForVisibility = [];
