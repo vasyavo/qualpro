@@ -39,7 +39,7 @@ exports.up = function(db, next) {
                         $set: {
                             'vacation.cover': ObjectId(vacation.cover),
                         },
-                    }, eachCb);
+                    }, {}, eachCb);
                 }
 
                 eachCb();
