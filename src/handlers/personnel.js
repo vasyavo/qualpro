@@ -3432,9 +3432,11 @@ const Personnel = function () {
             }
 
             function updateUsers(model, cb) {
-                const currentUserIdNew = model._id;
-                let coverBeforeUserId;
+                if (body.vacation && _.isString(body.vacation.cover) && body.vacation.cover.length === 24) {
+                    body.vacation.cover = ObjectId(body.vacation.cover);
+                }
 
+                const currentUserIdNew = model._id;
                 const parallelTasks = {
                     currentUser: (parallelCb) => {
                         if (body.newPass && body.oldPass) {
@@ -3453,10 +3455,8 @@ const Personnel = function () {
                         PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, parallelCb);
                     },
                 };
-
-                coverUserId = body.vacation ? body.vacation.cover : null;
-                coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
-
+                const coverUserId = body.vacation ? body.vacation.cover : null;
+                const coverBeforeUserId = model.vacation && model.vacation.cover ? model.vacation.cover : null;
 
                 if (coverBeforeUserId && body.vacation) {
                     parallelTasks.coverBeforeUser = (parallelCb) => {
