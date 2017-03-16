@@ -56,6 +56,7 @@ var Contract = function () {
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
         var positionFilter = options.positionFilter;
+        var currentUser = options.personnel;
         var searchFieldsArray = options.searchFieldsArray;
         var filterSearch = options.filterSearch;
         var skip = options.skip;
@@ -63,6 +64,34 @@ var Contract = function () {
         var isMobile = options.isMobile;
         var forSync = options.forSync;
         var pipeLine = [];
+        const $locationMatch = {
+            $and: [],
+        };
+        const locations = ['country', 'region', 'subRegion', 'branch'];
+
+        locations.forEach((location) => {
+            if (currentUser[location] && currentUser[location].length) {
+                $locationMatch.$and.push({
+                    $or: [
+                        {
+                            [location]: { $in: currentUser[location] },
+                        },
+                        {
+                            [location]: { $eq: [] },
+                        },
+                        {
+                            [location]: { $eq: null },
+                        },
+                    ],
+                });
+            }
+        });
+
+        if ($locationMatch.$and.length) {
+            pipeLine.push({
+                $match: $locationMatch,
+            });
+        }
 
         if (queryObject) {
             pipeLine.push({
@@ -156,7 +185,7 @@ var Contract = function () {
                 }
             }
         }));
-    
+
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from           : 'files',
             key            : 'documents.attachment',
@@ -274,9 +303,9 @@ var Contract = function () {
     }
 
     this.getAllForSync = function (req, res, next) {
-        function queryRun(uid) {
+        function queryRun(personnel) {
             var query = req.query;
-            var personnelId = ObjectId(uid);
+            var personnelId = ObjectId(personnel._id);
             var isMobile = req.isMobile;
             var lastLogOut = new Date(query.lastLogOut);
             var aggregateHelper;
@@ -335,6 +364,7 @@ var Contract = function () {
                 sort           : sort,
                 query          : query,
                 isMobile       : isMobile,
+                personnel,
                 forSync        : true
             });
 
@@ -845,7 +875,8 @@ var Contract = function () {
                 searchFieldsArray: searchFieldsArray,
                 filterSearch     : filterSearch,
                 skip             : skip,
-                limit            : limit
+                limit            : limit,
+                personnel,
             });
 
             aggregation = ContractSecondaryModel.aggregate(pipeLine);

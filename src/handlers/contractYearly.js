@@ -51,10 +51,39 @@ var Contract = function () {
         var positionFilter = options.positionFilter;
         var searchFieldsArray = options.searchFieldsArray;
         var filterSearch = options.filterSearch;
+        var currentUser = options.personnel;
         var skip = options.skip;
         var limit = options.limit;
         var isMobile = options.isMobile;
         var pipeLine = [];
+        const $locationMatch = {
+            $and: [],
+        };
+        const locations = ['country', 'region', 'subRegion', 'branch'];
+
+        locations.forEach((location) => {
+            if (currentUser[location] && currentUser[location].length) {
+                $locationMatch.$and.push({
+                    $or: [
+                        {
+                            [location]: { $in: currentUser[location] },
+                        },
+                        {
+                            [location]: { $eq: [] },
+                        },
+                        {
+                            [location]: { $eq: null },
+                        },
+                    ],
+                });
+            }
+        });
+
+        if ($locationMatch.$and.length) {
+            pipeLine.push({
+                $match: $locationMatch,
+            });
+        }
 
         if (queryObject) {
             pipeLine.push({
@@ -256,9 +285,9 @@ var Contract = function () {
     }
 
     this.getAllForSync = function (req, res, next) {
-        function queryRun(uid) {
+        function queryRun(personnel) {
             var query = req.query;
-            var personnelId = ObjectId(uid);
+            var personnelId = ObjectId(personnel._id);
             var isMobile = req.isMobile;
             var lastLogOut = new Date(query.lastLogOut);
             var aggregateHelper;
@@ -321,7 +350,8 @@ var Contract = function () {
                 sort           : sort,
                 query          : query,
                 isMobile       : isMobile,
-                forSync        : true
+                forSync        : true,
+                personnel
             });
 
             aggregation = ContractYearlyModel.aggregate(pipeLine);
@@ -390,7 +420,7 @@ var Contract = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -401,7 +431,7 @@ var Contract = function () {
                 return next(err);
             }
 
-            queryRun(req.session.uId);
+            queryRun(personnel);
         });
     };
 
@@ -799,6 +829,7 @@ var Contract = function () {
                 queryObject,
                 positionFilter,
                 isMobile,
+                personnel,
                 searchFieldsArray,
                 filterSearch,
                 skip,
