@@ -934,7 +934,7 @@ module.exports = function () {
      * @method /mobile/objectives
      * @instance
      */
-    
+
     router.get('/', handler.getAll);
 
     /**
