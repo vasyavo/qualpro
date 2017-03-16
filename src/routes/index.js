@@ -25,7 +25,6 @@ module.exports = function(app) {
     var notificationsRouter = require('./notifications')();
     var currencyRouter = require('./currency')();
     var fileRouter = require('./file')();
-    var objectivesRouter = require('./objectives')();
     var inStoreeTasksRouter = require('./inStoreTasks')();
     var domainRouter = require('./domain')();
     var promotionsItems = require('./promotionsItems')();
@@ -109,7 +108,7 @@ module.exports = function(app) {
     app.use('/mobile', mobileRouter);
     app.use('/currency', currencyRouter);
     app.use('/notifications', notificationsRouter);
-    app.use('/objectives', objectivesRouter);
+    app.use('/objectives', require('../stories/objectives/router'));
     app.use('/instoretasks', inStoreeTasksRouter);
     app.use('/planogram', planogramRouter);
     app.use('/questionnary', questionnaryRouter);
