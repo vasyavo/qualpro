@@ -138,7 +138,6 @@ const Personnel = function () {
 
     const personnelFindByIdAndPopulate = (options, callback) => {
         const id = ObjectId(options.id);
-        const isCurrent = options.isCurrent || false;
 
         const pipeline = [{
             $match: {
@@ -190,28 +189,6 @@ const Personnel = function () {
         }, {
             $addFields: {
                 'subRegion.imageSrc': null,
-            },
-        }, {
-            $lookup: {
-                from: 'retailSegments',
-                localField: 'retailSegment',
-                foreignField: '_id',
-                as: 'retailSegment',
-            },
-        }, {
-            $addFields: {
-                'retailSegment.imageSrc': null,
-            },
-        }, {
-            $lookup: {
-                from: 'outlets',
-                localField: 'outlet',
-                foreignField: '_id',
-                as: 'outlet',
-            },
-        }, {
-            $addFields: {
-                'outlet.imageSrc': null,
             },
         }, {
             $lookup: {
@@ -275,7 +252,7 @@ const Personnel = function () {
             },
         }];
 
-        if (isCurrent) {
+        if (!options.isMobile) {
             pipeline.push({
                 $lookup: {
                     from: 'personnels',
@@ -1409,6 +1386,7 @@ const Personnel = function () {
     };
 
     this.getById = function(req, res, next) {
+        const isMobile = req.isMobile;
         const session = req.session;
         const userId = session.uId;
 
@@ -1418,6 +1396,7 @@ const Personnel = function () {
             const options = {
                 id: actualId,
                 isCurrent: requestedId === userId,
+                isMobile,
             };
 
             async.waterfall([
@@ -1434,14 +1413,6 @@ const Personnel = function () {
                     }
 
                     personnel.workAccess = (personnel.accessRole.level < 3) || !personnel.vacation.onLeave;
-
-                    if (~[
-                        ACL_CONSTANTS.SALES_MAN,
-                        ACL_CONSTANTS.MERCHANDISER,
-                        ACL_CONSTANTS.CASH_VAN,
-                    ].indexOf(personnel.accessRole.level)) {
-                        return cb(null, personnel);
-                    }
 
                     async.waterfall([
 
@@ -1613,62 +1584,130 @@ const Personnel = function () {
                         },
 
                         (cb) => {
-                            const setIdSubRegion = personnel.subRegion.map(item => item._id);
+                            const $match = {};
+                            const setBranchId = personnel.branch.map(item => item._id);
+                            const setSubRegionId = personnel.subRegion.map(item => item._id);
 
-                            RetailSegmentModel.find({
-                                subRegions: {
-                                    $in: setIdSubRegion,
+                            if (personnel.branch.length) {
+                                $match.$and = [{
+                                    _id: {
+                                        $in: setBranchId,
+                                    },
+                                }, {
+                                    subRegion: {
+                                        $in: setSubRegionId,
+                                    },
+                                }];
+                            } else {
+                                $match.subRegion = {
+                                    $in: setSubRegionId,
+                                };
+                            }
+
+                            const pipeline = [{
+                                $match,
+                            }, {
+                                $project: {
+                                    'name.en': 1,
+                                    'name.ar': 1,
+                                    retailSegment: 1,
+                                    outlet: 1,
                                 },
-                            }).select({
-                                _id: 1,
-                                name: 1,
-                            }).lean().exec(cb);
+                            }, {
+                                $group: {
+                                    _id: null,
+                                    setBranch: {
+                                        $push: {
+                                            _id: '$_id',
+                                            name: {
+                                                en: '$name.en',
+                                                ar: '$name.ar',
+                                            },
+                                        },
+                                    },
+                                    setRetailSegment: {
+                                        $addToSet: '$retailSegment',
+                                    },
+                                    setOutlet: {
+                                        $addToSet: '$outlet',
+                                    },
+                                },
+                            }, {
+                                $project: {
+                                    setBranch: 1,
+                                    setRetailSegment: {
+                                        $filter: {
+                                            input: '$setRetailSegment',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: ['$$item', null],
+                                            },
+                                        },
+                                    },
+                                    setOutlet: {
+                                        $filter: {
+                                            input: '$setOutlet',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: ['$$item', null],
+                                            },
+                                        },
+                                    },
+                                },
+                            }, {
+                                $lookup: {
+                                    from: 'retailSegments',
+                                    localField: 'setRetailSegment',
+                                    foreignField: '_id',
+                                    as: 'setRetailSegment',
+                                },
+                            }, {
+                                $project: {
+                                    setBranch: 1,
+                                    setRetailSegment: {
+                                        _id: 1,
+                                        name: {
+                                            en: 1,
+                                            ar: 1,
+                                        },
+                                    },
+                                    setOutlet: 1,
+                                },
+                            }, {
+                                $lookup: {
+                                    from: 'outlets',
+                                    localField: 'setOutlet',
+                                    foreignField: '_id',
+                                    as: 'setOutlet',
+                                },
+                            }, {
+                                $project: {
+                                    setBranch: 1,
+                                    setRetailSegment: 1,
+                                    setOutlet: {
+                                        _id: 1,
+                                        name: {
+                                            en: 1,
+                                            ar: 1,
+                                        },
+                                    },
+                                },
+                            }];
+
+                            BranchModel.aggregate(pipeline).exec(cb);
                         },
 
-                        (setRetailSegment, cb) => {
-                            personnel.retailSegment = setRetailSegment;
+                        (result, cb) => {
+                            const groups = result.length ?
+                                result.slice().pop() : [{
+                                    setBranch: [],
+                                    setRetailSegment: [],
+                                    setOutlet: [],
+                                }];
 
-                            const setIdSubRegion = personnel.subRegion.map(item => item._id);
-                            const setIdRetailSegment = setRetailSegment.map(item => item._id);
-
-                            OutletModel.find({
-                                subRegions: {
-                                    $in: setIdSubRegion,
-                                },
-                                retailSegments: {
-                                    $in: setIdRetailSegment,
-                                },
-                            }).select({
-                                _id: 1,
-                                name: 1,
-                            }).lean().exec(cb);
-                        },
-
-                        (setOutlet, cb) => {
-                            personnel.outlet = setOutlet;
-
-                            const setIdSubRegion = personnel.subRegion.map(item => item._id);
-                            const setIdRetailSegment = personnel.retailSegment.map(item => item._id);
-                            const setIdOutlet = setOutlet.map(item => item._id);
-
-                            BranchModel.find({
-                                subRegion: {
-                                    $in: setIdSubRegion,
-                                },
-                                retailSegment: {
-                                    $in: setIdRetailSegment,
-                                },
-                                outlet: {
-                                    $in: setIdOutlet,
-                                },
-                            }).select({
-                                _id: 1,
-                                name: 1,
-                            }).lean().exec(cb);
-                        },
-
-                        (setBranch, cb) => {
-                            personnel.branch = setBranch;
+                            personnel.branch = groups.setBranch;
+                            personnel.retailSegment = groups.setRetailSegment;
+                            personnel.outlet = groups.outlet;
 
                             cb(null, personnel);
                         },
