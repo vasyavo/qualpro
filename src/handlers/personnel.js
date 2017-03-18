@@ -217,6 +217,7 @@ const Personnel = function () {
             },
         }, {
             $addFields: {
+                pass: null,
                 accessRole: {
                     $arrayElemAt: ['$accessRole', 0],
                 },
@@ -250,44 +251,31 @@ const Personnel = function () {
                     },
                 },
             },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                localField: 'vacation.cover',
+                foreignField: '_id',
+                as: 'covered',
+            },
+        }, {
+            $addFields: {
+                covered: {
+                    $map: {
+                        input: '$covered',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            firstName: '$$item.firstName',
+                            lastName: '$$item.lastName',
+                            accessRole: '$$item.accessRole',
+                            position: '$$item.position',
+                            onLeave: '$$item.vacation.onLeave',
+                        },
+                    },
+                },
+            },
         }];
-
-        if (!options.isMobile) {
-            pipeline.push({
-                $lookup: {
-                    from: 'personnels',
-                    localField: '_id',
-                    foreignField: 'vacation.cover',
-                    as: 'covered',
-                },
-            }, {
-                $unwind: {
-                    path: '$covered',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }, {
-                $addFields: {
-                    covered: {
-                        accessRole: 1,
-                        onLeave: '$covered.vacation.onLeave',
-                        _id: 1,
-                    },
-                },
-            }, {
-                $lookup: {
-                    from: 'accessRoles',
-                    localField: 'covered.accessRole',
-                    foreignField: '_id',
-                    as: 'covered.accessRole',
-                },
-            }, {
-                $addFields: {
-                    'covered.accessRole': {
-                        $arrayElemAt: ['$covered.accessRole', 0],
-                    },
-                },
-            });
-        }
 
         PersonnelModel.aggregate(pipeline)
             .exec((err, result) => {
@@ -1386,7 +1374,6 @@ const Personnel = function () {
     };
 
     this.getById = function(req, res, next) {
-        const isMobile = req.isMobile;
         const session = req.session;
         const userId = session.uId;
 
@@ -1396,7 +1383,6 @@ const Personnel = function () {
             const options = {
                 id: actualId,
                 isCurrent: requestedId === userId,
-                isMobile,
             };
 
             async.waterfall([
@@ -1409,7 +1395,7 @@ const Personnel = function () {
                     const onLeave = req.session.onLeave;
 
                     if (personnel.vacation.onLeave !== onLeave) {
-                        req.session.onLeave = !onLeave;
+                        session.onLeave = !onLeave;
                     }
 
                     personnel.workAccess = (personnel.accessRole.level < 3) || !personnel.vacation.onLeave;
