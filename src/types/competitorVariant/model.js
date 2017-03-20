@@ -1,10 +1,9 @@
-'use strict';
 const mongoose = require('mongoose');
 const schema = require('./schema');
-const contenType = require('./../../public/js/constants/contentType.js').COMPETITORVARIANT;
+const contentType = require('./../../public/js/constants/contentType').COMPETITORVARIANT;
 
-const model = mongoose.model(contenType, schema);
+const model = mongoose.model(contentType, schema);
 
-mongoose.Schemas[contenType] = schema;
+mongoose.Schemas[contentType] = schema;
 
 module.exports = model;

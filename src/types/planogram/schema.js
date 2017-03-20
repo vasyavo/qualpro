@@ -10,10 +10,13 @@ const schema = new Schema({
         required: true,
         ref: CONTENT_TYPES.DOMAIN,
     },
-    retailSegment: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.RETAILSEGMENT,
-    }],
+    retailSegment: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.RETAILSEGMENT,
+        }],
+        default: [],
+    },
     product: {
         type: ObjectId,
         ref: CONTENT_TYPES.CATEGORY,
@@ -56,7 +59,7 @@ const schema = new Schema({
         },
         date: {
             type: Date,
-            default: new Date(),
+            default: Date.now,
         },
     },
     editedBy: {
@@ -67,12 +70,13 @@ const schema = new Schema({
         },
         date: {
             type: Date,
-            default: new Date(),
+            default: Date.now,
         },
     },
 }, {
     autoIndex: false,
-    collection: 'planograms',
+    collection: `${CONTENT_TYPES.PLANOGRAM}s`,
+    versionKey: false,
 });
 
 module.exports = schema;

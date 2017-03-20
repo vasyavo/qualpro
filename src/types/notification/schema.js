@@ -1,27 +1,97 @@
 const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+
 const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    country: [{ type: ObjectId, ref: CONTENT_TYPES.COUNTRY, require: true }],
-    region: [{ type: ObjectId, ref: CONTENT_TYPES.REGION, default: null }],
-    subRegion: [{ type: ObjectId, ref: CONTENT_TYPES.SUBREGION, default: null }],
-    retailSegment: [{ type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT, default: null }],
-    outlet: [{ type: ObjectId, ref: CONTENT_TYPES.OUTLET, default: null }],
-    branch: [{ type: ObjectId, ref: CONTENT_TYPES.BRANCH, default: null }],
-    position: [{ type: ObjectId, ref: CONTENT_TYPES.POSITION, default: null }],
-    recipients: [{ type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null }],
-    attachments : [{ type: ObjectId, ref: CONTENT_TYPES.FILES, default: null }],
+    country: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.COUNTRY,
+        }],
+        default: [],
+    },
+    region: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.REGION,
+        }],
+        default: [],
+    },
+    subRegion: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.SUBREGION,
+        }],
+        default: [],
+    },
+    retailSegment: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.RETAILSEGMENT,
+        }],
+        default: [],
+    },
+    outlet: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.OUTLET,
+        }],
+        default: [],
+    },
+    branch: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.BRANCH,
+        }],
+        default: [],
+    },
+    position: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.POSITION,
+        }],
+        default: [],
+    },
+    recipients: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+        }],
+        default: [],
+    },
+    attachments: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.FILES,
+        }],
+        default: [],
+    },
     description: {
-        en: { type: String, default: '' },
-        ar: { type: String, default: '' }
+        en: {
+            type: String,
+            default: '',
+        },
+        ar: {
+            type: String,
+            default: '',
+        },
     },
     createdBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() }
-    }
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
+    },
 }, {
-    collection: 'notifications'
+    autoIndex: false,
+    collection: CONTENT_TYPES.NOTIFICATIONS,
+    versionKey: false,
 });
 
 module.exports = schema;

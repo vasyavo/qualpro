@@ -48,11 +48,13 @@ const schema = new Schema({
         },
         date: {
             type: Date,
+            default: Date.now,
         },
     },
 }, {
     autoIndex: false,
     collection: CONTENT_TYPES.FILES,
+    versionKey: false,
 });
 
 module.exports = schema;

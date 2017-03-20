@@ -1,37 +1,78 @@
 const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+
 const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
     name: {
-        en: { type: String },
-        ar: { type: String }
+        en: {
+            type: String,
+        },
+        ar: {
+            type: String,
+        },
     },
-    ID: String,
-    imageSrc: {
+    ID: {
         type: String,
-        default: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWAQMAAAAGz+OhAAAABlBMVEXNy8v///83JiJ6AAABlUlEQVRIx+3UMWrEQAyFYQ0Dcekj+ApbpgjrK6XcbuZocxQfYUoXZhRJtmGfxhAIKUJYNbt8jX+EZXrNv5vEzKszltmQglpDi6zzMxuuTJ/pbdXGX7fvn9uIwlXzn7VQe4trb8PW29hiZxOHC8sXVpK3kZfZ28B1YobX6C3yOvI++bApsAbalNOINdBmOWzOicNh9bQyc/a2SOCD0KoESiXYOuj/CLZFuw2wFuw20rOxBOovmATqKsA0UFYBpoHJmQbOJYJp4FQDmAaOG4Fp4NDQ2DZICcw2mNFsg3kGs8DizAInNA1cnGmgs6KB3jSwepPAOjqTQG83Cfx09i6BN2cfEkjO7hLobZbAzjI3mtxeSuLOFgn0ViUQrY6rbhBt2HSDzppuEGyNrBtECyyBEWwjPc0A1ihpoDMLTM/GFKsGguX9isEKkQaCyW1pIJjdUYtg+x0FMN5vB63snxmwlR4aCMZsG3RmGzxt2s02uKDZBgt8YNk2mA8LO+1XjGOBnY0XNlxYvLCg5odzb4n6udNrXnPOF+LsukzuroMwAAAAAElFTkSuQmCC'
     },
-    currency: { type: String, ref: CONTENT_TYPES.CURRENCY, default: null },
-    archived: { type: Boolean, default: false },
-    topArchived: { type: Boolean, default: false },
+    imageSrc: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.PREVIEW,
+        default: null,
+    },
+    currency: {
+        type: String,
+        ref: CONTENT_TYPES.CURRENCY,
+        default: null,
+    },
+    archived: {
+        type: Boolean,
+        default: false,
+    },
+    topArchived: {
+        type: Boolean,
+        default: false,
+    },
     type: {
         type: String,
         enum: ['country', 'region', 'subRegion'],
-        required: true
+        required: true,
     },
-    parent: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN, default: null },
-    xlsParent: { type: Number, default: null },
+    parent: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.DOMAIN,
+        default: null,
+    },
+    xlsParent: {
+        type: Number,
+        default: null,
+    },
     createdBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() }
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
     },
     editedBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
-        date: { type: Date, default: new Date() }
-    }
-}, { collection: 'domains' });
-
-schema.index({ name: 1, type: 1 }, { unique: true });
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
+    },
+}, {
+    autoIndex: false,
+    collection: `${CONTENT_TYPES.DOMAIN}s`,
+    versionKey: false,
+});
 
 module.exports = schema;

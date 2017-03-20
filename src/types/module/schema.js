@@ -1,17 +1,30 @@
 const Schema = require('mongoose').Schema;
-const ObjectId = Schema.Types.ObjectId;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
 
-var schema = new Schema({
+const schema = new Schema({
     _id: Number,
     name: {
-        en: { type: String, default: '' },
-        ar: { type: String, default: '' }
+        en: {
+            type: String,
+            default: '',
+        },
+        ar: {
+            type: String,
+            efault: '',
+        },
     },
     sequence: Number,
-    href: { type: String, default: '' },
+    href: {
+        type: String,
+        default: '',
+    },
     users: {},
     parrent: Number,
-    visible: Boolean
-}, { collection: 'modules' });
+    visible: Boolean,
+}, {
+    autoIndex: false,
+    collection: `${CONTENT_TYPES.MODULE}s`,
+    versionKey: false,
+});
 
 module.exports = schema;

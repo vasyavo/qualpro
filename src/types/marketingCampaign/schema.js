@@ -6,39 +6,62 @@ const ObjectId = Schema.Types.ObjectId;
 const PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
 
 const schema = new Schema({
-    category: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.CATEGORY,
-    }],
-    country: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DOMAIN,
-    }],
-    region: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DOMAIN,
-    }],
-    subRegion: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DOMAIN,
-    }],
-    retailSegment: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.RETAILSEGMENT,
-    }],
-    outlet: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.OUTLET,
-    }],
-    branch: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.BRANCH,
-    }],
-    displayType: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DISPLAYTYPE,
-        default: null,
-    }],
+    category: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.CATEGORY,
+        }],
+        default: [],
+    },
+    country: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DOMAIN,
+        }],
+        default: [],
+    },
+    region: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DOMAIN,
+        }],
+        default: [],
+    },
+    subRegion: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DOMAIN,
+        }],
+        default: [],
+    },
+    retailSegment: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.RETAILSEGMENT,
+        }],
+        default: [],
+    },
+    outlet: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.OUTLET,
+        }],
+        default: [],
+    },
+    branch: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.BRANCH,
+        }],
+        default: [],
+    },
+    displayType: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DISPLAYTYPE,
+        }],
+        default: [],
+    },
     dateStart: {
         type: Date,
     },
@@ -46,7 +69,10 @@ const schema = new Schema({
         type: Date,
     },
     attachments: {
-        type: Array,
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.FILES,
+        }],
         default: [],
     },
     description: {
@@ -90,13 +116,17 @@ const schema = new Schema({
         ],
         default: PROMOTION_STATUSES.DRAFT,
     },
-    personnel: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL,
-        default: null,
-    }],
+    personnel: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+        }],
+        default: [],
+    },
 }, {
+    autoIndex: false,
     collection: CONTENT_TYPES.MARKETING_CAMPAIGN,
+    versionKey: false,
 });
 
 module.exports = schema;

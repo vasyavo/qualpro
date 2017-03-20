@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const schema = require('./schema');
-const contentType = require('./../../public/js/constants/contentType.js').DISPLAYTYPE;
+const contentType = require('./../../public/js/constants/contentType').DISPLAYTYPE;
 
 const model = mongoose.model(contentType, schema);
 

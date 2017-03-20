@@ -1,7 +1,6 @@
-'use strict';
 const mongoose = require('mongoose');
 const schema = require('./schema');
-const contentType = require('./../../public/js/constants/contentType.js').CONTACT_US;
+const contentType = require('./../../public/js/constants/contentType').CONTACT_US;
 
 const model = mongoose.model(contentType, schema);
 

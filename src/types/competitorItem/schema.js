@@ -1,37 +1,79 @@
-'use strict';
 const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+
 const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
     name: {
-        en: { type: String, default: '' },
-        ar: { type: String, default: '' }
+        en: {
+            type: String,
+            default: '',
+        },
+        ar: {
+            type: String,
+            default: '',
+        },
     },
-    packing: { type: String, default: '' },
-    origin: [{ type: ObjectId, ref: CONTENT_TYPES.ORIGIN }],
-    brand: { type: ObjectId, ref: CONTENT_TYPES.BRAND },
-    variant: { type: ObjectId, ref: CONTENT_TYPES.COMPETITORVARIANT },
-    country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
+    packing: {
+        type: String,
+        default: '',
+    },
+    origin: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.ORIGIN,
+        }],
+        default: [],
+    },
+    brand: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.BRAND,
+        required: true,
+    },
+    variant: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.COMPETITORVARIANT,
+        required: true,
+    },
+    country: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.DOMAIN,
+        required: true,
+    },
     archived: {
         type: Boolean,
-        default: false
+        default: false,
     },
-    topArchived: { type: Boolean, default: false },
+    topArchived: {
+        type: Boolean,
+        default: false,
+    },
     createdBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
         date: {
             type: Date,
-            default: new Date()
-        }
+            default: Date.now,
+        },
     },
     editedBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
         date: {
             type: Date,
-            default: new Date()
-        }
-    }
-}, { collection: 'competitorItems' });
+            default: Date.now,
+        },
+    },
+}, {
+    autoIndex: false,
+    collection: `${CONTENT_TYPES.COMPETITORITEM}s`,
+    versionKey: false,
+});
 
 module.exports = schema;

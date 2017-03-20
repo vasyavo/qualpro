@@ -8,41 +8,65 @@ const schema = new Schema({
     itemName: {
         en: {
             type: String,
+            default: '',
         },
         ar: {
             type: String,
+            default: '',
         },
     },
-    country: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DOMAIN,
-    }],
-    region: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DOMAIN,
-    }],
-    subRegion: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.DOMAIN,
-    }],
-    branch: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.BRANCH,
-    }],
-    retailSegment: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.RETAILSEGMENT,
-    }],
-    outlet: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.OUTLET,
-    }],
-    assignedTo: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL,
-    }],
+    country: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DOMAIN,
+        }],
+        default: [],
+    },
+    region: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DOMAIN,
+        }],
+        default: [],
+    },
+    subRegion: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.DOMAIN,
+        }],
+        default: [],
+    },
+    branch: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.BRANCH,
+        }],
+        default: [],
+    },
+    retailSegment: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.RETAILSEGMENT,
+        }],
+        default: [],
+    },
+    outlet: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.OUTLET,
+        }],
+        default: [],
+    },
+    assignedTo: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+        }],
+        default: [],
+    },
     itemId: {
         type: ObjectId,
+        default: null,
     },
     itemDetails: {
         type: String,
@@ -54,9 +78,11 @@ const schema = new Schema({
     },
     accessRoleLevel: {
         type: Number,
+        default: null,
     },
     module: {
         type: Number,
+        default: null,
     },
     actionType: {
         type: String,
@@ -66,10 +92,13 @@ const schema = new Schema({
         type: Date,
         default: Date.now,
     },
-    personnels: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.PERSONNEL,
-    }],
+    personnels: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+        }],
+        default: [],
+    },
     createdBy: {
         user: {
             type: ObjectId,
@@ -82,7 +111,9 @@ const schema = new Schema({
         },
     },
 }, {
-    collection: 'activityLists',
+    autoIndex: false,
+    collection: `${CONTENT_TYPES.ACTIVITYLIST}s`,
+    versionKey: false,
 });
 
 module.exports = schema;

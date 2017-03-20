@@ -1,59 +1,134 @@
-const Schema = require('mongoose').Schema;
-const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
-const ItemHistoryModel = require('./../itemHistory/model');
 const _ = require('lodash');
+const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+const ItemHistoryModel = require('./../itemHistory/model');
+
+const ObjectId = Schema.Types.ObjectId;
 
 const LocationSchema = new Schema({
-    country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
-    retailSegment: { type: ObjectId, ref: CONTENT_TYPES.RETAILSEGMENT },
-    outlet: { type: ObjectId, ref: CONTENT_TYPES.OUTLET }
+    country: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.DOMAIN,
+    },
+    retailSegment: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.RETAILSEGMENT,
+    },
+    outlet: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.OUTLET,
+    },
 }, {
-    _id: false
+    _id: false,
 });
 
 const schema = new Schema({
-    ID: { type: String },
-    name: {
-        en: { type: String, default: '' },
-        ar: { type: String, default: '' }
+    ID: {
+        type: String,
     },
-    barCode: { type: String, default: '' },
-    packing: { type: String, default: '' },
-    ppt    : {type: Number, min: 0, default: 0}, //TODO: review field PPT (product item model)
-    pptPerCase : {type: Number, min: 0, default: 0},
-    rspMin : {type: Number, min: 0, default: 0},
-    rspMax : {type: Number, min: 0, default: 0},
-    origin: [{ type: ObjectId, ref: CONTENT_TYPES.ORIGIN }],
-    category: { type: ObjectId, ref: CONTENT_TYPES.CATEGORY },
-    variant: { type: ObjectId, ref: CONTENT_TYPES.VARIANT },
-    country: { type: ObjectId, ref: CONTENT_TYPES.DOMAIN },
+    name: {
+        en: {
+            type: String,
+            default: '',
+        },
+        ar: {
+            type: String,
+            default: '',
+        },
+    },
+    barCode: {
+        type: String,
+        default: '',
+    },
+    packing: {
+        type: String,
+        default: '',
+    },
+    ppt: {
+        type: Number,
+        min: 0,
+        default: 0,
+    },
+    pptPerCase: {
+        type: Number,
+        min: 0,
+        default: 0,
+    },
+    rspMin: {
+        type: Number,
+        min: 0,
+        default: 0,
+    },
+    rspMax: {
+        type: Number,
+        min: 0,
+        default: 0,
+    },
+    origin: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.ORIGIN,
+        }],
+        default: [],
+    },
+    category: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.CATEGORY,
+        default: null,
+    },
+    variant: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.VARIANT,
+        default: null,
+    },
+    country: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.DOMAIN,
+        default: null,
+    },
     location: [LocationSchema],
     archived: {
         type: Boolean,
-        default: false
+        default: false,
     },
-    topArchived: { type: Boolean, default: false },
+    topArchived: {
+        type: Boolean,
+        default: false,
+    },
     createdBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
         date: {
             type: Date,
-            default: new Date()
-        }
+            default: Date.now,
+        },
     },
     editedBy: {
-        user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
         date: {
             type: Date,
-            default: new Date()
-        }
-    }
-}, { collection: 'items' });
+            default: Date.now,
+        },
+    },
+}, {
+    autoIndex: false,
+    collection: `${CONTENT_TYPES.ITEM}s`,
+    versionKey: false,
+});
+
 schema.pre('save', function(next) {
     this.ppt = Math.round(this.ppt * 100);
     this.rspMin = Math.round(this.rspMin * 100);
     this.rspMax = Math.round(this.rspMax * 100);
     this.pptPerCase = Math.round(this.pptPerCase * 100);
+
     next();
 });
 
@@ -72,17 +147,17 @@ schema.pre('update', function(next) {
                 rspMin: Math.round(rspMin * 100),
                 rspMax: Math.round(rspMax * 100),
                 pptPerCase: Math.round(pptPerCase * 100),
-            }
+            },
         });
 
         return ItemHistoryModel.create({
-            item: item,
+            item,
             ppt: price,
-            rspMin: rspMin,
-            rspMax: rspMax,
-            pptPerCase: pptPerCase,
-            createdBy: createdBy
-        }, function(err) {
+            rspMin,
+            rspMax,
+            pptPerCase,
+            createdBy,
+        }, (err) => {
             if (err) {
                 return next(err);
             }
@@ -103,13 +178,14 @@ schema.post('findOne', (model, next) => {
 
         if (_.isInteger(price)) {
             model.set({
-                'ppt': price,
-                'rspMin': rspMin,
-                'rspMax': rspMax,
-                'pptPerCase': pptPerCase
+                ppt: price,
+                rspMin,
+                rspMax,
+                pptPerCase,
             });
         }
     }
+
     next();
 });
 
