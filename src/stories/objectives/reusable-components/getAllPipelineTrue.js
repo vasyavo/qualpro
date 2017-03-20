@@ -348,7 +348,6 @@ module.exports = (options) => {
                 _id: 1,
                 position: 1,
                 accessRole: 1,
-                imageSrc: 1,
                 firstName: 1,
                 lastName: 1,
             },
@@ -411,7 +410,6 @@ module.exports = (options) => {
                             firstName: '$$personnel.firstName',
                             lastName: '$$personnel.lastName',
                             position: '$$personnel.position',
-                            imageSrc: '$$personnel.imageSrc',
                             accessRole: '$$personnel.accessRole',
                         },
                     },
@@ -828,7 +826,6 @@ module.exports = (options) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
-                    imageSrc: 1,
                     accessRole: {
                         $let: {
                             vars: {
@@ -893,7 +890,6 @@ module.exports = (options) => {
                     firstName: 1,
                     lastName: 1,
                     accessRole: 1,
-                    imageSrc: 1,
                     position: {
                         $let: {
                             vars: {
@@ -1001,7 +997,6 @@ module.exports = (options) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
-                    imageSrc: 1,
                     accessRole: {
                         $let: {
                             vars: {
@@ -1069,7 +1064,6 @@ module.exports = (options) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
-                    imageSrc: 1,
                     position: {
                         $let: {
                             vars: {
