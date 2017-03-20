@@ -60,3 +60,6 @@ src/config/.env.production
 
 # Restore staging db script
 restore-staging-db.sh
+
+# QuotaGuard Tunnel
+/bin/qgtunnel
