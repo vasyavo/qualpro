@@ -4,6 +4,7 @@ const _ = require('lodash');
 const detectObjectivesForSubordinates = require('./../../../reusableComponents/detectObjectivesForSubordinates');
 const ACL_MODULES = require('./../../../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
+const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const AccessManager = require('./../../../helpers/access')();
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
 const GetImage = require('./../../../helpers/getImages');
@@ -12,6 +13,7 @@ const ObjectiveModel = require('./../../../types/objective/model');
 const PersonnelModel = require('./../../../types/personnel/model');
 const $defProjection = require('./../reusable-components/$defProjection');
 const getAllPipeline = require('./../reusable-components/getAllPipeline');
+const getAllPipelineTrue = require('./../reusable-components/getAllPipelineTrue');
 
 const getImage = new GetImage();
 const ObjectId = mongoose.Types.ObjectId;
@@ -21,7 +23,48 @@ module.exports = (req, res, next) => {
     const userId = session.uId;
     const accessRoleLevel = session.level;
 
-    const queryRun = (callback) => {
+    const queryRunForAdmins = (personnel, callback) => {
+        const query = req.query;
+        const lastLogOut = new Date(query.lastLogOut);
+        const queryObject = {
+            context: CONTENT_TYPES.OBJECTIVES,
+        };
+
+        queryObject.$or = [
+            {
+                'editedBy.date': {
+                    $gt: lastLogOut,
+                },
+            },
+            {
+                'createdBy.date': {
+                    $gt: lastLogOut,
+                },
+            },
+        ];
+
+        const pipeLine = getAllPipelineTrue({
+            queryObject,
+            isMobile: true,
+            personnel,
+            currentUserLevel: accessRoleLevel,
+        });
+
+        ObjectiveModel.aggregate(pipeLine)
+            .allowDiskUse(true)
+            .exec((err, response) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                response = response && response[0] ?
+                    response[0] : { data: [], total: 0 };
+
+                callback(null, response);
+            });
+    };
+
+    const queryRun = (personnel, callback) => {
         const query = req.query;
         const lastLogOut = new Date(query.lastLogOut);
         const queryObject = {
@@ -162,7 +205,17 @@ module.exports = (req, res, next) => {
         },
 
         (allowed, personnel, cb) => {
-            queryRun(cb);
+            const isAdmin = [
+                ACL_CONSTANTS.COUNTRY_ADMIN,
+                ACL_CONSTANTS.AREA_MANAGER,
+                ACL_CONSTANTS.AREA_IN_CHARGE,
+            ].indexOf(accessRoleLevel) !== -1;
+
+            if (isAdmin) {
+                queryRunForAdmins(personnel, cb);
+            } else {
+                queryRun(personnel, cb);
+            }
         },
 
     ], (err, response) => {

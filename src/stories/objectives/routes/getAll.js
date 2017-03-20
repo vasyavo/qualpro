@@ -4,6 +4,7 @@ const _ = require('lodash');
 const detectObjectivesForSubordinates = require('./../../../reusableComponents/detectObjectivesForSubordinates');
 
 const ACL_MODULES = require('./../../../constants/aclModulesNames');
+const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
 const CONSTANTS = require('./../../../constants/mainConstants');
 
@@ -13,6 +14,7 @@ const GetImage = require('./../../../helpers/getImages');
 const FilterMapper = require('./../../../helpers/filterMapper');
 const coveredByMe = require('./../../../helpers/coveredByMe');
 const getAllPipeline = require('./../reusable-components/getAllPipeline');
+const getAllPipelineTrue = require('./../reusable-components/getAllPipelineTrue');
 
 const ObjectiveModel = require('./../../../types/objective/model');
 const PersonnelModel = require('./../../../types/personnel/model');
@@ -272,6 +274,62 @@ module.exports = (req, res, next) => {
         });
     };
 
+    const queryRunForAdmins = (personnel, callback) => {
+        const query = req.query;
+        const filter = query.filter || {};
+        const page = query.page || 1;
+        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
+        const skip = (page - 1) * limit;
+        const filterMapper = new FilterMapper();
+        const filterSearch = filter.globalSearch || '';
+        const isMobile = req.isMobile;
+
+        delete filter.cover;
+        delete filter.globalSearch;
+
+        const queryObject = filterMapper.mapFilter({
+            contentType: CONTENT_TYPES.OBJECTIVES,
+            filter,
+            personnel,
+        });
+
+        const positionFilter = {};
+
+        if (queryObject.position && queryObject.position.$in) {
+            positionFilter.$or = [
+                { 'assignedTo.position': queryObject.position },
+                { 'createdBy.user.position': queryObject.position },
+            ];
+
+            delete queryObject.position;
+        }
+
+        queryObject.context = CONTENT_TYPES.OBJECTIVES;
+
+        const pipeline = getAllPipelineTrue({
+            queryObject,
+            positionFilter,
+            filterSearch,
+            isMobile,
+            skip,
+            limit,
+            personnel,
+        });
+
+        ObjectiveModel.aggregate(pipeline)
+            .allowDiskUse(true)
+            .exec((err, response) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                response = response && response[0]
+                    ? response[0] : { data: [], total: 0 };
+
+                callback(null, response);
+            });
+    };
+
     async.waterfall([
 
         (cb) => {
@@ -279,7 +337,22 @@ module.exports = (req, res, next) => {
         },
 
         (allowed, personnel, cb) => {
-            queryRun(personnel, cb);
+            const adminFromCMS = req.query.filter && req.query.filter.tabName === 'all';
+            const adminFromMobile = req.isMobile && [
+                ACL_CONSTANTS.COUNTRY_ADMIN,
+                ACL_CONSTANTS.AREA_MANAGER,
+                ACL_CONSTANTS.AREA_IN_CHARGE,
+            ].indexOf(accessRoleLevel) !== -1;
+
+            if (adminFromCMS) {
+                delete req.query.filter.tabName;
+            }
+
+            if (adminFromCMS || adminFromMobile) {
+                queryRunForAdmins(personnel, cb);
+            } else {
+                queryRun(personnel, cb);
+            }
         },
 
     ], (err, response) => {
