@@ -219,10 +219,31 @@ const Personnel = function () {
             $addFields: {
                 pass: null,
                 accessRole: {
-                    $arrayElemAt: ['$accessRole', 0],
+                    $let: {
+                        vars: {
+                            accessRole: {
+                                $arrayElemAt: ['$accessRole', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$accessRole._id',
+                            name: '$$accessRole.name',
+                            level: '$$accessRole.level',
+                        },
+                    },
                 },
                 position: {
-                    $arrayElemAt: ['$position', 0],
+                    $let: {
+                        vars: {
+                            position: {
+                                $arrayElemAt: ['$position', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: '$$position.name',
+                        },
+                    },
                 },
                 'createdBy.user': {
                     $cond: {
@@ -232,7 +253,20 @@ const Personnel = function () {
                             }, 0],
                         },
                         then: {
-                            $arrayElemAt: ['$createdBy.user', 0],
+                            $let: {
+                                vars: {
+                                    createdBy: {
+                                        $arrayElemAt: ['$createdBy.user', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$createdBy._id',
+                                    firstName: '$$createdBy.firstName',
+                                    lastName: '$$createdBy.lastName',
+                                    accessRole: '$$createdBy.accessRole',
+                                    position: '$$createdBy.position',
+                                },
+                            },
                         },
                         else: null,
                     },
@@ -245,7 +279,20 @@ const Personnel = function () {
                             }, 0],
                         },
                         then: {
-                            $arrayElemAt: ['$manager', 0],
+                            $let: {
+                                vars: {
+                                    manager: {
+                                        $arrayElemAt: ['$manager', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$manager._id',
+                                    firstName: '$$manager.firstName',
+                                    lastName: '$$manager.lastName',
+                                    accessRole: '$$manager.accessRole',
+                                    position: '$$manager.position',
+                                },
+                            },
                         },
                         else: null,
                     },
@@ -1693,7 +1740,7 @@ const Personnel = function () {
 
                             personnel.branch = groups.setBranch;
                             personnel.retailSegment = groups.setRetailSegment;
-                            personnel.outlet = groups.outlet;
+                            personnel.outlet = groups.setOutlet;
 
                             cb(null, personnel);
                         },
