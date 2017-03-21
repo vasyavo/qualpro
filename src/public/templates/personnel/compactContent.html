@@ -3,7 +3,7 @@
         <% _.each(collection, function(model, index){ %>
         <li class="inner">
             <div class="half-block left">
-                <img class="mini-avatar" src="<%=model.imageSrc>"/>
+                <img class="mini-avatar" src="preview/<%=model.imageSrc>"/>
                 <p>
                     <a id="<%=model._id%>" href="javascript;">
                         <%=model.name.first%> <%=model.name.last%>

@@ -4,7 +4,7 @@
     <div class="userBlock flexColumn">
         <div class="top flexRowStart bottomLine">
             <div class="left flexColumn">
-                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="flexColumn">
                 <% if (tabName === 'myCover' && covered[model.createdBy.user._id]) { %>
@@ -26,7 +26,7 @@
         <div class="middle flexColumn">
             <% model.assignedTo.forEach( function(assignedTo) { %>
             <div class="flexRowStart">
-                <img src="<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                <img src="preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                 <% if (tabName === 'myCover' && covered[assignedTo._id]) { %>
                 <div class="description fontCovering">
                     <%= translation.coveringFor %>

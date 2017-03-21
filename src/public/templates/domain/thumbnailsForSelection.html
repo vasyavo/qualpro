@@ -21,7 +21,7 @@
                 <%var checked = selected.indexOf(id) !== -1;%>
                 <input type="checkbox" value="<%=id%>" id="<%=id%>" class="customCheckbox hidden"<%=checked || itemsCount === 1 ?'checked':''%> />
                 <label for="<%=id%>" class="checkboxLabel"></label>
-                <img class="thumbnailImage" src="<%=domain.imageSrc%>">
+                <img class="thumbnailImage" src="preview/<%=domain.imageSrc%>">
             </div>
             <div class="thumbnailBottom">
                 <span class="thumbnailUserName"><%=domain.name.currentLanguage%></span>
