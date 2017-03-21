@@ -65,15 +65,9 @@ var BrandingActivity = function () {
 
         // fix do not show draft to other users
         if (isMobile) {
-            if (forSync) {
-                mainFilter.status = {
-                    $ne: 'draft'
-                };
-            } else {
-                mainFilter.status = {
-                    $nin: ['draft', 'expired']
-                };
-            }
+            mainFilter.status = {
+                $nin: ['draft', 'expired']
+            };
         } else {
             pipeLine.push({
                 $match: {
@@ -321,6 +315,8 @@ var BrandingActivity = function () {
             var skip = (page - 1) * limit;
             var filterMapper = new FilterMapper();
             var filterSearch = filter.globalSearch || '';
+
+            filterMapper.setFilterLocation(filter, personnel, 'branch', null);
             var queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.MARKETING_CAMPAIGN,
                 filter     : filter,
