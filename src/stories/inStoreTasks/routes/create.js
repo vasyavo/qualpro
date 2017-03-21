@@ -12,6 +12,7 @@ const bodyValidator = require('./../../../helpers/bodyValidator');
 const extractBody = require('./../../../utils/extractBody');
 const ActivityLog = require('./../../../stories/push-notifications/activityLog');
 const TestUtils = require('./../../../stories/push-notifications/utils/TestUtils');
+const getByIdAggr = require('../reusable-components/getByIdAggr');
 
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 const fileHandler = new FileHandler(mongo.db);
@@ -155,7 +156,7 @@ module.exports = (req, res, next) => {
             (inStoreTaskModel, cb) => {
                 const id = inStoreTaskModel.get('_id');
 
-                self.getByIdAggr({ id, isMobile }, cb);
+                getByIdAggr({ id, isMobile }, cb);
             },
 
         ], callback);
