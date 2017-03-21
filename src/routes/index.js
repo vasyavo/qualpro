@@ -79,6 +79,7 @@ module.exports = function(app) {
         res.render('index.html', {
             csrfToken: req.csrfToken(),
             pubnubSubscribeKey: config.pubnub.subscribeKey,
+            previewUrlRoot: config.previewUrlRoot,
         });
     });
 
@@ -94,6 +95,7 @@ module.exports = function(app) {
     app.use(require('./../stories/user-registration'));
 
     app.use('/activityList', require('../stories/activityList/router'));
+    app.use('/preview', require('../stories/preview/router'));
     app.use('/brandingAndMonthlyDisplay', require('./brandingAndMonthlyDisplay'));
     app.use('/marketingCampaign', marketingCampaignRouter);
     app.use('/marketingCampaignItem', marketingCampaignItemRouter);
@@ -149,6 +151,7 @@ module.exports = function(app) {
     app.use('/accessRole', accessRoleRouter);
 
     app.use('/displayType', displayTypeRouter);
+
 
     app.use('/form', formRouter);
 

@@ -1,16 +1,16 @@
 const async = require('async');
 const _ = require('lodash');
 const CONTENT_TYPES = require('../public/js/constants/contentType');
-const PreviewModel = require('./../types/preview/model');
-const defaultImageSrc = require('./../constants/defaultImageSrc');
+const PreviewCollection = require('./../stories/preview/collection');
+const defaultPreviews = require('./../stories/preview/autoload').defaults;
 const toString = require('./../utils/toString');
+const db = require('./../utils/mongo');
 
 class ImageHelper {
 
     getImages(options, cb) {
         const data = options.data;
         const modelNames = Object.keys(data);
-        const models = {};
 
         if (modelNames && !modelNames.length) {
             return cb(null, {});
@@ -28,20 +28,14 @@ class ImageHelper {
             return setPreview.indexOf(contentType) !== -1;
         };
 
-        modelNames.forEach((contentType) => {
-            if (isPreview(contentType)) {
-                models[contentType] = PreviewModel;
-            } else {
-                models[contentType] = require('./../types')[contentType];
-            }
-        });
-
-        const getWhereIdIn = (model, contentType) => {
+        const getWhereIdIn = (options) => {
             return (cb) => {
+                const { $in, collection } = options;
+
                 const pipeline = [{
                     $match: {
                         _id: {
-                            $in: data[contentType],
+                            $in,
                         },
                     },
                 }, {
@@ -51,12 +45,12 @@ class ImageHelper {
                     },
                 }];
 
-                model.aggregate(pipeline, cb);
+                collection.aggregate(pipeline, cb);
             };
         };
-        const getPreviewWhereIdIn = (contentType) => {
+        const getPreviewWhereIdIn = (options) => {
             return (cb) => {
-                const $in = data[contentType].filter(id => id);
+                const { $in, previewId } = options;
 
                 const pipeline = [{
                     $match: {
@@ -69,14 +63,14 @@ class ImageHelper {
                     // as they're will be set into result
                     $project: {
                         _id: '$itemId',
-                        imageSrc: '$base64',
+                        imageSrc: '$_id',
                     },
                 }];
 
                 async.waterfall([
 
                     (cb) => {
-                        PreviewModel.aggregate(pipeline, cb);
+                        PreviewCollection.aggregate(pipeline, cb);
                     },
 
                     (result, cb) => {
@@ -87,7 +81,7 @@ class ImageHelper {
                             const resultDefaults = _.difference(setInboundId, setIdInResult)
                                 .map(id => ({
                                     _id: id,
-                                    imageSrc: defaultImageSrc[contentType],
+                                    imageSrc: previewId,
                                 }));
                             const setOutboundData = [...result, ...resultDefaults];
 
@@ -103,15 +97,19 @@ class ImageHelper {
 
         const stack = {};
 
-        for (const contentType in models) {
-            const model = models[contentType];
+        modelNames.forEach((contentType) => {
+            const $in = data[contentType];
 
             if (isPreview(contentType)) {
-                stack[contentType] = getPreviewWhereIdIn(contentType);
+                const previewId = defaultPreviews[contentType];
+
+                stack[contentType] = getPreviewWhereIdIn({ $in, previewId });
             } else {
-                stack[contentType] = getWhereIdIn(model, contentType);
+                const collection = db.collection(contentType);
+
+                stack[contentType] = getWhereIdIn({ $in, collection });
             }
-        }
+        });
 
         async.parallel(stack, cb);
     }

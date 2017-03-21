@@ -1,10 +1,8 @@
-'use strict';
-
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const PasswordManager = require('./../helpers/passwordManager');
-const redis = require('./../helpers/redisClient');
 const ObjectiveModel = require('./../types/objective/model');
+const defaultPreviews = require('./../stories/preview/autoload').defaults;
 
 const Personnel = function () {
     const mongoose = require('mongoose');
@@ -13,7 +11,6 @@ const Personnel = function () {
     const RESPONSES_CONSTANTS = require('../constants/responses');
     const CONSTANTS = require('../constants/mainConstants');
     const CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    const ACTIVITY_TYPES = require('../constants/activityTypes');
     const ERROR_MESSAGES = require('../constants/errorMessages');
     const REGEXP = require('../public/js/constants/validation.js');
     const PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
@@ -32,9 +29,7 @@ const Personnel = function () {
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
     const DomainModel = require('./../types/domain/model');
-    const OutletModel = require('./../types/outlet/model');
     const BranchModel = require('./../types/branch/model');
-    const RetailSegmentModel = require('./../types/retailSegment/model');
     const SessionModel = require('./../types/session/model');
     const xssFilters = require('xss-filters');
     const ObjectId = mongoose.Types.ObjectId;
@@ -322,6 +317,18 @@ const Personnel = function () {
                     },
                 },
             },
+        }, {
+            $lookup: {
+                from: 'preview',
+                localField: 'imageSrc',
+                foreignField: '_id',
+                as: 'imageSrc',
+            },
+        }, {
+            $unwind: {
+                path: '$imageSrc',
+                preserveNullAndEmptyArrays: true,
+            },
         }];
 
         PersonnelModel.aggregate(pipeline)
@@ -332,6 +339,10 @@ const Personnel = function () {
 
                 const personnel = result.length > 0 ?
                     result.slice().pop() : {};
+
+                if (!personnel.imageSrc) {
+                    personnel.imageSrc = defaultPreviews[CONTENT_TYPES.PERSONNEL];
+                }
 
                 callback(null, personnel);
             });

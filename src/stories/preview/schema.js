@@ -1,6 +1,5 @@
 const Schema = require('mongoose').Schema;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType');
-const defaults = require('./../../constants/defaultImageSrc');
 
 const ObjectId = Schema.Types.ObjectId;
 
@@ -9,13 +8,17 @@ const schema = new Schema({
         type: String,
         required: true,
     },
-    domain: {
+    itemId: {
         type: ObjectId,
+        default: null,
+    },
+    contentType: {
+        type: String,
         required: true,
     },
-    module: {
-        type: Number,
-        required: true,
+    isDefault: {
+        type: Boolean,
+        default: false,
     },
 }, {
     autoIndex: false,
