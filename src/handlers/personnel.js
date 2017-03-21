@@ -1174,7 +1174,11 @@ const Personnel = function () {
             },
 
             (result, cb) => {
-                if (result.length !== 1) {
+                if (!result.length) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD);
+                }
+
+                if (result.length > 1) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.USERS_WITH_SAME_LOGIN);
                 }
 
