@@ -31,10 +31,10 @@ const Personnel = function () {
     const getImagesHelper = new GetImagesHelper();
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
-    const CountryModel = require('./../types/domain/model');
+    const DomainModel = require('./../types/domain/model');
     const OutletModel = require('./../types/outlet/model');
     const BranchModel = require('./../types/branch/model');
-    const retailSegmentModel = require('./../types/retailSegment/model');
+    const RetailSegmentModel = require('./../types/retailSegment/model');
     const SessionModel = require('./../types/session/model');
     const xssFilters = require('xss-filters');
     const ObjectId = mongoose.Types.ObjectId;
@@ -136,384 +136,205 @@ const Personnel = function () {
         return { $literal: false };
     };
 
-    const pushCurrentUserCovered = function(pipeLine) {
-        pipeLine.push({
-            $lookup: {
-                from: 'personnels',
-                localField: '_id',
-                foreignField: 'vacation.cover',
-                as: 'covered',
-            },
-        });
+    const personnelFindByIdAndPopulate = (options, callback) => {
+        const id = ObjectId(options.id);
 
-        pipeLine.push({
-            $unwind: {
-                path: '$covered',
-                preserveNullAndEmptyArrays: true,
+        const pipeline = [{
+            $match: {
+                _id: id,
             },
-        });
-
-        pipeLine.push({
-            $project: {
-                _id: 1,
-                position: 1,
-                avgRating: 1,
-                manager: 1,
-                lastAccess: 1,
-                beforeAccess: 1,
-                firstName: 1,
-                lastName: 1,
-                email: 1,
-                phoneNumber: 1,
-                accessRole: 1,
-                dateJoined: 1,
-                createdBy: 1,
-                covered: {
-                    accessRole: 1,
-                    onLeave: '$covered.vacation.onLeave',
-                    _id: 1,
-                },
-                vacation: 1,
-                status: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                country: 1,
-                currentLanguage: 1,
-                super: 1,
-                archived: 1,
-                temp: 1,
-                confirmed: 1,
-                translated: 1,
-            },
-        });
-
-        pipeLine.push({
+        }, {
             $lookup: {
                 from: 'accessRoles',
-                localField: 'covered.accessRole',
+                localField: 'accessRole',
                 foreignField: '_id',
-                as: 'covered.accessRole',
+                as: 'accessRole',
             },
-        });
-
-        pipeLine.push({
-            $project: {
-                _id: 1,
-                position: 1,
-                avgRating: 1,
-                manager: 1,
-                lastAccess: 1,
-                beforeAccess: 1,
-                firstName: 1,
-                lastName: 1,
-                email: 1,
-                phoneNumber: 1,
-                accessRole: 1,
-                dateJoined: 1,
-                createdBy: 1,
-                covered: {
-                    _id: 1,
-                    accessRoles: {
-                        $arrayElemAt: [
-                            '$covered.accessRole',
-                            0,
-                        ],
+        }, {
+            $lookup: {
+                from: 'positions',
+                localField: 'position',
+                foreignField: '_id',
+                as: 'position',
+            },
+        }, {
+            $lookup: {
+                from: 'domains',
+                localField: 'country',
+                foreignField: '_id',
+                as: 'country',
+            },
+        }, {
+            $addFields: {
+                'country.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from: 'domains',
+                localField: 'region',
+                foreignField: '_id',
+                as: 'region',
+            },
+        }, {
+            $addFields: {
+                'region.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from: 'domains',
+                localField: 'subRegion',
+                foreignField: '_id',
+                as: 'subRegion',
+            },
+        }, {
+            $addFields: {
+                'subRegion.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from: 'branches',
+                localField: 'branch',
+                foreignField: '_id',
+                as: 'branch',
+            },
+        }, {
+            $addFields: {
+                'branch.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                localField: 'createdBy.user',
+                foreignField: '_id',
+                as: 'createdBy.user',
+            },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                localField: 'manager',
+                foreignField: '_id',
+                as: 'manager',
+            },
+        }, {
+            $addFields: {
+                pass: null,
+                accessRole: {
+                    $let: {
+                        vars: {
+                            accessRole: {
+                                $arrayElemAt: ['$accessRole', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$accessRole._id',
+                            name: '$$accessRole.name',
+                            level: '$$accessRole.level',
+                        },
                     },
-                    onLeave: 1,
                 },
-                status: 1,
-                vacation: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                country: 1,
-                currentLanguage: 1,
-                super: 1,
-                archived: 1,
-                temp: 1,
-                confirmed: 1,
-                translated: 1,
-            },
-        });
-
-        pipeLine.push({
-            $project: {
-                _id: 1,
-                position: 1,
-                avgRating: 1,
-                manager: 1,
-                lastAccess: 1,
-                beforeAccess: 1,
-                firstName: 1,
-                lastName: 1,
-                dateJoined: 1,
-                email: 1,
-                phoneNumber: 1,
-                accessRole: 1,
-                createdBy: 1,
-                covered: {
-                    _id: 1,
-                    accessRoles: {
-                        _id: 1,
-                        editedBy: 1,
-                        createdBy: 1,
-                        name: 1,
-                        __v: 1,
-                        level: 1,
-                    },
-                    onLeave: 1,
-                },
-                status: 1,
-                vacation: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                country: 1,
-                currentLanguage: 1,
-                super: 1,
-                archived: 1,
-                temp: 1,
-                confirmed: 1,
-                translated: 1,
-            },
-        });
-
-        pipeLine.push({
-            $group: {
-                _id: '$_id',
                 position: {
-                    $first: '$position',
+                    $let: {
+                        vars: {
+                            position: {
+                                $arrayElemAt: ['$position', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: '$$position.name',
+                        },
+                    },
                 },
-                avgRating: {
-                    $first: '$avgRating',
+                'createdBy.user': {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$createdBy.user',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    createdBy: {
+                                        $arrayElemAt: ['$createdBy.user', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$createdBy._id',
+                                    firstName: '$$createdBy.firstName',
+                                    lastName: '$$createdBy.lastName',
+                                    accessRole: '$$createdBy.accessRole',
+                                    position: '$$createdBy.position',
+                                },
+                            },
+                        },
+                        else: null,
+                    },
                 },
                 manager: {
-                    $first: '$manager',
-                },
-                lastAccess: {
-                    $first: '$lastAccess',
-                },
-                beforeAccess: {
-                    $first: '$beforeAccess',
-                },
-                firstName: {
-                    $first: '$firstName',
-                },
-                lastName: {
-                    $first: '$lastName',
-                },
-                email: {
-                    $first: '$email',
-                },
-                phoneNumber: {
-                    $first: '$phoneNumber',
-                },
-                accessRole: {
-                    $first: '$accessRole',
-                },
-                dateJoined: {
-                    $first: '$dateJoined',
-                },
-                createdBy: {
-                    $first: '$createdBy',
-                },
-                vacation: {
-                    $first: '$vacation',
-                },
-                status: {
-                    $first: '$status',
-                },
-                region: {
-                    $first: '$region',
-                },
-                subRegion: {
-                    $first: '$subRegion',
-                },
-                retailSegment: {
-                    $first: '$retailSegment',
-                },
-                outlet: {
-                    $first: '$outlet',
-                },
-                branch: {
-                    $first: '$branch',
-                },
-                country: {
-                    $first: '$country',
-                },
-                currentLanguage: {
-                    $first: '$currentLanguage',
-                },
-                super: {
-                    $first: '$super',
-                },
-                archived: {
-                    $first: '$archived',
-                },
-                temp: {
-                    $first: '$temp',
-                },
-                confirmed: {
-                    $first: '$confirmed',
-                },
-                translated: {
-                    $first: '$translated',
-                },
-                covered: {
-                    $addToSet: '$covered',
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$manager',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    manager: {
+                                        $arrayElemAt: ['$manager', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$manager._id',
+                                    firstName: '$$manager.firstName',
+                                    lastName: '$$manager.lastName',
+                                    accessRole: '$$manager.accessRole',
+                                    position: '$$manager.position',
+                                },
+                            },
+                        },
+                        else: null,
+                    },
                 },
             },
-        });
-
-        return pipeLine;
-    };
-
-    const personnelFindByIdAndPopulate = function(options, callback) {
-        const id = options.id || '';
-        const isCurrent = options.isCurrent || false;
-        const queryObject = { _id: ObjectId(id) };
-        const isMobile = options.isMobile || false;
-
-        const aggregateHelper = new AggregationHelper($defProjection);
-        let pipeLine = [];
-        let aggregation;
-
-        const domainsArray = ['country', 'region', 'subRegion'];
-
-        pipeLine.push({
-            $match: queryObject,
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'positions',
-            key: 'position',
-            isArray: false,
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'accessRoles',
-            key: 'accessRole',
-            isArray: false,
-            addProjection: 'level',
-        }));
-
-        domainsArray.forEach((element) => {
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from: 'domains',
-                key: element,
-            }));
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'branches',
-            key: 'branch',
-            addMainProjection: ['retailSegment', 'outlet'],
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'retailSegments',
-            key: 'retailSegment',
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
-            key: 'outlet',
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'createdBy.user',
-            isArray: false,
-            nameFields: ['firstName', 'lastName'],
-            includeSiblings: { createdBy: { date: 1 } },
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'manager',
-            isArray: false,
-            addProjection: ['firstName', 'lastName'],
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'vacation.cover',
-            isArray: false,
-            addProjection: ['firstName', 'lastName', 'accessRole', 'vacation'],
-            includeSiblings: { vacation: { onLeave: 1 } },
-        }));
-
-        if (isCurrent) {
-            pipeLine = pushCurrentUserCovered(pipeLine);
-        }
-
-        aggregation = PersonnelModel.aggregate(pipeLine);
-
-        aggregation.options = {
-            allowDiskUse: true,
-        };
-
-        aggregation.exec((err, result) => {
-            if (err) {
-                return callback(err);
-            }
-            if (!result || !result.length) {
-                return callback(null, {});
-            }
-            let coveredObject = {};
-            let personnel;
-            const ids = [result[0]._id];
-            const options = {
-                data: {},
-            };
-            if (isMobile) {
-                coveredObject = [];
-            }
-            personnel = result[0];
-
-            if (personnel.firstName) {
-                personnel.firstName = {
-                    en: _.unescape(personnel.firstName.en),
-                    ar: _.unescape(personnel.firstName.ar),
-                };
-            }
-            if (personnel.lastName) {
-                personnel.lastName = {
-                    en: _.unescape(personnel.lastName.en),
-                    ar: _.unescape(personnel.lastName.ar),
-                };
-            }
-            if (personnel && personnel.covered && !isMobile) {
-                personnel.covered.forEach((value) => {
-                    if (value.onLeave) {
-                        coveredObject[value._id] = value.accessRoles;
-                    }
-                });
-                personnel.covered = coveredObject;
-            }
-
-            options.data[CONTENT_TYPES.PERSONNEL] = ids;
-
-            getImagesHelper.getImages(options, (err, result) => {
-                const optionsForImplement = {
-                    response: personnel,
-                    imgsObject: result,
-                    fields: {
-                        personnel: [],
+        }, {
+            $lookup: {
+                from: 'personnels',
+                localField: 'vacation.cover',
+                foreignField: '_id',
+                as: 'covered',
+            },
+        }, {
+            $addFields: {
+                covered: {
+                    $map: {
+                        input: '$covered',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            firstName: '$$item.firstName',
+                            lastName: '$$item.lastName',
+                            accessRole: '$$item.accessRole',
+                            position: '$$item.position',
+                            onLeave: '$$item.vacation.onLeave',
+                        },
                     },
-                };
-                getImagesHelper.setIntoResult(optionsForImplement, (response) => {
-                    callback(null, response);
-                });
+                },
+            },
+        }];
+
+        PersonnelModel.aggregate(pipeline)
+            .exec((err, result) => {
+                if (err) {
+                    return callback(err);
+                }
+
+                const personnel = result.length > 0 ?
+                    result.slice().pop() : {};
+
+                callback(null, personnel);
             });
-        });
     };
 
     this.getForDD = function(req, res, next) {
@@ -1353,7 +1174,11 @@ const Personnel = function () {
             },
 
             (result, cb) => {
-                if (result.length !== 1) {
+                if (!result.length) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_USERNAME_OR_PASSWORD);
+                }
+
+                if (result.length > 1) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.USERS_WITH_SAME_LOGIN);
                 }
 
@@ -1600,339 +1425,355 @@ const Personnel = function () {
     };
 
     this.getById = function(req, res, next) {
-        let options = {};
+        const session = req.session;
+        const userId = session.uId;
 
-        function queryRun() {
-            const id = req.params.id || req.session.uId;
-            options = { id };
+        const queryRun = (callback) => {
+            const requestedId = req.params.id;
+            const actualId = requestedId || userId;
+            const options = {
+                id: actualId,
+                isCurrent: requestedId === userId,
+            };
 
-            options.isMobile = req.isMobile;
+            async.waterfall([
 
-            if (id === req.session.uId) {
-                options.isCurrent = true;
-            }
+                (cb) => {
+                    personnelFindByIdAndPopulate(options, cb);
+                },
 
-            personnelFindByIdAndPopulate(options, (err, response) => {
-                if (err) {
-                    return next(err);
-                }
+                (personnel, cb) => {
+                    const onLeave = req.session.onLeave;
 
-                const onLeave = req.session.onLeave;
-
-                if (response.vacation.onLeave != onLeave) {
-                    req.session.onLeave = !onLeave;
-                }
-
-                if (!Object.keys(response).length) {
-                    err = new Error(500);
-                    return next(err);
-                }
-
-                const key = `${'notificationCount' + '#'}${response._id}`;
-
-                response.workAccess = (response.accessRole.level < 3) || !response.vacation.onLeave;
-
-                redis.cacheStore.readFromStorage(key, (err, value) => {
-                    let valueJSON;
-                    if (err) {
-                        return next(err);
+                    if (personnel.vacation.onLeave !== onLeave) {
+                        session.onLeave = !onLeave;
                     }
 
-                    valueJSON = value ? JSON.parse(value) : 0;
+                    personnel.workAccess = (personnel.accessRole.level < 3) || !personnel.vacation.onLeave;
 
-                    response.notificationCount = valueJSON;
+                    async.waterfall([
 
-                    const accessLevel = _.get(response, 'accessRole.level');
-                    let adminMappingTasks = [];
+                        (cb) => {
+                            const pipeline = [{
+                                $project: {
+                                    _id: 1,
+                                    'name.en': 1,
+                                    'name.ar': 1,
+                                    type: 1,
+                                    parent: 1,
+                                },
+                            }, {
+                                $group: {
+                                    _id: null,
+                                    setDomain: {
+                                        $push: '$$ROOT',
+                                    },
+                                },
+                            }, {
+                                $project: {
+                                    setDomain: 1,
+                                    setCountry: {
+                                        $let: {
+                                            vars: {
+                                                setCountry: personnel.country,
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: {
+                                                        $gt: [{
+                                                            $size: '$$setCountry',
+                                                        }, 0],
+                                                    },
+                                                    then: '$$setCountry',
+                                                    else: {
+                                                        $filter: {
+                                                            input: '$setDomain',
+                                                            as: 'item',
+                                                            cond: {
+                                                                $eq: ['$$item.type', 'country'],
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            }, {
+                                $project: {
+                                    setDomain: 1,
+                                    setCountry: 1,
+                                    setRegion: {
+                                        $let: {
+                                            vars: {
+                                                setRegion: personnel.region,
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: {
+                                                        $gt: [{
+                                                            $size: '$$setRegion',
+                                                        }, 0],
+                                                    },
+                                                    then: '$$setRegion',
+                                                    else: {
+                                                        $let: {
+                                                            vars: {
+                                                                setId: '$setCountry._id',
+                                                            },
+                                                            in: {
+                                                                $filter: {
+                                                                    input: '$setDomain',
+                                                                    as: 'item',
+                                                                    cond: {
+                                                                        $and: [{
+                                                                            $eq: ['$$item.type', 'region'],
+                                                                        }, {
+                                                                            $setIsSubset: [['$$item.parent'], '$$setId'],
+                                                                        }],
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            }, {
+                                $project: {
+                                    setDomain: 1,
+                                    setCountry: 1,
+                                    setRegion: 1,
+                                    setSubRegion: {
+                                        $let: {
+                                            vars: {
+                                                setSubRegion: personnel.subRegion,
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: {
+                                                        $gt: [{
+                                                            $size: '$$setSubRegion',
+                                                        }, 0],
+                                                    },
+                                                    then: '$$setSubRegion',
+                                                    else: {
+                                                        $let: {
+                                                            vars: {
+                                                                setId: '$setRegion._id',
+                                                            },
+                                                            in: {
+                                                                $filter: {
+                                                                    input: '$setDomain',
+                                                                    as: 'item',
+                                                                    cond: {
+                                                                        $and: [{
+                                                                            $eq: ['$$item.type', 'subRegion'],
+                                                                        }, {
+                                                                            $setIsSubset: [['$$item.parent'], '$$setId'],
+                                                                        }],
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            }, {
+                                $project: {
+                                    setCountry: {
+                                        _id: 1,
+                                        name: 1,
+                                    },
+                                    setRegion: {
+                                        _id: 1,
+                                        name: 1,
+                                    },
+                                    setSubRegion: {
+                                        _id: 1,
+                                        name: 1,
+                                    },
+                                },
+                            }];
 
-                    switch (accessLevel) {
-                        case ACL_CONSTANTS.MASTER_ADMIN:
-                        case ACL_CONSTANTS.SUPER_ADMIN:
-                        case ACL_CONSTANTS.TRADE_MARKETER:
-                            adminMappingTasks = [
-                                function(cb) {
-                                    CountryModel.find({ type: 'country' }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((countries) => {
-                                        response.country = countries;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    CountryModel.find({ type: 'region' }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((regions) => {
-                                        response.region = regions;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    CountryModel.find({ type: 'subRegion' }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((subRegions) => {
-                                        response.subRegion = subRegions;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    OutletModel.find({}, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((outlets) => {
-                                        response.outlet = outlets;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    BranchModel.find({}, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((branches) => {
-                                        response.branch = branches;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    retailSegmentModel.find({}, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((retailSegments) => {
-                                        response.retailSegment = retailSegments;
-                                        cb();
-                                    });
-                                },
-                            ];
-                            break;
-                        case ACL_CONSTANTS.COUNTRY_ADMIN:
-                            const countryId = _.get(response, 'country[0]._id');
-                            adminMappingTasks = [
-                                function(cb) {
-                                    CountryModel.find({
-                                        type: 'region',
-                                        parent: countryId,
+                            DomainModel.aggregate(pipeline)
+                                .exec(cb);
+                        },
 
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((regions) => {
-                                        response.region = regions;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    CountryModel.find({
-                                        type: 'subRegion',
-                                        parent: {
-                                            $in: _.map(response.region, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((subRegions) => {
-                                        response.subRegion = subRegions;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    retailSegmentModel.find({
-                                        subRegions: {
-                                            $in: _.map(response.subRegion, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((retailSegments) => {
-                                        response.retailSegment = retailSegments;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    OutletModel.find({
-                                        subRegions: {
-                                            $in: _.map(response.subRegion, o => o._id),
-                                        },
-                                        retailSegments: {
-                                            $in: _.map(response.retailSegment, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((outlets) => {
-                                        response.outlet = outlets;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    BranchModel.find({
-                                        subRegion: {
-                                            $in: _.map(response.subRegion, o => o._id),
-                                        },
-                                        retailSegment: {
-                                            $in: _.map(response.retailSegment, o => o._id),
-                                        },
-                                        outlet: {
-                                            $in: _.map(response.outlet, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((branches) => {
-                                        response.branch = branches;
-                                        cb();
-                                    });
-                                },
-                            ];
-                            break;
-                        case ACL_CONSTANTS.AREA_MANAGER:
-                            const regionId = _.get(response, 'region[0]._id');
+                        (result, cb) => {
+                            const {
+                                setCountry,
+                                setRegion,
+                                setSubRegion,
+                            } = result.length > 0 ?
+                                result.slice().pop() : {};
 
-                            adminMappingTasks = [
-                                function(cb) {
-                                    CountryModel.find({
-                                        type: 'subRegion',
-                                        parent: regionId,
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((subRegions) => {
-                                        response.subRegion = subRegions;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    retailSegmentModel.find({
-                                        subRegions: {
-                                            $in: _.map(response.subRegion, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((retailSegments) => {
-                                        response.retailSegment = retailSegments;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    OutletModel.find({
-                                        subRegions: {
-                                            $in: _.map(response.subRegion, o => o._id),
-                                        },
-                                        retailSegments: {
-                                            $in: _.map(response.retailSegment, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((outlets) => {
-                                        response.outlet = outlets;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    BranchModel.find({
-                                        subRegion: {
-                                            $in: _.map(response.subRegion, o => o._id),
-                                        },
-                                        retailSegment: {
-                                            $in: _.map(response.retailSegment, o => o._id),
-                                        },
-                                        outlet: {
-                                            $in: _.map(response.outlet, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((branches) => {
-                                        response.branch = branches;
-                                        cb();
-                                    });
-                                },
-                            ];
-                            break;
-                        case ACL_CONSTANTS.AREA_IN_CHARGE:
-                            const subRegionIds = _.map(response.subRegion, o => o._id);
+                            personnel.country = setCountry;
+                            personnel.region = setRegion;
+                            personnel.subRegion = setSubRegion;
 
-                            adminMappingTasks = [
-                                function(cb) {
-                                    retailSegmentModel.find({
-                                        subRegions: {
-                                            $in: subRegionIds,
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((retailSegments) => {
-                                        response.retailSegment = retailSegments;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    OutletModel.find({
-                                        subRegions: {
-                                            $in: subRegionIds,
-                                        },
-                                        retailSegments: {
-                                            $in: _.map(response.retailSegment, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((outlets) => {
-                                        response.outlet = outlets;
-                                        cb();
-                                    });
-                                },
-                                function(cb) {
-                                    BranchModel.find({
-                                        subRegion: {
-                                            $in: subRegionIds,
-                                        },
-                                        retailSegment: {
-                                            $in: _.map(response.retailSegment, o => o._id),
-                                        },
-                                        outlet: {
-                                            $in: _.map(response.outlet, o => o._id),
-                                        },
-                                    }, {
-                                        ID: 1,
-                                        name: 1,
-                                    }).then((branches) => {
-                                        response.branch = branches;
-                                        cb();
-                                    });
-                                },
-                            ];
-                            break;
-                        default:
-                            break;
-                    }
+                            cb(null);
+                        },
 
-                    async.series(adminMappingTasks, (err) => {
-                        if (err) {
-                            return next(err);
-                        }
-                        next({
-                            status: 200,
-                            body: response,
-                        });
-                    });
-                });
-            });
-        }
+                        (cb) => {
+                            const $match = {};
+                            const setBranchId = personnel.branch.map(item => item._id);
+                            const setSubRegionId = personnel.subRegion.map(item => item._id);
 
-        access.getReadAccess(req, ACL_MODULES.PERSONNEL, (err, allowed) => {
+                            if (personnel.branch.length) {
+                                $match.$and = [{
+                                    _id: {
+                                        $in: setBranchId,
+                                    },
+                                }, {
+                                    subRegion: {
+                                        $in: setSubRegionId,
+                                    },
+                                }];
+                            } else {
+                                $match.subRegion = {
+                                    $in: setSubRegionId,
+                                };
+                            }
+
+                            const pipeline = [{
+                                $match,
+                            }, {
+                                $project: {
+                                    'name.en': 1,
+                                    'name.ar': 1,
+                                    retailSegment: 1,
+                                    outlet: 1,
+                                },
+                            }, {
+                                $group: {
+                                    _id: null,
+                                    setBranch: {
+                                        $push: {
+                                            _id: '$_id',
+                                            name: {
+                                                en: '$name.en',
+                                                ar: '$name.ar',
+                                            },
+                                        },
+                                    },
+                                    setRetailSegment: {
+                                        $addToSet: '$retailSegment',
+                                    },
+                                    setOutlet: {
+                                        $addToSet: '$outlet',
+                                    },
+                                },
+                            }, {
+                                $project: {
+                                    setBranch: 1,
+                                    setRetailSegment: {
+                                        $filter: {
+                                            input: '$setRetailSegment',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: ['$$item', null],
+                                            },
+                                        },
+                                    },
+                                    setOutlet: {
+                                        $filter: {
+                                            input: '$setOutlet',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: ['$$item', null],
+                                            },
+                                        },
+                                    },
+                                },
+                            }, {
+                                $lookup: {
+                                    from: 'retailSegments',
+                                    localField: 'setRetailSegment',
+                                    foreignField: '_id',
+                                    as: 'setRetailSegment',
+                                },
+                            }, {
+                                $project: {
+                                    setBranch: 1,
+                                    setRetailSegment: {
+                                        _id: 1,
+                                        name: {
+                                            en: 1,
+                                            ar: 1,
+                                        },
+                                    },
+                                    setOutlet: 1,
+                                },
+                            }, {
+                                $lookup: {
+                                    from: 'outlets',
+                                    localField: 'setOutlet',
+                                    foreignField: '_id',
+                                    as: 'setOutlet',
+                                },
+                            }, {
+                                $project: {
+                                    setBranch: 1,
+                                    setRetailSegment: 1,
+                                    setOutlet: {
+                                        _id: 1,
+                                        name: {
+                                            en: 1,
+                                            ar: 1,
+                                        },
+                                    },
+                                },
+                            }];
+
+                            BranchModel.aggregate(pipeline).exec(cb);
+                        },
+
+                        (result, cb) => {
+                            const groups = result.length ?
+                                result.slice().pop() : [{
+                                    setBranch: [],
+                                    setRetailSegment: [],
+                                    setOutlet: [],
+                                }];
+
+                            personnel.branch = groups.setBranch;
+                            personnel.retailSegment = groups.setRetailSegment;
+                            personnel.outlet = groups.setOutlet;
+
+                            cb(null, personnel);
+                        },
+
+                    ], cb);
+                },
+
+            ], callback);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                access.getReadAccess(req, ACL_MODULES.PERSONNEL, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            },
+
+        ], (err, personnel) => {
             if (err) {
                 return next(err);
             }
 
-            if (!allowed) {
-                return errorSender.forbidden(next);
-            }
-
-            queryRun();
+            next({
+                status: 200,
+                body: personnel,
+            });
         });
     };
 

@@ -2,6 +2,8 @@
 # Install Bower components
 bower install
 
+curl https://s3.amazonaws.com/quotaguard/qgtunnel-latest.tar.gz | tar xz
+
 # Generate API docs
 npm i aglio
 chmod 755 ./API_documentation/update_docs.sh
