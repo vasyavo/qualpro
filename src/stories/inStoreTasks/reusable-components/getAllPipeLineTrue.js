@@ -355,69 +355,82 @@ module.exports = (options) => {
         },
     });
 
-    pipeline.push({
-        $lookup: {
-            from: 'personnels',
-            localField: 'createdBy.user',
-            foreignField: '_id',
-            as: 'createdBy.user',
-        },
-    });
+    if (limit && !isMobile) {
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'createdBy.user',
+                foreignField: '_id',
+                as: 'createdBy.user',
+            },
+        });
 
-    pipeline.push({
-        $project: {
-            total: 1,
-            assignedTo: 1,
-            createdBy: {
-                date: 1,
-                user: {
-                    $let: {
-                        vars: {
-                            personnel: { $arrayElemAt: ['$createdBy.user', 0] },
-                        },
-                        in: {
-                            _id: '$$personnel._id',
-                            firstName: '$$personnel.firstName',
-                            lastName: '$$personnel.lastName',
-                            position: '$$personnel.position',
-                            accessRole: '$$personnel.accessRole',
+        pipeline.push({
+            $project: {
+                total: 1,
+                assignedTo: 1,
+                createdBy: {
+                    date: 1,
+                    user: {
+                        $let: {
+                            vars: {
+                                personnel: { $arrayElemAt: ['$createdBy.user', 0] },
+                            },
+                            in: {
+                                _id: '$$personnel._id',
+                                firstName: '$$personnel.firstName',
+                                lastName: '$$personnel.lastName',
+                                position: '$$personnel.position',
+                                accessRole: '$$personnel.accessRole',
+                            },
                         },
                     },
                 },
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                complete: 1,
+                parent: 1,
+                level: 1,
+                countSubTasks: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                history: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
+                archived: 1,
             },
-            title: 1,
-            companyObjective: 1,
-            description: 1,
-            objectiveType: 1,
-            priority: 1,
-            status: 1,
-            complete: 1,
-            parent: 1,
-            level: 1,
-            countSubTasks: 1,
-            completedSubTasks: 1,
-            dateStart: 1,
-            dateEnd: 1,
-            dateClosed: 1,
-            history: 1,
-            comments: 1,
-            attachments: 1,
-            editedBy: 1,
-            country: 1,
-            region: 1,
-            subRegion: 1,
-            retailSegment: 1,
-            outlet: 1,
-            branch: 1,
-            location: 1,
-            form: 1,
-            efforts: 1,
-            context: 1,
-            creationDate: 1,
-            updateDate: 1,
-            archived: 1,
-        },
-    });
+        });
+    }
+
+    if (!limit && isMobile) {
+        pipeline.push({
+            $addFields: {
+                createdBy: {
+                    date: '$createdBy.date',
+                    user: '$createdBy.user._id',
+                },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {
@@ -442,12 +455,12 @@ module.exports = (options) => {
             complete: 1,
             parent: 1,
             level: 1,
+            history: 1,
             countSubTasks: 1,
             completedSubTasks: 1,
             dateStart: 1,
             dateEnd: 1,
             dateClosed: 1,
-            history: 1,
             comments: 1,
             attachments: {
                 _id: 1,
@@ -491,10 +504,10 @@ module.exports = (options) => {
             companyObjective: 1,
             description: 1,
             objectiveType: 1,
+            history: 1,
             priority: 1,
             status: 1,
             complete: 1,
-            history: 1,
             parent: 1,
             level: 1,
             countSubTasks: 1,
@@ -545,6 +558,7 @@ module.exports = (options) => {
             priority: 1,
             status: 1,
             complete: 1,
+            history: 1,
             parent: 1,
             level: 1,
             countSubTasks: 1,
@@ -552,7 +566,6 @@ module.exports = (options) => {
             dateStart: 1,
             dateEnd: 1,
             dateClosed: 1,
-            history: 1,
             comments: 1,
             attachments: 1,
             editedBy: 1,
@@ -591,6 +604,7 @@ module.exports = (options) => {
             createdBy: 1,
             title: 1,
             companyObjective: 1,
+            history: 1,
             description: 1,
             objectiveType: 1,
             priority: 1,
@@ -602,7 +616,6 @@ module.exports = (options) => {
             completedSubTasks: 1,
             dateStart: 1,
             dateEnd: 1,
-            history: 1,
             dateClosed: 1,
             comments: 1,
             attachments: 1,
@@ -645,6 +658,7 @@ module.exports = (options) => {
             description: 1,
             objectiveType: 1,
             priority: 1,
+            history: 1,
             status: 1,
             complete: 1,
             parent: 1,
@@ -653,7 +667,6 @@ module.exports = (options) => {
             completedSubTasks: 1,
             dateStart: 1,
             dateEnd: 1,
-            history: 1,
             dateClosed: 1,
             comments: 1,
             attachments: 1,
@@ -695,6 +708,7 @@ module.exports = (options) => {
             companyObjective: 1,
             description: 1,
             objectiveType: 1,
+            history: 1,
             priority: 1,
             status: 1,
             complete: 1,
@@ -707,7 +721,6 @@ module.exports = (options) => {
             dateClosed: 1,
             comments: 1,
             attachments: 1,
-            history: 1,
             editedBy: 1,
             country: 1,
             region: 1,
@@ -744,6 +757,7 @@ module.exports = (options) => {
             createdBy: 1,
             title: 1,
             companyObjective: 1,
+            history: 1,
             description: 1,
             objectiveType: 1,
             priority: 1,
@@ -756,7 +770,6 @@ module.exports = (options) => {
             dateStart: 1,
             dateEnd: 1,
             dateClosed: 1,
-            history: 1,
             comments: 1,
             attachments: 1,
             editedBy: 1,
@@ -828,10 +841,10 @@ module.exports = (options) => {
                 parent: 1,
                 level: 1,
                 countSubTasks: 1,
-                history: 1,
                 completedSubTasks: 1,
                 dateStart: 1,
                 dateEnd: 1,
+                history: 1,
                 dateClosed: 1,
                 comments: 1,
                 attachments: 1,
@@ -888,6 +901,7 @@ module.exports = (options) => {
                 description: 1,
                 objectiveType: 1,
                 priority: 1,
+                history: 1,
                 status: 1,
                 complete: 1,
                 parent: 1,
@@ -898,7 +912,6 @@ module.exports = (options) => {
                 dateEnd: 1,
                 dateClosed: 1,
                 comments: 1,
-                history: 1,
                 attachments: 1,
                 editedBy: 1,
                 country: 1,
@@ -930,6 +943,7 @@ module.exports = (options) => {
                 priority: { $first: '$priority' },
                 status: { $first: '$status' },
                 complete: { $first: '$complete' },
+                history: { $first: '$complete' },
                 parent: { $first: '$parent' },
                 level: { $first: '$level' },
                 countSubTasks: { $first: '$countSubTasks' },
@@ -942,7 +956,6 @@ module.exports = (options) => {
                 editedBy: { $first: '$editedBy' },
                 country: { $first: '$country' },
                 region: { $first: '$region' },
-                history: { $first: '$history' },
                 subRegion: { $first: '$subRegion' },
                 retailSegment: { $first: '$retailSegment' },
                 outlet: { $first: '$outlet' },
@@ -958,140 +971,142 @@ module.exports = (options) => {
         });
     }
 
-    pipeline.push({
-        $lookup: {
-            from: 'accessRoles',
-            localField: 'createdBy.user.accessRole',
-            foreignField: '_id',
-            as: 'createdBy.user.accessRole',
-        },
-    });
+    if (!isMobile) {
+        pipeline.push({
+            $lookup: {
+                from: 'accessRoles',
+                localField: 'createdBy.user.accessRole',
+                foreignField: '_id',
+                as: 'createdBy.user.accessRole',
+            },
+        });
 
-    pipeline.push({
-        $project: {
-            total: 1,
-            assignedTo: 1,
-            createdBy: {
-                date: 1,
-                user: {
-                    _id: 1,
-                    position: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    accessRole: {
-                        $let: {
-                            vars: {
-                                accessRole: { $arrayElemAt: ['$createdBy.user.accessRole', 0] },
-                            },
-                            in: {
-                                _id: '$$accessRole._id',
-                                name: '$$accessRole.name',
-                                level: '$$accessRole.level',
+        pipeline.push({
+            $project: {
+                total: 1,
+                assignedTo: 1,
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        accessRole: {
+                            $let: {
+                                vars: {
+                                    accessRole: { $arrayElemAt: ['$createdBy.user.accessRole', 0] },
+                                },
+                                in: {
+                                    _id: '$$accessRole._id',
+                                    name: '$$accessRole.name',
+                                    level: '$$accessRole.level',
+                                },
                             },
                         },
                     },
                 },
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                complete: 1,
+                parent: 1,
+                level: 1,
+                countSubTasks: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                history: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
+                archived: 1,
             },
-            title: 1,
-            companyObjective: 1,
-            description: 1,
-            objectiveType: 1,
-            priority: 1,
-            status: 1,
-            complete: 1,
-            parent: 1,
-            level: 1,
-            countSubTasks: 1,
-            history: 1,
-            completedSubTasks: 1,
-            dateStart: 1,
-            dateEnd: 1,
-            dateClosed: 1,
-            comments: 1,
-            attachments: 1,
-            editedBy: 1,
-            country: 1,
-            region: 1,
-            subRegion: 1,
-            retailSegment: 1,
-            outlet: 1,
-            branch: 1,
-            location: 1,
-            form: 1,
-            efforts: 1,
-            context: 1,
-            creationDate: 1,
-            updateDate: 1,
-            archived: 1,
-        },
-    });
+        });
 
-    pipeline.push({
-        $lookup: {
-            from: 'positions',
-            localField: 'createdBy.user.position',
-            foreignField: '_id',
-            as: 'createdBy.user.position',
-        },
-    });
+        pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'createdBy.user.position',
+            },
+        });
 
-    pipeline.push({
-        $project: {
-            total: 1,
-            assignedTo: 1,
-            createdBy: {
-                date: 1,
-                user: {
-                    _id: 1,
-                    accessRole: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    position: {
-                        $let: {
-                            vars: {
-                                position: { $arrayElemAt: ['$createdBy.user.position', 0] },
-                            },
-                            in: {
-                                _id: '$$position._id',
-                                name: '$$position.name',
+        pipeline.push({
+            $project: {
+                total: 1,
+                assignedTo: 1,
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        position: {
+                            $let: {
+                                vars: {
+                                    position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                                },
+                                in: {
+                                    _id: '$$position._id',
+                                    name: '$$position.name',
+                                },
                             },
                         },
                     },
                 },
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                complete: 1,
+                parent: 1,
+                level: 1,
+                countSubTasks: 1,
+                history: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
+                archived: 1,
             },
-            title: 1,
-            companyObjective: 1,
-            description: 1,
-            objectiveType: 1,
-            priority: 1,
-            status: 1,
-            complete: 1,
-            parent: 1,
-            level: 1,
-            countSubTasks: 1,
-            history: 1,
-            completedSubTasks: 1,
-            dateStart: 1,
-            dateEnd: 1,
-            dateClosed: 1,
-            comments: 1,
-            attachments: 1,
-            editedBy: 1,
-            country: 1,
-            region: 1,
-            subRegion: 1,
-            retailSegment: 1,
-            outlet: 1,
-            branch: 1,
-            location: 1,
-            form: 1,
-            efforts: 1,
-            context: 1,
-            creationDate: 1,
-            updateDate: 1,
-            archived: 1,
-        },
-    });
+        });
+    }
 
     pipeline.push({
         $group: {
