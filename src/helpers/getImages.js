@@ -1,7 +1,9 @@
 const async = require('async');
 const _ = require('lodash');
-const CONTENT_TYPES = require('../public/js/constants/contentType.js');
-const mongo = require('./../utils/mongo');
+const CONTENT_TYPES = require('../public/js/constants/contentType');
+const PreviewModel = require('./../types/preview/model');
+const defaultImageSrc = require('./../constants/defaultImageSrc');
+const toString = require('./../utils/toString');
 
 class ImageHelper {
 
@@ -9,42 +11,109 @@ class ImageHelper {
         const data = options.data;
         const modelNames = Object.keys(data);
         const models = {};
-        const parallelTasks = {};
-        const $defProjectionImages = {
-            imageSrc: 1,
-            preview : 1
+
+        if (modelNames && !modelNames.length) {
+            return cb(null, {});
+        }
+
+        const setPreview = [
+            CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.DOMAIN,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.BRAND,
+        ];
+        const isPreview = (contentType) => {
+            return setPreview.indexOf(contentType) !== -1;
         };
 
-        if (modelNames && modelNames.length) {
-            modelNames.forEach((key) => {
-                models[key] = require('./../types')[key];
-            });
-        }
+        modelNames.forEach((contentType) => {
+            if (isPreview(contentType)) {
+                models[contentType] = PreviewModel;
+            } else {
+                models[contentType] = require('./../types')[contentType];
+            }
+        });
 
-
-        function getWhereIdIn(model, name) {
+        const getWhereIdIn = (model, contentType) => {
             return (cb) => {
-                const pipeLine = [{
+                const pipeline = [{
                     $match: {
                         _id: {
-                            $in: data[name]
-                        }
-                    }
+                            $in: data[contentType],
+                        },
+                    },
                 }, {
-                    $project: $defProjectionImages
+                    $project: {
+                        imageSrc: 1,
+                        preview: 1,
+                    },
                 }];
 
-                model.aggregate(pipeLine, cb);
+                model.aggregate(pipeline, cb);
             };
+        };
+        const getPreviewWhereIdIn = (contentType) => {
+            return (cb) => {
+                const $in = data[contentType].filter(id => id);
+
+                const pipeline = [{
+                    $match: {
+                        itemId: {
+                            $in,
+                        },
+                    },
+                }, {
+                    // local ID should be replaced with item ID
+                    // as they're will be set into result
+                    $project: {
+                        _id: '$itemId',
+                        imageSrc: '$base64',
+                    },
+                }];
+
+                async.waterfall([
+
+                    (cb) => {
+                        PreviewModel.aggregate(pipeline, cb);
+                    },
+
+                    (result, cb) => {
+                        // in order to set default imageSrc
+                        if (result.length < $in.length) {
+                            const setInboundId = $in.map(objectId => objectId.toString());
+                            const setIdInResult = result.map(preview => toString(preview, '_id'));
+                            const resultDefaults = _.difference(setInboundId, setIdInResult)
+                                .map(id => ({
+                                    _id: id,
+                                    imageSrc: defaultImageSrc[contentType],
+                                }));
+                            const setOutboundData = [...result, ...resultDefaults];
+
+                            return cb(null, setOutboundData);
+                        }
+
+                        cb(null, result);
+                    },
+
+                ], cb);
+            };
+        };
+
+        const stack = {};
+
+        for (const contentType in models) {
+            const model = models[contentType];
+
+            if (isPreview(contentType)) {
+                stack[contentType] = getPreviewWhereIdIn(contentType);
+            } else {
+                stack[contentType] = getWhereIdIn(model, contentType);
+            }
         }
 
-        for (let key in models) {
-            const model = models[key];
-
-            parallelTasks[key] = getWhereIdIn(model, key);
-        }
-
-        async.parallel(parallelTasks, cb);
+        async.parallel(stack, cb);
     }
 
     setIntoResult(options, cb) {
