@@ -1,34 +1,16 @@
-const OTHER_CONSTANTS = require('./../../../public/js/constants/otherConstants');
-
-const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-
 module.exports = (options) => {
     const {
         queryObject,
         positionFilter,
-        filterSearch,
+        isMobile,
         skip,
         limit,
+        filterSearch,
         personnel,
-        isMobile,
     } = options;
 
     const locations = ['country', 'region', 'subRegion', 'branch'];
     const pipeline = [];
-
-    pipeline.push({
-        $match: {
-            $or: [
-                {
-                    status: { $ne: OBJECTIVE_STATUSES.DRAFT },
-                },
-                {
-                    status: { $eq: OBJECTIVE_STATUSES.DRAFT },
-                    'createdBy.user': { $eq: personnel._id },
-                },
-            ],
-        },
-    });
 
     pipeline.push({
         $match: queryObject,
@@ -146,7 +128,6 @@ module.exports = (options) => {
             priority: 1,
             status: 1,
             complete: 1,
-            parent: 1,
             level: 1,
             countSubTasks: 1,
             completedSubTasks: 1,
@@ -281,7 +262,6 @@ module.exports = (options) => {
                             priority: '$$fields.priority',
                             status: '$$fields.status',
                             complete: '$$fields.complete',
-                            parent: '$$fields.parent',
                             level: '$$fields.level',
                             countSubTasks: '$$fields.countSubTasks',
                             completedSubTasks: '$$fields.completedSubTasks',
@@ -318,19 +298,6 @@ module.exports = (options) => {
     }
 
     // pagination end
-
-    if (isMobile) {
-        pipeline.push({
-            $addFields: {
-                parent: {
-                    level1: '$parent.1',
-                    level2: '$parent.2',
-                    level3: '$parent.3',
-                    level4: '$parent.4',
-                },
-            },
-        });
-    }
 
     pipeline.push({
         $lookup: {

@@ -4,6 +4,7 @@ const lodash = require('lodash');
 const mongoose = require('mongoose');
 const ACL_MODULES = require('./../../../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
+const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const CONSTANTS = require('./../../../constants/mainConstants');
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
 const GetImagesHelper = require('./../../../helpers/getImages');
@@ -15,11 +16,15 @@ const access = require('./../../../helpers/access')();
 const detectObjectivesForSubordinates = require('../../../reusableComponents/detectObjectivesForSubordinates');
 const $defProjection = require('../reusable-components/defProjection');
 const getAllPipeLine = require('../reusable-components/getAllPipeline');
+const getAllPipeLineTrue = require('../reusable-components/getAllPipeLineTrue');
 
 const ObjectId = mongoose.Types.ObjectId;
 const getImagesHelper = new GetImagesHelper();
 
 module.exports = function (req, res, next) {
+    const session = req.session;
+    const accessRoleLevel = session.level;
+
     function queryRun(personnel) {
         const query = req.query;
         const filter = query.filter || {};
@@ -313,10 +318,159 @@ module.exports = function (req, res, next) {
         });
     }
 
+    function queryRunForAdmins(personnel) {
+        const query = req.query;
+        const filter = query.filter || {};
+        const page = query.page || 1;
+        const limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
+        const skip = (page - 1) * limit;
+        const isMobile = req.isMobile;
+        const filterMapper = new FilterMapper();
+        const filterSearch = filter.globalSearch || '';
+        let positionFilter = {};
+        let ids;
+
+        delete filter.globalSearch;
+        delete filter.myCC;
+
+        const queryObject = filterMapper.mapFilter({
+            contentType: CONTENT_TYPES.INSTORETASKS,
+            filter: query.filter || {},
+            personnel,
+        });
+
+        if (isMobile) {
+            delete queryObject.region;
+            delete queryObject.subRegion;
+            delete queryObject.branch;
+        }
+
+        if (query.personnelTasks) {
+            $defProjection.context = 1;
+        }
+
+        if (query._ids) {
+            ids = query._ids.split(',');
+            ids = _.map(ids, (id) => {
+                return ObjectId(id);
+            });
+            queryObject._id = {
+                $in: ids,
+            };
+        }
+
+        if (queryObject.position && queryObject.position.$in) {
+            positionFilter = {
+                $or: [
+                    {
+                        'assignedTo.position': queryObject.position,
+                    },
+                    {
+                        'createdBy.user.position': queryObject.position,
+                    },
+                ],
+            };
+
+            delete queryObject.position;
+        }
+
+        queryObject.context = CONTENT_TYPES.INSTORETASKS;
+
+        async.waterfall([
+            function (cb) {
+                const pipeLine = getAllPipeLineTrue({
+                    queryObject,
+                    positionFilter,
+                    isMobile,
+                    filterSearch,
+                    skip,
+                    limit,
+                    personnel,
+                });
+
+                const aggregation = ObjectiveModel.aggregate(pipeLine);
+
+                aggregation.options = {
+                    allowDiskUse: true,
+                };
+
+                aggregation.exec((err, response) => {
+                    if (err) {
+                        return cb(err, null);
+                    }
+
+                    response = response && response[0] ? response[0] : { data: [], total: 0 };
+
+                    response.data = _.map(response.data, (objective) => {
+                        if (objective.description) {
+                            objective.description = {
+                                ar: _.unescape(objective.description.ar),
+                                en: _.unescape(objective.description.en),
+                            };
+                        }
+
+                        if (objective.title) {
+                            objective.title = {
+                                ar: _.unescape(objective.title.ar),
+                                en: _.unescape(objective.title.en),
+                            };
+                        }
+
+                        return objective;
+                    });
+
+                    cb(null, response);
+                });
+            },
+
+        ], (err, response) => {
+            let idsPersonnel = [];
+            let idsFile = [];
+            const options = {
+                data: {},
+            };
+            if (err) {
+                return next(err);
+            }
+
+            _.map(response.data, (model) => {
+                idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
+                idsPersonnel.push(model.createdBy.user._id);
+                idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
+            });
+
+            idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
+            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
+            options.data[CONTENT_TYPES.FILES] = idsFile;
+
+            getImagesHelper.getImages(options, (err, result) => {
+                const fieldNames = {};
+
+                if (err) {
+                    return next(err);
+                }
+
+                const setOptions = {
+                    response,
+                    imgsObject: result,
+                };
+
+                fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
+                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
+                setOptions.fields = fieldNames;
+
+                getImagesHelper.setIntoResult(setOptions, (response) => {
+                    next({ status: 200, body: response });
+                });
+            });
+        });
+    }
+
     access.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, (err, allowed, personnel) => {
         if (err) {
             return next(err);
         }
+
         if (!allowed) {
             err = new Error();
             err.status = 403;
@@ -324,6 +478,21 @@ module.exports = function (req, res, next) {
             return next(err);
         }
 
-        queryRun(personnel);
+        const adminFromCMS = req.query.filter && req.query.filter.tabName === 'all';
+        const adminFromMobile = req.isMobile && [
+            ACL_CONSTANTS.COUNTRY_ADMIN,
+            ACL_CONSTANTS.AREA_MANAGER,
+            ACL_CONSTANTS.AREA_IN_CHARGE,
+        ].indexOf(accessRoleLevel) !== -1;
+
+        if (adminFromCMS) {
+            delete req.query.filter.tabName;
+        }
+
+        if (adminFromCMS || adminFromMobile) {
+            queryRunForAdmins(personnel);
+        } else {
+            queryRun(personnel);
+        }
     });
 };
