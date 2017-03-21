@@ -109,7 +109,7 @@ module.exports = function(app) {
     app.use('/currency', currencyRouter);
     app.use('/notifications', notificationsRouter);
     app.use('/objectives', require('../stories/objectives/router'));
-    app.use('/instoretasks', inStoreeTasksRouter);
+    app.use('/instoretasks', require('../stories/inStoreTasks/router'));
     app.use('/planogram', planogramRouter);
     app.use('/questionnary', questionnaryRouter);
     app.use('/consumersSurvey', require('../stories/consumersSurvey/router'));

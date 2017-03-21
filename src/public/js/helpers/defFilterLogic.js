@@ -27,7 +27,7 @@ define([
                 result = self[contentType][tabsName + 'MA'];
             }
 
-            if (isAdmin && tabsName === 'all' && contentType === CONTENT_TYPES.OBJECTIVES) {
+            if (isAdmin && tabsName === 'all' && (contentType === CONTENT_TYPES.OBJECTIVES || contentType === CONTENT_TYPES.INSTORETASKS) ) {
                 result = {
                     tabName: 'all'
                 };

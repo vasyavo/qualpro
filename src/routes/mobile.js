@@ -69,7 +69,7 @@ module.exports = function () {
     router.use('/form', formRouter);
     router.use('/objectives', require('../stories/objectives/router'));
     router.use('/comment', commentRouter);
-    router.use('/inStoreTasks', inStoreTasksRouter);
+    router.use('/inStoreTasks', require('../stories/inStoreTasks/router'));
     router.use('/priceSurvey', require('./../stories/reporting/price-survey/router.mobile'));
     router.use('/competitorBranding', competitorBrandingRouter);
     router.use('/competitorPromotion', competitorPromotionRouter);
