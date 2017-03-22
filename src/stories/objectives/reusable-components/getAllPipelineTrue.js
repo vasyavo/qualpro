@@ -452,26 +452,92 @@ module.exports = (options) => {
 
     if (!limit && isMobile) {
         pipeline.push({
-            $addFields: {
+            $project: {
                 createdBy: {
                     date: '$createdBy.date',
                     user: {
                         _id: '$createdBy.user._id',
                     },
                 },
+                total: 1,
+                assignedTo: 1,
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                complete: 1,
+                parent: 1,
+                level: 1,
+                history: 1,
+                countSubTasks: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
+                archived: 1,
             },
         });
     }
 
     if (limit && isMobile) {
         pipeline.push({
-            $addFields: {
+            $project: {
                 createdBy: {
                     date: '$createdBy.date',
                     user: {
                         _id: '$createdBy.user',
                     },
                 },
+                total: 1,
+                assignedTo: 1,
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                complete: 1,
+                parent: 1,
+                level: 1,
+                history: 1,
+                countSubTasks: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
+                archived: 1,
             },
         });
     }
