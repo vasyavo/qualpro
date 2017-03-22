@@ -12,8 +12,12 @@ define([
 
         this.getDefFilter = function (contentType, tabsName) {
             var result = self[contentType][tabsName];
-
             var level = App.currentUser.accessRole.level;
+            const isAdmin = [
+                ACL_INDEXES.COUNTRY_ADMIN,
+                ACL_INDEXES.AREA_MANAGER,
+                ACL_INDEXES.AREA_IN_CHARGE
+            ].indexOf(level) !== -1;
 
             var condition = level === 1
                 && (contentType === CONTENT_TYPES.OBJECTIVES || contentType === CONTENT_TYPES.INSTORETASKS)
@@ -21,6 +25,12 @@ define([
 
             if (condition) {
                 result = self[contentType][tabsName + 'MA'];
+            }
+
+            if (isAdmin && tabsName === 'all' && (contentType === CONTENT_TYPES.OBJECTIVES || contentType === CONTENT_TYPES.INSTORETASKS) ) {
+                result = {
+                    tabName: 'all'
+                };
             }
 
             return result;
