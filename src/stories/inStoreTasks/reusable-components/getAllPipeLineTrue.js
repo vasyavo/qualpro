@@ -434,6 +434,19 @@ module.exports = (options) => {
         });
     }
 
+    if (limit && isMobile) {
+        pipeline.push({
+            $addFields: {
+                createdBy: {
+                    date: '$createdBy.date',
+                    user: {
+                        _id: '$createdBy.user',
+                    },
+                },
+            },
+        });
+    }
+
     pipeline.push({
         $lookup: {
             from: 'files',
