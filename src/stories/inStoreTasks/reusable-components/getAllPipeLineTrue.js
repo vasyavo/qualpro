@@ -301,61 +301,61 @@ module.exports = (options) => {
 
     // pagination end
 
-    pipeline.push({
-        $lookup: {
-            from: 'personnels',
-            localField: 'assignedTo',
-            foreignField: '_id',
-            as: 'assignedTo',
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            total: 1,
-            assignedTo: {
-                _id: 1,
-                position: 1,
-                accessRole: 1,
-                firstName: 1,
-                lastName: 1,
-            },
-            createdBy: 1,
-            title: 1,
-            companyObjective: 1,
-            description: 1,
-            objectiveType: 1,
-            priority: 1,
-            status: 1,
-            complete: 1,
-            parent: 1,
-            history: 1,
-            level: 1,
-            countSubTasks: 1,
-            completedSubTasks: 1,
-            dateStart: 1,
-            dateEnd: 1,
-            dateClosed: 1,
-            comments: 1,
-            attachments: 1,
-            editedBy: 1,
-            country: 1,
-            region: 1,
-            subRegion: 1,
-            retailSegment: 1,
-            outlet: 1,
-            branch: 1,
-            location: 1,
-            form: 1,
-            efforts: 1,
-            context: 1,
-            creationDate: 1,
-            updateDate: 1,
-            archived: 1,
-        },
-    });
-
     if (limit && !isMobile) {
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'assignedTo',
+                foreignField: '_id',
+                as: 'assignedTo',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                total: 1,
+                assignedTo: {
+                    _id: 1,
+                    position: 1,
+                    accessRole: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
+                createdBy: 1,
+                title: 1,
+                companyObjective: 1,
+                description: 1,
+                objectiveType: 1,
+                priority: 1,
+                status: 1,
+                complete: 1,
+                parent: 1,
+                history: 1,
+                level: 1,
+                countSubTasks: 1,
+                completedSubTasks: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                comments: 1,
+                attachments: 1,
+                editedBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                location: 1,
+                form: 1,
+                efforts: 1,
+                context: 1,
+                creationDate: 1,
+                updateDate: 1,
+                archived: 1,
+            },
+        });
+
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -423,11 +423,34 @@ module.exports = (options) => {
 
     if (!limit && isMobile) {
         pipeline.push({
-            $project: {
+            $addFields: {
                 createdBy: {
                     date: '$createdBy.date',
                     user: {
                         _id: '$createdBy.user._id',
+                    },
+                },
+                assignedTo: {
+                    $map: {
+                        input: '$assignedTo',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            position: '$$item.position',
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    if (limit && isMobile) {
+        pipeline.push({
+            $project: {
+                createdBy: {
+                    date: '$createdBy.date',
+                    user: {
+                        _id: '$createdBy.user',
                     },
                 },
                 total: 1,
@@ -465,19 +488,25 @@ module.exports = (options) => {
                 archived: 1,
             },
         });
-    }
 
-    if (limit && isMobile) {
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'assignedTo',
+                foreignField: '_id',
+                as: 'assignedTo',
+            },
+        });
+
         pipeline.push({
             $project: {
-                createdBy: {
-                    date: '$createdBy.date',
-                    user: {
-                        _id: '$createdBy.user',
-                    },
-                },
                 total: 1,
-                assignedTo: 1,
+                assignedTo: {
+                    _id: 1,
+                    position: 1,
+                    accessRole: 1,
+                },
+                createdBy: 1,
                 title: 1,
                 companyObjective: 1,
                 description: 1,
@@ -486,8 +515,8 @@ module.exports = (options) => {
                 status: 1,
                 complete: 1,
                 parent: 1,
-                level: 1,
                 history: 1,
+                level: 1,
                 countSubTasks: 1,
                 completedSubTasks: 1,
                 dateStart: 1,
