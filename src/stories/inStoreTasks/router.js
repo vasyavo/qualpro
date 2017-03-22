@@ -26,6 +26,7 @@ router.post('/duplicate', onLeaveMiddleware, duplicateInStoreTask);
 router.post('/', multipartMiddleware, onLeaveMiddleware, create);
 
 router.put('/:id([0-9a-fA-F]{24})', multipartMiddleware, onLeaveMiddleware, update);
+router.patch('/:id([0-9a-fA-F]{24})', multipartMiddleware, onLeaveMiddleware, update);
 
 router.get('/taskFlow/:id([0-9a-fA-F]{24})', getByIdTaskFlow);
 
