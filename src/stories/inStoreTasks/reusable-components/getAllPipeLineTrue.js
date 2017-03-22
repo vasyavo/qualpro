@@ -426,7 +426,9 @@ module.exports = (options) => {
             $addFields: {
                 createdBy: {
                     date: '$createdBy.date',
-                    user: '$createdBy.user._id',
+                    user: {
+                        _id: '$createdBy.user._id',
+                    },
                 },
             },
         });
@@ -969,9 +971,7 @@ module.exports = (options) => {
                 archived: { $first: '$archived' },
             },
         });
-    }
 
-    if (!isMobile) {
         pipeline.push({
             $lookup: {
                 from: 'accessRoles',
