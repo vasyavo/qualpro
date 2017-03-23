@@ -187,7 +187,7 @@ var BrandingActivity = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -195,7 +195,7 @@ var BrandingActivity = function () {
             from           : 'personnels',
             key            : 'editedBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {editedBy: {date: 1}}
         }));
 
@@ -225,7 +225,8 @@ var BrandingActivity = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -242,7 +243,8 @@ var BrandingActivity = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -260,7 +262,8 @@ var BrandingActivity = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -277,7 +280,8 @@ var BrandingActivity = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -286,7 +290,7 @@ var BrandingActivity = function () {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'files',
             key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy']
+            addProjection: ['contentType', 'originalName', 'createdBy', 'preview']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({

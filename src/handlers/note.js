@@ -71,7 +71,7 @@ var Note = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -93,7 +93,8 @@ var Note = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -110,7 +111,8 @@ var Note = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -121,7 +123,7 @@ var Note = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -137,7 +139,8 @@ var Note = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -154,7 +157,8 @@ var Note = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -167,28 +171,6 @@ var Note = function () {
             isArray: true,
             addProjection : ['_id', 'name', 'originalName', 'preview']
         }));
-
-        /*if (!forSync) {
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
-
-            pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-        }
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        if (!forSync) {
-            pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
-        }*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,

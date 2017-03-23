@@ -154,7 +154,7 @@ const Notifications = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['lastName', 'firstName', 'country', 'region', 'subRegion'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection  : ['lastName', 'firstName', 'country', 'region', 'subRegion', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -235,7 +235,8 @@ const Notifications = function () {
                             position  : '$createdBy.user.position',
                             accessRole: '$createdBy.user.accessRole',
                             lastName  : '$createdBy.user.lastName',
-                            firstName : '$createdBy.user.firstName'
+                            firstName : '$createdBy.user.firstName',
+                            imageSrc : '$createdBy.user.imageSrc',
                         },
                         date: '$createdBy.date'
                     }
@@ -254,7 +255,8 @@ const Notifications = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     },
                     date: 1
                 }
@@ -271,7 +273,8 @@ const Notifications = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     },
                     date: 1
                 }
@@ -281,7 +284,7 @@ const Notifications = function () {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'personnels',
             key          : 'recipients',
-            addProjection: ['lastName', 'firstName']
+            addProjection: ['lastName', 'firstName', 'imageSrc']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -299,7 +302,7 @@ const Notifications = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -315,7 +318,8 @@ const Notifications = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -332,7 +336,8 @@ const Notifications = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -376,24 +381,6 @@ const Notifications = function () {
                 }
             });
         }
-
-        /*pipeLine.push({
-         $sort: {
-         'createdBy.date': -1
-         }
-         });
-
-         if (isMobile) {
-         pipeLine.push({
-         $project: aggregateHelper.getProjection({
-         creationDate: '$createdBy.date'
-         })
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile    : isMobile,
@@ -552,7 +539,7 @@ const Notifications = function () {
 
                 const body = result.length ? result[0] : { data: [], total: 0 };
 
-                result.data.forEach(element => {
+                body.data.forEach(element => {
                     if (element.description) {
                         element.description = {
                             en: _.unescape(element.description.en),

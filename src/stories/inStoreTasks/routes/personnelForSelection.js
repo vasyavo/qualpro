@@ -301,22 +301,19 @@ module.exports = function (req, res, next) {
                     allowDiskUse: true,
                 };
 
-                aggregation.exec((err, response) => {
-                    if (err) {
-                        return waterfallCb(err);
-                    }
-
-                    response = response && response[0] ? response[0] : { data: [], total: 0 };
-
-                    waterfallCb(null, response);
-                });
+                aggregation.exec(waterfallCb);
             },
-        ], (err, response) => {
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            next({ status: 200, body: response });
+            const body = result.length ? result[0] : { data: [], total: 0 };
+
+            next({
+                status: 200,
+                body,
+            });
         });
     }
 

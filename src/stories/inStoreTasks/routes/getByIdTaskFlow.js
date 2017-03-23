@@ -29,21 +29,21 @@ module.exports = function (req, res, next) {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'files',
             key: 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy'],
+            addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'personnels',
             key: 'createdBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection: ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: { createdBy: { date: 1 } },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'personnels',
             key: 'assignedTo',
-            addProjection: ['position', 'accessRole', 'firstName', 'lastName'],
+            addProjection: ['position', 'accessRole', 'firstName', 'lastName', 'imageSrc'],
         }));
 
         if (!isMobile) {
@@ -60,6 +60,7 @@ module.exports = function (req, res, next) {
                             position: 1,
                             firstName: 1,
                             lastName: 1,
+                            imageSrc: 1,
                         },
                     },
                 },
@@ -77,6 +78,7 @@ module.exports = function (req, res, next) {
                             accessRole: 1,
                             firstName: 1,
                             lastName: 1,
+                            imageSrc: 1,
                         },
                     },
                 },
@@ -94,7 +96,7 @@ module.exports = function (req, res, next) {
             from: 'personnels',
             key: 'history.assignedTo',
             isArray: false,
-            addProjection: ['_id', 'position', 'firstName', 'lastName', 'accessRole'],
+            addProjection: ['_id', 'position', 'firstName', 'lastName', 'accessRole', 'imageSrc'],
             includeSiblings: { history: { index: 1 } },
         }));
 
@@ -111,6 +113,7 @@ module.exports = function (req, res, next) {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -128,6 +131,7 @@ module.exports = function (req, res, next) {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },

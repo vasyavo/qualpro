@@ -474,7 +474,7 @@ var planogramsHandler = function() {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'files',
             key : 'fileID',
-            addProjection : ['contentType', 'originalName', 'createdBy'],
+            addProjection : ['contentType', 'originalName', 'createdBy', 'preview'],
             isArray : false
         }));
 
@@ -578,7 +578,6 @@ var planogramsHandler = function() {
             var queryObject = query.filter || {};
             var filterSearch = queryObject.globalSearch || '';
             var isMobile = req.isMobile;
-            var parallelTasks;
             var aggregateHelper;
             var key;
 
@@ -629,53 +628,32 @@ var planogramsHandler = function() {
                 queryObject.archived = false;
             }
 
-            function contentFinder(parallelCb) {
-                var aggregation;
+            const pipeline = getAllPipeLine({
+                queryObject,
+                aggregateHelper,
+                isMobile,
+                searchFieldsArray,
+                filterSearch,
+                skip,
+                limit,
+                sort,
+            });
 
-                var pipeLine = getAllPipeLine({
-                    queryObject : queryObject,
-                    aggregateHelper : aggregateHelper,
-                    isMobile : isMobile,
-                    searchFieldsArray : searchFieldsArray,
-                    filterSearch : filterSearch,
-                    skip : skip,
-                    limit : limit,
-                    sort : sort
-                });
-
-                aggregation = PlanogramModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse : true
-                };
-
-                aggregation.exec(function(err, result) {
+            PlanogramModel.aggregate(pipeline)
+                .allowDiskUse(true)
+                .exec((err, result) => {
                     if (err) {
-                        return parallelCb(err);
+                        return next(err);
                     }
 
-                    parallelCb(null, result);
+                    const body = result.length ?
+                        result[0] : { data: [], total: 0 };
+
+                    next({
+                        status: 200,
+                        body,
+                    });
                 });
-
-            }
-
-            parallelTasks = {
-                data : contentFinder
-            };
-
-            async.parallel(parallelTasks, (err, result) => {
-                if (err) {
-                    return next(err);
-                }
-
-                const body = result.length ?
-                    result.data[0] : { data: [], total: 0 };
-
-                next({
-                    status: 200,
-                    body,
-                });
-            });
         }
 
         access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed, personnel) {

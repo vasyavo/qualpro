@@ -135,6 +135,7 @@ const Documents = function () {
                     contentType: 1,
                     originalName: 1,
                     extension: 1,
+                    preview: 1,
                 },
                 breadcrumbs: 1,
                 createdBy: {
@@ -143,6 +144,7 @@ const Documents = function () {
                         _id: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
                 editedBy: {
@@ -151,6 +153,7 @@ const Documents = function () {
                         _id: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
                 parent: {
@@ -299,6 +302,7 @@ const Documents = function () {
                         _id: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
                 editedBy: {
@@ -307,6 +311,7 @@ const Documents = function () {
                         _id: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
                 attachment: {

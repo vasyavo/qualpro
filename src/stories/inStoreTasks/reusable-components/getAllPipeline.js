@@ -83,13 +83,13 @@ module.exports = (options) => {
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
         from: 'personnels',
         key: 'assignedTo',
-        addProjection: ['_id', 'position', 'accessRole', 'firstName', 'lastName'],
+        addProjection: ['_id', 'position', 'accessRole', 'firstName', 'lastName', 'imageSrc'],
     }));
 
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
         from: 'files',
         key: 'attachments',
-        addProjection: ['contentType', 'originalName', 'createdBy'],
+        addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
     }));
 
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -126,7 +126,7 @@ module.exports = (options) => {
         from: 'personnels',
         key: 'createdBy.user',
         isArray: false,
-        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
         includeSiblings: { createdBy: { date: 1 } },
     }));
 
@@ -154,6 +154,7 @@ module.exports = (options) => {
                     firstName: 1,
                     lastName: 1,
                     position: 1,
+                    imageSrc: 1,
                 },
             },
         }));
@@ -168,6 +169,7 @@ module.exports = (options) => {
                     firstName: 1,
                     lastName: 1,
                     accessRole: 1,
+                    imageSrc: 1,
                 },
             },
         }));
@@ -192,6 +194,7 @@ module.exports = (options) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         },
@@ -209,6 +212,7 @@ module.exports = (options) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         },
@@ -219,7 +223,7 @@ module.exports = (options) => {
             from: 'personnels',
             key: 'editedBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { editedBy: { date: 1 } },
         }));
 
@@ -236,6 +240,7 @@ module.exports = (options) => {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -253,17 +258,11 @@ module.exports = (options) => {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
         }));
-
-        /* pipeLine.push({
-         $project: aggregateHelper.getProjection({
-         creationDate: '$createdBy.date',
-         updateDate  : '$editedBy.date'
-         })
-         });*/
     }
 
     pipeLine.push({
@@ -275,39 +274,8 @@ module.exports = (options) => {
                     cond: { $ne: ['$$oneItem', null] },
                 },
             },
-            /*lastDate  : {
-             $ifNull: [
-             '$editedBy.date',
-             '$createdBy.date'
-             ]
-             }*/
         }),
     });
-
-    /* if (!forSync) {
-     pipeLine.push({
-     $sort: {
-     lastDate: -1
-     }
-     });
-
-     pipeLine.push({
-     $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-     });
-     }
-
-     pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-     if (limit && limit !== -1) {
-     pipeLine.push({
-     $skip: skip
-     });
-     pipeLine.push({
-     $limit: limit
-     });
-     }
-
-     pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
     pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
         isMobile,

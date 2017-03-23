@@ -95,7 +95,7 @@ var Promotions = function () {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'files',
             key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'createdBy']
+            addProjection: ['contentType', 'originalName', 'createdBy', 'preview']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -146,7 +146,7 @@ var Promotions = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -168,7 +168,8 @@ var Promotions = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -185,7 +186,8 @@ var Promotions = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -196,7 +198,7 @@ var Promotions = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -212,7 +214,8 @@ var Promotions = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -229,49 +232,13 @@ var Promotions = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
             }));
         }
-
-        /*pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                lastDate: {
-                    $ifNull: [
-                        '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }
-            })
-        });
-
-        if (!forSync) {
-            pipeLine.push({
-                $sort: {
-                    lastDate: -1
-                }
-            });
-
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,

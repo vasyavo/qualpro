@@ -239,33 +239,7 @@ module.exports = function (req, res, next) {
                     allowDiskUse: true,
                 };
 
-                aggregation.exec((err, response) => {
-                    if (err) {
-                        return cb(err, null);
-                    }
-
-                    response = response && response[0] ? response[0] : { data: [], total: 0 };
-
-                    response.data = _.map(response.data, (objective) => {
-                        if (objective.description) {
-                            objective.description = {
-                                ar: _.unescape(objective.description.ar),
-                                en: _.unescape(objective.description.en),
-                            };
-                        }
-
-                        if (objective.title) {
-                            objective.title = {
-                                ar: _.unescape(objective.title.ar),
-                                en: _.unescape(objective.title.en),
-                            };
-                        }
-
-                        return objective;
-                    });
-
-                    cb(null, response/* , coveredIds*/);
-                });
+                aggregation.exec(cb);
             },
 
         ], (err, result) => {
@@ -283,6 +257,21 @@ module.exports = function (req, res, next) {
             const currentUserId = req.session.uId;
 
             body.data = detectObjectivesForSubordinates(body.data, subordinatesId, currentUserId);
+            body.data.forEach(objective => {
+                if (objective.description) {
+                    objective.description = {
+                        ar: _.unescape(objective.description.ar),
+                        en: _.unescape(objective.description.en),
+                    };
+                }
+
+                if (objective.title) {
+                    objective.title = {
+                        ar: _.unescape(objective.title.ar),
+                        en: _.unescape(objective.title.en),
+                    };
+                }
+            });
 
             next({
                 status: 200,
@@ -367,33 +356,7 @@ module.exports = function (req, res, next) {
                     allowDiskUse: true,
                 };
 
-                aggregation.exec((err, response) => {
-                    if (err) {
-                        return cb(err, null);
-                    }
-
-                    response = response && response[0] ? response[0] : { data: [], total: 0 };
-
-                    response.data = _.map(response.data, (objective) => {
-                        if (objective.description) {
-                            objective.description = {
-                                ar: _.unescape(objective.description.ar),
-                                en: _.unescape(objective.description.en),
-                            };
-                        }
-
-                        if (objective.title) {
-                            objective.title = {
-                                ar: _.unescape(objective.title.ar),
-                                en: _.unescape(objective.title.en),
-                            };
-                        }
-
-                        return objective;
-                    });
-
-                    cb(null, response);
-                });
+                aggregation.exec(cb);
             },
 
         ], (err, result) => {
@@ -403,6 +366,22 @@ module.exports = function (req, res, next) {
 
             const body = result.length ?
                 result[0] : { data: [], total: 0 };
+
+            body.data.forEach(objective => {
+                if (objective.description) {
+                    objective.description = {
+                        ar: _.unescape(objective.description.ar),
+                        en: _.unescape(objective.description.en),
+                    };
+                }
+
+                if (objective.title) {
+                    objective.title = {
+                        ar: _.unescape(objective.title.ar),
+                        en: _.unescape(objective.title.en),
+                    };
+                }
+            });
 
             next({
                 status: 200,

@@ -100,33 +100,7 @@ module.exports = function (req, res, next) {
                     allowDiskUse: true,
                 };
 
-                aggregation.exec((err, response) => {
-                    if (err) {
-                        return next(err);
-                    }
-                    if (response.length) {
-                        response[0].data = _.map(response[0].data, (element) => {
-                            if (element.description) {
-                                element.description = {
-                                    ar: _.unescape(element.description.ar),
-                                    en: _.unescape(element.description.en),
-                                };
-                            }
-                            if (element.title) {
-                                element.title = {
-                                    ar: _.unescape(element.title.ar),
-                                    en: _.unescape(element.title.en),
-                                };
-                            }
-
-                            return element;
-                        });
-                    }
-
-                    const result = response && response[0] ? response[0] : { data: [], total: 0 };
-
-                    cb(null, result);
-                });
+                aggregation.exec(cb);
             },
         ], (err, response) => {
             if (err) {
@@ -142,6 +116,21 @@ module.exports = function (req, res, next) {
             const currentUserId = req.session.uId;
 
             body.data = detectObjectivesForSubordinates(body.data, subordinatesId, currentUserId);
+            body.data.forEach(objective => {
+                if (objective.description) {
+                    objective.description = {
+                        ar: _.unescape(objective.description.ar),
+                        en: _.unescape(objective.description.en),
+                    };
+                }
+
+                if (objective.title) {
+                    objective.title = {
+                        ar: _.unescape(objective.title.ar),
+                        en: _.unescape(objective.title.en),
+                    };
+                }
+            });
 
             next({
                 status: 200,

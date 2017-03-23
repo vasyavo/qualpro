@@ -38,7 +38,8 @@ var RetailSegmentHandler = function () {
         configurations: 1,
         createdBy     : 1,
         editedBy      : 1,
-        topArchived   : 1
+        topArchived   : 1,
+        imageSrc: 1,
     };
 
     this.getSubRegionsByCountryOrRegion = function (filter, type, cb) {
@@ -429,7 +430,8 @@ var RetailSegmentHandler = function () {
                     editedBy   : '$retailSegment.editedBy',
                     archived   : '$retailSegment.archived',
                     topArchived: '$retailSegment.topArchived',
-                    subRegions : '$retailSegment.subRegions'
+                    subRegions : '$retailSegment.subRegions',
+                    imageSrc: '$retailSegment.imageSrc',
                 }
             });
         }
@@ -438,7 +440,7 @@ var RetailSegmentHandler = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -454,7 +456,8 @@ var RetailSegmentHandler = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -471,7 +474,8 @@ var RetailSegmentHandler = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -482,7 +486,7 @@ var RetailSegmentHandler = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -498,7 +502,8 @@ var RetailSegmentHandler = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -515,7 +520,8 @@ var RetailSegmentHandler = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -548,7 +554,7 @@ var RetailSegmentHandler = function () {
                     total         : '$data.total',
                     name          : '$data.name',
                     createdBy     : '$data.createdBy',
-                    subRegions    : '$data.subRegions'
+                    subRegions    : '$data.subRegions',
                 }
             };
 

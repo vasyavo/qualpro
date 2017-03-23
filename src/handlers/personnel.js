@@ -2605,6 +2605,7 @@ const Personnel = function () {
                 context: 1,
                 creationDate: 1,
                 updateDate: 1,
+                imageSrc: 1,
             };
 
             const page = query.page || 1;
@@ -2708,13 +2709,13 @@ const Personnel = function () {
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'personnels',
                     key: 'assignedTo',
-                    addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+                    addProjection: ['firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'files',
                     key: 'attachments',
-                    addProjection: ['contentType', 'originalName', 'createdBy'],
+                    addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -2751,7 +2752,7 @@ const Personnel = function () {
                     from: 'personnels',
                     key: 'createdBy.user',
                     isArray: false,
-                    addProjection: ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+                    addProjection: ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
                     includeSiblings: { createdBy: { date: 1 } },
                 }));
 
@@ -2780,6 +2781,7 @@ const Personnel = function () {
                                 position: 1,
                                 firstName: 1,
                                 lastName: 1,
+                                imageSrc: 1,
                             },
                         },
                     }));
@@ -2794,6 +2796,7 @@ const Personnel = function () {
                                 accessRole: 1,
                                 firstName: 1,
                                 lastName: 1,
+                                imageSrc: 1,
                             },
                         },
                     }));
@@ -2819,6 +2822,7 @@ const Personnel = function () {
                                     position: 1,
                                     firstName: 1,
                                     lastName: 1,
+                                    imageSrc: 1,
                                 },
                             },
                         },
@@ -2836,6 +2840,7 @@ const Personnel = function () {
                                     accessRole: 1,
                                     firstName: 1,
                                     lastName: 1,
+                                    imageSrc: 1,
                                 },
                             },
                         },

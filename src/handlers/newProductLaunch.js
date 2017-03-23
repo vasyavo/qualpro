@@ -373,7 +373,7 @@ var NewProductLaunch = function() {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'files',
             key : 'attachments',
-            addProjection : ['contentType', 'originalName', 'extension', 'createdBy']
+            addProjection : ['contentType', 'originalName', 'extension', 'createdBy', 'imageSrc']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -449,7 +449,7 @@ var NewProductLaunch = function() {
             from : 'personnels',
             key : 'createdBy.user',
             isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings : {createdBy : {date : 1}}
         }));
 
@@ -471,7 +471,8 @@ var NewProductLaunch = function() {
                         _id : 1,
                         position : 1,
                         firstName : 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -488,7 +489,8 @@ var NewProductLaunch = function() {
                         _id : 1,
                         accessRole : 1,
                         firstName : 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -499,7 +501,7 @@ var NewProductLaunch = function() {
                 from : 'personnels',
                 key : 'editedBy.user',
                 isArray : false,
-                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings : {editedBy : {date : 1}}
             }));
 
@@ -515,7 +517,8 @@ var NewProductLaunch = function() {
                             _id : 1,
                             position : 1,
                             firstName : 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -532,7 +535,8 @@ var NewProductLaunch = function() {
                             _id : 1,
                             accessRole : 1,
                             firstName : 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -562,42 +566,8 @@ var NewProductLaunch = function() {
                     _id : {$ifNull : ['$variant._id', '$variant.name']},
                     name : 1
                 },
-                /*lastDate: {
-                 $ifNull: [
-                 '$editedBy.date',
-                 '$createdBy.date'
-                 ]
-                 }*/
             })
         });
-
-        /* if (!forSync) {
-         pipeLine.push({
-         $sort: {
-         lastDate: -1
-         }
-         });
-
-         pipeLine.push({
-         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-         });
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-         }
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-         if (!forSync) {
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
-         }*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile : isMobile,

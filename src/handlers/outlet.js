@@ -33,6 +33,7 @@ const OutletHandler = function () {
         editedBy: 1,
         topArchived: 1,
         translated: 1,
+        imageSrc: 1,
     };
     const self = this;
 
@@ -379,6 +380,7 @@ const OutletHandler = function () {
                     topArchived: '$outlet.topArchived',
                     retailSegments: '$outlet.retailSegments',
                     subRegions: '$outlet.subRegions',
+                    imageSrc: '$outlet.imageSrc',
                 },
             });
         }
@@ -387,7 +389,7 @@ const OutletHandler = function () {
             from: 'personnels',
             key: 'createdBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { createdBy: { date: 1 } },
         }));
 
@@ -404,6 +406,7 @@ const OutletHandler = function () {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -421,6 +424,7 @@ const OutletHandler = function () {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -431,7 +435,7 @@ const OutletHandler = function () {
                 from: 'personnels',
                 key: 'editedBy.user',
                 isArray: false,
-                addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: { editedBy: { date: 1 } },
             }));
 
@@ -448,6 +452,7 @@ const OutletHandler = function () {
                             position: 1,
                             firstName: 1,
                             lastName: 1,
+                            imageSrc: 1,
                         },
                     },
                 },
@@ -465,6 +470,7 @@ const OutletHandler = function () {
                             accessRole: 1,
                             firstName: 1,
                             lastName: 1,
+                            imageSrc: 1,
                         },
                     },
                 },
@@ -497,6 +503,7 @@ const OutletHandler = function () {
                     name: '$data.name',
                     createdBy: '$data.createdBy',
                     subRegions: '$data.subRegions',
+                    imageSrc: '$data.imageSrc',
                 },
             };
 

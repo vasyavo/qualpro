@@ -758,14 +758,14 @@ var Comment = function () {
                         from         : 'files',
                         key          : 'attachments',
                         isArray      : true,
-                        addProjection: ['contentType', 'originalName', 'extension']
+                        addProjection: ['contentType', 'originalName', 'extension', 'preview']
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                         from           : 'personnels',
                         key            : 'createdBy.user',
                         isArray        : false,
-                        addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+                        addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
                         includeSiblings: {createdBy: {date: 1}}
                     }));
 
@@ -782,7 +782,8 @@ var Comment = function () {
                                         _id      : 1,
                                         position : 1,
                                         firstName: 1,
-                                        lastName : 1
+                                        lastName : 1,
+                                        imageSrc: 1,
                                     }
                                 }
                             }
@@ -799,7 +800,8 @@ var Comment = function () {
                                         _id       : 1,
                                         accessRole: 1,
                                         firstName : 1,
-                                        lastName  : 1
+                                        lastName  : 1,
+                                        imageSrc: 1,
                                     }
                                 }
                             }
@@ -846,7 +848,8 @@ var Comment = function () {
                         const body = result.length ?
                             result[0] : { data: [], total: 0 };
 
-                        body.data = result.data.forEach(comment => {
+                        // fixme crash on click details in marketing campaign item
+                        body.data.forEach(comment => {
                             if (comment.body) {
                                 comment.body = _.unescape(comment.body);
                             }

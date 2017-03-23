@@ -401,7 +401,8 @@ var ContactUs = function() {
                     }, {
                         name : 1,
                         originalName : 1,
-                        contentType : 1
+                        contentType : 1,
+                        preview: 1,
                     })
                     .lean()
                     .exec(function(err, attachments) {

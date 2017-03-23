@@ -1179,7 +1179,7 @@ const QuestionnaryHandler = function () {
                 key              : 'personnelId',
                 as               : 'personnel',
                 isArray          : false,
-                addProjection    : ['firstName', 'lastName'],
+                addProjection    : ['firstName', 'lastName', 'imageSrc'],
                 addMainProjection: ['position']
             }));
 

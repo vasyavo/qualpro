@@ -155,15 +155,14 @@ module.exports = (req, res, next) => {
 
                 ObjectiveModel.aggregate(pipeline)
                     .allowDiskUse(true)
-                    .exec((err, response) => {
+                    .exec((err, result) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        response = response && response[0]
-                            ? response[0] : { data: [], total: 0 };
+                        const body = result.length ? result[0] : { data: [], total: 0 };
 
-                        cb(null, response);
+                        cb(null, body);
                     });
             },
 

@@ -118,7 +118,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -133,7 +133,7 @@ var Contract = function () {
             key          : 'documents',
             as           : 'documents',
             isArray      : true,
-            addProjection: ['createdBy', 'title', 'attachment']
+            addProjection: ['createdBy', 'title', 'attachment', 'preview']
         }));
 
         pipeLine.push({
@@ -147,7 +147,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'documents.createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -156,7 +156,8 @@ var Contract = function () {
                     contentType: 1,
                     createdBy  : {
                         date: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -165,7 +166,7 @@ var Contract = function () {
             from           : 'files',
             key            : 'documents.attachment',
             isArray        : false,
-            addProjection  : ['_id', 'contentType'],
+            addProjection  : ['_id', 'contentType', 'preview'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -174,7 +175,8 @@ var Contract = function () {
                     createdBy  : {
                         date: 1,
                         user: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -197,7 +199,8 @@ var Contract = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -214,7 +217,8 @@ var Contract = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -225,7 +229,7 @@ var Contract = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -241,7 +245,8 @@ var Contract = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -258,7 +263,8 @@ var Contract = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
