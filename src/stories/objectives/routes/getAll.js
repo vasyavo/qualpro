@@ -10,7 +10,6 @@ const CONSTANTS = require('./../../../constants/mainConstants');
 
 const AccessManager = require('./../../../helpers/access')();
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
-const GetImage = require('./../../../helpers/getImages');
 const FilterMapper = require('./../../../helpers/filterMapper');
 const coveredByMe = require('./../../../helpers/coveredByMe');
 const getAllPipeline = require('./../reusable-components/getAllPipeline');
@@ -20,7 +19,6 @@ const ObjectiveModel = require('./../../../types/objective/model');
 const PersonnelModel = require('./../../../types/personnel/model');
 const $defProjection = require('./../reusable-components/$defProjection');
 
-const getImage = new GetImage();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
@@ -188,89 +186,50 @@ module.exports = (req, res, next) => {
 
                 ObjectiveModel.aggregate(mobilePipeLine)
                     .allowDiskUse(true)
-                    .exec((err, responseMobile) => {
-                        if (err) {
-                            return cb(err, null);
-                        }
-
-                        responseMobile = responseMobile && responseMobile[0] ?
-                            responseMobile[0] : { data: [], total: 0 };
-
-                        response.data = response.data.concat(responseMobile.data);
-                        response.total += responseMobile.total;
-
-                        cb(null, response);
-                    });
+                    .exec(cb);
             },
 
-        ], (err, response) => {
+        ], (err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            const setFileId = [];
-            const setPersonnelId = [];
+            const body = result.length ?
+                result[0] : { data: [], total: 0 };
 
-            response.data = response.data.map((model) => {
+            body.data = body.data.concat(result.data);
+            body.total += result.total;
+
+            body.data.forEach(model => {
                 if (model.title) {
                     model.title = {
                         en: model.title.en ? _.unescape(model.title.en) : '',
                         ar: model.title.ar ? _.unescape(model.title.ar) : '',
                     };
                 }
+
                 if (model.description) {
                     model.description = {
                         en: model.description.en ? _.unescape(model.description.en) : '',
                         ar: model.description.ar ? _.unescape(model.description.ar) : '',
                     };
                 }
+
                 if (model.companyObjective) {
                     model.companyObjective = {
                         en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
                         ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                     };
                 }
-
-                setFileId.push(..._.map(model.attachments, '_id'));
-                setPersonnelId.push(
-                    _.get(model, 'createdBy.user._id'),
-                    ..._.map(model.assignedTo, '_id')
-                );
-
-                return model;
             });
 
-            const options = {
-                data: {
-                    [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                    [CONTENT_TYPES.FILES]: setFileId,
-                },
-            };
-
-            getImage.getImages(options, (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
-
-                const setOptions = {
-                    response,
-                    imgsObject: result,
-                    fields: {
-                        [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
-                        [CONTENT_TYPES.FILES]: [['attachments']],
-                    },
-                };
-
-                getImage.setIntoResult(setOptions, (response) => {
-                    const subordinatesId = setSubordinateId.map((ObjectId) => {
-                        return ObjectId.toString();
-                    });
-
-                    response.data = detectObjectivesForSubordinates(response.data, subordinatesId, userId);
-
-                    callback(null, response);
-                });
+            const subordinatesId = setSubordinateId.map((ObjectId) => {
+                return ObjectId.toString();
             });
+
+            body.data = detectObjectivesForSubordinates(body.data, subordinatesId, userId);
+
+            callback(null, body);
         });
     };
 
@@ -318,18 +277,15 @@ module.exports = (req, res, next) => {
 
         ObjectiveModel.aggregate(pipeline)
             .allowDiskUse(true)
-            .exec((err, response) => {
+            .exec((err, result) => {
                 if (err) {
                     return callback(err);
                 }
 
-                const setFileId = [];
-                const setPersonnelId = [];
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                response = response && response[0]
-                    ? response[0] : { data: [], total: 0 };
-
-                response.data = response.data.map((model) => {
+                body.data.forEach(model => {
                     if (model.title) {
                         model.title = {
                             en: model.title.en ? _.unescape(model.title.en) : '',
@@ -348,41 +304,9 @@ module.exports = (req, res, next) => {
                             ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                         };
                     }
-
-                    setFileId.push(..._.map(model.attachments, '_id'));
-                    setPersonnelId.push(
-                        _.get(model, 'createdBy.user._id'),
-                        ..._.map(model.assignedTo, '_id')
-                    );
-
-                    return model;
                 });
 
-                const options = {
-                    data: {
-                        [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                        [CONTENT_TYPES.FILES]: setFileId,
-                    },
-                };
-
-                getImage.getImages(options, (err, result) => {
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    const setOptions = {
-                        response,
-                        imgsObject: result,
-                        fields: {
-                            [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
-                            [CONTENT_TYPES.FILES]: [['attachments']],
-                        },
-                    };
-
-                    getImage.setIntoResult(setOptions, (response) => {
-                        callback(null, response);
-                    });
-                });
+                callback(null, body);
             });
     };
 

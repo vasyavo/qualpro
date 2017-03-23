@@ -21,7 +21,8 @@ const schema = new Schema({
         default: null,
     },
     preview: {
-        type: String,
+        type: ObjectId,
+        ref: CONTENT_TYPES.PREVIEW,
         default: null,
     },
     isProcessing: {

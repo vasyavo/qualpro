@@ -8,17 +8,13 @@ var CompetitorBranding = function() {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACL_MODULES = require('../constants/aclModulesNames');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var CompetitorPromotionModel = require('./../types/competitorPromotion/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
     var access = require('../helpers/access')();
     var FilterMapper = require('../helpers/filterMapper');
     var ObjectId = mongoose.Types.ObjectId;
-    var FileModel = require('./../types/file/model');
     var bodyValidator = require('../helpers/bodyValidator');
     var CommentHandler = require('./comment');
     var commentHandler = new CommentHandler();
@@ -301,75 +297,38 @@ var CompetitorBranding = function() {
                 allowDiskUse : true
             };
 
-            aggregation.exec(function(err, response) {
-                var options = {
-                    data : {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {
-                    data : [],
-                    total : 0
-                };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function(model) {
+                body.data.forEach(model => {
                     if (model.description) {
                         model.description = {
-                            ar : _.unescape(model.description.ar),
-                            en : _.unescape(model.description.en)
+                            ar: _.unescape(model.description.ar),
+                            en: _.unescape(model.description.en),
                         };
                     }
+
                     if (model.promotion) {
                         model.promotion = _.unescape(model.promotion);
                     }
+
                     if (model.price) {
                         model.price = _.unescape(model.price);
                     }
+
                     if (model.packing) {
                         model.packing = _.unescape(model.packing);
                     }
-                    personnelIds.push(model.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(model.attachments, '_id'));
-
-                    return model;
                 });
 
-                if (!response.data.length) {
-                    return next({
-                        status : 200,
-                        body : response
-                    });
-                }
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function(err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response : response,
-                        imgsObject : result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function(response) {
-                        next({
-                            status : 200,
-                            body : response
-                        });
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -748,63 +707,33 @@ var CompetitorBranding = function() {
             allowDiskUse : true
         };
 
-        aggregation.exec(function(err, response) {
-            var options = {
-                data : {}
-            };
-            var personnelIds = [];
-            var fileIds;
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response || !response.length) {
-                return callback(null, response);
-            }
+            const body = result.length ? result[0] : {};
 
-            response = response ? response[0] : {};
-
-            if (response.description) {
-                response.description = {
-                    ar : _.unescape(response.description.ar),
-                    en : _.unescape(response.description.en)
+            if (body.description) {
+                body.description = {
+                    ar: _.unescape(body.description.ar),
+                    en: _.unescape(body.description.en),
                 };
             }
-            if (response.promotion) {
-                response.promotion = _.unescape(response.promotion);
-            }
-            if (response.price) {
-                response.price = _.unescape(response.price);
-            }
-            if (response.packing) {
-                response.packing = _.unescape(response.packing);
+
+            if (body.promotion) {
+                body.promotion = _.unescape(body.promotion);
             }
 
-            personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.attachments, '_id');
+            if (body.price) {
+                body.price = _.unescape(body.price);
+            }
 
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
+            if (body.packing) {
+                body.packing = _.unescape(body.packing);
+            }
 
-            getImagesHelper.getImages(options, function(err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response : response,
-                    imgsObject : result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function(response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     }
 };

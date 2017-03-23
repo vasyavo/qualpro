@@ -29,7 +29,7 @@ const insertDefaults = (callback) => {
                     defaults[contentType] = previewId;
 
                     logger.info(`Default preview for "${contentType}" is "${previewId}"`);
-                    return eachCb(null, previewId);
+                    return eachCb(null);
                 }
 
                 collection.insertOne({

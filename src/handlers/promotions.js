@@ -12,14 +12,11 @@ var Promotions = function () {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var VALIDATION = require('../public/js/constants/validation.js');
     var CONSTANTS = require('../constants/mainConstants');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     var PromotionModel = require('./../types/promotion/model');
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper();
     var ObjectId = mongoose.Types.ObjectId;
     var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
@@ -488,60 +485,26 @@ var Promotions = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response.length ? response[0] : {data: [], total: 0};
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.promotionType) {
                         element.promotionType = {
                             ar: _.unescape(element.promotionType.ar),
-                            en: _.unescape(element.promotionType.en)
+                            en: _.unescape(element.promotionType.en),
                         };
                     }
-
-                    personnelIds.push(element.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-                    return element;
                 });
 
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -653,60 +616,25 @@ var Promotions = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
+            aggregation.exec((err, response) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response.length ? response[0] : {data: [], total: 0};
+                const body = response.length ? response[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.promotionType) {
                         element.promotionType = {
                             ar: _.unescape(element.promotionType.ar),
-                            en: _.unescape(element.promotionType.en)
+                            en: _.unescape(element.promotionType.en),
                         };
                     }
-
-                    personnelIds.push(element.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-                    return element;
                 });
 
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -1063,54 +991,21 @@ var Promotions = function () {
             allowDiskUse: true
         };
 
-        aggregation.exec(function (err, response) {
-            var options = {
-                data: {}
-            };
-            var personnelIds = [];
-            var fileIds;
-
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response.length) {
-                return callback(null, {});
-            }
+            const body = result.length ? result[0] : {};
 
-            response = response[0];
-
-            if (response.promotionType) {
-                response.promotionType = {
-                    ar: _.unescape(response.promotionType.ar),
-                    en: _.unescape(response.promotionType.en)
+            if (body.promotionType) {
+                body.promotionType = {
+                    ar: _.unescape(body.promotionType.ar),
+                    en: _.unescape(body.promotionType.en),
                 };
             }
 
-            personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.attachments, '_id');
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     };
 };

@@ -506,7 +506,7 @@ module.exports = [
             read   : true
         }
     },
-    require('./../../stories/consumer-survey/acl/tradeMarketer'),
+    require('./../../stories/consumersSurvey/acl/tradeMarketer'),
     {
         module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
         cms   : {

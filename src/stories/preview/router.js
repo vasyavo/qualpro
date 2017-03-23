@@ -5,6 +5,6 @@ const router = new Router();
 
 router.use(access.checkAuth);
 
-router.get('/:id', require('./routes/getById'));
+router.get('/:id([0-9a-fA-F]{24})', require('./routes/getById'));
 
 module.exports = router;

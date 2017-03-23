@@ -5,12 +5,9 @@ const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const FilterMapper = require('../../../helpers/filterMapper');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
 const ConsumersSurveyAnswersModel = require('../../../types/consumersSurveyAnswers/model');
-const GetImageHelper = require('../../../helpers/getImages');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
 const access = require('../../../helpers/access')();
 const ObjectId = mongoose.Types.ObjectId;
-
-const getImagesHelper = new GetImageHelper();
 
 const $defProjection = {
     _id: 1,

@@ -7,7 +7,6 @@ const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
 const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const AccessManager = require('./../../../helpers/access')();
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
-const GetImage = require('./../../../helpers/getImages');
 const coveredByMe = require('./../../../helpers/coveredByMe');
 const ObjectiveModel = require('./../../../types/objective/model');
 const PersonnelModel = require('./../../../types/personnel/model');
@@ -15,7 +14,6 @@ const $defProjection = require('./../reusable-components/$defProjection');
 const getAllPipeline = require('./../reusable-components/getAllPipeline');
 const getAllPipelineTrue = require('./../reusable-components/getAllPipelineTrue');
 
-const getImage = new GetImage();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
@@ -52,19 +50,15 @@ module.exports = (req, res, next) => {
 
         ObjectiveModel.aggregate(pipeLine)
             .allowDiskUse(true)
-            .exec((err, response) => {
+            .exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ?
-                    response[0] : { data: [], total: 0 };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-
-                const setPersonnelId = [];
-                const setFileId = [];
-
-                response.data = response.data.map((model) => {
+                body.data.forEach(model => {
                     if (model.title) {
                         model.title = {
                             en: model.title.en ? _.unescape(model.title.en) : '',
@@ -85,41 +79,9 @@ module.exports = (req, res, next) => {
                             ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                         };
                     }
-
-                    setFileId.push(..._.map(model.attachments, '_id'));
-                    setPersonnelId.push(
-                        _.get(model, 'createdBy.user._id'),
-                        ..._.map(model.assignedTo, '_id')
-                    );
-
-                    return model;
                 });
 
-                const options = {
-                    data: {
-                        [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                        [CONTENT_TYPES.FILES]: setFileId,
-                    },
-                };
-
-                getImage.getImages(options, (err, result) => {
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    const setOptions = {
-                        response,
-                        imgsObject: result,
-                        fields: {
-                            [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
-                            [CONTENT_TYPES.FILES]: [['attachments']],
-                        },
-                    };
-
-                    getImage.setIntoResult(setOptions, (response) => {
-                        callback(null, response);
-                    });
-                });
+                callback(null, body);
             });
     };
 
@@ -170,28 +132,18 @@ module.exports = (req, res, next) => {
 
                 ObjectiveModel.aggregate(pipeLine)
                     .allowDiskUse(true)
-                    .exec((err, response) => {
-                        if (err) {
-                            return next(err);
-                        }
-
-                        response = response && response[0] ?
-                            response[0] : { data: [], total: 0 };
-
-                        cb(null, response);
-                    });
+                    .exec(cb);
             },
 
-        ], (err, response) => {
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
+            const body = result.length ?
+                result[0] : { data: [], total: 0 };
 
-            const setPersonnelId = [];
-            const setFileId = [];
-
-            response.data = response.data.map((model) => {
+            body.data.forEach(model => {
                 if (model.title) {
                     model.title = {
                         en: model.title.en ? _.unescape(model.title.en) : '',
@@ -212,48 +164,15 @@ module.exports = (req, res, next) => {
                         ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                     };
                 }
-
-                setFileId.push(..._.map(model.attachments, '_id'));
-                setPersonnelId.push(
-                    _.get(model, 'createdBy.user._id'),
-                    ..._.map(model.assignedTo, '_id')
-                );
-
-                return model;
             });
 
-
-            const options = {
-                data: {
-                    [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                    [CONTENT_TYPES.FILES]: setFileId,
-                },
-            };
-
-            getImage.getImages(options, (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
-
-                const setOptions = {
-                    response,
-                    imgsObject: result,
-                    fields: {
-                        [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
-                        [CONTENT_TYPES.FILES]: [['attachments']],
-                    },
-                };
-
-                getImage.setIntoResult(setOptions, (response) => {
-                    const setSubordinateStringId = setSubordinateObjectId.map((ObjectId) => {
-                        return ObjectId.toString();
-                    });
-
-                    response.data = detectObjectivesForSubordinates(response.data, setSubordinateStringId, userId);
-
-                    callback(null, response);
-                });
+            const setSubordinateStringId = setSubordinateObjectId.map((ObjectId) => {
+                return ObjectId.toString();
             });
+
+            body.data = detectObjectivesForSubordinates(body.data, setSubordinateStringId, userId);
+
+            callback(null, body);
         });
     };
 

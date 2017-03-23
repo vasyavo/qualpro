@@ -9,7 +9,7 @@
         <label for="<%=model._id%>"
                class="checkboxLabel"></label>
         <% } %>
-        <img class="thumbnailImageSquare" src="<%=model.fileID && model.fileID.preview ? model.fileID.preview :'' %>">
+        <img class="thumbnailImageSquare" src="preview/<%=model.fileID && model.fileID.preview ? model.fileID.preview :'' %>">
     </div>
     <div class="thumbnailBottom">
         <span class="configuration"><%= model.configuration.name %></span>

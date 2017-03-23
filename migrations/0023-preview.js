@@ -11,8 +11,19 @@ exports.up = function(db, next) {
         // perform personnel migration
         (cb) => {
             const collectionName = `${contentTypes.PERSONNEL}s`;
+            const cursor = db.collection(collectionName).find({})
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 // if it default then set null
                 if (doc.imageSrc === defaultImageSrc[contentTypes.PERSONNEL]) {
                     return db.collection(collectionName).updateOne({
@@ -51,12 +62,6 @@ exports.up = function(db, next) {
                 ], queueCb);
             }, Infinity);
 
-            const cursor = db.collection(collectionName).find({})
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
             cursor.each((err, doc) => {
                 if (doc) {
                     return queue.push(doc);
@@ -77,8 +82,19 @@ exports.up = function(db, next) {
         // perform domain migration
         (cb) => {
             const collectionName = `${contentTypes.DOMAIN}s`;
+            const cursor = db.collection(collectionName).find({})
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 // if it default then set null
                 if (doc.imageSrc === defaultImageSrc[contentTypes.DOMAIN]) {
                     return db.collection(collectionName).updateOne({
@@ -117,12 +133,6 @@ exports.up = function(db, next) {
                 ], queueCb);
             }, Infinity);
 
-            const cursor = db.collection(collectionName).find({})
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
             cursor.each((err, doc) => {
                 if (doc) {
                     return queue.push(doc);
@@ -143,8 +153,19 @@ exports.up = function(db, next) {
         // perform outlet migration
         (cb) => {
             const collectionName = `${contentTypes.OUTLET}s`;
+            const cursor = db.collection(collectionName).find({})
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 // if it default then set null
                 if (doc.imageSrc === defaultImageSrc[contentTypes.OUTLET]) {
                     return db.collection(collectionName).updateOne({
@@ -183,12 +204,6 @@ exports.up = function(db, next) {
                 ], queueCb);
             }, Infinity);
 
-            const cursor = db.collection(collectionName).find({})
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
             cursor.each((err, doc) => {
                 if (doc) {
                     return queue.push(doc);
@@ -209,8 +224,19 @@ exports.up = function(db, next) {
         // perform retail segment migration
         (cb) => {
             const collectionName = `${contentTypes.RETAILSEGMENT}s`;
+            const cursor = db.collection(collectionName).find({})
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 // if it default then set null
                 if (doc.imageSrc === defaultImageSrc[contentTypes.RETAILSEGMENT]) {
                     return db.collection(collectionName).updateOne({
@@ -249,12 +275,6 @@ exports.up = function(db, next) {
                 ], queueCb);
             }, Infinity);
 
-            const cursor = db.collection(collectionName).find({})
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
             cursor.each((err, doc) => {
                 if (doc) {
                     return queue.push(doc);
@@ -275,8 +295,19 @@ exports.up = function(db, next) {
         // perform branch migration
         (cb) => {
             const collectionName = `${contentTypes.BRANCH}es`;
+            const cursor = db.collection(collectionName).find({})
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 // if it default then set null
                 if (doc.imageSrc === defaultImageSrc[contentTypes.BRANCH]) {
                     return db.collection(collectionName).updateOne({
@@ -315,12 +346,6 @@ exports.up = function(db, next) {
                 ], queueCb);
             }, Infinity);
 
-            const cursor = db.collection(collectionName).find({})
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
             cursor.each((err, doc) => {
                 if (doc) {
                     return queue.push(doc);
@@ -341,8 +366,19 @@ exports.up = function(db, next) {
         // perform brand migration
         (cb) => {
             const collectionName = `${contentTypes.BRAND}s`;
+            const cursor = db.collection(collectionName).find({})
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 // if it default then set null
                 if (doc.imageSrc === defaultImageSrc[contentTypes.BRAND]) {
                     return db.collection(collectionName).updateOne({
@@ -381,12 +417,6 @@ exports.up = function(db, next) {
                 ], queueCb);
             }, Infinity);
 
-            const cursor = db.collection(collectionName).find({})
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
             cursor.each((err, doc) => {
                 if (doc) {
                     return queue.push(doc);
@@ -413,8 +443,18 @@ exports.down = function(db, next) {
         // perform personnel rollback
         (cb) => {
             const collectionName = `${contentTypes.PERSONNEL}s`;
+            // read in stream personnel preview
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.PERSONNEL,
+            });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 async.series([
 
                     // put base64 back to personnel
@@ -437,11 +477,6 @@ exports.down = function(db, next) {
 
                 ], queueCb);
             }, Infinity);
-
-            // read in stream personnel preview
-            const cursor = db.collection('preview').find({
-                contentType: contentTypes.PERSONNEL,
-            });
 
             cursor.each((err, doc) => {
                 if (doc) {
@@ -470,8 +505,18 @@ exports.down = function(db, next) {
         // perform domain rollback
         (cb) => {
             const collectionName = `${contentTypes.DOMAIN}s`;
+            // read in stream domain preview
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.DOMAIN,
+            });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 async.series([
 
                     // put base64 back to domain
@@ -494,11 +539,6 @@ exports.down = function(db, next) {
 
                 ], queueCb);
             }, Infinity);
-
-            // read in stream domain preview
-            const cursor = db.collection('preview').find({
-                contentType: contentTypes.DOMAIN,
-            });
 
             cursor.each((err, doc) => {
                 if (doc) {
@@ -527,8 +567,18 @@ exports.down = function(db, next) {
         // perform outlet rollback
         (cb) => {
             const collectionName = `${contentTypes.OUTLET}s`;
+            // read in stream outlet preview
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.OUTLET,
+            });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 async.series([
 
                     // put base64 back to outlet
@@ -551,11 +601,6 @@ exports.down = function(db, next) {
 
                 ], queueCb);
             }, Infinity);
-
-            // read in stream outlet preview
-            const cursor = db.collection('preview').find({
-                contentType: contentTypes.OUTLET,
-            });
 
             cursor.each((err, doc) => {
                 if (doc) {
@@ -584,8 +629,18 @@ exports.down = function(db, next) {
         // perform retail segment rollback
         (cb) => {
             const collectionName = `${contentTypes.RETAILSEGMENT}s`;
+            // read in stream retail segment preview
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.RETAILSEGMENT,
+            });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 async.series([
 
                     // put base64 back to retail segment
@@ -608,11 +663,6 @@ exports.down = function(db, next) {
 
                 ], queueCb);
             }, Infinity);
-
-            // read in stream retail segment preview
-            const cursor = db.collection('preview').find({
-                contentType: contentTypes.RETAILSEGMENT,
-            });
 
             cursor.each((err, doc) => {
                 if (doc) {
@@ -641,8 +691,18 @@ exports.down = function(db, next) {
         // perform branch rollback
         (cb) => {
             const collectionName = `${contentTypes.BRANCH}es`;
+            // read in stream branch preview
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.BRANCH,
+            });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 async.series([
 
                     // put base64 back to branch
@@ -665,11 +725,6 @@ exports.down = function(db, next) {
 
                 ], queueCb);
             }, Infinity);
-
-            // read in stream branch preview
-            const cursor = db.collection('preview').find({
-                contentType: contentTypes.BRANCH,
-            });
 
             cursor.each((err, doc) => {
                 if (doc) {
@@ -698,8 +753,18 @@ exports.down = function(db, next) {
         // perform brand rollback
         (cb) => {
             const collectionName = `${contentTypes.BRAND}s`;
+            // read in stream brand preview
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.BRAND,
+            });
 
             const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
                 async.series([
 
                     // put base64 back to brand
@@ -722,11 +787,6 @@ exports.down = function(db, next) {
 
                 ], queueCb);
             }, Infinity);
-
-            // read in stream brand preview
-            const cursor = db.collection('preview').find({
-                contentType: contentTypes.BRAND,
-            });
 
             cursor.each((err, doc) => {
                 if (doc) {

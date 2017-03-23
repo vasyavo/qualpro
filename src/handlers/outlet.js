@@ -8,11 +8,8 @@ const OutletHandler = function () {
     const CONTENT_TYPES = require('../public/js/constants/contentType.js');
     const CONSTANTS = require('../constants/mainConstants');
     const AggregationHelper = require('../helpers/aggregationCreater');
-    const GetImagesHelper = require('../helpers/getImages');
-    const getImagesHelper = new GetImagesHelper();
     const ACTIVITY_TYPES = require('../constants/activityTypes');
     const OutletModel = require('./../types/outlet/model');
-    const BranchesModel = require('./../types/branch/model');
     const DomainModel = require('./../types/domain/model');
     const FilterMapper = require('../helpers/filterMapper');
     const Archiver = require('../helpers/archiver');
@@ -601,54 +598,25 @@ const OutletHandler = function () {
                     });
                 },
 
-            ], (err, response) => {
-                const options = {
-                    data: {},
-                };
-                const outletIds = [];
-
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : { data: [], total: 0 };
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({ status: 200, body: response });
-                }
-
-                response.data = _.map(response.data, (element) => {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
                             en: _.unescape(element.name.en),
                         };
                     }
-
-                    outletIds.push(element._id);
-
-                    return element;
                 });
 
-                options.data[CONTENT_TYPES.OUTLET] = outletIds;
-
-                getImagesHelper.getImages(options, (err, result) => {
-                    const fieldNames = {};
-                    let setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-                    fieldNames[CONTENT_TYPES.OUTLET] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        next({ status: 200, body: response });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -773,54 +741,26 @@ const OutletHandler = function () {
                     });
                 },
 
-            ], (err, response) => {
-                const options = {
-                    data: {},
-                };
-                const outletIds = [];
-
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : { data: [], total: 0 };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({ status: 200, body: response });
-                }
-
-                response.data = _.map(response.data, (element) => {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
                             en: _.unescape(element.name.en),
                         };
                     }
-
-                    outletIds.push(element._id);
-
-                    return element;
                 });
 
-                options.data[CONTENT_TYPES.OUTLET] = outletIds;
-
-                getImagesHelper.getImages(options, (err, result) => {
-                    const fieldNames = {};
-                    let setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-                    fieldNames[CONTENT_TYPES.OUTLET] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        next({ status: 200, body: response });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }

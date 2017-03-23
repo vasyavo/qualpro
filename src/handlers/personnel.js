@@ -2,7 +2,6 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const PasswordManager = require('./../helpers/passwordManager');
 const ObjectiveModel = require('./../types/objective/model');
-const defaultPreviews = require('./../stories/preview/autoload').defaults;
 
 const Personnel = function () {
     const mongoose = require('mongoose');
@@ -24,8 +23,6 @@ const Personnel = function () {
     const smsSender = require('../helpers/smsSender');
     const FilterMapper = require('../helpers/filterMapper');
     const async = require('async');
-    const GetImagesHelper = require('../helpers/getImages');
-    const getImagesHelper = new GetImagesHelper();
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
     const DomainModel = require('./../types/domain/model');
@@ -76,6 +73,7 @@ const Personnel = function () {
         lasMonthEvaluate: 1,
         covered: 1,
         token: 1,
+        imageSrc: 1,
     };
 
     const convertDomainsToObjectIdArray = function(body) {
@@ -317,18 +315,6 @@ const Personnel = function () {
                     },
                 },
             },
-        }, {
-            $lookup: {
-                from: 'preview',
-                localField: 'imageSrc',
-                foreignField: '_id',
-                as: 'imageSrc',
-            },
-        }, {
-            $unwind: {
-                path: '$imageSrc',
-                preserveNullAndEmptyArrays: true,
-            },
         }];
 
         PersonnelModel.aggregate(pipeline)
@@ -339,10 +325,6 @@ const Personnel = function () {
 
                 const personnel = result.length > 0 ?
                     result.slice().pop() : {};
-
-                if (!personnel.imageSrc) {
-                    personnel.imageSrc = defaultPreviews[CONTENT_TYPES.PERSONNEL];
-                }
 
                 callback(null, personnel);
             });
@@ -1998,7 +1980,7 @@ const Personnel = function () {
             from: 'personnels',
             key: 'createdBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { createdBy: { date: 1 } },
         }));
 
@@ -2006,7 +1988,7 @@ const Personnel = function () {
             from: 'personnels',
             key: 'editedBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { editedBy: { date: 1 } },
         }));
 
@@ -2023,6 +2005,7 @@ const Personnel = function () {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -2040,6 +2023,7 @@ const Personnel = function () {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -2058,6 +2042,7 @@ const Personnel = function () {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -2075,6 +2060,7 @@ const Personnel = function () {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -2123,6 +2109,7 @@ const Personnel = function () {
                     _id: '$manager._id',
                     firstName: '$manager.firstName',
                     lastName: '$manager.lastName',
+                    imageSrc: '$manager.imageSrc',
                 },
             }),
         });
@@ -2152,6 +2139,7 @@ const Personnel = function () {
                         _id: '$vacation.cover._id',
                         firstName: '$vacation.cover.firstName',
                         lastName: '$vacation.cover.lastName',
+                        imageSrc: '$vacation.cover.imageSrc',
                     },
                     onLeave: 1,
                 },
@@ -2202,6 +2190,7 @@ const Personnel = function () {
                 confirmed: { $first: '$confirmed' },
                 translated: { $first: '$translated' },
                 covered: { $first: '$covered' },
+                imageSrc: { $first: '$imageSrc' },
             },
         });
 
@@ -2235,30 +2224,6 @@ const Personnel = function () {
             });
         }
 
-        /* pipeLine.push({
-         $sort: sort
-         });
-
-         if (!isMobile) {
-         pipeLine.push({
-         $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         if (limit && limit !== -1) {
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile,
             searchFieldsArray,
@@ -2284,50 +2249,10 @@ const Personnel = function () {
             },
 
             (result, cb) => {
-                const response = result && result[0] ?
-                    result[0] : {
-                        data: [],
-                        total: 0,
-                    };
-                const ids = response.data.map((item) => (item._id));
-                const options = {
-                    data: {
-                        [CONTENT_TYPES.PERSONNEL]: ids,
-                    },
+                const body = result && result[0] ?
+                    result[0] : { data: [], total: 0 };
 
-                };
-
-                cb(null, {
-                    response,
-                    options,
-                });
-            },
-
-            (data, cb) => {
-                getImagesHelper.getImages(data.options, (err, result) => {
-                    cb(err, {
-                        response: data.response,
-                        result,
-                    });
-                });
-            },
-
-            (data, cb) => {
-                const optionsForImplement = {
-                    response: data.response,
-                    imgsObject: data.result,
-                    fields: {
-                        personnel: [],
-                    },
-                };
-
-                getImagesHelper.setIntoResult(optionsForImplement, (response) => {
-                    cb(null, response);
-                });
-            },
-
-            (response, cb) => {
-                response.data = response.data.map((element) => {
+                body.data.forEach(element => {
                     if (element.firstName) {
                         element.firstName = {
                             ar: _.unescape(element.firstName.ar),
@@ -2341,53 +2266,9 @@ const Personnel = function () {
                             en: _.unescape(element.lastName.en),
                         };
                     }
-
-                    return element;
                 });
 
-                cb(null, response);
-            },
-
-            (response, cb) => {
-                if (!isMobile) {
-                    return cb(null, response);
-                }
-
-                async.eachLimit(response.data, 100, (eachPersonnel, eachCb) => {
-                    let personnelLocation;
-                    let propName;
-
-                    switch (personnelLevel) {
-                        case ACL_CONSTANTS.COUNTRY_ADMIN:
-                            personnelLocation = personnel.country;
-                            propName = 'country';
-                            break;
-                        case ACL_CONSTANTS.AREA_MANAGER:
-                            personnelLocation = personnel.region;
-                            propName = 'region';
-                            break;
-                        case ACL_CONSTANTS.AREA_IN_CHARGE:
-                            personnelLocation = personnel.subRegion;
-                            propName = 'subRegion';
-                            break;
-                        case ACL_CONSTANTS.SALES_MAN:
-                        case ACL_CONSTANTS.MERCHANDISER:
-                        case ACL_CONSTANTS.CASH_VAN:
-                            personnelLocation = personnel.branch;
-                            propName = 'branch';
-                            break;
-                    }
-
-                    const intersection = !_.intersection(personnelLocation, eachPersonnel[propName]);
-
-                    if (eachPersonnel.level < personnelLevel || intersection) {
-                        delete eachPersonnel.avgRating;
-                    }
-
-                    eachCb(null);
-                }, (err) => {
-                    cb(err, response);
-                });
+                cb(null, body);
             },
 
         ], callback);
@@ -3058,80 +2939,40 @@ const Personnel = function () {
                 id: ObjectId(uId),
             });
 
-            ObjectiveModel.aggregate(pipeLine, (err, response) => {
-                let idsPersonnel = [];
-                let idsFile = [];
-                const options = {
-                    data: {},
-                };
+            ObjectiveModel.aggregate(pipeLine, (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {
-                    data: [],
-                    total: 0,
-                };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({
-                        status: 200,
-                        body: response,
-                    });
-                }
-
-                response.data = _.map(response.data, (model) => {
+                body.data.forEach(model => {
                     if (model.title) {
                         model.title = {
                             en: model.title.en ? _.unescape(model.title.en) : '',
                             ar: model.title.ar ? _.unescape(model.title.ar) : '',
                         };
                     }
+
                     if (model.description) {
                         model.description = {
                             en: model.description.en ? _.unescape(model.description.en) : '',
                             ar: model.description.ar ? _.unescape(model.description.ar) : '',
                         };
                     }
+
                     if (model.companyObjective) {
                         model.companyObjective = {
                             en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
                             ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
                         };
                     }
-
-                    idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                    idsPersonnel.push(model.createdBy.user._id);
-                    idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
-
-                    return model;
                 });
 
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                options.data[CONTENT_TYPES.FILES] = idsFile;
-
-                getImagesHelper.getImages(options, (err, result) => {
-                    const fieldNames = {};
-                    let setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        next({
-                            status: 200,
-                            body: response,
-                        });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }

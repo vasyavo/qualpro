@@ -7,10 +7,7 @@ var BrandingActivity = function () {
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var VALIDATION = require('../public/js/constants/validation.js');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper();
     var FilterMapper = require('../helpers/filterMapper');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
@@ -375,58 +372,23 @@ var BrandingActivity = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     element.description = {
                         ar: _.unescape(element.description.ar),
-                        en: _.unescape(element.description.en)
+                        en: _.unescape(element.description.en),
                     };
-
-                    personnelIds.push(element.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-                    return element;
                 });
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -507,59 +469,23 @@ var BrandingActivity = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     element.description = {
                         ar: _.unescape(element.description.ar),
-                        en: _.unescape(element.description.en)
+                        en: _.unescape(element.description.en),
                     };
-
-                    personnelIds.push(element.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-                    return element;
                 });
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -1027,62 +953,27 @@ var BrandingActivity = function () {
             allowDiskUse: true
         };
 
-        aggregation.exec(function (err, response) {
-            var options = {
-                data: {}
-            };
-            var personnelIds = [];
-            var fileIds;
-            var keys;
-
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            response = response[0] ? response[0] : {};
-            keys = Object.keys(response);
+            const body = result.length ? result[0] : {};
 
-            if (keys.length && response.description) {
-                response.description = {
-                    ar: _.unescape(response.description.ar),
-                    en: _.unescape(response.description.en)
+            if (body.description) {
+                body.description = {
+                    ar: _.unescape(body.description.ar),
+                    en: _.unescape(body.description.en),
                 };
-            }
-
-            if (!keys.length) {
-                return callback(null, response);
             }
 
             if (isMobile) {
-                if (response.displayType && response.displayType.length) {
-                    response.displayType = response.displayType[0];
+                if (body.displayType && body.displayType.length) {
+                    body.displayType = body.displayType[0];
                 }
             }
 
-            personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.attachments, '_id');
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     };
 

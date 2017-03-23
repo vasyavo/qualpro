@@ -12,16 +12,13 @@ const ACL_CONSTANTS = require('../constants/aclRolesNames');
 const ACL_MODULES = require('../constants/aclModulesNames');
 const CONTENT_TYPES = require('../public/js/constants/contentType.js');
 const CONSTANTS = require('../constants/mainConstants');
-const ACTIVITY_TYPES = require('../constants/activityTypes');
 const FilterMapper = require('../helpers/filterMapper');
 const bodyValidator = require('../helpers/bodyValidator');
 const AggregationHelper = require('../helpers/aggregationCreater');
 const access = require('../helpers/access')();
-const GetImageHelper = require('../helpers/getImages');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const QuestionnaryHandler = function () {
-    const getImagesHelper = new GetImageHelper();
     const $defProjection = {
         _id: 1,
         title: 1,
@@ -1254,49 +1251,23 @@ const QuestionnaryHandler = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var personnelIds = [];
-                var options = {
-                    data: {}
-                };
-
-                if (!response.length) {
-                    return next({status: 200, body: []});
+            aggregation.exec((err, result) => {
+                if (err) {
+                    return next(err);
                 }
 
-                _.map(response, function (answer) {
+                result.forEach(answer => {
                     if (answer.text) {
                         answer.text = {
                             en: _.unescape(answer.text.en),
-                            ar: _.unescape(answer.text.ar)
-                        }
+                            ar: _.unescape(answer.text.ar),
+                        };
                     }
-                    personnelIds.push(answer.personnel._id);
-
-                    return answer;
                 });
 
-                personnelIds = lodash.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['personnel'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body: result,
                 });
             });
         }

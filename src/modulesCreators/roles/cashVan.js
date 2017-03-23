@@ -598,7 +598,7 @@ module.exports = [
             read: false
         }
     },
-    require('./../../stories/consumer-survey/acl/cashVan'),
+    require('./../../stories/consumersSurvey/acl/cashVan'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

@@ -1,7 +1,7 @@
 <div data-id="<%= model.cid || model._id || model.document%>" class="fileThumbnailItem brandItem masonryThumbnail">
     <div class="thumbnail_js thumbnailBody">
         <% if (model.url) { %>
-        <img src="<%= model.preview %>" style="max-width: 100%">
+        <img src="preview/<%= model.preview %>" style="max-width: 100%">
         <% } else {%>
         <div class="iconThumbnail <%= model.type %>"></div>
         <% } %>

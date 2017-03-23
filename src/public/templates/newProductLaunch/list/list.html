@@ -36,7 +36,7 @@
                 <% for(var i=0; i<previewCount; i++){ %>
                 <div class="bannerMin">
                     <% if (model.attachments[i].preview) { %>
-                    <img src="<%= model.attachments[i].preview %>" alt="<%=  model.attachments[i].originalName %>" class="bannerImage"/>
+                    <img src="preview/<%= model.attachments[i].preview %>" alt="<%=  model.attachments[i].originalName %>" class="bannerImage"/>
                     <% } else {%>
                     <div class="iconThumbnail <%= model.attachments[i].type %>"></div>
                     <% } %>

@@ -11,12 +11,10 @@ const ERROR_MESSAGES = require('../constants/errorMessages');
 
 const DocumentModel = require('./../types/document/model');
 const FileHandler = require('../handlers/file');
-const GetImagesHelper = require('../helpers/getImages');
 const errorSender = require('../utils/errorSender');
 const joiValidate = require('../helpers/joiValidate');
 const access = require('../helpers/access')();
 
-const getImagesHelper = new GetImagesHelper();
 const fileHandler = new FileHandler();
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -1032,44 +1030,14 @@ const Documents = function () {
         });
     };
 
-    const fillImagesIntoResult = (response, cb) => {
-        const fileIds = [];
-        const options = {
-            data: {},
-        };
-
-        response.data = _.map(response.data, function (elem) {
+    const fillImagesIntoResult = (body, cb) => {
+        body.data.forEach(elem => {
             if (elem.title) {
                 elem.title = _.unescape(elem.title);
             }
-
-            if (elem.attachment) {
-                fileIds.push(elem.attachment._id);
-            }
-
-            return elem;
         });
 
-        options.data[CONTENT_TYPES.FILES] = fileIds;
-
-        getImagesHelper.getImages(options, function (err, result) {
-            if (err) {
-                return cb(err);
-            }
-
-            const fieldNames = {};
-            const setOptions = {
-                response,
-                imgsObject: result,
-            };
-
-            fieldNames[CONTENT_TYPES.FILES] = ['attachment'];
-            setOptions.fields = fieldNames;
-
-            getImagesHelper.setIntoResult(setOptions, function (response) {
-                cb(null, response);
-            });
-        });
+        cb(null, body);
     };
 
     // ============== METHODS ==================
@@ -1836,51 +1804,20 @@ const Documents = function () {
                 personnelId,
                 sortBy,
                 sortOrder,
-            }, (err, response) => {
+            }, (err, body) => {
                 if (err) {
                     return next(err);
                 }
 
-                if (response.total === 0) {
-                    return next({ status: 200, body: response });
-                }
-
-                const fileIds = [];
-                const options = {
-                    data: {},
-                };
-
-                response.data = _.map(response.data, function (elem) {
+                body.data.forEach(elem => {
                     if (elem.title) {
                         elem.title = _.unescape(elem.title);
                     }
-
-                    if (elem.attachment) {
-                        fileIds.push(elem.attachment._id);
-                    }
-
-                    return elem;
                 });
 
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    const fieldNames = {};
-                    const setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-
-                    fieldNames[CONTENT_TYPES.FILES] = ['attachment'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({ status: 200, body: response });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }

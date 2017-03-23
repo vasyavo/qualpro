@@ -28,7 +28,7 @@ module.exports = (req, res, next) => {
                 return next(error);
             }
 
-            const base64Data = result.base64.replace(/^data:image\/png;base64,/, '');
+            const base64Data = result.base64.replace(/^data:image\/\w+;base64,/, '');
             const body = new Buffer(base64Data, 'base64');
 
             cb(null, body);

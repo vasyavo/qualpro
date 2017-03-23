@@ -672,7 +672,7 @@ module.exports = [
             read: false
         }
     },
-    require('./../../stories/consumer-survey/acl/masterAdmin'),
+    require('./../../stories/consumersSurvey/acl/masterAdmin'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

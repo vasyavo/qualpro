@@ -10,7 +10,7 @@
         <label for="<%=item._id%>"
                class="checkboxLabel"></label>
         <% } %>
-        <img class="thumbnailImageSquare" src="<%=item.fileID.preview%>">
+        <img class="thumbnailImageSquare" src="preview/<%=item.fileID.preview%>">
     </div>
     <div class="thumbnailBottom">
         <span class="configuration"><%= item.configuration ? item.configuration.name : '' %></span>

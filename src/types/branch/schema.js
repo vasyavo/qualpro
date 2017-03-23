@@ -3,6 +3,7 @@ const async = require('async');
 const CONTENT_TYPES = require('./../../public/js/constants/contentType');
 const RetailSegmentModel = require('./../retailSegment/model');
 const OutletModel = require('./../outlet/model');
+const defaultPreviews = require('./../../stories/preview/autoload').defaults;
 
 const ObjectId = Schema.Types.ObjectId;
 
@@ -21,7 +22,7 @@ const schema = Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: null,
+        default: defaultPreviews[CONTENT_TYPES.BRANCH],
     },
     archived: {
         type: Boolean,

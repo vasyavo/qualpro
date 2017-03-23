@@ -16,7 +16,6 @@ var Domain = function () {
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var ObjectId = mongoose.Types.ObjectId;
     var access = require('../helpers/access')();
-    var xssFilters = require('xss-filters');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/domainArchiver');
     var logWriter = require('../helpers/logWriter.js');
@@ -24,8 +23,6 @@ var Domain = function () {
     var populateByType = require('../helpers/populateByType');
     var contentTypes = require('../public/js/helpers/contentTypesHelper');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var bodyValidator = require('../helpers/bodyValidator');
     var cutOccupiedDomains = require('../helpers/cutOccupiedDomains');
     var objectId = mongoose.Types.ObjectId;
@@ -41,7 +38,8 @@ var Domain = function () {
         archived   : 1,
         topArchived: 1,
         total      : 1,
-        translated : 1
+        translated : 1,
+        imageSrc: 1,
     };
 
     this.create = function (req, res, next) {
@@ -434,7 +432,7 @@ var Domain = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -442,7 +440,7 @@ var Domain = function () {
             from           : 'personnels',
             key            : 'editedBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {editedBy: {date: 1}}
         }));
 
@@ -458,7 +456,8 @@ var Domain = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -475,7 +474,8 @@ var Domain = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -493,7 +493,8 @@ var Domain = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -510,7 +511,8 @@ var Domain = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -577,55 +579,23 @@ var Domain = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var domainIds = [];
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     element.name = {
                         ar: _.unescape(element.name.ar),
-                        en: _.unescape(element.name.en)
+                        en: _.unescape(element.name.en),
                     };
-                    personnelIds.push(element.createdBy.user._id);
-                    domainIds.push(element._id);
-
-                    return element;
                 });
 
-                personnelIds = lodash.uniqBy(personnelIds, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.DOMAIN] = domainIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.DOMAIN] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -649,7 +619,6 @@ var Domain = function () {
         function queryRun(personnel) {
             var query = req.query;
             var filter = query.filter || {};
-            var personnelAccessRoleLevel = query.accessRoleLevel;
             var type = query.parentCT;
             var isMobile = req.isMobile;
             var contentType = contentTypes.getNextType(type);
@@ -666,7 +635,6 @@ var Domain = function () {
             var filterMapper = new FilterMapper();
             var filterSearch = filter.globalSearch || '';
             var aggregation;
-            var pipeLine;
             var key;
             var queryObject = isMobile ? filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.DOMAIN,
@@ -703,97 +671,50 @@ var Domain = function () {
                 queryObject.type = contentType;
             }
 
-            function returnResult(excludeItems) {
-                pipeLine = getAllPipeline({
-                    queryObject      : queryObject,
-                    aggregateHelper  : aggregateHelper,
-                    language         : language,
-                    translateFields  : translateFields,
-                    translated       : translated,
-                    searchFieldsArray: searchFieldsArray,
-                    filterSearch     : filterSearch,
-                    sort             : sort,
-                    skip             : skip,
-                    limit            : limit,
-                    isMobile         : isMobile,
-                    excludeItems     : excludeItems
-                });
-
-                aggregation = DomainModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse: true
-                };
-
-                aggregation.exec(function (err, response) {
-                    var options = {
-                        data: {}
-                    };
-                    var personnelIds = [];
-                    var domainIds = [];
-                    if (err) {
-                        return next(err);
-                    }
-
-                    response = response && response[0] ? response[0] : {data: [], total: 0};
-
-                    if (!response.data.length) {
-                        return next({status: 200, body: response});
-                    }
-
-                    response.data = _.map(response.data, function (element) {
-                        element.name = {
-                            ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
-                        };
-                        personnelIds.push(element.createdBy.user._id);
-                        domainIds.push(element._id);
-
-                        return element;
-                    });
-
-                    personnelIds = lodash.uniqBy(personnelIds, 'id');
-                    options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                    options.data[CONTENT_TYPES.DOMAIN] = domainIds;
-
-                    getImagesHelper.getImages(options, function (err, result) {
-                        var fieldNames = {};
-                        var setOptions;
-                        if (err) {
-                            return next(err);
-                        }
-
-                        setOptions = {
-                            response  : response,
-                            imgsObject: result
-                        };
-                        fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                        fieldNames[CONTENT_TYPES.DOMAIN] = [];
-                        setOptions.fields = fieldNames;
-
-                        getImagesHelper.setIntoResult(setOptions, function (response) {
-                            next({status: 200, body: response});
-                        })
-                    });
-                });
-            }
-
-            // TODO: If will need cutOccupiedDomains helper, change it and use
-            // if (!isMobile) {
-            //     cutOccupiedDomains(PersonnelModel, personnelAccessRoleLevel, contentType, returnResult);
-            // } else {
-            //     delete queryObject.region;
-            //     delete queryObject.subRegion;
-
-            //     returnResult();
-            // }
-
             if (isMobile) {
                 delete queryObject.region;
                 delete queryObject.subRegion;
             }
 
-            returnResult();
+            const pipeLine = getAllPipeline({
+                queryObject,
+                aggregateHelper,
+                language,
+                translateFields,
+                translated,
+                searchFieldsArray,
+                filterSearch,
+                sort,
+                skip,
+                limit,
+                isMobile,
+            });
+
+            aggregation = DomainModel.aggregate(pipeLine);
+
+            aggregation.options = {
+                allowDiskUse: true,
+            };
+
+            aggregation.exec((err, result) => {
+                if (err) {
+                    return next(err);
+                }
+
+                const body = result.length ? result[0] : { data: [], total: 0 };
+
+                body.data.forEach(element => {
+                    element.name = {
+                        ar: _.unescape(element.name.ar),
+                        en: _.unescape(element.name.en),
+                    };
+                });
+
+                next({
+                    status: 200,
+                    body,
+                });
+            });
         }
 
         access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed, personnel) {

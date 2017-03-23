@@ -5,13 +5,9 @@ var NewProductLaunch = function() {
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
-    var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var NewProductLaunchModel = require('./../types/newProductLaunch/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
@@ -279,110 +275,71 @@ var NewProductLaunch = function() {
                 allowDiskUse : true
             };
 
-            aggregation.exec(function(err, response) {
-                var options = {
-                    data : {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {
-                    data : [],
-                    total : 0
-                };
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({
-                        status : 200,
-                        body : response
-                    });
-                }
-
-                response.data = _.map(response.data, function(element) {
+                body.data.forEach(element => {
                     if (element.additionalComment) {
                         element.additionalComment = {
-                            en : _.unescape(element.additionalComment.en),
-                            ar : _.unescape(element.additionalComment.ar)
+                            en: _.unescape(element.additionalComment.en),
+                            ar: _.unescape(element.additionalComment.ar),
                         };
                     }
                     if (element.location) {
                         element.location = {
-                            en : _.unescape(element.location.en),
-                            ar : _.unescape(element.location.ar)
+                            en: _.unescape(element.location.en),
+                            ar: _.unescape(element.location.ar),
                         };
                     }
                     if (element.distributor) {
                         element.distributor = {
-                            en : _.unescape(element.distributor.en),
-                            ar : _.unescape(element.distributor.ar)
+                            en: _.unescape(element.distributor.en),
+                            ar: _.unescape(element.distributor.ar),
                         };
                     }
+
                     if (element.brand && element.brand.name) {
                         if (typeof element.brand.name === 'string') {
                             element.brand.name = _.unescape(element.brand.name);
                         } else {
                             element.brand.name = {
-                                en : _.unescape(element.brand.name.en),
-                                ar : _.unescape(element.brand.name.ar)
+                                en: _.unescape(element.brand.name.en),
+                                ar: _.unescape(element.brand.name.ar),
                             };
                         }
                     }
+
                     if (element.variant && element.variant.name) {
                         if (typeof element.variant.name === 'string') {
                             element.variant.name = _.unescape(element.variant.name);
                         } else {
                             element.variant.name = {
-                                en : _.unescape(element.variant.name.en),
-                                ar : _.unescape(element.variant.name.ar)
+                                en: _.unescape(element.variant.name.en),
+                                ar: _.unescape(element.variant.name.ar),
                             };
                         }
                     }
+
                     if (element.price) {
                         element.price = _.unescape(element.price);
                     }
+
                     if (element.packing) {
                         element.packing = _.unescape(element.packing);
                     }
+
                     if (element.shelfLife) {
                         element.shelfLife = _.unescape(element.shelfLife);
                     }
-
-                    personnelIds.push(element.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(element.attachments, '_id'));
-
-                    return element;
                 });
 
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function(err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response : response,
-                        imgsObject : result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function(response) {
-                        next({
-                            status : 200,
-                            body : response
-                        });
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -840,96 +797,69 @@ var NewProductLaunch = function() {
             allowDiskUse : true
         };
 
-        aggregation.exec(function(err, response) {
-            var options = {
-                data : {}
-            };
-            var personnelIds = [];
-            var fileIds;
-
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response.length) {
-                return callback(null, {});
+            const body = result.length ? result[0] : {};
+
+            if (body.additionalComment) {
+                body.additionalComment = {
+                    en: _.unescape(body.additionalComment.en),
+                    ar: _.unescape(body.additionalComment.ar),
+                };
             }
 
-            response = response[0];
+            if (body.location) {
+                body.location = {
+                    en: _.unescape(body.location.en),
+                    ar: _.unescape(body.location.ar),
+                };
+            }
 
-            if (response.additionalComment) {
-                response.additionalComment = {
-                    en : _.unescape(response.additionalComment.en),
-                    ar : _.unescape(response.additionalComment.ar)
+            if (body.distributor) {
+                body.distributor = {
+                    en: _.unescape(body.distributor.en),
+                    ar: _.unescape(body.distributor.ar),
                 };
             }
-            if (response.location) {
-                response.location = {
-                    en : _.unescape(response.location.en),
-                    ar : _.unescape(response.location.ar)
-                };
-            }
-            if (response.distributor) {
-                response.distributor = {
-                    en : _.unescape(response.distributor.en),
-                    ar : _.unescape(response.distributor.ar)
-                };
-            }
-            if (response.brand && response.brand.name) {
-                if (typeof response.brand.name === 'string') {
-                    response.brand.name = _.unescape(response.brand.name);
+
+            if (body.brand && body.brand.name) {
+                if (typeof body.brand.name === 'string') {
+                    body.brand.name = _.unescape(body.brand.name);
                 } else {
-                    response.brand.name = {
-                        en : _.unescape(response.brand.name.en),
-                        ar : _.unescape(response.brand.name.ar)
+                    body.brand.name = {
+                        en: _.unescape(body.brand.name.en),
+                        ar: _.unescape(body.brand.name.ar),
                     };
                 }
             }
-            if (response.variant && response.variant.name) {
-                if (typeof response.variant.name === 'string') {
-                    response.variant.name = _.unescape(response.variant.name);
+
+            if (body.variant && body.variant.name) {
+                if (typeof body.variant.name === 'string') {
+                    body.variant.name = _.unescape(body.variant.name);
                 } else {
-                    response.variant.name = {
-                        en : _.unescape(response.variant.name.en),
-                        ar : _.unescape(response.variant.name.ar)
+                    body.variant.name = {
+                        en: _.unescape(body.variant.name.en),
+                        ar: _.unescape(body.variant.name.ar),
                     };
                 }
             }
-            if (response.price) {
-                response.price = _.unescape(response.price);
-            }
-            if (response.packing) {
-                response.packing = _.unescape(response.packing);
-            }
-            if (response.shelfLife) {
-                response.shelfLife = _.unescape(response.shelfLife);
+
+            if (body.price) {
+                body.price = _.unescape(body.price);
             }
 
-            personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.attachments, '_id');
+            if (body.packing) {
+                body.packing = _.unescape(body.packing);
+            }
 
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
+            if (body.shelfLife) {
+                body.shelfLife = _.unescape(body.shelfLife);
+            }
 
-            getImagesHelper.getImages(options, function(err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response : response,
-                    imgsObject : result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function(response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     };
 };

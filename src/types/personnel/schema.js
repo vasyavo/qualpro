@@ -1,5 +1,6 @@
 const Schema = require('mongoose').Schema;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+const defaultPreviews = require('./../../stories/preview/autoload').defaults;
 
 const ObjectId = Schema.Types.ObjectId;
 
@@ -23,7 +24,7 @@ const schema = new Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: null,
+        default: defaultPreviews[CONTENT_TYPES.PERSONNEL],
     },
     firstName: {
         type: {

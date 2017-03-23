@@ -17,14 +17,12 @@ const async = require('async');
 const ActivityListModel = require('./../types/activityList/model');
 const PersonnelModel = require('./../types/personnel/model');
 const AggregationHelper = require('../helpers/aggregationCreater');
-const GetImageHelper = require('../helpers/getImages');
 const _ = require('lodash');
 const MODULE_NAMES = require('../public/js/constants/moduleNamesForActivity');
 
 const ObjectId = mongoose.Types.ObjectId;
 
 const Personnel = function() {
-    const getImagesHelper = new GetImageHelper();
     const $defProjection = {
         _id: 1,
         module: 1,
@@ -741,57 +739,21 @@ const Personnel = function() {
 
                 aggregation = ActivityListModel.aggregate(pipeLine);
 
-                aggregation.exec((err, response) => {
-                    let idsPersonnel = [];
-                    const options = {
-                        data: {},
-                    };
+                aggregation.exec((err, result) => {
                     if (err) {
                         return next(err);
                     }
-                    response = response.length ? response[0] : {
-                        data: [],
-                        total: 0,
-                    };
 
-                    if (!response.data.length) {
-                        return next({
-                            status: 200,
-                            body: response,
-                        });
-                    }
+                    const body = result.length ?
+                        result[0] : { data: [], total: 0 };
 
-                    _.map(response.data, (model) => {
-                        idsPersonnel.push(model.createdBy.user._id);
+                    body.data.forEach(element => {
+                        element.module = MODULE_NAMES[element.module._id];
                     });
 
-                    idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                    options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-
-                    getImagesHelper.getImages(options, (err, result) => {
-                        const fieldNames = {};
-                        let setOptions;
-                        if (err) {
-                            return next(err);
-                        }
-
-                        setOptions = {
-                            response,
-                            imgsObject: result,
-                        };
-                        fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                        setOptions.fields = fieldNames;
-
-                        getImagesHelper.setIntoResult(setOptions, (response) => {
-                            _.map(response.data, (element) => {
-                                element.module = MODULE_NAMES[element.module._id];
-                            });
-
-                            next({
-                                status: 200,
-                                body: response,
-                            });
-                        });
+                    next({
+                        status: 200,
+                        body,
                     });
                 });
             });
@@ -885,70 +847,15 @@ const Personnel = function() {
                     aggregation.exec(cb);
                 },
 
-                (response, cb) => {
-                    const idsPersonnel = [];
+                (result, cb) => {
+                    const body = result.length ?
+                        result[0] : { data: [], total: 0 };
 
-                    response = response.length ?
-                        response[0] : {
-                            data: [],
-                            total: 0,
-                        };
-
-                    if (!response.data.length) {
-                        return next({
-                            status: 200,
-                            body: response,
-                        });
-                    }
-
-                    _.forEach(response.data, (model) => {
-                        idsPersonnel.push(model.createdBy.user._id);
-                    });
-
-
-                    const options = {
-                        data: {
-                            [CONTENT_TYPES.PERSONNEL]: _.uniqBy(idsPersonnel, 'id'),
-                        },
-                    };
-
-                    cb(null, {
-                        response,
-                        options,
-                    });
-                },
-
-                (data, cb) => {
-                    getImagesHelper.getImages(data.options, (err, result) => {
-                        cb(err, {
-                            response: data.response,
-                            result,
-                        });
-                    });
-                },
-
-                (data, cb) => {
-                    const options = {
-                        response: data.response,
-                        imgsObject: data.result,
-                        fields: {
-                            [CONTENT_TYPES.PERSONNEL]: ['createdBy.user'],
-                        },
-                    };
-
-                    getImagesHelper.setIntoResult(options, (response) => {
-                        cb(null, response);
-                    });
-                },
-
-                (response, cb) => {
-                    response.data = response.data.map((item) => {
+                    body.data.forEach(item => {
                         item.module = MODULE_NAMES[item.module._id];
-
-                        return item;
                     });
 
-                    cb(null, response);
+                    cb(null, body);
                 },
 
             ], callback);

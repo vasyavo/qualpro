@@ -2,15 +2,12 @@ const _ = require('underscore');
 const lodash = require('lodash');
 const mongoose = require('mongoose');
 const ACL_MODULES = require('./../../../constants/aclModulesNames');
-const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
-const GetImagesHelper = require('./../../../helpers/getImages');
 const ObjectiveModel = require('././../../../types/objective/model');
 const access = require('./../../../helpers/access')();
 const $defProjection = require('../reusable-components/defProjection');
 
 const ObjectId = mongoose.Types.ObjectId;
-const getImagesHelper = new GetImagesHelper();
 
 module.exports = function (req, res, next) {
     function queryRun() {
@@ -173,69 +170,37 @@ module.exports = function (req, res, next) {
             allowDiskUse: true,
         };
 
-        aggregation.exec((err, response) => {
-            let idsPersonnel;
-            const options = {
-                data: {},
-            };
+        aggregation.exec((err, result) => {
             if (err) {
                 return next(err);
             }
 
-            if (!response.length) {
-                return next({ status: 200, body: {} });
+            const body = result[0];
+
+            if (body) {
+                if (body.title) {
+                    body.title = {
+                        en: body.title.en ? _.unescape(body.title.en) : '',
+                        ar: body.title.ar ? _.unescape(body.title.ar) : '',
+                    };
+                }
+                if (body.description) {
+                    body.description = {
+                        en: body.description.en ? _.unescape(body.description.en) : '',
+                        ar: body.description.ar ? _.unescape(body.description.ar) : '',
+                    };
+                }
+                if (body.companyObjective) {
+                    body.companyObjective = {
+                        en: body.companyObjective.en ? _.unescape(body.companyObjective.en) : '',
+                        ar: body.companyObjective.ar ? _.unescape(body.companyObjective.ar) : '',
+                    };
+                }
             }
 
-            response = response[0];
-
-            const idsFile = _.map(response.attachments, '_id');
-            idsPersonnel = _.union([response.createdBy.user._id], _.map(response.assignedTo, '_id'));
-            response.history.forEach((history) => {
-                idsPersonnel.push(history.assignedTo._id);
-            });
-
-            idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
-
-            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-            options.data[CONTENT_TYPES.FILES] = idsFile;
-
-            getImagesHelper.getImages(options, (err, result) => {
-                const fieldNames = {};
-                if (err) {
-                    return next(err);
-                }
-
-                const setOptions = {
-                    response,
-                    imgsObject: result,
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], ['history.assignedTo'], 'createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, (model) => {
-                    if (model) {
-                        if (model.title) {
-                            model.title = {
-                                en: model.title.en ? _.unescape(model.title.en) : '',
-                                ar: model.title.ar ? _.unescape(model.title.ar) : '',
-                            };
-                        }
-                        if (model.description) {
-                            model.description = {
-                                en: model.description.en ? _.unescape(model.description.en) : '',
-                                ar: model.description.ar ? _.unescape(model.description.ar) : '',
-                            };
-                        }
-                        if (model.companyObjective) {
-                            model.companyObjective = {
-                                en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                                ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
-                            };
-                        }
-                    }
-                    next({ status: 200, body: model });
-                });
+            next({
+                status: 200,
+                body,
             });
         });
     }

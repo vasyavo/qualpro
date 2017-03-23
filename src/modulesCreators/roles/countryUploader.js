@@ -656,7 +656,7 @@ module.exports = [
         }
 
     },
-    require('./../../stories/consumer-survey/acl/countryUploader'),
+    require('./../../stories/consumersSurvey/acl/countryUploader'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

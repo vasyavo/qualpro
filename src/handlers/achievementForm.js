@@ -9,18 +9,13 @@ var AchievementForm = function () {
     var mongoose = require('mongoose');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
-    var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var AchievementFormModel = require('./../types/achievementForm/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
     var access = require('../helpers/access')();
     var FilterMapper = require('../helpers/filterMapper');
     var ObjectId = mongoose.Types.ObjectId;
-    var FileModel = require('./../types/file/model');
     var bodyValidator = require('../helpers/bodyValidator');
     var self = this;
 
@@ -225,63 +220,32 @@ var AchievementForm = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
-                var options = {
-                    data: {}
-                };
-                var idsPersonnel = [];
-                var idsFile = [];
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function (model) {
-                    idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                    idsPersonnel.push(model.createdBy.user._id);
+                body.data.forEach(model => {
                     if (model.description) {
                         model.description = {
                             en: _.unescape(model.description.en),
-                            ar: _.unescape(model.description.ar)
+                            ar: _.unescape(model.description.ar),
                         };
                     }
                     if (model.additionalComment) {
                         model.additionalComment = {
                             en: _.unescape(model.additionalComment.en),
-                            ar: _.unescape(model.additionalComment.ar)
+                            ar: _.unescape(model.additionalComment.ar),
                         };
                     }
-
-                    return model;
                 });
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                options.data[CONTENT_TYPES.FILES] = idsFile;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -316,7 +280,7 @@ var AchievementForm = function () {
         var filesObj = {
             from         : 'files',
             key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'extension', 'createdBy']
+            addProjection: ['contentType', 'originalName', 'extension', 'createdBy', 'preview']
         };
 
         delete queryObject.personnel;
@@ -371,7 +335,7 @@ var AchievementForm = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -394,7 +358,8 @@ var AchievementForm = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -411,48 +376,13 @@ var AchievementForm = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
             }));
         }
-
-        /*pipeLine.push({
-            $project: aggregateHelper.getProjection({
-                lastDate: {
-                    $ifNull: [
-                        '$editedBy.date',
-                        '$createdBy.date'
-                    ]
-                }
-            })
-        });
-
-        if (!forSync) {
-            pipeLine.push({
-                $sort: {
-                    lastDate: -1
-                }
-            });
-            pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
@@ -503,7 +433,7 @@ var AchievementForm = function () {
         var filesObj = {
             from         : 'files',
             key          : 'attachments',
-            addProjection: ['contentType', 'originalName', 'extension', 'createdBy']
+            addProjection: ['contentType', 'originalName', 'extension', 'createdBy', 'preview']
         };
 
         aggregateHelper = new AggregationHelper($defProjection);
@@ -558,7 +488,7 @@ var AchievementForm = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -575,7 +505,8 @@ var AchievementForm = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -592,7 +523,8 @@ var AchievementForm = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -605,61 +537,29 @@ var AchievementForm = function () {
             allowDiskUse: true
         };
 
-        aggregation.exec(function (err, response) {
-            var idsPersonnel = [];
-            var idsFile = [];
-            response = response[0] ? response[0] : {};
-            var keys = Object.keys(response);
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
-            var options = {
-                data: {}
-            };
 
-            if (keys.length) {
-                if (response.description) {
-                    response.description = {
-                        en: _.unescape(response.description.en),
-                        ar: _.unescape(response.description.ar)
+            const model = result[0];
+
+            if (model) {
+                if (model.description) {
+                    model.description = {
+                        en: _.unescape(model.description.en),
+                        ar: _.unescape(model.description.ar),
                     };
                 }
-                if (response.additionalComment) {
-                    response.additionalComment = {
-                        en: _.unescape(response.additionalComment.en),
-                        ar: _.unescape(response.additionalComment.ar)
+                if (model.additionalComment) {
+                    model.additionalComment = {
+                        en: _.unescape(model.additionalComment.en),
+                        ar: _.unescape(model.additionalComment.ar),
                     };
                 }
             }
 
-            if (!keys.length) {
-                return callback(null, response);
-            }
-
-            idsFile = _.map(response.attachments, '_id');
-            idsPersonnel.push(response.createdBy.user._id);
-            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-            options.data[CONTENT_TYPES.FILES] = idsFile;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (model) {
-                    callback(null, model);
-                })
-            });
+            callback(null, model);
         });
     };
 

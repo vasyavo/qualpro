@@ -639,7 +639,7 @@ module.exports = [
             read: false
         }
     },
-    require('./../../stories/consumer-survey/acl/superAdmin'),
+    require('./../../stories/consumersSurvey/acl/superAdmin'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

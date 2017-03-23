@@ -102,14 +102,14 @@ module.exports = (options) => {
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'personnels',
         key: 'assignedTo',
-        addProjection: ['position', 'accessRole', 'firstName', 'lastName'],
+        addProjection: ['position', 'accessRole', 'firstName', 'lastName', 'imageSrc'],
         isArray: true,
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'files',
         key: 'attachments',
-        addProjection: ['contentType', 'originalName', 'createdBy'],
+        addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
@@ -146,7 +146,7 @@ module.exports = (options) => {
         from: 'personnels',
         key: 'createdBy.user',
         isArray: false,
-        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
         includeSiblings: { createdBy: { date: 1 } },
     }));
 
@@ -175,6 +175,7 @@ module.exports = (options) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         }));
@@ -189,6 +190,7 @@ module.exports = (options) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         }));
@@ -213,6 +215,7 @@ module.exports = (options) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         },
@@ -230,6 +233,7 @@ module.exports = (options) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         },
@@ -240,7 +244,7 @@ module.exports = (options) => {
             from: 'personnels',
             key: 'editedBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { editedBy: { date: 1 } },
         }));
 
@@ -257,6 +261,7 @@ module.exports = (options) => {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -274,6 +279,7 @@ module.exports = (options) => {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },

@@ -21,8 +21,6 @@ var BranchHandler = function () {
     var bodyValidator = require('../helpers/bodyValidator');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImageHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImageHelper();
     var SomeEvents = require('../helpers/someEvents');
     var someEvents = new SomeEvents();
 
@@ -43,7 +41,8 @@ var BranchHandler = function () {
         name         : 1,
         topArchived  : 1,
         creationDate : 1,
-        updateDate   : 1
+        updateDate   : 1,
+        imageSrc: 1,
     };
 
     this.getLocation = function (req, res, next) {
@@ -505,7 +504,7 @@ var BranchHandler = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? ['position', 'accessRole'] : []),
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? ['position', 'accessRole'] : []),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -513,7 +512,7 @@ var BranchHandler = function () {
             from           : 'personnels',
             key            : 'editedBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? ['position', 'accessRole'] : []),
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? ['position', 'accessRole'] : []),
             includeSiblings: {editedBy: {date: 1}}
         }));
 
@@ -529,7 +528,8 @@ var BranchHandler = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -546,7 +546,8 @@ var BranchHandler = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -564,7 +565,8 @@ var BranchHandler = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -581,7 +583,8 @@ var BranchHandler = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -591,7 +594,7 @@ var BranchHandler = function () {
             from         : 'personnels',
             key          : 'manager',
             isArray      : false,
-            addProjection: ['_id', 'firstName', 'lastName', 'phoneNumber', 'email']
+            addProjection: ['_id', 'firstName', 'lastName', 'phoneNumber', 'email', 'imageSrc']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -613,35 +616,12 @@ var BranchHandler = function () {
                 manager      : 1,
                 subRegion    : 1,
                 retailSegment: 1,
-                outlet       : 1
+                outlet       : 1,
+                imageSrc: 1,
             })
         };
 
-        /*if (isMobile) {
-            pipeObject.$project.creationDate = '$createdBy.date';
-            pipeObject.$project.updateDate = '$editedBy.date';
-        }
-*/
-
         pipeLine.push(pipeObject);
-
-       /* pipeLine.push({
-            $sort: sort
-        });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
@@ -699,69 +679,37 @@ var BranchHandler = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var idsPersonnel = [];
-                var branchIds = [];
-                var options = {
-                    data: {}
-                };
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response.length ? response[0] : {data: [], total: 0};
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function (element) {
+                result.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
+                            en: _.unescape(element.name.en),
                         };
                     }
+
                     if (element.address) {
                         element.address = {
                             en: element.address.en ? _.unescape(element.address.en) : '',
-                            ar: element.address.ar ? _.unescape(element.address.ar) : ''
+                            ar: element.address.ar ? _.unescape(element.address.ar) : '',
                         };
                     }
+
                     if (element.linkToMap) {
                         element.linkToMap = element.linkToMap ? _.unescape(element.linkToMap) : '';
                     }
-                    return element;
                 });
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                _.map(response.data, function (model) {
-                    idsPersonnel.push(model.createdBy.user._id);
-                    branchIds.push(model._id);
-                });
-
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                options.data[CONTENT_TYPES.BRANCH] = branchIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.BRANCH] = [];
-
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -854,69 +802,37 @@ var BranchHandler = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var idsPersonnel = [];
-                var branchIds = [];
-                var options = {
-                    data: {}
-                };
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response.length ? response[0] : {data: [], total: 0};
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
+                            en: _.unescape(element.name.en),
                         };
                     }
+
                     if (element.address) {
                         element.address = {
                             en: element.address.en ? _.unescape(element.address.en) : '',
-                            ar: element.address.ar ? _.unescape(element.address.ar) : ''
+                            ar: element.address.ar ? _.unescape(element.address.ar) : '',
                         };
                     }
+
                     if (element.linkToMap) {
                         element.linkToMap = element.linkToMap ? _.unescape(element.linkToMap) : '';
                     }
-                    return element;
                 });
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                _.map(response.data, function (model) {
-                    idsPersonnel.push(model.createdBy.user._id);
-                    branchIds.push(model._id);
-                });
-
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-                options.data[CONTENT_TYPES.BRANCH] = branchIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.BRANCH] = [];
-
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }

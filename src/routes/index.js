@@ -25,7 +25,6 @@ module.exports = function(app) {
     var notificationsRouter = require('./notifications')();
     var currencyRouter = require('./currency')();
     var fileRouter = require('./file')();
-    var inStoreeTasksRouter = require('./inStoreTasks')();
     var domainRouter = require('./domain')();
     var promotionsItems = require('./promotionsItems')();
     var retailSegmentRouter = require('./retailSegment')();

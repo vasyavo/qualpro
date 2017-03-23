@@ -7,6 +7,7 @@ const config = {};
 
 // for example NODE_ENV is development
 config.env = process.env.NODE_ENV;
+config.logLevel = process.env.LOG_LEVEL || 'info';
 config.isTest = process.env.NODE_ENV === 'test';
 
 config.schedulerHost = process.env.SCHEDULER_HOST || null;

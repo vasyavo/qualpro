@@ -14,10 +14,7 @@ var Note = function () {
     var CONSTANTS = require('../constants/mainConstants');
     var NoteModel = require('./../types/note/model');
     var FilterMapper = require('../helpers/filterMapper');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var Archiver = require('../helpers/archiver');
     var archiver = new Archiver(NoteModel);
     var ObjectId = mongoose.Types.ObjectId;
@@ -544,67 +541,36 @@ var Note = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                const options = {
-                    data: {}
-                };
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                let personnelIds = [];
-
-                response = response && response[0] ? response[0] : {data: [], total: 0};
-
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.attachments) {
-                        element.attachments.map((file) => {
+                        element.attachments.forEach((file) => {
                             file.url = fileHandler.computeUrl(file.name);
-
-                            return file;
                         });
                     }
+
                     if (element.title) {
                         element.title = _.unescape(element.title);
                     }
+
                     if (element.theme) {
                         element.theme = _.unescape(element.theme);
                     }
+
                     if (element.description) {
                         element.description = _.unescape(element.description);
                     }
-
-                    personnelIds.push(element.createdBy.user._id);
-
-                    return element;
                 });
 
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -668,29 +634,17 @@ var Note = function () {
                 allowDiskUse: true
             };
             
-            aggregation.exec(function (err, response) {
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
-                
-                const options = {
-                    data: {}
-                };
-                
-                let personnelIds = [];
-                
-                response = response && response[0] ? response[0] : {data: [], total: 0};
-                
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-                
-                response.data = _.map(response.data, function (element) {
+
+                const body = result.length ? result[0] : { data: [], total: 0 };
+
+                body.data.forEach(element => {
                     if (element.attachments) {
-                        element.attachments.map((file) => {
+                        element.attachments.forEach((file) => {
                             file.url = fileHandler.computeUrl(file.name);
-                            
-                            return file;
                         });
                     }
                     if (element.title) {
@@ -702,33 +656,11 @@ var Note = function () {
                     if (element.description) {
                         element.description = _.unescape(element.description);
                     }
-                    
-                    personnelIds.push(element.createdBy.user._id);
-                    
-                    return element;
                 });
-                
-                personnelIds = _.uniqBy(personnelIds, 'id');
-                
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-                    
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    setOptions.fields = fieldNames;
-                    
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -952,54 +884,26 @@ var Note = function () {
             allowDiskUse: true
         };
 
-        aggregation.exec(function (err, response) {
-            var options = {
-                data: {}
-            };
-            var personnelIds = [];
-
+        aggregation.exec((err, response) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response.length) {
-                return callback(null, {});
+            const body = response.length ? response[0] : {};
+
+            if (body.title) {
+                body.title = _.unescape(body.title);
             }
 
-            response = response[0];
-
-            if (response.title) {
-                response.title = _.unescape(response.title);
-            }
-            if (response.theme) {
-                response.theme = _.unescape(response.theme);
-            }
-            if (response.description) {
-                response.description = _.unescape(response.description);
+            if (body.theme) {
+                body.theme = _.unescape(body.theme);
             }
 
-            personnelIds.push(response.createdBy.user._id);
+            if (body.description) {
+                body.description = _.unescape(body.description);
+            }
 
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     };
 };

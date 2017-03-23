@@ -57,6 +57,8 @@ app.use(cookieParser('CRMkey'));
 app.use(setCacheControl);
 app.get('/info', require('./utils/isApiAvailable'));
 
+require('./../src/stories/preview/autoload').insertDefaults();
+
 require('./routes')(app, mongo);
 
 const server = http.createServer(app);
