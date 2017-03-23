@@ -780,8 +780,7 @@ var Contract = function () {
 
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.CONTRACTSSECONDARY,
-                filter     : filter,
-                personnel  : personnel
+                filter,
             });
 
             if (queryObject.personnel) {
