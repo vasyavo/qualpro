@@ -22,7 +22,9 @@ const schema = Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: defaultPreviews[CONTENT_TYPES.BRANCH],
+        default: () => {
+            return defaultPreviews[CONTENT_TYPES.BRANCH];
+        },
     },
     archived: {
         type: Boolean,

@@ -19,7 +19,9 @@ const schema = new Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: defaultPreviews[CONTENT_TYPES.BRAND],
+        default: () => {
+            return defaultPreviews[CONTENT_TYPES.BRAND];
+        },
     },
     ourCompany: {
         type: Boolean,

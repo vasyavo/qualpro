@@ -21,7 +21,9 @@ const schema = new Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: defaultPreviews[CONTENT_TYPES.OUTLET],
+        default: () => {
+            return defaultPreviews[CONTENT_TYPES.OUTLET];
+        },
     },
     subRegions: {
         type: [{

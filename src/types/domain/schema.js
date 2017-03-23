@@ -19,7 +19,9 @@ const schema = new Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: defaultPreviews[CONTENT_TYPES.DOMAIN],
+        default: () => {
+            return defaultPreviews[CONTENT_TYPES.DOMAIN];
+        },
     },
     currency: {
         type: String,

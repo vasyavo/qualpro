@@ -24,7 +24,9 @@ const schema = new Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.PREVIEW,
-        default: defaultPreviews[CONTENT_TYPES.PERSONNEL],
+        default: () => {
+            return defaultPreviews[CONTENT_TYPES.PERSONNEL];
+        },
     },
     firstName: {
         type: {

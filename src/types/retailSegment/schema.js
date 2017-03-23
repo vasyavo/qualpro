@@ -18,7 +18,9 @@ const schema = new Schema({
     imageSrc: {
         type: ObjectId,
         ref: CONTENT_TYPES.FILES,
-        default: defaultPreviews[CONTENT_TYPES.RETAILSEGMENT],
+        default: () => {
+            return defaultPreviews[CONTENT_TYPES.RETAILSEGMENT];
+        },
     },
     ID: String,
     archived: {
