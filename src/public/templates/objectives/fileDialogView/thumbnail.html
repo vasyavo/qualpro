@@ -7,7 +7,7 @@
         <% if (iconsClass.indexOf(preview) !== -1) { %>
         <div class="<%= preview %>"></div>
         <% } else { %>
-        <img class="imgResponsive" src="preview/<%= preview %>">
+        <img class="imgResponsive" src="<% print(_.templateHelpers.isPreview(preview)); %>">
         <% } %>
        <div class="fileDescription hoverFullText textEllipsis"><%= name %></div>
     </div>

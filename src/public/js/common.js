@@ -17,7 +17,7 @@
             ctx.drawImage(img, 0, 0, canvasSize, canvasSize);
         };
 
-        img.src = 'preview/' + model.imageSrc;
+        img.src = model.imageSrc;
         context.imageSrc = model.imageSrc;
     };
 

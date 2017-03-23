@@ -30,7 +30,7 @@ module.exports = (options, callback) => {
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'personnels',
         key: 'assignedTo',
-        addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+        addProjection: ['firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({

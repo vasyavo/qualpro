@@ -1,5 +1,7 @@
 // Filename: app.js
-define(['jQuery',
+define([
+    'underscore',
+    'jQuery',
     'router',
     'communication',
     'custom',
@@ -11,8 +13,15 @@ define(['jQuery',
     'tree',
     'ckeditor-jquery',
     'jquery-masked-field'
-], function ($, Router, Communication, Custom, CKEDITOR, io) {
+], function (_, $, Router, Communication, Custom, CKEDITOR, io) {
     var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+    _.templateHelpers = {
+        isPreview: function(value) {
+            return _.isString(value) && value.length === 24 ?
+                'preview/' + value : value;
+        }
+    };
 
     var initialize = function () {
         var appRouter = new Router();
