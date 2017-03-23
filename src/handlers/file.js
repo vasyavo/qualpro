@@ -12,6 +12,8 @@ const FileModel = require('./../types/file/model');
 const NEED_PROCESSING_TYPES = _.union(OTHER_CONSTANTS.IMAGE_CONTENT_TYPES, OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, OTHER_CONSTANTS.OTHER_FORMATS);
 const ObjectId = mongoose.Types.ObjectId;
 const mime = require('mime');
+const CONTENT_TYPES = require('./../public/js/constants/contentType');
+const PreviewCollection = require('./../stories/preview/collection');
 
 module.exports = function() {
     var fileUploaderConfig;
@@ -378,15 +380,34 @@ module.exports = function() {
                 },
 
                 (cb) => {
+                    PreviewCollection.insert({
+                        contentType: CONTENT_TYPES.FILES,
+                        itemId: fileOptions._id,
+                        base64: fileOptions.preview,
+                    }, (err, result) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        const previewId = result.ops[0]._id;
+
+                        // replace with reference to preview
+                        fileOptions.preview = previewId;
+
+                        cb();
+                    });
+                },
+
+                (cb) => {
                     const saveData = {
                         name: `${fileOptions.name}.${fileOptions.extension}`,
                         originalName: fileOptions.originalFilename,
                         extension: fileOptions.extension,
                         contentType: fileOptions.type,
                         createdBy: {
-                            user: userId
+                            user: userId,
                         },
-                        preview: fileOptions.preview
+                        preview: fileOptions.preview,
                     };
 
                     newFile.set(saveData);
@@ -397,7 +418,8 @@ module.exports = function() {
 
                         cb(null);
                     });
-                }
+                },
+
             ], eachCb);
 
         }, (err) => {
