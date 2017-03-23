@@ -1,9 +1,10 @@
 ﻿define([
+    'underscore',
     'jQuery',
     'dataService',
     'constants/otherConstants',
     'constants/errorMessages'
-], function ($, dataService, CONSTANTS, ERROR_MESSAGES) {
+], function (_, $, dataService, CONSTANTS, ERROR_MESSAGES) {
     var canvasSize = CONSTANTS.CANVAS_SIZE;
 
     var canvasDrawing = function (options, context) {
@@ -17,7 +18,7 @@
             ctx.drawImage(img, 0, 0, canvasSize, canvasSize);
         };
 
-        img.src = model.imageSrc;
+        img.src = _.templateHelpers.isPreview(model.imageSrc);
         context.imageSrc = model.imageSrc;
     };
 
