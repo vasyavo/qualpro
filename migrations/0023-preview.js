@@ -63,13 +63,12 @@ exports.up = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Personnel pick fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -134,13 +133,12 @@ exports.up = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Domain pick fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -205,13 +203,12 @@ exports.up = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Outlet pick fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -276,13 +273,12 @@ exports.up = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Retail Segment pick fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -347,13 +343,12 @@ exports.up = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Branch pick fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -418,13 +413,12 @@ exports.up = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Brand pick fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -479,13 +473,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Personnel restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -541,13 +534,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Domain restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -603,13 +595,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Outlet restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -665,13 +656,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Retail Segment restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -727,13 +717,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Branch restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
@@ -789,13 +778,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('Brand restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {

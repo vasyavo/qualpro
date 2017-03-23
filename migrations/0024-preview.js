@@ -117,13 +117,12 @@ exports.down = function(db, next) {
             }, Infinity);
 
             cursor.each((err, doc) => {
-                if (doc) {
-                    return queue.push(doc);
-                }
-
                 if (err) {
                     logger.error('File restore fails', err);
+                    return;
                 }
+
+                queue.push(doc);
             });
 
             queue.drain = () => {
