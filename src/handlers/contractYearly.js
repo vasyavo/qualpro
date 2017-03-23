@@ -775,8 +775,7 @@ var Contract = function () {
             const filterMapper = new FilterMapper();
             const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.CONTRACTSYEARLY,
-                filter     : filter,
-                personnel  : personnel
+                filter,
             });
 
             if (queryObject.personnel) {
