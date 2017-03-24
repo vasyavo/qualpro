@@ -15,6 +15,7 @@ var RetailSegmentHandler = function () {
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var BranchesModel = require('./../types/branch/model');
     var PersonnelModel = require('./../types/personnel/model');
+    var PreviewModel = require('./../stories/preview/model.business');
     var SessionModel = require('./../types/session/model');
     var logWriter = require('../helpers/logWriter.js');
     var PlanogramModel = require('./../types/planogram/model');
@@ -83,38 +84,51 @@ var RetailSegmentHandler = function () {
             var model;
             var createdBy = {
                 user: req.session.uId,
-                date: new Date()
+                date: new Date(),
             };
 
-            if (!body.imageSrc) {
-                delete body.imageSrc;
-            }
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             if (body.name) {
                 body.name = {
                     en: body.name.en ? _.escape(body.name.en) : '',
-                    ar: body.name.ar ? _.escape(body.name.ar) : ''
-                }
+                    ar: body.name.ar ? _.escape(body.name.ar) : '',
+                };
             }
 
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
             model = new RetailSegmentModel(body);
-            model.save(function (error, model) {
-                if (error) {
-                    return next(error);
+
+            async.waterfall([
+                (cb) => {
+                    model.save(cb);
+                },
+                (model, count, cb) => {
+                    ActivityLog.emit('trade-channel:created', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel: req.session.level,
+                        body: model.toJSON(),
+                    });
+
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.RETAILSEGMENT,
+                    }, cb);
+                },
+            ], (err, model) => {
+                if (err) {
+                    return next(err);
                 }
-                ActivityLog.emit('trade-channel:created', {
-                    actionOriginator: req.session.uId,
-                    accessRoleLevel : req.session.level,
-                    body            : model.toJSON()
-                });
 
                 if (model && model.name) {
                     model.name = {
                         en: model.name.en ? _.unescape(model.name.en) : '',
-                        ar: model.name.ar ? _.unescape(model.name.ar) : ''
+                        ar: model.name.ar ? _.unescape(model.name.ar) : '',
                     };
                 }
 
@@ -849,6 +863,11 @@ var RetailSegmentHandler = function () {
     this.update = function (req, res, next) {
         function queryRun(body) {
             var id = req.params.id;
+
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
+
             if (body.name) {
                 body.name = {
                     en: body.name.en ? _.escape(body.name.en) : '',
@@ -861,26 +880,37 @@ var RetailSegmentHandler = function () {
                 date: new Date()
             };
 
-            RetailSegmentModel.findByIdAndUpdate(id, body, {new: true})
-                .exec(function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
+            async.waterfall([
+                (cb) => {
+                    RetailSegmentModel.findByIdAndUpdate(id, body, { new: true }).exec(cb);
+                },
+                (model, cb) => {
                     ActivityLog.emit('trade-channel:updated', {
                         actionOriginator: req.session.uId,
-                        accessRoleLevel : req.session.level,
-                        body            : result.toJSON()
+                        accessRoleLevel: req.session.level,
+                        body: model.toJSON(),
                     });
 
-                    if (result && result.name) {
-                        result.name = {
-                            en: result.name.en ? _.unescape(result.name.en) : '',
-                            ar: result.name.ar ? _.unescape(result.name.ar) : ''
-                        };
-                    }
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.RETAILSEGMENT,
+                    }, cb);
+                },
+            ], (err, result) => {
+                if (err) {
+                    return next(err);
+                }
 
-                    res.status(200).send(result);
-                });
+                if (result && result.name) {
+                    result.name = {
+                        en: result.name.en ? _.unescape(result.name.en) : '',
+                        ar: result.name.ar ? _.unescape(result.name.ar) : '',
+                    };
+                }
+
+                res.status(200).send(result);
+            });
         }
 
         access.getEditAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {

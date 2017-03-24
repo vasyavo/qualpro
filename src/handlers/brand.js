@@ -1,60 +1,76 @@
-var BranchHandler = function () {
-    var async = require('async');
-    var mongoose = require('mongoose');
-    var _ = require('underscore');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var CONSTANTS = require('../constants/mainConstants');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var access = require('../helpers/access')();
-    var BrandModel = require('./../types/brand/model');
-    var CompetitorItemModel = require('./../types/competitorItem/model');
-    var CompetitorVariantModel = require('./../types/competitorVariant/model');
-    var xssFilters = require('xss-filters');
-    var FilterMapper = require('../helpers/filterMapper');
-    var Archiver = require('../helpers/archiver');
-    var archiver = new Archiver(BrandModel);
-    var bodyValidator = require('../helpers/bodyValidator');
-    var logWriter = require('../helpers/logWriter.js');
-    var ObjectId = mongoose.Types.ObjectId;
+const BranchHandler = function () {
+    const async = require('async');
+    const mongoose = require('mongoose');
+    const _ = require('underscore');
+    const AggregationHelper = require('../helpers/aggregationCreater');
+    const ACL_MODULES = require('../constants/aclModulesNames');
+    const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+    const CONSTANTS = require('../constants/mainConstants');
+    const ACTIVITY_TYPES = require('../constants/activityTypes');
+    const access = require('../helpers/access')();
+    const BrandModel = require('./../types/brand/model');
+    const CompetitorItemModel = require('./../types/competitorItem/model');
+    const CompetitorVariantModel = require('./../types/competitorVariant/model');
+    const xssFilters = require('xss-filters');
+    const FilterMapper = require('../helpers/filterMapper');
+    const Archiver = require('../helpers/archiver');
+    const archiver = new Archiver(BrandModel);
+    const bodyValidator = require('../helpers/bodyValidator');
+    const logWriter = require('../helpers/logWriter.js');
+    const PreviewModel = require('./../stories/preview/model.business');
 
-    var $defProjection = {
-        _id      : 1,
-        ID       : 1,
-        editedBy : 1,
+    const ObjectId = mongoose.Types.ObjectId;
+
+    const $defProjection = {
+        _id: 1,
+        ID: 1,
+        editedBy: 1,
         createdBy: 1,
-        archived : 1,
-        name     : 1
+        archived: 1,
+        name: 1,
     };
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            var model;
-            var name = body.name;
-            var createdBy = {
+            const name = body.name;
+            const createdBy = {
                 user: req.session.uId,
-                date: new Date()
+                date: new Date(),
             };
+
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             body.name.en = name.en ? _.escape(name.en) : '';
             body.name.ar = name.ar ? _.escape(name.ar) : '';
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
-            model = new BrandModel(body);
-            model.save(function (error, model) {
-                if (error) {
-                    return next(error);
+            const model = new BrandModel(body);
+
+            async.waterfall([
+                (cb) => {
+                    model.save(cb);
+                },
+                (model, count, cb) => {
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.BRAND,
+                    }, cb);
+                },
+            ], (err, model) => {
+                if (err) {
+                    return next(err);
                 }
 
                 res.status(201).send(model);
-
             });
         }
 
-        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
-            var body = req.body;
+        access.getWriteAccess(req, ACL_MODULES.COMPETITOR_LIST, (err, allowed) => {
+            const body = req.body;
 
             if (err) {
                 return next(err);
@@ -67,7 +83,7 @@ var BranchHandler = function () {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRAND, 'create', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRAND, 'create', (err, saveData) => {
                 if (err) {
                     return next(err);
                 }
@@ -79,41 +95,41 @@ var BranchHandler = function () {
 
     this.archive = function (req, res, next) {
         function queryRun() {
-            var uId = req.session.uId;
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var type = ACTIVITY_TYPES.ARCHIVED;
-            var editedBy = {
+            const uId = req.session.uId;
+            const idsToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            let type = ACTIVITY_TYPES.ARCHIVED;
+            const editedBy = {
                 user: req.session.uId,
-                date: Date.now()
+                date: Date.now(),
             };
-            var options = [
+            const options = [
                 {
-                    idsToArchive   : idsToArchive,
+                    idsToArchive,
                     keyForCondition: '_id',
-                    archived       : archived,
-                    topArchived    : archived,
-                    model          : BrandModel
+                    archived,
+                    topArchived: archived,
+                    model: BrandModel,
                 },
                 {
                     keyForCondition: 'brand',
-                    archived       : archived,
-                    topArchived    : false,
+                    archived,
+                    topArchived: false,
                     keyForSelection: 'variant',
-                    model          : CompetitorItemModel
+                    model: CompetitorItemModel,
                 },
                 {
                     keyForCondition: '_id',
-                    archived       : archived,
-                    topArchived    : false,
-                    model          : CompetitorVariantModel
-                }
+                    archived,
+                    topArchived: false,
+                    model: CompetitorVariantModel,
+                },
             ];
 
             if (!archived) {
                 type = ACTIVITY_TYPES.UNARCHIVED;
             }
-            archiver.archive(uId, options, function (err) {
+            archiver.archive(uId, options, (err) => {
                 if (err) {
                     return next(err);
                 }
@@ -122,7 +138,7 @@ var BranchHandler = function () {
             });
         }
 
-        access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
+        access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_LIST, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -139,10 +155,10 @@ var BranchHandler = function () {
 
     this.getById = function (req, res, next) {
         function queryRun() {
-            var id = req.params.id;
+            const id = req.params.id;
 
             BrandModel.findById(id)
-                .exec(function (err, result) {
+                .exec((err, result) => {
                     if (err) {
                         return next(err);
                     }
@@ -151,7 +167,7 @@ var BranchHandler = function () {
                 });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -168,13 +184,13 @@ var BranchHandler = function () {
 
     this.getForDD = function (req, res, next) {
         function queryRun() {
-            var query = req.query;
+            const query = req.query;
 
             query['name.en'] = {
-                $ne: 'Alalali'
+                $ne: 'Alalali',
             };
 
-            BrandModel.find(query, '_id name').exec(function (err, result) {
+            BrandModel.find(query, '_id name').exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
@@ -183,7 +199,7 @@ var BranchHandler = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -196,32 +212,31 @@ var BranchHandler = function () {
 
             queryRun();
         });
-
     };
 
     this.getAllForSync = function (req, res, next) {
         function queryRun() {
-            var query = req.query;
-            var lastLogOut = new Date(query.lastLogOut);
-            var filterMapper = new FilterMapper();
-            var sort = {'createdBy.date': -1};
-            var queryObject = filterMapper.mapFilter({
+            const query = req.query;
+            const lastLogOut = new Date(query.lastLogOut);
+            const filterMapper = new FilterMapper();
+            const sort = { 'createdBy.date': -1 };
+            const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.BRAND,
-                filter     : query.filter || {}
+                filter: query.filter || {},
             });
 
-            var aggregateHelper = new AggregationHelper($defProjection, queryObject);
-            var aggregation;
-            var ids;
-            var pipeLine;
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            let aggregation;
+            let ids;
+            let pipeLine;
 
             if (query._ids) {
                 ids = query._ids.split(',');
-                ids = _.map(ids, function (id) {
+                ids = _.map(ids, (id) => {
                     return ObjectId(id);
                 });
                 queryObject._id = {
-                    $in: ids
+                    $in: ids,
                 };
             }
 
@@ -229,11 +244,11 @@ var BranchHandler = function () {
 
             pipeLine = [
                 {
-                    $match: queryObject
+                    $match: queryObject,
                 },
                 {
-                    $sort: sort
-                }
+                    $sort: sort,
+                },
             ];
 
             pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
@@ -241,26 +256,26 @@ var BranchHandler = function () {
             aggregation = BrandModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse: true
+                allowDiskUse: true,
             };
 
-            aggregation.exec(function (err, response) {
-                var result;
+            aggregation.exec((err, response) => {
+                let result;
 
                 if (err) {
                     return next(err);
                 }
 
                 result = response && response[0] ? response[0] : {
-                    data : [],
-                    total: 0
+                    data: [],
+                    total: 0,
                 };
 
-                next({status: 200, body: result});
+                next({ status: 200, body: result });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -277,17 +292,17 @@ var BranchHandler = function () {
 
     this.getAll = function (req, res, next) {
         function queryRun(personnel) {
-            var query = req.query;
-            var page = query.page || 1;
-            var limit = parseInt(query.count) || parseInt(CONSTANTS.LIST_COUNT);
-            var skip = (page - 1) * limit;
-            var filterMapper = new FilterMapper();
-            var queryObject = query.filter ? filterMapper.mapFilter({
+            const query = req.query;
+            const page = query.page || 1;
+            const limit = parseInt(query.count) || parseInt(CONSTANTS.LIST_COUNT);
+            const skip = (page - 1) * limit;
+            const filterMapper = new FilterMapper();
+            const queryObject = query.filter ? filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.BRAND,
-                filter     : query.filter || {},
-                personnel  : personnel
+                filter: query.filter || {},
+                personnel,
             }) : {};
-            var parallelTasks;
+            let parallelTasks;
 
             if (!queryObject.hasOwnProperty('archived')) {
                 queryObject.archived = false;
@@ -295,38 +310,38 @@ var BranchHandler = function () {
 
             if (!req.isMobile) {
                 queryObject['name.en'] = {
-                    $ne: 'Al alali'
+                    $ne: 'Al alali',
                 };
             }
 
             parallelTasks = {
                 total: BrandModel.count.bind(BrandModel, queryObject),
-                data : function (parallelCb) {
-                    var query = BrandModel.find(queryObject);
+                data (parallelCb) {
+                    const query = BrandModel.find(queryObject);
 
                     if (limit && limit !== -1) {
                         query
                             .skip(skip)
-                            .limit(limit)
+                            .limit(limit);
                     }
 
-                    //.populate('createdBy.user', 'firstName lastName')
+                    // .populate('createdBy.user', 'firstName lastName')
                     query.exec(parallelCb);
-                }
+                },
             };
 
-            async.parallel(parallelTasks, function (err, response) {
+            async.parallel(parallelTasks, (err, response) => {
                 if (err) {
                     return next(err);
                 }
 
                 // res.status(200).send(response);
 
-                next({status: 200, body: response});
+                next({ status: 200, body: response });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COMPETITOR_LIST, (err, allowed, personnel) => {
             if (err) {
                 return next(err);
             }
@@ -343,8 +358,12 @@ var BranchHandler = function () {
 
     this.update = function (req, res, next) {
         function queryRun(body) {
-            var id = req.params.id;
-            var name = body.name;
+            const id = req.params.id;
+            const name = body.name;
+
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             if (name) {
                 body.name.en = name.en ? xssFilters.inHTMLData(name.en) : '';
@@ -353,21 +372,31 @@ var BranchHandler = function () {
 
             body.editedBy = {
                 user: req.session.uId,
-                date: Date.now()
+                date: Date.now(),
             };
 
-            BrandModel.findByIdAndUpdate(id, body, {new: true})
-                .exec(function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
+            async.waterfall([
+                (cb) => {
+                    BrandModel.findByIdAndUpdate(id, body, { new: true }).exec(cb);
+                },
+                (model, cb) => {
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.BRAND,
+                    }, cb);
+                },
+            ], (err, model) => {
+                if (err) {
+                    return next(err);
+                }
 
-                    res.status(200).send(result);
-                });
+                res.status(200).send(model);
+            });
         }
 
-        access.getEditAccess(req, ACL_MODULES.ITEMS_AND_PRICES, function (err, allowed) {
-            var body = req.body;
+        access.getEditAccess(req, ACL_MODULES.ITEMS_AND_PRICES, (err, allowed) => {
+            const body = req.body;
 
             if (err) {
                 return next(err);
@@ -379,7 +408,7 @@ var BranchHandler = function () {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRAND, 'update', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.BRAND, 'update', (err, saveData) => {
                 if (err) {
                     return next(err);
                 }
@@ -387,8 +416,7 @@ var BranchHandler = function () {
                 queryRun(saveData);
             });
         });
-    }
-
+    };
 };
 
 module.exports = BranchHandler;

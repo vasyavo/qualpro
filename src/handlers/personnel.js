@@ -40,6 +40,7 @@ const Personnel = function () {
     const someEvents = new SomeEvents();
     const config = require('../config');
     const redisClient = require('../helpers/redisClient');
+    const PreviewModel = require('./../stories/preview/model.business');
 
     const $defProjection = {
         _id: 1,
@@ -992,9 +993,9 @@ const Personnel = function () {
                 };
             }
 
-            if (!body.imageSrc) {
-                delete body.imageSrc;
-            }
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             body.createdBy = createdBy;
             body.editedBy = createdBy;
@@ -1039,7 +1040,13 @@ const Personnel = function () {
                         body: personnel.toJSON(),
                     });
 
-                    cb(null, { id: personnelId });
+                    PreviewModel.setNewPreview({
+                        model: personnel,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.PERSONNEL,
+                    }, (err) => {
+                        cb(err, { id: personnelId });
+                    });
                 },
 
                 (options, cb) => {
@@ -3150,7 +3157,22 @@ const Personnel = function () {
                             }
                         }
 
-                        PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, parallelCb);
+                        const imageSrc = body.imageSrc;
+
+                        delete body.imageSrc;
+
+                        async.waterfall([
+                            (cb) => {
+                                PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, cb);
+                            },
+                            (model, cb) => {
+                                PreviewModel.setNewPreview({
+                                    model,
+                                    base64: imageSrc,
+                                    contentType: CONTENT_TYPES.PERSONNEL,
+                                }, cb);
+                            },
+                        ], parallelCb);
                     },
                 };
                 const coverUserId = body.vacation ? body.vacation.cover : null;
