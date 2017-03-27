@@ -262,6 +262,56 @@ exports.up = function(db, next) {
             };
         },
 
+        // perform migration
+        (cb) => {
+            const collectionName = `${contentTypes.BRANCH}es`;
+            const query = {
+                $or: [{
+                    imageSrc: { $exists: false },
+                }, {
+                    imageSrc: { $eq: null },
+                }],
+            };
+            const cursor = db.collection(collectionName).find(query)
+                .project({
+                    _id: 1,
+                    imageSrc: 1,
+                });
+
+            const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
+
+                    return queueCb();
+                }
+
+                const previewId = autoload.defaults[contentTypes.BRANCH];
+
+                db.collection(collectionName).updateOne({
+                    _id: doc._id,
+                }, {
+                    $set: {
+                        imageSrc: previewId,
+                    },
+                }, queueCb);
+            }, Infinity);
+
+            cursor.each((err, doc) => {
+                if (err) {
+                    logger.error('Branch pick fails', err);
+                    return;
+                }
+
+                queue.push(doc);
+            });
+
+            queue.drain = () => {
+                if (cursor.isClosed()) {
+                    return cb();
+                }
+            };
+        },
+
     ], next);
 };
 
@@ -330,6 +380,19 @@ exports.down = function(db, next) {
 
             db.collection(collectionName).updateOne({
                 imageSrc: autoload.defaults[contentTypes.BRAND],
+            }, {
+                $set: {
+                    imageSrc: null,
+                },
+            }, cb);
+        },
+
+        // perform rollback
+        (cb) => {
+            const collectionName = `${contentTypes.BRANCH}es`;
+
+            db.collection(collectionName).updateOne({
+                imageSrc: autoload.defaults[contentTypes.BRANCH],
             }, {
                 $set: {
                     imageSrc: null,
