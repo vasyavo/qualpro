@@ -295,8 +295,8 @@ const Personnel = function () {
         }, {
             $lookup: {
                 from: 'personnels',
-                localField: 'vacation.cover',
-                foreignField: '_id',
+                localField: '_id',
+                foreignField: 'vacation.cover',
                 as: 'covered',
             },
         }, {
@@ -316,6 +316,47 @@ const Personnel = function () {
                     },
                 },
             },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                localField: 'vacation.cover',
+                foreignField: '_id',
+                as: 'cover',
+            },
+        }, {
+            $addFields: {
+                cover: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$cover',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    cover: {
+                                        $arrayElemAt: ['$cover', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$cover._id',
+                                    firstName: '$$cover.firstName',
+                                    lastName: '$$cover.lastName',
+                                    position: '$$cover.position',
+                                    accessRole: '$$cover.accessRole',
+                                    onLeave: '$$cover.vacation.onLeave',
+                                },
+                            },
+                        },
+                        else: null,
+                    },
+                },
+            },
+        }, {
+            $addFields: {
+                'vacation.cover': '$cover',
+            },
         }];
 
         PersonnelModel.aggregate(pipeline)
@@ -326,6 +367,10 @@ const Personnel = function () {
 
                 const personnel = result.length > 0 ?
                     result.slice().pop() : {};
+
+                if (personnel.covered) {
+                    personnel.covered = _.keyBy(personnel.covered, covered => covered._id.toString());
+                }
 
                 callback(null, personnel);
             });
