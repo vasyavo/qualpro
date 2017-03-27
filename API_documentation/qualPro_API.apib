@@ -211,6 +211,17 @@ Http Code | Error Type           |  Error                             | Details
 + after
     + files (array[VisibilityFormAfterBeforeDone])
 
+## Preview
++ _id: `5818b01a13187de020871b63` (string)
++ base64: `data:image/png;base64,iVBORw0KGg....` (string)
++ contentType: `personnel` (string)
++ isDefault: false (boolean)
++ itemId: `5818b01a13187de020871b63` (string)
+
+## GetPreviews
++ previews (array)
+    + `5818b01a13187de020871b63` (string)
+
 # Group ContactUs
 
 ## Send contactUs form [/mobile/contactUs]
@@ -485,3 +496,16 @@ Update Visibility Form
 + Response 400 (application/json)
     + Attributes (GenericError)
 
+# Group Preview
+
+## Group Get Preview For Sync [/preview/sync]
+
+### Get For Sync [POST]
+Group Get Preview For Sync
+
++ Request (application/json)
+    + Attributes (GetPreviews)
++ Response 200 (application/json)
+    + Attributes (array[Preview])
++ Response 400 (application/json)
+    + Attributes (GenericError)
