@@ -374,7 +374,7 @@ const Personnel = function () {
                 *          but CMS accepts Object with keys which are Personnel ID
                 *          and as value covered Personnel
                 * */
-                if (isMobile && personnel.covered) {
+                if (!isMobile && personnel.covered) {
                     personnel.covered = _.keyBy(personnel.covered, covered => covered._id.toString());
                 }
 
