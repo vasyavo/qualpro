@@ -138,6 +138,7 @@ const Personnel = function () {
 
     const personnelFindByIdAndPopulate = (options, callback) => {
         const id = ObjectId(options.id);
+        const { isMobile } = options;
 
         const pipeline = [{
             $match: {
@@ -374,7 +375,12 @@ const Personnel = function () {
                 const personnel = result.length > 0 ?
                     result.slice().pop() : {};
 
-                if (personnel.covered) {
+                /*
+                * warning: mobile app accepts set Personnel
+                *          but CMS accepts Object with keys which are Personnel ID
+                *          and as value covered Personnel
+                * */
+                if (!isMobile && personnel.covered) {
                     personnel.covered = _.keyBy(personnel.covered, covered => covered._id.toString());
                 }
 
@@ -982,6 +988,7 @@ const Personnel = function () {
         const body = req.body;
         const accessLevel = req.session.level;
         const uId = req.session.uId;
+        const isMobile = req.isMobile;
 
         function queryRun(body, callback) {
             let phone = body.phoneNumber;
@@ -1091,7 +1098,12 @@ const Personnel = function () {
                         body: personnel.toJSON(),
                     });
 
-                    cb(null, { id: personnelId });
+                    const options = {
+                        id: personnelId,
+                        isMobile,
+                    };
+
+                    cb(null, options);
                 },
 
                 (options, cb) => {
@@ -1472,13 +1484,14 @@ const Personnel = function () {
     this.getById = function(req, res, next) {
         const session = req.session;
         const userId = session.uId;
+        const isMobile = req.isMobile;
 
         const queryRun = (callback) => {
             const requestedId = req.params.id;
             const actualId = requestedId || userId;
             const options = {
                 id: actualId,
-                isCurrent: requestedId === userId,
+                isMobile,
             };
 
             async.waterfall([
@@ -3190,6 +3203,7 @@ const Personnel = function () {
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
         const coveredUsers = [];
+        const isMobile = req.isMobile;
         let coverUserId;
         let generatedPassword;
 
@@ -3419,6 +3433,7 @@ const Personnel = function () {
             function getUserForUi(model, cb) {
                 const options = {
                     id: model._id,
+                    isMobile,
                 };
 
                 personnelFindByIdAndPopulate(options, (err, personnel) => {
