@@ -718,7 +718,7 @@ var BrandingActivity = function () {
             var fullUpdate = {
                 $set: updateObject
             };
-            var keys = ['branch', 'category'];
+            var keys = ['branch', 'category', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'displayType', 'personnel'];
             keys.forEach(function (key) {
                 if (typeof updateObject[key] === 'string') {
                     updateObject[key] = updateObject[key].split(',');
