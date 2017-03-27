@@ -944,7 +944,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -952,7 +952,7 @@ var Contract = function () {
             from         : 'documents',
             key          : 'documents',
             as           : 'documents',
-            addProjection: ['createdBy', 'title', 'attachment', 'contentType']
+            addProjection: ['createdBy', 'title', 'attachment', 'contentType', 'preview']
         }));
 
         pipeLine.push({
@@ -966,7 +966,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'documents.createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -975,7 +975,8 @@ var Contract = function () {
                     attachment : 1,
                     createdBy: {
                         date: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -984,7 +985,7 @@ var Contract = function () {
             from           : 'files',
             key            : 'documents.attachment',
             isArray        : false,
-            addProjection  : ['_id', 'contentType'],
+            addProjection  : ['_id', 'contentType', 'preview'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -993,7 +994,8 @@ var Contract = function () {
                     createdBy  : {
                         date: 1,
                         user: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -1017,7 +1019,8 @@ var Contract = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -1034,7 +1037,8 @@ var Contract = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
