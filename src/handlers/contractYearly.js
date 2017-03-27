@@ -587,7 +587,7 @@ var Contract = function () {
                             user: ObjectId(userId),
                             date: new Date()
                         };
-                        
+
                         if (description) {
                             if (description.en) {
                                 description.en = _.escape(description.en);
@@ -598,12 +598,11 @@ var Contract = function () {
                             }
                             updateObject.description = description;
                         }
-                      
+
                         if (updateObject.attachments && updateObject.attachments.length) {
-                            fullUpdate.$addToSet = {};
-                            fullUpdate.$addToSet.documents = {$each: updateObject.attachments.objectID()};
-                            delete updateObject.documents;
+                            fullUpdate.documents = updateObject.attachments.objectID();
                         }
+
                         updateObject.status = saveContractsYearly ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
 
                         delete updateObject.attachments;

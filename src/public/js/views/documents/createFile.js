@@ -123,8 +123,8 @@ define(function (require) {
                                 title : that.$el.find('#title').val(),
                                 type : 'file'
                             };
-                            var folder = that.collection.folder;
-                            if (folder) {
+
+                            if (that.collection && that.collection.folder) {
                                 data.parent = folder;
                             }
 
