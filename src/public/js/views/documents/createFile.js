@@ -125,7 +125,7 @@ define(function (require) {
                             };
 
                             if (that.collection && that.collection.folder) {
-                                data.parent = folder;
+                                data.parent = that.collection.folder;
                             }
 
                             that.model.saveFile(formData, data);
