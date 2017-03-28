@@ -670,8 +670,8 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var dateStart = new Date();
-            var dateEnd;
+            var dateStart = jsonModel.dateStart ? moment(jsonModel.dateStart, 'DD.MM.YYYY').toDate() : new Date();
+            var dateEnd = jsonModel.dateEnd ? moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate() : new Date();
             var $startDate;
             var $dueDate;
             var startDateObj;
@@ -733,7 +733,6 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : new Date(dateStart),
                 maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateStart, 'DD.MM.YYYY').toDate(),
                 onClose    : function (selectedDate) {
@@ -746,17 +745,11 @@ define([
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate(),
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }
             };
-
-            if (!this.duplicate) {
-                startDateObj.maxDate = new Date(dateEnd);
-                endDateObj.minDate = new Date(dateStart);
-            }
 
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
