@@ -7,7 +7,7 @@ const createReadStream = fs.createReadStream;
 
 const readCsv = (path, cb) => {
     const converter = new Converter({});
-    const filePath = `${config.workingDirectory}/${path}`;
+    const filePath = `${config.workingDirectory}${config.importPath}${path}.csv`;
 
     createReadStream(filePath).pipe(converter);
 
