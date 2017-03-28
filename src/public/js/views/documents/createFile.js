@@ -123,9 +123,9 @@ define(function (require) {
                                 title : that.$el.find('#title').val(),
                                 type : 'file'
                             };
-                            var folder = that.collection.folder;
-                            if (folder) {
-                                data.parent = folder;
+
+                            if (that.collection && that.collection.folder) {
+                                data.parent = that.collection.folder;
                             }
 
                             that.model.saveFile(formData, data);

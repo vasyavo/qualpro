@@ -107,5 +107,7 @@ config.session = {
 
 config.previewUrlRoot = '/preview/';
 
+config.importPath = process.env.IMPORT_PATH;
+
 // import this file at begin of server.js
 module.exports = config;

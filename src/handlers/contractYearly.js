@@ -54,7 +54,7 @@ var Contract = function () {
         const locations = ['country', 'region', 'subRegion', 'branch'];
 
         locations.forEach((location) => {
-            if (currentUser[location] && currentUser[location].length) {
+            if (currentUser[location] && currentUser[location].length && !queryObject[location]) {
                 $locationMatch.$and.push({
                     $or: [
                         {
@@ -71,15 +71,15 @@ var Contract = function () {
             }
         });
 
-        if ($locationMatch.$and.length) {
+        if (queryObject) {
             pipeLine.push({
-                $match: $locationMatch,
+                $match: queryObject,
             });
         }
 
-        if (queryObject) {
+        if ($locationMatch.$and.length) {
             pipeLine.push({
-                $match: queryObject
+                $match: $locationMatch,
             });
         }
 
@@ -548,7 +548,7 @@ var Contract = function () {
                             user: ObjectId(userId),
                             date: new Date()
                         };
-                        
+
                         if (description) {
                             if (description.en) {
                                 description.en = _.escape(description.en);
@@ -559,12 +559,11 @@ var Contract = function () {
                             }
                             updateObject.description = description;
                         }
-                      
+
                         if (updateObject.attachments && updateObject.attachments.length) {
-                            fullUpdate.$addToSet = {};
-                            fullUpdate.$addToSet.documents = {$each: updateObject.attachments.objectID()};
-                            delete updateObject.documents;
+                            fullUpdate.documents = updateObject.attachments.objectID();
                         }
+
                         updateObject.status = saveContractsYearly ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
 
                         delete updateObject.attachments;
@@ -723,12 +722,23 @@ var Contract = function () {
                 'createdBy.user.lastName.ar'
             ];
             var orCondition = [
-                {'createdBy.user': personnel._id},
                 {
                     status: {
-                        $nin: ['draft']
-                    }
-                }
+                        $nin: ['draft'],
+                    },
+                },
+                {
+                    $and: [
+                        {
+                            status: {
+                                $in: ['draft'],
+                            },
+                        },
+                        {
+                            'createdBy.user': personnel._id,
+                        },
+                    ],
+                },
             ];
 
             delete filter.globalSearch;
@@ -773,12 +783,13 @@ var Contract = function () {
             if (queryObject.$or) {
                 queryObject.$and = [
                     {
-                        $or: queryObject.$or
+                        $or: queryObject.$or,
                     },
                     {
-                        $or: orCondition
-                    }
+                        $or: orCondition,
+                    },
                 ];
+
                 delete queryObject.$or;
             } else {
                 queryObject.$or = orCondition;

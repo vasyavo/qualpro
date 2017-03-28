@@ -1,18 +1,37 @@
 const mongoose = require('mongoose');
+const async = require('async');
 
 mongoose.Schemas = {};
 require('./../../utils/mongo');
 
-const importOrigin = require('./types/origin');
-const importItem = require('./types/item');
+const importDomain = require('./types/domain');
+const importOutlet = require('./types/outlet');
+const importRetailSegment = require('./types/retailSegment');
+const importBranch = require('./types/branch');
+
+const importAccessRole = require('./types/accessRole');
+const importPosition = require('./types/position');
+const importPersonnel = require('./types/personnel');
+
 const logger = require('./../../utils/logger');
 
-importItem((err, data) => {
+async.series([
+
+    importDomain,
+    importOutlet,
+    importRetailSegment,
+    importBranch,
+
+    importAccessRole,
+    importPosition,
+    importPersonnel,
+
+], (err) => {
     if (err) {
-        logger.error('Import failed.');
+        logger.error('Something went wrong...', err);
         process.exit(1);
     }
 
-    logger.info('Import done.');
+    logger.info('Data imported successfully');
     process.exit(0);
 });
