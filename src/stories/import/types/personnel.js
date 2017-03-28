@@ -10,6 +10,10 @@ const PositionModel = require('./../../../types/position/model');
 const AccessRoleModel = require('./../../../types/accessRole/model');
 const PersonnelModel = require('./../../../types/personnel/model');
 const PersonnelCollection = require('./../../../types/personnel/collection');
+const aclRoleNames = require('./../../../constants/aclRolesNames');
+const getLocation = require('./../../personnel/reusable-components/getLocation');
+const getBranches = require('./../../personnel/reusable-components/getBranches');
+const toString = require('./../../../utils/toString');
 
 const setStandardPasswordToYopmail = (patch) => {
     if (/yopmail/.test(patch.email)) {
@@ -27,6 +31,7 @@ const setStandardPasswordToYopmail = (patch) => {
 
 const pathPersonnel = (options, callback) => {
     const {
+        accessRoleLevel,
         patch,
     } = options;
 
@@ -100,42 +105,112 @@ const pathPersonnel = (options, callback) => {
 
         const setPersonnel = setResult.filter(personnel => personnel);
 
-        if (setPersonnel.length) {
-            const existingPersonnel = setPersonnel.pop();
+        const pipeline = [];
 
-            patch.$addToSet = {};
+        const defineRelations = ({
+            patch = {},
+            setCountry = [],
+            setRegion = [],
+            setSubRegion = [],
+            setBranch = [],
+        }, callback) => {
+            const relations = {};
 
-            if (patch.country) {
-                patch.$addToSet.country = {
-                    $each: patch.country,
-                };
+            async.waterfall([
 
-                delete patch.country;
-            }
+                (cb) => {
+                    getLocation({
+                        setCountry,
+                        setRegion,
+                        setSubRegion,
+                    }, cb);
+                },
 
-            if (patch.region) {
-                patch.$addToSet.region = {
-                    $each: patch.region,
-                };
+                (result, cb) => {
+                    const groups = result.length ?
+                        result.slice().pop() : {
+                            setCountry: [],
+                            setRegion: [],
+                            setSubRegion: [],
+                        };
 
-                delete patch.region;
-            }
+                    relations.setCountry = groups.setCountry.map(country => toString(country, '_id'));
+                    relations.setRegion = groups.setRegion.map(region => toString(region, '_id'));
+                    relations.setSubRegion = groups.setSubRegion.map(subRegion => toString(subRegion, '_id'));
 
-            if (patch.subRegion) {
-                patch.$addToSet.subRegion = {
-                    $each: patch.subRegion,
-                };
+                    cb(null);
+                },
 
-                delete patch.subRegion;
-            }
+                (cb) => {
+                    getBranches({
+                        setSubRegion,
+                        setBranch,
+                    }, cb);
+                },
 
-            if (patch.branch) {
-                patch.$addToSet.branch = {
-                    $each: patch.branch,
-                };
+                (result, cb) => {
+                    const groups = result.length ?
+                        result.slice().pop() : {
+                            setBranch: [],
+                            setRetailSegment: [],
+                            setOutlet: [],
+                        };
 
-                delete patch.branch;
-            }
+                    relations.setBranch = groups.setBranch.map(branch => toString(branch, '_id'));
+
+                    cb(null);
+                },
+
+                (cb) => {
+                    switch (accessRoleLevel) {
+                        default:
+                        case aclRoleNames.MASTER_ADMIN:
+                        case aclRoleNames.MASTER_UPLOADER:
+                        case aclRoleNames.TRADE_MARKETER:
+                            return cb(null, Object.assign({}, patch, {
+                                country: [],
+                                region: [],
+                                subRegion: [],
+                                branch: [],
+                            }));
+                        case aclRoleNames.COUNTRY_ADMIN:
+                        case aclRoleNames.COUNTRY_UPLOADER:
+                            return cb(null, Object.assign({}, patch, {
+                                country: relations.setCountry,
+                                region: [],
+                                subRegion: [],
+                                branch: [],
+                            }));
+                        case aclRoleNames.AREA_MANAGER:
+                            return cb(null, Object.assign({}, patch, {
+                                country: relations.setCountry,
+                                region: relations.setRegion,
+                                subRegion: [],
+                                branch: [],
+                            }));
+                        case aclRoleNames.AREA_IN_CHARGE:
+                            return cb(null, Object.assign({}, patch, {
+                                country: relations.setCountry,
+                                region: relations.setRegion,
+                                subRegion: relations.setSubRegion,
+                                branch: setBranch.length ? relations.setBranch : [],
+                            }));
+                        case aclRoleNames.SALES_MAN:
+                        case aclRoleNames.MERCHANDISER:
+                        case aclRoleNames.CASH_VAN:
+                            return cb(null, Object.assign({}, patch, {
+                                country: relations.setCountry,
+                                region: relations.setRegion,
+                                subRegion: relations.setSubRegion,
+                                branch: relations.setBranch,
+                            }));
+                    }
+                },
+
+            ], callback);
+        };
+        const updateRelationsInExistingPersonnel = (patch, callback) => {
+            const existingPersonnel = setPersonnel.slice().pop();
 
             existingPersonnel.set(patch);
 
@@ -150,23 +225,89 @@ const pathPersonnel = (options, callback) => {
 
                 callback(null, existingPersonnel);
             });
-        }
+        };
+        const createNewPersonnelWithRelations = (patch, callback) => {
+            const newPersonnel = new PersonnelModel();
 
-        const newPersonnel = new PersonnelModel();
+            newPersonnel.set(patch);
 
-        newPersonnel.set(patch);
+            return newPersonnel.save((err) => {
+                if (err) {
+                    if (err.code === 11000) {
+                        return callback(null);
+                    }
 
-        return newPersonnel.save((err) => {
-            if (err) {
-                if (err.code === 11000) {
                     return callback(null);
                 }
 
-                return callback(null);
-            }
+                callback(null, newPersonnel);
+            });
+        };
 
-            callback(null, newPersonnel);
-        });
+        if (setPersonnel.length) {
+            pipeline.push(
+                (cb) => {
+                    const existingPersonnel = setPersonnel.slice().pop();
+
+                    const existingSetCountry = Array.isArray(existingPersonnel.country) ?
+                        existingPersonnel.country.map(objectId => ({
+                            _id: objectId,
+                            name: {},
+                        })) : [];
+                    const existingSetRegion = Array.isArray(existingPersonnel.region) ?
+                        existingPersonnel.region.map(objectId => ({
+                            _id: objectId,
+                            name: {},
+                        })) : [];
+                    const existingSetSubRegion = Array.isArray(existingPersonnel.subRegion) ?
+                        existingPersonnel.subRegion.map(objectId => ({
+                            _id: objectId,
+                            name: {},
+                        })) : [];
+                    const existingSetBranch = Array.isArray(existingPersonnel.branch) ?
+                        existingPersonnel.branch.map(objectId => ({
+                            _id: objectId,
+                            name: {},
+                        })) : [];
+
+                    defineRelations({
+                        patch,
+                        setCountry: _.unionBy([
+                            ...existingSetCountry,
+                            ...patch.country,
+                        ], country => country._id.toString()),
+                        setRegion: _.unionBy([
+                            ...existingSetRegion,
+                            ...patch.region,
+                        ], region => region._id.toString()),
+                        setSubRegion: _.unionBy([
+                            ...existingSetSubRegion,
+                            ...patch.subRegion,
+                        ], subRegion => subRegion._id.toString()),
+                        setBranch: _.unionBy([
+                            ...existingSetBranch,
+                            ...patch.branch,
+                        ], branch => branch._id.toString()),
+                    }, cb);
+                },
+                updateRelationsInExistingPersonnel
+            );
+        } else {
+            pipeline.push(
+                (cb) => {
+                    defineRelations({
+                        patch,
+                        setCountry: patch.country,
+                        setRegion: patch.region,
+                        setSubRegion: patch.subRegion,
+                        setBranch: patch.branch,
+                    }, cb);
+                },
+                createNewPersonnelWithRelations
+            );
+        }
+
+        async.waterfall(pipeline, callback);
     });
 };
 
@@ -254,7 +395,7 @@ module.exports = (callback) => {
                 }
 
                 if (country) {
-                    parallelJobs.country = (cb) => {
+                    parallelJobs.setCountry = (cb) => {
                         const countries = country
                             .split(',')
                             .map((item) => (item.trim()));
@@ -265,12 +406,12 @@ module.exports = (callback) => {
                             type: 'country',
                         };
 
-                        DomainModel.find(query).select('_id').lean().exec(cb);
+                        DomainModel.find(query).select('_id name').lean().exec(cb);
                     };
                 }
 
                 if (region) {
-                    parallelJobs.region = (cb) => {
+                    parallelJobs.setRegion = (cb) => {
                         const regions = region
                             .split(',')
                             .map((item) => (item.trim()));
@@ -281,12 +422,12 @@ module.exports = (callback) => {
                             type: 'region',
                         };
 
-                        DomainModel.find(query).select('_id').lean().exec(cb);
+                        DomainModel.find(query).select('_id name').lean().exec(cb);
                     };
                 }
 
                 if (subRegion) {
-                    parallelJobs.subRegion = (cb) => {
+                    parallelJobs.setSubRegion = (cb) => {
                         const subRegions = subRegion
                             .split(',')
                             .map((item) => (item.trim()));
@@ -297,12 +438,12 @@ module.exports = (callback) => {
                             type: 'subRegion',
                         };
 
-                        DomainModel.find(query).select('_id').lean().exec(cb);
+                        DomainModel.find(query).select('_id name').lean().exec(cb);
                     };
                 }
 
                 if (branch) {
-                    parallelJobs.branch = (cb) => {
+                    parallelJobs.setBranch = (cb) => {
                         const branches = branch
                             .split('|')
                             .map((item) => (item.trim()));
@@ -312,7 +453,7 @@ module.exports = (callback) => {
                             },
                         };
 
-                        BranchModel.find(query).select('_id').lean().exec(cb);
+                        BranchModel.find(query).select('_id name').lean().exec(cb);
                     };
                 }
 
@@ -329,7 +470,7 @@ module.exports = (callback) => {
                         'name.en': accessRole,
                     };
 
-                    AccessRoleModel.findOne(query).select('_id').lean().exec(cb);
+                    AccessRoleModel.findOne(query).select('_id level').lean().exec(cb);
                 };
 
                 async.parallel(parallelJobs, (err, population) => {
@@ -337,22 +478,10 @@ module.exports = (callback) => {
                         return mapCb(err);
                     }
 
-                    patch.country = Array.isArray(population.country) ?
-                        population.country.map((model) => {
-                            return model._id;
-                        }) : [];
-                    patch.region = Array.isArray(population.region) ?
-                        population.region.map((model) => {
-                            return model._id;
-                        }) : [];
-                    patch.subRegion = Array.isArray(population.subRegion) ?
-                        population.subRegion.map((model) => {
-                            return model._id;
-                        }) : [];
-                    patch.branch = Array.isArray(population.branch) ?
-                        population.branch.map((model) => {
-                            return model._id;
-                        }) : [];
+                    patch.country = Array.isArray(population.setCountry) ? population.setCountry : [];
+                    patch.region = Array.isArray(population.setRegion) ? population.setRegion : [];
+                    patch.subRegion = Array.isArray(population.setSubRegion) ? population.setSubRegion : [];
+                    patch.branch = Array.isArray(population.setBranch) ? population.setBranch : [];
                     patch.position = population.position ?
                         population.position._id : null;
                     patch.accessRole = population.accessRole ?
@@ -364,7 +493,11 @@ module.exports = (callback) => {
 
                     setStandardPasswordToYopmail(patch);
 
-                    pathPersonnel({ patch }, mapCb);
+                    pathPersonnel({
+                        accessRoleLevel: population.accessRole ?
+                            population.accessRole.level : null,
+                        patch,
+                    }, mapCb);
                 });
             }, cb);
         },
