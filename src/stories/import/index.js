@@ -13,9 +13,13 @@ const importAccessRole = require('./types/accessRole');
 const importPosition = require('./types/position');
 const importPersonnel = require('./types/personnel');
 
+const PreviewAutoload = require('./../preview/autoload');
+
 const logger = require('./../../utils/logger');
 
 async.series([
+
+    PreviewAutoload.insertDefaults,
 
     importDomain,
     importOutlet,
