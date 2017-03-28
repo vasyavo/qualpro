@@ -49,21 +49,18 @@ define([
             this.files = new FileCollection();
             this.makeRender();
 
-            dataService.getData('documents/files', {}, function (err, response) {
-                var documents = response.data;
-                var attachments;
-
-                attachments = _.map(documents, function (document) {
+            dataService.getData('documents/filesForContract', {
+                contractType: CONTENT_TYPES.CONTRACTSYEARLY,
+                contractId: this.model.get('_id'),
+            }, function (err, documents) {
+                var attachments = _.map(documents, function (document) {
                     var title = document.title;
-                    attachments = document.attachment;
-                    var attach = attachments;
+                    var attach = document.attachment;
 
                     attach.originalName = title;
                     attach.document = document._id;
 
-
                     return attach;
-
                 });
 
                 if (err) {
