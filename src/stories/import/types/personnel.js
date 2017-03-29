@@ -40,15 +40,19 @@ const pathPersonnel = (options, callback) => {
         (cb) => {
             if (patch.email) {
                 const query = {
-                    $or: [{
-                        'firstName.en': patch.firstName.en,
-                        'lastName.en': patch.lastName.en,
-                        email: patch.email,
+                    $and: [{
+                        archived: false,
                     }, {
-                        // vise verse first name and last name
-                        'firstName.en': patch.lastName.en,
-                        'lastName.en': patch.firstName.en,
-                        email: patch.email,
+                        $or: [{
+                            'firstName.en': patch.firstName.en,
+                            'lastName.en': patch.lastName.en,
+                            email: patch.email,
+                        }, {
+                            // vise verse first name and last name
+                            'firstName.en': patch.lastName.en,
+                            'lastName.en': patch.firstName.en,
+                            email: patch.email,
+                        }],
                     }],
                 };
 
@@ -61,15 +65,19 @@ const pathPersonnel = (options, callback) => {
         (cb) => {
             if (patch.phoneNumber) {
                 const query = {
-                    $or: [{
-                        'firstName.en': patch.firstName.en,
-                        'lastName.en': patch.lastName.en,
-                        phoneNumber: patch.phoneNumber,
+                    $and: [{
+                        archived: false,
                     }, {
-                        // vise verse first name and last name
-                        'firstName.en': patch.lastName.en,
-                        'lastName.en': patch.firstName.en,
-                        phoneNumber: patch.phoneNumber,
+                        $or: [{
+                            'firstName.en': patch.firstName.en,
+                            'lastName.en': patch.lastName.en,
+                            phoneNumber: patch.phoneNumber,
+                        }, {
+                            // vise verse first name and last name
+                            'firstName.en': patch.lastName.en,
+                            'lastName.en': patch.firstName.en,
+                            phoneNumber: patch.phoneNumber,
+                        }],
                     }],
                 };
 
@@ -82,13 +90,17 @@ const pathPersonnel = (options, callback) => {
         (cb) => {
             if (!patch.email && !patch.phoneNumber) {
                 const query = {
-                    $or: [{
-                        'firstName.en': patch.firstName.en,
-                        'lastName.en': patch.lastName.en,
+                    $and: [{
+                        archived: false,
                     }, {
-                        // vise verse first name and last name
-                        'firstName.en': patch.lastName.en,
-                        'lastName.en': patch.firstName.en,
+                        $or: [{
+                            'firstName.en': patch.firstName.en,
+                            'lastName.en': patch.lastName.en,
+                        }, {
+                            // vise verse first name and last name
+                            'firstName.en': patch.lastName.en,
+                            'lastName.en': patch.firstName.en,
+                        }],
                     }],
                 };
 
