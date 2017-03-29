@@ -2,36 +2,34 @@ const async = require('async');
 const patchRecord = require('./../utils/patchRecord');
 const trimObjectValues = require('./../utils/trimObjectValues');
 const readCsv = require('./../utils/readCsv');
-const OriginModel = require('./../../../types/origin/model');
+const PositionModel = require('./../../../types/position/model');
 
-function importOrigin(callback) {
+module.exports = (callback) => {
     async.waterfall([
 
-        async.apply(readCsv, 'Origin'),
+        async.apply(readCsv, 'Position'),
 
         (data, cb) => {
-            async.mapLimit(data, 10, (sourceObj, mapCb) => {
+            async.eachLimit(data, 10, (sourceObj, eachCb) => {
                 const obj = trimObjectValues(sourceObj);
                 const patch = Object.assign({}, {
                     ID: obj.ID,
                     name: {
                         en: obj['Name (EN)'],
-                        ar: obj['Name (AR)']
-                    }
+                        ar: obj['Name (AR)'],
+                    },
                 });
                 const query = {
-                    ID: patch.ID
+                    'name.en': patch.name.en,
                 };
 
                 patchRecord({
                     query,
                     patch,
-                    model: OriginModel
-                }, mapCb);
-            }, cb)
-        }
+                    model: PositionModel,
+                }, eachCb);
+            }, cb);
+        },
 
     ], callback);
-}
-
-module.exports = importOrigin;
+};

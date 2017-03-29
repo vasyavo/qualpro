@@ -104,5 +104,7 @@ config.session = {
     maxAge: process.env.SESSION_MAX_AGE || 365 * 24 * 60 * 60 * 1000,
 };
 
+config.importPath = process.env.IMPORT_PATH;
+
 // import this file at begin of server.js
 module.exports = config;
