@@ -6,21 +6,20 @@ module.exports = (options, callback) => {
         setBranch,
     } = options;
 
-    const $match = {};
+    const $match = {
+        archived: false,
+    };
     const setSubRegionId = setSubRegion.map(item => item._id);
 
     if (setBranch.length) {
         const setBranchId = setBranch.map(item => item._id);
 
-        $match.$and = [{
-            _id: {
-                $in: setBranchId,
-            },
-        }, {
-            subRegion: {
-                $in: setSubRegionId,
-            },
-        }];
+        $match._id = {
+            $in: setBranchId,
+        };
+        $match.subRegion = {
+            $in: setSubRegionId,
+        };
     } else {
         $match.subRegion = {
             $in: setSubRegionId,
@@ -88,6 +87,20 @@ module.exports = (options, callback) => {
         $project: {
             setBranch: 1,
             setRetailSegment: {
+                $filter: {
+                    input: '$setRetailSegment',
+                    as: 'item',
+                    cond: {
+                        $eq: ['$$item.archived', false],
+                    },
+                },
+            },
+            setOutlet: 1,
+        },
+    }, {
+        $project: {
+            setBranch: 1,
+            setRetailSegment: {
                 _id: 1,
                 name: {
                     en: 1,
@@ -102,6 +115,20 @@ module.exports = (options, callback) => {
             localField: 'setOutlet',
             foreignField: '_id',
             as: 'setOutlet',
+        },
+    }, {
+        $project: {
+            setBranch: 1,
+            setRetailSegment: 1,
+            setOutlet: {
+                $filter: {
+                    input: '$setOutlet',
+                    as: 'item',
+                    cond: {
+                        $eq: ['$$item.archived', false],
+                    },
+                },
+            },
         },
     }, {
         $project: {

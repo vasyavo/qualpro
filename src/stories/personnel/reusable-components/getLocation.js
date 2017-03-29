@@ -8,6 +8,10 @@ module.exports = (options, callback) => {
     } = options;
 
     const pipeline = [{
+        $match: {
+            archived: false,
+        },
+    }, {
         $project: {
             _id: 1,
             'name.en': 1,
