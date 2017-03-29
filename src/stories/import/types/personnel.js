@@ -29,298 +29,213 @@ const setStandardPasswordToYopmail = (patch) => {
     return patch;
 };
 
+const defineRelations = ({
+    patch = {},
+    setCountry = [],
+    setRegion = [],
+    setSubRegion = [],
+    setBranch = [],
+    accessRoleLevel,
+}, callback) => {
+    const relations = {};
+
+    async.waterfall([
+
+        (cb) => {
+            getLocation({
+                setCountry,
+                setRegion,
+                setSubRegion,
+            }, cb);
+        },
+
+        (result, cb) => {
+            const groups = result.length ?
+                result.slice().pop() : {
+                    setCountry: [],
+                    setRegion: [],
+                    setSubRegion: [],
+                };
+
+            relations.setCountry = groups.setCountry.map(country => toString(country, '_id'));
+            relations.setRegion = groups.setRegion.map(region => toString(region, '_id'));
+            relations.setSubRegion = groups.setSubRegion.map(subRegion => toString(subRegion, '_id'));
+
+            cb(null);
+        },
+
+        (cb) => {
+            getBranches({
+                setSubRegion,
+                setBranch,
+            }, cb);
+        },
+
+        (result, cb) => {
+            const groups = result.length ?
+                result.slice().pop() : {
+                    setBranch: [],
+                    setRetailSegment: [],
+                    setOutlet: [],
+                };
+
+            relations.setBranch = groups.setBranch.map(branch => toString(branch, '_id'));
+
+            cb(null);
+        },
+
+        (cb) => {
+            switch (accessRoleLevel) {
+                default:
+                case aclRoleNames.MASTER_ADMIN:
+                case aclRoleNames.MASTER_UPLOADER:
+                case aclRoleNames.TRADE_MARKETER:
+                    return cb(null, Object.assign({}, patch, {
+                        country: [],
+                        region: [],
+                        subRegion: [],
+                        branch: [],
+                    }));
+                case aclRoleNames.COUNTRY_ADMIN:
+                case aclRoleNames.COUNTRY_UPLOADER:
+                    return cb(null, Object.assign({}, patch, {
+                        country: relations.setCountry,
+                        region: [],
+                        subRegion: [],
+                        branch: [],
+                    }));
+                case aclRoleNames.AREA_MANAGER:
+                    return cb(null, Object.assign({}, patch, {
+                        country: relations.setCountry,
+                        region: relations.setRegion,
+                        subRegion: [],
+                        branch: [],
+                    }));
+                case aclRoleNames.AREA_IN_CHARGE:
+                    return cb(null, Object.assign({}, patch, {
+                        country: relations.setCountry,
+                        region: relations.setRegion,
+                        subRegion: relations.setSubRegion,
+                        branch: setBranch.length ? relations.setBranch : [],
+                    }));
+                case aclRoleNames.SALES_MAN:
+                case aclRoleNames.MERCHANDISER:
+                case aclRoleNames.CASH_VAN:
+                    return cb(null, Object.assign({}, patch, {
+                        country: relations.setCountry,
+                        region: relations.setRegion,
+                        subRegion: relations.setSubRegion,
+                        branch: relations.setBranch,
+                    }));
+            }
+        },
+
+    ], callback);
+};
+const updateRelationsInExistingPersonnel = (options, callback) => {
+    const {
+        patch,
+        existingPersonnel,
+    } = options;
+
+    existingPersonnel.set(patch);
+
+    return existingPersonnel.save((err) => {
+        if (err) {
+            if (err.code === 11000) {
+                return callback(null);
+            }
+
+            return callback(null);
+        }
+
+        callback(null, existingPersonnel);
+    });
+};
+const createNewPersonnelWithRelations = (options, callback) => {
+    const {
+        patch,
+    } = options;
+
+    const newPersonnel = new PersonnelModel();
+
+    newPersonnel.set(patch);
+
+    return newPersonnel.save((err) => {
+        if (err) {
+            if (err.code === 11000) {
+                return callback(null);
+            }
+
+            return callback(null);
+        }
+
+        callback(null, newPersonnel);
+    });
+};
+
 const pathPersonnel = (options, callback) => {
     const {
         accessRoleLevel,
         patch,
     } = options;
 
-    async.parallel([
+    async.waterfall([
 
         (cb) => {
-            if (patch.email) {
-                const query = {
-                    $and: [{
-                        archived: false,
-                    }, {
-                        $or: [{
-                            'firstName.en': patch.firstName.en,
-                            'lastName.en': patch.lastName.en,
-                            email: patch.email,
-                        }, {
-                            // vise verse first name and last name
-                            'firstName.en': patch.lastName.en,
-                            'lastName.en': patch.firstName.en,
-                            email: patch.email,
-                        }],
+            const query = {
+                $and: [{
+                    archived: false,
+                }, {
+                    $or: [{
+                        'firstName.en': patch.firstName.en,
+                        'lastName.en': patch.lastName.en,
                     }],
-                };
+                }],
+            };
 
-                return PersonnelModel.findOne(query).exec(cb);
-            }
-
-            cb(null);
+            PersonnelModel.findOne(query).exec(cb);
         },
 
-        (cb) => {
-            if (patch.phoneNumber) {
-                const query = {
-                    $and: [{
-                        archived: false,
-                    }, {
-                        $or: [{
-                            'firstName.en': patch.firstName.en,
-                            'lastName.en': patch.lastName.en,
-                            phoneNumber: patch.phoneNumber,
-                        }, {
-                            // vise verse first name and last name
-                            'firstName.en': patch.lastName.en,
-                            'lastName.en': patch.firstName.en,
-                            phoneNumber: patch.phoneNumber,
-                        }],
-                    }],
-                };
-
-                return PersonnelModel.findOne(query).exec(cb);
-            }
-
-            cb(null);
-        },
-
-        (cb) => {
-            if (!patch.email && !patch.phoneNumber) {
-                const query = {
-                    $and: [{
-                        archived: false,
-                    }, {
-                        $or: [{
-                            'firstName.en': patch.firstName.en,
-                            'lastName.en': patch.lastName.en,
-                        }, {
-                            // vise verse first name and last name
-                            'firstName.en': patch.lastName.en,
-                            'lastName.en': patch.firstName.en,
-                        }],
-                    }],
-                };
-
-                return PersonnelModel.findOne(query).exec(cb);
-            }
-
-            cb(null);
-        },
-
-    ], (err, setResult) => {
-        if (err) {
-            return callback(null);
-        }
-
-        const setPersonnel = setResult.filter(personnel => personnel);
-
-        const pipeline = [];
-
-        const defineRelations = ({
-            patch = {},
-            setCountry = [],
-            setRegion = [],
-            setSubRegion = [],
-            setBranch = [],
-        }, callback) => {
-            const relations = {};
-
-            async.waterfall([
-
-                (cb) => {
-                    getLocation({
-                        setCountry,
-                        setRegion,
-                        setSubRegion,
-                    }, cb);
-                },
-
-                (result, cb) => {
-                    const groups = result.length ?
-                        result.slice().pop() : {
-                            setCountry: [],
-                            setRegion: [],
-                            setSubRegion: [],
-                        };
-
-                    relations.setCountry = groups.setCountry.map(country => toString(country, '_id'));
-                    relations.setRegion = groups.setRegion.map(region => toString(region, '_id'));
-                    relations.setSubRegion = groups.setSubRegion.map(subRegion => toString(subRegion, '_id'));
-
-                    cb(null);
-                },
-
-                (cb) => {
-                    getBranches({
-                        setSubRegion,
-                        setBranch,
-                    }, cb);
-                },
-
-                (result, cb) => {
-                    const groups = result.length ?
-                        result.slice().pop() : {
-                            setBranch: [],
-                            setRetailSegment: [],
-                            setOutlet: [],
-                        };
-
-                    relations.setBranch = groups.setBranch.map(branch => toString(branch, '_id'));
-
-                    cb(null);
-                },
-
-                (cb) => {
-                    switch (accessRoleLevel) {
-                        default:
-                        case aclRoleNames.MASTER_ADMIN:
-                        case aclRoleNames.MASTER_UPLOADER:
-                        case aclRoleNames.TRADE_MARKETER:
-                            return cb(null, Object.assign({}, patch, {
-                                country: [],
-                                region: [],
-                                subRegion: [],
-                                branch: [],
-                            }));
-                        case aclRoleNames.COUNTRY_ADMIN:
-                        case aclRoleNames.COUNTRY_UPLOADER:
-                            return cb(null, Object.assign({}, patch, {
-                                country: relations.setCountry,
-                                region: [],
-                                subRegion: [],
-                                branch: [],
-                            }));
-                        case aclRoleNames.AREA_MANAGER:
-                            return cb(null, Object.assign({}, patch, {
-                                country: relations.setCountry,
-                                region: relations.setRegion,
-                                subRegion: [],
-                                branch: [],
-                            }));
-                        case aclRoleNames.AREA_IN_CHARGE:
-                            return cb(null, Object.assign({}, patch, {
-                                country: relations.setCountry,
-                                region: relations.setRegion,
-                                subRegion: relations.setSubRegion,
-                                branch: setBranch.length ? relations.setBranch : [],
-                            }));
-                        case aclRoleNames.SALES_MAN:
-                        case aclRoleNames.MERCHANDISER:
-                        case aclRoleNames.CASH_VAN:
-                            return cb(null, Object.assign({}, patch, {
-                                country: relations.setCountry,
-                                region: relations.setRegion,
-                                subRegion: relations.setSubRegion,
-                                branch: relations.setBranch,
-                            }));
-                    }
-                },
-
-            ], callback);
-        };
-        const updateRelationsInExistingPersonnel = (patch, callback) => {
-            const existingPersonnel = setPersonnel.slice().pop();
-
-            existingPersonnel.set(patch);
-
-            return existingPersonnel.save((err) => {
-                if (err) {
-                    if (err.code === 11000) {
-                        return callback(null);
-                    }
-
-                    return callback(null);
-                }
-
-                callback(null, existingPersonnel);
-            });
-        };
-        const createNewPersonnelWithRelations = (patch, callback) => {
-            const newPersonnel = new PersonnelModel();
-
-            newPersonnel.set(patch);
-
-            return newPersonnel.save((err) => {
-                if (err) {
-                    if (err.code === 11000) {
-                        return callback(null);
-                    }
-
-                    return callback(null);
-                }
-
-                callback(null, newPersonnel);
-            });
-        };
-
-        if (setPersonnel.length) {
-            pipeline.push(
-                (cb) => {
-                    const existingPersonnel = setPersonnel.slice().pop();
-
-                    const existingSetCountry = Array.isArray(existingPersonnel.country) ?
-                        existingPersonnel.country.map(objectId => ({
-                            _id: objectId,
-                            name: {},
-                        })) : [];
-                    const existingSetRegion = Array.isArray(existingPersonnel.region) ?
-                        existingPersonnel.region.map(objectId => ({
-                            _id: objectId,
-                            name: {},
-                        })) : [];
-                    const existingSetSubRegion = Array.isArray(existingPersonnel.subRegion) ?
-                        existingPersonnel.subRegion.map(objectId => ({
-                            _id: objectId,
-                            name: {},
-                        })) : [];
-                    const existingSetBranch = Array.isArray(existingPersonnel.branch) ?
-                        existingPersonnel.branch.map(objectId => ({
-                            _id: objectId,
-                            name: {},
-                        })) : [];
-
-                    defineRelations({
-                        patch,
-                        setCountry: _.unionBy([
-                            ...existingSetCountry,
-                            ...patch.country,
-                        ], country => country._id.toString()),
-                        setRegion: _.unionBy([
-                            ...existingSetRegion,
-                            ...patch.region,
-                        ], region => region._id.toString()),
-                        setSubRegion: _.unionBy([
-                            ...existingSetSubRegion,
-                            ...patch.subRegion,
-                        ], subRegion => subRegion._id.toString()),
-                        setBranch: _.unionBy([
-                            ...existingSetBranch,
-                            ...patch.branch,
-                        ], branch => branch._id.toString()),
-                    }, cb);
-                },
-                updateRelationsInExistingPersonnel
-            );
-        } else {
-            pipeline.push(
+        (existingPersonnel, cb) => {
+            const pipeline = [
                 (cb) => {
                     defineRelations({
                         patch,
+                        accessRoleLevel,
                         setCountry: patch.country,
                         setRegion: patch.region,
                         setSubRegion: patch.subRegion,
                         setBranch: patch.branch,
                     }, cb);
                 },
-                createNewPersonnelWithRelations
-            );
-        }
+            ];
 
-        async.waterfall(pipeline, callback);
-    });
+            if (existingPersonnel) {
+                pipeline.push(
+                    (patch, cb) => {
+                        cb(null, {
+                            patch,
+                            existingPersonnel,
+                        });
+                    },
+                    updateRelationsInExistingPersonnel
+                );
+            } else {
+                pipeline.push(
+                    (patch, cb) => {
+                        cb(null, {
+                            patch,
+                        });
+                    },
+                    createNewPersonnelWithRelations
+                );
+            }
+
+            async.waterfall(pipeline, cb);
+        },
+
+    ], callback);
 };
 
 const cleanXlsParent = (callback) => {
