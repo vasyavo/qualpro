@@ -331,6 +331,7 @@ module.exports = (callback) => {
                                 $in: countries,
                             },
                             type: 'country',
+                            archived: false,
                         };
 
                         DomainModel.find(query).select('_id name').lean().exec(cb);
@@ -347,6 +348,7 @@ module.exports = (callback) => {
                                 $in: regions,
                             },
                             type: 'region',
+                            archived: false,
                         };
 
                         DomainModel.find(query).select('_id name').lean().exec(cb);
@@ -363,6 +365,7 @@ module.exports = (callback) => {
                                 $in: subRegions,
                             },
                             type: 'subRegion',
+                            archived: false,
                         };
 
                         DomainModel.find(query).select('_id name').lean().exec(cb);
@@ -378,6 +381,7 @@ module.exports = (callback) => {
                             'name.en': {
                                 $in: branches,
                             },
+                            archived: false,
                         };
 
                         BranchModel.find(query).select('_id name').lean().exec(cb);
