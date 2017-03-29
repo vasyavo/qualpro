@@ -110,7 +110,8 @@
     "service:scheduler": "cd ./node_modules/abstract-scheduler && cross-env NODE_ENV=development npm start",
     "migrations:up": "chmod +x migrations.sh && ./migrations.sh up",
     "migrations:down": "chmod +x migrations.sh && ./migrations.sh down",
-    "import:run": "node src/stories/import/index.js"
+    "utils:import": "node src/stories/import/index.js",
+    "utils:passwords": "node src/utils/setDefaultPasswordToPersonnel"
   },
   "pre-push": [
     "test",
