@@ -30,12 +30,4 @@ const schema = new Schema({
 
 }, { collection: 'outlets' });
 
-schema.index({
-    name: 1,
-    subRegions: 1,
-    retailSegments: 1,
-}, {
-    unique: true,
-});
-
 module.exports = schema;
