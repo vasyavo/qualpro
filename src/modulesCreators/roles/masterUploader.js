@@ -147,7 +147,7 @@ module.exports = [
         cms: {
             archive: true,
             edit: true,
-            write: false,
+            write: true,
             read: true
         },
         mobile: {
