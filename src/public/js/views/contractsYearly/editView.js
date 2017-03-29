@@ -292,6 +292,7 @@ define([
                 this.formData.delete(file.cid);
             }
 
+            App.masonryGrid.call($curEl);
         },
 
         setSelectedFiles: function () {
@@ -395,6 +396,8 @@ define([
 
                 self.$el.find('#filesBlock').show();
                 self.fileDialogView.trigger('fileSelected', inputModel);
+
+                App.masonryGrid.call(self.$el);
             });
         },
 
@@ -406,6 +409,8 @@ define([
             }));
 
             $curEl.find('.filesBlock').show();
+
+            App.masonryGrid.call($curEl);
         },
 
         renderLocations: function () {
