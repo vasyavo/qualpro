@@ -26,13 +26,13 @@ async.watrefall([
                 }, cb);
             },
 
-            bahrainDemo: [{
+            bahrainDemo: {
                 _id: ObjectId('583720173a90064c13696624'),
                 name: {
                     en: 'BAHRAIN',
                     ar: 'البحرين',
                 },
-            }],
+            },
 
         }, cb);
     },
