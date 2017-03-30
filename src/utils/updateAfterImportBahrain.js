@@ -7,6 +7,7 @@ const ItemCollection = require('./../types/item/collection');
 const CompetitorItemCollection = require('./../types/competitorItem/collection');
 const ActivityListCollection = require('./../types/activityList/collection');
 
+const ObjectId = require('mongoose').Types.ObjectId;
 
 async.watrefall([
 
@@ -25,17 +26,13 @@ async.watrefall([
                 }, cb);
             },
 
-            bahrainDemo: (cb) => {
-                DomainCollection.findOne({
-                    'name.en': 'BAHRAIN',
-                    archived: true,
-                }, {
-                    fields: {
-                        _id: 1,
-                        name: 1,
-                    },
-                }, cb);
-            },
+            bahrainDemo: [{
+                _id: ObjectId('583720173a90064c13696624'),
+                name: {
+                    en: 'BAHRAIN',
+                    ar: 'البحرين',
+                },
+            }],
 
         }, cb);
     },
