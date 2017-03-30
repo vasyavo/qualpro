@@ -9,7 +9,7 @@ const ActivityListCollection = require('./../types/activityList/collection');
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
-async.watrefall([
+async.waterfall([
 
     (cb) => {
         async.parallel({
@@ -26,12 +26,14 @@ async.watrefall([
                 }, cb);
             },
 
-            bahrainDemo: {
-                _id: ObjectId('583720173a90064c13696624'),
-                name: {
-                    en: 'BAHRAIN',
-                    ar: 'البحرين',
-                },
+            bahrainDemo: (cb) => {
+                cb(null, {
+                    _id: ObjectId('583720173a90064c13696624'),
+                    name: {
+                        en: 'BAHRAIN',
+                        ar: 'البحرين',
+                    },
+                });
             },
 
         }, cb);
@@ -45,7 +47,7 @@ async.watrefall([
 
             (cb) => {
                 DomainCollection.updateOne({
-                    _id: bahrainNewId,
+                    _id: bahrainDemoId,
                 }, {
                     $set: {
                         'name.en': 'BAHRAIN DEMO',
@@ -55,20 +57,20 @@ async.watrefall([
 
             (cb) => {
                 ItemCollection.updateMany({
-                    country: bahrainNewId,
+                    country: bahrainDemoId,
                 }, {
                     $set: {
-                        country: bahrainDemoId,
+                        country: bahrainNewId,
                     },
                 }, cb);
             },
 
             (cb) => {
                 CompetitorItemCollection.updateMany({
-                    country: bahrainNewId,
+                    country: bahrainDemoId,
                 }, {
                     $set: {
-                        country: bahrainDemoId,
+                        country: bahrainNewId,
                     },
                 }, cb);
             },
@@ -76,11 +78,11 @@ async.watrefall([
             (cb) => {
                 ActivityListCollection.updateMany({
                     country: {
-                        $in: [bahrainNewId],
+                        $in: [bahrainDemoId],
                     },
                 }, {
                     $set: {
-                        country: [bahrainDemoId],
+                        country: [bahrainNewId],
                     },
                 }, cb);
             },
