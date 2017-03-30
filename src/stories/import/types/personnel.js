@@ -238,13 +238,10 @@ const pathPersonnel = (options, callback) => {
     ], callback);
 };
 
-const cleanXlsParent = (callback) => {
-    PersonnelCollection.updateMany({
-        xlsParent: {
-            $ne: null,
-        },
-    }, {
+const normalize = (callback) => {
+    PersonnelCollection.updateMany({}, {
         $set: {
+            ID: null,
             xlsParent: null,
         },
     }, (err) => {
@@ -263,7 +260,7 @@ module.exports = (callback) => {
         (cb) => {
             async.series([
 
-                cleanXlsParent,
+                normalize,
 
             ], (err) => {
                 if (err) {
@@ -452,7 +449,7 @@ module.exports = (callback) => {
             }, cb);
         },
 
-        cleanXlsParent,
+        normalize,
 
     ], callback);
 };
