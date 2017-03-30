@@ -12,7 +12,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 async.watrefall([
 
     (cb) => {
-        async.series({
+        async.parallel({
 
             bahrainNew: (cb) => {
                 DomainCollection.findOne({
