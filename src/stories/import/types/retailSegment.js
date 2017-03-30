@@ -20,6 +20,7 @@ function importOrigin(callback) {
                 });
                 const query = {
                     'name.en': patch.name.en,
+                    archived: false,
                 };
 
                 patchRecord({

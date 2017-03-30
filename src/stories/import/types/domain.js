@@ -66,6 +66,7 @@ module.exports = (callback) => {
                         const query = {
                             'name.en': patch.name.en,
                             type: patch.type,
+                            archived: false,
                         };
 
                         patchRecord({

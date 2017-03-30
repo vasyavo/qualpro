@@ -84,6 +84,7 @@ module.exports = (callback) => {
                         subRegion: patch.subRegion,
                         retailSegment: patch.retailSegment,
                         outlet: patch.outlet,
+                        archived: false,
                     };
 
                     patchRecord({
