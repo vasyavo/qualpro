@@ -159,7 +159,7 @@ module.exports = (options) => {
                                 else: {
                                     $cond: {
                                         if: {
-                                            $gte: [
+                                            $gt: [
                                                 '$total',
                                                 '$$skip',
                                             ],
@@ -167,7 +167,7 @@ module.exports = (options) => {
                                         then: {
                                             $slice: ['$setActivity', '$$skip', { $subtract: ['$total', '$$skip'] }],
                                         },
-                                        else: '$setActivity',
+                                        else: [],
                                     },
                                 },
                             },
