@@ -23,6 +23,11 @@ async.waterfall([
 
         DomainCollection.aggregate([
             {
+                $match: {
+                    archived: false,
+                },
+            },
+            {
                 $project: {
                     _id: 1,
                     'name.en': 1,
@@ -58,7 +63,9 @@ async.waterfall([
                                             input: '$setDomain',
                                             as: 'item',
                                             cond: {
-                                                $eq: ['$$item.type', 'country'],
+                                                $and: [
+                                                    { $eq: ['$$item.type', 'country'] },
+                                                ],
                                             },
                                         },
                                     },
@@ -94,11 +101,10 @@ async.waterfall([
                                                     input: '$setDomain',
                                                     as: 'item',
                                                     cond: {
-                                                        $and: [{
-                                                            $eq: ['$$item.type', 'region'],
-                                                        }, {
-                                                            $setIsSubset: [['$$item.parent'], '$$setId'],
-                                                        }],
+                                                        $and: [
+                                                            { $eq: ['$$item.type', 'region'] },
+                                                            { $setIsSubset: [['$$item.parent'], '$$setId'] },
+                                                        ],
                                                     },
                                                 },
                                             },
@@ -137,11 +143,10 @@ async.waterfall([
                                                     input: '$setDomain',
                                                     as: 'item',
                                                     cond: {
-                                                        $and: [{
-                                                            $eq: ['$$item.type', 'subRegion'],
-                                                        }, {
-                                                            $setIsSubset: [['$$item.parent'], '$$setId'],
-                                                        }],
+                                                        $and: [
+                                                            { $eq: ['$$item.type', 'subRegion'] },
+                                                            { $setIsSubset: [['$$item.parent'], '$$setId'] },
+                                                        ],
                                                     },
                                                 },
                                             },
@@ -195,6 +200,11 @@ async.waterfall([
                 setDomain: [],
             };
 
+        logger.info('Current Bahrain locations:', {
+            setSubRegion: groups.setSubRegion.map(objectId => objectId.toString()),
+            setDomain: groups.setDomain.map(objectId => objectId.toString()),
+        });
+
         async.series([
 
             (cb) => {
@@ -220,7 +230,7 @@ async.waterfall([
             (cb) => {
                 DomainCollection.updateMany({
                     _id: {
-                        $in: groups.setSubRegion,
+                        $in: groups.setDomain,
                     },
                 }, {
                     $set: {
@@ -374,11 +384,17 @@ async.waterfall([
             }
 
             const groups = result.length ?
-                result.slice.pop() : {
+                result.slice().pop() : {
                     setBranch: [],
                     setRetailSegment: [],
                     setOutlet: [],
                 };
+
+            logger.info('Branches in Bahrain', {
+                setBranch: groups.setBranch.map(objectId => objectId.toString()),
+                setRetailSegment: groups.setRetailSegment.map(objectId => objectId.toString()),
+                setOutlet: groups.setOutlet.map(objectId => objectId.toString()),
+            });
 
             const nextOptions = Object.assign({}, groups, {
                 setDomain: options.setDomain,
@@ -391,6 +407,52 @@ async.waterfall([
 
     (options, cb) => {
         async.series([
+
+            (cb) => {
+                async.parallel([
+
+                    (cb) => {
+                        PersonnelCollection.updateMany({
+                            country: null,
+                        }, {
+                            $set: {
+                                country: [],
+                            },
+                        }, cb);
+                    },
+
+                    (cb) => {
+                        PersonnelCollection.updateMany({
+                            region: null,
+                        }, {
+                            $set: {
+                                region: [],
+                            },
+                        }, cb);
+                    },
+
+                    (cb) => {
+                        PersonnelCollection.updateMany({
+                            subRegion: null,
+                        }, {
+                            $set: {
+                                subRegion: [],
+                            },
+                        }, cb);
+                    },
+
+                    (cb) => {
+                        PersonnelCollection.updateMany({
+                            branch: null,
+                        }, {
+                            $set: {
+                                branch: [],
+                            },
+                        }, cb);
+                    },
+
+                ], cb);
+            },
 
             (cb) => {
                 PersonnelCollection.updateMany({}, {
