@@ -32,6 +32,10 @@ const schema = new Schema({
     }
 }, { collection: 'domains' });
 
-schema.index({ name: 1, type: 1 }, { unique: true });
+schema.index({
+    name: 1,
+    type: 1,
+    archived: 1,
+}, { unique: true });
 
 module.exports = schema;
