@@ -1,3 +1,5 @@
+const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
+
 module.exports = (options) => {
     const {
         queryObject,
@@ -11,6 +13,10 @@ module.exports = (options) => {
 
     const locations = ['country', 'region', 'subRegion', 'branch'];
     const pipeline = [];
+
+    if (personnel.accessRole.level === ACL_CONSTANTS.AREA_IN_CHARGE) {
+        locations.pop();
+    }
 
     pipeline.push({
         $match: queryObject,
