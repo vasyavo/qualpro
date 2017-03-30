@@ -8,18 +8,23 @@ const RetailSegmentCollection = require('./../types/retailSegment/collection');
 const OutletCollection = require('./../types/outlet/collection');
 const PersonnelCollection = require('./../types/personnel/collection');
 
-const ObjectId = require('mongoose').Types.ObjectId;
 
 async.waterfall([
 
     (cb) => {
-        const setCountry = [{
-            _id: ObjectId('583720173a90064c13696624'),
-            name: {
-                en: 'BAHRAIN',
-                ar: 'البحرين',
+        DomainCollection.findOne({
+            'name.en': 'BAHRAIN',
+            archived: false,
+        }, {
+            fields: {
+                _id: 1,
+                name: 1,
             },
-        }];
+        }, cb);
+    },
+
+    (countryBahrain, cb) => {
+        const setCountry = [countryBahrain];
 
         DomainCollection.aggregate([
             {
