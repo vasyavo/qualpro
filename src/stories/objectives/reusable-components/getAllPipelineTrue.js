@@ -230,7 +230,7 @@ module.exports = (options) => {
                                 else: {
                                     $cond: {
                                         if: {
-                                            $gte: [
+                                            $gt: [
                                                 '$total',
                                                 '$$skip',
                                             ],

@@ -30,7 +30,7 @@
               "else": {
                 "$cond": {
                   "if": {
-                    "$gte": [
+                    "$gt": [
                       "$total",
                       "$$skip"
                     ]
