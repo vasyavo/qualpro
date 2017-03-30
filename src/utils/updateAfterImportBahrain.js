@@ -47,7 +47,7 @@ async.waterfall([
 
             (cb) => {
                 DomainCollection.updateOne({
-                    _id: bahrainNewId,
+                    _id: bahrainDemoId,
                 }, {
                     $set: {
                         'name.en': 'BAHRAIN DEMO',
