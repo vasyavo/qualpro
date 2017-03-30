@@ -57,20 +57,20 @@ async.waterfall([
 
             (cb) => {
                 ItemCollection.updateMany({
-                    country: bahrainNewId,
+                    country: bahrainDemoId,
                 }, {
                     $set: {
-                        country: bahrainDemoId,
+                        country: bahrainNewId,
                     },
                 }, cb);
             },
 
             (cb) => {
                 CompetitorItemCollection.updateMany({
-                    country: bahrainNewId,
+                    country: bahrainDemoId,
                 }, {
                     $set: {
-                        country: bahrainDemoId,
+                        country: bahrainNewId,
                     },
                 }, cb);
             },
@@ -78,11 +78,11 @@ async.waterfall([
             (cb) => {
                 ActivityListCollection.updateMany({
                     country: {
-                        $in: [bahrainNewId],
+                        $in: [bahrainDemoId],
                     },
                 }, {
                     $set: {
-                        country: [bahrainDemoId],
+                        country: [bahrainNewId],
                     },
                 }, cb);
             },
