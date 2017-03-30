@@ -167,7 +167,7 @@ module.exports = (options) => {
                                         then: {
                                             $slice: ['$setActivity', '$$skip', { $subtract: ['$total', '$$skip'] }],
                                         },
-                                        else: '$setActivity',
+                                        else: [],
                                     },
                                 },
                             },

@@ -243,7 +243,7 @@ module.exports = (options) => {
                                         then: {
                                             $slice: ['$setObjectives', '$$skip', { $subtract: ['$total', '$$skip'] }],
                                         },
-                                        else: '$setObjectives',
+                                        else: [],
                                     },
                                 },
                             },
