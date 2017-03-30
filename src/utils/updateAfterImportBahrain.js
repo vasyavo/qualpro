@@ -9,7 +9,7 @@ const ActivityListCollection = require('./../types/activityList/collection');
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
-async.watrefall([
+async.waterfall([
 
     (cb) => {
         async.parallel({
@@ -26,12 +26,14 @@ async.watrefall([
                 }, cb);
             },
 
-            bahrainDemo: {
-                _id: ObjectId('583720173a90064c13696624'),
-                name: {
-                    en: 'BAHRAIN',
-                    ar: 'البحرين',
-                },
+            bahrainDemo: (cb) => {
+                cb(null, {
+                    _id: ObjectId('583720173a90064c13696624'),
+                    name: {
+                        en: 'BAHRAIN',
+                        ar: 'البحرين',
+                    },
+                });
             },
 
         }, cb);
