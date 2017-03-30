@@ -225,7 +225,7 @@ module.exports = (options) => {
                                         },
                                         then: {
                                             $slice: ['$setObjectives', '$$skip', { $subtract: ['$total', '$$skip'] }],
-                                        },
+                                        }, // if set objectives is empty array, total will be 0
                                         else: [],
                                     },
                                 },
