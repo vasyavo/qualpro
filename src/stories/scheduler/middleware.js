@@ -1,12 +1,12 @@
-const middleware = require('abstract-scheduler');
+const middleware = require('abstract-scheduler').middleware;
 const logger = require('./../../utils/logger');
 const config = require('./../../config');
-const SchedulerModel = require('./model');
+const SchedulerCollection = require('./collection');
 const actions = require('./actions');
 
 module.exports = middleware({
     logger,
-    host: config.schedulerHost,
+    url: config.schedulerHost,
     actions,
-    scheduler: SchedulerModel,
+    collection: SchedulerCollection,
 });
