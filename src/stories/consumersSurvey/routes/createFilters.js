@@ -1,35 +1,6 @@
 const _ = require('underscore');
-const AggregationHelper = require('../../../helpers/aggregationCreater');
 const FilterMapper = require('../../../helpers/filterMapper');
 const PersonnelModel = require('../../../types/personnel/model');
-
-const $defProjectionExtended = {
-    _id: 1,
-    origin: 1,
-    country: 1,
-    retailSegment: 1,
-    region: 1,
-    subRegion: 1,
-    outlet: 1,
-    branch: 1,
-    brand: 1,
-    variant: 1,
-    category: 1,
-    product: 1,
-    editedBy: 1,
-    createdBy: 1,
-    archived: 1,
-    type: 1,
-    status: 1,
-    configuration: 1,
-    priority: 1,
-    assignedTo: 1,
-    location: 1,
-    name: 1,
-    position: 1,
-    firstName: 1,
-    lastName: 1,
-};
 
 module.exports = (req, res, next) => {
     const query = req.query;
@@ -40,108 +11,82 @@ module.exports = (req, res, next) => {
         personnel: req.personnelModel,
     });
 
-    const aggregationHelper = new AggregationHelper($defProjectionExtended, filter);
     const pipeLine = [];
-
-    pipeLine.push({
-        $unwind: {
-            path: '$country',
-            preserveNullAndEmptyArrays: true,
-        },
-    });
+    const locationMatch = {
+        $and: [],
+    };
 
     if (filter.country) {
-        pipeLine.push({
-            $match: {
-                $or: [
-                    {
-                        country: filter.country,
-                    },
-                    {
-                        country: { $exists: false },
-                    },
-                ],
-            },
+        locationMatch.$and.push({
+            $or: [
+                {
+                    country: filter.country,
+                },
+                {
+                    country: { $exists: false },
+                },
+            ],
         });
     }
-
-    pipeLine.push({
-        $unwind: {
-            path: '$region',
-            preserveNullAndEmptyArrays: true,
-        },
-    });
 
     if (filter.region) {
-        pipeLine.push({
-            $match: {
-                $or: [
-                    {
-                        region: filter.region,
-                    },
-                    {
-                        region: { $exists: false },
-                    },
-                ],
-            },
+        locationMatch.$and.push({
+            $or: [
+                {
+                    region: filter.region,
+                },
+                {
+                    region: { $exists: false },
+                },
+            ],
         });
     }
-
-    pipeLine.push({
-        $unwind: {
-            path: '$subRegion',
-            preserveNullAndEmptyArrays: true,
-        },
-    });
 
     if (filter.subRegion) {
-        pipeLine.push({
-            $match: {
-                $or: [
-                    {
-                        subRegion: filter.subRegion,
-                    },
-                    {
-                        subRegion: { $exists: false },
-                    },
-                ],
-            },
+        locationMatch.$and.push({
+            $or: [
+                {
+                    subRegion: filter.subRegion,
+                },
+                {
+                    subRegion: { $exists: false },
+                },
+            ],
         });
     }
 
-    pipeLine.push({
-        $unwind: {
-            path: '$branch',
-            preserveNullAndEmptyArrays: true,
-        },
-    });
+    if (filter.branch) {
+        locationMatch.$and.push({
+            $or: [
+                {
+                    branch: filter.branch,
+                },
+                {
+                    branch: { $exists: false },
+                },
+            ],
+        });
+    }
 
-    pipeLine.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'country',
-            foreignField: '_id',
-            as: 'country',
-        },
-    });
 
-    pipeLine.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'region',
-            foreignField: '_id',
-            as: 'region',
-        },
-    });
+    if (filter.position) {
+        locationMatch.$and.push({
+            $or: [
+                {
+                    position: filter.position,
+                },
+                {
+                    position: { $exists: false },
+                },
+            ],
+        });
+    }
 
-    pipeLine.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'subRegion',
-            foreignField: '_id',
-            as: 'subRegion',
-        },
-    });
+    if (locationMatch.$and.length) {
+        pipeLine.push({
+            $match: locationMatch,
+        });
+    }
 
     pipeLine.push({
         $lookup: {
@@ -154,172 +99,15 @@ module.exports = (req, res, next) => {
 
     pipeLine.push({
         $project: {
-            country: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$country',
-                            [
-
-                            ],
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        $arrayElemAt: [
-                            '$country',
-                            0,
-                        ],
-                    },
-                },
-            },
-            region: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$region',
-                            [
-
-                            ],
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        $arrayElemAt: [
-                            '$region',
-                            0,
-                        ],
-                    },
-                },
-            },
-            subRegion: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$subRegion',
-                            [
-
-                            ],
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        $arrayElemAt: [
-                            '$subRegion',
-                            0,
-                        ],
-                    },
-                },
-            },
+            country: 1,
+            region: 1,
+            subRegion: 1,
             branch: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$branch',
-                            [
-
-                            ],
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        $arrayElemAt: [
-                            '$branch',
-                            0,
-                        ],
-                    },
-                },
-            },
-            outlet: 1,
-            _id: 1,
-            origin: 1,
-            retailSegment: 1,
-            brand: 1,
-            variant: 1,
-            category: 1,
-            product: 1,
-            editedBy: 1,
-            createdBy: 1,
-            archived: 1,
-            type: 1,
-            status: 1,
-            configuration: 1,
-            priority: 1,
-            assignedTo: 1,
-            location: 1,
-            name: 1,
-            position: 1,
-            firstName: 1,
-            lastName: 1,
-        },
-    });
-
-    pipeLine.push({
-        $project: {
-            country: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$country',
-                            null,
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        _id: '$country._id',
-                        name: '$country.name',
-                    },
-                },
-            },
-            region: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$region',
-                            null,
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        _id: '$region._id',
-                        name: '$region.name',
-                        parent: '$region.parent',
-                    },
-                },
-            },
-            subRegion: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$subRegion',
-                            null,
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        _id: '$subRegion._id',
-                        name: '$subRegion.name',
-                        parent: '$subRegion.parent',
-                    },
-                },
-            },
-            branch: {
-                $cond: {
-                    if: {
-                        $eq: [
-                            '$branch',
-                            null,
-                        ],
-                    },
-                    then: null,
-                    else: {
-                        _id: '$branch._id',
-                        name: '$branch.name',
-                        subRegion: '$branch.subRegion',
-                        outlet: '$branch.outlet',
-                        retailSegment: '$branch.retailSegment',
-                    },
-                },
+                _id: 1,
+                name: 1,
+                subRegion: 1,
+                outlet: 1,
+                retailSegment: 1,
             },
             outlet: 1,
             _id: 1,
@@ -375,25 +163,67 @@ module.exports = (req, res, next) => {
         });
     }
 
-    if (filter.position) {
-        pipeLine.push({
-            $match: {
-                $or: [
-                    {
-                        position: filter.position,
-                    },
-                    {
-                        position: { $exists: false },
-                    },
-                ],
-            },
-        });
-    }
+    pipeLine.push({
+        $project: {
+            outlet: '$branch.outlet',
+            retailSegment: '$branch.retailSegment',
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            branch: 1,
+            _id: 1,
+            origin: 1,
+            brand: 1,
+            variant: 1,
+            category: 1,
+            product: 1,
+            editedBy: 1,
+            createdBy: 1,
+            archived: 1,
+            type: 1,
+            status: 1,
+            configuration: 1,
+            priority: 1,
+            assignedTo: 1,
+            location: 1,
+            name: 1,
+            position: 1,
+            firstName: 1,
+            lastName: 1,
+        },
+    });
+
+    pipeLine.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'country',
+            foreignField: '_id',
+            as: 'country',
+        },
+    });
+
+    pipeLine.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'region',
+            foreignField: '_id',
+            as: 'region',
+        },
+    });
+
+    pipeLine.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'subRegion',
+            foreignField: '_id',
+            as: 'subRegion',
+        },
+    });
 
     pipeLine.push({
         $lookup: {
             from: 'outlets',
-            localField: 'branch.outlet',
+            localField: 'outlet',
             foreignField: '_id',
             as: 'outlet',
         },
@@ -402,7 +232,7 @@ module.exports = (req, res, next) => {
     pipeLine.push({
         $lookup: {
             from: 'retailSegments',
-            localField: 'branch.retailSegment',
+            localField: 'retailSegment',
             foreignField: '_id',
             as: 'retailSegment',
         },
@@ -503,6 +333,20 @@ module.exports = (req, res, next) => {
 
     pipeLine.push({
         $project: {
+            country: {
+                _id: 1,
+                name: 1,
+            },
+            region: {
+                _id: 1,
+                name: 1,
+                parent: 1,
+            },
+            subRegion: {
+                _id: 1,
+                name: 1,
+                parent: 1,
+            },
             outlet: {
                 $cond: {
                     if: {
@@ -549,9 +393,6 @@ module.exports = (req, res, next) => {
                 },
             },
             _id: 1,
-            country: 1,
-            region: 1,
-            subRegion: 1,
             branch: 1,
             origin: 1,
             brand: 1,
@@ -570,84 +411,6 @@ module.exports = (req, res, next) => {
             name: 1,
             firstName: 1,
             lastName: 1,
-        },
-    });
-
-    pipeLine.push({
-        $group: {
-            _id: '$_id',
-            country: {
-                $addToSet: '$country',
-            },
-            region: {
-                $addToSet: '$region',
-            },
-            subRegion: {
-                $addToSet: '$subRegion',
-            },
-            branch: {
-                $addToSet: '$branch',
-            },
-            origin: {
-                $first: '$origin',
-            },
-            retailSegment: {
-                $first: '$retailSegment',
-            },
-            outlet: {
-                $first: '$outlet',
-            },
-            brand: {
-                $first: '$brand',
-            },
-            variant: {
-                $first: '$variant',
-            },
-            category: {
-                $first: '$category',
-            },
-            product: {
-                $first: '$product',
-            },
-            editedBy: {
-                $first: '$editedBy',
-            },
-            createdBy: {
-                $first: '$createdBy',
-            },
-            archived: {
-                $first: '$archived',
-            },
-            type: {
-                $first: '$type',
-            },
-            status: {
-                $first: '$status',
-            },
-            configuration: {
-                $first: '$configuration',
-            },
-            priority: {
-                $first: '$priority',
-            },
-            assignedTo: {
-                $first: '$assignedTo',
-            },
-            location: {
-                $first: '$location',
-            },
-            name: {
-                $first: '$name',
-            },
-            position: {
-                $first: '$position',
-            },
-            firstName: {
-                $first: '$firstName',
-            },
-            lastName: {
-                $first: '$lastName',
-            },
         },
     });
 
@@ -701,32 +464,6 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
-            _id: 1,
-            origin: 1,
-            retailSegment: 1,
-            outlet: 1,
-            brand: 1,
-            variant: 1,
-            category: 1,
-            product: 1,
-            editedBy: 1,
-            createdBy: 1,
-            archived: 1,
-            type: 1,
-            status: 1,
-            configuration: 1,
-            priority: 1,
-            assignedTo: 1,
-            location: 1,
-            name: 1,
-            position: 1,
-            firstName: 1,
-            lastName: 1,
-        },
-    });
-
-    pipeLine.push({
-        $project: aggregationHelper.getProjection({
             personnel: {
                 _id: '$_id',
                 name: {
@@ -738,7 +475,10 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
-        }),
+            position: 1,
+            retailSegment: 1,
+            outlet: 1,
+        },
     });
 
     pipeLine.push({
@@ -755,6 +495,253 @@ module.exports = (req, res, next) => {
         },
     });
 
+    pipeLine.push({
+        $project: {
+            country: {
+                $reduce: {
+                    input: '$country',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            region: {
+                $reduce: {
+                    input: '$region',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            subRegion: {
+                $reduce: {
+                    input: '$subRegion',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            branch: {
+                $reduce: {
+                    input: '$branch',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            position: 1,
+            retailSegment: 1,
+            outlet: 1,
+            personnel: 1,
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            country: 1,
+            region: {
+                $let: {
+                    vars: {
+                        setCountry: filter.country && filter.country.$in.length ? filter.country.$in : {
+                            $map: {
+                                input: '$country',
+                                as: 'item',
+                                in: '$$item._id',
+                            },
+                        },
+                    },
+                    in: {
+                        $filter: {
+                            input: '$region',
+                            as: 'item',
+                            cond: {
+                                $setIsSubset: [['$$item.parent'], '$$setCountry'],
+                            },
+                        },
+                    },
+                },
+            },
+            subRegion: 1,
+            branch: 1,
+            position: 1,
+            retailSegment: 1,
+            outlet: 1,
+            personnel: 1,
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            country: 1,
+            region: 1,
+            subRegion: {
+                $let: {
+                    vars: {
+                        setRegion: filter.region && filter.region.$in.length ? filter.region.$in : {
+                            $map: {
+                                input: '$region',
+                                as: 'item',
+                                in: '$$item._id',
+                            },
+                        },
+                    },
+                    in: {
+                        $filter: {
+                            input: '$subRegion',
+                            as: 'item',
+                            cond: {
+                                $setIsSubset: [['$$item.parent'], '$$setRegion'],
+                            },
+                        },
+                    },
+                },
+            },
+            branch: 1,
+            retailSegment: 1,
+            outlet: 1,
+            position: 1,
+            personnel: 1,
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            branch: {
+                $let: {
+                    vars: {
+                        setSubRegion: filter.subRegion && filter.subRegion.$in.length ? filter.subRegion.$in : {
+                            $map: {
+                                input: '$subRegion',
+                                as: 'item',
+                                in: '$$item._id',
+                            },
+                        },
+                    },
+                    in: {
+                        $filter: {
+                            input: '$branch',
+                            as: 'item',
+                            cond: {
+                                $setIsSubset: [['$$item.subRegion'], '$$setSubRegion'],
+                            },
+                        },
+                    },
+                },
+            },
+            retailSegment: 1,
+            outlet: 1,
+            position: 1,
+            personnel: 1,
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            branch: 1,
+            retailSegment: {
+                $let: {
+                    vars: {
+                        setRetailSegment: filter.retailSegment && filter.retailSegment.$in.length ? filter.retailSegment.$in : {
+                            $map: {
+                                input: '$branch',
+                                as: 'item',
+                                in: '$$item.retailSegment',
+                            },
+                        },
+                    },
+                    in: {
+                        $filter: {
+                            input: '$retailSegment',
+                            as: 'item',
+                            cond: {
+                                $setIsSubset: [['$$item._id'], '$$setRetailSegment'],
+                            },
+                        },
+                    },
+                },
+            },
+            outlet: 1,
+            position: 1,
+            personnel: 1,
+        },
+    });
+
+    pipeLine.push({
+        $project: {
+            country: 1,
+            region: 1,
+            subRegion: 1,
+            branch: 1,
+            retailSegment: 1,
+            outlet: {
+                $let: {
+                    vars: {
+                        setOutlet: filter.outlet && filter.outlet.$in.length ? filter.outlet.$in : {
+                            $map: {
+                                input: '$branch',
+                                as: 'item',
+                                in: '$$item.outlet',
+                            },
+                        },
+                    },
+                    in: {
+                        $filter: {
+                            input: '$outlet',
+                            as: 'item',
+                            cond: {
+                                $setIsSubset: [['$$item._id'], '$$setOutlet'],
+                            },
+                        },
+                    },
+                },
+            },
+            position: 1,
+            personnel: 1,
+        },
+    });
+
     const aggregation = PersonnelModel.aggregate(pipeLine);
 
     aggregation.options = {
@@ -768,31 +755,6 @@ module.exports = (req, res, next) => {
 
         result = result[0] || {};
 
-        const respUniqueIterator = function (item) {
-            return item && item._id && item._id.toString && item._id.toString();
-        };
-
-        const response = {
-            country: (result.country && _.uniq(_.flatten(result.country), false, respUniqueIterator)) || [],
-            region: (result.region && _.uniq(_.flatten(result.region), false, respUniqueIterator)) || [],
-            subRegion: (result.subRegion && _.uniq(_.flatten(result.subRegion), false, respUniqueIterator)) || [],
-            branch: (result.branch && _.uniq(_.flatten(result.branch), false, respUniqueIterator)) || [],
-            retailSegment: (result.retailSegment && _.uniq(result.retailSegment, false, respUniqueIterator)) || [],
-            outlet: (result.outlet && _.uniq(result.outlet, false, respUniqueIterator)) || [],
-            personnel: result.personnel || [],
-            position: (result.position && _.uniq(result.position, false, respUniqueIterator)) || [],
-        };
-
-        Object.keys(response).forEach((key) => {
-            if (response[key]) {
-                for (let i = response[key].length - 1; i >= 0; i--) {
-                    if (!response[key][i] || !response[key][i]._id) {
-                        response[key].splice(i, 1);
-                    }
-                }
-            }
-        });
-
-        res.status(200).send(response);
+        res.status(200).send(result);
     });
 };
