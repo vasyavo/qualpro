@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const nconf = require('nconf');
 const cluster = require('cluster');
+const AbstractScheduler = require('abstract-scheduler').api;
 
 const config = {};
 
@@ -11,6 +12,8 @@ config.logLevel = process.env.LOG_LEVEL || 'info';
 config.isTest = process.env.NODE_ENV === 'test';
 
 config.schedulerHost = process.env.SCHEDULER_HOST || null;
+
+AbstractScheduler.setUrl(config.schedulerHost);
 
 // at this moment environment variables will be imported from .env.development
 // if NODE_ENV not provided then dotenv will import variables from .env

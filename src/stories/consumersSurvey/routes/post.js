@@ -7,9 +7,9 @@ const ACL_MODULES = require('../../../constants/aclModulesNames');
 const getByIdAggr = require('../reusable-components/getByIdAggr');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType');
 const SchedulerModel = require('./../../scheduler/model');
-const requestService = require('../../scheduler/request');
 const ActivityLog = require('./../../push-notifications/activityLog');
 const extractBody = require('./../../../utils/extractBody');
+const AbstractScheduler = require('abstract-scheduler').api;
 
 module.exports = (req, res, next) => {
     const session = req.session;
@@ -94,10 +94,8 @@ module.exports = (req, res, next) => {
                 } else {
                     ActivityLog.emit('marketing:consumer-survey:published', eventPayload);
 
-                    requestService.post({
-                        json: {
-                            date: body.dueDate,
-                        },
+                    AbstractScheduler.register({
+                        date: body.dueDate,
                     }, (err, response) => {
                         if (!err) {
                             const taskSchedulerModel = new SchedulerModel();
