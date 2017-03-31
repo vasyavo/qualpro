@@ -163,10 +163,18 @@ define([
 
             this.linkedForm = null;
             this.model.set('form', null);
-            this.changed.formType = null;
             this.branchesForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
+
+            this.changed.assignedTo = null;
+            this.changed.formType = null;
+            this.changed.location = null;
+
+            $el.find('#assignDd').html('');
+            $el.find('#personnelLocation').html('');
+            $el.find('#personnelLocation').attr('data-location', '');
+
             $el.find('#formThumbnail').html('');
             $el.find('.formBlock').hide();
             this.showLinkForm();
