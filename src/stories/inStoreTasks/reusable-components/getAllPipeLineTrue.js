@@ -2,6 +2,7 @@ const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 
 module.exports = (options) => {
     const {
+        setSubordinateId,
         queryObject,
         positionFilter,
         isMobile,
@@ -49,6 +50,12 @@ module.exports = (options) => {
                     },
                     {
                         [location]: { $eq: null },
+                    },
+                    {
+                        assignedTo: { $in: setSubordinateId },
+                    },
+                    {
+                        'createdBy.user': { $eq: personnel._id },
                     },
                 ],
             });

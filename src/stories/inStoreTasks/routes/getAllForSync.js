@@ -23,6 +23,7 @@ const getImagesHelper = new GetImagesHelper();
 module.exports = function (req, res, next) {
     const session = req.session;
     const accessRoleLevel = session.level;
+    const userId = session.uId;
 
     function queryRun(personnel) {
         const query = req.query;
@@ -191,6 +192,7 @@ module.exports = function (req, res, next) {
         let positionFilter;
         let aggregation;
         let ids;
+        const setSubordinateId = [];
 
         if (query._ids) {
             ids = query._ids.split(',');
@@ -230,12 +232,26 @@ module.exports = function (req, res, next) {
         }];
 
         async.waterfall([
-            function (cb) {
+            (cb) => {
+                PersonnelModel.distinct('_id', {
+                    manager: userId,
+                }).exec((err, setAvailableSubordinateId) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    setSubordinateId.push(...setAvailableSubordinateId);
+
+                    cb(null);
+                });
+            },
+            (cb) => {
                 pipeLine = getAllPipeLineTrue({
                     queryObject,
                     positionFilter,
                     isMobile: true,
                     personnel,
+                    setSubordinateId,
                 });
 
                 aggregation = ObjectiveModel.aggregate(pipeLine);
@@ -308,6 +324,12 @@ module.exports = function (req, res, next) {
                 setOptions.fields = fieldNames;
 
                 getImagesHelper.setIntoResult(setOptions, (response) => {
+                    const subordinatesId = setSubordinateId.map((ObjectId) => {
+                        return ObjectId.toString();
+                    });
+
+                    response.data = detectObjectivesForSubordinates(response.data, subordinatesId, userId);
+
                     next({ status: 200, body: response });
                 });
             });
