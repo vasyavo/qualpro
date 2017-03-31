@@ -7,6 +7,21 @@ const DomainModel = require('./../../../types/domain/model');
 const DomainCollection = require('./../../../types/domain/collection');
 const mapCurrency = require('./../utils/mapCurrency');
 
+const normalize = (callback) => {
+    DomainCollection.updateMany({}, {
+        $set: {
+            ID: null,
+            xlsParent: null,
+        },
+    }, (err) => {
+        if (err) {
+            return callback(err);
+        }
+
+        callback(null);
+    });
+};
+
 module.exports = (callback) => {
     async.waterfall([
 
@@ -16,23 +31,7 @@ module.exports = (callback) => {
             async.waterfall([
 
                 // normalize collection
-                (cb) => {
-                    DomainCollection.updateMany({
-                        xlsParent: {
-                            $ne: null,
-                        },
-                    }, {
-                        $set: {
-                            xlsParent: null,
-                        },
-                    }, (err) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null);
-                    });
-                },
+                normalize,
 
                 fetchCurrency,
 
@@ -66,6 +65,7 @@ module.exports = (callback) => {
                         const query = {
                             'name.en': patch.name.en,
                             type: patch.type,
+                            archived: false,
                         };
 
                         patchRecord({
@@ -95,6 +95,8 @@ module.exports = (callback) => {
                         }, eachCb);
                     }, cb);
                 },
+
+                normalize,
 
             ], cb);
         },

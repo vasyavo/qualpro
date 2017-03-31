@@ -39,6 +39,7 @@ module.exports = (callback) => {
                     const query = {
                         'name.en': subRegion,
                         type: 'subRegion',
+                        archived: false,
                     };
 
                     DomainModel.findOne(query).select('_id').lean().exec(cb);
@@ -47,6 +48,7 @@ module.exports = (callback) => {
                 parallelJobs.retailSegment = (cb) => {
                     const query = {
                         'name.en': retailSegment,
+                        archived: false,
                     };
 
                     RetailSegmentModel.findOne(query).select('_id').lean().exec(cb);
@@ -55,6 +57,7 @@ module.exports = (callback) => {
                 parallelJobs.outlet = (cb) => {
                     const query = {
                         'name.en': outlet,
+                        archived: false,
                     };
 
                     OutletModel.findOne(query).select('_id').lean().exec(cb);
@@ -81,6 +84,7 @@ module.exports = (callback) => {
                         subRegion: patch.subRegion,
                         retailSegment: patch.retailSegment,
                         outlet: patch.outlet,
+                        archived: false,
                     };
 
                     patchRecord({
@@ -89,7 +93,6 @@ module.exports = (callback) => {
                         model: BranchModel,
                     }, (err) => {
                         if (err) {
-                            console.log(query, patch)
                             return eachCb(err);
                         }
 

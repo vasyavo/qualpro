@@ -9,7 +9,13 @@ const accessRoles = require('./../../../constants/aclRolesNames');
  * */
 
 module.exports = function * (options) {
-    const setCountry = options.setCountry.map(id => ObjectId(id));
+    const setCountry = options.setCountry.map((id) => {
+        if (typeof id === 'string') {
+            return ObjectId(id);
+        }
+
+        return id;
+    });
 
     const pipeline = [{
         $project: {
