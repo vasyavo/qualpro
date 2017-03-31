@@ -27,6 +27,7 @@ module.exports = (req, res, next) => {
         const queryObject = {
             context: CONTENT_TYPES.OBJECTIVES,
         };
+        const setSubordinateId = [];
 
         queryObject.$or = [
             {
@@ -41,48 +42,66 @@ module.exports = (req, res, next) => {
             },
         ];
 
-        const pipeLine = getAllPipelineTrue({
-            queryObject,
-            isMobile: true,
-            personnel,
-            currentUserLevel: accessRoleLevel,
-        });
-
-        ObjectiveModel.aggregate(pipeLine)
-            .allowDiskUse(true)
-            .exec((err, result) => {
-                if (err) {
-                    return next(err);
-                }
-
-                const body = result.length ?
-                    result[0] : { data: [], total: 0 };
-
-                body.data.forEach(model => {
-                    if (model.title) {
-                        model.title = {
-                            en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : '',
-                        };
+        async.waterfall([
+            (cb) => {
+                PersonnelModel.distinct('_id', {
+                    manager: userId,
+                }).exec((err, setAvailableSubordinateId) => {
+                    if (err) {
+                        return cb(err);
                     }
 
-                    if (model.description) {
-                        model.description = {
-                            en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : '',
-                        };
-                    }
+                    setSubordinateId.push(...setAvailableSubordinateId);
 
-                    if (model.companyObjective) {
-                        model.companyObjective = {
-                            en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
-                        };
-                    }
+                    cb(null);
+                });
+            },
+            (cb) => {
+                const pipeLine = getAllPipelineTrue({
+                    queryObject,
+                    isMobile: true,
+                    personnel,
+                    setSubordinateId,
+                    currentUserLevel: accessRoleLevel,
                 });
 
-                callback(null, body);
+                ObjectiveModel.aggregate(pipeLine)
+                    .allowDiskUse(true)
+                    .exec(cb);
+            },
+        ], (err, result) => {
+            if (err) {
+                return next(err);
+            }
+
+            const body = result.length ?
+                result[0] : { data: [], total: 0 };
+
+            body.data.forEach(model => {
+                if (model.title) {
+                    model.title = {
+                        en: model.title.en ? _.unescape(model.title.en) : '',
+                        ar: model.title.ar ? _.unescape(model.title.ar) : '',
+                    };
+                }
+
+                if (model.description) {
+                    model.description = {
+                        en: model.description.en ? _.unescape(model.description.en) : '',
+                        ar: model.description.ar ? _.unescape(model.description.ar) : '',
+                    };
+                }
+
+                if (model.companyObjective) {
+                    model.companyObjective = {
+                        en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                        ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
+                    };
+                }
             });
+
+            callback(null, body);
+        });
     };
 
     const queryRun = (personnel, callback) => {

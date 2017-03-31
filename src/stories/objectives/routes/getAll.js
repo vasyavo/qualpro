@@ -231,6 +231,9 @@ module.exports = (req, res, next) => {
         const filterSearch = filter.globalSearch || '';
         const isMobile = req.isMobile;
 
+        const myCC = filter.myCC;
+
+        delete filter.myCC;
         delete filter.cover;
         delete filter.globalSearch;
 
@@ -241,6 +244,7 @@ module.exports = (req, res, next) => {
         });
 
         const positionFilter = {};
+        const setSubordinateId = [];
 
         if (queryObject.position && queryObject.position.$in) {
             positionFilter.$or = [
@@ -253,49 +257,75 @@ module.exports = (req, res, next) => {
 
         queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
-        const pipeline = getAllPipelineTrue({
-            queryObject,
-            positionFilter,
-            filterSearch,
-            isMobile,
-            skip,
-            limit,
-            personnel,
-        });
+        async.waterfall([
+            (cb) => {
+                if (myCC || isMobile) {
+                    return PersonnelModel.distinct('_id', {
+                        manager: userId,
+                    }).exec((err, setAvailableSubordinateId) => {
+                        if (err) {
+                            return cb(err);
+                        }
 
-        ObjectiveModel.aggregate(pipeline)
-            .allowDiskUse(true)
-            .exec((err, result) => {
-                if (err) {
-                    return callback(err);
+                        setSubordinateId.push(...setAvailableSubordinateId);
+
+                        cb(null);
+                    });
                 }
 
-                const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                cb(null);
+            },
+            (cb) => {
+                if (myCC) {
+                    _.set(queryObject, '$and[0].assignedTo.$in', setSubordinateId);
+                }
 
-                body.data.forEach(model => {
-                    if (model.title) {
-                        model.title = {
-                            en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : '',
-                        };
-                    }
-                    if (model.description) {
-                        model.description = {
-                            en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : '',
-                        };
-                    }
-                    if (model.companyObjective) {
-                        model.companyObjective = {
-                            en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
-                        };
-                    }
+                const pipeline = getAllPipelineTrue({
+                    queryObject,
+                    positionFilter,
+                    filterSearch,
+                    isMobile,
+                    skip,
+                    limit,
+                    personnel,
+                    setSubordinateId,
                 });
 
-                callback(null, body);
+                ObjectiveModel.aggregate(pipeline)
+                    .allowDiskUse(true)
+                    .exec(cb);
+            },
+        ], (err, result) => {
+            if (err) {
+                return callback(err);
+            }
+
+            const body = result.length ?
+                result[0] : { data: [], total: 0 };
+
+            body.data.forEach(model => {
+                if (model.title) {
+                    model.title = {
+                        en: model.title.en ? _.unescape(model.title.en) : '',
+                        ar: model.title.ar ? _.unescape(model.title.ar) : '',
+                    };
+                }
+                if (model.description) {
+                    model.description = {
+                        en: model.description.en ? _.unescape(model.description.en) : '',
+                        ar: model.description.ar ? _.unescape(model.description.ar) : '',
+                    };
+                }
+                if (model.companyObjective) {
+                    model.companyObjective = {
+                        en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                        ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
+                    };
+                }
             });
+
+            callback(null, body);
+        });
     };
 
     async.waterfall([

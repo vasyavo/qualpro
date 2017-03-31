@@ -5,6 +5,7 @@ const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
 module.exports = (options) => {
     const {
+        setSubordinateId,
         queryObject,
         positionFilter,
         filterSearch,
@@ -66,6 +67,12 @@ module.exports = (options) => {
                     },
                     {
                         [location]: { $eq: null },
+                    },
+                    {
+                        assignedTo: { $in: setSubordinateId },
+                    },
+                    {
+                        'createdBy.user': { $eq: personnel._id },
                     },
                 ],
             });
