@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
-    "abstract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git#0.3",
+    "abstract-scheduler": "git+https://52d4d7de06e3b8563f0aac24602e217c66395d6c:x-oauth-basic@github.com/rhinobuccaneers/abstract-scheduler.git#0.4",
     "async": "2.1.2",
     "aws-sdk": "2.2.42",
     "bcryptjs": "2.2.2",
