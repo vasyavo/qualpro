@@ -1,7 +1,7 @@
 const ObjectId = require('mongoose').Types.ObjectId;
 const ObjectiveModel = require('./../types/objective/model');
 const SchedulerModel = require('./../stories/scheduler/model');
-const SchedulerRequest = require('./../stories/scheduler/request');
+const AbstractScheduler = require('abstract-scheduler').api;
 const redis = require('./../helpers/redisClient');
 
 var VisibilityForm = function () {
@@ -832,10 +832,8 @@ var VisibilityForm = function () {
                             const dueDate = new Date();
 
                             dueDate.setSeconds(dueDate.getSeconds() + 10);
-                            SchedulerRequest.post({
-                                json : {
-                                    date: dueDate.getSeconds(),
-                                },
+                            AbstractScheduler.register({
+                                date: dueDate,
                             }, cb);
                         },
 
@@ -1054,10 +1052,8 @@ var VisibilityForm = function () {
                             const dueDate = new Date();
 
                             dueDate.setSeconds(dueDate.getSeconds() + 10);
-                            SchedulerRequest.post({
-                                json : {
-                                    date: dueDate.getSeconds(),
-                                },
+                            AbstractScheduler.register({
+                                date: dueDate.getSeconds(),
                             }, cb);
                         },
 
