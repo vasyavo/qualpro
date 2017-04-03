@@ -50,7 +50,6 @@ module.exports = function(app) {
     var competitorPromotion = require('./competitorPromotion')();
     var achievementForm = require('./achievementForm')();
     var newProductLaunch = require('./newProductLaunch')();
-    var activityList = require('./activityList')();
     var originRouter = require('./origin')();
     var contactUs = require('./contactUs')();
 
