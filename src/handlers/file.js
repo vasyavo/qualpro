@@ -218,7 +218,8 @@ module.exports = function() {
                     deleteFile(outputPath);
 
                     logger.error(err);
-                }).exec();
+                })
+                .exec();
         }
 
 
@@ -273,7 +274,7 @@ module.exports = function() {
                         fileOptions._id = fileId;
                         filesId.push(fileId);
                         cb();
-                    })
+                    });
                 },
                 // if video file
                 (cb) => {
@@ -289,7 +290,7 @@ module.exports = function() {
                             timestamps: ['1%'],
                             size: '150x?',
                             folder: '/tmp',
-                            filename  : `${fileName}.png`
+                            filename: `${fileName}.png`,
                         })
                         .on('start', (command) => {
                             logger.info(command);
@@ -308,13 +309,13 @@ module.exports = function() {
                             processVideo(fileOptions);
 
                             cb(null);
-                        }).on('error', (err) => {
-
-                        deleteFile(thumbnailPath);
+                        })
+                        .on('error', (err) => {
+                            deleteFile(thumbnailPath);
                             err.status = 415;
                             cb(err);
                         });
-                },
+                    },
 
                 // if image file
                 (cb) => {
@@ -324,9 +325,9 @@ module.exports = function() {
 
                     const convertOptions = {
                         srcData: fs.readFileSync(fileOptions.tempPath, 'binary'),
-                        width  : 150,
+                        width: 150,
                         quality: 1,
-                        format : fileOptions.extension
+                        format: fileOptions.extension,
                     };
 
                     im.resize(convertOptions, (err, stdout) => {
@@ -421,7 +422,6 @@ module.exports = function() {
                 },
 
             ], eachCb);
-
         }, (err) => {
             if (err) {
                 return callback(err);
