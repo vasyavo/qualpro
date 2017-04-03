@@ -89,15 +89,6 @@ define([
             this.attachments = _.pluck(this.model.get('attachments'), '_id');
             this.files = new FileCollection(this.model.get('attachments'), true);
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
-
-            var form = this.model.get('form');
-
-            if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[1]._id) {
-                this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[1];
-            } else if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[0]._id) {
-                this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[0];
-            }
-
             this.makeRender();
 
             if (this.parentObjectiveId) {
@@ -162,8 +153,6 @@ define([
             var $el = this.$el;
 
             this.linkedForm = null;
-            this.model.set('form', null);
-            this.changed.formType = null;
             this.branchesForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
@@ -185,8 +174,14 @@ define([
                 return;
             }
 
-            form = this.linkedForm;
-            contentType = form._id;
+            if (this.duplicate) {
+                form = this.linkedForm;
+                contentType = form._id;
+            } else {
+                form = modelJSON.form;
+                id = form._id;
+                contentType = form.contentType;
+            }
 
             if (contentType === 'visibility' && modelJSON.createdBy.user._id === App.currentUser._id) {
                 description = {
@@ -317,7 +312,6 @@ define([
 
             this.linkFormView.on('formLinked', function (modelJSON) {
                 self.linkedForm = modelJSON;
-                self.changed.formType = modelJSON._id;
 
                 self.$el.find('#formThumbnail').append(self.formTemplate({
                     name       : modelJSON.name[self.currentLanguage],
@@ -1011,13 +1005,13 @@ define([
                 }
 
                 if (jsonPersonnels.length && !self.linkedForm) {
-                    if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual' && self.model.get('objectiveType') !== 'individual') {
+                    if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual') {
                         return;
                     }
 
                     self.showLinkForm();
                 } else {
-                    self.unlinkForm();
+                    self.hideLinkForm();
                 }
             });
         },
@@ -1192,8 +1186,7 @@ define([
 
             jsonModel.duplicate = this.duplicate;
             formString = this.template({
-                jsonModel: jsonModel,
-                linkedForm: this.linkedForm,
+                jsonModel  : jsonModel,
                 translation: this.translation
             });
 
