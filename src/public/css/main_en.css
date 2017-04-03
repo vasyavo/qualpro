@@ -871,8 +871,8 @@ a {
 }
 .filterName .triDown:after {
   position: absolute;
-  right: 7px;
-  height: 41px;
+  right: 10px;
+  top: 3px;
   width: 10px;
   color: #cfd8dc;
   transition: all ease .2s;
@@ -4591,7 +4591,7 @@ input[type=number]::-webkit-outer-spin-button {
   height: calc(100% - 50px);
 }
 .competitorBrandingPreview .blockObjective {
-  height: calc(100% - 110px);
+  height: 100%;
 }
 .competitorBrandingPreview .blockObjective .block-left,
 .competitorBrandingPreview .blockObjective .block-right {
@@ -4659,7 +4659,7 @@ input[type=number]::-webkit-outer-spin-button {
   height: 100%;
 }
 .productLaunchPreview {
-  height: calc(100% - 50px);
+  height: calc(100% - 100px);
 }
 .productLaunchPreview .block-left,
 .productLaunchPreview .block-right,
