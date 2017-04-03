@@ -285,22 +285,6 @@ module.exports = (req, res, next) => {
             waterfall.push(updateObjectiveWithForm);
         }
 
-        if ($set.formType === null) {
-            const updateObjectiveWithForm = (objective, cb) => {
-                objective.form = null;
-
-                objective.save((err) => {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null, objective);
-                });
-            };
-
-            waterfall.push(updateObjectiveWithForm);
-        }
-
         if ($set.status && $set.status !== OBJECTIVE_STATUSES.CLOSED) {
             waterfall.push(updateParents);
         }

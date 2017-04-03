@@ -63,8 +63,7 @@ define([
             'click #actionHolder:not(ul)': 'showHideActionDropdown',
             'click .formThumbnail'       : 'openForm',
             'click .fileThumbnailItem'   : 'showFilePreviewDialog',
-            'click #downloadFile'        : 'stopPropagation',
-            'click #personnelLocation'   : 'changePersonnelLocation',
+            'click #downloadFile'        : 'stopPropagation'
         },
 
         initialize: function (options) {
@@ -90,15 +89,6 @@ define([
             this.attachments = _.pluck(this.model.get('attachments'), '_id');
             this.files = new FileCollection(this.model.get('attachments'), true);
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
-
-            var form = this.model.get('form');
-
-            if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[1]._id) {
-                this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[1];
-            } else if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[0]._id) {
-                this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[0];
-            }
-
             this.makeRender();
 
             if (this.parentObjectiveId) {
@@ -163,8 +153,6 @@ define([
             var $el = this.$el;
 
             this.linkedForm = null;
-            this.model.set('form', null);
-            this.changed.formType = null;
             this.branchesForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
@@ -186,8 +174,14 @@ define([
                 return;
             }
 
-            form = this.linkedForm;
-            contentType = form._id;
+            if (this.duplicate) {
+                form = this.linkedForm;
+                contentType = form._id;
+            } else {
+                form = modelJSON.form;
+                id = form._id;
+                contentType = form.contentType;
+            }
 
             if (contentType === 'visibility' && modelJSON.createdBy.user._id === App.currentUser._id) {
                 description = {
@@ -318,7 +312,6 @@ define([
 
             this.linkFormView.on('formLinked', function (modelJSON) {
                 self.linkedForm = modelJSON;
-                self.changed.formType = modelJSON._id;
 
                 self.$el.find('#formThumbnail').append(self.formTemplate({
                     name       : modelJSON.name[self.currentLanguage],
@@ -931,7 +924,6 @@ define([
         locationSelected: function (data) {
             var $personnelLocation = this.$el.find('#personnelLocation');
             var locations = this.locations;
-            var self = this;
 
             locations.country = data.country;
             locations.region = data.region;
@@ -945,14 +937,17 @@ define([
 
             this.changed.location = data.location;
 
-            this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
-                return self.locations.branch.indexOf(branch._id || branch) !== -1;
-            });
-            this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
-                return item._id || item;
-            });
-
-            this.unlinkForm();
+            if (this.duplicate) {
+                this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
+                    return self.locations.branch.indexOf(branch._id) !== -1;
+                });
+                this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
+                    return item._id;
+                });
+                this.branchesForVisibility = _.map(this.branchesForVisibility, function (branch) {
+                    return branch.name.currentLanguage;
+                });
+            }
         },
 
         showPersonnelView: function () {
@@ -1001,43 +996,24 @@ define([
                 self.$el.find('#assignDd').html(personnelsNames);
                 self.changed.assignedTo = personnelsIds;
 
-                self.branchesForVisibility = [];
+                if (this.duplicate) {
+                    self.branchesForVisibility = [];
 
-                jsonPersonnels.forEach(function (personnel) {
-                    self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
-                });
+                    jsonPersonnels.forEach(function (personnel) {
+                        self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                    });
+                }
 
                 if (jsonPersonnels.length && !self.linkedForm) {
-                    if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual' && self.model.get('objectiveType') !== 'individual') {
+                    if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual') {
                         return;
                     }
 
                     self.showLinkForm();
                 } else {
-                    self.unlinkForm();
+                    self.hideLinkForm();
                 }
             });
-        },
-
-        changePersonnelLocation: function () {
-            var personnels = this.model.get('assignedTo');
-            var personnelsIds = this.changed.assignedTo || _.pluck(personnels, '_id');
-            var self = this;
-
-            this.treeView = new TreeView({
-                ids        : personnelsIds,
-                translation: this.translation
-            });
-
-            this.treeView.on('locationSelected', this.locationSelected, this);
-
-            if (!this.branchesForVisibility || (this.branchesForVisibility && !this.branchesForVisibility.length) ) {
-                this.branchesForVisibility = [];
-
-                personnels.forEach(function (personnel) {
-                    self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
-                });
-            }
         },
 
         showLinkedForm: function (form) {
@@ -1210,8 +1186,7 @@ define([
 
             jsonModel.duplicate = this.duplicate;
             formString = this.template({
-                jsonModel: jsonModel,
-                linkedForm: this.linkedForm,
+                jsonModel  : jsonModel,
                 translation: this.translation
             });
 

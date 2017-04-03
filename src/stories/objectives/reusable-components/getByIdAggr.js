@@ -38,7 +38,7 @@ module.exports = (options, callback) => {
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'personnels',
         key: 'assignedTo',
-        addProjection: ['firstName', 'lastName', 'branch'].concat(isMobile ? [] : ['position', 'accessRole']),
+        addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
@@ -105,7 +105,6 @@ module.exports = (options, callback) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
-                    branch: 1,
                 },
             },
         }));
@@ -120,7 +119,6 @@ module.exports = (options, callback) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
-                    branch: 1,
                 },
             },
         }));

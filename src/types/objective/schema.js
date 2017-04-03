@@ -69,11 +69,8 @@ const schema = new Schema({
     comments: [{ type: ObjectId, ref: CONTENT_TYPES.COMMENT, default: null }],
     attachments: { type: Array, default: [] },
     form: {
-        type: {
-            _id: { type: ObjectId },
-            contentType: { type: String, enum: ['visibility', 'distribution'] }
-        },
-        default: null,
+        _id: { type: ObjectId },
+        contentType: { type: String, enum: ['visibility', 'distribution'] }
     },
     editedBy: {
         user: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null },
