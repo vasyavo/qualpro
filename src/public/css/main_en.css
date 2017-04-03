@@ -7425,6 +7425,9 @@ table.list .withImg img {
   position: relative;
   min-height: 250px;
 }
+.previousRating .absoluteWrap {
+  min-height: 10px;
+}
 .absoluteWrap table thead tr th:first-child {
   border-left: 1px solid #cfd8dc;
 }
@@ -11349,4 +11352,7 @@ label[for=searchInputnoCT]::after {
   overflow: initial;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.scroll-fix.consumersSurveyTableWrap .mCSB_container{
+  padding-bottom: 120px;
 }
