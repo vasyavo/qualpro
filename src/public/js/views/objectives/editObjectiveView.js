@@ -176,7 +176,7 @@ define([
         openForm: function () {
             var modelJSON = this.model.toJSON();
             var form;
-            var id;
+            var id = modelJSON && modelJSON.form && modelJSON.form._id;
             var contentType;
             var description;
             var self = this;
