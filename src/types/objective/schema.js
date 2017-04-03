@@ -73,11 +73,8 @@ const schema = new Schema({
         default: [],
     },
     form: {
-        type: {
-            _id: { type: ObjectId },
-            contentType: { type: String, enum: ['visibility', 'distribution'] }
-        },
-        default: null,
+        _id: { type: ObjectId },
+        contentType: { type: String, enum: ['visibility', 'distribution'] }
     },
     createdBy: {
         user: {
