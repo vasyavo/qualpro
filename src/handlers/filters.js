@@ -397,7 +397,7 @@ const Filters = function() {
         if (filter.subRegion) {
             pipeLine.push({
                 $match: {
-                    region: filter.subRegion,
+                    subRegion: filter.subRegion,
                 },
             });
         }
@@ -481,7 +481,7 @@ const Filters = function() {
         if (filter.retailSegment) {
             pipeLine.push({
                 $match: {
-                    region: filter.retailSegment,
+                    retailSegment: filter.retailSegment,
                 },
             });
         }
@@ -564,7 +564,7 @@ const Filters = function() {
         if (filter.outlet) {
             pipeLine.push({
                 $match: {
-                    region: filter.outlet,
+                    outlet: filter.outlet,
                 },
             });
         }
@@ -647,7 +647,7 @@ const Filters = function() {
         if (filter.branch) {
             pipeLine.push({
                 $match: {
-                    region: filter.branch,
+                    branch: filter.branch,
                 },
             });
         }
