@@ -62,7 +62,8 @@ define([
             'click #actionHolder:not(ul)': 'showHideActionDropdown',
             'click .formThumbnail'       : 'openForm',
             'click .fileThumbnailItem'   : 'showFilePreviewDialog',
-            'click #downloadFile'        : 'stopPropagation'
+            'click #downloadFile'        : 'stopPropagation',
+            'click #personnelLocation'   : 'changePersonnelLocation',
         },
 
         initialize: function (options) {
@@ -162,18 +163,10 @@ define([
 
             this.linkedForm = null;
             this.model.set('form', null);
+            this.changed.formType = null;
             this.branchesForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
-
-            this.changed.assignedTo = null;
-            this.changed.formType = null;
-            this.changed.location = null;
-
-            $el.find('#assignDd').html('');
-            $el.find('#personnelLocation').html('');
-            $el.find('#personnelLocation').attr('data-location', '');
-
             $el.find('#formThumbnail').html('');
             $el.find('.formBlock').hide();
             this.showLinkForm();
@@ -937,6 +930,7 @@ define([
         locationSelected: function (data) {
             var $personnelLocation = this.$el.find('#personnelLocation');
             var locations = this.locations;
+            var self = this;
 
             locations.country = data.country;
             locations.region = data.region;
@@ -950,17 +944,14 @@ define([
 
             this.changed.location = data.location;
 
-            if (this.duplicate) {
-                this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
-                    return self.locations.branch.indexOf(branch._id) !== -1;
-                });
-                this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
-                    return item._id;
-                });
-                this.branchesForVisibility = _.map(this.branchesForVisibility, function (branch) {
-                    return branch.name.currentLanguage;
-                });
-            }
+            this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
+                return self.locations.branch.indexOf(branch._id || branch) !== -1;
+            });
+            this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
+                return item._id || item;
+            });
+
+            this.unlinkForm();
         },
 
         showPersonnelView: function () {
@@ -1009,13 +1000,11 @@ define([
                 self.$el.find('#assignDd').html(personnelsNames);
                 self.changed.assignedTo = personnelsIds;
 
-                if (this.duplicate) {
-                    self.branchesForVisibility = [];
+                self.branchesForVisibility = [];
 
-                    jsonPersonnels.forEach(function (personnel) {
-                        self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
-                    });
-                }
+                jsonPersonnels.forEach(function (personnel) {
+                    self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                });
 
                 if (jsonPersonnels.length && !self.linkedForm) {
                     if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual' && self.model.get('objectiveType') !== 'individual') {
@@ -1027,6 +1016,27 @@ define([
                     self.unlinkForm();
                 }
             });
+        },
+
+        changePersonnelLocation: function () {
+            var personnels = this.model.get('assignedTo');
+            var personnelsIds = this.changed.assignedTo || _.pluck(personnels, '_id');
+            var self = this;
+
+            this.treeView = new TreeView({
+                ids        : personnelsIds,
+                translation: this.translation
+            });
+
+            this.treeView.on('locationSelected', this.locationSelected, this);
+
+            if (!this.branchesForVisibility || (this.branchesForVisibility && !this.branchesForVisibility.length) ) {
+                this.branchesForVisibility = [];
+
+                personnels.forEach(function (personnel) {
+                    self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                });
+            }
         },
 
         showLinkedForm: function (form) {
