@@ -7,7 +7,8 @@ function (_, otherConstants) {
     var STATUSES = otherConstants.OBJECTIVE_STATUSES;
 
     var checkStatus = function (status, createdByUser, currentStatus) {
-        var currentUser = createdByUser._id === App.currentUser._id;
+        var coveredIds = App.currentUser.covered ? Object.keys(App.currentUser.covered) : [];
+        var currentUser = createdByUser._id === App.currentUser._id || coveredIds.indexOf(createdByUser._id) !== -1;
 
         if (status._id === STATUSES.CLOSED && currentStatus !== STATUSES.CLOSED && !currentUser) {
             return false;
