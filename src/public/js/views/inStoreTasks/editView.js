@@ -47,7 +47,6 @@ define([
         },
 
         events: {
-            'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
             'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
@@ -778,6 +777,7 @@ define([
             $endDate = $curEl.find('#dateEnd');
 
             $curEl.find('#mainForm').on('submit', {body: this.body, context: this}, this.formSubmit);
+            $curEl.find('#assignDd').on('click', _.debounce(this.showPersonnelView.bind(this), 2000, true));
 
             startDateObj = {
                 changeMonth: true,
