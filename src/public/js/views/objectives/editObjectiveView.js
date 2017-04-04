@@ -94,8 +94,10 @@ define([
 
             if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[1]._id) {
                 this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[1];
+                this.linkedForm.formId = form._id;
             } else if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[0]._id) {
                 this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[0];
+                this.linkedForm.formId = form._id;
             }
 
             this.makeRender();
@@ -162,11 +164,11 @@ define([
             var $el = this.$el;
 
             this.linkedForm = null;
-            this.model.set('form', null);
             this.changed.formType = null;
             this.branchesForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
+            this.model.unset('form');
             $el.find('#formThumbnail').html('');
             $el.find('.formBlock').hide();
             this.showLinkForm();
@@ -284,10 +286,10 @@ define([
                         translation : self.translation
                     };
 
-                    if (this.duplicate) {
-                        formOptions.forCreate = true;
-                    } else {
+                    if (id) {
                         formOptions.id = id;
+                    } else {
+                        formOptions.forCreate = true;
                     }
 
                     this.visibilityForm = new VisibilityEditView(formOptions);
@@ -1056,6 +1058,7 @@ define([
             var model = this.model.toJSON();
             var objectiveType = $curEl.find('#typeDd').attr('data-id');
             var selectedFiles;
+            var currentLanguage = App.currentUser.currentLanguage;
             var attachments;
             var files;
             var change;
@@ -1088,17 +1091,25 @@ define([
             this.model.setFieldsNames(this.translation, this.changed);
             this.model.validate(this.changed, function (err) {
                 if (err && err.length) {
-                    App.renderErrors(err);
-                } else {
-                    if (self.changed.attachments) {
-                        self.changed.attachments = _.compact(self.changed.attachments);
-                        self.changed.attachments = self.changed.attachments.length ? self.changed.attachments : [];
-                    }
-
-                    self.changed.saveObjective = options.save;
-
-                    self.$el.find('#mainForm').submit();
+                    return App.renderErrors(err);
                 }
+
+                var objectiveType = self.changed.objectiveType || self.model.get('objectiveType');
+
+                if (App.currentUser.accessRole.level === 2 && !self.linkedForm) {
+                    return App.render({type: 'error', message: ERROR_MESSAGES.linkSomeForm[currentLanguage]});
+                } else if (objectiveType === 'individual' && !self.linkedForm) {
+                    return App.render({type: 'error', message: ERROR_MESSAGES.linkSomeForm[currentLanguage]});
+                }
+
+                if (self.changed.attachments) {
+                    self.changed.attachments = _.compact(self.changed.attachments);
+                    self.changed.attachments = self.changed.attachments.length ? self.changed.attachments : [];
+                }
+
+                self.changed.saveObjective = options.save;
+
+                self.$el.find('#mainForm').submit();
             });
 
         },
