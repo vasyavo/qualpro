@@ -687,7 +687,7 @@ var BranchHandler = function () {
                 const body = result.length ?
                     result[0] : { data: [], total: 0 };
 
-                result.data.forEach(element => {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
