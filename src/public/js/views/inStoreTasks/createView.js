@@ -45,7 +45,6 @@ define([
         imageSrc: '',
 
         events: {
-            'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
             'click #attachForm'          : 'linkVisibilityForm',
             'click #actionHolder:not(ul)': 'showHideActionDropdown',
@@ -499,6 +498,7 @@ define([
             $curEl.find('#' + titleIdToHide).hide();
             $curEl.find('#filesBlock').hide();
             $curEl.find('#mainForm').on('submit', {body: this.body, context: this}, this.formSubmit);
+            $curEl.find('#assignDd').on('click', _.debounce(this.showPersonnelView.bind(this), 2000, true));
 
             $startDate = $curEl.find('#dateStart');
             $endDate = $curEl.find('#dateEnd');

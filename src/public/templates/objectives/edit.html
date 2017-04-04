@@ -167,18 +167,15 @@
                     <div id="attachments" class="attachmentsBlock">
                         <div class="attachmentsHeader">
                             <span class="attachmentsDescription fontBold floatLeft "><%= translation.attachments %></span>
-                            <% if (!jsonModel.duplicate) {%>
-                            <input id="attachFile" type="button" value="<%= translation.attachFiles %>" class="btn greyBtn floatRight">
-                            <% } else { %>
+
                             <div id="actionHolder" class="actionHolder actionBtn floatRight">
                                 <span class="dropDown downArrow triUp"><%= translation.action %></span>
                                 <ul class="dropDownContent">
                                     <li id="attachFile" class="hasSubMenu"><%= translation.attachFiles %></li>
-                                    <li id="attachForm" class="archiveBtn hidden"><%= translation.linkForm %></li>
-                                    <li id="unlinkForm" class="archiveBtn hidden"><%= translation.unlinkForm %></li>
+                                    <li id="attachForm" class="archiveBtn <%= linkedForm ? 'hidden' : '' %>"><%= translation.linkForm %></li>
+                                    <li id="unlinkForm" class="archiveBtn <%= linkedForm ? '' : 'hidden' %>"><%= translation.unlinkForm %></li>
                                 </ul>
                             </div>
-                            <% } %>
                         </div>
                         <div class="formBlock borderBottom objectivesPaddingBlock">
                             <div id="formThumbnail" class="formThumbnail"></div>

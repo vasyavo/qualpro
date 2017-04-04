@@ -784,12 +784,13 @@ define([
             var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
             var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
-            var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
-                || (statusId === STATUSES.COMPLETED && !createdByMe)
+            var createdByMyCover = coveredIds.indexOf(jsonModel.createdBy.user._id) !== -1;
+            var condition = (statusId === STATUSES.IN_PROGRESS && (createdByMe || createdByMyCover))
+                || (statusId === STATUSES.COMPLETED && !createdByMe && !createdByMyCover)
                 || (statusId === STATUSES.CLOSED)
                 || (statusId === STATUSES.FAIL)
-                || (statusId === STATUSES.OVER_DUE && !createdByMe)
-                || (statusId === STATUSES.RE_OPENED && createdByMe)
+                || (statusId === STATUSES.OVER_DUE && !createdByMe && !createdByMyCover)
+                || (statusId === STATUSES.RE_OPENED && (createdByMe || createdByMyCover))
                 || this.activityList
                 || jsonModel.myCC
                 || !App.currentUser.workAccess
