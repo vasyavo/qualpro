@@ -53,7 +53,6 @@ define([
         fileForVFWithoutBranches : {},
 
         events: {
-            'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
             'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
@@ -1206,6 +1205,7 @@ define([
             $curEl.find('#filesBlock').hide();
 
             $curEl.find('#mainForm').on('submit', {body: this.changed, context: this}, this.formSubmit);
+            $curEl.find('#assignDd').on('click', _.debounce(this.showPersonnelView.bind(this), 2000, true));
 
             startDateObj = {
                 changeMonth: true,

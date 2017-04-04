@@ -307,7 +307,7 @@ define(function(require) {
                 collection : this.collection
             }).render());
 
-            this.$el.find('tbody.listTable tr').on('click', _.throttle(this.rowClick.bind(this), 1000));
+            this.$el.find('tbody.listTable tr').on('click', _.debounce(this.rowClick.bind(this), 1000, true));
 
             return this;
         },
