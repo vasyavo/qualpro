@@ -4,8 +4,8 @@ curl="/usr/bin/curl"
 
 # Get additional scripts
 HEROKU_APP_ENV=${HEROKU_APP_ENV:="staging"}
-TOKEN="52d4d7de06e3b8563f0aac24602e217c66395d6c"
-OWNER="rhinobuccaneers"
+TOKEN="d6e7978abd2d2f3cbea3d54216daf6b8f7bd156d"
+OWNER="foxtrapplimited"
 REPO="qualpro-scripts"
 PATH="reproduce-${HEROKU_APP_ENV}-db.sh"
 FILE="https://api.github.com/repos/$OWNER/$REPO/contents/$PATH"
