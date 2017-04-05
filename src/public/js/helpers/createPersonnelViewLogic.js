@@ -315,15 +315,15 @@ define([
 
                 /*
                  * @feature
-                 * @see https://foxtrapp.myjetbrains.com/youtrack/issue/QP-859
-                 * @description Enable the possibility of having multiple regions and subRegions for SM, MC, CV
+                 * @see https://foxtrapp.myjetbrains.com/youtrack/issue/QP-848
+                 * @description Send all activities from 00:00:00 3 days ago
                  */
 
-                if ([ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 && domainType !== 'country') {
+                if ([ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1) {
                     multiSelect = true;
                 }
 
-                /* QP-859 end */
+                /* QP-848 end */
 
                 if (domainType !== 'country') {
                     $prevDomainA = this['$' + contentTypes.getPreviousType(domainType)];
