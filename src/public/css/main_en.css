@@ -3177,7 +3177,7 @@ span.currency + input:not([type="checkbox"]) {
   line-height: 28px;
 }
 .dropDownInput input {
-  min-width: 210px;
+  /*min-width: 210px;*/
   height: 28px;
   padding-right: 40px;
   border: 0;
