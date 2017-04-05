@@ -11,10 +11,9 @@ define([
     'constants/personnelStatuses',
     'dataService',
     'custom',
-    'constants/errorMessages',
-    'constants/aclRoleIndexes'
+    'constants/errorMessages'
 ], function (Backbone, _, $, contentTypes, DomainThumbnailsView, Cookies, CONTENT_TYPES, PERSONNEL_LOCATION_FLOW,
-             moment, STATUSES, dataService, custom, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
+             moment, STATUSES, dataService, custom, ERROR_MESSAGES) {
     'use strict';
     var types = [
         CONTENT_TYPES.COUNTRY,
@@ -313,18 +312,6 @@ define([
                 var locationFlow = PERSONNEL_LOCATION_FLOW[this.personnelAccessRoleLevel];
                 var multiSelect = domainType === locationFlow[locationFlow.length - 1];
 
-                /*
-                 * @feature
-                 * @see https://foxtrapp.myjetbrains.com/youtrack/issue/QP-859
-                 * @description Enable the possibility of having multiple regions and subRegions for SM, MC, CV
-                 */
-
-                if ([ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 && domainType !== 'country') {
-                    multiSelect = true;
-                }
-
-                /* QP-859 end */
-
                 if (domainType !== 'country') {
                     $prevDomainA = this['$' + contentTypes.getPreviousType(domainType)];
                     parentId = $prevDomainA.attr('data-id');
@@ -428,7 +415,7 @@ define([
                 $currentDomainA.text(text);
                 $currentDomainA.attr('data-id', ids);
 
-                showNextField = this.userHasAccessTo(nextDomainType) && (data.length === 1 || [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 );
+                showNextField = this.userHasAccessTo(nextDomainType) && data.length === 1;
 
                 this.view.$el.find('.' + nextDomainType + 'Field').toggle(showNextField);
             },

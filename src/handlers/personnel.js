@@ -467,7 +467,6 @@ const Personnel = function () {
                         });
                 },
 
-
                 function(level, cb) {
                     if (level === ACL_CONSTANTS.MASTER_ADMIN) {
                         return cb(null, []);
@@ -551,7 +550,6 @@ const Personnel = function () {
                             region: {
                                 _id: { $arrayElemAt: ['$region._id', 0] },
                                 title: { $arrayElemAt: [`$region.name.${currentLanguage}`, 0] },
-                                parent: { $arrayElemAt: ['$region.parent', 0] },
                                 expanded: { $literal: true },
                                 selected: { $literal: false },
                                 unselectable: unselectable(currentLevel, 'region', instoreObjective),
@@ -575,7 +573,6 @@ const Personnel = function () {
                             subRegion: {
                                 _id: { $arrayElemAt: ['$subRegion._id', 0] },
                                 title: { $arrayElemAt: [`$subRegion.name.${currentLanguage}`, 0] },
-                                parent: { $arrayElemAt: ['$subRegion.parent', 0] },
                                 expanded: { $literal: true },
                                 selected: { $literal: false },
                                 unselectable: unselectable(currentLevel, 'subRegion', instoreObjective),
@@ -708,30 +705,14 @@ const Personnel = function () {
                             key: { $first: '$country.key' },
                             children: {
                                 $addToSet: {
-                                    $cond: {
-                                        if: {
-                                            $eq: ['$region.parent', '$country._id'],
-                                        },
-                                        then: {
-                                            _id: '$region._id',
-                                            title: '$region.title',
-                                            expanded: '$region.expanded',
-                                            selected: '$region.selected',
-                                            unselectable: '$region.unselectable',
-                                            contentType: '$region.contentType',
-                                            key: '$region.key',
-                                            children: {
-                                                $filter: {
-                                                    input: '$children',
-                                                    as: 'item',
-                                                    cond: {
-                                                        $ne: ['$$item', false],
-                                                    },
-                                                },
-                                            },
-                                        },
-                                        else: false,
-                                    },
+                                    _id: '$region._id',
+                                    title: '$region.title',
+                                    expanded: '$region.expanded',
+                                    selected: '$region.selected',
+                                    unselectable: '$region.unselectable',
+                                    contentType: '$region.contentType',
+                                    key: '$region.key',
+                                    children: '$children',
                                 },
                             },
                         },
@@ -739,30 +720,19 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                countryId: '$country._id',
-                                regionId: '$region._id',
-                            },
+                            _id: '$region._id',
                             region: { $first: '$region' },
                             country: { $first: '$country' },
                             children: {
                                 $addToSet: {
-                                    $cond: {
-                                        if: {
-                                            $eq: ['$subRegion.parent', '$region._id'],
-                                        },
-                                        then: {
-                                            _id: '$subRegion._id',
-                                            title: '$subRegion.title',
-                                            expanded: '$subRegion.expanded',
-                                            selected: '$subRegion.selected',
-                                            unselectable: '$subRegion.unselectable',
-                                            contentType: '$subRegion.contentType',
-                                            key: '$subRegion.key',
-                                            children: '$children',
-                                        },
-                                        else: false,
-                                    },
+                                    _id: '$subRegion._id',
+                                    title: '$subRegion.title',
+                                    expanded: '$subRegion.expanded',
+                                    selected: '$subRegion.selected',
+                                    unselectable: '$subRegion.unselectable',
+                                    contentType: '$subRegion.contentType',
+                                    key: '$subRegion.key',
+                                    children: '$children',
                                 },
                             },
                         },
@@ -770,11 +740,7 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                countryId: '$country._id',
-                                regionId: '$region._id',
-                                subRegionId: '$subRegion._id',
-                            },
+                            _id: '$subRegion._id',
                             subRegion: { $first: '$subRegion' },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
@@ -794,12 +760,7 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                retailSegmentId: '$retailSegment._id',
-                                countryId: '$country._id',
-                                regionId: '$region._id',
-                                subRegionId: '$subRegion._id',
-                            },
+                            _id: '$retailSegment._id',
                             retailSegment: { $first: '$retailSegment' },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
@@ -820,12 +781,7 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                outletId: '$outlet._id',
-                                countryId: '$country._id',
-                                regionId: '$region._id',
-                                subRegionId: '$subRegion._id',
-                            },
+                            _id: '$outlet._id',
                             outlet: { $first: '$outlet' },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
@@ -878,6 +834,7 @@ const Personnel = function () {
                         cb(null, result);
                     });
                 },
+
             ], (err, result) => {
                 if (err) {
                     return next(err);
