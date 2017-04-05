@@ -124,6 +124,71 @@ module.exports = (options, callback) => {
                 },
             },
         }));
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: 'assignedTo.branch',
+                foreignField: '_id',
+                as: 'assignedTo.branch',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                assignedTo: {
+                    branch: {
+                        $map: {
+                            input: '$assignedTo.branch',
+                            as: 'item',
+                            in: {
+                                _id: '$$item._id',
+                                name: '$$item.name',
+                                outlet: '$$item.outlet',
+                            },
+                        },
+                    },
+                    outlet: '$assignedTo.branch.outlet',
+                    _id: '$assignedTo._id',
+                    accessRole: '$assignedTo.accessRole',
+                    firstName: '$assignedTo.firstName',
+                    position: '$assignedTo.position',
+                    lastName: '$assignedTo.lastName',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: 'assignedTo.outlet',
+                foreignField: '_id',
+                as: 'assignedTo.outlet',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                assignedTo: {
+                    outlet: {
+                        $map: {
+                            input: '$assignedTo.outlet',
+                            as: 'item',
+                            in: {
+                                _id: '$$item._id',
+                                name: '$$item.name',
+                            },
+                        },
+                    },
+                    _id: '$assignedTo._id',
+                    branch: '$assignedTo.branch',
+                    accessRole: '$assignedTo.accessRole',
+                    firstName: '$assignedTo.firstName',
+                    position: '$assignedTo.position',
+                    lastName: '$assignedTo.lastName',
+                },
+            },
+        });
     }
 
     pipeline.push({
