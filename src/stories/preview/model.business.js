@@ -22,7 +22,9 @@ const setNewPreview = ({ model, base64, contentType }, callback) => {
         },
         (result, cb) => {
             model.imageSrc = result._id;
-            model.save(cb);
+            model.save((err, data) => {
+                cb(err, data);
+            });
         },
     ], callback);
 };
