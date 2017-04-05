@@ -11360,3 +11360,6 @@ label[for=searchInputnoCT]::after {
 .contractsYearlyPreview {
   height: 100%;
 }
+.achivementFormPreview {
+  height: calc(100% - 66px);
+}
