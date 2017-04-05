@@ -11357,3 +11357,6 @@ label[for=searchInputnoCT]::after {
 .scroll-fix.consumersSurveyTableWrap .mCSB_container{
   padding-bottom: 120px;
 }
+.contractsYearlyPreview {
+  height: 100%;
+}
