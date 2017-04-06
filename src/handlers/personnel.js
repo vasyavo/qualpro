@@ -760,7 +760,20 @@ const Personnel = function () {
                                             unselectable: '$subRegion.unselectable',
                                             contentType: '$subRegion.contentType',
                                             key: '$subRegion.key',
-                                            children: '$children',
+                                            children: {
+                                                $filter: {
+                                                    input: '$children',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $ne: [
+                                                            {
+                                                                $size: '$$item.children',
+                                                            },
+                                                            0,
+                                                        ],
+                                                    },
+                                                },
+                                            },
                                         },
                                         else: false,
                                     },
