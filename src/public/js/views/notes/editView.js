@@ -59,7 +59,7 @@ define([
             App.masonryGrid.call(self.$el);
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
@@ -70,7 +70,7 @@ define([
                 bucket     : this.contentType,
                 translation: this.translation
             });
-        },
+        }, 1000, true),
 
         showAttachDialog: function () {
             this.fileDialogView = new FileDialogView({
