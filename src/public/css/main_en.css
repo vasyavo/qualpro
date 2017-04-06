@@ -11363,3 +11363,7 @@ label[for=searchInputnoCT]::after {
 .achivementFormPreview {
   height: calc(100% - 66px);
 }
+.consumersSurveyTableWrap .forPosition{
+  position: fixed;
+  top: initial;
+}
