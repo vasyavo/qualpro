@@ -69,7 +69,7 @@ define(function(require) {
             });
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $targetEl = $(e.target);
             var $targetRow = $targetEl.closest('.listRow');
             var $targetFile = $targetEl.closest('.fileThumbnailItem');
@@ -89,7 +89,7 @@ define(function(require) {
                 bucket     : 'documents',
                 translation: this.translation
             });
-        },
+        }, 1000, true),
 
         showMoreContent: function (newModels) {
             var $currentEl = this.$el;

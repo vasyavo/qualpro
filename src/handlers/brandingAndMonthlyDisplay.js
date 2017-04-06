@@ -144,6 +144,7 @@ const getById = (req, res, next) => {
                 branch: { $first: '$branch' },
                 displayType: { $first: '$displayType' },
                 outlet: { $first: '$outlet' },
+                retailSegment: { $first: '$retailSegment' },
                 attachments: { $first: '$attachments' },
                 description: { $first: '$description' },
                 createdAt: { $first: '$createdAt' },
@@ -178,6 +179,7 @@ const getById = (req, res, next) => {
                 region: { $first: '$region' },
                 displayType: { $first: '$displayType' },
                 outlet: { $first: '$outlet' },
+                retailSegment: { $first: '$retailSegment' },
                 description: { $first: '$description' },
                 createdAt: { $first: '$createdAt' },
                 dateEnd: { $first: '$dateEnd' },
@@ -219,6 +221,7 @@ const getById = (req, res, next) => {
                 branch: { $first: '$branch' },
                 categories: { $first: '$categories' },
                 outlet: { $first: '$outlet' },
+                retailSegment: { $first: '$retailSegment' },
                 attachments: { $first: '$attachments' },
                 description: { $first: '$description' },
                 createdAt: { $first: '$createdAt' },
@@ -237,6 +240,17 @@ const getById = (req, res, next) => {
             $unwind: {
                 path: '$outlet',
             },
+        }, {
+            $lookup: {
+                from: `${CONTENT_TYPES.RETAILSEGMENT}s`,
+                localField: 'retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        }, {
+            $unwind: {
+                path: '$retailSegment',
+            },w
         }, {
             $lookup: {
                 from: `${CONTENT_TYPES.BRANCH}es`,
@@ -291,6 +305,8 @@ const getById = (req, res, next) => {
                 'branch.name': 1,
                 'outlet._id': 1,
                 'outlet.name': 1,
+                'retailSegment._id': 1,
+                'retailSegment.name': 1,
                 'createdBy._id': 1,
                 'createdBy.ID': 1,
                 'createdBy.lastName': 1,

@@ -125,7 +125,7 @@ define([
             _.bindAll(this, 'fileSelected');
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
@@ -144,7 +144,7 @@ define([
                 $fileElement[0].click();
                 $fileElement.remove();
             });
-        },
+        }, 1000, true),
 
         showUnlinkPopUp: function () {
             var self = this;
@@ -173,7 +173,7 @@ define([
             this.showLinkForm();
         },
 
-        openForm: function () {
+        openForm: _.debounce(function () {
             var modelJSON = this.model.toJSON();
             var form;
             var id = modelJSON && modelJSON.form && modelJSON.form._id;
@@ -303,7 +303,7 @@ define([
                     message: ERROR_MESSAGES.youHaveNoRights[self.currentLanguage] + ' ' + self.linkedForm.name[self.currentLanguage] + ' ' + this.translation.form
                 });
             }
-        },
+        }, 1000, true),
 
         showLinkFormDialog: function () {
             var self = this;

@@ -15,7 +15,7 @@ define([
             'click #linkBtn': 'showItemsToOutletDialog'
         },
 
-        showItemsToOutletDialog: function (e) {
+        showItemsToOutletDialog: _.debounce(function (e) {
             var self = this;
             var selectLocationView = new SelectLocationView({
                 translation: this.translation
@@ -27,7 +27,7 @@ define([
                     translation: self.translation
                 });
             });
-        }
+        }, 1000, true)
     });
 
     return TopBarView;

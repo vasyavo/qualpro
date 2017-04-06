@@ -62,7 +62,7 @@ define([
             _.bindAll(this, 'render');
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
@@ -81,7 +81,7 @@ define([
                 $fileElement[0].click();
                 $fileElement.remove();
             });
-        },
+        }, 1000, true),
 
         preventDefaults: function (e) {
             e.preventDefault();
@@ -201,7 +201,7 @@ define([
             fileInput.click();
         },
 
-        sendComment: function () {
+        sendComment: _.debounce(function () {
             var commentModel = new CommentModel();
             var self = this;
 
@@ -221,7 +221,7 @@ define([
                     self.$el.find('#commentForm').submit();
                 }
             });
-        },
+        }, 1000, true),
 
         commentFormSubmit: function (e) {
             var context = e.data.context;

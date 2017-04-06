@@ -227,11 +227,11 @@ define([
             this.trigger('nextPage', {page: currentPage, itemsNumber: itemsNumber});
         },
 
-        createEvent: function (e) {
+        createEvent: _.debounce(function (e) {
             this.preventDefaults(e);
 
             this.trigger('createEvent');
-        },
+        }, 1000, true),
 
         editEvent: function (e) {
             this.preventDefaults(e);
