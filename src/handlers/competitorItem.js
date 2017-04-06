@@ -407,7 +407,7 @@ var CompetitorItem = function () {
             var skip = (page - 1) * limit;
             var filterMapper = new FilterMapper();
             var filter = query.filter || {};
-            var filterSearch = filter.globalSearch || '';
+            var filterSearch = filter.globalSearch && filter.globalSearch.trim() || '';
             var queryObjectAfterLookup = {};
             var queryObject;
             var key;
@@ -468,19 +468,8 @@ var CompetitorItem = function () {
                 var aggregation;
 
                 var searchFieldsArray = [
-                    'name.en',
-                    'name.ar',
-                    'product.name.en',
-                    'product.name.ar',
                     'variant.name.en',
                     'variant.name.ar',
-                    'origin.name.en',
-                    'origin.name.ar',
-                    'brand.name.en',
-                    'brand.name.ar',
-                    'origin.name',
-                    'country.name.en',
-                    'country.name.ar'
                 ];
 
                 if (isMobile || limit === -1) {
@@ -610,8 +599,21 @@ var CompetitorItem = function () {
         }));
 
         if (filterSearch) {
+            const searchMatch = {
+                $or: [],
+            };
+
+            searchFieldsArray.forEach((searchField) => {
+                searchMatch.$or.push({
+                    [searchField]: {
+                        $regex: filterSearch,
+                        $options: 'i',
+                    },
+                });
+            });
+
             pipeLine.push({
-                $match: aggregationHelper.getSearchMatch(searchFieldsArray, filterSearch)
+                $match: searchMatch,
             });
         }
 
