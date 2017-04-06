@@ -347,6 +347,7 @@ define([
                 model.descriptionString = model.description[currentLanguage];
                 model.branchString = model.branch.name[currentLanguage];
                 model.outletString = model.outlet.name[currentLanguage];
+                model.retailSegmentString = model.retailSegment.name[currentLanguage];
                 model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType[0].name[currentLanguage] : '';
                 model.dateStart = moment(model.dateStart).format('DD.MM.YYYY');
                 model.dateEnd = moment(model.dateEnd).format('DD.MM.YYYY');
