@@ -3063,6 +3063,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   margin: 10px 0;
 }
 .user-profile-dialog .form-holder .previewPersonnel .tabs .evaluationContainer .personnelPerformance {
+  width: 40%;
   height: 100%;
 }
 .user-profile-dialog .form-holder .previewPersonnel .scrollable {
@@ -11366,4 +11367,9 @@ label[for=searchInputnoCT]::after {
 .consumersSurveyTableWrap .forPosition{
   position: fixed;
   top: initial;
+}
+.evaluationPersonnel .previousRating .mCSB_container {
+  height: 100% !important;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
