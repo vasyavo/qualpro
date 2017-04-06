@@ -39,8 +39,8 @@ module.exports = (options) => {
             actionType,
             itemId: body._id,
             itemName: {
-                en: body.firstName.en + body.lastName.en,
-                ar: body.firstName.ar + body.lastName.ar,
+                en: `${body.firstName.en} ${body.lastName.en}`,
+                ar: `${body.firstName.ar} ${body.lastName.ar}`,
             },
             createdBy: {
                 user: actionOriginator,
