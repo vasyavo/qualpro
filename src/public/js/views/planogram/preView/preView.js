@@ -42,14 +42,14 @@ define([
             this.render();
         },
 
-        showFilePreviewDialog: function () {
+        showFilePreviewDialog: _.debounce(function () {
             var fileModel = new FileModel(this.model.attributes.fileID, {parse: true});
             this.fileDialogView = new FileDialogPreviewView({
                 translation: this.translation,
                 fileModel  : fileModel,
                 bucket     : this.contentType
             });
-        },
+        }, 1000, true),
 
         openEditView: function () {
             var self = this;

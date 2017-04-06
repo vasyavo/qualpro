@@ -112,7 +112,7 @@ define(function(require) {
             $holder.find('#checkAll').prop('checked', false);
         },
 
-        listRowClick: function (e) {
+        listRowClick: _.debounce(function (e) {
             var targetEl = $(e.target);
             var targetRow = targetEl.closest('tr');
             var name = targetRow.attr('data-name');
@@ -124,7 +124,7 @@ define(function(require) {
             } else {
                 this.previewItem(id);
             }
-        },
+        }, 1000, true),
 
         createItem: function () {
             this.logic.createNewItem(this.translation);

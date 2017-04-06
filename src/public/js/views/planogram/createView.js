@@ -98,7 +98,7 @@ define([
 
         },
 
-        addPlanogram: function () {
+        addPlanogram: _.debounce(function () {
             var self = this;
 
             this.body = {
@@ -120,7 +120,7 @@ define([
                     self.$el.find('#createPlanogramForm').submit();
                 }
             });
-        },
+        }, 1000, true),
 
         submitForm: function (e) {
             var context = e.data.context;

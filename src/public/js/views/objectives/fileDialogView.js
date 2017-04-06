@@ -50,7 +50,7 @@ define([
             this.on('fileSelected', this.fileSelected, this);
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.thumbnail');
             var fileModelCid = $thumbnail.attr('data-id');
@@ -69,7 +69,7 @@ define([
                 $fileElement[0].click();
                 $fileElement.remove();
             });
-        },
+        }, 1000, true),
 
         getPreview: function (file) {
             var preview = file.preview || file.type || file.get('preview');
