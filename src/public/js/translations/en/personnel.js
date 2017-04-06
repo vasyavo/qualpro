@@ -168,7 +168,7 @@ define([
         age                          : 'Age',
         individualObjectives         : 'Individual Objectives',
         companyObjectives            : 'Company Objectives',
-        inStoreTasks                 : 'In Store Reporting of Tasks',
+        inStoreTasks                 : 'In Store Reporting Tasks',
         submittingReports            : 'Submitting Reports',
         achievement                  : 'Achievement',
         performance                  : 'Performance',
