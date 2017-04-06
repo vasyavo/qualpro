@@ -1053,7 +1053,7 @@ var VisibilityForm = function () {
 
                             dueDate.setSeconds(dueDate.getSeconds() + 10);
                             AbstractScheduler.register({
-                                date: dueDate.getSeconds(),
+                                date: dueDate,
                             }, cb);
                         },
 
