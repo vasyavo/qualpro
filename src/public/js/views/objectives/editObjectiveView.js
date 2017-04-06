@@ -165,7 +165,6 @@ define([
 
             this.linkedForm = null;
             this.changed.formType = null;
-            this.branchesForVisibility = [];
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
             this.model.unset('form');
@@ -257,15 +256,15 @@ define([
                         });
                     }
                 } else {
-                    this.branchesForVisibility = modelJSON.branch;
-                    this.outletsForVisibility = _.map(modelJSON.outlet, function (outlet) {
+                    this.branchesForVisibility = this.branchesForVisibility || modelJSON.branch;
+                    this.outletsForVisibility = _.map(this.outletsForVisibility || modelJSON.outlet, function (outlet) {
                         let result = {
                             name : outlet.name[currentLanguage],
                             _id : outlet._id,
                             branches : []
                         };
 
-                        self.branchesForVisibility.map((branch) => {
+                        self.branchesForVisibility.forEach(function(branch) {
                             if (outlet._id === branch.outlet) {
                                 result.branches.push({
                                     name : branch.name[currentLanguage],
@@ -653,30 +652,7 @@ define([
                             }
                         }
                     } else {
-                        if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
-                            var branches = context.branchesForVisibility;
-                            requestPayload = {
-                                before: {
-                                    files: []
-                                },
-                                after: {
-                                    description: '',
-                                    files: []
-                                },
-                                branches: branches.map(function (item) {
-                                    return {
-                                        branchId: item._id,
-                                        before: {
-                                            files: [files.files[0]._id]
-                                        },
-                                        after: {
-                                            files: [],
-                                            description: ''
-                                        }
-                                    };
-                                })
-                            };
-                        } else if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
+                        if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll')) {
                             var fileToAllBranches = context.visibilityFormAjax.model.get('fileToAllBranches');
                             var branches = context.branchesForVisibility;
 
@@ -692,7 +668,7 @@ define([
                                     return {
                                         branchId: item._id,
                                         before: {
-                                            files: [fileToAllBranches]
+                                            files: [files.files[0] ? files.files[0]._id : fileToAllBranches]
                                         },
                                         after: {
                                             files: [],
@@ -709,23 +685,10 @@ define([
                                     originalName: item.fileName
                                 });
 
-                                if (fileFromServer) {
-                                    return {
-                                        branchId: item.branch,
-                                        before : {
-                                            files: [fileFromServer._id]
-                                        },
-                                        after : {
-                                            files : [],
-                                            description : ''
-                                        }
-                                    };
-                                }
-
                                 return {
-                                    branchId : item.branch,
+                                    branchId: item.branch,
                                     before : {
-                                        files : [item._id]
+                                        files: [fileFromServer ? fileFromServer._id : item._id]
                                     },
                                     after : {
                                         files : [],
@@ -947,12 +910,18 @@ define([
             this.changed.location = data.location;
 
             this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
-                return self.locations.branch.indexOf(branch._id || branch) !== -1;
+                return self.locations.branch.indexOf(branch._id) !== -1;
             });
             this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
-                return item._id || item;
+                return item._id;
             });
 
+            this.outletsForVisibility = _.filter(this.outletsForVisibility, function (outlet) {
+                return self.locations.outlet.indexOf(outlet._id) !== -1;
+            });
+            this.outletsForVisibility = _.uniq(this.outletsForVisibility, false, function (item) {
+                return item._id;
+            });
             this.unlinkForm();
         },
 
@@ -1003,9 +972,11 @@ define([
                 self.changed.assignedTo = personnelsIds;
 
                 self.branchesForVisibility = [];
+                self.outletsForVisibility = [];
 
                 jsonPersonnels.forEach(function (personnel) {
                     self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                    self.outletsForVisibility = self.outletsForVisibility.concat(personnel.outlet);
                 });
 
                 if (jsonPersonnels.length && !self.linkedForm) {
@@ -1037,6 +1008,14 @@ define([
 
                 personnels.forEach(function (personnel) {
                     self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                });
+            }
+
+            if (!this.outletsForVisibility || (this.outletsForVisibility && !this.outletsForVisibility.length) ) {
+                this.outletsForVisibility = [];
+
+                personnels.forEach(function (personnel) {
+                    self.outletsForVisibility = self.outletsForVisibility.concat(personnel.outlet);
                 });
             }
         },
@@ -1105,6 +1084,10 @@ define([
                 if (self.changed.attachments) {
                     self.changed.attachments = _.compact(self.changed.attachments);
                     self.changed.attachments = self.changed.attachments.length ? self.changed.attachments : [];
+                }
+
+                if (self.linkedForm) {
+                    self.changed.formType = self.linkedForm._id;
                 }
 
                 self.changed.saveObjective = options.save;
