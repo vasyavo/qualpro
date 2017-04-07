@@ -11376,6 +11376,6 @@ label[for=searchInputnoCT]::after {
 .questionnarieTable .forPosition {
   top: auto;
 }
-.competitor-branding-fix {
-  height: calc(100% - 170px);
+.competitorBrandingPreview  {
+  height: calc(100% - 160px);
 }
