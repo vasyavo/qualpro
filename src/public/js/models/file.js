@@ -50,7 +50,7 @@ define([
                 file.uploaded = true;
                 file.selected = !!selected;
 
-                if (!uploaded) {
+                if (uploaded) {
                     file.contentType = file.type;
                     file.uploaded = false;
                 }
