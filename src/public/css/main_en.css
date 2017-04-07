@@ -4145,7 +4145,7 @@ input[type=number]::-webkit-outer-spin-button {
   position: fixed;
   width: 100px;
   z-index: 1;
-  top: 50vh;
+  top: auto;
 }
 .forPosition .dropDownContent {
   position: absolute !important;
