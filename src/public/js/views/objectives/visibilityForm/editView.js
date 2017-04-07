@@ -33,7 +33,7 @@ define([
             self.forEdit = options.forEdit;
             this.forCreate = options.forCreate;
             this.translation = options.translation;
-            this.description = options.description[currentLanguage];
+            this.description = $(options.description[currentLanguage]).text();
             this.outlets = options.outlets || [];
             this.editAfter = options.editAfter;
             this.oldAjaxObj = options.oldAjaxObj;
