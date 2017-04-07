@@ -44,6 +44,7 @@ schema.index({
     outlet: 1,
     retailSegment: 1,
     subRegion: 1,
+    archived: 1,
 }, {
     unique: true,
 });

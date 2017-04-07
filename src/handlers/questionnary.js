@@ -84,10 +84,7 @@ const QuestionnaryHandler = function () {
     };
 
     const filterRetrievedResultOnGetAll = (options, cb) => {
-        const personnel = options.personnel;
-        const accessRoleLevel = options.accessRoleLevel;
         const result = options.result;
-        const personnelId = personnel._id.toString();
 
         if (result.length) {
             result[0].data = result[0].data
@@ -132,29 +129,6 @@ const QuestionnaryHandler = function () {
 
         const body = result && result[0] ?
             result[0] : { data: [], total: 0 };
-
-        if (accessRoleLevel !== 1 && accessRoleLevel !== 10) {
-            body.data = body.data.filter((question) => {
-                const personnelArray = question.personnels.fromObjectID();
-                const isEnoughMembers = question.personnels && personnelArray.length;
-                const isMember = personnelArray.indexOf(personnelId) !== -1;
-                const creator = question.createdBy.user;
-
-                let isCreator = null;
-
-                if (isValidObjectId(creator)) {
-                    // fixme: should check it here as sync aggregation do not includes projection for $createdBy.user
-                    isCreator = creator && creator.toString() === personnelId;
-                } else {
-                    // fixme: if $createdBy.user already projected then get only _id
-                    isCreator = creator && creator._id.toString() === personnelId;
-                }
-
-                return isCreator || (isEnoughMembers && isMember);
-            });
-
-            body.total = body.data.length;
-        }
 
         cb(null, body);
     };
@@ -459,7 +433,7 @@ const QuestionnaryHandler = function () {
             ];
 
             const sort = query.sort || {
-                lastDate: -1
+                dueDate: -1,
             };
 
             const queryObject = filterMapper.mapFilter({

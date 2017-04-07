@@ -52,7 +52,6 @@ define([
         imageSrc: '',
 
         events: {
-            'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
             'click #attachForm'          : 'showLinkFormDialog',
             'click #unlinkForm'          : 'showUnlinkPopUp',
@@ -72,10 +71,10 @@ define([
             _.bindAll(this, 'fileSelected');
         },
 
-        showFilePreviewDialog: function () {
+        showFilePreviewDialog: _.debounce(function () {
             var currentLanguage = App.currentUser.currentLanguage;
             App.render({type: 'alert', message: ERROR_MESSAGES.fileIsNotUploaded[currentLanguage]});
-        },
+        }, 1000, true),
 
         showLinkForm: function () {
             var $liEl = this.$el.find('#attachForm');
@@ -742,6 +741,7 @@ define([
             $curEl.find('#' + titleIdToHide).hide();
             $curEl.find('.filesBlock').hide();
             $curEl.find('#mainForm').on('submit', {body: this.body, context: this}, this.formSubmit);
+            $curEl.find('#assignDd').on('click', _.debounce(this.showPersonnelView.bind(this), 2000, true));
 
             $startDate = $curEl.find('#dateStart');
             $endDate = $curEl.find('#dateEnd');

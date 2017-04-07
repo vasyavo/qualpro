@@ -871,8 +871,8 @@ a {
 }
 .filterName .triDown:after {
   position: absolute;
-  right: 7px;
-  height: 41px;
+  right: 10px;
+  top: 3px;
   width: 10px;
   color: #cfd8dc;
   transition: all ease .2s;
@@ -3063,6 +3063,7 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
   margin: 10px 0;
 }
 .user-profile-dialog .form-holder .previewPersonnel .tabs .evaluationContainer .personnelPerformance {
+  width: 40%;
   height: 100%;
 }
 .user-profile-dialog .form-holder .previewPersonnel .scrollable {
@@ -3177,7 +3178,7 @@ span.currency + input:not([type="checkbox"]) {
   line-height: 28px;
 }
 .dropDownInput input {
-  min-width: 210px;
+  /*min-width: 210px;*/
   height: 28px;
   padding-right: 40px;
   border: 0;
@@ -4144,6 +4145,7 @@ input[type=number]::-webkit-outer-spin-button {
   position: fixed;
   width: 100px;
   z-index: 1;
+  top: auto;
 }
 .forPosition .dropDownContent {
   position: absolute !important;
@@ -4590,7 +4592,7 @@ input[type=number]::-webkit-outer-spin-button {
   height: calc(100% - 50px);
 }
 .competitorBrandingPreview .blockObjective {
-  height: calc(100% - 110px);
+  height: 100%;
 }
 .competitorBrandingPreview .blockObjective .block-left,
 .competitorBrandingPreview .blockObjective .block-right {
@@ -4658,7 +4660,7 @@ input[type=number]::-webkit-outer-spin-button {
   height: 100%;
 }
 .productLaunchPreview {
-  height: calc(100% - 50px);
+  height: calc(100% - 100px);
 }
 .productLaunchPreview .block-left,
 .productLaunchPreview .block-right,
@@ -7425,6 +7427,9 @@ table.list .withImg img {
   position: relative;
   min-height: 250px;
 }
+.previousRating .absoluteWrap {
+  min-height: 10px;
+}
 .absoluteWrap table thead tr th:first-child {
   border-left: 1px solid #cfd8dc;
 }
@@ -9584,7 +9589,7 @@ table.fancytree-ext-table {
 .questionsList .questionsStatus.answer {
   display: inline-block;
   width: 200px;
-  padding: 5px 0 5px 5px;
+  padding: 5px 15px 5px 5px;
   line-height: 25px;
   font-size: 14px;
   font-size: 0.875rem;
@@ -11349,4 +11354,28 @@ label[for=searchInputnoCT]::after {
   overflow: initial;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.scroll-fix.consumersSurveyTableWrap .mCSB_container{
+  padding-bottom: 120px;
+}
+.contractsYearlyPreview {
+  height: 100%;
+}
+.achivementFormPreview {
+  height: calc(100% - 66px);
+}
+.consumersSurveyTableWrap .forPosition{
+  position: fixed;
+  top: initial;
+}
+.evaluationPersonnel .previousRating .mCSB_container {
+  height: 100% !important;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.questionnarieTable .forPosition {
+  top: auto;
+}
+.competitor-branding-fix {
+  height: calc(100% - 170px);
 }

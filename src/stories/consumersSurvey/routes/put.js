@@ -9,8 +9,8 @@ const ACL_MODULES = require('../../../constants/aclModulesNames');
 const bodyValidator = require('../../../helpers/bodyValidator');
 const access = require('../../../helpers/access')();
 const aggregateById = require('../reusable-components/getByIdAggr');
-const requestService = require('../../scheduler/request');
 const ActivityLog = require('./../../push-notifications/activityLog');
+const AbstractScheduler = require('abstract-scheduler').api;
 
 const onDueDateChange = (survey, cb) => {
     async.waterfall([
@@ -28,10 +28,8 @@ const onDueDateChange = (survey, cb) => {
             const setScheduledId = setScheduled.map(model => model.scheduleId);
 
             if (setScheduledId.length) {
-                requestService.del({
-                    json: {
-                        data: setScheduledId,
-                    },
+                AbstractScheduler.deleteMany({
+                    id: setScheduledId,
                 }, () => {
                     SchedulerModel.remove({
                         scheduleId: {
@@ -41,10 +39,8 @@ const onDueDateChange = (survey, cb) => {
                 });
             }
 
-            requestService.post({
-                json: {
-                    date: survey.dueDate,
-                },
+            AbstractScheduler.register({
+                date: survey.dueDate,
             }, (err, response) => {
                 if (!err) {
                     const taskSchedulerModel = new SchedulerModel();

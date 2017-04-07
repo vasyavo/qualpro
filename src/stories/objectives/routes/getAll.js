@@ -284,6 +284,9 @@ module.exports = (req, res, next) => {
         const filterSearch = filter.globalSearch || '';
         const isMobile = req.isMobile;
 
+        const myCC = filter.myCC;
+
+        delete filter.myCC;
         delete filter.cover;
         delete filter.globalSearch;
 
@@ -294,6 +297,7 @@ module.exports = (req, res, next) => {
         });
 
         const positionFilter = {};
+        const setSubordinateId = [];
 
         if (queryObject.position && queryObject.position.$in) {
             positionFilter.$or = [
@@ -306,84 +310,116 @@ module.exports = (req, res, next) => {
 
         queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
-        const pipeline = getAllPipelineTrue({
-            queryObject,
-            positionFilter,
-            filterSearch,
-            isMobile,
-            skip,
-            limit,
-            personnel,
-        });
+        async.waterfall([
+            (cb) => {
+                if (myCC || isMobile) {
+                    return PersonnelModel.distinct('_id', {
+                        manager: userId,
+                    }).exec((err, setAvailableSubordinateId) => {
+                        if (err) {
+                            return cb(err);
+                        }
 
-        ObjectiveModel.aggregate(pipeline)
-            .allowDiskUse(true)
-            .exec((err, response) => {
+                        setSubordinateId.push(...setAvailableSubordinateId);
+
+                        cb(null);
+                    });
+                }
+
+                cb(null);
+            },
+            (cb) => {
+                if (myCC) {
+                    _.set(queryObject, '$and[0].assignedTo.$in', setSubordinateId);
+                }
+
+                const pipeline = getAllPipelineTrue({
+                    queryObject,
+                    positionFilter,
+                    filterSearch,
+                    isMobile,
+                    skip,
+                    limit,
+                    personnel,
+                    setSubordinateId,
+                });
+
+                ObjectiveModel.aggregate(pipeline)
+                    .allowDiskUse(true)
+                    .exec(cb);
+            },
+        ], (err, response) => {
+            if (err) {
+                return callback(err);
+            }
+
+            const setFileId = [];
+            const setPersonnelId = [];
+
+            response = response && response[0]
+                ? response[0] : { data: [], total: 0 };
+
+            response.data = response.data.map((model) => {
+                if (model.title) {
+                    model.title = {
+                        en: model.title.en ? _.unescape(model.title.en) : '',
+                        ar: model.title.ar ? _.unescape(model.title.ar) : '',
+                    };
+                }
+                if (model.description) {
+                    model.description = {
+                        en: model.description.en ? _.unescape(model.description.en) : '',
+                        ar: model.description.ar ? _.unescape(model.description.ar) : '',
+                    };
+                }
+                if (model.companyObjective) {
+                    model.companyObjective = {
+                        en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
+                        ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
+                    };
+                }
+
+                setFileId.push(..._.map(model.attachments, '_id'));
+                setPersonnelId.push(
+                    _.get(model, 'createdBy.user._id'),
+                    ..._.map(model.assignedTo, '_id')
+                );
+
+                return model;
+            });
+
+            const options = {
+                data: {
+                    [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
+                    [CONTENT_TYPES.FILES]: setFileId,
+                },
+            };
+
+            getImage.getImages(options, (err, result) => {
                 if (err) {
                     return callback(err);
                 }
 
-                const setFileId = [];
-                const setPersonnelId = [];
-
-                response = response && response[0]
-                    ? response[0] : { data: [], total: 0 };
-
-                response.data = response.data.map((model) => {
-                    if (model.title) {
-                        model.title = {
-                            en: model.title.en ? _.unescape(model.title.en) : '',
-                            ar: model.title.ar ? _.unescape(model.title.ar) : '',
-                        };
-                    }
-                    if (model.description) {
-                        model.description = {
-                            en: model.description.en ? _.unescape(model.description.en) : '',
-                            ar: model.description.ar ? _.unescape(model.description.ar) : '',
-                        };
-                    }
-                    if (model.companyObjective) {
-                        model.companyObjective = {
-                            en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                            ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
-                        };
-                    }
-
-                    setFileId.push(..._.map(model.attachments, '_id'));
-                    setPersonnelId.push(
-                        _.get(model, 'createdBy.user._id'),
-                        ..._.map(model.assignedTo, '_id')
-                    );
-
-                    return model;
-                });
-
-                const options = {
-                    data: {
-                        [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                        [CONTENT_TYPES.FILES]: setFileId,
+                const setOptions = {
+                    response,
+                    imgsObject: result,
+                    fields: {
+                        [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
+                        [CONTENT_TYPES.FILES]: [['attachments']],
                     },
                 };
 
-                getImage.getImages(options, (err, result) => {
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    const setOptions = {
-                        response,
-                        imgsObject: result,
-                        fields: {
-                            [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
-                            [CONTENT_TYPES.FILES]: [['attachments']],
-                        },
-                    };
-
-                    getImage.setIntoResult(setOptions, (response) => {
-                        callback(null, response);
+                getImage.setIntoResult(setOptions, (response) => {
+                    const subordinatesId = setSubordinateId.map((ObjectId) => {
+                        return ObjectId.toString();
                     });
+
+                    response.data = detectObjectivesForSubordinates(response.data, subordinatesId, userId);
+
+                    callback(null, response);
                 });
             });
+        });
     };
 
     async.waterfall([

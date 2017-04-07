@@ -10,6 +10,8 @@ const CONTENT_TYPES = require('../public/js/constants/contentType');
 const ERROR_MESSAGES = require('../constants/errorMessages');
 
 const DocumentModel = require('./../types/document/model');
+const ContractYearlyModel = require('./../types/contractYearly/model');
+const ContractSecondaryModel = require('./../types/contractSecondary/model');
 const FileHandler = require('../handlers/file');
 const GetImagesHelper = require('../helpers/getImages');
 const errorSender = require('../utils/errorSender');
@@ -1072,6 +1074,67 @@ const Documents = function () {
         });
     };
 
+    const getDocsForContracts = (options, callback) => {
+        const {
+            personnelId,
+            contractId,
+            contractType,
+        } = options;
+
+        async.waterfall([
+            (cb) => {
+                if (contractType === CONTENT_TYPES.CONTRACTSYEARLY) {
+                    ContractYearlyModel.findOne(ObjectId(contractId), cb);
+                } else {
+                    ContractSecondaryModel.findOne(ObjectId(contractId), cb);
+                }
+            },
+            (contract, cb) => {
+                const pipeLine = [];
+
+                pipeLine.push({
+                    $match: {
+                        $or: [
+                            {
+                                _id: {
+                                    $in: contract.documents,
+                                },
+                            },
+                            {
+                                'createdBy.user': ObjectId(personnelId),
+                            },
+                        ],
+                    },
+                });
+
+                pipeLine.push({
+                    $lookup: {
+                        from: 'files',
+                        localField: 'attachment',
+                        foreignField: '_id',
+                        as: 'attachment',
+                    },
+                });
+
+                pipeLine.push({
+                    $addFields: {
+                        attachment: {
+                            $arrayElemAt: ['$attachment', 0],
+                        },
+                    },
+                });
+
+                pipeLine.push({
+                    $match: {
+                        attachment: { $ne: null },
+                    },
+                });
+
+                DocumentModel.aggregate(pipeLine).allowDiskUse(true).exec(cb);
+            },
+        ], callback);
+    };
+
     // ============== METHODS ==================
 
     this.create = function (req, res, next) {
@@ -1805,6 +1868,58 @@ const Documents = function () {
             }
 
             joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, body) {
+                if (err) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
+                }
+
+                queryRun(body);
+            });
+        });
+    };
+
+    // web only
+    this.getFilesForContract = function (req, res, next) {
+        function queryRun(query) {
+            const {
+                session: { uId: personnelId } = { uId: null },
+            } = req;
+            const {
+                contractId,
+                contractType,
+            } = query;
+            getDocsForContracts({
+                personnelId,
+                contractId,
+                contractType,
+            }, (err, response) => {
+                if (err) {
+                    return next(err);
+                }
+
+                if (response.total === 0) {
+                    return res.status(200).send(response);
+                }
+
+                fillImagesIntoResult(response, (err, result) => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    res.status(200).send(result);
+                });
+            });
+        }
+
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+            if (err) {
+                return next(err);
+            }
+
+            if (!allowed) {
+                return errorSender.forbidden(next);
+            }
+
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', (err, body) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }

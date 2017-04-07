@@ -37,6 +37,23 @@ module.exports = (req, res, next) => {
 
         delete filter.globalSearch;
 
+        /*
+         * @feature
+         * @see https://foxtrapp.myjetbrains.com/youtrack/issue/QP-848
+         * @description Send all activities from 00:00:00 3 days ago.
+         */
+        if (isMobile) {
+            filter.time = filter.time || {
+                names: '3 days ago',
+                type: 'date',
+                values: [
+                    new Date().addDays(-3),
+                    new Date(),
+                ],
+            };
+        }
+        /* QP-848 end */
+
         const queryObject = filterMapper.mapFilter({
             contentType: CONTENT_TYPES.ACTIVITYLIST,
             filter,

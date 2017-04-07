@@ -21,6 +21,7 @@ module.exports = function () {
     
     router.get('/folder/:id([0-9a-fA-F]{24})?', handler.getFolderContent);
     router.get('/files', handler.getRawFiles);
+    router.get('/filesForContract', handler.getFilesForContract);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
 
     return router;

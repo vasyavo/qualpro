@@ -26,7 +26,7 @@ module.exports = function () {
      * @param {string} count - count of elements in response
      * @param {string} page - number of page to show
      *
-     * @see {@link OriginModel}
+     * @see {@link RetailSegmentModel}
      *
      * @example Request example:
      *     'http://192.168.88.15:9797/origin'

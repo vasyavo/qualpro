@@ -51,8 +51,9 @@ define([
                 file.selected = !!selected;
 
                 if (!uploaded) {
-                    file.contentType = file.type;
                     file.uploaded = false;
+                } else {
+                    file.contentType = file.type;
                 }
 
                 file.type = this.getTypeFromContentType(file.contentType);

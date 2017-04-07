@@ -26,7 +26,15 @@ const getEveryAdminInCountry = {
                     },
                 },
                 in: {
-                    $eq: ['$$originatorCountry', '$$personnelCountry'],
+                    $or: [
+                        {
+                            $eq: ['$$originatorCountry', '$$personnelCountry'],
+                        },
+                        // if MA then originator country is null
+                        {
+                            $eq: ['$$originatorCountry', null],
+                        },
+                    ],
                 },
             },
         }],

@@ -28,7 +28,7 @@ define([
                     validation.checkZipField(errors, true, attrs.packing, this.translatedFields.packing);
                 }
                 if(this.translatedFields.origin){
-                    validation.checkForValuePresence(errors, true, attrs.origin, this.translatedFields.origin);
+                    validation.checkForValuePresence(errors, false, attrs.origin, this.translatedFields.origin);
                 }
 
                 if (errors.length > 0) {

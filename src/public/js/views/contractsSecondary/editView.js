@@ -55,21 +55,18 @@ define([
             this.translation = options.translation;
             this.makeRender();
 
-            dataService.getData('documents/files', {}, function (err, response) {
-                var documents = response.data;
-                var attachments;
-
-                attachments = _.map(documents, function (document) {
-                    var attachments = self.model.get('attachments');
+            dataService.getData('documents/filesForContract', {
+                contractType: CONTENT_TYPES.CONTRACTSSECONDARY,
+                contractId: this.model.get('_id'),
+            }, function (err, documents) {
+                var attachments = _.map(documents, function (document) {
                     var title = document.title;
-                    var attachments = document.attachment;
-                    var attach = attachments;
+                    var attach = document.attachment;
 
                     attach.originalName = title;
                     attach.document = document._id;
 
                     return attach;
-
                 });
 
                 if (err) {
@@ -292,6 +289,8 @@ define([
                 $curEl.find('#' + file.cid).remove();
                 this.formData.delete(file.cid);
             }
+
+            App.masonryGrid.call($curEl);
         },
 
         setSelectedFiles: function () {
@@ -393,6 +392,8 @@ define([
 
                 self.$el.find('#filesBlock').show();
                 self.fileDialogView.trigger('fileSelected', inputModel);
+
+                App.masonryGrid.call(self.$el);
             });
         },
 
@@ -404,6 +405,8 @@ define([
             }));
 
             $curEl.find('.filesBlock').show();
+
+            App.masonryGrid.call($curEl);
         },
 
         renderLocations: function () {

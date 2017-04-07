@@ -123,13 +123,13 @@ define(function (require) {
                                 title : that.$el.find('#title').val(),
                                 type : 'file'
                             };
-                            var folder = that.collection.folder;
-                            if (folder) {
-                                data.parent = folder;
+
+                            if (that.collection && that.collection.folder) {
+                                data.parent = that.collection.folder;
                             }
 
                             that.model.saveFile(formData, data);
-                        }, 2000),
+                        }, 2000, true),
                     },
                     cancel: {
                         text: that.translation.cancelBtn,

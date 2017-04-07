@@ -1,9 +1,5 @@
-'use strict';
-
 const ActivityLog = require('./../stories/push-notifications/activityLog');
-
 const PasswordManager = require('./../helpers/passwordManager');
-const redis = require('./../helpers/redisClient');
 const ObjectiveModel = require('./../types/objective/model');
 
 const Personnel = function () {
@@ -13,7 +9,6 @@ const Personnel = function () {
     const RESPONSES_CONSTANTS = require('../constants/responses');
     const CONSTANTS = require('../constants/mainConstants');
     const CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    const ACTIVITY_TYPES = require('../constants/activityTypes');
     const ERROR_MESSAGES = require('../constants/errorMessages');
     const REGEXP = require('../public/js/constants/validation.js');
     const PERSONNEL_STATUSES = require('../public/js/constants/personnelStatuses.js');
@@ -31,10 +26,7 @@ const Personnel = function () {
     const getImagesHelper = new GetImagesHelper();
     const PersonnelModel = require('./../types/personnel/model');
     const AccessRoleModel = require('./../types/accessRole/model');
-    const DomainModel = require('./../types/domain/model');
-    const OutletModel = require('./../types/outlet/model');
     const BranchModel = require('./../types/branch/model');
-    const RetailSegmentModel = require('./../types/retailSegment/model');
     const SessionModel = require('./../types/session/model');
     const xssFilters = require('xss-filters');
     const ObjectId = mongoose.Types.ObjectId;
@@ -138,6 +130,7 @@ const Personnel = function () {
 
     const personnelFindByIdAndPopulate = (options, callback) => {
         const id = ObjectId(options.id);
+        const { isMobile } = options;
 
         const pipeline = [{
             $match: {
@@ -301,8 +294,8 @@ const Personnel = function () {
         }, {
             $lookup: {
                 from: 'personnels',
-                localField: 'vacation.cover',
-                foreignField: '_id',
+                localField: '_id',
+                foreignField: 'vacation.cover',
                 as: 'covered',
             },
         }, {
@@ -322,6 +315,47 @@ const Personnel = function () {
                     },
                 },
             },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                localField: 'vacation.cover',
+                foreignField: '_id',
+                as: 'cover',
+            },
+        }, {
+            $addFields: {
+                cover: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$cover',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    cover: {
+                                        $arrayElemAt: ['$cover', 0],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$cover._id',
+                                    firstName: '$$cover.firstName',
+                                    lastName: '$$cover.lastName',
+                                    position: '$$cover.position',
+                                    accessRole: '$$cover.accessRole',
+                                    onLeave: '$$cover.vacation.onLeave',
+                                },
+                            },
+                        },
+                        else: null,
+                    },
+                },
+            },
+        }, {
+            $addFields: {
+                'vacation.cover': '$cover',
+            },
         }];
 
         PersonnelModel.aggregate(pipeline)
@@ -332,6 +366,15 @@ const Personnel = function () {
 
                 const personnel = result.length > 0 ?
                     result.slice().pop() : {};
+
+                /*
+                * warning: mobile app accepts set Personnel
+                *          but CMS accepts Object with keys which are Personnel ID
+                *          and as value covered Personnel
+                * */
+                if (!isMobile && personnel.covered) {
+                    personnel.covered = _.keyBy(personnel.covered, covered => covered._id.toString());
+                }
 
                 callback(null, personnel);
             });
@@ -424,6 +467,7 @@ const Personnel = function () {
                         });
                 },
 
+
                 function(level, cb) {
                     if (level === ACL_CONSTANTS.MASTER_ADMIN) {
                         return cb(null, []);
@@ -507,6 +551,7 @@ const Personnel = function () {
                             region: {
                                 _id: { $arrayElemAt: ['$region._id', 0] },
                                 title: { $arrayElemAt: [`$region.name.${currentLanguage}`, 0] },
+                                parent: { $arrayElemAt: ['$region.parent', 0] },
                                 expanded: { $literal: true },
                                 selected: { $literal: false },
                                 unselectable: unselectable(currentLevel, 'region', instoreObjective),
@@ -530,6 +575,7 @@ const Personnel = function () {
                             subRegion: {
                                 _id: { $arrayElemAt: ['$subRegion._id', 0] },
                                 title: { $arrayElemAt: [`$subRegion.name.${currentLanguage}`, 0] },
+                                parent: { $arrayElemAt: ['$subRegion.parent', 0] },
                                 expanded: { $literal: true },
                                 selected: { $literal: false },
                                 unselectable: unselectable(currentLevel, 'subRegion', instoreObjective),
@@ -552,6 +598,7 @@ const Personnel = function () {
                         $project: aggregateHelper.getProjection({
                             branch: {
                                 _id: { $arrayElemAt: ['$branch._id', 0] },
+                                subRegion: { $arrayElemAt: ['$branch.subRegion', 0] },
                                 title: { $arrayElemAt: [`$branch.name.${currentLanguage}`, 0] },
                                 expanded: { $literal: true },
                                 selected: { $literal: false },
@@ -662,14 +709,30 @@ const Personnel = function () {
                             key: { $first: '$country.key' },
                             children: {
                                 $addToSet: {
-                                    _id: '$region._id',
-                                    title: '$region.title',
-                                    expanded: '$region.expanded',
-                                    selected: '$region.selected',
-                                    unselectable: '$region.unselectable',
-                                    contentType: '$region.contentType',
-                                    key: '$region.key',
-                                    children: '$children',
+                                    $cond: {
+                                        if: {
+                                            $eq: ['$region.parent', '$country._id'],
+                                        },
+                                        then: {
+                                            _id: '$region._id',
+                                            title: '$region.title',
+                                            expanded: '$region.expanded',
+                                            selected: '$region.selected',
+                                            unselectable: '$region.unselectable',
+                                            contentType: '$region.contentType',
+                                            key: '$region.key',
+                                            children: {
+                                                $filter: {
+                                                    input: '$children',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $ne: ['$$item', false],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        else: false,
+                                    },
                                 },
                             },
                         },
@@ -677,19 +740,43 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: '$region._id',
+                            _id: {
+                                countryId: '$country._id',
+                                regionId: '$region._id',
+                            },
                             region: { $first: '$region' },
                             country: { $first: '$country' },
                             children: {
                                 $addToSet: {
-                                    _id: '$subRegion._id',
-                                    title: '$subRegion.title',
-                                    expanded: '$subRegion.expanded',
-                                    selected: '$subRegion.selected',
-                                    unselectable: '$subRegion.unselectable',
-                                    contentType: '$subRegion.contentType',
-                                    key: '$subRegion.key',
-                                    children: '$children',
+                                    $cond: {
+                                        if: {
+                                            $eq: ['$subRegion.parent', '$region._id'],
+                                        },
+                                        then: {
+                                            _id: '$subRegion._id',
+                                            title: '$subRegion.title',
+                                            expanded: '$subRegion.expanded',
+                                            selected: '$subRegion.selected',
+                                            unselectable: '$subRegion.unselectable',
+                                            contentType: '$subRegion.contentType',
+                                            key: '$subRegion.key',
+                                            children: {
+                                                $filter: {
+                                                    input: '$children',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $ne: [
+                                                            {
+                                                                $size: '$$item.children',
+                                                            },
+                                                            0,
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        else: false,
+                                    },
                                 },
                             },
                         },
@@ -697,7 +784,11 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: '$subRegion._id',
+                            _id: {
+                                countryId: '$country._id',
+                                regionId: '$region._id',
+                                subRegionId: '$subRegion._id',
+                            },
                             subRegion: { $first: '$subRegion' },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
@@ -709,7 +800,20 @@ const Personnel = function () {
                                     selected: '$retailSegment.selected',
                                     contentType: '$retailSegment.contentType',
                                     key: '$retailSegment.key',
-                                    children: '$children',
+                                    children: {
+                                        $filter: {
+                                            input: '$children',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: [
+                                                    {
+                                                        $size: '$$item.children',
+                                                    },
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -717,11 +821,16 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: '$retailSegment._id',
-                            retailSegment: { $first: '$retailSegment' },
+                            _id: {
+                                countryId: '$country._id',
+                                regionId: '$region._id',
+                                subRegionId: '$subRegion._id',
+                                retailSegmentId: '$retailSegment._id',
+                            },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
                             subRegion: { $first: '$subRegion' },
+                            retailSegment: { $first: '$retailSegment' },
                             children: {
                                 $addToSet: {
                                     _id: '$outlet._id',
@@ -730,7 +839,15 @@ const Personnel = function () {
                                     selected: '$outlet.selected',
                                     contentType: '$outlet.contentType',
                                     key: '$outlet.key',
-                                    children: '$children',
+                                    children: {
+                                        $filter: {
+                                            input: '$children',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: ['$$item', false],
+                                            },
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -738,20 +855,34 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: '$outlet._id',
-                            outlet: { $first: '$outlet' },
+                            _id: {
+                                countryId: '$country._id',
+                                regionId: '$region._id',
+                                subRegionId: '$subRegion._id',
+                                retailSegmentId: '$retailSegment._id',
+                                outletId: '$outlet._id',
+                            },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
                             subRegion: { $first: '$subRegion' },
+                            outlet: { $first: '$outlet' },
                             retailSegment: { $first: '$retailSegment' },
                             children: {
                                 $addToSet: {
-                                    _id: '$branch._id',
-                                    title: '$branch.title',
-                                    expanded: '$branch.expanded',
-                                    selected: '$branch.selected',
-                                    contentType: '$branch.contentType',
-                                    key: '$branch.key',
+                                    $cond: {
+                                        if: {
+                                            $eq: ['$branch.subRegion', '$subRegion._id'],
+                                        },
+                                        then: {
+                                            _id: '$branch._id',
+                                            title: '$branch.title',
+                                            expanded: '$branch.expanded',
+                                            selected: '$branch.selected',
+                                            contentType: '$branch.contentType',
+                                            key: '$branch.key',
+                                        },
+                                        else: false,
+                                    },
                                 },
                             },
                         },
@@ -791,7 +922,6 @@ const Personnel = function () {
                         cb(null, result);
                     });
                 },
-
             ], (err, result) => {
                 if (err) {
                     return next(err);
@@ -937,6 +1067,7 @@ const Personnel = function () {
         const body = req.body;
         const accessLevel = req.session.level;
         const uId = req.session.uId;
+        const isMobile = req.isMobile;
 
         function queryRun(body, callback) {
             let phone = body.phoneNumber;
@@ -1046,7 +1177,12 @@ const Personnel = function () {
                         body: personnel.toJSON(),
                     });
 
-                    cb(null, { id: personnelId });
+                    const options = {
+                        id: personnelId,
+                        isMobile,
+                    };
+
+                    cb(null, options);
                 },
 
                 (options, cb) => {
@@ -1427,13 +1563,14 @@ const Personnel = function () {
     this.getById = function(req, res, next) {
         const session = req.session;
         const userId = session.uId;
+        const isMobile = req.isMobile;
 
         const queryRun = (callback) => {
             const requestedId = req.params.id;
             const actualId = requestedId || userId;
             const options = {
                 id: actualId,
-                isCurrent: requestedId === userId,
+                isMobile,
             };
 
             async.waterfall([
@@ -1454,293 +1591,42 @@ const Personnel = function () {
                     async.waterfall([
 
                         (cb) => {
-                            const pipeline = [{
-                                $project: {
-                                    _id: 1,
-                                    'name.en': 1,
-                                    'name.ar': 1,
-                                    type: 1,
-                                    parent: 1,
-                                },
-                            }, {
-                                $group: {
-                                    _id: null,
-                                    setDomain: {
-                                        $push: '$$ROOT',
-                                    },
-                                },
-                            }, {
-                                $project: {
-                                    setDomain: 1,
-                                    setCountry: {
-                                        $let: {
-                                            vars: {
-                                                setCountry: personnel.country,
-                                            },
-                                            in: {
-                                                $cond: {
-                                                    if: {
-                                                        $gt: [{
-                                                            $size: '$$setCountry',
-                                                        }, 0],
-                                                    },
-                                                    then: '$$setCountry',
-                                                    else: {
-                                                        $filter: {
-                                                            input: '$setDomain',
-                                                            as: 'item',
-                                                            cond: {
-                                                                $eq: ['$$item.type', 'country'],
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }, {
-                                $project: {
-                                    setDomain: 1,
-                                    setCountry: 1,
-                                    setRegion: {
-                                        $let: {
-                                            vars: {
-                                                setRegion: personnel.region,
-                                            },
-                                            in: {
-                                                $cond: {
-                                                    if: {
-                                                        $gt: [{
-                                                            $size: '$$setRegion',
-                                                        }, 0],
-                                                    },
-                                                    then: '$$setRegion',
-                                                    else: {
-                                                        $let: {
-                                                            vars: {
-                                                                setId: '$setCountry._id',
-                                                            },
-                                                            in: {
-                                                                $filter: {
-                                                                    input: '$setDomain',
-                                                                    as: 'item',
-                                                                    cond: {
-                                                                        $and: [{
-                                                                            $eq: ['$$item.type', 'region'],
-                                                                        }, {
-                                                                            $setIsSubset: [['$$item.parent'], '$$setId'],
-                                                                        }],
-                                                                    },
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }, {
-                                $project: {
-                                    setDomain: 1,
-                                    setCountry: 1,
-                                    setRegion: 1,
-                                    setSubRegion: {
-                                        $let: {
-                                            vars: {
-                                                setSubRegion: personnel.subRegion,
-                                            },
-                                            in: {
-                                                $cond: {
-                                                    if: {
-                                                        $gt: [{
-                                                            $size: '$$setSubRegion',
-                                                        }, 0],
-                                                    },
-                                                    then: '$$setSubRegion',
-                                                    else: {
-                                                        $let: {
-                                                            vars: {
-                                                                setId: '$setRegion._id',
-                                                            },
-                                                            in: {
-                                                                $filter: {
-                                                                    input: '$setDomain',
-                                                                    as: 'item',
-                                                                    cond: {
-                                                                        $and: [{
-                                                                            $eq: ['$$item.type', 'subRegion'],
-                                                                        }, {
-                                                                            $setIsSubset: [['$$item.parent'], '$$setId'],
-                                                                        }],
-                                                                    },
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }, {
-                                $project: {
-                                    setCountry: {
-                                        _id: 1,
-                                        name: 1,
-                                    },
-                                    setRegion: {
-                                        _id: 1,
-                                        name: 1,
-                                    },
-                                    setSubRegion: {
-                                        _id: 1,
-                                        name: 1,
-                                    },
-                                },
-                            }];
-
-                            DomainModel.aggregate(pipeline)
-                                .exec(cb);
+                            require('./../stories/personnel/reusable-components/getLocation')({
+                                setCountry: personnel.country,
+                                setRegion: personnel.region,
+                                setSubRegion: personnel.subRegion,
+                            }, cb);
                         },
 
                         (result, cb) => {
-                            const {
-                                setCountry,
-                                setRegion,
-                                setSubRegion,
-                            } = result.length > 0 ?
-                                result.slice().pop() : {};
+                            const groups = result.length ?
+                                result.slice().pop() : {
+                                    setCountry: [],
+                                    setRegion: [],
+                                    setSubRegion: [],
+                                };
 
-                            personnel.country = setCountry;
-                            personnel.region = setRegion;
-                            personnel.subRegion = setSubRegion;
+                            personnel.country = groups.setCountry;
+                            personnel.region = groups.setRegion;
+                            personnel.subRegion = groups.setSubRegion;
 
                             cb(null);
                         },
 
                         (cb) => {
-                            const $match = {};
-                            const setBranchId = personnel.branch.map(item => item._id);
-                            const setSubRegionId = personnel.subRegion.map(item => item._id);
-
-                            if (personnel.branch.length) {
-                                $match.$and = [{
-                                    _id: {
-                                        $in: setBranchId,
-                                    },
-                                }, {
-                                    subRegion: {
-                                        $in: setSubRegionId,
-                                    },
-                                }];
-                            } else {
-                                $match.subRegion = {
-                                    $in: setSubRegionId,
-                                };
-                            }
-
-                            const pipeline = [{
-                                $match,
-                            }, {
-                                $project: {
-                                    'name.en': 1,
-                                    'name.ar': 1,
-                                    retailSegment: 1,
-                                    outlet: 1,
-                                },
-                            }, {
-                                $group: {
-                                    _id: null,
-                                    setBranch: {
-                                        $push: {
-                                            _id: '$_id',
-                                            name: {
-                                                en: '$name.en',
-                                                ar: '$name.ar',
-                                            },
-                                        },
-                                    },
-                                    setRetailSegment: {
-                                        $addToSet: '$retailSegment',
-                                    },
-                                    setOutlet: {
-                                        $addToSet: '$outlet',
-                                    },
-                                },
-                            }, {
-                                $project: {
-                                    setBranch: 1,
-                                    setRetailSegment: {
-                                        $filter: {
-                                            input: '$setRetailSegment',
-                                            as: 'item',
-                                            cond: {
-                                                $ne: ['$$item', null],
-                                            },
-                                        },
-                                    },
-                                    setOutlet: {
-                                        $filter: {
-                                            input: '$setOutlet',
-                                            as: 'item',
-                                            cond: {
-                                                $ne: ['$$item', null],
-                                            },
-                                        },
-                                    },
-                                },
-                            }, {
-                                $lookup: {
-                                    from: 'retailSegments',
-                                    localField: 'setRetailSegment',
-                                    foreignField: '_id',
-                                    as: 'setRetailSegment',
-                                },
-                            }, {
-                                $project: {
-                                    setBranch: 1,
-                                    setRetailSegment: {
-                                        _id: 1,
-                                        name: {
-                                            en: 1,
-                                            ar: 1,
-                                        },
-                                    },
-                                    setOutlet: 1,
-                                },
-                            }, {
-                                $lookup: {
-                                    from: 'outlets',
-                                    localField: 'setOutlet',
-                                    foreignField: '_id',
-                                    as: 'setOutlet',
-                                },
-                            }, {
-                                $project: {
-                                    setBranch: 1,
-                                    setRetailSegment: 1,
-                                    setOutlet: {
-                                        _id: 1,
-                                        name: {
-                                            en: 1,
-                                            ar: 1,
-                                        },
-                                    },
-                                },
-                            }];
-
-                            BranchModel.aggregate(pipeline).exec(cb);
+                            require('./../stories/personnel/reusable-components/getBranches')({
+                                setSubRegion: personnel.subRegion,
+                                setBranch: personnel.branch,
+                            }, cb);
                         },
 
                         (result, cb) => {
                             const groups = result.length ?
-                                result.slice().pop() : [{
+                                result.slice().pop() : {
                                     setBranch: [],
                                     setRetailSegment: [],
                                     setOutlet: [],
-                                }];
+                                };
 
                             personnel.branch = groups.setBranch;
                             personnel.retailSegment = groups.setRetailSegment;
@@ -3145,6 +3031,7 @@ const Personnel = function () {
         const currentUserId = req.session.uId;
         const currentLanguage = req.cookies.currentLanguage;
         const coveredUsers = [];
+        const isMobile = req.isMobile;
         let coverUserId;
         let generatedPassword;
 
@@ -3374,6 +3261,7 @@ const Personnel = function () {
             function getUserForUi(model, cb) {
                 const options = {
                     id: model._id,
+                    isMobile,
                 };
 
                 personnelFindByIdAndPopulate(options, (err, personnel) => {

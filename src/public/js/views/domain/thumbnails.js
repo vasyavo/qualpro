@@ -35,7 +35,7 @@ define(function(require) {
         events: {
             "click .checkboxLabel"             : "checked", //method locate in paginator
             "click input[type='checkbox']"     : "inputClick",//just for prevent thumbnailsClick
-            "click .thumbnail:not(label,input)": "thumbnailsClick"
+            "click .thumbnail:not(label,input)": "thumbnailsClick",
         },
 
         initialize: function (options) {
@@ -93,7 +93,7 @@ define(function(require) {
             this.logic.loadChildContent(childContentType, parentId, parentName, parentTabName);
         },
 
-        thumbnailsClick: function (e) {
+        thumbnailsClick: _.debounce(function (e) {
             var $targetEl = $(e.target);
 
             var $targetDivContainer = $targetEl.closest('.thumbnail.' + this.contentType);
@@ -107,7 +107,7 @@ define(function(require) {
             } else {
                 this.previewItem(id);
             }
-        },
+        }, 1000, true),
 
         showMoreContent: function (newModels) {
             var $currentEl = this.$el;

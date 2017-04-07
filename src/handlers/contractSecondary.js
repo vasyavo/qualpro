@@ -648,12 +648,11 @@ var Contract = function () {
                         if (salesTarget) {
                             updateObject.salesTarget = _.escape(salesTarget);
                         }
-                        
+
                         if (updateObject.attachments && updateObject.attachments.length) {
-                            fullUpdate.$addToSet = {};
-                            fullUpdate.$addToSet.documents = {$each: updateObject.attachments.objectID()};
-                            delete updateObject.documents;
+                            fullUpdate.documents = updateObject.attachments.objectID();
                         }
+
                         updateObject.status = saveContractsSecondary ? PROMOTION_STATUSES.DRAFT : PROMOTION_STATUSES.ACTIVE;
 
                         delete updateObject.attachments;
@@ -825,8 +824,7 @@ var Contract = function () {
 
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.CONTRACTSSECONDARY,
-                filter     : filter,
-                personnel  : personnel
+                filter,
             });
 
             if (queryObject.personnel) {

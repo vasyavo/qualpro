@@ -41,7 +41,7 @@ define([
             });
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var haveBefore = $el.hasClass('before');
             var before = this.model.get('before') || {};
@@ -62,7 +62,7 @@ define([
                 bucket     : 'visibilityForm',
                 translation: this.translation
             }); //TODO: change bucket from constants
-        },
+        }, 1000, true),
 
         render: function () {
             var self = this;

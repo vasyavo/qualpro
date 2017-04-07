@@ -16,11 +16,11 @@ define([
                 'click #manageBtn': 'showManageDialog'
             },
 
-            showManageDialog: function () {
+            showManageDialog: _.debounce(function () {
                 new manageView({
                     translation: this.translation
                 });
-            }
+            }, 1000, true)
         });
 
         return TopBarView;

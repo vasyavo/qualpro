@@ -68,7 +68,7 @@ define([
             this.$el.dialog('close').dialog('destroy').remove();
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var fileModelId = $el.attr('data-id') || $el.closest('.masonryThumbnail').attr('data-id');
             var fileModel = this.previewFiles.get(fileModelId);
@@ -86,7 +86,7 @@ define([
                     });
                 }
             });
-        },
+        }, 100, true),
 
         setSelectedFiles: function (files) {
             var self = this;

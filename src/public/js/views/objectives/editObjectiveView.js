@@ -53,7 +53,6 @@ define([
         fileForVFWithoutBranches : {},
 
         events: {
-            'click #assignDd'            : 'showPersonnelView',
             'click #attachFile'          : 'showAttachDialog',
             'input #titleEn, #titleAr'   : 'changeTitle',
             'change #dateStart, #dateEnd': 'changeDate',
@@ -63,7 +62,8 @@ define([
             'click #actionHolder:not(ul)': 'showHideActionDropdown',
             'click .formThumbnail'       : 'openForm',
             'click .fileThumbnailItem'   : 'showFilePreviewDialog',
-            'click #downloadFile'        : 'stopPropagation'
+            'click #downloadFile'        : 'stopPropagation',
+            'click #personnelLocation'   : 'changePersonnelLocation',
         },
 
         initialize: function (options) {
@@ -89,6 +89,17 @@ define([
             this.attachments = _.pluck(this.model.get('attachments'), '_id');
             this.files = new FileCollection(this.model.get('attachments'), true);
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
+
+            var form = this.model.get('form');
+
+            if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[1]._id) {
+                this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[1];
+                this.linkedForm.formId = form._id;
+            } else if (form && form.contentType === CONSTANTS.OBJECTIVES_FORMS[0]._id) {
+                this.linkedForm = CONSTANTS.OBJECTIVES_FORMS[0];
+                this.linkedForm.formId = form._id;
+            }
+
             this.makeRender();
 
             if (this.parentObjectiveId) {
@@ -114,7 +125,7 @@ define([
             _.bindAll(this, 'fileSelected');
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
@@ -133,7 +144,7 @@ define([
                 $fileElement[0].click();
                 $fileElement.remove();
             });
-        },
+        }, 1000, true),
 
         showUnlinkPopUp: function () {
             var self = this;
@@ -153,18 +164,19 @@ define([
             var $el = this.$el;
 
             this.linkedForm = null;
-            this.branchesForVisibility = [];
+            this.changed.formType = null;
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
+            this.model.unset('form');
             $el.find('#formThumbnail').html('');
             $el.find('.formBlock').hide();
             this.showLinkForm();
         },
 
-        openForm: function () {
+        openForm: _.debounce(function () {
             var modelJSON = this.model.toJSON();
             var form;
-            var id;
+            var id = modelJSON && modelJSON.form && modelJSON.form._id;
             var contentType;
             var description;
             var self = this;
@@ -174,14 +186,8 @@ define([
                 return;
             }
 
-            if (this.duplicate) {
-                form = this.linkedForm;
-                contentType = form._id;
-            } else {
-                form = modelJSON.form;
-                id = form._id;
-                contentType = form.contentType;
-            }
+            form = this.linkedForm;
+            contentType = form._id;
 
             if (contentType === 'visibility' && modelJSON.createdBy.user._id === App.currentUser._id) {
                 description = {
@@ -250,15 +256,15 @@ define([
                         });
                     }
                 } else {
-                    this.branchesForVisibility = modelJSON.branch;
-                    this.outletsForVisibility = _.map(modelJSON.outlet, function (outlet) {
+                    this.branchesForVisibility = this.branchesForVisibility || modelJSON.branch;
+                    this.outletsForVisibility = _.map(this.outletsForVisibility || modelJSON.outlet, function (outlet) {
                         let result = {
                             name : outlet.name[currentLanguage],
                             _id : outlet._id,
                             branches : []
                         };
 
-                        self.branchesForVisibility.map((branch) => {
+                        self.branchesForVisibility.forEach(function(branch) {
                             if (outlet._id === branch.outlet) {
                                 result.branches.push({
                                     name : branch.name[currentLanguage],
@@ -279,10 +285,10 @@ define([
                         translation : self.translation
                     };
 
-                    if (this.duplicate) {
-                        formOptions.forCreate = true;
-                    } else {
+                    if (id) {
                         formOptions.id = id;
+                    } else {
+                        formOptions.forCreate = true;
                     }
 
                     this.visibilityForm = new VisibilityEditView(formOptions);
@@ -297,7 +303,7 @@ define([
                     message: ERROR_MESSAGES.youHaveNoRights[self.currentLanguage] + ' ' + self.linkedForm.name[self.currentLanguage] + ' ' + this.translation.form
                 });
             }
-        },
+        }, 1000, true),
 
         showLinkFormDialog: function () {
             var self = this;
@@ -312,6 +318,7 @@ define([
 
             this.linkFormView.on('formLinked', function (modelJSON) {
                 self.linkedForm = modelJSON;
+                self.changed.formType = modelJSON._id;
 
                 self.$el.find('#formThumbnail').append(self.formTemplate({
                     name       : modelJSON.name[self.currentLanguage],
@@ -645,30 +652,7 @@ define([
                             }
                         }
                     } else {
-                        if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && files.files[0]) {
-                            var branches = context.branchesForVisibility;
-                            requestPayload = {
-                                before: {
-                                    files: []
-                                },
-                                after: {
-                                    description: '',
-                                    files: []
-                                },
-                                branches: branches.map(function (item) {
-                                    return {
-                                        branchId: item._id,
-                                        before: {
-                                            files: [files.files[0]._id]
-                                        },
-                                        after: {
-                                            files: [],
-                                            description: ''
-                                        }
-                                    };
-                                })
-                            };
-                        } else if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll') && !files.files[0]) {
+                        if (context.visibilityFormAjax && context.visibilityFormAjax.model && context.visibilityFormAjax.model.get('applyFileToAll')) {
                             var fileToAllBranches = context.visibilityFormAjax.model.get('fileToAllBranches');
                             var branches = context.branchesForVisibility;
 
@@ -684,7 +668,7 @@ define([
                                     return {
                                         branchId: item._id,
                                         before: {
-                                            files: [fileToAllBranches]
+                                            files: [files.files[0] ? files.files[0]._id : fileToAllBranches]
                                         },
                                         after: {
                                             files: [],
@@ -701,23 +685,10 @@ define([
                                     originalName: item.fileName
                                 });
 
-                                if (fileFromServer) {
-                                    return {
-                                        branchId: item.branch,
-                                        before : {
-                                            files: [fileFromServer._id]
-                                        },
-                                        after : {
-                                            files : [],
-                                            description : ''
-                                        }
-                                    };
-                                }
-
                                 return {
-                                    branchId : item.branch,
+                                    branchId: item.branch,
                                     before : {
-                                        files : [item._id]
+                                        files: [fileFromServer ? fileFromServer._id : item._id]
                                     },
                                     after : {
                                         files : [],
@@ -924,6 +895,7 @@ define([
         locationSelected: function (data) {
             var $personnelLocation = this.$el.find('#personnelLocation');
             var locations = this.locations;
+            var self = this;
 
             locations.country = data.country;
             locations.region = data.region;
@@ -937,17 +909,20 @@ define([
 
             this.changed.location = data.location;
 
-            if (this.duplicate) {
-                this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
-                    return self.locations.branch.indexOf(branch._id) !== -1;
-                });
-                this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
-                    return item._id;
-                });
-                this.branchesForVisibility = _.map(this.branchesForVisibility, function (branch) {
-                    return branch.name.currentLanguage;
-                });
-            }
+            this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
+                return self.locations.branch.indexOf(branch._id) !== -1;
+            });
+            this.branchesForVisibility = _.uniq(this.branchesForVisibility, false, function (item) {
+                return item._id;
+            });
+
+            this.outletsForVisibility = _.filter(this.outletsForVisibility, function (outlet) {
+                return self.locations.outlet.indexOf(outlet._id) !== -1;
+            });
+            this.outletsForVisibility = _.uniq(this.outletsForVisibility, false, function (item) {
+                return item._id;
+            });
+            this.unlinkForm();
         },
 
         showPersonnelView: function () {
@@ -996,24 +971,53 @@ define([
                 self.$el.find('#assignDd').html(personnelsNames);
                 self.changed.assignedTo = personnelsIds;
 
-                if (this.duplicate) {
-                    self.branchesForVisibility = [];
+                self.branchesForVisibility = [];
+                self.outletsForVisibility = [];
 
-                    jsonPersonnels.forEach(function (personnel) {
-                        self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
-                    });
-                }
+                jsonPersonnels.forEach(function (personnel) {
+                    self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                    self.outletsForVisibility = self.outletsForVisibility.concat(personnel.outlet);
+                });
 
                 if (jsonPersonnels.length && !self.linkedForm) {
-                    if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual') {
+                    if (App.currentUser.accessRole.level === 1 && self.changed.objectiveType !== 'individual' && self.model.get('objectiveType') !== 'individual') {
                         return;
                     }
 
                     self.showLinkForm();
                 } else {
-                    self.hideLinkForm();
+                    self.unlinkForm();
                 }
             });
+        },
+
+        changePersonnelLocation: function () {
+            var personnels = this.model.get('assignedTo');
+            var personnelsIds = this.changed.assignedTo || _.pluck(personnels, '_id');
+            var self = this;
+
+            this.treeView = new TreeView({
+                ids        : personnelsIds,
+                translation: this.translation
+            });
+
+            this.treeView.on('locationSelected', this.locationSelected, this);
+
+            if (!this.branchesForVisibility || (this.branchesForVisibility && !this.branchesForVisibility.length) ) {
+                this.branchesForVisibility = [];
+
+                personnels.forEach(function (personnel) {
+                    self.branchesForVisibility = self.branchesForVisibility.concat(personnel.branch);
+                });
+            }
+
+            if (!this.outletsForVisibility || (this.outletsForVisibility && !this.outletsForVisibility.length) ) {
+                this.outletsForVisibility = [];
+
+                personnels.forEach(function (personnel) {
+                    self.outletsForVisibility = self.outletsForVisibility.concat(personnel.outlet);
+                });
+            }
         },
 
         showLinkedForm: function (form) {
@@ -1033,6 +1037,7 @@ define([
             var model = this.model.toJSON();
             var objectiveType = $curEl.find('#typeDd').attr('data-id');
             var selectedFiles;
+            var currentLanguage = App.currentUser.currentLanguage;
             var attachments;
             var files;
             var change;
@@ -1065,17 +1070,29 @@ define([
             this.model.setFieldsNames(this.translation, this.changed);
             this.model.validate(this.changed, function (err) {
                 if (err && err.length) {
-                    App.renderErrors(err);
-                } else {
-                    if (self.changed.attachments) {
-                        self.changed.attachments = _.compact(self.changed.attachments);
-                        self.changed.attachments = self.changed.attachments.length ? self.changed.attachments : [];
-                    }
-
-                    self.changed.saveObjective = options.save;
-
-                    self.$el.find('#mainForm').submit();
+                    return App.renderErrors(err);
                 }
+
+                var objectiveType = self.changed.objectiveType || self.model.get('objectiveType');
+
+                if (App.currentUser.accessRole.level === 2 && !self.linkedForm) {
+                    return App.render({type: 'error', message: ERROR_MESSAGES.linkSomeForm[currentLanguage]});
+                } else if (objectiveType === 'individual' && !self.linkedForm) {
+                    return App.render({type: 'error', message: ERROR_MESSAGES.linkSomeForm[currentLanguage]});
+                }
+
+                if (self.changed.attachments) {
+                    self.changed.attachments = _.compact(self.changed.attachments);
+                    self.changed.attachments = self.changed.attachments.length ? self.changed.attachments : [];
+                }
+
+                if (self.linkedForm) {
+                    self.changed.formType = self.linkedForm._id;
+                }
+
+                self.changed.saveObjective = options.save;
+
+                self.$el.find('#mainForm').submit();
             });
 
         },
@@ -1186,7 +1203,8 @@ define([
 
             jsonModel.duplicate = this.duplicate;
             formString = this.template({
-                jsonModel  : jsonModel,
+                jsonModel: jsonModel,
+                linkedForm: this.linkedForm,
                 translation: this.translation
             });
 
@@ -1206,6 +1224,7 @@ define([
             $curEl.find('#filesBlock').hide();
 
             $curEl.find('#mainForm').on('submit', {body: this.changed, context: this}, this.formSubmit);
+            $curEl.find('#assignDd').on('click', _.debounce(this.showPersonnelView.bind(this), 2000, true));
 
             startDateObj = {
                 changeMonth: true,

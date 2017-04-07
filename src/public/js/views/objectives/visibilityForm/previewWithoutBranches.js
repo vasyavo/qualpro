@@ -13,10 +13,11 @@ define(function (require) {
 
         initialize : function (options) {
             var that = this;
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
 
             this.formId = options.formId;
             this.assigneId = options.assigneId;
-            this.translation = options.translation;
+            this.translation = $(options.description[currentLanguage]).text();
             this.templateOptions = {
                 translation : this.translation,
                 beforeDescription : options.beforeDescription,

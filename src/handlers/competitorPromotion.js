@@ -614,7 +614,10 @@ var CompetitorBranding = function() {
             searchFieldsArray : searchFieldsArray,
             filterSearch : filterSearch,
             skip : skip,
-            limit : limit
+            limit : limit,
+            sort: {
+                dateStart: -1,
+            },
         }));
 
         return pipeLine;

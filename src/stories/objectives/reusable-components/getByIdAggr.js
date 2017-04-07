@@ -38,7 +38,7 @@ module.exports = (options, callback) => {
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'personnels',
         key: 'assignedTo',
-        addProjection: ['firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+        addProjection: ['firstName', 'lastName', 'branch'].concat(isMobile ? [] : ['position', 'accessRole']),
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
@@ -105,6 +105,7 @@ module.exports = (options, callback) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
+                    branch: 1,
                 },
             },
         }));
@@ -119,9 +120,75 @@ module.exports = (options, callback) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
+                    branch: 1,
                 },
             },
         }));
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: 'assignedTo.branch',
+                foreignField: '_id',
+                as: 'assignedTo.branch',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                assignedTo: {
+                    branch: {
+                        $map: {
+                            input: '$assignedTo.branch',
+                            as: 'item',
+                            in: {
+                                _id: '$$item._id',
+                                name: '$$item.name',
+                                outlet: '$$item.outlet',
+                            },
+                        },
+                    },
+                    outlet: '$assignedTo.branch.outlet',
+                    _id: '$assignedTo._id',
+                    accessRole: '$assignedTo.accessRole',
+                    firstName: '$assignedTo.firstName',
+                    position: '$assignedTo.position',
+                    lastName: '$assignedTo.lastName',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: 'assignedTo.outlet',
+                foreignField: '_id',
+                as: 'assignedTo.outlet',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                assignedTo: {
+                    outlet: {
+                        $map: {
+                            input: '$assignedTo.outlet',
+                            as: 'item',
+                            in: {
+                                _id: '$$item._id',
+                                name: '$$item.name',
+                            },
+                        },
+                    },
+                    _id: '$assignedTo._id',
+                    branch: '$assignedTo.branch',
+                    accessRole: '$assignedTo.accessRole',
+                    firstName: '$assignedTo.firstName',
+                    position: '$assignedTo.position',
+                    lastName: '$assignedTo.lastName',
+                },
+            },
+        });
     }
 
     pipeline.push({

@@ -14,6 +14,7 @@ module.exports = (req, res, next) => {
     const $matchPersonnel = {
         $and: [],
     };
+    const user = req.personnelModel;
 
     const filter = {};
     const isObjectId = (filter) => {
@@ -374,6 +375,19 @@ module.exports = (req, res, next) => {
                 module: 1,
             },
         },
+        user.country.length ? {
+            $addFields: {
+                country: {
+                    $filter: {
+                        input: '$country',
+                        as: 'item',
+                        cond: {
+                            $setIsSubset: [['$$item._id'], user.country],
+                        },
+                    },
+                },
+            },
+        } : null,
         {
             $lookup: {
                 from: 'domains',
@@ -408,7 +422,35 @@ module.exports = (req, res, next) => {
                                     in: '$$item._id',
                                 },
                             },
-                            setRegion: filter.setRegion && filter.setRegion.length ? filter.setRegion : [],
+                            setRegion: filter.setRegion && filter.setRegion.length ? filter.setRegion :
+                                user.region.length ? {
+                                    $let: {
+                                        vars: {
+                                            setRegionInsideActivities: {
+                                                $filter: {
+                                                    input: '$region',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $setIsSubset: [['$$item._id'], user.region],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        in: {
+                                            $map: {
+                                                input: '$$setRegionInsideActivities',
+                                                as: 'item',
+                                                in: '$$item._id',
+                                            },
+                                        },
+                                    },
+                                } : {
+                                    $map: {
+                                        input: '$region',
+                                        as: 'item',
+                                        in: '$$item._id',
+                                    },
+                                },
                         },
                         in: {
                             $cond: {
@@ -481,7 +523,35 @@ module.exports = (req, res, next) => {
                                     in: '$$item._id',
                                 },
                             },
-                            setSubRegion: filter.setSubRegion && filter.setSubRegion.length ? filter.setSubRegion : [],
+                            setSubRegion: filter.setSubRegion && filter.setSubRegion.length ? filter.setSubRegion :
+                                user.subRegion.length ? {
+                                    $let: {
+                                        vars: {
+                                            setSubRegionInsideActivities: {
+                                                $filter: {
+                                                    input: '$subRegion',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $setIsSubset: [['$$item._id'], user.subRegion],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        in: {
+                                            $map: {
+                                                input: '$$setSubRegionInsideActivities',
+                                                as: 'item',
+                                                in: '$$item._id',
+                                            },
+                                        },
+                                    },
+                                } : {
+                                    $map: {
+                                        input: '$subRegion',
+                                        as: 'item',
+                                        in: '$$item._id',
+                                    },
+                                },
                         },
                         in: {
                             $cond: {
@@ -551,7 +621,35 @@ module.exports = (req, res, next) => {
                                     in: '$$item._id',
                                 },
                             },
-                            setBranch: filter.setBranch && filter.setBranch.length ? filter.setBranch : [],
+                            setBranch: filter.setBranch && filter.setBranch.length ? filter.setBranch :
+                                user.branch.length ? {
+                                    $let: {
+                                        vars: {
+                                            setBranchInsideActivities: {
+                                                $filter: {
+                                                    input: '$branch',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $setIsSubset: [['$$item._id'], user.branch],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        in: {
+                                            $map: {
+                                                input: '$$setBranchInsideActivities',
+                                                as: 'item',
+                                                in: '$$item._id',
+                                            },
+                                        },
+                                    },
+                                } : {
+                                    $map: {
+                                        input: '$branch',
+                                        as: 'item',
+                                        in: '$$item._id',
+                                    },
+                                },
                         },
                         in: {
                             $cond: {
@@ -617,7 +715,7 @@ module.exports = (req, res, next) => {
         },
     ]);
 
-    ActivityListModel.aggregate(pipeline).allowDiskUse(true).exec((err, result) => {
+    ActivityListModel.aggregate(pipeline.filter(stage => stage)).allowDiskUse(true).exec((err, result) => {
         if (err) {
             return next(err);
         }

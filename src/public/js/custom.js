@@ -198,7 +198,7 @@ define([
     };
 
     var dateFormater = function (formatString, dateString) {
-        var date = moment(dateString);
+        var date = moment.utc(dateString);
         var isRender = (App && App.render);
         var currentLanguage = (App && App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
 
@@ -206,7 +206,7 @@ define([
             App.render({type: 'error', message: ERROR_MESSAGES.invalidDate[currentLanguage]});
         }
 
-        return moment(dateString).format(formatString);
+        return moment.utc(dateString).format(formatString);
     };
 
     return {

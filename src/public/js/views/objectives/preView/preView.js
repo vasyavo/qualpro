@@ -153,7 +153,7 @@ define([
             });
         },
 
-        showFilePreviewDialog: function (e) {
+        showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
@@ -176,7 +176,7 @@ define([
                 $fileElement[0].click();
                 $fileElement.remove();
             });
-        },
+        }, 1000, true),
 
         onTreePreview: function (e) {
             var self = this;
@@ -602,7 +602,7 @@ define([
             fileInput.click();
         },
 
-        sendComment: function () {
+        sendComment: _.debounce(function () {
             var commentModel = new CommentModel();
             var self = this;
 
@@ -622,7 +622,7 @@ define([
                     self.$el.find('#commentForm').submit();
                 }
             });
-        },
+        }, 1000, true),
 
         commentFormSubmit: function (e) {
             var context = e.data.context;
@@ -784,12 +784,13 @@ define([
             var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
             var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
-            var condition = (statusId === STATUSES.IN_PROGRESS && createdByMe)
-                || (statusId === STATUSES.COMPLETED && !createdByMe)
+            var createdByMyCover = coveredIds.indexOf(jsonModel.createdBy.user._id) !== -1;
+            var condition = (statusId === STATUSES.IN_PROGRESS && (createdByMe || createdByMyCover))
+                || (statusId === STATUSES.COMPLETED && !createdByMe && !createdByMyCover)
                 || (statusId === STATUSES.CLOSED)
                 || (statusId === STATUSES.FAIL)
-                || (statusId === STATUSES.OVER_DUE && !createdByMe)
-                || (statusId === STATUSES.RE_OPENED && createdByMe)
+                || (statusId === STATUSES.OVER_DUE && !createdByMe && !createdByMyCover)
+                || (statusId === STATUSES.RE_OPENED && (createdByMe || createdByMyCover))
                 || this.activityList
                 || jsonModel.myCC
                 || !App.currentUser.workAccess

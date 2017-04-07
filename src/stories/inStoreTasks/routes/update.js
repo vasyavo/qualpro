@@ -11,6 +11,7 @@ const FileHandler = require('./../../../handlers/file');
 const access = require('./../../../helpers/access')();
 const bodyValidator = require('./../../../helpers/bodyValidator');
 const InStoreTaskUtils = require('./../../../stories/test-utils').InStoreTaskUtils;
+const getByIdAggr = require('../reusable-components/getByIdAggr');
 
 const ObjectId = mongoose.Types.ObjectId;
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
@@ -153,7 +154,7 @@ module.exports = function (req, res, next) {
             },
 
             function (id, cb) {
-                self.getByIdAggr({ id, isMobile: req.isMobile }, cb);
+                getByIdAggr({ id, isMobile: req.isMobile }, cb);
             },
 
         ], (err, result) => {

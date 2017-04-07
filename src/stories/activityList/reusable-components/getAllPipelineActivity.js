@@ -159,15 +159,15 @@ module.exports = (options) => {
                                 else: {
                                     $cond: {
                                         if: {
-                                            $gte: [
+                                            $gt: [
                                                 '$total',
                                                 '$$skip',
                                             ],
                                         },
                                         then: {
                                             $slice: ['$setActivity', '$$skip', { $subtract: ['$total', '$$skip'] }],
-                                        },
-                                        else: '$setActivity',
+                                        }, // if set objectives is empty array, total will be 0
+                                        else: [],
                                     },
                                 },
                             },
