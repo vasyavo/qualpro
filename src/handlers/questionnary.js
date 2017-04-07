@@ -433,7 +433,7 @@ const QuestionnaryHandler = function () {
             ];
 
             const sort = query.sort || {
-                lastDate: -1
+                'createdBy.date': -1,
             };
 
             const queryObject = filterMapper.mapFilter({
