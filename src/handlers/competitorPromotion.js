@@ -616,7 +616,7 @@ var CompetitorBranding = function() {
             skip : skip,
             limit : limit,
             sort: {
-                'createdBy.date': -1,
+                dateStart: -1,
             },
         }));
 

@@ -48,7 +48,7 @@ module.exports = (req, res, next) => {
         ];
 
         const sort = query.sort || {
-            'createdBy.date': -1,
+            startDate: -1,
         };
 
         const queryObject = filterMapper.mapFilter({
