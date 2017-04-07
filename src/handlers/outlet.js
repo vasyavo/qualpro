@@ -1,4 +1,5 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
+const BranchCollection = require('./../types/branch/collection');
 
 const OutletHandler = function () {
     const async = require('async');
@@ -697,7 +698,6 @@ const OutletHandler = function () {
                 });
 
             let key;
-            let pipeLine;
             const sort = query.sort || sortObject;
             const searchFieldsArray = [
                 'name.en',
@@ -705,7 +705,6 @@ const OutletHandler = function () {
             ];
             let searchObject;
             let aggregateHelper;
-            let aggregation;
             const archived = queryObject.archived;
             delete queryObject.archived;
 
@@ -743,34 +742,385 @@ const OutletHandler = function () {
                     aggregateHelper = new AggregationHelper($defProjection, queryObject);
                     searchObject = aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch);
 
-                    pipeLine = getAllPipeLine({
-                        skip,
-                        limit,
-                        sort,
-                        isMobile,
-                        queryObject,
-                        translated,
-                        translateFields,
-                        language,
-                        aggregateHelper,
-                        searchObject,
-                    });
-
                     if (isMobile) {
-                        aggregation = BranchModel.aggregate(pipeLine);
-                    } else {
-                        aggregation = OutletModel.aggregate(pipeLine);
-                    }
-                    aggregation.options = {
-                        allowDiskUse: true,
-                    };
-                    aggregation.exec((err, result) => {
-                        if (err) {
-                            return waterfallCb(err);
-                        }
+                        const pipeLine = getAllPipeLine({
+                            skip,
+                            limit,
+                            sort,
+                            isMobile,
+                            queryObject,
+                            translated,
+                            translateFields,
+                            language,
+                            aggregateHelper,
+                            searchObject,
+                        });
 
-                        waterfallCb(null, result);
-                    });
+                        return BranchModel.aggregate(pipeLine)
+                            .allowDiskUse(true)
+                            .exec(waterfallCb);
+                    }
+
+                    const isArchivedView = queryObject.archived && queryObject.archived.$in[0];
+                    const genericQuery = {
+                        archived: isArchivedView,
+                    };
+                    const $match = {
+                        $and: [
+                            genericQuery,
+                        ],
+                    };
+
+                    if (queryObject.subRegions) {
+                        genericQuery.subRegion = queryObject.subRegions;
+                    }
+
+                    if (queryObject.retailSegments) {
+                        genericQuery.retailSegment = queryObject.retailSegments;
+                    }
+
+                    if (filter.globalSearch && filter.globalSearch.length) {
+                        $match.$and.push({
+                            $or: [
+                                {
+                                    'name.en': {
+                                        $regex: filter.globalSearch,
+                                        $options: 'i',
+                                    },
+                                },
+                                {
+                                    'name.ar': {
+                                        $regex: filter.globalSearch,
+                                        $options: 'i',
+                                    },
+                                },
+                            ],
+                        });
+                    }
+
+                    const pipeline = [
+                        {
+                            $project: {
+                                subRegion: 1,
+                                retailSegment: 1,
+                                outlet: 1,
+                                archived: 1,
+                            },
+                        },
+                        {
+                            $match,
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                outlet: {
+                                    $addToSet: '$outlet',
+                                },
+                            },
+                        },
+                        {
+                            $unwind: {
+                                path: '$outlet',
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: 'outlets',
+                                localField: 'outlet',
+                                foreignField: '_id',
+                                as: 'outlet',
+                            },
+                        },
+                        {
+                            $project: {
+                                outlet: {
+                                    $arrayElemAt: ['$outlet', 0],
+                                },
+                            },
+                        },
+                        {
+                            $replaceRoot: {
+                                newRoot: '$outlet',
+                            },
+                        },
+                        !isArchivedView ? {
+                            $match: {
+                                $and: [
+                                    { archived: false },
+                                    { topArchived: false },
+                                ],
+                            },
+                        } : null,
+                        {
+                            $lookup: {
+                                from: 'personnels',
+                                localField: 'createdBy.user',
+                                foreignField: '_id',
+                                as: 'createdBy.user',
+                            },
+                        },
+                        {
+                            $project: {
+                                createdBy: {
+                                    user: {
+                                        $cond: {
+                                            if: {
+                                                $eq: ['$createdBy.user', []],
+                                            },
+                                            then: null,
+                                            else: {
+                                                $arrayElemAt: ['$createdBy.user', 0],
+                                            },
+                                        },
+                                    },
+                                    date: 1,
+                                },
+                                _id: 1,
+                                name: 1,
+                                archived: 1,
+                                subRegions: 1,
+                                retailSegments: 1,
+                                editedBy: 1,
+                                topArchived: 1,
+                                translated: 1,
+                            },
+                        },
+                        {
+                            $project: {
+                                createdBy: {
+                                    user: {
+                                        $cond: {
+                                            if: {
+                                                $eq: ['$createdBy.user', null],
+                                            },
+                                            then: null,
+                                            else: {
+                                                _id: '$createdBy.user._id',
+                                                name: '$createdBy.user.name',
+                                                firstName: '$createdBy.user.firstName',
+                                                lastName: '$createdBy.user.lastName',
+                                                position: '$createdBy.user.position',
+                                                accessRole: '$createdBy.user.accessRole',
+                                            },
+                                        },
+                                    },
+                                    date: 1,
+                                },
+                                _id: 1,
+                                name: 1,
+                                archived: 1,
+                                subRegions: 1,
+                                retailSegments: 1,
+                                editedBy: 1,
+                                topArchived: 1,
+                                translated: 1,
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: 'accessRoles',
+                                localField: 'createdBy.user.accessRole',
+                                foreignField: '_id',
+                                as: 'createdBy.user.accessRole',
+                            },
+                        },
+                        {
+                            $project: {
+                                createdBy: {
+                                    user: {
+                                        accessRole: {
+                                            $cond: {
+                                                if: {
+                                                    $eq: ['$createdBy.user.accessRole', []],
+                                                },
+                                                then: null,
+                                                else: {
+                                                    $arrayElemAt: ['$createdBy.user.accessRole', 0],
+                                                },
+                                            },
+                                        },
+                                        _id: 1,
+                                        position: 1,
+                                        firstName: 1,
+                                        lastName: 1,
+                                    },
+                                    date: 1,
+                                },
+                                _id: 1,
+                                name: 1,
+                                archived: 1,
+                                subRegions: 1,
+                                retailSegments: 1,
+                                editedBy: 1,
+                                topArchived: 1,
+                                translated: 1,
+                            },
+                        },
+                        {
+                            $project: {
+                                createdBy: {
+                                    user: {
+                                        accessRole: {
+                                            $cond: {
+                                                if: {
+                                                    $eq: ['$createdBy.user.accessRole', null],
+                                                },
+                                                then: null,
+                                                else: {
+                                                    _id: '$createdBy.user.accessRole._id',
+                                                    name: '$createdBy.user.accessRole.name',
+                                                    level: '$createdBy.user.accessRole.level',
+                                                },
+                                            },
+                                        },
+                                        _id: 1,
+                                        position: 1,
+                                        firstName: 1,
+                                        lastName: 1,
+                                    },
+                                    date: 1,
+                                },
+                                _id: 1,
+                                name: 1,
+                                archived: 1,
+                                subRegions: 1,
+                                retailSegments: 1,
+                                editedBy: 1,
+                                topArchived: 1,
+                                translated: 1,
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: 'positions',
+                                localField: 'createdBy.user.position',
+                                foreignField: '_id',
+                                as: 'createdBy.user.position',
+                            },
+                        },
+                        {
+                            $project: {
+                                createdBy: {
+                                    user: {
+                                        position: {
+                                            $cond: {
+                                                if: {
+                                                    $eq: ['$createdBy.user.position', []],
+                                                },
+                                                then: null,
+                                                else: {
+                                                    $arrayElemAt: ['$createdBy.user.position', 0],
+                                                },
+                                            },
+                                        },
+                                        _id: 1,
+                                        accessRole: 1,
+                                        firstName: 1,
+                                        lastName: 1,
+                                    },
+                                    date: 1,
+                                },
+                                _id: 1,
+                                name: 1,
+                                archived: 1,
+                                subRegions: 1,
+                                retailSegments: 1,
+                                editedBy: 1,
+                                topArchived: 1,
+                                translated: 1,
+                            },
+                        },
+                        {
+                            $project: {
+                                createdBy: {
+                                    user: {
+                                        position: {
+                                            $cond: {
+                                                if: {
+                                                    $eq: ['$createdBy.user.position', null],
+                                                },
+                                                then: null,
+                                                else: {
+                                                    _id: '$createdBy.user.position._id',
+                                                    name: '$createdBy.user.position.name',
+                                                },
+                                            },
+                                        },
+                                        _id: 1,
+                                        accessRole: 1,
+                                        firstName: 1,
+                                        lastName: 1,
+                                    },
+                                    date: 1,
+                                },
+                                _id: 1,
+                                name: 1,
+                                archived: 1,
+                                subRegions: 1,
+                                retailSegments: 1,
+                                editedBy: 1,
+                                topArchived: 1,
+                                translated: 1,
+                            },
+                        },
+                        {
+                            $sort: sortObject,
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                total: {
+                                    $sum: 1,
+                                },
+                                data: {
+                                    $push: '$$ROOT',
+                                },
+                            },
+                        },
+                        {
+                            $unwind: {
+                                path: '$data',
+                                preserveNullAndEmptyArrays: true,
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: '$data._id',
+                                name: '$data.name',
+                                archived: '$data.archived',
+                                subRegions: '$data.subRegions',
+                                retailSegments: '$data.retailSegments',
+                                createdBy: '$data.createdBy',
+                                editedBy: '$data.editedBy',
+                                topArchived: '$data.topArchived',
+                                translated: '$data.translated',
+                                total: 1,
+                            },
+                        },
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: limit,
+                        },
+                        {
+                            $group: {
+                                _id: '$total',
+                                data: {
+                                    $push: '$$ROOT',
+                                },
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: 0,
+                                total: '$_id',
+                                data: 1,
+                            },
+                        },
+                    ].filter(stage => stage);
+
+                    BranchCollection.aggregate(pipeline, waterfallCb);
                 },
 
             ], (err, response) => {
