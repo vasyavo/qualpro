@@ -1,5 +1,6 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const BranchCollection = require('./../types/branch/collection');
+const OutletCollection = require('./../types/outlet/collection');
 
 const OutletHandler = function () {
     const async = require('async');
@@ -703,12 +704,8 @@ const OutletHandler = function () {
                 'name.en',
                 'name.ar',
             ];
-            let searchObject;
-            let aggregateHelper;
             const archived = queryObject.archived;
             delete queryObject.archived;
-
-            delete filter.globalSearch;
 
             for (key in sort) {
                 sort[key] = parseInt(sort[key], 10);
@@ -739,10 +736,12 @@ const OutletHandler = function () {
                         queryObject.archived = archived;
                     }
 
-                    aggregateHelper = new AggregationHelper($defProjection, queryObject);
-                    searchObject = aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch);
-
                     if (isMobile) {
+                        delete filter.globalSearch;
+
+                        const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+                        const searchObject = aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch);
+
                         const pipeLine = getAllPipeLine({
                             skip,
                             limit,
@@ -762,95 +761,7 @@ const OutletHandler = function () {
                     }
 
                     const isArchivedView = queryObject.archived && queryObject.archived.$in[0];
-                    const genericQuery = {
-                        archived: isArchivedView,
-                    };
-                    const $match = {
-                        $and: [
-                            genericQuery,
-                        ],
-                    };
-
-                    if (queryObject.subRegions) {
-                        genericQuery.subRegion = queryObject.subRegions;
-                    }
-
-                    if (queryObject.retailSegments) {
-                        genericQuery.retailSegment = queryObject.retailSegments;
-                    }
-
-                    if (filter.globalSearch && filter.globalSearch.length) {
-                        $match.$and.push({
-                            $or: [
-                                {
-                                    'name.en': {
-                                        $regex: filter.globalSearch,
-                                        $options: 'i',
-                                    },
-                                },
-                                {
-                                    'name.ar': {
-                                        $regex: filter.globalSearch,
-                                        $options: 'i',
-                                    },
-                                },
-                            ],
-                        });
-                    }
-
-                    const pipeline = [
-                        {
-                            $project: {
-                                subRegion: 1,
-                                retailSegment: 1,
-                                outlet: 1,
-                                archived: 1,
-                            },
-                        },
-                        {
-                            $match,
-                        },
-                        {
-                            $group: {
-                                _id: null,
-                                outlet: {
-                                    $addToSet: '$outlet',
-                                },
-                            },
-                        },
-                        {
-                            $unwind: {
-                                path: '$outlet',
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: 'outlets',
-                                localField: 'outlet',
-                                foreignField: '_id',
-                                as: 'outlet',
-                            },
-                        },
-                        {
-                            $project: {
-                                outlet: {
-                                    $arrayElemAt: ['$outlet', 0],
-                                },
-                            },
-                        },
-                        {
-                            $replaceRoot: {
-                                newRoot: '$outlet',
-                            },
-                        },
-                        !isArchivedView ? {
-                            $match: {
-                                $and: [
-                                    { archived: false },
-                                    { topArchived: false },
-                                ],
-                            },
-                        } : null,
+                    const outletPipeline = [
                         {
                             $lookup: {
                                 from: 'personnels',
@@ -1118,9 +1029,147 @@ const OutletHandler = function () {
                                 data: 1,
                             },
                         },
-                    ].filter(stage => stage);
+                    ];
+                    const searchQuery = {
+                        $or: [
+                            {
+                                'name.en': {
+                                    $regex: filter.globalSearch,
+                                    $options: 'i',
+                                },
+                            },
+                            {
+                                'name.ar': {
+                                    $regex: filter.globalSearch,
+                                    $options: 'i',
+                                },
+                            },
+                        ],
+                    };
 
-                    BranchCollection.aggregate(pipeline, waterfallCb);
+                    // menu "Customers" in CMS
+                    if (!queryObject.subRegions && !queryObject.retailSegments) {
+                        const outletSearchQuery = {
+                            $match: {
+                                $and: [],
+                            },
+                        };
+
+                        if (filter.globalSearch && filter.globalSearch.length) {
+                            outletSearchQuery.$match.$and.push(searchQuery);
+                        }
+
+                        if (isArchivedView) {
+                            outletSearchQuery.$match.$and.push({
+                                $or: [
+                                    { archived: true },
+                                    { topArchived: true },
+                                ],
+                            });
+                        } else {
+                            outletSearchQuery.$match.$and.push({
+                                archived: false,
+                                topArchived: false,
+                            });
+                        }
+
+                        const pipeline = [
+                            outletSearchQuery,
+                            ...outletPipeline,
+                        ];
+
+                        return OutletCollection.aggregate(pipeline, waterfallCb);
+                    }
+
+                    // section "Customers" in menu "Countries" in CMS
+                    const genericQuery = {
+                        archived: isArchivedView,
+                    };
+                    const $match = {
+                        $and: [
+                            genericQuery,
+                        ],
+                    };
+
+                    if (queryObject.subRegions) {
+                        genericQuery.subRegion = queryObject.subRegions;
+                    }
+
+                    if (queryObject.retailSegments) {
+                        genericQuery.retailSegment = queryObject.retailSegments;
+                    }
+
+                    const pipeline = [
+                        {
+                            $project: {
+                                subRegion: 1,
+                                retailSegment: 1,
+                                outlet: 1,
+                                archived: 1,
+                            },
+                        },
+                        {
+                            $match,
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                outlet: {
+                                    $addToSet: '$outlet',
+                                },
+                            },
+                        },
+                        {
+                            $unwind: {
+                                path: '$outlet',
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: 'outlets',
+                                localField: 'outlet',
+                                foreignField: '_id',
+                                as: 'outlet',
+                            },
+                        },
+                        {
+                            $project: {
+                                outlet: {
+                                    $arrayElemAt: ['$outlet', 0],
+                                },
+                            },
+                        },
+                        {
+                            $replaceRoot: {
+                                newRoot: '$outlet',
+                            },
+                        },
+                    ];
+
+                    const branchSearchQuery = {
+                        $match: {
+                            $and: [],
+                        },
+                    };
+
+                    if (!isArchivedView) {
+                        branchSearchQuery.$match.$and.push({
+                            archived: false,
+                            topArchived: false,
+                        });
+                    }
+
+                    if (filter.globalSearch && filter.globalSearch.length) {
+                        branchSearchQuery.$match.$and.push(searchQuery);
+                    }
+
+                    if (branchSearchQuery.$match.$and.length) {
+                        pipeline.push(branchSearchQuery);
+                    }
+
+                    pipeline.push(...outletPipeline);
+
+                    BranchCollection.aggregate(pipeline.filter(stage => stage), waterfallCb);
                 },
 
             ], (err, response) => {
