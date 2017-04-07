@@ -11373,3 +11373,6 @@ label[for=searchInputnoCT]::after {
   overflow-y: scroll;
   overflow-x: hidden;
 }
+.questionnarieTable .forPosition {
+  top: auto;
+}
