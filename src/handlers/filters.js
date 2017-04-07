@@ -7410,6 +7410,7 @@ const Filters = function() {
         const query = req.query;
         const queryFilter = query.filter || {};
         const globalSearch = queryFilter.globalSearch;
+        const currentUser = req.personnelModel;
         const $matchPersonnel = {
             $and: [],
         };
@@ -7573,14 +7574,17 @@ const Filters = function() {
             });
         }
 
+
         const $matchGeneral = {
             $and: [],
         };
 
-        if (filter.setCountry) {
+        if (filter.setCountry || (currentUser.country && currentUser.country.length)) {
+            filter.setCountry = filter.setCountry || [];
+
             $matchGeneral.$and.push({
                 country: {
-                    $in: filter.setCountry,
+                    $in: _.union(filter.setCountry, currentUser.country),
                 },
             });
         }
@@ -7593,26 +7597,32 @@ const Filters = function() {
             });
         }
 
-        if (filter.setRegion) {
+        if (filter.setRegion || (currentUser.region && currentUser.region.length)) {
+            filter.setRegion = filter.setRegion || [];
+
             $matchGeneral.$and.push({
                 region: {
-                    $in: filter.setRegion,
+                    $in: _.union(filter.setRegion, currentUser.region),
                 },
             });
         }
 
-        if (filter.setSubRegion) {
+        if (filter.setSubRegion || (currentUser.subRegion && currentUser.subRegion.length)) {
+            filter.setSubRegion = filter.setSubRegion || [];
+
             $matchGeneral.$and.push({
                 subRegion: {
-                    $in: filter.setSubRegion,
+                    $in: _.union(filter.setSubRegion, currentUser.subRegion),
                 },
             });
         }
 
-        if (filter.setBranch) {
+        if (filter.setBranch || (currentUser.branch && currentUser.branch.length)) {
+            filter.setBranch = filter.setBranch || [];
+
             $matchGeneral.$and.push({
                 branch: {
-                    $in: filter.setBranch,
+                    $in: _.union(filter.setBranch, currentUser.branch),
                 },
             });
         }

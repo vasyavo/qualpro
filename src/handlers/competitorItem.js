@@ -489,6 +489,7 @@ var CompetitorItem = function () {
                     pipeLine = self.getAllForUI({
                         queryObject      : queryObject,
                         aggregationHelper: aggregationHelper,
+                        queryObjectAfterLookup: queryObjectAfterLookup,
                         query            : query,
                         skip             : skip,
                         limit            : limit,
@@ -547,6 +548,7 @@ var CompetitorItem = function () {
     this.getAllForUI = function (options) {
         var queryObject = options.queryObject;
         var aggregationHelper = options.aggregationHelper;
+        const queryObjectAfterLookup = options.queryObjectAfterLookup;
         var query = options.query;
         var skip = options.skip;
         var sort = options.sort;
@@ -590,6 +592,14 @@ var CompetitorItem = function () {
             addMainProjection: ['category'],
             isArray          : false
         }));
+
+        if (queryObjectAfterLookup && queryObjectAfterLookup.product && queryObjectAfterLookup.product.$in && queryObjectAfterLookup.product.$in.length) {
+            pipeLine.push({
+                $match: {
+                    category: queryObjectAfterLookup.product,
+                },
+            });
+        }
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
             from         : 'categories',
