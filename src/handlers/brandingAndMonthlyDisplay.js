@@ -250,7 +250,7 @@ const getById = (req, res, next) => {
         }, {
             $unwind: {
                 path: '$retailSegment',
-            },w
+            },
         }, {
             $lookup: {
                 from: `${CONTENT_TYPES.BRANCH}es`,
