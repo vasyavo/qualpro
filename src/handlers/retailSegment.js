@@ -397,10 +397,32 @@ var RetailSegmentHandler = function () {
         var pipeObject;
         var pipeLine = [];
 
+        const $match = {
+            archived: queryObject.archived,
+        };
+
+        /*
+        * In case of mobile app pipeline begin from "branches".
+        * */
+        if (isMobile) {
+            $match.subRegion = queryObject.subRegion;
+        }
+
+        /*
+        * In case of desktop app pipeline begin from "retailSegments".
+        * Should fix menu "Trade Channels" and section during user flow "Countries"
+        * Roles: MA, CA, AM, AinM.
+        * */
+        if (!isMobile) {
+            if (queryObject.subRegion && queryObject.subRegion.$in.length) {
+                $match.subRegions = queryObject.subRegion;
+            } else if (queryObject.subRegions && queryObject.subRegions.$in.length) {
+                $match.subRegions = queryObject.subRegions;
+            }
+        }
+
         pipeLine.push({
-            $match: isMobile ?
-                _.pick(queryObject, 'subRegion', 'archived') :
-                _.pick(queryObject, 'subRegions', 'archived'),
+            $match,
         });
 
         if (translated && translated.length === 1) {
