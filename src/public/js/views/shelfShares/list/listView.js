@@ -40,7 +40,7 @@ define(function(require) {
             this.makeRender(options);
         },
 
-        listRowClick: function (e) {
+        listRowClick: _.debounce(function (e) {
             var $targetEl = $(e.target);
             var $targetRow = $targetEl.closest('.showAllBrands');
             var categoryId = $targetRow.attr('data-category-id');
@@ -69,7 +69,7 @@ define(function(require) {
                     translation: self.translation
                 });
             });
-        },
+        }, 1000, true),
 
         showMoreContent: function (newModels) {
             var $currentEl = this.$el;

@@ -71,10 +71,10 @@ define([
             _.bindAll(this, 'fileSelected');
         },
 
-        showFilePreviewDialog: function () {
+        showFilePreviewDialog: _.debounce(function () {
             var currentLanguage = App.currentUser.currentLanguage;
             App.render({type: 'alert', message: ERROR_MESSAGES.fileIsNotUploaded[currentLanguage]});
-        },
+        }, 1000, true),
 
         showLinkForm: function () {
             var $liEl = this.$el.find('#attachForm');

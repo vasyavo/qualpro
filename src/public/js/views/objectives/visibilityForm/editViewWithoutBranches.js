@@ -12,10 +12,11 @@ define(function (require) {
         initialize : function (options) {
             var that = this;
             this.translation = options.translation;
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
 
             this.templateOptions = {
                 translation : this.translation,
-                description : options.description,
+                description : $(options.description[currentLanguage]).text(),
                 locationString : options.locationString,
                 fileContainer : '',
                 allowed : CONSTANTS.IMAGE_CONTENT_TYPES.concat(CONSTANTS.VIDEO_CONTENT_TYPES).join(', ')

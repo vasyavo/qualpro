@@ -144,6 +144,7 @@ const getById = (req, res, next) => {
                 branch: { $first: '$branch' },
                 displayType: { $first: '$displayType' },
                 outlet: { $first: '$outlet' },
+                retailSegment: { $first: '$retailSegment' },
                 attachments: { $first: '$attachments' },
                 description: { $first: '$description' },
                 createdAt: { $first: '$createdAt' },
@@ -178,6 +179,7 @@ const getById = (req, res, next) => {
                 region: { $first: '$region' },
                 displayType: { $first: '$displayType' },
                 outlet: { $first: '$outlet' },
+                retailSegment: { $first: '$retailSegment' },
                 description: { $first: '$description' },
                 createdAt: { $first: '$createdAt' },
                 dateEnd: { $first: '$dateEnd' },
@@ -219,6 +221,7 @@ const getById = (req, res, next) => {
                 branch: { $first: '$branch' },
                 categories: { $first: '$categories' },
                 outlet: { $first: '$outlet' },
+                retailSegment: { $first: '$retailSegment' },
                 attachments: { $first: '$attachments' },
                 description: { $first: '$description' },
                 createdAt: { $first: '$createdAt' },
@@ -236,6 +239,17 @@ const getById = (req, res, next) => {
         }, {
             $unwind: {
                 path: '$outlet',
+            },
+        }, {
+            $lookup: {
+                from: `${CONTENT_TYPES.RETAILSEGMENT}s`,
+                localField: 'retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        }, {
+            $unwind: {
+                path: '$retailSegment',
             },
         }, {
             $lookup: {
@@ -291,6 +305,8 @@ const getById = (req, res, next) => {
                 'branch.name': 1,
                 'outlet._id': 1,
                 'outlet.name': 1,
+                'retailSegment._id': 1,
+                'retailSegment.name': 1,
                 'createdBy._id': 1,
                 'createdBy.ID': 1,
                 'createdBy.lastName': 1,
@@ -384,6 +400,7 @@ const getById = (req, res, next) => {
 const getAll = (req, res, next) => {
     const session = req.session;
     const accessRoleLevel = session.level;
+    let currentUser;
 
     const generateSearchCondition = (query) => {
         const globalSearch = query.globalSearch;
@@ -478,7 +495,38 @@ const getAll = (req, res, next) => {
         const limit = query.count;
         const skip = (query.page - 1) * limit;
         const condition = generateSearchCondition(query.filter);
-        const mongoQuery = BrandingAndMonthlyDisplayModel.aggregate()
+        const locations = ['country', 'region', 'subRegion', 'branch'];
+        const $generalMatch = {
+            $and: [],
+        };
+
+        locations.forEach((location) => {
+            if (currentUser[location] && currentUser[location].length) {
+                $generalMatch.$and.push({
+                    $or: [
+                        {
+                            [location]: { $in: currentUser[location] },
+                        },
+                        {
+                            [location]: { $eq: [] },
+                        },
+                        {
+                            [location]: { $eq: null },
+                        },
+                    ],
+                });
+            }
+        });
+
+        let mongoQuery = BrandingAndMonthlyDisplayModel.aggregate();
+
+        if ($generalMatch.$and.length) {
+            mongoQuery = mongoQuery.append({
+                $match: $generalMatch,
+            });
+        }
+
+        mongoQuery
             .append(condition.formCondition)
             .lookup({
                 from: `${CONTENT_TYPES.COMMENT}s`,
@@ -856,6 +904,8 @@ const getAll = (req, res, next) => {
         },
 
         (allowed, personnel, cb) => {
+            currentUser = personnel;
+
             joiValidate(req.query, accessRoleLevel, CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY, 'read', cb);
         },
 

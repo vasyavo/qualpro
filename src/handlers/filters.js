@@ -3315,109 +3315,7 @@ const Filters = function() {
         });
     };
 
-    this.competitorsListFilters = function(req, res, next) {
-        const query = req.query;
-        const filterMapper = new FilterMapper();
-        const queryFilter = query.filter || {};
-        const filter = filterMapper.mapFilter({
-            filter: queryFilter,
-            personnel: req.personnelModel,
-        });
-
-        const aggregateHelper = new AggregationHelper($defProjection, filter);
-        const beforeFilter = _.pick(filter, 'country', 'brand', 'archived');
-        const originFilter = _.pick(filter, 'origin');
-        const afterFilter = _.pick(filter, 'product');
-
-        const pipeline = [];
-
-        pipeline.push({
-            $match: beforeFilter,
-        });
-
-        pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key: 'country',
-            as: 'country',
-            isArray: false,
-        }));
-
-        pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'brands',
-            key: 'brand',
-            as: 'brand',
-            isArray: false,
-        }));
-
-        pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'competitorVariants',
-            key: 'variant',
-            as: 'variant',
-            isArray: false,
-            addMainProjection: ['category'],
-        }));
-
-        pipeline.push({
-            $match: afterFilter,
-        });
-        pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'categories',
-            key: 'category',
-            as: 'product',
-            isArray: false,
-        }));
-
-        pipeline.push({
-            $unwind: {
-                path: '$origin',
-                preserveNullAndEmptyArrays: true,
-            },
-        });
-
-        pipeline.push({
-            $match: originFilter,
-        });
-
-        pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'origins',
-            key: 'origin',
-            as: 'origin',
-            isArray: false,
-        }));
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                origin: { $addToSet: '$origin' },
-                country: { $addToSet: '$country' },
-                brand: { $addToSet: '$brand' },
-                product: { $addToSet: '$product' },
-                variant: { $addToSet: '$variant' },
-            },
-        });
-
-        const aggregation = CompetitorItemModel.aggregate(pipeline);
-
-        aggregation.options = {
-            allowDiskUse: true,
-        };
-
-        aggregation.exec((err, result) => {
-            if (err) {
-                return next(err);
-            }
-
-            const groups = result[0] || {};
-            const body = {
-                country: groups.country || [],
-                origin: _.flatten(groups.origin) || [],
-                brand: groups.brand || [],
-                product: groups.product || [],
-            };
-
-            res.status(200).send(body);
-        });
-    };
+    this.competitorsListFilters = require('./../stories/competitorItem/routes/filters');
 
     this.selectItemsLocationFilters = function(req, res, next) {
         let pipeLine = [];
@@ -7512,6 +7410,7 @@ const Filters = function() {
         const query = req.query;
         const queryFilter = query.filter || {};
         const globalSearch = queryFilter.globalSearch;
+        const currentUser = req.personnelModel;
         const $matchPersonnel = {
             $and: [],
         };
@@ -7675,14 +7574,17 @@ const Filters = function() {
             });
         }
 
+
         const $matchGeneral = {
             $and: [],
         };
 
-        if (filter.setCountry) {
+        if (filter.setCountry || (currentUser.country && currentUser.country.length)) {
+            filter.setCountry = filter.setCountry || [];
+
             $matchGeneral.$and.push({
                 country: {
-                    $in: filter.setCountry,
+                    $in: _.union(filter.setCountry, currentUser.country),
                 },
             });
         }
@@ -7695,26 +7597,32 @@ const Filters = function() {
             });
         }
 
-        if (filter.setRegion) {
+        if (filter.setRegion || (currentUser.region && currentUser.region.length)) {
+            filter.setRegion = filter.setRegion || [];
+
             $matchGeneral.$and.push({
                 region: {
-                    $in: filter.setRegion,
+                    $in: _.union(filter.setRegion, currentUser.region),
                 },
             });
         }
 
-        if (filter.setSubRegion) {
+        if (filter.setSubRegion || (currentUser.subRegion && currentUser.subRegion.length)) {
+            filter.setSubRegion = filter.setSubRegion || [];
+
             $matchGeneral.$and.push({
                 subRegion: {
-                    $in: filter.setSubRegion,
+                    $in: _.union(filter.setSubRegion, currentUser.subRegion),
                 },
             });
         }
 
-        if (filter.setBranch) {
+        if (filter.setBranch || (currentUser.branch && currentUser.branch.length)) {
+            filter.setBranch = filter.setBranch || [];
+
             $matchGeneral.$and.push({
                 branch: {
-                    $in: filter.setBranch,
+                    $in: _.union(filter.setBranch, currentUser.branch),
                 },
             });
         }

@@ -599,6 +599,7 @@ const Personnel = function () {
                         $project: aggregateHelper.getProjection({
                             branch: {
                                 _id: { $arrayElemAt: ['$branch._id', 0] },
+                                subRegion: { $arrayElemAt: ['$branch.subRegion', 0] },
                                 title: { $arrayElemAt: [`$branch.name.${currentLanguage}`, 0] },
                                 expanded: { $literal: true },
                                 selected: { $literal: false },
@@ -760,7 +761,20 @@ const Personnel = function () {
                                             unselectable: '$subRegion.unselectable',
                                             contentType: '$subRegion.contentType',
                                             key: '$subRegion.key',
-                                            children: '$children',
+                                            children: {
+                                                $filter: {
+                                                    input: '$children',
+                                                    as: 'item',
+                                                    cond: {
+                                                        $ne: [
+                                                            {
+                                                                $size: '$$item.children',
+                                                            },
+                                                            0,
+                                                        ],
+                                                    },
+                                                },
+                                            },
                                         },
                                         else: false,
                                     },
@@ -787,7 +801,20 @@ const Personnel = function () {
                                     selected: '$retailSegment.selected',
                                     contentType: '$retailSegment.contentType',
                                     key: '$retailSegment.key',
-                                    children: '$children',
+                                    children: {
+                                        $filter: {
+                                            input: '$children',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: [
+                                                    {
+                                                        $size: '$$item.children',
+                                                    },
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -796,15 +823,15 @@ const Personnel = function () {
                     pipeArray.push({
                         $group: {
                             _id: {
-                                retailSegmentId: '$retailSegment._id',
                                 countryId: '$country._id',
                                 regionId: '$region._id',
                                 subRegionId: '$subRegion._id',
+                                retailSegmentId: '$retailSegment._id',
                             },
-                            retailSegment: { $first: '$retailSegment' },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
                             subRegion: { $first: '$subRegion' },
+                            retailSegment: { $first: '$retailSegment' },
                             children: {
                                 $addToSet: {
                                     _id: '$outlet._id',
@@ -813,7 +840,15 @@ const Personnel = function () {
                                     selected: '$outlet.selected',
                                     contentType: '$outlet.contentType',
                                     key: '$outlet.key',
-                                    children: '$children',
+                                    children: {
+                                        $filter: {
+                                            input: '$children',
+                                            as: 'item',
+                                            cond: {
+                                                $ne: ['$$item', false],
+                                            },
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -822,24 +857,33 @@ const Personnel = function () {
                     pipeArray.push({
                         $group: {
                             _id: {
-                                outletId: '$outlet._id',
                                 countryId: '$country._id',
                                 regionId: '$region._id',
                                 subRegionId: '$subRegion._id',
+                                retailSegmentId: '$retailSegment._id',
+                                outletId: '$outlet._id',
                             },
-                            outlet: { $first: '$outlet' },
                             country: { $first: '$country' },
                             region: { $first: '$region' },
                             subRegion: { $first: '$subRegion' },
+                            outlet: { $first: '$outlet' },
                             retailSegment: { $first: '$retailSegment' },
                             children: {
                                 $addToSet: {
-                                    _id: '$branch._id',
-                                    title: '$branch.title',
-                                    expanded: '$branch.expanded',
-                                    selected: '$branch.selected',
-                                    contentType: '$branch.contentType',
-                                    key: '$branch.key',
+                                    $cond: {
+                                        if: {
+                                            $eq: ['$branch.subRegion', '$subRegion._id'],
+                                        },
+                                        then: {
+                                            _id: '$branch._id',
+                                            title: '$branch.title',
+                                            expanded: '$branch.expanded',
+                                            selected: '$branch.selected',
+                                            contentType: '$branch.contentType',
+                                            key: '$branch.key',
+                                        },
+                                        else: false,
+                                    },
                                 },
                             },
                         },
