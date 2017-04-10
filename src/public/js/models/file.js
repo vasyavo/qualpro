@@ -52,7 +52,9 @@ define([
 
                 if (!uploaded) {
                     file.uploaded = false;
-                } else {
+                }
+
+                if (!uploaded && file.type) {
                     file.contentType = file.type;
                 }
 
