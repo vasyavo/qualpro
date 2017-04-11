@@ -54,7 +54,7 @@ define([
                     file.uploaded = false;
                 }
 
-                if (!uploaded && file.type) {
+                if (!file.contentType) {
                     file.contentType = file.type;
                 }
 
