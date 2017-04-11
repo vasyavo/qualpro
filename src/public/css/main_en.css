@@ -2044,9 +2044,9 @@ label[for=searchInputretailSegment]:after {
   top: 7px;
 }
 .questionnarie .searchInputWrap.translatedSearch {
-  top: 7px;
+  top: 15px;
   left: auto;
-  right: 10px;
+  right: 40px;
 }
 .notesViewBar {
   padding: 10px 0;
@@ -9369,8 +9369,7 @@ table.fancytree-ext-table {
   padding: 10px 0 10px 20px;
 }
 .questionnarieWrap .searchInputWrap label:after {
-  top: 0;
-  line-height: 2.4;
+  top: -5px;
 }
 .notesSearch .searchInputWrap label:after {
   line-height: 1.5;
