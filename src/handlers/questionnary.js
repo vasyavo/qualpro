@@ -640,6 +640,10 @@ const QuestionnaryHandler = function () {
                 $and: [],
             };
 
+            if (req.session.level === ACL_CONSTANTS.AREA_IN_CHARGE) {
+                locations.pop();
+            }
+
             locations.forEach((location) => {
                 if (personnel[location] && personnel[location].length && !queryObject[location]) {
                     $locationMatch.$and.push({
@@ -757,6 +761,9 @@ const QuestionnaryHandler = function () {
                             },
                             {
                                 personnels: null,
+                            },
+                            {
+                                'createdBy.user': { $eq: personnel._id },
                             },
                         ],
                     });
