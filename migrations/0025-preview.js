@@ -1,31 +1,26 @@
 const async = require('async');
 const contentTypes = require('./../src/public/js/constants/contentType');
 const logger = require('./../src/utils/logger');
-const autoload = require('./../src/stories/preview/autoload');
 
 require('mongodb');
 
 exports.up = function(db, next) {
     async.series([
 
+        // perform file migration
         (cb) => {
-            autoload.insertDefaults(cb);
-        },
-
-        // perform migration
-        (cb) => {
-            const collectionName = `${contentTypes.PERSONNEL}s`;
+            const collectionName = `${contentTypes.FILES}`;
             const query = {
-                $or: [{
-                    imageSrc: { $exists: false },
+                $and: [{
+                    preview: { $exists: true },
                 }, {
-                    imageSrc: { $eq: null },
+                    preview: { $ne: null },
                 }],
             };
             const cursor = db.collection(collectionName).find(query)
                 .project({
                     _id: 1,
-                    imageSrc: 1,
+                    preview: 1,
                 });
 
             const queue = async.queue((doc, queueCb) => {
@@ -35,270 +30,36 @@ exports.up = function(db, next) {
                     return queueCb();
                 }
 
-                const previewId = autoload.defaults[contentTypes.PERSONNEL];
+                async.waterfall([
 
-                db.collection(collectionName).updateOne({
-                    _id: doc._id,
-                }, {
-                    $set: {
-                        imageSrc: previewId,
+                    // create preview
+                    (cb) => {
+                        db.collection('preview').insertOne({
+                            base64: doc.preview,
+                            itemId: doc._id,
+                            contentType: contentTypes.FILES,
+                        }, cb);
                     },
-                }, queueCb);
+
+                    // set files ID into brand
+                    (result, cb) => {
+                        const previewId = result.ops[0]._id;
+
+                        db.collection(collectionName).updateOne({
+                            _id: doc._id,
+                        }, {
+                            $set: {
+                                preview: previewId,
+                            },
+                        }, cb);
+                    },
+
+                ], queueCb);
             }, Infinity);
 
             cursor.each((err, doc) => {
                 if (err) {
-                    logger.error('Personnel pick fails', err);
-                    return;
-                }
-
-                queue.push(doc);
-            });
-
-            queue.drain = () => {
-                if (cursor.isClosed()) {
-                    return cb();
-                }
-            };
-        },
-
-        // perform migration
-        (cb) => {
-            const collectionName = `${contentTypes.DOMAIN}s`;
-            const query = {
-                $or: [{
-                    imageSrc: { $exists: false },
-                }, {
-                    imageSrc: { $eq: null },
-                }],
-            };
-            const cursor = db.collection(collectionName).find(query)
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
-            const queue = async.queue((doc, queueCb) => {
-                if (!doc) {
-                    cursor.close();
-
-                    return queueCb();
-                }
-
-                const previewId = autoload.defaults[contentTypes.DOMAIN];
-
-                db.collection(collectionName).updateOne({
-                    _id: doc._id,
-                }, {
-                    $set: {
-                        imageSrc: previewId,
-                    },
-                }, queueCb);
-            }, Infinity);
-
-            cursor.each((err, doc) => {
-                if (err) {
-                    logger.error('Domain pick fails', err);
-                    return;
-                }
-
-                queue.push(doc);
-            });
-
-            queue.drain = () => {
-                if (cursor.isClosed()) {
-                    return cb();
-                }
-            };
-        },
-
-        // perform migration
-        (cb) => {
-            const collectionName = `${contentTypes.OUTLET}s`;
-            const query = {
-                $or: [{
-                    imageSrc: { $exists: false },
-                }, {
-                    imageSrc: { $eq: null },
-                }],
-            };
-            const cursor = db.collection(collectionName).find(query)
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
-            const queue = async.queue((doc, queueCb) => {
-                if (!doc) {
-                    cursor.close();
-
-                    return queueCb();
-                }
-
-                const previewId = autoload.defaults[contentTypes.OUTLET];
-
-                db.collection(collectionName).updateOne({
-                    _id: doc._id,
-                }, {
-                    $set: {
-                        imageSrc: previewId,
-                    },
-                }, queueCb);
-            }, Infinity);
-
-            cursor.each((err, doc) => {
-                if (err) {
-                    logger.error('Outlet pick fails', err);
-                    return;
-                }
-
-                queue.push(doc);
-            });
-
-            queue.drain = () => {
-                if (cursor.isClosed()) {
-                    return cb();
-                }
-            };
-        },
-
-        // perform migration
-        (cb) => {
-            const collectionName = `${contentTypes.RETAILSEGMENT}s`;
-            const query = {
-                $or: [{
-                    imageSrc: { $exists: false },
-                }, {
-                    imageSrc: { $eq: null },
-                }],
-            };
-            const cursor = db.collection(collectionName).find(query)
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
-            const queue = async.queue((doc, queueCb) => {
-                if (!doc) {
-                    cursor.close();
-
-                    return queueCb();
-                }
-
-                const previewId = autoload.defaults[contentTypes.RETAILSEGMENT];
-
-                db.collection(collectionName).updateOne({
-                    _id: doc._id,
-                }, {
-                    $set: {
-                        imageSrc: previewId,
-                    },
-                }, queueCb);
-            }, Infinity);
-
-            cursor.each((err, doc) => {
-                if (err) {
-                    logger.error('Retail Segment pick fails', err);
-                    return;
-                }
-
-                queue.push(doc);
-            });
-
-            queue.drain = () => {
-                if (cursor.isClosed()) {
-                    return cb();
-                }
-            };
-        },
-
-        // perform migration
-        (cb) => {
-            const collectionName = `${contentTypes.BRAND}s`;
-            const query = {
-                $or: [{
-                    imageSrc: { $exists: false },
-                }, {
-                    imageSrc: { $eq: null },
-                }],
-            };
-            const cursor = db.collection(collectionName).find(query)
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
-            const queue = async.queue((doc, queueCb) => {
-                if (!doc) {
-                    cursor.close();
-
-                    return queueCb();
-                }
-
-                const previewId = autoload.defaults[contentTypes.BRAND];
-
-                db.collection(collectionName).updateOne({
-                    _id: doc._id,
-                }, {
-                    $set: {
-                        imageSrc: previewId,
-                    },
-                }, queueCb);
-            }, Infinity);
-
-            cursor.each((err, doc) => {
-                if (err) {
-                    logger.error('Brand pick fails', err);
-                    return;
-                }
-
-                queue.push(doc);
-            });
-
-            queue.drain = () => {
-                if (cursor.isClosed()) {
-                    return cb();
-                }
-            };
-        },
-
-        // perform migration
-        (cb) => {
-            const collectionName = `${contentTypes.BRANCH}es`;
-            const query = {
-                $or: [{
-                    imageSrc: { $exists: false },
-                }, {
-                    imageSrc: { $eq: null },
-                }],
-            };
-            const cursor = db.collection(collectionName).find(query)
-                .project({
-                    _id: 1,
-                    imageSrc: 1,
-                });
-
-            const queue = async.queue((doc, queueCb) => {
-                if (!doc) {
-                    cursor.close();
-
-                    return queueCb();
-                }
-
-                const previewId = autoload.defaults[contentTypes.BRANCH];
-
-                db.collection(collectionName).updateOne({
-                    _id: doc._id,
-                }, {
-                    $set: {
-                        imageSrc: previewId,
-                    },
-                }, queueCb);
-            }, Infinity);
-
-            cursor.each((err, doc) => {
-                if (err) {
-                    logger.error('Branch pick fails', err);
+                    logger.error('File pick fails', err);
                     return;
                 }
 
@@ -318,86 +79,57 @@ exports.up = function(db, next) {
 exports.down = function(db, next) {
     async.series([
 
+        // perform file rollback
         (cb) => {
-            autoload.insertDefaults(cb);
-        },
+            const collectionName = `${contentTypes.FILES}`;
+            const cursor = db.collection('preview').find({
+                contentType: contentTypes.FILES,
+            });
 
-        // perform rollback
-        (cb) => {
-            const collectionName = `${contentTypes.PERSONNEL}s`;
+            const queue = async.queue((doc, queueCb) => {
+                if (!doc) {
+                    cursor.close();
 
-            db.collection(collectionName).updateOne({
-                imageSrc: autoload.defaults[contentTypes.PERSONNEL],
-            }, {
-                $set: {
-                    imageSrc: null,
-                },
-            }, cb);
-        },
+                    return queueCb();
+                }
 
-        // perform rollback
-        (cb) => {
-            const collectionName = `${contentTypes.DOMAIN}s`;
+                async.series([
 
-            db.collection(collectionName).updateOne({
-                imageSrc: autoload.defaults[contentTypes.DOMAIN],
-            }, {
-                $set: {
-                    imageSrc: null,
-                },
-            }, cb);
-        },
+                    // put base64 back to file
+                    (cb) => {
+                        db.collection(collectionName).updateOne({
+                            _id: doc.itemId,
+                        }, {
+                            $set: {
+                                preview: doc.base64,
+                            },
+                        }, cb);
+                    },
 
-        // perform rollback
-        (cb) => {
-            const collectionName = `${contentTypes.OUTLET}s`;
+                    // cleanup from preview
+                    (cb) => {
+                        db.collection('preview').removeOne({
+                            _id: doc._id,
+                        }, cb);
+                    },
 
-            db.collection(collectionName).updateOne({
-                imageSrc: autoload.defaults[contentTypes.OUTLET],
-            }, {
-                $set: {
-                    imageSrc: null,
-                },
-            }, cb);
-        },
+                ], queueCb);
+            }, Infinity);
 
-        // perform rollback
-        (cb) => {
-            const collectionName = `${contentTypes.RETAILSEGMENT}s`;
+            cursor.each((err, doc) => {
+                if (err) {
+                    logger.error('File restore fails', err);
+                    return;
+                }
 
-            db.collection(collectionName).updateOne({
-                imageSrc: autoload.defaults[contentTypes.RETAILSEGMENT],
-            }, {
-                $set: {
-                    imageSrc: null,
-                },
-            }, cb);
-        },
+                queue.push(doc);
+            });
 
-        // perform rollback
-        (cb) => {
-            const collectionName = `${contentTypes.BRAND}s`;
-
-            db.collection(collectionName).updateOne({
-                imageSrc: autoload.defaults[contentTypes.BRAND],
-            }, {
-                $set: {
-                    imageSrc: null,
-                },
-            }, cb);
-        },
-
-        // perform rollback
-        (cb) => {
-            const collectionName = `${contentTypes.BRANCH}es`;
-
-            db.collection(collectionName).updateOne({
-                imageSrc: autoload.defaults[contentTypes.BRANCH],
-            }, {
-                $set: {
-                    imageSrc: null,
-                },
-            }, cb);
+            queue.drain = () => {
+                if (cursor.isClosed()) {
+                    cb();
+                }
+            };
         },
 
     ], next);

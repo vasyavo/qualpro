@@ -97,7 +97,7 @@ exports.up = (db, next) => {
                         headers: {
                             contentType: 'CompetitorItem',
                             actionType: 'Deleted',
-                            migration: '0026-competitorItem',
+                            migration: '0023-competitorItem',
                             redirectTo: '$sample',
                         },
                         payload: '$items',
@@ -134,7 +134,7 @@ exports.down = (db, next) => {
 
         (cb) => {
             MigrationMapCollection.find({
-                'headers.migration': '0026-competitorItem',
+                'headers.migration': '0023-competitorItem',
             }, cb);
         },
 
