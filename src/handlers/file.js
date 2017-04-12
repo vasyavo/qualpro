@@ -1,17 +1,19 @@
-const async = require('async');
 const fs = require('fs');
+const async = require('async');
 const _ = require('lodash');
-const path = require('path');
-const logger = require('../utils/logger');
-const ffmpeg = require('fluent-ffmpeg');
-const im = require('imagemagick');
 const mongoose = require('mongoose');
+const mime = require('mime');
+const im = require('imagemagick');
+const gm = require('gm');
+const ffmpeg = require('fluent-ffmpeg');
+
 const config = require('./../config');
-const OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
+const logger = require('../utils/logger');
+const OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
 const FileModel = require('./../types/file/model');
+
 const NEED_PROCESSING_TYPES = _.union(OTHER_CONSTANTS.IMAGE_CONTENT_TYPES, OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, OTHER_CONSTANTS.OTHER_FORMATS);
 const ObjectId = mongoose.Types.ObjectId;
-const mime = require('mime');
 const CONTENT_TYPES = require('./../public/js/constants/contentType');
 const PreviewCollection = require('./../stories/preview/collection');
 
@@ -323,25 +325,69 @@ module.exports = function() {
                         return cb(null);
                     }
 
+                    const rotatedSourcePath = `${fileOptions.tempPath}.source`;
+                    const rotatedSourceWriteStream = fs.createWriteStream(rotatedSourcePath);
+                    const thumbnailPath = `${rotatedSourcePath}.thumbnail`;
+                    const thumbnailWriteStream = fs.createWriteStream(thumbnailPath);
                     const convertOptions = {
-                        srcData: fs.readFileSync(fileOptions.tempPath, 'binary'),
                         width: 150,
-                        quality: 1,
-                        format: fileOptions.extension,
+                        height: 150,
                     };
 
-                    im.resize(convertOptions, (err, stdout) => {
+                    // Step 2. If source rotated and ready then create thumbnail.
+                    rotatedSourceWriteStream.on('close', (err) => {
                         if (err) {
                             return cb(err);
                         }
 
-                        const base64Image = new Buffer(stdout, 'binary').toString('base64');
-                        fileOptions.preview = `data:${fileOptions.type};base64,${base64Image}`;
+                        fileOptions.tempPath = rotatedSourcePath;
 
-                        uploadFile(fileOptions);
-
-                        cb(null);
+                        gm(rotatedSourcePath)
+                            .autoOrient()
+                            .noProfile()
+                            .resize(convertOptions.width, convertOptions.height, '^')
+                            .stream()
+                            .pipe(thumbnailWriteStream);
                     });
+
+                    // Step 3. If thumbnail is ready then store it as preview.
+                    thumbnailWriteStream.on('close', (err) => {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        async.waterfall([
+
+                            (cb) => {
+                                fs.readFile(thumbnailPath, cb);
+                            },
+
+                            (data, cb) => {
+                                const base64Image = Buffer.from(data).toString('base64');
+
+                                fileOptions.preview = `data:${fileOptions.type};base64,${base64Image}`;
+
+                                cb(null);
+                            },
+
+                        ], (err) => {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            // Step 4. Upload file.
+                            uploadFile(fileOptions);
+                            cb(null);
+                        });
+                    });
+
+                    // Step 1. Auto-rotation.
+                    gm(fileOptions.tempPath)
+                        .autoOrient()
+                        .quality(90)
+                        .noProfile()
+                        .stream()
+                        .pipe(rotatedSourceWriteStream);
                 },
 
                 // if pdf type
