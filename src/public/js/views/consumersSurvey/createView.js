@@ -298,7 +298,7 @@ define([
                 success : function (xhr) {
                     var startDate = xhr.get('startDate');
                     if (startDate) {
-                        xhr.set('startDate', moment(startDate).format('DD.MM.YYYY'));
+                        xhr.set('startDate', moment.utc(startDate).format('DD.MM.YYYY'));
                     }
 
                     self.trigger('modelSaved', xhr);
@@ -313,8 +313,8 @@ define([
 
             this.body = {};
             this.body.title = title;
-            this.body.dueDate = dueDate ? moment(dueDate, 'DD.MM.YYYY').toISOString() : null;
-            this.body.startDate = startDate ? moment(startDate, 'DD.MM.YYYY').toISOString() : null;
+            this.body.dueDate = dueDate ? moment.utc(dueDate, 'DD.MM.YYYY').toISOString() : null;
+            this.body.startDate = startDate ? moment.utc(startDate, 'DD.MM.YYYY').toISOString() : null;
             this.body.questions = $questionsRows.length;
             this.setLocations();
             if (this.edit && this.model) {

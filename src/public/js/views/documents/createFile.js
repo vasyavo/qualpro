@@ -129,7 +129,7 @@ define(function (require) {
                             }
 
                             that.model.saveFile(formData, data);
-                        }, 2000, true),
+                        }, 4000, true),
                     },
                     cancel: {
                         text: that.translation.cancelBtn,

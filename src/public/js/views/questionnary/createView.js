@@ -282,7 +282,7 @@ define([
 
             this.body = {};
             this.body.title = title;
-            this.body.dueDate = dueDate ? moment(dueDate, 'DD.MM.YYYY').toISOString() : null;
+            this.body.dueDate = dueDate ? moment.utc(dueDate, 'DD.MM.YYYY').toISOString() : null;
             this.body.questions = $questionsRows.length;
             this.setLocations();
             if (this.edit && this.model) {
@@ -389,8 +389,6 @@ define([
             var idToSearch = '#' + this.currentLanguage;
             var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
             var $endDate;
-            var dateStart = new Date();
-            var dateEnd;
             var idToFind;
 
             this.$el = $(formString).dialog({
@@ -439,9 +437,8 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
-                defaultDate: new Date(dateEnd)
+                minDate    : new Date(),
+                defaultDate: jsonModel.dueDate || new Date()
             });
 
             implementShowHideArabicInputIn(this);

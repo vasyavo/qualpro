@@ -9,8 +9,8 @@
         <div class="questionnarieWrap">
             <div class="questionnarieInputWrap questionnarieTab">
                 <% if(model && model.status && model.status._id === 'active' && edit) {%>
-                <span class="customInput" id="questionnaryTitle"> <%= model.title.en || '' %> </span>
-                <span class="customInput" id="questionnaryTitle"> <%= model.title.ar || '' %> </span>
+                <span class="customInput" id="questionnaryTitle"> <%= model.title.en || '<span class="fontGray">English</span>' %> </span>
+                <span class="customInput" id="questionnaryTitle"> <%= model.title.ar || '<span class="fontGray">Arabic</span>' %> </span>
                 <% } else { %>
                 <!--<input type="text" class="customInput" id="questionnaryTitle" placeholder="<%= translation.title %>"
                        value="<%= model.title || '' %>"/>-->
