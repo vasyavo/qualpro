@@ -1,73 +1,65 @@
 'use strict';
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var Domain = function () {
-    var async = require('async');
-    var mongoose = require('mongoose');
-    var _ = require('underscore');
-    var lodash = require('lodash');
-    var ACL_MODULES = require('../constants/aclModulesNames');
-    var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var CONSTANTS = require('../constants/mainConstants');
-    var DomainModel = require('./../types/domain/model');
-    var BranchModel = require('./../types/branch/model');
-    var PersonnelModel = require('./../types/personnel/model');
-    var SessionModel = require('./../types/session/model');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
-    var ObjectId = mongoose.Types.ObjectId;
-    var access = require('../helpers/access')();
-    var xssFilters = require('xss-filters');
-    var FilterMapper = require('../helpers/filterMapper');
-    var Archiver = require('../helpers/domainArchiver');
-    var logWriter = require('../helpers/logWriter.js');
-    var archiver = new Archiver(DomainModel, BranchModel);
-    var populateByType = require('../helpers/populateByType');
-    var contentTypes = require('../public/js/helpers/contentTypesHelper');
-    var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
-    var bodyValidator = require('../helpers/bodyValidator');
-    var cutOccupiedDomains = require('../helpers/cutOccupiedDomains');
-    var objectId = mongoose.Types.ObjectId;
+const Domain = function () {
+    const async = require('async');
+    const mongoose = require('mongoose');
+    const _ = require('underscore');
+    const lodash = require('lodash');
+    const ACL_MODULES = require('../constants/aclModulesNames');
+    const CONTENT_TYPES = require('../public/js/constants/contentType.js');
+    const CONSTANTS = require('../constants/mainConstants');
+    const DomainModel = require('./../types/domain/model');
+    const BranchModel = require('./../types/branch/model');
+    const PersonnelModel = require('./../types/personnel/model');
+    const PreviewModel = require('./../stories/preview/model.business');
+    const SessionModel = require('./../types/session/model');
+    const ACTIVITY_TYPES = require('../constants/activityTypes');
+    const ObjectId = mongoose.Types.ObjectId;
+    const access = require('../helpers/access')();
+    const FilterMapper = require('../helpers/filterMapper');
+    const Archiver = require('../helpers/domainArchiver');
+    const logWriter = require('../helpers/logWriter.js');
+    const archiver = new Archiver(DomainModel, BranchModel);
+    const populateByType = require('../helpers/populateByType');
+    const contentTypes = require('../public/js/helpers/contentTypesHelper');
+    const AggregationHelper = require('../helpers/aggregationCreater');
+    const bodyValidator = require('../helpers/bodyValidator');
+    const cutOccupiedDomains = require('../helpers/cutOccupiedDomains');
+    const objectId = mongoose.Types.ObjectId;
 
-    var $defProjection = {
-        _id        : 1,
-        name       : 1,
-        currency   : 1,
-        type       : 1,
-        editedBy   : 1,
-        createdBy  : 1,
-        parent     : 1,
-        archived   : 1,
+    const $defProjection = {
+        _id: 1,
+        name: 1,
+        currency: 1,
+        type: 1,
+        editedBy: 1,
+        createdBy: 1,
+        parent: 1,
+        archived: 1,
         topArchived: 1,
-        total      : 1,
-        translated : 1
+        total: 1,
+        translated: 1,
+        imageSrc: 1,
     };
 
     this.create = function (req, res, next) {
-        var mid = req.mid || ACL_MODULES.COUNTRY;
+        const mid = req.mid || ACL_MODULES.COUNTRY;
 
         function queryRun(body) {
-            var model;
-            var moduleNumber = ACL_MODULES.COUNTRY;
-            if (body.type === 'region') {
-                moduleNumber = ACL_MODULES.REGION;
-            } else if (body.type === 'subRegion') {
-                moduleNumber = ACL_MODULES.SUB_REGION;
-            }
-            var createdBy = {
+            const createdBy = {
                 user: req.session.uId,
-                date: new Date()
+                date: new Date(),
             };
 
-            if (!body.imageSrc) {
-                delete body.imageSrc;
-            }
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             if (body.name) {
                 body.name = {
                     en: body.name.en ? _.escape(body.name.en) : '',
-                    ar: body.name.ar ? _.escape(body.name.ar) : ''
+                    ar: body.name.ar ? _.escape(body.name.ar) : '',
                 };
             }
 
@@ -78,43 +70,55 @@ var Domain = function () {
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
-            model = new DomainModel(body);
-            model.save(function (error, result) {
-                if (error) {
-                    return next(error);
+            const model = new DomainModel(body);
+
+            async.waterfall([
+                (cb) => {
+                    model.save(cb);
+                },
+                (result, count, cb) => {
+                    const bodyObject = {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel: req.session.level,
+                        body: result.toJSON(),
+                    };
+
+                    switch (body.type) {
+                        case ('country') :
+                            ActivityLog.emit('country:created', bodyObject);
+                            break;
+                        case ('region') :
+                            ActivityLog.emit('region:created', bodyObject);
+                            break;
+                        case ('subRegion') :
+                            ActivityLog.emit('sub-region:created', bodyObject);
+                            break;
+                    }
+
+                    PreviewModel.setNewPreview({
+                        model: result,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.DOMAIN,
+                    }, cb);
+                },
+            ], (err, result) => {
+                if (err) {
+                    return next(err);
                 }
-                const bodyObject = {
-                    actionOriginator : req.session.uId,
-                    accessRoleLevel : req.session.level,
-                    body : result.toJSON()
-                };
-
-                switch (body.type) {
-                    case ('country') :
-                        ActivityLog.emit('country:created', bodyObject);
-                        break;
-                    case ('region') :
-                        ActivityLog.emit('region:created', bodyObject);
-                        break;
-                    case ('subRegion') :
-                        ActivityLog.emit('sub-region:created', bodyObject);
-                        break;
-               }
-
 
                 if (result && result.name) {
                     result.name = {
                         en: result.name.en ? _.unescape(result.name.en) : '',
-                        ar: result.name.ar ? _.unescape(result.name.ar) : ''
-                    }
+                        ar: result.name.ar ? _.unescape(result.name.ar) : '',
+                    };
                 }
 
                 res.status(201).send(result);
             });
         }
 
-        access.getWriteAccess(req, mid, function (err, allowed) {
-            var body = req.body;
+        access.getWriteAccess(req, mid, (err, allowed) => {
+            const body = req.body;
 
             if (err) {
                 return next(err);
@@ -127,7 +131,7 @@ var Domain = function () {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DOMAIN, 'create', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DOMAIN, 'create', (err, saveData) => {
                 if (err) {
                     return next(err);
                 }
@@ -135,13 +139,12 @@ var Domain = function () {
                 queryRun(saveData);
             });
         });
-
     };
 
     this.remove = function (req, res, next) {
-        var id = req.params.id;
+        const id = req.params.id;
 
-        DomainModel.findByIdAndRemove(id, function (error) {
+        DomainModel.findByIdAndRemove(id, (error) => {
             if (error) {
                 return next(error);
             }
@@ -151,28 +154,28 @@ var Domain = function () {
     };
 
     this.archive = function (req, res, next) {
-        var mid = req.mid || ACL_MODULES.COUNTRY;
+        const mid = req.mid || ACL_MODULES.COUNTRY;
 
         function queryRun() {
-            var idsToArchive = req.body.ids.objectID();
-            var archived = req.body.archived === 'false' ? false : !!req.body.archived;
-            var baseUrl = req.baseUrl;
-            var uId = req.session.uId;
-            var contentType = baseUrl.slice(1, baseUrl.length);
-            var options = {
-                ids        : idsToArchive,
-                archived   : archived,
-                contentType: contentType,
-                Personnel  : PersonnelModel,
-                Session    : SessionModel,
-                Branch     : BranchModel
+            const idsToArchive = req.body.ids.objectID();
+            const archived = req.body.archived === 'false' ? false : !!req.body.archived;
+            const baseUrl = req.baseUrl;
+            const uId = req.session.uId;
+            const contentType = baseUrl.slice(1, baseUrl.length);
+            const options = {
+                ids: idsToArchive,
+                archived,
+                contentType,
+                Personnel: PersonnelModel,
+                Session: SessionModel,
+                Branch: BranchModel,
             };
 
-            archiver.archiveToEnd(uId, options, function (err, response) {
-                var type = ACTIVITY_TYPES.ARCHIVED;
-                var createdBy = {
+            archiver.archiveToEnd(uId, options, (err, response) => {
+                let type = ACTIVITY_TYPES.ARCHIVED;
+                const createdBy = {
                     user: req.session.uId,
-                    date: new Date()
+                    date: new Date(),
                 };
 
                 if (err) {
@@ -182,18 +185,18 @@ var Domain = function () {
                 if (!req.body.archived) {
                     type = ACTIVITY_TYPES.UNARCHIVED;
                 }
-                async.each(idsToArchive, (id, eCb)=>{
+                async.each(idsToArchive, (id, eCb) => {
                     DomainModel.findById(id)
                         .lean()
-                        .exec((err, resp)=>{
-                            if (err){
-                                return eCb(err)
+                        .exec((err, resp) => {
+                            if (err) {
+                                return eCb(err);
                             }
 
                             const bodyObject = {
                                 actionOriginator: req.session.uId,
-                                accessRoleLevel : req.session.level,
-                                body            : resp
+                                accessRoleLevel: req.session.level,
+                                body: resp,
                             };
 
                             switch (options.contentType) {
@@ -208,8 +211,8 @@ var Domain = function () {
                                     break;
                             }
                             eCb();
-                        })
-                }, (err)=>{
+                        });
+                }, (err) => {
                     if (err) {
                         logWriter.log('planogram archived error', err);
                     }
@@ -219,7 +222,7 @@ var Domain = function () {
             });
         }
 
-        access.getArchiveAccess(req, mid, function (err, allowed) {
+        access.getArchiveAccess(req, mid, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -237,26 +240,26 @@ var Domain = function () {
 
     this.getById = function (req, res, next) {
         function queryRun() {
-            var id = req.params.id;
+            const id = req.params.id;
 
             BranchModel
                 .findById(id)
                 .populate('currency')
-                .exec(function (err, result) {
+                .exec((err, result) => {
                     if (err) {
                         return next(err);
                     }
                     if (result && result.name) {
                         result.name = {
                             en: result.name.en ? _.unescape(result.name.en) : '',
-                            ar: result.name.ar ? _.unescape(result.name.ar) : ''
-                        }
+                            ar: result.name.ar ? _.unescape(result.name.ar) : '',
+                        };
                     }
                     res.status(200).send(result);
                 });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -273,17 +276,17 @@ var Domain = function () {
 
     this.getForDD = function (req, res, next) {
         function queryRun() {
-            var query = req.query;
+            const query = req.query;
 
-            DomainModel.find(query, '_id name parent').exec(function (err, result) {
+            DomainModel.find(query, '_id name parent').exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
                 if (result.length) {
-                    result = _.map(result, function (element) {
+                    result = _.map(result, (element) => {
                         element.name = {
                             ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
+                            en: _.unescape(element.name.en),
                         };
                         return element;
                     });
@@ -293,7 +296,7 @@ var Domain = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -309,226 +312,230 @@ var Domain = function () {
     };
 
     function getAllPipeline(options) {
-        var queryObject = options.queryObject;
-        var aggregateHelper = options.aggregateHelper;
-        var language = options.language;
-        var translateFields = options.translateFields;
-        var translated = options.translated;
-        var searchFieldsArray = options.searchFieldsArray;
-        var filterSearch = options.filterSearch;
-        var sort = options.sort;
-        var skip = options.skip;
-        var limit = options.limit;
-        var forSync = options.forSync;
-        var isMobile = options.isMobile;
-        var excludeItems = options.excludeItems;
-        var pipeLine = [];
-        var queryObjectTime = _.pick(queryObject, '$or');
-        var queryObjectWithoutTime = _.omit(queryObject, '$or');
+        const queryObject = options.queryObject;
+        const aggregateHelper = options.aggregateHelper;
+        const language = options.language;
+        const translateFields = options.translateFields;
+        const translated = options.translated;
+        const searchFieldsArray = options.searchFieldsArray;
+        const filterSearch = options.filterSearch;
+        const sort = options.sort;
+        const skip = options.skip;
+        const limit = options.limit;
+        const forSync = options.forSync;
+        const isMobile = options.isMobile;
+        const excludeItems = options.excludeItems;
+        let pipeLine = [];
+        const queryObjectTime = _.pick(queryObject, '$or');
+        const queryObjectWithoutTime = _.omit(queryObject, '$or');
         if (!isMobile) {
             pipeLine.push({
-                $match: queryObject
+                $match: queryObject,
             });
 
             if (excludeItems) {
                 pipeLine.push({
                     $match: {
                         _id: {
-                            $nin: excludeItems
-                        }
-                    }
+                            $nin: excludeItems,
+                        },
+                    },
                 });
             }
 
             pipeLine.push({
-                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
+                $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch),
             });
         } else {
             if (queryObject.subRegion) {
                 pipeLine.push({
                     $match: {
                         $or: [
-                            {_id: queryObject.subRegion},
-                            {_id: queryObject.region},
-                            {_id: queryObject.country}
-                        ]
-                    }
+                            { _id: queryObject.subRegion },
+                            { _id: queryObject.region },
+                            { _id: queryObject.country },
+                        ],
+                    },
                 });
             } else if (queryObject.region) {
                 pipeLine.push({
                     $match: {
                         $or: [
-                            {_id: queryObject.region},
-                            {_id: queryObject.country},
-                            {parent: queryObject.region}
-                        ]
-                    }
+                            { _id: queryObject.region },
+                            { _id: queryObject.country },
+                            { parent: queryObject.region },
+                        ],
+                    },
                 });
             } else if (queryObject.country) {
                 pipeLine.push({
                     $match: {
                         $or: [
-                            {_id: queryObject.country},
-                            {parent: queryObject.country},
-                            {type: 'subRegion'}
-                        ]
-                    }
+                            { _id: queryObject.country },
+                            { parent: queryObject.country },
+                            { type: 'subRegion' },
+                        ],
+                    },
                 });
 
                 pipeLine.push({
                     $lookup: {
-                        from        : 'domains',
-                        localField  : 'parent',
+                        from: 'domains',
+                        localField: 'parent',
                         foreignField: '_id',
-                        as          : 'parent'
-                    }
+                        as: 'parent',
+                    },
                 });
 
                 pipeLine.push({
                     $project: aggregateHelper.getProjection({
-                        parent: {$arrayElemAt: ['$parent', 0]}
-                    })
+                        parent: { $arrayElemAt: ['$parent', 0] },
+                    }),
                 });
 
                 pipeLine.push({
                     $match: {
                         $or: [
-                            {type: 'country'},
-                            {type: 'region'},
-                            {'parent.parent': queryObject.country}
-                        ]
-                    }
+                            { type: 'country' },
+                            { type: 'region' },
+                            { 'parent.parent': queryObject.country },
+                        ],
+                    },
                 });
 
                 pipeLine.push({
                     $project: aggregateHelper.getProjection({
-                        parent: '$parent._id'
-                    })
+                        parent: '$parent._id',
+                    }),
                 });
             } else {
                 pipeLine.push({
-                    $match: queryObjectWithoutTime
+                    $match: queryObjectWithoutTime,
                 });
             }
 
             pipeLine.push({
-                $match: queryObjectTime
+                $match: queryObjectTime,
             });
         }
 
         if (translated && translated.length === 1) {
             pipeLine.push({
                 $project: aggregateHelper.getProjection({
-                    translated: aggregateHelper.translatedCond(language, translateFields, translated[0])
-                })
+                    translated: aggregateHelper.translatedCond(language, translateFields, translated[0]),
+                }),
             });
 
             pipeLine.push({
                 $match: {
-                    translated: true
-                }
+                    translated: true,
+                },
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: { createdBy: { date: 1 } },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'editedBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {editedBy: {date: 1}}
+            from: 'personnels',
+            key: 'editedBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: { editedBy: { date: 1 } },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
+            from: 'accessRoles',
+            key: 'createdBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id      : 1,
-                        position : 1,
+                        _id: 1,
+                        position: 1,
                         firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }
+                        lastName: 1,
+                        imageSrc: 1,
+                    },
+                },
+            },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
+            from: 'positions',
+            key: 'createdBy.user.position',
+            isArray: false,
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id       : 1,
+                        _id: 1,
                         accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'editedBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                editedBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
                         firstName: 1,
-                        lastName : 1
-                    }
-                }
-            }
+                        lastName: 1,
+                        imageSrc: 1,
+                    },
+                },
+            },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'editedBy.user.position',
-            isArray        : false,
+            from: 'accessRoles',
+            key: 'editedBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
             includeSiblings: {
                 editedBy: {
                     date: 1,
                     user: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        imageSrc: 1,
+                    },
+                },
+            },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from   : 'currencies',
-            key    : 'currency',
-            isArray: false
+            from: 'positions',
+            key: 'editedBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        imageSrc: 1,
+                    },
+                },
+            },
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'currencies',
+            key: 'currency',
+            isArray: false,
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit,
-            sort             : sort
+            isMobile,
+            searchFieldsArray,
+            filterSearch,
+            skip,
+            limit,
+            sort,
         }));
 
         return pipeLine;
@@ -536,101 +543,69 @@ var Domain = function () {
 
     this.getAllForSync = function (req, res, next) {
         function queryRun(personnel) {
-            var query = req.query;
-            var filter = query.filter || {};
-            var lastLogOut = new Date(query.lastLogOut);
-            var filterMapper = new FilterMapper();
-            var type = query.parentCT;
-            var queryObject = filterMapper.mapFilter({
+            const query = req.query;
+            const filter = query.filter || {};
+            const lastLogOut = new Date(query.lastLogOut);
+            const filterMapper = new FilterMapper();
+            const type = query.parentCT;
+            const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.DOMAIN,
-                filter     : filter,
-                personnel  : personnel
+                filter,
+                personnel,
             });
-            var aggregateHelper = new AggregationHelper($defProjection, queryObject);
-            var sort = query.sort || {'editedBy.date': 1};
-            var pipeLine;
-            var aggregation;
-            var ids;
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const sort = query.sort || { 'editedBy.date': 1 };
+            let pipeLine;
+            let aggregation;
+            let ids;
 
             if (query._ids) {
                 ids = query._ids.split(',');
-                ids = _.map(ids, function (id) {
+                ids = _.map(ids, (id) => {
                     return ObjectId(id);
                 });
                 queryObject._id = {
-                    $in: ids
+                    $in: ids,
                 };
             }
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             pipeLine = getAllPipeline({
-                aggregateHelper: aggregateHelper,
-                queryObject    : queryObject,
-                sort           : sort,
-                forSync        : true,
-                isMobile       : req.isMobile
+                aggregateHelper,
+                queryObject,
+                sort,
+                forSync: true,
+                isMobile: req.isMobile,
             });
 
             aggregation = DomainModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse: true
+                allowDiskUse: true,
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var domainIds = [];
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     element.name = {
                         ar: _.unescape(element.name.ar),
-                        en: _.unescape(element.name.en)
+                        en: _.unescape(element.name.en),
                     };
-                    personnelIds.push(element.createdBy.user._id);
-                    domainIds.push(element._id);
-
-                    return element;
                 });
 
-                personnelIds = lodash.uniqBy(personnelIds, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.DOMAIN] = domainIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.DOMAIN] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, (err, allowed, personnel) => {
             if (err) {
                 return next(err);
             }
@@ -647,46 +622,44 @@ var Domain = function () {
 
     this.getAll = function (req, res, next) {
         function queryRun(personnel) {
-            var query = req.query;
-            var filter = query.filter || {};
-            var personnelAccessRoleLevel = query.accessRoleLevel;
-            var type = query.parentCT;
-            var isMobile = req.isMobile;
-            var contentType = contentTypes.getNextType(type);
-            var page = query.page || 1;
-            var limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
-            var skip = (page - 1) * limit;
+            const query = req.query;
+            const filter = query.filter || {};
+            const type = query.parentCT;
+            const isMobile = req.isMobile;
+            const contentType = contentTypes.getNextType(type);
+            const page = query.page || 1;
+            const limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
+            const skip = (page - 1) * limit;
 
-            var language = req.cookies.currentLanguage;
-            var sortObject = language === 'en' ? {'name.en': 1} : {'name.ar': 1};
+            const language = req.cookies.currentLanguage;
+            const sortObject = language === 'en' ? { 'name.en': 1 } : { 'name.ar': 1 };
 
-            var translateFields = ['name'];
-            var translated = (query.filter && query.filter.translated) ? query.filter.translated.values : [];
+            const translateFields = ['name'];
+            const translated = (query.filter && query.filter.translated) ? query.filter.translated.values : [];
 
-            var filterMapper = new FilterMapper();
-            var filterSearch = filter.globalSearch || '';
-            var aggregation;
-            var pipeLine;
-            var key;
-            var queryObject = isMobile ? filterMapper.mapFilter({
+            const filterMapper = new FilterMapper();
+            const filterSearch = filter.globalSearch || '';
+            let aggregation;
+            let key;
+            const queryObject = isMobile ? filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.DOMAIN,
-                filter     : filter,
-                personnel  : personnel
+                filter,
+                personnel,
             }) :
                 filterMapper.mapFilter({
                     contentType: CONTENT_TYPES.DOMAIN,
-                    filter     : filter,
-                    context    : contentType,
-                    personnel  : personnel
+                    filter,
+                    context: contentType,
+                    personnel,
                 });
 
-            var aggregateHelper = new AggregationHelper($defProjection, queryObject);
+            const aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
-            var sort = query.sort || sortObject;
+            const sort = query.sort || sortObject;
 
-            var searchFieldsArray = [
+            const searchFieldsArray = [
                 'name.en',
-                'name.ar'
+                'name.ar',
             ];
 
             delete filter.globalSearch;
@@ -703,100 +676,53 @@ var Domain = function () {
                 queryObject.type = contentType;
             }
 
-            function returnResult(excludeItems) {
-                pipeLine = getAllPipeline({
-                    queryObject      : queryObject,
-                    aggregateHelper  : aggregateHelper,
-                    language         : language,
-                    translateFields  : translateFields,
-                    translated       : translated,
-                    searchFieldsArray: searchFieldsArray,
-                    filterSearch     : filterSearch,
-                    sort             : sort,
-                    skip             : skip,
-                    limit            : limit,
-                    isMobile         : isMobile,
-                    excludeItems     : excludeItems
-                });
-
-                aggregation = DomainModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse: true
-                };
-
-                aggregation.exec(function (err, response) {
-                    var options = {
-                        data: {}
-                    };
-                    var personnelIds = [];
-                    var domainIds = [];
-                    if (err) {
-                        return next(err);
-                    }
-
-                    response = response && response[0] ? response[0] : {data: [], total: 0};
-
-                    if (!response.data.length) {
-                        return next({status: 200, body: response});
-                    }
-
-                    response.data = _.map(response.data, function (element) {
-                        element.name = {
-                            ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
-                        };
-                        personnelIds.push(element.createdBy.user._id);
-                        domainIds.push(element._id);
-
-                        return element;
-                    });
-
-                    personnelIds = lodash.uniqBy(personnelIds, 'id');
-                    options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                    options.data[CONTENT_TYPES.DOMAIN] = domainIds;
-
-                    getImagesHelper.getImages(options, function (err, result) {
-                        var fieldNames = {};
-                        var setOptions;
-                        if (err) {
-                            return next(err);
-                        }
-
-                        setOptions = {
-                            response  : response,
-                            imgsObject: result
-                        };
-                        fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                        fieldNames[CONTENT_TYPES.DOMAIN] = [];
-                        setOptions.fields = fieldNames;
-
-                        getImagesHelper.setIntoResult(setOptions, function (response) {
-                            next({status: 200, body: response});
-                        })
-                    });
-                });
-            }
-
-            // TODO: If will need cutOccupiedDomains helper, change it and use
-            // if (!isMobile) {
-            //     cutOccupiedDomains(PersonnelModel, personnelAccessRoleLevel, contentType, returnResult);
-            // } else {
-            //     delete queryObject.region;
-            //     delete queryObject.subRegion;
-
-            //     returnResult();
-            // }
-
             if (isMobile) {
                 delete queryObject.region;
                 delete queryObject.subRegion;
             }
 
-            returnResult();
+            const pipeLine = getAllPipeline({
+                queryObject,
+                aggregateHelper,
+                language,
+                translateFields,
+                translated,
+                searchFieldsArray,
+                filterSearch,
+                sort,
+                skip,
+                limit,
+                isMobile,
+            });
+
+            aggregation = DomainModel.aggregate(pipeLine);
+
+            aggregation.options = {
+                allowDiskUse: true,
+            };
+
+            aggregation.exec((err, result) => {
+                if (err) {
+                    return next(err);
+                }
+
+                const body = result.length ? result[0] : { data: [], total: 0 };
+
+                body.data.forEach(element => {
+                    element.name = {
+                        ar: _.unescape(element.name.ar),
+                        en: _.unescape(element.name.en),
+                    };
+                });
+
+                next({
+                    status: 200,
+                    body,
+                });
+            });
         }
 
-        access.getReadAccess(req, ACL_MODULES.COUNTRY, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.COUNTRY, (err, allowed, personnel) => {
             if (err) {
                 return next(err);
             }
@@ -812,58 +738,70 @@ var Domain = function () {
     };
 
     this.update = function (req, res, next) {
-        var mid = req.mid || ACL_MODULES.COUNTRY;
+        const mid = req.mid || ACL_MODULES.COUNTRY;
 
         function queryRun(body) {
-            var id = req.params.id;
-            var query;
-            var moduleNumber = ACL_MODULES.COUNTRY;
-            if (body.type === 'region') {
-                moduleNumber = ACL_MODULES.REGION;
-            } else if (body.type === 'subRegion') {
-                moduleNumber = ACL_MODULES.SUB_REGION;
-            }
+            const id = req.params.id;
+
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             if (body.name) {
                 body.name = {
                     en: body.name.en ? _.escape(body.name.en) : '',
-                    ar: body.name.ar ? _.escape(body.name.ar) : ''
-                }
+                    ar: body.name.ar ? _.escape(body.name.ar) : '',
+                };
             }
 
             body.editedBy = {
                 user: req.session.uId,
-                date: new Date()
+                date: new Date(),
             };
 
-            query = DomainModel.findByIdAndUpdate(id, body, {new: true});
+            const query = DomainModel.findByIdAndUpdate(id, body, { new: true });
 
-            populateByType(query, body.type).exec(function (err, result) {
+            async.waterfall([
+                (cb) => {
+                    populateByType(query, body.type).exec((err, result) => {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        const bodyObject = {
+                            actionOriginator: req.session.uId,
+                            accessRoleLevel: req.session.level,
+                            body: result.toJSON(),
+                        };
+
+                        switch (body.type) {
+                            case ('country') :
+                                ActivityLog.emit('country:updated', bodyObject);
+                                break;
+                            case ('region') :
+                                ActivityLog.emit('region:updated', bodyObject);
+                                break;
+                            case ('subRegion') :
+                                ActivityLog.emit('sub-region:updated', bodyObject);
+                                break;
+                        }
+
+                        PreviewModel.setNewPreview({
+                            model: result,
+                            base64: imageSrc,
+                            contentType: CONTENT_TYPES.DOMAIN,
+                        }, cb);
+                    });
+                },
+            ], (err, result) => {
                 if (err) {
                     return next(err);
-                }
-                const bodyObject = {
-                    actionOriginator: req.session.uId,
-                    accessRoleLevel : req.session.level,
-                    body            : result.toJSON()
-                };
-
-                switch (body.type) {
-                    case ('country') :
-                        ActivityLog.emit('country:updated', bodyObject);
-                        break;
-                    case ('region') :
-                        ActivityLog.emit('region:updated', bodyObject);
-                        break;
-                    case ('subRegion') :
-                        ActivityLog.emit('sub-region:updated', bodyObject);
-                        break;
                 }
 
                 if (result && result.name) {
                     result.name = {
                         en: result.name.en ? _.unescape(result.name.en) : '',
-                        ar: result.name.ar ? _.unescape(result.name.ar) : ''
+                        ar: result.name.ar ? _.unescape(result.name.ar) : '',
                     };
                 }
 
@@ -871,8 +809,8 @@ var Domain = function () {
             });
         }
 
-        access.getEditAccess(req, mid, function (err, allowed) {
-            var body = req.body;
+        access.getEditAccess(req, mid, (err, allowed) => {
+            const body = req.body;
 
             if (err) {
                 return next(err);
@@ -884,7 +822,7 @@ var Domain = function () {
                 return next(err);
             }
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DOMAIN, 'update', function (err, saveData) {
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.DOMAIN, 'update', (err, saveData) => {
                 if (err) {
                     return next(err);
                 }

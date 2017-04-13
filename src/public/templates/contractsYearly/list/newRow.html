@@ -3,7 +3,7 @@
     <div class="userBlock flexColumn">
         <div class="top flexRowStart">
             <div class="left flexColumn">
-                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="right flexColumn">
                 <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ?
@@ -36,7 +36,7 @@
                              class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
                             <div class="thumbnail_js thumbnailBody">
                                 <% if (model.documents[i].attachment.preview) { %>
-                                <img src="<%= model.documents[i].attachment.preview %>" class="bannerImage">
+                                <img src="preview/<%= model.documents[i].attachment.preview %>" class="bannerImage">
                                 <% } else {%>
                                 <div class="bannerImage iconThumbnail <%= model.documents[i].attachment.type %>"></div>
                                 <% } %>

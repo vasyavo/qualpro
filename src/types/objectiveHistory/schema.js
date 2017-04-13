@@ -1,15 +1,22 @@
-'use strict';
-
 const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+
 const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    objective: { type: ObjectId, ref: CONTENT_TYPES.OBJECTIVES },
-    person: { type: ObjectId, ref: CONTENT_TYPES.PERSONNEL }
+    objective: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.OBJECTIVES,
+    },
+    person: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.PERSONNEL,
+    },
 }, {
+    autoIndex: false,
     collection: 'objectiveHistories',
-    timestamps: true
+    versionKey: false,
+    timestamps: true,
 });
 
 module.exports = schema;

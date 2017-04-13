@@ -1,34 +1,45 @@
-'use strict';
 const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+
 const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    description : {
-        type : String
+    description: {
+        type: String,
     },
-    type : {
-        type : String
+    type: {
+        type: String,
     },
-    status : {
-        type : String
+    status: {
+        type: String,
     },
-    comments : {
-        type : Array,
-        default : []
+    comments: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.COMMENT,
+        }],
+        default: [],
     },
-    attachments : { type: Array, default: [] },
-    createdBy : {
-        type : ObjectId,
-        ref : CONTENT_TYPES.PERSONNEL,
-        default : null
+    attachments: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.FILES,
+        }],
+        default: [],
     },
-    createdAt : {
-        type : Date
-    }
-
+    createdBy: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.PERSONNEL,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 }, {
-    collection : 'contactUs'
+    autoIndex: false,
+    collection: CONTENT_TYPES.CONTACT_US,
+    versionKey: false,
 });
 
 module.exports = schema;

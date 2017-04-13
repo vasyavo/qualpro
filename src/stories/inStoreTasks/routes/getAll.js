@@ -7,7 +7,6 @@ const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
 const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const CONSTANTS = require('./../../../constants/mainConstants');
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
-const GetImagesHelper = require('./../../../helpers/getImages');
 const ObjectiveModel = require('././../../../types/objective/model');
 const PersonnelModel = require('./../../../types/personnel/model');
 const FilterMapper = require('./../../../helpers/filterMapper');
@@ -19,7 +18,6 @@ const getAllPipeLine = require('../reusable-components/getAllPipeline');
 const getAllPipeLineTrue = require('../reusable-components/getAllPipeLineTrue');
 
 const ObjectId = mongoose.Types.ObjectId;
-const getImagesHelper = new GetImagesHelper();
 
 module.exports = function (req, res, next) {
     const session = req.session;
@@ -242,79 +240,43 @@ module.exports = function (req, res, next) {
                     allowDiskUse: true,
                 };
 
-                aggregation.exec((err, response) => {
-                    if (err) {
-                        return cb(err, null);
-                    }
-
-                    response = response && response[0] ? response[0] : { data: [], total: 0 };
-
-                    response.data = _.map(response.data, (objective) => {
-                        if (objective.description) {
-                            objective.description = {
-                                ar: _.unescape(objective.description.ar),
-                                en: _.unescape(objective.description.en),
-                            };
-                        }
-
-                        if (objective.title) {
-                            objective.title = {
-                                ar: _.unescape(objective.title.ar),
-                                en: _.unescape(objective.title.en),
-                            };
-                        }
-
-                        return objective;
-                    });
-
-                    cb(null, response/* , coveredIds*/);
-                });
+                aggregation.exec(cb);
             },
 
-        ], (err, response) => {
-            let idsPersonnel = [];
-            let idsFile = [];
-            const options = {
-                data: {},
-            };
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            _.map(response.data, (model) => {
-                idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                idsPersonnel.push(model.createdBy.user._id);
-                idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
+            const body = result.length ?
+                result[0] : { data: [], total: 0 };
+
+            const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
+                return ObjectId.toString();
             });
 
-            idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
-            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-            options.data[CONTENT_TYPES.FILES] = idsFile;
+            const currentUserId = req.session.uId;
 
-            getImagesHelper.getImages(options, (err, result) => {
-                const fieldNames = {};
-                if (err) {
-                    return next(err);
+            body.data = detectObjectivesForSubordinates(body.data, subordinatesId, currentUserId);
+            body.data.forEach(objective => {
+                if (objective.description) {
+                    objective.description = {
+                        ar: _.unescape(objective.description.ar),
+                        en: _.unescape(objective.description.en),
+                    };
                 }
 
-                const setOptions = {
-                    response,
-                    imgsObject: result,
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
+                if (objective.title) {
+                    objective.title = {
+                        ar: _.unescape(objective.title.ar),
+                        en: _.unescape(objective.title.en),
+                    };
+                }
+            });
 
-                getImagesHelper.setIntoResult(setOptions, (response) => {
-                    const subordinatesId = arrayOfSubordinateUsersId.map((ObjectId) => {
-                        return ObjectId.toString();
-                    });
-                    const currentUserId = req.session.uId;
-
-                    response.data = detectObjectivesForSubordinates(response.data, subordinatesId, currentUserId);
-
-                    next({ status: 200, body: response });
-                });
+            next({
+                status: 200,
+                body,
             });
         });
     }
@@ -420,80 +382,36 @@ module.exports = function (req, res, next) {
                     allowDiskUse: true,
                 };
 
-                aggregation.exec((err, response) => {
-                    if (err) {
-                        return cb(err, null);
-                    }
-
-                    response = response && response[0] ? response[0] : { data: [], total: 0 };
-
-                    response.data = _.map(response.data, (objective) => {
-                        if (objective.description) {
-                            objective.description = {
-                                ar: _.unescape(objective.description.ar),
-                                en: _.unescape(objective.description.en),
-                            };
-                        }
-
-                        if (objective.title) {
-                            objective.title = {
-                                ar: _.unescape(objective.title.ar),
-                                en: _.unescape(objective.title.en),
-                            };
-                        }
-
-                        return objective;
-                    });
-
-                    cb(null, response);
-                });
+                aggregation.exec(cb);
             },
 
-        ], (err, response) => {
-            let idsPersonnel = [];
-            let idsFile = [];
-            const options = {
-                data: {},
-            };
+        ], (err, result) => {
             if (err) {
                 return next(err);
             }
 
-            _.map(response.data, (model) => {
-                idsFile = _.union(idsFile, _.map(model.attachments, '_id'));
-                idsPersonnel.push(model.createdBy.user._id);
-                idsPersonnel = _.union(idsPersonnel, _.map(model.assignedTo, '_id'));
-            });
+            const body = result.length ?
+                result[0] : { data: [], total: 0 };
 
-            idsPersonnel = lodash.uniqBy(idsPersonnel, 'id');
-            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-            options.data[CONTENT_TYPES.FILES] = idsFile;
-
-            getImagesHelper.getImages(options, (err, result) => {
-                const fieldNames = {};
-
-                if (err) {
-                    return next(err);
+            body.data.forEach(objective => {
+                if (objective.description) {
+                    objective.description = {
+                        ar: _.unescape(objective.description.ar),
+                        en: _.unescape(objective.description.en),
+                    };
                 }
 
-                const setOptions = {
-                    response,
-                    imgsObject: result,
-                };
+                if (objective.title) {
+                    objective.title = {
+                        ar: _.unescape(objective.title.ar),
+                        en: _.unescape(objective.title.en),
+                    };
+                }
+            });
 
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['assignedTo'], 'createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, (response) => {
-                    const subordinatesId = setSubordinateId.map((ObjectId) => {
-                        return ObjectId.toString();
-                    });
-
-                    response.data = detectObjectivesForSubordinates(response.data, subordinatesId, userId);
-
-                    next({ status: 200, body: response });
-                });
+            next({
+                status: 200,
+                body,
             });
         });
     }

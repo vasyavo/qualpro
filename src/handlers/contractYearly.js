@@ -1,26 +1,18 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 var Contract = function () {
-    'use strict';
-
     var async = require('async');
     var _ = require('lodash');
     var mongoose = require('mongoose');
-    var FileHandler = require('../handlers/file');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACL_CONSTANTS = require('../constants/aclRolesNames');
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     var ContractYearlyModel = require('./../types/contractYearly/model');
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
-    var DocumentHandler = require('../handlers/document');
-    var documentHandler = new DocumentHandler();
     var ObjectId = mongoose.Types.ObjectId;
     var access = require('../helpers/access')();
     var bodyValidator = require('../helpers/bodyValidator');
@@ -126,7 +118,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -141,7 +133,7 @@ var Contract = function () {
             key          : 'documents',
             as           : 'documents',
             isArray      : true,
-            addProjection: ['createdBy', 'title', 'attachment']
+            addProjection: ['createdBy', 'title', 'attachment', 'preview']
         }));
 
         pipeLine.push({
@@ -155,7 +147,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'documents.createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -164,7 +156,8 @@ var Contract = function () {
                     contentType: 1,
                     createdBy  : {
                         date: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -173,7 +166,7 @@ var Contract = function () {
             from           : 'files',
             key            : 'documents.attachment',
             isArray        : false,
-            addProjection  : ['_id', 'contentType'],
+            addProjection  : ['_id', 'contentType', 'preview'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -182,7 +175,8 @@ var Contract = function () {
                     createdBy  : {
                         date: 1,
                         user: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -205,7 +199,8 @@ var Contract = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -222,7 +217,8 @@ var Contract = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -233,7 +229,7 @@ var Contract = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -249,7 +245,8 @@ var Contract = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -266,7 +263,8 @@ var Contract = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -360,62 +358,25 @@ var Contract = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                if (response && response.data && response.data.length) {
-                    response.data = _.map(response.data, function (model) {
-                        if (model.description) {
-                            model.description = {
-                                en: _.unescape(model.description.en),
-                                ar: _.unescape(model.description.ar)
-                            };
-                        }
-                        _.map(model.documents, function (el) {
-                            personnelIds.push(el.createdBy.user._id);
-                        });
-                        personnelIds.push(model.createdBy.user._id);
-                        fileIds = _.union(fileIds, _.map(model.documents, '_id'));
-
-                        return model;
-                    });
-                }
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.DOCUMENTS] = fileIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
+                body.data.forEach(model => {
+                    if (model.description) {
+                        model.description = {
+                            en: _.unescape(model.description.en),
+                            ar: _.unescape(model.description.ar),
+                        };
                     }
+                });
 
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                    fieldNames[CONTENT_TYPES.DOCUMENTS] = [['documents']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -858,98 +819,20 @@ var Contract = function () {
                     aggregation.exec(cb);
                 },
 
-                (response, cb) => {
-                    let personnelIds = [];
-                    const fileIds = [];
+                (result, cb) => {
+                    const body = result.length ?
+                        result[0] : { data: [], total: 0 };
 
-                    response = response && response[0] ?
-                        response[0] : { data: [], total: 0 };
-
-                    if (!response.data.length) {
-                        return next({
-                            status: 200,
-                            body: response
-                        });
-                    }
-
-                    if (response && response.data && response.data.length) {
-                        response.data = response.data.map((model) => {
-                            if (model.description) {
-                                model.description = {
-                                    en: _.unescape(model.description.en),
-                                    ar: _.unescape(model.description.ar)
-                                };
-                            }
-
-                            model.documents.forEach((item) => {
-                                const itUser = item.createdBy.user;
-
-                                if (itUser && itUser._id) {
-                                    personnelIds.push(itUser._id);
-                                }
-                            });
-
-                            const createdByUser = model.createdBy.user;
-
-                            if (createdByUser && createdByUser._id) {
-                                personnelIds.push(createdByUser._id);
-                            }
-
-                            const documentsId = model.documents
-                                .filter((item) => {
-                                    return item && item.attachment && item.attachment._id;
-                                })
-                                .map((item) => (item.attachment._id));
-
-                            fileIds.push(...documentsId);
-
-                            return model;
-                        });
-                    }
-
-                    personnelIds = _.uniqBy(personnelIds, 'id');
-
-                    cb(null, {
-                        personnelIds,
-                        fileIds,
-                        response
-                    })
-                },
-
-                (data, cb) => {
-                    const personnelIds = data.personnelIds;
-                    const fileIds = data.fileIds;
-                    const response = data.response;
-
-                    const options = {
-                        data: {}
-                    };
-
-                    options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                    options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                    async.waterfall([
-
-                        async.apply(getImagesHelper.getImages, options),
-
-                        (result, cb) => {
-                            const fieldNames = {};
-                            const setOptions = {
-                                response,
-                                imgsObject: result,
-                                fields: fieldNames
+                    body.data.forEach(model => {
+                        if (model.description) {
+                            model.description = {
+                                en: _.unescape(model.description.en),
+                                ar: _.unescape(model.description.ar),
                             };
-
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['documents.attachment']];
-
-                            getImagesHelper.setIntoResult(setOptions, (data) => {
-                                // fixme incorrect error callback format
-                                cb(null, data);
-                            });
                         }
+                    });
 
-                    ], cb);
+                    cb(null, body);
                 },
 
             ], callback);
@@ -1023,7 +906,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -1031,7 +914,7 @@ var Contract = function () {
             from         : 'documents',
             key          : 'documents',
             as           : 'documents',
-            addProjection: ['createdBy', 'title', 'attachment', 'contentType']
+            addProjection: ['createdBy', 'title', 'attachment', 'contentType', 'preview']
         }));
 
         pipeLine.push({
@@ -1045,7 +928,7 @@ var Contract = function () {
             from           : 'personnels',
             key            : 'documents.createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -1054,7 +937,8 @@ var Contract = function () {
                     attachment : 1,
                     createdBy  : {
                         date: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -1063,7 +947,7 @@ var Contract = function () {
             from           : 'files',
             key            : 'documents.attachment',
             isArray        : false,
-            addProjection  : ['_id', 'contentType'],
+            addProjection  : ['_id', 'contentType', 'preview'],
             includeSiblings: {
                 documents: {
                     _id        : 1,
@@ -1072,7 +956,8 @@ var Contract = function () {
                     createdBy  : {
                         date: 1,
                         user: 1
-                    }
+                    },
+                    preview: 1,
                 }
             }
         }));
@@ -1096,7 +981,8 @@ var Contract = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -1113,7 +999,8 @@ var Contract = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -1126,57 +1013,21 @@ var Contract = function () {
             allowDiskUse: true
         };
 
-        aggregation.exec(function (err, response) {
-            var options = {
-                data: {}
-            };
-            var personnelIds = [];
-            var fileIds;
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response.length) {
-                return callback(response);
-            }
+            const body = result[0];
 
-            response = response[0];
-
-            if (response.description) {
-                response.description = {
-                    en: _.unescape(response.description.en),
-                    ar: _.unescape(response.description.ar)
+            if (body.description) {
+                body.description = {
+                    en: _.unescape(body.description.en),
+                    ar: _.unescape(body.description.ar),
                 };
             }
-            _.map(response.documents, function (el) {
-                personnelIds.push(el.createdBy.user._id);
-            });
-            personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.documents, 'attachment._id');
 
-            personnelIds = _.uniqBy(personnelIds, 'id');
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['documents.createdBy.user'], 'createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['documents.attachment']];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     };
 };

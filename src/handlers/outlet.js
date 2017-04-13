@@ -10,12 +10,10 @@ const OutletHandler = function () {
     const CONTENT_TYPES = require('../public/js/constants/contentType.js');
     const CONSTANTS = require('../constants/mainConstants');
     const AggregationHelper = require('../helpers/aggregationCreater');
-    const GetImagesHelper = require('../helpers/getImages');
-    const getImagesHelper = new GetImagesHelper();
     const ACTIVITY_TYPES = require('../constants/activityTypes');
     const OutletModel = require('./../types/outlet/model');
-    const BranchesModel = require('./../types/branch/model');
     const DomainModel = require('./../types/domain/model');
+    const PreviewModel = require('./../stories/preview/model.business');
     const FilterMapper = require('../helpers/filterMapper');
     const Archiver = require('../helpers/archiver');
     const access = require('../helpers/access')();
@@ -38,6 +36,7 @@ const OutletHandler = function () {
         editedBy: 1,
         topArchived: 1,
         translated: 1,
+        imageSrc: 1,
     };
     const self = this;
 
@@ -84,15 +83,14 @@ const OutletHandler = function () {
 
     this.create = function (req, res, next) {
         function queryRun(body) {
-            let model;
             const createdBy = {
                 user: req.session.uId,
                 date: new Date(),
             };
 
-            if (!body.imageSrc) {
-                delete body.imageSrc;
-            }
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             if (body.name) {
                 body.name = {
@@ -104,17 +102,29 @@ const OutletHandler = function () {
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
-            model = new OutletModel(body);
-            model.save((error, model) => {
-                if (error) {
-                    return next(error);
-                }
+            const model = new OutletModel(body);
 
-                ActivityLog.emit('customer:created', {
-                    actionOriginator: req.session.uId,
-                    accessRoleLevel: req.session.level,
-                    body: model.toJSON(),
-                });
+            async.waterfall([
+                (cb) => {
+                    model.save(cb);
+                },
+                (model, count, cb) => {
+                    ActivityLog.emit('customer:created', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel: req.session.level,
+                        body: model.toJSON(),
+                    });
+
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.OUTLET,
+                    }, cb);
+                },
+            ], (err, model) => {
+                if (err) {
+                    return next(err);
+                }
 
                 if (model && model.name) {
                     model.name = {
@@ -384,6 +394,7 @@ const OutletHandler = function () {
                     topArchived: '$outlet.topArchived',
                     retailSegments: '$outlet.retailSegments',
                     subRegions: '$outlet.subRegions',
+                    imageSrc: '$outlet.imageSrc',
                 },
             });
         }
@@ -392,7 +403,7 @@ const OutletHandler = function () {
             from: 'personnels',
             key: 'createdBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { createdBy: { date: 1 } },
         }));
 
@@ -409,6 +420,7 @@ const OutletHandler = function () {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -426,6 +438,7 @@ const OutletHandler = function () {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -436,7 +449,7 @@ const OutletHandler = function () {
                 from: 'personnels',
                 key: 'editedBy.user',
                 isArray: false,
-                addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: { editedBy: { date: 1 } },
             }));
 
@@ -453,6 +466,7 @@ const OutletHandler = function () {
                             position: 1,
                             firstName: 1,
                             lastName: 1,
+                            imageSrc: 1,
                         },
                     },
                 },
@@ -470,6 +484,7 @@ const OutletHandler = function () {
                             accessRole: 1,
                             firstName: 1,
                             lastName: 1,
+                            imageSrc: 1,
                         },
                     },
                 },
@@ -502,6 +517,7 @@ const OutletHandler = function () {
                     name: '$data.name',
                     createdBy: '$data.createdBy',
                     subRegions: '$data.subRegions',
+                    imageSrc: '$data.imageSrc',
                 },
             };
 
@@ -603,54 +619,25 @@ const OutletHandler = function () {
                     });
                 },
 
-            ], (err, response) => {
-                const options = {
-                    data: {},
-                };
-                const outletIds = [];
-
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : { data: [], total: 0 };
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({ status: 200, body: response });
-                }
-
-                response.data = _.map(response.data, (element) => {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
                             en: _.unescape(element.name.en),
                         };
                     }
-
-                    outletIds.push(element._id);
-
-                    return element;
                 });
 
-                options.data[CONTENT_TYPES.OUTLET] = outletIds;
-
-                getImagesHelper.getImages(options, (err, result) => {
-                    const fieldNames = {};
-                    let setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-                    fieldNames[CONTENT_TYPES.OUTLET] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        next({ status: 200, body: response });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -1172,54 +1159,26 @@ const OutletHandler = function () {
                     BranchCollection.aggregate(pipeline.filter(stage => stage), waterfallCb);
                 },
 
-            ], (err, response) => {
-                const options = {
-                    data: {},
-                };
-                const outletIds = [];
-
+            ], (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : { data: [], total: 0 };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({ status: 200, body: response });
-                }
-
-                response.data = _.map(response.data, (element) => {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
                             en: _.unescape(element.name.en),
                         };
                     }
-
-                    outletIds.push(element._id);
-
-                    return element;
                 });
 
-                options.data[CONTENT_TYPES.OUTLET] = outletIds;
-
-                getImagesHelper.getImages(options, (err, result) => {
-                    const fieldNames = {};
-                    let setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-                    fieldNames[CONTENT_TYPES.OUTLET] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        next({ status: 200, body: response });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -1249,32 +1208,46 @@ const OutletHandler = function () {
                 };
             }
 
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
+
             body.editedBy = {
                 user: req.session.uId,
                 date: new Date(),
             };
 
-            OutletModel.findByIdAndUpdate(id, body, { new: true })
-                .exec((err, result) => {
-                    if (err) {
-                        return next(err);
-                    }
-
+            async.waterfall([
+                (cb) => {
+                    OutletModel.findByIdAndUpdate(id, body, { new: true }).exec(cb);
+                },
+                (model, cb) => {
                     ActivityLog.emit('customer:updated', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel: req.session.level,
-                        body: result.toJSON(),
+                        body: model.toJSON(),
                     });
 
-                    if (result && result.name) {
-                        result.name = {
-                            en: result.name.en ? _.unescape(result.name.en) : '',
-                            ar: result.name.ar ? _.unescape(result.name.ar) : '',
-                        };
-                    }
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.OUTLET,
+                    }, cb);
+                },
+            ], (err, model) => {
+                if (err) {
+                    return next(err);
+                }
 
-                    res.status(200).send(result);
-                });
+                if (model && model.name) {
+                    model.name = {
+                        en: model.name.en ? _.unescape(model.name.en) : '',
+                        ar: model.name.ar ? _.unescape(model.name.ar) : '',
+                    };
+                }
+
+                res.status(200).send(model);
+            });
         }
 
         access.getEditAccess(req, ACL_MODULES.CUSTOMER, (err, allowed) => {

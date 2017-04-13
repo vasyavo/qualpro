@@ -21,7 +21,8 @@ const schema = new Schema({
         default: null,
     },
     preview: {
-        type: String,
+        type: ObjectId,
+        ref: CONTENT_TYPES.PREVIEW,
         default: null,
     },
     isProcessing: {
@@ -48,11 +49,13 @@ const schema = new Schema({
         },
         date: {
             type: Date,
+            default: Date.now,
         },
     },
 }, {
     autoIndex: false,
     collection: CONTENT_TYPES.FILES,
+    versionKey: false,
 });
 
 module.exports = schema;

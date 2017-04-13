@@ -106,7 +106,8 @@
             RETAIL_SEGMENT : 'Trade channel',
             OUTLET : 'Outlet',
             BRANCH : 'Branch'
-        }
+        },
+        PREVIEW: 'preview',
     };
 
     if (typeof window === 'object' && this === window) {

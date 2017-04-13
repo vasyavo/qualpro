@@ -1,7 +1,7 @@
 <div class="commentWrap" data-id="<%= comment._id %>">
     <div class="userBlock">
         <div class="flexRowStart">
-            <img src="<%=comment.createdBy.user.imageSrc%>" alt="image" class="userImgBig imgCircle"/>
+            <img src="preview/<%=comment.createdBy.user.imageSrc%>" alt="image" class="userImgBig imgCircle"/>
             <div class="userDescription">
                 <div class="fontSmall"><%= comment.createdBy.user.firstName.currentLanguage + comment.createdBy.user.lastName.currentLanguage %></div>
                 <div class="fontMicro"><%= comment.createdBy.user.accessRole.name.currentLanguage %></div>

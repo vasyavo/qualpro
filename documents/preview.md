@@ -16,5 +16,5 @@ Any of CMS views and mobile as well may fail on load or during map operation on 
 **History:**
  - "src/helpers/getImages.js" contains two functions "getImages" and "setIntoResult".
  - Helper aggregates over collection which provided by scope and match by set of domain ID and project props "imageSrc" and "preview".
- In case with set of domain: **Personnel**, **Domain**, **Outlet**, **RetailSegment**, **Branch** it map base64 to "imageSrc" prop. And in case with **File** and **Document** - "preview" prop.
+ In case with set of domain: **Personnel**, **Domain**, **Outlet**, **RetailSegment**, **Branch**, **Brand** it map base64 to "imageSrc" prop. And in case with **File** and **Document** - "preview" prop.
  

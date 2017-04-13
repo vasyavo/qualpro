@@ -10,8 +10,8 @@
                class="checkboxLabel"></label>
         <% } %>
         <span class="status <%=model.status?model.status:''%>"></span>
-        <img class="thumbnailImage" src="<%=model.imageSrc%>">
-        <% if( personnel.accessRole.level > 2 && personnel.accessRole.level <8){ %>
+        <img class="thumbnailImage" src="<% print(_.templateHelpers.isPreview(model.imageSrc)); %>">
+        <% if( model.accessRole.level > 2 && model.accessRole.level <8){ %>
         <select class="rating">
             <option value="0">0</option>
             <option value="1">1</option>

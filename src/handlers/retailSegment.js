@@ -10,13 +10,12 @@ var RetailSegmentHandler = function () {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var RetailSegmentModel = require('./../types/retailSegment/model');
     var DomainModel = require('./../types/domain/model');
     var ACTIVITY_TYPES = require('../constants/activityTypes');
     var BranchesModel = require('./../types/branch/model');
     var PersonnelModel = require('./../types/personnel/model');
+    var PreviewModel = require('./../stories/preview/model.business');
     var SessionModel = require('./../types/session/model');
     var logWriter = require('../helpers/logWriter.js');
     var PlanogramModel = require('./../types/planogram/model');
@@ -40,7 +39,8 @@ var RetailSegmentHandler = function () {
         configurations: 1,
         createdBy     : 1,
         editedBy      : 1,
-        topArchived   : 1
+        topArchived   : 1,
+        imageSrc: 1,
     };
 
     this.getSubRegionsByCountryOrRegion = function (filter, type, cb) {
@@ -84,38 +84,51 @@ var RetailSegmentHandler = function () {
             var model;
             var createdBy = {
                 user: req.session.uId,
-                date: new Date()
+                date: new Date(),
             };
 
-            if (!body.imageSrc) {
-                delete body.imageSrc;
-            }
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
 
             if (body.name) {
                 body.name = {
                     en: body.name.en ? _.escape(body.name.en) : '',
-                    ar: body.name.ar ? _.escape(body.name.ar) : ''
-                }
+                    ar: body.name.ar ? _.escape(body.name.ar) : '',
+                };
             }
 
             body.createdBy = createdBy;
             body.editedBy = createdBy;
 
             model = new RetailSegmentModel(body);
-            model.save(function (error, model) {
-                if (error) {
-                    return next(error);
+
+            async.waterfall([
+                (cb) => {
+                    model.save(cb);
+                },
+                (model, count, cb) => {
+                    ActivityLog.emit('trade-channel:created', {
+                        actionOriginator: req.session.uId,
+                        accessRoleLevel: req.session.level,
+                        body: model.toJSON(),
+                    });
+
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.RETAILSEGMENT,
+                    }, cb);
+                },
+            ], (err, model) => {
+                if (err) {
+                    return next(err);
                 }
-                ActivityLog.emit('trade-channel:created', {
-                    actionOriginator: req.session.uId,
-                    accessRoleLevel : req.session.level,
-                    body            : model.toJSON()
-                });
 
                 if (model && model.name) {
                     model.name = {
                         en: model.name.en ? _.unescape(model.name.en) : '',
-                        ar: model.name.ar ? _.unescape(model.name.ar) : ''
+                        ar: model.name.ar ? _.unescape(model.name.ar) : '',
                     };
                 }
 
@@ -455,7 +468,8 @@ var RetailSegmentHandler = function () {
                     editedBy   : '$retailSegment.editedBy',
                     archived   : '$retailSegment.archived',
                     topArchived: '$retailSegment.topArchived',
-                    subRegions : '$retailSegment.subRegions'
+                    subRegions : '$retailSegment.subRegions',
+                    imageSrc: '$retailSegment.imageSrc',
                 }
             });
         }
@@ -464,7 +478,7 @@ var RetailSegmentHandler = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -480,7 +494,8 @@ var RetailSegmentHandler = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -497,7 +512,8 @@ var RetailSegmentHandler = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -508,7 +524,7 @@ var RetailSegmentHandler = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -524,7 +540,8 @@ var RetailSegmentHandler = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -541,7 +558,8 @@ var RetailSegmentHandler = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -574,7 +592,7 @@ var RetailSegmentHandler = function () {
                     total         : '$data.total',
                     name          : '$data.name',
                     createdBy     : '$data.createdBy',
-                    subRegions    : '$data.subRegions'
+                    subRegions    : '$data.subRegions',
                 }
             };
 
@@ -679,54 +697,26 @@ var RetailSegmentHandler = function () {
                         waterfallCb(null, result);
                     });
                 }
-            ], function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var outletIds = [];
-
+            ], (err, response) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = response.length ?
+                    response[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
+                            en: _.unescape(element.name.en),
                         };
                     }
-
-                    outletIds.push(element._id);
-
-                    return element;
                 });
 
-                options.data[CONTENT_TYPES.RETAILSEGMENT] = outletIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.RETAILSEGMENT] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -855,54 +845,26 @@ var RetailSegmentHandler = function () {
                     });
                 }
 
-            ], function (err, response) {
-                var options = {
-                    data: {}
-                };
-                var outletIds = [];
-
+            ], (err, response) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = response.length ?
+                    response[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.name) {
                         element.name = {
                             ar: _.unescape(element.name.ar),
-                            en: _.unescape(element.name.en)
+                            en: _.unescape(element.name.en),
                         };
                     }
-
-                    outletIds.push(element._id);
-
-                    return element;
                 });
 
-                options.data[CONTENT_TYPES.RETAILSEGMENT] = outletIds;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.RETAILSEGMENT] = [];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -925,6 +887,11 @@ var RetailSegmentHandler = function () {
     this.update = function (req, res, next) {
         function queryRun(body) {
             var id = req.params.id;
+
+            const imageSrc = body.imageSrc;
+
+            delete body.imageSrc;
+
             if (body.name) {
                 body.name = {
                     en: body.name.en ? _.escape(body.name.en) : '',
@@ -937,26 +904,37 @@ var RetailSegmentHandler = function () {
                 date: new Date()
             };
 
-            RetailSegmentModel.findByIdAndUpdate(id, body, {new: true})
-                .exec(function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
+            async.waterfall([
+                (cb) => {
+                    RetailSegmentModel.findByIdAndUpdate(id, body, { new: true }).exec(cb);
+                },
+                (model, cb) => {
                     ActivityLog.emit('trade-channel:updated', {
                         actionOriginator: req.session.uId,
-                        accessRoleLevel : req.session.level,
-                        body            : result.toJSON()
+                        accessRoleLevel: req.session.level,
+                        body: model.toJSON(),
                     });
 
-                    if (result && result.name) {
-                        result.name = {
-                            en: result.name.en ? _.unescape(result.name.en) : '',
-                            ar: result.name.ar ? _.unescape(result.name.ar) : ''
-                        };
-                    }
+                    PreviewModel.setNewPreview({
+                        model,
+                        base64: imageSrc,
+                        contentType: CONTENT_TYPES.RETAILSEGMENT,
+                    }, cb);
+                },
+            ], (err, result) => {
+                if (err) {
+                    return next(err);
+                }
 
-                    res.status(200).send(result);
-                });
+                if (result && result.name) {
+                    result.name = {
+                        en: result.name.en ? _.unescape(result.name.en) : '',
+                        ar: result.name.ar ? _.unescape(result.name.ar) : '',
+                    };
+                }
+
+                res.status(200).send(result);
+            });
         }
 
         access.getEditAccess(req, ACL_MODULES.TRADE_CHANNEL, function (err, allowed) {

@@ -11,7 +11,7 @@
     <div class="userBlock flexColumn">
         <div class="top flexRowStart bottomLine">
             <div class="left flexColumn">
-                <img src="<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="right flexColumn">
                 <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName[currentLanguage] + ' ' + model.createdBy.user.lastName[currentLanguage] : '' %></div>
@@ -21,7 +21,7 @@
         </div>
         <div class="notificationsOverflowWrap">
             <% model.recipients.forEach( function(recipient) { %>
-                <img src="<%= recipient.imageSrc %>" class="imgCircle userImgSmall">
+                <img src="preview/<%= recipient.imageSrc %>" class="imgCircle userImgSmall">
             <% }); %>
         </div>
     </div>
@@ -40,7 +40,7 @@
                                 <% model.attachments.map((attachment) => { %>
                                 <div class="filetype-<%- attachment.name.split('.').pop() %> floatLeft">
                                     <% if(attachment.name.split('.').pop() == 'png' || attachment.name.split('.').pop() == 'jpg') { %>
-                                    <img class="" src="<%- attachment.preview %>"/>
+                                    <img class="" src="preview/<%- attachment.preview %>"/>
                                     <% } %>
                                 </div>
                                 <% }); %>

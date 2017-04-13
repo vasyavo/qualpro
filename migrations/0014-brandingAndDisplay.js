@@ -59,8 +59,6 @@ exports.up = function(db, next) {
         },
         (result, cb) => {
             async.eachLimit(result, 10, (item, eachCb) => {
-                logger.inspect(item);
-
                 db.collection(CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY).update({ _id: item._id }, {$set: item}, eachCb);
             }, cb);
         },

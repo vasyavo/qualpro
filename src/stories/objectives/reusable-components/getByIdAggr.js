@@ -1,14 +1,6 @@
 const _ = require('lodash');
-
-const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
-
 const AggregationHelper = require('./../../../helpers/aggregationCreater');
-const GetImage = require('./../../../helpers/getImages');
-
 const ObjectiveModel = require('./../../../types/objective/model');
-
-const getImage = new GetImage();
-
 const $defProjection = require('./../reusable-components/$defProjection');
 
 module.exports = (options, callback) => {
@@ -38,13 +30,13 @@ module.exports = (options, callback) => {
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'personnels',
         key: 'assignedTo',
-        addProjection: ['firstName', 'lastName', 'branch'].concat(isMobile ? [] : ['position', 'accessRole']),
+        addProjection: ['firstName', 'lastName', 'imageSrc', 'branch'].concat(isMobile ? [] : ['position', 'accessRole']),
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'files',
         key: 'attachments',
-        addProjection: ['contentType', 'originalName', 'createdBy'],
+        addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
@@ -82,7 +74,7 @@ module.exports = (options, callback) => {
         from: 'personnels',
         key: 'createdBy.user',
         isArray: false,
-        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
         includeSiblings: { createdBy: { date: 1 } },
     }));
 
@@ -105,6 +97,7 @@ module.exports = (options, callback) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                     branch: 1,
                 },
             },
@@ -120,6 +113,7 @@ module.exports = (options, callback) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                     branch: 1,
                 },
             },
@@ -210,6 +204,7 @@ module.exports = (options, callback) => {
                     position: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         },
@@ -227,6 +222,7 @@ module.exports = (options, callback) => {
                     accessRole: 1,
                     firstName: 1,
                     lastName: 1,
+                    imageSrc: 1,
                 },
             },
         },
@@ -237,7 +233,7 @@ module.exports = (options, callback) => {
             from: 'personnels',
             key: 'editedBy.user',
             isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings: { editedBy: { date: 1 } },
         }));
 
@@ -254,6 +250,7 @@ module.exports = (options, callback) => {
                         position: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -271,6 +268,7 @@ module.exports = (options, callback) => {
                         accessRole: 1,
                         firstName: 1,
                         lastName: 1,
+                        imageSrc: 1,
                     },
                 },
             },
@@ -299,67 +297,34 @@ module.exports = (options, callback) => {
 
     ObjectiveModel.aggregate(pipeline)
         .allowDiskUse(true)
-        .exec((err, response) => {
+        .exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            const objective = response[0];
+            const body = result[0];
 
-            if (!objective || !Object.keys(objective).length) {
-                return callback(null, objective);
+            if (body) {
+                if (body.title) {
+                    body.title = {
+                        en: body.title.en ? _.unescape(body.title.en) : '',
+                        ar: body.title.ar ? _.unescape(body.title.ar) : '',
+                    };
+                }
+                if (body.description) {
+                    body.description = {
+                        en: body.description.en ? _.unescape(body.description.en) : '',
+                        ar: body.description.ar ? _.unescape(body.description.ar) : '',
+                    };
+                }
+                if (body.companyObjective) {
+                    body.companyObjective = {
+                        en: body.companyObjective.en ? _.unescape(body.companyObjective.en) : '',
+                        ar: body.companyObjective.ar ? _.unescape(body.companyObjective.ar) : '',
+                    };
+                }
             }
 
-            const setFileId = _.map(objective.attachments, '_id');
-            const setPersonnelId = [
-                _.get(objective, 'createdBy.user._id'),
-                ..._.map(objective.assignedTo, '_id'),
-            ];
-
-            const options = {
-                data: {
-                    [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                    [CONTENT_TYPES.FILES]: setFileId,
-                },
-            };
-
-            getImage.getImages(options, (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
-
-                const setOptions = {
-                    response: objective,
-                    imgsObject: result,
-                    fields: {
-                        [CONTENT_TYPES.PERSONNEL]: [['assignedTo'], 'createdBy.user'],
-                        [CONTENT_TYPES.FILES]: [['attachments']],
-                    },
-                };
-
-                getImage.setIntoResult(setOptions, (model) => {
-                    if (model) {
-                        if (model.title) {
-                            model.title = {
-                                en: model.title.en ? _.unescape(model.title.en) : '',
-                                ar: model.title.ar ? _.unescape(model.title.ar) : '',
-                            };
-                        }
-                        if (model.description) {
-                            model.description = {
-                                en: model.description.en ? _.unescape(model.description.en) : '',
-                                ar: model.description.ar ? _.unescape(model.description.ar) : '',
-                            };
-                        }
-                        if (model.companyObjective) {
-                            model.companyObjective = {
-                                en: model.companyObjective.en ? _.unescape(model.companyObjective.en) : '',
-                                ar: model.companyObjective.ar ? _.unescape(model.companyObjective.ar) : '',
-                            };
-                        }
-                    }
-                    callback(null, model);
-                });
-            });
+            callback(null, body);
         });
 };

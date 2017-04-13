@@ -7,7 +7,6 @@ const ACL_MODULES = require('./../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../public/js/constants/contentType');
 const CONSTANTS = require('./../constants/mainConstants');
 const AggregationHelper = require('./../helpers/aggregationCreater');
-const GetImageHelper = require('./../helpers/getImages');
 const FilterMapper = require('./../helpers/filterMapper');
 const NotificationModel = require('./../types/notification/model');
 const AccessManager = require('./../helpers/access')();
@@ -16,7 +15,6 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 const redis = require('./../helpers/redisClient');
 
-const getImagesHelper = new GetImageHelper();
 const ObjectId = mongoose.Types.ObjectId;
 
 const Notifications = function () {
@@ -156,7 +154,7 @@ const Notifications = function () {
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
-            addProjection  : ['lastName', 'firstName', 'country', 'region', 'subRegion'].concat(isMobile ? [] : ['position', 'accessRole']),
+            addProjection  : ['lastName', 'firstName', 'country', 'region', 'subRegion', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
             includeSiblings: {createdBy: {date: 1}}
         }));
 
@@ -237,7 +235,8 @@ const Notifications = function () {
                             position  : '$createdBy.user.position',
                             accessRole: '$createdBy.user.accessRole',
                             lastName  : '$createdBy.user.lastName',
-                            firstName : '$createdBy.user.firstName'
+                            firstName : '$createdBy.user.firstName',
+                            imageSrc : '$createdBy.user.imageSrc',
                         },
                         date: '$createdBy.date'
                     }
@@ -256,7 +255,8 @@ const Notifications = function () {
                         _id      : 1,
                         position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     },
                     date: 1
                 }
@@ -273,7 +273,8 @@ const Notifications = function () {
                         _id       : 1,
                         accessRole: 1,
                         firstName : 1,
-                        lastName  : 1
+                        lastName  : 1,
+                        imageSrc: 1,
                     },
                     date: 1
                 }
@@ -283,7 +284,7 @@ const Notifications = function () {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'personnels',
             key          : 'recipients',
-            addProjection: ['lastName', 'firstName']
+            addProjection: ['lastName', 'firstName', 'imageSrc']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -301,7 +302,7 @@ const Notifications = function () {
                 from           : 'personnels',
                 key            : 'editedBy.user',
                 isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
@@ -317,7 +318,8 @@ const Notifications = function () {
                             _id      : 1,
                             position : 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -334,7 +336,8 @@ const Notifications = function () {
                             _id       : 1,
                             accessRole: 1,
                             firstName : 1,
-                            lastName  : 1
+                            lastName  : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -378,24 +381,6 @@ const Notifications = function () {
                 }
             });
         }
-
-        /*pipeLine.push({
-         $sort: {
-         'createdBy.date': -1
-         }
-         });
-
-         if (isMobile) {
-         pipeLine.push({
-         $project: aggregateHelper.getProjection({
-         creationDate: '$createdBy.date'
-         })
-         });
-         }
-
-         pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile    : isMobile,
@@ -450,65 +435,41 @@ const Notifications = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var idsPersonnel = [];
-                var options = {
-                    data: {}
-                };
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                if (isMobile || !response.data.length) {
-                    if (response.data.length) {
-                        response.data = _.map(response.data, function (element) {
-                            if (element.description) {
-                                element.description = {
-                                    en: _.unescape(element.description.en),
-                                    ar: _.unescape(element.description.ar)
-                                };
-                            }
-                            return element;
-                        });
-                    }
-                    return next({status: 200, body: response});
+                if (isMobile) {
+                    body.data.forEach(element => {
+                        if (element.description) {
+                            element.description = {
+                                en: _.unescape(element.description.en),
+                                ar: _.unescape(element.description.ar),
+                            };
+                        }
+                    });
+
+                    return next({
+                        status: 200,
+                        body,
+                    });
                 }
 
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.description) {
                         element.description = {
                             en: _.unescape(element.description.en),
-                            ar: _.unescape(element.description.ar)
+                            ar: _.unescape(element.description.ar),
                         };
                     }
-                    idsPersonnel.push(element.createdBy.user._id);
-                    idsPersonnel = _.union(idsPersonnel, _.map(element.recipients, '_id'));
-
-                    return element;
                 });
 
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['recipients'], 'createdBy.user'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -571,54 +532,25 @@ const Notifications = function () {
                 allowDiskUse: true
             };
 
-            aggregation.exec(function (err, response) {
-                var idsPersonnel = [];
-                var options = {
-                    data: {}
-                };
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {data: [], total: 0};
+                const body = result.length ? result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function (element) {
+                body.data.forEach(element => {
                     if (element.description) {
                         element.description = {
                             en: _.unescape(element.description.en),
-                            ar: _.unescape(element.description.ar)
+                            ar: _.unescape(element.description.ar),
                         };
                     }
-                    idsPersonnel.push(element.createdBy.user._id);
-                    idsPersonnel = _.union(idsPersonnel, _.map(element.recipients, '_id'));
-
-                    return element;
                 });
 
-                if (isMobile || !response.data.length) {
-                    return next({status: 200, body: response});
-                }
-
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-
-                getImagesHelper.getImages(options, function (err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response  : response,
-                        imgsObject: result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = [['recipients'], 'createdBy.user'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function (response) {
-                        next({status: 200, body: response});
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -717,90 +649,47 @@ const Notifications = function () {
                         .exec(cb);
                 },
 
-                (response, cb) => {
-                    if (response.length) {
-                        response = response[0];
-                        response = response.data && response.data.length ? response.data[0] : response;
+                (result, cb) => {
+                    const body = result.length ?
+                        result[0] : { data: [], total: 0 };
 
-                        if (response.description) {
-                            response.desciption = {
-                                ar: _.unescape(response.description.ar),
-                                en: _.unescape(response.description.en),
-                            };
-                        }
+                    if (body.description) {
+                        body.desciption = {
+                            ar: _.unescape(body.description.ar),
+                            en: _.unescape(body.description.en),
+                        };
                     }
 
                     redisNotifications({
                         currentUserId: userId,
-                        notificationObject: response,
+                        notificationObject: body,
                         contentType: CONTENT_TYPES.NOTIFICATIONS,
                     }, cb);
                 },
 
-                (cache, cb) => {
-                    if (!Object.keys(cache).length) {
-                        return cb(null, cache);
+                (body, cb) => {
+                    if (!Object.keys(body).length) {
+                        return cb(null, body);
                     }
 
-                    if (cache.description) {
-                        cache.description = {
-                            en: _.unescape(cache.description.en),
-                            ar: _.unescape(cache.description.ar),
+                    if (body.description) {
+                        body.description = {
+                            en: _.unescape(body.description.en),
+                            ar: _.unescape(body.description.ar),
                         };
                     }
 
-                    const setPersonnelId = _.uniqBy([
-                        _.get(cache, 'createdBy.user._id'),
-                        ..._.map(cache.recipients, '_id'),
-                    ], 'id');
-                    const options = {
-                        data: {
-                            [CONTENT_TYPES.PERSONNEL]: setPersonnelId,
-                        },
-                    };
-
-                    getImagesHelper.getImages(options, (err, resultFromImageHelper) => {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                        cb(null, {
-                            resultFromImageHelper,
-                            cache,
-                        });
-                    });
+                    cb(null, body);
                 },
 
-            ], (err, options) => {
+            ], (err, body) => {
                 if (err) {
                     return next(err);
                 }
 
-                const {
-                    resultFromImageHelper,
-                    cache,
-                } = options;
-
-                if (!cache) {
-                    return callback(null, {
-                        status: 200,
-                        body: resultFromImageHelper,
-                    });
-                }
-
-                const setOptions = {
-                    response: cache,
-                    imgsObject: resultFromImageHelper,
-                    fields: {
-                        [CONTENT_TYPES.PERSONNEL]: [['recipients'], 'createdBy.user'],
-                    },
-                };
-
-                getImagesHelper.setIntoResult(setOptions, (response) => {
-                    callback(null, {
-                        status: 200,
-                        body: response,
-                    });
+                callback(null, {
+                    status: 200,
+                    body,
                 });
             });
         };
@@ -1048,62 +937,21 @@ const Notifications = function () {
             allowDiskUse: true
         };
 
-        aggregation.exec(function (err, response) {
-            var idsPersonnel = [];
-            var options = {
-                data: {}
-            };
-
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (isMobile || !response.length) {
-                if (response.length) {
-                    if (response[0].description) {
-                        response[0].description = {
-                            en: _.unescape(response[0].description.en),
-                            ar: _.unescape(response[0].description.ar)
-                        };
-                    }
-                }
-                callback(null, response[0] || {});
+            const body = result.length ? result[0] : {};
+
+            if (body.description) {
+                body.description = {
+                    en: _.unescape(body.description.en),
+                    ar: _.unescape(body.description.ar),
+                };
             }
 
-            response = response[0];
-
-            idsPersonnel.push(response.createdBy.user._id);
-            idsPersonnel = _.union(idsPersonnel, _.map(response.recipients, '_id'));
-            idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-
-            options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-
-            getImagesHelper.getImages(options, function (err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response  : response,
-                    imgsObject: result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = [['recipients'], 'createdBy.user'];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function (model) {
-                    if (model) {
-                        if (model.description) {
-                            model.description = {
-                                en: _.unescape(model.description.en),
-                                ar: _.unescape(model.description.ar)
-                            };
-                        }
-                    }
-                    callback(null, model);
-                })
-            });
+            callback(null, body);
         });
     };
 

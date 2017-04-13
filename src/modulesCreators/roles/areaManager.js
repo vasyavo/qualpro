@@ -607,7 +607,7 @@ module.exports = [
             read: false
         }
     },
-    require('./../../stories/consumer-survey/acl/areaManager'),
+    require('./../../stories/consumersSurvey/acl/areaManager'),
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {

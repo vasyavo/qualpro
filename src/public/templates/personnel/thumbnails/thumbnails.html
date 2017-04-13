@@ -13,7 +13,7 @@
                class="checkboxLabel"></label>
         <% } %>
         <span class="status <%=personnel.status?personnel.status.classCss:''%>"></span>
-        <img class="thumbnailImage" src="<%=personnel.imageSrc%>">
+        <img class="thumbnailImage" src="<% print(_.templateHelpers.isPreview(personnel.imageSrc)); %>">
         <% if( personnel.accessRole && personnel.accessRole.level > 2 && personnel.accessRole.level <8 && App.currentUser.workAccess){ %>
         <select class="rating">
             <option value="0"

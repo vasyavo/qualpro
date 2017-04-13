@@ -8,17 +8,13 @@ var CompetitorBranding = function() {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var ACL_MODULES = require('../constants/aclModulesNames');
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var CompetitorBrandingModel = require('./../types/competitorBranding/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
     var access = require('../helpers/access')();
     var FilterMapper = require('../helpers/filterMapper');
     var ObjectId = mongoose.Types.ObjectId;
-    var FileModel = require('./../types/file/model');
     var bodyValidator = require('../helpers/bodyValidator');
     const errorSender = require('../utils/errorSender');
     var self = this;
@@ -243,72 +239,33 @@ var CompetitorBranding = function() {
                 allowDiskUse : true
             };
 
-            aggregation.exec(function(err, response) {
-                var options = {
-                    data : {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response[0] ? response[0] : {
-                    data : [],
-                    total : 0
-                };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                response.data = _.map(response.data, function(model) {
+                body.data.forEach(model => {
                     if (model.description) {
                         model.description = {
-                            en : _.unescape(model.description.en),
-                            ar : _.unescape(model.description.ar)
+                            en: _.unescape(model.description.en),
+                            ar: _.unescape(model.description.ar),
                         };
                     }
+
                     if (model.location) {
                         model.location = {
-                            en : _.unescape(model.location.en),
-                            ar : _.unescape(model.location.ar)
+                            en: _.unescape(model.location.en),
+                            ar: _.unescape(model.location.ar),
                         };
                     }
-                    personnelIds.push(model.createdBy.user._id);
-                    fileIds = _.union(fileIds, _.map(model.attachments, '_id'));
-
-                    return model;
                 });
 
-                if (!response.data.length) {
-                    return next({
-                        status : 200,
-                        body : response
-                    });
-                }
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function(err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response : response,
-                        imgsObject : result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function(response) {
-                        next({
-                            status : 200,
-                            body : response
-                        });
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -348,7 +305,7 @@ var CompetitorBranding = function() {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'files',
             key : 'attachments',
-            addProjection : ['contentType', 'originalName', 'createdBy']
+            addProjection : ['contentType', 'originalName', 'createdBy', 'preview']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -408,7 +365,7 @@ var CompetitorBranding = function() {
             from : 'personnels',
             key : 'createdBy.user',
             isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
             includeSiblings : {createdBy : {date : 1}}
         }));
 
@@ -430,7 +387,8 @@ var CompetitorBranding = function() {
                         _id : 1,
                         position : 1,
                         firstName : 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -447,7 +405,8 @@ var CompetitorBranding = function() {
                         _id : 1,
                         accessRole : 1,
                         firstName : 1,
-                        lastName : 1
+                        lastName : 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -458,7 +417,7 @@ var CompetitorBranding = function() {
                 from : 'personnels',
                 key : 'editedBy.user',
                 isArray : false,
-                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
                 includeSiblings : {editedBy : {date : 1}}
             }));
 
@@ -474,7 +433,8 @@ var CompetitorBranding = function() {
                             _id : 1,
                             position : 1,
                             firstName : 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -491,7 +451,8 @@ var CompetitorBranding = function() {
                             _id : 1,
                             accessRole : 1,
                             firstName : 1,
-                            lastName : 1
+                            lastName : 1,
+                            imageSrc: 1,
                         }
                     }
                 }
@@ -654,68 +615,28 @@ var CompetitorBranding = function() {
             allowDiskUse : true
         };
 
-        aggregation.exec(function(err, response) {
-            var options = {
-                data : {}
-            };
-            var personnelIds = [];
-            var fileIds;
-            var keys;
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response.length) {
-                return errorSender.badRequest(callback);
-            }
+            const body = result.length ? result[0] : {};
 
-            response = response && response[0] ? response[0] : {};
-            keys = Object.keys(response);
-
-            if (keys.length) {
-                if (response.description) {
-                    response.description = {
-                        en : _.unescape(response.description.en),
-                        ar : _.unescape(response.description.ar)
-                    };
-                }
-                if (response.location) {
-                    response.location = {
-                        en : _.unescape(response.location.en),
-                        ar : _.unescape(response.location.ar)
-                    };
-                }
-            }
-
-            if (!keys.length) {
-                return callback(null, response);
-            }
-
-            personnelIds.push(response.createdBy.user._id);
-            fileIds = _.map(response.attachments, '_id');
-
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
-
-            getImagesHelper.getImages(options, function(err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response : response,
-                    imgsObject : result
+            if (body.description) {
+                body.description = {
+                    en: _.unescape(body.description.en),
+                    ar: _.unescape(body.description.ar),
                 };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                setOptions.fields = fieldNames;
+            }
 
-                getImagesHelper.setIntoResult(setOptions, function(response) {
-                    callback(null, response);
-                })
-            });
+            if (body.location) {
+                body.location = {
+                    en: _.unescape(body.location.en),
+                    ar: _.unescape(body.location.ar),
+                };
+            }
+
+            callback(null, body);
         });
     };
 };

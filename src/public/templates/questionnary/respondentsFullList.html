@@ -1,6 +1,6 @@
 <div class="questionsList flexRowStretch noShrink borderBottom" data-id="<%= answer.personnel._id %>">
     <div class="questionsUser">
-        <img src="<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
+        <img src="preview/<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
     </div>
     <div class="questionsDescription flexGrow">
         <div class="fontBold"><%= answer.personnel.firstName[App.currentUser.currentLanguage] + ' ' + answer.personnel.lastName[App.currentUser.currentLanguage] %></div>

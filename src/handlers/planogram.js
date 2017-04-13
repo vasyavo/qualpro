@@ -14,15 +14,12 @@ var planogramsHandler = function() {
     var _ = require('lodash');
     var PlanogramModel = require('./../types/planogram/model');
     var access = require('../helpers/access')();
-    var ACTIVITY_TYPES = require('../constants/activityTypes');
     var logWriter = require('../helpers/logWriter.js');
     var FilterMapper = require('../helpers/filterMapper');
     var Archiver = require('../helpers/archiver');
     var archiver = new Archiver(PlanogramModel);
     var populateByType = require('../helpers/populateByType');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var bodyValidator = require('../helpers/bodyValidator');
     var ObjectId = mongoose.Types.ObjectId;
     var self = this;
@@ -243,48 +240,14 @@ var planogramsHandler = function() {
             allowDiskUse : true
         };
 
-        aggregation.exec(function(err, response) {
-            var options = {
-                data : {}
-            };
-            var personnelIds = [];
-            var fileIds = [];
-
+        aggregation.exec((err, result) => {
             if (err) {
                 return callback(err);
             }
 
-            if (!response.length) {
-                return callback(null, {});
-            }
+            const body = result.length ? result[0] : {};
 
-            response = response[0];
-
-            personnelIds.push(response.createdBy.user._id);
-            fileIds.push(response.fileID._id);
-
-            options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-            options.data[CONTENT_TYPES.FILES] = fileIds;
-
-            getImagesHelper.getImages(options, function(err, result) {
-                var fieldNames = {};
-                var setOptions;
-                if (err) {
-                    return callback(err);
-                }
-
-                setOptions = {
-                    response : response,
-                    imgsObject : result
-                };
-                fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                fieldNames[CONTENT_TYPES.FILES] = ['fileID'];
-                setOptions.fields = fieldNames;
-
-                getImagesHelper.setIntoResult(setOptions, function(response) {
-                    callback(null, response);
-                })
-            });
+            callback(null, body);
         });
     };
 
@@ -511,7 +474,7 @@ var planogramsHandler = function() {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'files',
             key : 'fileID',
-            addProjection : ['contentType', 'originalName', 'createdBy'],
+            addProjection : ['contentType', 'originalName', 'createdBy', 'preview'],
             isArray : false
         }));
 
@@ -574,60 +537,17 @@ var planogramsHandler = function() {
                 allowDiskUse : true
             };
 
-            aggregation.exec(function(err, response) {
-                var options = {
-                    data : {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response && response.length ? response[0] : {
-                    data : [],
-                    total : 0
-                };
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                if (!response.data.length) {
-                    return next({
-                        status : 200,
-                        body : response
-                    });
-                }
-
-                _.map(response.data, function(element) {
-                    personnelIds.push(element.createdBy.user._id);
-                    fileIds.push(element.fileID._id);
-                });
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function(err, result) {
-                    var fieldNames = {};
-                    var setOptions;
-                    if (err) {
-                        return next(err);
-                    }
-
-                    setOptions = {
-                        response : response,
-                        imgsObject : result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = ['fileID'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, function(response) {
-                        next({
-                            status : 200,
-                            body : response
-                        });
-                    })
+                next({
+                    status: 200,
+                    body,
                 });
             });
         }
@@ -658,7 +578,6 @@ var planogramsHandler = function() {
             var queryObject = query.filter || {};
             var filterSearch = queryObject.globalSearch || '';
             var isMobile = req.isMobile;
-            var parallelTasks;
             var aggregateHelper;
             var key;
 
@@ -709,98 +628,32 @@ var planogramsHandler = function() {
                 queryObject.archived = false;
             }
 
-            function contentFinder(parallelCb) {
-                var aggregation;
+            const pipeline = getAllPipeLine({
+                queryObject,
+                aggregateHelper,
+                isMobile,
+                searchFieldsArray,
+                filterSearch,
+                skip,
+                limit,
+                sort,
+            });
 
-                var pipeLine = getAllPipeLine({
-                    queryObject : queryObject,
-                    aggregateHelper : aggregateHelper,
-                    isMobile : isMobile,
-                    searchFieldsArray : searchFieldsArray,
-                    filterSearch : filterSearch,
-                    skip : skip,
-                    limit : limit,
-                    sort : sort
-                });
-
-                aggregation = PlanogramModel.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse : true
-                };
-
-                aggregation.exec(function(err, result) {
-                    if (err) {
-                        return parallelCb(err);
-                    }
-
-                    parallelCb(null, result);
-                });
-
-            }
-
-            parallelTasks = {
-                data : contentFinder
-            };
-
-            async.parallel(parallelTasks, function(err, response) {
-                var options = {
-                    data : {}
-                };
-                var personnelIds = [];
-                var fileIds = [];
-
-                if (err) {
-                    return next(err);
-                }
-
-                response = response && response.data && response.data.length ? response.data[0] : {
-                    data : [],
-                    total : 0
-                };
-
-                if (!response.data.length) {
-                    return next({
-                        status : 200,
-                        body : response
-                    });
-                }
-
-                _.map(response.data, function(element) {
-                    personnelIds.push(element.createdBy.user._id);
-                    if (element.fileID && element.fileID._id) {
-                        fileIds.push(element.fileID._id);
-                    }
-                });
-
-                personnelIds = _.uniqBy(personnelIds, 'id');
-
-                options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                getImagesHelper.getImages(options, function(err, result) {
-                    var fieldNames = {};
-                    var setOptions;
+            PlanogramModel.aggregate(pipeline)
+                .allowDiskUse(true)
+                .exec((err, result) => {
                     if (err) {
                         return next(err);
                     }
 
-                    setOptions = {
-                        response : response,
-                        imgsObject : result
-                    };
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    fieldNames[CONTENT_TYPES.FILES] = ['fileID'];
-                    setOptions.fields = fieldNames;
+                    const body = result.length ?
+                        result[0] : { data: [], total: 0 };
 
-                    getImagesHelper.setIntoResult(setOptions, function(response) {
-                        next({
-                            status : 200,
-                            body : response
-                        });
-                    })
+                    next({
+                        status: 200,
+                        body,
+                    });
                 });
-            });
         }
 
         access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed, personnel) {

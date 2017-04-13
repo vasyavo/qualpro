@@ -1,5 +1,3 @@
-const ObjectiveUtils = require('./../stories/test-utils').ObjectiveUtils;
-const InStoreTaskUtils = require('./../stories/test-utils').InStoreTaskUtils;
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const CommentModel = require('./../types/comment/model');
 const ObjectiveModel = require('./../types/objective/model');
@@ -22,8 +20,6 @@ var Comment = function () {
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
-    var GetImagesHelper = require('../helpers/getImages');
-    var getImagesHelper = new GetImagesHelper();
     var FilesModel = require('./../types/file/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
@@ -295,48 +291,14 @@ var Comment = function () {
                         'allowDiskUse': true
                     };
 
-                    aggregation.exec(function (err, response) {
-                        var options = {
-                            data: {}
-                        };
-                        var personnelIds = [];
-                        var fileIds;
-                        var keys;
+                    aggregation.exec((err, result) => {
                         if (err) {
                             return waterfallCb(err);
                         }
 
-                        response = response[0] ? response[0] : {};
-                        keys = Object.keys(response);
+                        const body = result.length ? result[0] : {};
 
-                        if (!keys.length) {
-                            return waterfallCb(null, response);
-                        }
-
-                        personnelIds.push(response.createdBy.user._id);
-                        fileIds = _.map(response.attachments, '_id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                        options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return waterfallCb(err);
-                            }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                waterfallCb(null, response);
-                            })
-                        });
+                        waterfallCb(null, body);
                     });
                 },
 
@@ -401,94 +363,98 @@ var Comment = function () {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from         : 'files',
-                key          : 'attachments',
-                isArray      : true,
-                addProjection: ['contentType', 'originalName', 'extension']
+                from: 'files',
+                key: 'attachments',
+                isArray: true,
+                addProjection: ['contentType', 'originalName', 'extension', 'preview']
             }));
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {createdBy: {date: 1}}
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: { createdBy: { date: 1 } }
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'editedBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings: {editedBy: {date: 1}}
+            from: 'personnels',
+            key: 'editedBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: { editedBy: { date: 1 } }
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
+            from: 'accessRoles',
+            key: 'createdBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id      : 1,
-                        position : 1,
+                        _id: 1,
+                        position: 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName: 1,
+                        imageSrc: 1,
                     }
                 }
             }
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
+            from: 'positions',
+            key: 'createdBy.user.position',
+            isArray: false,
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id       : 1,
+                        _id: 1,
                         accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'editedBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                editedBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName: 1,
+                        imageSrc: 1,
                     }
                 }
             }
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'editedBy.user.position',
-            isArray        : false,
+            from: 'accessRoles',
+            key: 'editedBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
             includeSiblings: {
                 editedBy: {
                     date: 1,
                     user: {
-                        _id       : 1,
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        imageSrc: 1,
+                    }
+                }
+            }
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'positions',
+            key: 'editedBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
                         accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
+                        firstName: 1,
+                        lastName: 1,
+                        imageSrc: 1,
                     }
                 }
             }
@@ -497,44 +463,26 @@ var Comment = function () {
         pipeLine.push({
             $project: aggregateHelper.getProjection({
                 createdBy: {
-                    user    : 1,
-                    date    : 1,
+                    user: 1,
+                    date: 1,
                     diffDate: {
                         $let: {
                             vars: {
-                                dateNow   : new Date(),
+                                dateNow: new Date(),
                                 createDate: '$createdBy.date'
                             },
 
-                            in: {$subtract: ['$$dateNow', '$$createDate']}
+                            in: { $subtract: ['$$dateNow', '$$createDate'] }
                         }
                     }
                 }
             })
         });
 
-       /* pipeLine.push({
-            $sort: {'createdBy.date': -1}
-        });
-
-        if (limit && limit !== -1) {
-            pipeLine.push({
-                $skip: skip
-            });
-
-            pipeLine.push({
-                $limit: limit
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-        pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile         : isMobile,
-            skip             : skip,
-            limit            : limit
+            isMobile: isMobile,
+            skip: skip,
+            limit: limit
         }));
 
         return pipeLine;
@@ -603,57 +551,21 @@ var Comment = function () {
                         'allowDiskUse': true
                     };
 
-                    aggregation.exec(function (err, response) {
-                        var options = {
-                            data: {}
-                        };
-                        var personnelIds = [];
-                        var fileIds = [];
+                    aggregation.exec((err, result) => {
                         if (err) {
                             return waterfallCb(err);
                         }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                        const body = result.length ?
+                            result[0] : { data: [], total: 0 };
 
-                        if (response && response.data && response.data.length) {
-                            response.data = _.map(response.data, function (comment) {
-                                if (comment.body) {
-                                    comment.body = _.unescape(comment.body);
-                                }
-                                personnelIds.push(comment.createdBy.user._id);
-                                fileIds = _.union(fileIds, _.map(comment.attachments, '_id'));
-
-                                return comment;
-                            });
-                        }
-
-                        if (!response.data.length) {
-                            return waterfallCb(null, response);
-                        }
-
-                        personnelIds = _.uniqBy(personnelIds, 'id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                        options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return waterfallCb(err);
+                        body.data.forEach(comment => {
+                            if (comment.body) {
+                                comment.body = _.unescape(comment.body);
                             }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                waterfallCb(null, response);
-                            })
                         });
+
+                        waterfallCb(null, body);
                     });
                 }
             ], function (err, result) {
@@ -746,57 +658,21 @@ var Comment = function () {
                         allowDiskUse: true
                     };
 
-                    aggregation.exec(function (err, response) {
-                        var options = {
-                            data: {}
-                        };
-                        var personnelIds = [];
-                        var fileIds = [];
+                    aggregation.exec((err, result) => {
                         if (err) {
                             return waterfallCb(err);
                         }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                        const body = result.length ?
+                            result[0] : { data: [], total: 0 };
 
-                        if (response && response.data && response.data.length) {
-                            response.data = _.map(response.data, function (comment) {
-                                if (comment.body) {
-                                    comment.body = _.unescape(comment.body);
-                                }
-                                personnelIds.push(comment.createdBy.user._id);
-                                fileIds = _.union(fileIds, _.map(comment.attachments, '_id'));
-
-                                return comment;
-                            });
-                        }
-
-                        if (!response.data.length) {
-                            return waterfallCb(null, response);
-                        }
-
-                        personnelIds = _.uniqBy(personnelIds, 'id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                        options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return waterfallCb(err);
+                        body.data.forEach(comment => {
+                            if (comment.body) {
+                                comment.body = _.unescape(comment.body);
                             }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                waterfallCb(null, response);
-                            })
                         });
+
+                        waterfallCb(null, body);
                     });
                 }
             ], function (err, comments) {
@@ -882,14 +758,14 @@ var Comment = function () {
                         from         : 'files',
                         key          : 'attachments',
                         isArray      : true,
-                        addProjection: ['contentType', 'originalName', 'extension']
+                        addProjection: ['contentType', 'originalName', 'extension', 'preview']
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                         from           : 'personnels',
                         key            : 'createdBy.user',
                         isArray        : false,
-                        addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+                        addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
                         includeSiblings: {createdBy: {date: 1}}
                     }));
 
@@ -906,7 +782,8 @@ var Comment = function () {
                                         _id      : 1,
                                         position : 1,
                                         firstName: 1,
-                                        lastName : 1
+                                        lastName : 1,
+                                        imageSrc: 1,
                                     }
                                 }
                             }
@@ -923,7 +800,8 @@ var Comment = function () {
                                         _id       : 1,
                                         accessRole: 1,
                                         firstName : 1,
-                                        lastName  : 1
+                                        lastName  : 1,
+                                        imageSrc: 1,
                                     }
                                 }
                             }
@@ -962,57 +840,22 @@ var Comment = function () {
                         allowDiskUse: true
                     };
 
-                    aggregation.exec(function (err, response) {
-                        var options = {
-                            data: {}
-                        };
-                        var personnelIds = [];
-                        var fileIds = [];
+                    aggregation.exec((err, result) => {
                         if (err) {
                             return waterfallCb(err);
                         }
 
-                        response = response && response[0] ? response[0] : {data: [], total: 0};
+                        const body = result.length ?
+                            result[0] : { data: [], total: 0 };
 
-                        if (response && response.data && response.data.length) {
-                            response.data = _.map(response.data, function (comment) {
-                                if (comment.body) {
-                                    comment.body = _.unescape(comment.body);
-                                }
-                                personnelIds.push(comment.createdBy.user._id);
-                                fileIds = _.union(fileIds, _.map(comment.attachments, '_id'));
-
-                                return comment;
-                            });
-                        }
-
-                        if (!response.data.length) {
-                            return waterfallCb(null, response);
-                        }
-
-                        personnelIds = _.uniqBy(personnelIds, 'id');
-                        options.data[CONTENT_TYPES.PERSONNEL] = personnelIds;
-                        options.data[CONTENT_TYPES.FILES] = fileIds;
-
-                        getImagesHelper.getImages(options, function (err, result) {
-                            var fieldNames = {};
-                            var setOptions;
-                            if (err) {
-                                return callback(err);
+                        // fixme crash on click details in marketing campaign item
+                        body.data.forEach(comment => {
+                            if (comment.body) {
+                                comment.body = _.unescape(comment.body);
                             }
-
-                            setOptions = {
-                                response  : response,
-                                imgsObject: result
-                            };
-                            fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                            fieldNames[CONTENT_TYPES.FILES] = [['attachments']];
-                            setOptions.fields = fieldNames;
-
-                            getImagesHelper.setIntoResult(setOptions, function (response) {
-                                waterfallCb(null, response);
-                            })
                         });
+
+                        waterfallCb(null, body);
                     });
                 }
             ], function (err, comments) {

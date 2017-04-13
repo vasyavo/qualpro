@@ -486,7 +486,7 @@ const modules = [
         visible : true
     },
 
-    require('./../stories/consumer-survey/acl/module'),
+    require('./../stories/consumersSurvey/acl/module'),
 
     {
         _id     : 45,

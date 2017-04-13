@@ -9,9 +9,6 @@ const AggregationHelper = require('../../../helpers/aggregationCreater');
 const MODULE_NAMES = require('../../../public/js/constants/moduleNamesForActivity');
 const getUserInfo = require('../reusable-components/getUserInfo');
 const getAllPipelineActivity = require('../reusable-components/getAllPipelineActivity');
-const GetImageHelper = require('../../../helpers/getImages');
-
-const getImagesHelper = new GetImageHelper();
 
 const $defProjection = {
     _id: 1,
@@ -95,56 +92,21 @@ module.exports = (req, res, next) => {
 
             aggregation = ActivityListModel.aggregate(pipeLine);
 
-            aggregation.exec((err, response) => {
-                let idsPersonnel = [];
-                const options = {
-                    data: {},
-                };
+            aggregation.exec((err, result) => {
                 if (err) {
                     return next(err);
                 }
-                response = response.length ? response[0] : {
-                    data: [],
-                    total: 0,
-                };
 
-                if (!response.data.length) {
-                    return next({
-                        status: 200,
-                        body: response,
-                    });
-                }
+                const body = result.length ?
+                    result[0] : { data: [], total: 0 };
 
-                _.map(response.data, (model) => {
-                    idsPersonnel.push(model.createdBy.user._id);
+                body.data.forEach(element => {
+                    element.module = MODULE_NAMES[element.module._id];
                 });
 
-                idsPersonnel = _.uniqBy(idsPersonnel, 'id');
-                options.data[CONTENT_TYPES.PERSONNEL] = idsPersonnel;
-
-                getImagesHelper.getImages(options, (err, result) => {
-                    const fieldNames = {};
-                    const setOptions = {
-                        response,
-                        imgsObject: result,
-                    };
-                    if (err) {
-                        return next(err);
-                    }
-
-                    fieldNames[CONTENT_TYPES.PERSONNEL] = ['createdBy.user'];
-                    setOptions.fields = fieldNames;
-
-                    getImagesHelper.setIntoResult(setOptions, (response) => {
-                        _.map(response.data, (element) => {
-                            element.module = MODULE_NAMES[element.module._id];
-                        });
-
-                        next({
-                            status: 200,
-                            body: response,
-                        });
-                    });
+                next({
+                    status: 200,
+                    body,
                 });
             });
         });

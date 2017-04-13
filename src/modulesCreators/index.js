@@ -5,8 +5,9 @@ module.exports = (callback) => {
 
         require('./addModules').generate,
 
+        require('./addModulesToAccessRoles').generate,
 
-        require('./addModulesToAccessRoles').generate
+        require('./../stories/preview/autoload').insertDefaults,
 
     ], callback);
 };

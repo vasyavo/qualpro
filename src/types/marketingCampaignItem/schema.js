@@ -9,16 +9,20 @@ const schema = new Schema({
         ref: CONTENT_TYPES.MARKETING_CAMPAIGN,
         default: null,
     },
-    branch: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.BRANCH,
-        default: null,
-    }],
-    comments: [{
-        type: ObjectId,
-        ref: CONTENT_TYPES.COMMENT,
-        default: null,
-    }],
+    branch: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.BRANCH,
+        }],
+        default: [],
+    },
+    comments: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.COMMENT,
+        }],
+        default: [],
+    },
     createdBy: {
         user: {
             type: ObjectId,
@@ -42,7 +46,9 @@ const schema = new Schema({
         },
     },
 }, {
+    autoIndex: false,
     collection: CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
+    versionKey: false,
 });
 
 module.exports = schema;

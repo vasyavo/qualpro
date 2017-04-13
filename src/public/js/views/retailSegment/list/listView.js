@@ -8,7 +8,7 @@ define(function(require) {
     var EditView = require('views/domain/editView');
     var headerTemplate = require('text!templates/retailSegment/list/listHeader.html');
     var newRow = require('text!templates/domain/newRow.html');
-    var BadgeStore = require('serices/badgeStore');
+    var BadgeStore = require('services/badgeStore');
 
     var View = paginator.extend({
         el         : '#contentHolder',

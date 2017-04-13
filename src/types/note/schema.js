@@ -1,22 +1,65 @@
 const Schema = require('mongoose').Schema;
+const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+
 const ObjectId = Schema.Types.ObjectId;
-const CONTENT_TYPES = require('./../../public/js/constants/contentType.js');
 
 const schema = new Schema({
-    title      : {type: String, default: '', require: true},
-    theme      : {type: String, default: '', require: true},
-    description: {type: String, default: '', require: true},
-    archived   : {type: Boolean, default: false},
-    deleted    : {type: Boolean, default: false},
-    attachments: [{type: ObjectId, ref: CONTENT_TYPES.FILES, default: null}],
-    createdBy  : {
-        user: {type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null},
-        date: {type: Date, default: new Date()}
+    title: {
+        type: String,
+        required: true,
+        default: '',
     },
-    editedBy   : {
-        user: {type: ObjectId, ref: CONTENT_TYPES.PERSONNEL, default: null},
-        date: {type: Date, default: new Date()}
-    }
-}, { collection: 'notes' });
+    theme: {
+        type: String,
+        required: true,
+        default: '',
+    },
+    description: {
+        type: String,
+        required: true,
+        default: '',
+    },
+    archived: {
+        type: Boolean,
+        default: false,
+    },
+    deleted: {
+        type: Boolean,
+        default: false,
+    },
+    attachments: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.FILES,
+        }],
+        default: [],
+    },
+    createdBy: {
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
+    },
+    editedBy: {
+        user: {
+            type: ObjectId,
+            ref: CONTENT_TYPES.PERSONNEL,
+            default: null,
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
+    },
+}, {
+    autoIndex: false,
+    collection: CONTENT_TYPES.NOTES,
+    versionKey: false,
+});
 
 module.exports = schema;
