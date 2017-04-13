@@ -34,7 +34,7 @@ define(function (require) {
             CONSTANTS.MS_WORD_CONTENT_TYPES,
             CONSTANTS.MS_EXCEL_CONTENT_TYPES,
             CONSTANTS.MS_POWERPOINT_CONTENT_TYPES,
-            CONSTANTS.OTHER_FORMATS,
+            CONSTANTS.OTHER_FORMATS
         ),
 
         model : new DocumentModel(),
