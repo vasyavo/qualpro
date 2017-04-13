@@ -12,7 +12,11 @@ const logger = require('../utils/logger');
 const OTHER_CONSTANTS = require('../public/js/constants/otherConstants');
 const FileModel = require('./../types/file/model');
 
-const NEED_PROCESSING_TYPES = _.union(OTHER_CONSTANTS.IMAGE_CONTENT_TYPES, OTHER_CONSTANTS.VIDEO_CONTENT_TYPES, OTHER_CONSTANTS.OTHER_FORMATS);
+const OTHER_CONTENT_TYPES = [
+    OTHER_CONSTANTS.MS_WORD_CONTENT_TYPES,
+    OTHER_CONSTANTS.MS_EXCEL_CONTENT_TYPES,
+    OTHER_CONSTANTS.MS_POWERPOINT_CONTENT_TYPES,
+];
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = function() {
@@ -413,8 +417,7 @@ module.exports = function() {
 
                 // if other type
                 (cb) => {
-                // ToDo: check is file type is valid (doc|docx|oxt|odp|ods|xls|xlsx|pptx|ppt)
-                    if (_.includes(NEED_PROCESSING_TYPES, fileOptions.type)) {
+                    if (_.includes(OTHER_CONTENT_TYPES, fileOptions.type)) {
                         return cb(null);
                     }
 
