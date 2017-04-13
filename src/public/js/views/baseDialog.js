@@ -309,6 +309,8 @@ define([
                 return 'word_icon';
             } else if (CONSTANTS.MS_EXCEL_CONTENT_TYPES.indexOf(contentType) !== -1) {
                 return 'excel_icon';
+            } else if (CONSTANTS.MS_POWERPOINT_CONTENT_TYPES.indexOf(contentType) !== -1) {
+                return 'powerpoint_icon';
             } else {
                 return 'pdf_icon';
             }

@@ -21,7 +21,14 @@ define([
         template: _.template(EditTemplate),
         fileTemplate: _.template(FileTemplate),
 
-        ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES),
+        ALLOWED_CONTENT_TYPES: _.union(
+            CONSTANTS.IMAGE_CONTENT_TYPES,
+            CONSTANTS.VIDEO_CONTENT_TYPES,
+            CONSTANTS.MS_WORD_CONTENT_TYPES,
+            CONSTANTS.MS_EXCEL_CONTENT_TYPES,
+            CONSTANTS.MS_POWERPOINT_CONTENT_TYPES,
+            CONSTANTS.OTHER_FORMATS,
+        ),
 
         initialize: function (options) {
             this.files = new FileCollection();
