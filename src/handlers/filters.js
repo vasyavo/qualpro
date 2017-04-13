@@ -2472,7 +2472,7 @@ const Filters = function() {
                 $locationMatch.$and.push({
                     $or: [
                         {
-                            [location]: { $in: filter[location].$in || personnel[location] },
+                            [location]: { $in: filter[location] && filter[location].$in || personnel[location] },
                         },
                         {
                             [location]: { $eq: [] },
@@ -2817,11 +2817,11 @@ const Filters = function() {
         const queryFilter = query.filter || {};
         const currentSelected = query.current;
         const filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
+        const personnel = req.personnelModel;
 
         const filterMapper = new FilterMapper();
         const filter = filterMapper.mapFilter({
             filter: query.filter,
-            personnel: req.personnelModel,
         });
 
         let aggregation;
@@ -2858,7 +2858,7 @@ const Filters = function() {
         });
 
         locations.forEach((location) => {
-            if (filter[location] && filter[location].$in.length) {
+            if ((personnel[location] && personnel[location].length) || (filter[location] && filter[location].$in && filter[location].$in.length)) {
                 filterConditions.push({
                     $or: [
                         {
@@ -2870,7 +2870,7 @@ const Filters = function() {
                         {
                             $ne: [
                                 {
-                                    $setIntersection: [`$$personnel.${location}`, filter[location].$in],
+                                    $setIntersection: [`$$personnel.${location}`, filter[location] && filter[location].$in || personnel[location]],
                                 },
                                 [],
                             ],
@@ -2934,49 +2934,59 @@ const Filters = function() {
             $project: {
                 _id: 1,
                 country: {
-                    $let: {
-                        vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                        },
+                    $map: {
+                        input: '$country',
+                        as: 'item',
                         in: {
-                            _id: '$$country._id',
-                            name: '$$country.name',
+                            _id: '$$item._id',
+                            name: '$$item.name',
                         },
                     },
                 },
                 region: {
-                    $let: {
-                        vars: {
-                            region: { $arrayElemAt: ['$region', 0] },
-                        },
+                    $map: {
+                        input: '$region',
+                        as: 'item',
                         in: {
-                            _id: '$$region._id',
-                            name: '$$region.name',
+                            _id: '$$item._id',
+                            name: '$$item.name',
                         },
                     },
                 },
                 subRegion: {
-                    $let: {
-                        vars: {
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                        },
+                    $map: {
+                        input: '$subRegion',
+                        as: 'item',
                         in: {
-                            _id: '$$subRegion._id',
-                            name: '$$subRegion.name',
+                            _id: '$$item._id',
+                            name: '$$item.name',
                         },
                     },
                 },
                 branch: {
-                    $let: {
-                        vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
-                        },
+                    $map: {
+                        input: '$branch',
+                        as: 'item',
                         in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
-                            retailSegment: '$$branch.retailSegment',
-                            outlet: '$$branch.outlet',
+                            _id: '$$item._id',
+                            name: '$$item.name',
+                            retailSegment: '$$item.retailSegment',
+                            outlet: '$$item.outlet',
                         },
+                    },
+                },
+                retailSegment: {
+                    $map: {
+                        input: '$branch',
+                        as: 'item',
+                        in: '$$item.retailSegment',
+                    },
+                },
+                outlet: {
+                    $map: {
+                        input: '$branch',
+                        as: 'item',
+                        in: '$$item.outlet',
                     },
                 },
                 position: {
@@ -3039,7 +3049,7 @@ const Filters = function() {
         pipeLine.push({
             $lookup: {
                 from: 'retailSegments',
-                localField: 'branch.retailSegment',
+                localField: 'retailSegment',
                 foreignField: '_id',
                 as: 'retailSegment',
             },
@@ -3048,7 +3058,7 @@ const Filters = function() {
         pipeLine.push({
             $lookup: {
                 from: 'outlets',
-                localField: 'branch.outlet',
+                localField: 'outlet',
                 foreignField: '_id',
                 as: 'outlet',
             },
@@ -3057,24 +3067,22 @@ const Filters = function() {
         pipeLine.push({
             $addFields: {
                 retailSegment: {
-                    $let: {
-                        vars: {
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                        },
+                    $map: {
+                        input: '$retailSegment',
+                        as: 'item',
                         in: {
-                            _id: '$$retailSegment._id',
-                            name: '$$retailSegment.name',
+                            _id: '$$item._id',
+                            name: '$$item.name',
                         },
                     },
                 },
                 outlet: {
-                    $let: {
-                        vars: {
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
-                        },
+                    $map: {
+                        input: '$outlet',
+                        as: 'item',
                         in: {
-                            _id: '$$outlet._id',
-                            name: '$$outlet.name',
+                            _id: '$$item._id',
+                            name: '$$item.name',
                         },
                     },
                 },
@@ -3112,11 +3120,11 @@ const Filters = function() {
 
             response = {
                 country: result.country && _.uniq(_.flatten(result.country)) || [],
-                region: result.region || [],
-                subRegion: result.subRegion || [],
-                retailSegment: result.retailSegment || [],
-                outlet: result.outlet || [],
-                branch: result.branch || [],
+                region: result.region && _.uniq(_.flatten(result.region)) || [],
+                subRegion: result.subRegion && _.uniq(_.flatten(result.subRegion)) || [],
+                retailSegment: result.retailSegment && _.uniq(_.flatten(result.retailSegment)) || [],
+                outlet: result.outlet && _.uniq(_.flatten(result.outlet)) || [],
+                branch: result.branch && _.uniq(_.flatten(result.branch)) || [],
                 personnel: result.personnel || [],
                 position: result.position || [],
             };
