@@ -2472,7 +2472,7 @@ const Filters = function() {
                 $locationMatch.$and.push({
                     $or: [
                         {
-                            [location]: { $in: filter[location].$in || personnel[location] },
+                            [location]: { $in: filter[location] && filter[location].$in || personnel[location] },
                         },
                         {
                             [location]: { $eq: [] },
