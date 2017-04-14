@@ -488,11 +488,39 @@
             }
         ],
 
-        IMAGE_CONTENT_TYPES   : ['image/jpeg', 'image/png'],
-        VIDEO_CONTENT_TYPES   : ['video/mpeg', 'video/mp4', 'video/x-msvideo', 'video/x-sgi-movie', 'audio/mpeg', 'audio/mp4'],
-        MS_WORD_CONTENT_TYPES : ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint', 'application/vnd.ms-excel' /*, 'application/octet-stream'*/ /*'application/vnd.openxmlformats-officedocument.wordprocessingml.template',*/ /*'application/vnd.ms-word.document.macroEnabled.12'*/],
-        MS_EXCEL_CONTENT_TYPES: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', /* 'application/vnd.openxmlformats-officedocument.spreadsheetml.template', 'application/vnd.ms-excel.sheet.macroEnabled.12', 'application/vnd.ms-excel.template.macroEnabled.12', 'application/vnd.ms-excel.addin.macroEnabled.12', 'application/vnd.ms-excel.sheet.binary.macroEnabled.12'*/],
-        OTHER_FORMATS         : ['application/pdf', 'application/mp4']
+        IMAGE_CONTENT_TYPES: [
+            'image/jpeg',
+            'image/png',
+        ],
+        VIDEO_CONTENT_TYPES: [
+            'video/mpeg',
+            'video/mp4',
+            'video/x-msvideo',
+            'video/x-sgi-movie',
+            'audio/mpeg',
+            'audio/mp4',
+        ],
+        MS_WORD_CONTENT_TYPES: [
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+        ],
+        MS_EXCEL_CONTENT_TYPES: [
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+        ],
+        MS_POWERPOINT_CONTENT_TYPES: [
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.openxmlformats-officedocument.presentationml.template',
+            'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+
+        ],
+        OTHER_FORMATS: [
+            'application/pdf',
+            'application/mp4',
+        ]
     };
 
     var objectiveStatuses = {
