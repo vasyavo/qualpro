@@ -415,7 +415,7 @@ define([
                 title = this.translation.create;
             }
 
-            if (jsonModel.startDate) {
+            if (jsonModel.startDate && (new Date(jsonModel.startDate)).toString() !== 'Invalid Date') {
                 jsonModel.startDate = moment(jsonModel.startDate).format('DD.MM.YYYY');
             }
 
