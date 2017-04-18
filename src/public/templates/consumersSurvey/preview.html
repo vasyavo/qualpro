@@ -17,7 +17,7 @@
             </ul>
             <% if (!activityList && isNotAMorAinM) { %>
                 <button id="duplicate" class="greyBtn floatRight"><%= translation.duplicateBtn %></button>
-            <% if (model && model.status && model.status._id !== 'expired' && isNotAMorAinM) { %>
+            <% if (model && model.status && model.status._id !== 'expired' && model.status._id !== 'completed' && isNotAMorAinM) { %>
                 <button id="edit" class="greenBtn floatRight"><%= translation.editBtn %></button>
             <%}%>
             <%}%>
