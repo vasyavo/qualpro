@@ -61,6 +61,11 @@ define(function(require) {
 
             this.pageAnimation(this.collection.direction, $currentEl);
 
+            jsonCollection.map(function (item) {
+                item.startDate = moment(item.startDate).format('DD.MM.YYYY');
+                return item;
+            });
+
             $currentEl.empty();
             $currentEl.html(this.template({
                 collection : jsonCollection,
