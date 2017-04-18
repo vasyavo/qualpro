@@ -1,6 +1,38 @@
 * {
     box-sizing: border-box;
 }
+ul {
+    padding: 0;
+    margin: 0;
+}
+@font-face {
+    font-family: 'proxima_nova_rgbold';
+    src: url('../fonts/proxima_nova_bold-webfont.eot');
+    src: url('../fonts/proxima_nova_bold-webfont.eot?#iefix') format('embedded-opentype'), url('../fonts/proxima_nova_bold-webfont.woff2') format('woff2'), url('../fonts/proxima_nova_bold-webfont.woff') format('woff'), url('../fonts/proxima_nova_bold-webfont.ttf') format('truetype'), url('../fonts/proxima_nova_bold-webfont.svg#proxima_nova_rgbold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'proxima_nova_rgregular';
+    src: url('../fonts/proxima_nova_regular-webfont.eot');
+    src: url('../fonts/proxima_nova_regular-webfont.eot?#iefix') format('embedded-opentype'), url('../fonts/proxima_nova_regular-webfont.woff2') format('woff2'), url('../fonts/proxima_nova_regular-webfont.woff') format('woff'), url('../fonts/proxima_nova_regular-webfont.ttf') format('truetype'), url('../fonts/proxima_nova_regular-webfont.svg#proxima_nova_rgregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'proxima_nova_ltsemibold';
+    src: url('../fonts/proxima_nova_semibold-webfont.eot');
+    src: url('../fonts/proxima_nova_semibold-webfont.eot?#iefix') format('embedded-opentype'), url('../fonts/proxima_nova_semibold-webfont.woff2') format('woff2'), url('../fonts/proxima_nova_semibold-webfont.woff') format('woff'), url('../fonts/proxima_nova_semibold-webfont.ttf') format('truetype'), url('../fonts/proxima_nova_semibold-webfont.svg#proxima_nova_ltsemibold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'icomoon';
+    src: url('../fonts/icomoon.eot?4r31y4');
+    src: url('../fonts/icomoon.eot?4r31y4#iefix') format('embedded-opentype'), url('../fonts/icomoon.ttf?4r31y4') format('truetype'), url('../fonts/icomoon.woff?4r31y4') format('woff'), url('../fonts/icomoon.svg?4r31y4#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
 body, html {
     margin: 0;
     padding: 0;
@@ -15,6 +47,28 @@ header {
     padding: 0 70px 0 61px;
     background: #c62828;
     box-shadow: 1px 0 4px rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.question-icon::after,
+.bell-icon::after,
+.list-icon::after,
+.logout-icon::after {
+    font-family: 'icomoon';
+}
+
+.question-icon::after {
+    content: '\e951';
+}
+.bell-icon::after {
+    content: '\e904';
+}
+.list-icon::after {
+    content: '\e919';
+}
+.logout-icon::after {
+    content: '\e950';
 }
 .main {
     height: calc(100% - 187px);
@@ -66,5 +120,145 @@ header {
     top: -28px;
     font-family: 'proxima_nova_ltsemibold', sans-serif;
     font-size: 18px;
-    font-size: 1.125rem;
+}
+.header-buttons {
+    position: relative;
+    right: -50px;
+    margin: 0;
+}
+.header-buttons li {
+    float: left;
+    list-style: none;
+    padding: 0 15px;
+}
+.header-buttons li a {
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+}
+.contact-us-icon {
+    display: block;
+    content: "";
+    width: 30px;
+    height: 33px;
+    background: url(../images/header/phone.png) no-repeat;
+    float: left;
+    margin: 0 6px 0 0;
+}
+.user-panel {
+    margin-left: 26px;
+}
+.user-detail {
+    float: left;
+    padding: 15px 0;
+    margin-left: 165px;
+    cursor: pointer;
+}
+.avatar-header {
+    float: left;
+    margin: 0 20px;
+}
+.avatar-header img {
+    height: 60px;
+    width: auto;
+    border-radius: 50%;
+}
+.personnel-description {
+
+}
+.personnel-name {
+    margin-bottom: 10px;
+    font-family: 'proxima_nova_rgbold', sans-serif;
+    color: #ffffff;
+    font-size: 18px;
+}
+.personnel-position {
+    font-family: 'proxima_nova_rgregular', sans-serif;
+    color: #ffffff;
+    font-size: 14px;
+}
+.logo {
+    position: absolute;
+    z-index: 200;
+    transform: scale(0.8);
+    top: 10px;
+    left: 36px;
+}
+.logo img {
+    background: #cc7a13;
+    background: -moz-linear-gradient(45deg, #e09605 0%, #f2d623 16%, #cc7a13 32%, #f2d623 50%, #cc7a13 68%, #f2d623 85%, #cc7a13 100%);
+    background: -webkit-gradient(left bottom, right top, color-stop(0%, #e09605), color-stop(16%, #f2d623), color-stop(32%, #cc7a13), color-stop(50%, #f2d623), color-stop(68%, #cc7a13), color-stop(85%, #f2d623), color-stop(100%, #cc7a13));
+    background: -webkit-linear-gradient(45deg, #e09605 0%, #f2d623 16%, #cc7a13 32%, #f2d623 50%, #cc7a13 68%, #f2d623 85%, #cc7a13 100%);
+    background: -o-linear-gradient(45deg, #e09605 0%, #f2d623 16%, #cc7a13 32%, #f2d623 50%, #cc7a13 68%, #f2d623 85%, #cc7a13 100%);
+    background: -ms-linear-gradient(45deg, #e09605 0%, #f2d623 16%, #cc7a13 32%, #f2d623 50%, #cc7a13 68%, #f2d623 85%, #cc7a13 100%);
+    background: linear-gradient(45deg, #e09605 0%, #f2d623 16%, #cc7a13 32%, #f2d623 50%, #cc7a13 68%, #f2d623 85%, #cc7a13 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e09605', endColorstr='#cc7a13', GradientType=1);
+    -webkit-border-radius: 50%;
+    -webkit-background-clip: padding-box;
+    -moz-border-radius: 50%;
+    -moz-background-clip: padding;
+    border-radius: 50%;
+    background-clip: padding-box;
+}
+.logo-stroke {
+    position: absolute;
+    z-index: 190;
+    top: -20px;
+}
+.logo-stroke img {
+    background-color: #ffffff;
+    -webkit-transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    -o-transform: scale(0.8);
+    transform: scale(0.8);
+    -webkit-transition: all 0.4s linear;
+    -moz-transition: all 0.4s linear;
+    -o-transition: all 0.4s linear;
+    transition: all 0.4s linear;
+}
+
+
+
+.parent-left {
+    height: 43px;
+}
+.sidebar-menu li{
+    position: relative;
+    background-color: #ffffff;
+    overflow: hidden;
+    transition: height ease-in-out 0.5s
+}
+.sidebar-menu li a {
+    display: block;
+    padding-left: 30px;
+    color: #000000;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-size: 14px;
+    text-decoration: none;
+}
+.sidebar-menu .parent-left > a {
+    height: 43px;
+    width: 100%;
+    top: 0;
+    position: absolute;
+}
+.sidebar-menu li a:hover {
+    background-color: #fafafa;
+}
+.sidebar-menu .selected a{
+    background-color: #e6e6e6;
+}
+
+.sidebar-menu .selected a:hover {
+    background-color: #e6e6e6;
 }
