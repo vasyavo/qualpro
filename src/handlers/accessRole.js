@@ -6,14 +6,21 @@ var AccessRole = function () {
     this.getForDD = function (req, res, next) {
         var query = req.query;
         var level = req.session.level;
+        var accessRolesMatchConditions = {
+            [ACL_ROLES.MASTER_ADMIN]: { $gt: ACL_ROLES.SUPER_ADMIN },
+            [ACL_ROLES.COUNTRY_ADMIN]: { $gt: level, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.AREA_MANAGER]: { $gt: level, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.AREA_IN_CHARGE]: { $gt: level, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.SALES_MAN]: { $gt: level, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.MERCHANDISER]: { $gt: level, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.CASH_VAN]: { $gt: level, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.MASTER_UPLOADER]: { $gte: ACL_ROLES.COUNTRY_ADMIN, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.COUNTRY_UPLOADER]: { $gt: ACL_ROLES.COUNTRY_ADMIN, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.TRADE_MARKETER]: { $gt: ACL_ROLES.COUNTRY_ADMIN, $lte: ACL_ROLES.TRADE_MARKETER },
+            [ACL_ROLES.VIRTUAL]: { $gt: ACL_ROLES.COUNTRY_ADMIN, $lte: ACL_ROLES.TRADE_MARKETER },
+        };
 
-        query.level = {$gt: ACL_ROLES.SUPER_ADMIN};
-
-        if (level !== 1) {
-            query.level = level < ACL_ROLES.MASTER_UPLOADER
-                ? {$gt: level, $lte: ACL_ROLES.TRADE_MARKETER}
-                : {$gt: ACL_ROLES.COUNTRY_ADMIN, $lte: ACL_ROLES.TRADE_MARKETER};
-        }
+        query.level = accessRolesMatchConditions[level];
 
         AccessRoleModel.find(query, '_id name level')
             .exec(function (err, result) {
