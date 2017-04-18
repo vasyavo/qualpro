@@ -132,7 +132,7 @@ define([
                 }
             }
             if (date && !condition) {
-                value = moment(value, 'DD.MM.YYYY, h:mm:ss');
+                value = moment.utc(value, 'DD.MM.YYYY, h:mm:ss');
                 value = key === 'dateStart' ? value.set('hour', 0).set('minute', 1) : value.set('hour', 23).set('minute', 59);
                 this.body[key] = value;
                 return;
