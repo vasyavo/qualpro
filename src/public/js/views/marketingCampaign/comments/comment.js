@@ -42,7 +42,14 @@ define([
             this.currentLanguage = App.currentUser.currentLanguage;
             this.translation = options.translation;
             this.newFileCollection = new FileCollection();
-            this.ALLOWED_CONTENT_TYPES = _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS, CONSTANTS.VIDEO_CONTENT_TYPES);
+            this.ALLOWED_CONTENT_TYPES = _.union(
+                CONSTANTS.IMAGE_CONTENT_TYPES,
+                CONSTANTS.VIDEO_CONTENT_TYPES,
+                CONSTANTS.MS_WORD_CONTENT_TYPES,
+                CONSTANTS.MS_EXCEL_CONTENT_TYPES,
+                CONSTANTS.MS_POWERPOINT_CONTENT_TYPES,
+                CONSTANTS.OTHER_FORMATS
+            );
 
             this.collection = new CommentCollection({
                 data: {

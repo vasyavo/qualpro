@@ -415,7 +415,7 @@ define([
                 title = this.translation.create;
             }
 
-            if (jsonModel.startDate) {
+            if (jsonModel.startDate && (new Date(jsonModel.startDate)).toString() !== 'Invalid Date') {
                 jsonModel.startDate = moment(jsonModel.startDate).format('DD.MM.YYYY');
             }
 
@@ -433,7 +433,7 @@ define([
             var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
             var dateStart = jsonModel.startDate && moment(jsonModel.startDate, 'DD.MM.YYYY').toDate();
             var startDate = dateStart && (dateStart < new Date()) ? dateStart :  new Date();
-            var dateEnd;
+            var dateEnd = jsonModel.dueDate && moment(jsonModel.dueDate, 'DD.MM.YYYY').toDate();
             var idToFind;
 
             this.$el = $(formString).dialog({
@@ -483,7 +483,8 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : startDate,
+                minDate    : new Date(),
+                maxDate    : dateEnd,
                 onClose    : function (selectedDate) {
                     if (selectedDate){
                         $endDate.datepicker('option', 'minDate', selectedDate);
@@ -495,7 +496,12 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : startDate
+                minDate    : dateStart,
+                onClose    : function (selectedDate) {
+                    if (selectedDate){
+                        $startDate.datepicker('option', 'maxDate', selectedDate);
+                    }
+                }
             });
 
             implementShowHideArabicInputIn(this);

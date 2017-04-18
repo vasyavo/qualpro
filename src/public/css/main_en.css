@@ -9322,8 +9322,8 @@ table.fancytree-ext-table {
   border: 1px solid #cfd8dc;
 }
 .questionnarieInputWrap .customInput {
-  width: 300px;
-  margin-right: 20px;
+  width: 250px;
+  margin-right: 15px;
 }
 .questionnarieInputWrap .questionnarieDatapickerWrap {
   position: relative;

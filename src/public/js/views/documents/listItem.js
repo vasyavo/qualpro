@@ -28,7 +28,7 @@ define(function (require) {
         },
 
         ui : {
-            thumbnail : '#item',
+            thumbnail : '.documentBody',
             checkbox : '#checkbox',
             edit : '#edit'
         },
