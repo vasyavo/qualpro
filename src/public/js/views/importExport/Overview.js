@@ -5,6 +5,8 @@ define(function (require) {
 
     return Marionette.View.extend({
 
+        className: 'row import-buttons',
+
         template: function () {
             return Template;
         }
