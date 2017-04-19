@@ -11412,6 +11412,7 @@ label[for=searchInputnoCT]::after {
 }
 .radio-switch input[type="radio"] + label {
   background: #fff;
+  cursor: pointer;
 }
 .radio-switch input[type="radio"]:checked + label {
   background: #d9e0e3;
