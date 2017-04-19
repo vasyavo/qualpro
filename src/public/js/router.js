@@ -14,10 +14,11 @@ define([
     'js-cookie',
     'views/documents/list',
     'views/documents/topBar',
-    'views/importExport/Overview'
+    'views/importExport/Overview',
+    'views/importExport/TopBar'
 ], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
              forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView, ImportExportOverview) {
+             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -153,10 +154,10 @@ define([
                     $loader.addClass('smallLogo').removeClass('ellipseAnimated');
                 }
 
-                $('#topBarHolder').html('');
+                var importExportTopBar = new ImportExportTopBarView();
+                $('#topBarHolder').html(importExportTopBar.render().$el);
 
                 var importEportOverview = new ImportExportOverview();
-
                 $('#contentHolder').html(importEportOverview.render().$el);
             });
         },
