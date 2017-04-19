@@ -14,6 +14,10 @@ npm run docs
 chmod +x ./get-scripts.sh
 ./get-scripts.sh
 
+# Build Custom Reports
+chmod +x ./build-custom-reports.sh
+./build-custom-reports.sh
+
 # Make database migration
 if [ ! -z $CI ] ; then
     echo "Making database migration:"
