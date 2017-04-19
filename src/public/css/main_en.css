@@ -11442,10 +11442,12 @@ label[for=searchInputnoCT]::after {
 .import-button i {
   font-size: 40px;
   font-weight: normal;
+  pointer-events: none;
 }
 .import-button span {
   display: block;
   font-size: 14px;
+  pointer-events: none;
 }
 .font-yellow {
   color: #f6d959;
