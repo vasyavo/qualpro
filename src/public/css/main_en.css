@@ -11393,6 +11393,29 @@ label[for=searchInputnoCT]::after {
   width: 25%;
   padding: 0 15px;
 }
+.import-export-topbar {
+  background: #f3f3f3;
+  padding: 10px 30px;
+  border: 1px solid #d0d0d0;
+  border-bottom: none;
+}
+.radio-switch {
+  border: 1px solid #d9e0e3;
+  display: inline-block;
+}
+.radio-switch label {
+  padding: 10px 30px;
+  display: inline-block;
+}
+.radio-switch input[type="radio"] {
+  display: none;
+}
+.radio-switch input[type="radio"] + label {
+  background: #fff;
+}
+.radio-switch input[type="radio"]:checked + label {
+  background: #d9e0e3;
+}
 .import-buttons {
   text-align: center;
   padding: 10px 15px;

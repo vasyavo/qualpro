@@ -5,6 +5,8 @@ define(function (require) {
 
     return Marionette.View.extend({
 
+        className: 'import-export-topbar',
+
         template: function () {
             return Template;
         },
