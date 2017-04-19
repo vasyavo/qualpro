@@ -13,10 +13,11 @@ define([
     'constants/contentType',
     'js-cookie',
     'views/documents/list',
-    'views/documents/topBar'
+    'views/documents/topBar',
+    'views/importExport/Overview'
 ], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
              forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView) {
+             DocumentsListView, DocumentsTopBarView, ImportExportOverview) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -31,6 +32,7 @@ define([
             forgotPass : 'forgotPass',
             'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
             'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
+            'qualPro/import-export' : 'goToImportExportView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -122,6 +124,40 @@ define([
 
                     documentsCollection.getFirstPage();
                 });
+            });
+        },
+
+        goToImportExportView: function () {
+            var that = this;
+
+            this.checkLogin(function (success) {
+                if (!success) {
+                    return that.redirectTo();
+                }
+
+                if (that.view) {
+                    that.view.undelegateEvents();
+                }
+
+                if (that.wrapperView) {
+                    that.wrapperView.undelegateEvents();
+                }
+
+                if (!that.wrapperView) {
+                    that.main('documents');
+                }
+
+                var $loader = $('#alaliLogo');
+                if (!$loader.hasClass('smallLogo')) {
+                    $loader.addClass('animated');
+                    $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+                }
+
+                $('#topBarHolder').html('');
+
+                var importEportOverview = new ImportExportOverview();
+
+                $('#contentHolder').html(importEportOverview.render().$el);
             });
         },
 
