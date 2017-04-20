@@ -16,7 +16,7 @@ define([
         template: _.template(PreviewTemplate),
 
         events: {
-            'click .showPreview': 'showFilePreviewDialog'
+            'click .showPreview': 'openNoBranch'
         },
 
         initialize: function (options) {
@@ -41,27 +41,26 @@ define([
             });
         },
 
-        showFilePreviewDialog: _.debounce(function (e) {
+        openNoBranch: _.debounce(function (e) {
             var $el = $(e.target);
-            var haveBefore = $el.hasClass('before');
+            var isBefore = $el.hasClass('before');
+
             var before = this.model.get('before') || {};
             var after = this.model.get('after') || {};
             var fileCollection;
-            var fileModel;
 
-            if (haveBefore) {
-                fileCollection = new FileCollection([before.files], true);
+            if (isBefore) {
+                fileCollection = new FileCollection(before.files, true);
             } else {
-                fileCollection = new FileCollection([after.files], true);
+                fileCollection = new FileCollection(after.files, true);
             }
 
-            fileModel = fileCollection.at(0);
+            var fileModel = fileCollection.at(0);
 
             this.fileDialogView = new FileDialogPreviewView({
                 fileModel  : fileModel,
-                bucket     : 'visibilityForm',
                 translation: this.translation
-            }); //TODO: change bucket from constants
+            });
         }, 1000, true),
 
         render: function () {
@@ -77,8 +76,6 @@ define([
             });
 
             var afterPart = this.model.get('after');
-            var file = afterPart.files;
-            afterPart.files = file;
 
             this.model.set('after', afterPart);
 
