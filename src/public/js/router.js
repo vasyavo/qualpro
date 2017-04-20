@@ -33,7 +33,7 @@ define([
             forgotPass : 'forgotPass',
             'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
             'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
-            'qualPro/import-export' : 'goToImportExportView',
+            'qualPro/importExport' : 'goToImportExportView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
