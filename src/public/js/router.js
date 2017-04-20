@@ -15,10 +15,10 @@ define([
     'views/documents/list',
     'views/documents/topBar',
     'views/importExport/Overview',
-    'views/importExport/TopBar'
-], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
-             forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView) {
+    'views/importExport/TopBar',
+    'models/importExport',
+], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView, forgotPassView, dataService, custom, CONSTANTS, Cookies,
+             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView, ImportExportModel) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -154,11 +154,17 @@ define([
                     $loader.addClass('smallLogo').removeClass('ellipseAnimated');
                 }
 
-                var importExportTopBar = new ImportExportTopBarView();
+                var importExportModel = new ImportExportModel();
+
+                var importExportTopBar = new ImportExportTopBarView({
+                    model: importExportModel,
+                });
                 $('#topBarHolder').html(importExportTopBar.render().$el);
 
-                var importEportOverview = new ImportExportOverview();
-                $('#contentHolder').html(importEportOverview.render().$el);
+                var importExportOverview = new ImportExportOverview({
+                    model: importExportModel,
+                });
+                $('#contentHolder').html(importExportOverview.render().$el);
             });
         },
 

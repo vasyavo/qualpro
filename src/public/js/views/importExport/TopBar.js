@@ -11,6 +11,19 @@ define(function (require) {
             return Template;
         },
 
+        ui: {
+            radioInputs: 'input[type="radio"]',
+        },
+
+        events: {
+            'change @ui.radioInputs': 'actionTypeChanged',
+        },
+
+        actionTypeChanged: function (event) {
+            this.model.set('action', event.target.value);
+            this.model.trigger('action:changed');
+        }
+
     });
 
 });
