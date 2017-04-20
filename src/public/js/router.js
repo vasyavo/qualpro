@@ -17,8 +17,9 @@ define([
     'views/importExport/Overview',
     'views/importExport/TopBar',
     'models/importExport',
+    'constants/aclRoleIndexes'
 ], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView, forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView, ImportExportModel) {
+             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView, ImportExportModel, ACL_ROLES) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -134,6 +135,11 @@ define([
             this.checkLogin(function (success) {
                 if (!success) {
                     return that.redirectTo();
+                }
+
+                var currentUserAccessRole = App.currentUser.accessRole.level;
+                if (![ACL_ROLES.MASTER_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
+                    return Backbone.history.navigate('qualPro', true);
                 }
 
                 if (that.view) {
