@@ -68,6 +68,12 @@ define(function(require) {
                     brand      : brandId,
                     translation: self.translation
                 });
+
+                self.brandPreview.on('shelf-shares-value-edited', function () {
+                    self.collection.getPage(self.collection.currentPage, {
+                        filter: self.filter,
+                    });
+                });
             });
         }, 1000, true),
 
