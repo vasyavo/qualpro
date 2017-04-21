@@ -97,6 +97,12 @@ define(function(require) {
                     branch     : branch,
                     translation: self.translation
                 });
+
+                self.brandPreview.on('price-survey-value-edited', function () {
+                    self.collection.getPage(self.collection.currentPage, {
+                        filter: self.filter,
+                    });
+                });
             });
         },
 

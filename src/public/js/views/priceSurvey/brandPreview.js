@@ -6,15 +6,19 @@ define([
     'collections/priceSurvey/brandCollection',
     'views/baseDialog',
     'constants/contentType',
-    'dataService'
-], function ($, _, PreviewTemplate, PreviewBodyTemplate, BrandCollection, BaseView, CONTENT_TYPES, dataService) {
+    'dataService',
+    'views/priceSurvey/editPriceSurveyValue',
+    'models/priceSurveyBrand'
+], function ($, _, PreviewTemplate, PreviewBodyTemplate, BrandCollection, BaseView, CONTENT_TYPES, dataService, EditPriceSurveyValueView, PriceSurveyBrandModel) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.PRICESURVEY,
 
         template           : _.template(PreviewTemplate),
         previewBodyTemplate: _.template(PreviewBodyTemplate),
 
-        events: {},
+        events: {
+            'click #edit' : 'handleEditClick',
+        },
 
         initialize: function (options) {
             var self = this;
@@ -40,6 +44,35 @@ define([
             }, 500);
 
             this.$el.find('#brandSearch').on('input', this.brandSearchEvent);
+        },
+
+        handleEditClick: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var currentValue = target.attr('data-value');
+
+            this.editablePriceSurveyId = target.attr('data-id');
+            this.editablePriceSurveyItemId = target.attr('data-item-id');
+
+            this.editValueView = new EditPriceSurveyValueView({
+                translation: this.translation,
+                initialValue: currentValue,
+            });
+
+            this.editValueView.on('new-price-submitted', function (newPrice) {
+                var model = new PriceSurveyBrandModel();
+
+                model.editValueOfPriceSurveyItem({
+                    price: newPrice,
+                    priceSurveyId: that.editablePriceSurveyId,
+                    priceSurveyItemId: that.editablePriceSurveyItemId,
+                });
+
+                model.on('price-survey-value-edited', function () {
+                    that.$el.find('#' + that.editablePriceSurveyId).html('' + newPrice);
+                    that.trigger('price-survey-value-edited');
+                });
+            });
         },
 
         brandSearch: function (value) {
