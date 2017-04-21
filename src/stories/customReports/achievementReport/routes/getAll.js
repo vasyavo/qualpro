@@ -78,7 +78,7 @@ module.exports = (req, res, next) => {
                             },
                         },
                     },
-                    date: 'createdBy.date',
+                    date: '$createdBy.date',
                 },
             },
         });
