@@ -128,10 +128,12 @@ allowedParams[CONTENT_TYPES.SHELFSHARES] = {
         create: []
     },
     1: {
-        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
+        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands'],
+        update: ['length']
     },
     2: {
-        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
+        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands'],
+        update: ['length']
     },
     3: {
         create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
@@ -149,10 +151,12 @@ allowedParams[CONTENT_TYPES.SHELFSHARES] = {
         create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
     },
     8: {
-        create: []
+        create: [],
+        update: ['length']
     },
     9: {
-        create: []
+        create: [],
+        update: ['length']
     },
     10: {
         create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
@@ -1391,11 +1395,11 @@ allowedParams[CONTENT_TYPES.PRICESURVEY] = {
     },
     1: {
         create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
-        update: []
+        update: ['price']
     },
     2: {
         create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
-        update: []
+        update: ['price']
     },
     3: {
         create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
@@ -1419,7 +1423,11 @@ allowedParams[CONTENT_TYPES.PRICESURVEY] = {
     },
     8: {
         create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
-        update: []
+        update: ['price']
+    },
+    9: {
+        create: [],
+        update: ['price']
     },
     10: {
         create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],

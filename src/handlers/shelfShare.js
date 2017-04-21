@@ -130,6 +130,7 @@ var ShelfShareHandler = function () {
                 isArray        : false,
                 includeSiblings: {
                     brands: {
+                        _id    : 1,
                         brand  : 1,
                         length : 1,
                         percent: 1
@@ -827,6 +828,63 @@ var ShelfShareHandler = function () {
             });
 
             res.status(200).send(model);
+        });
+    };
+
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+        const itemId = req.params.itemId;
+
+        const queryRun = (body, callback) => {
+            async.waterfall([
+                (cb) => {
+                    ShelfShareModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (model) => {
+                    if (model && model.brands) {
+                        model.brands.forEach((brand) => {
+                            if (brand._id.toString() === itemId) {
+                                brand.length = _.escape(body.length)
+                            }
+                        });
+
+                        const data = {
+                            brands : model.brands,
+                            editedBy: {
+                                user: userId,
+                                date: new Date()
+                            }
+                        };
+                        ShelfShareModel.findByIdAndUpdate(id, data, { new: true }, callback)
+                    }
+                },
+            ]);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.SHELF_SHARES, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.SHELFSHARES, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
         });
     };
 

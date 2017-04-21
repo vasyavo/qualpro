@@ -398,6 +398,63 @@ const create = (req, res, next) => {
     });
 };
 
+const update = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const requestBody = req.body;
+    const id = req.params.id;
+    const itemId = req.params.itemId;
+
+    const queryRun = (body, callback) => {
+        async.waterfall([
+            (cb) => {
+                PriceSurveyModel.findOne({ _id : id }).lean().exec(cb);
+            },
+            (model) => {
+                if (model && model.items) {
+                    model.items.forEach((item) => {
+                        if (item._id.toString() === itemId) {
+                            item.price = _.escape(body.price)
+                        }
+                    });
+
+                    const data = {
+                        items : model.items,
+                        editedBy: {
+                            user: userId,
+                            date: new Date()
+                        }
+                    };
+                    PriceSurveyModel.findByIdAndUpdate(id, data, { new: true }, callback)
+                }
+            },
+        ]);
+    };
+
+    async.waterfall([
+
+        (cb) => {
+            access.getEditAccess(req, ACL_MODULES.PRICE_SURVEY, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.PRICESURVEY, 'update', cb);
+        },
+
+        (body, cb) => {
+            queryRun(body, cb);
+        },
+
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+
+        res.status(200).send(body);
+    });
+};
+
 const getAll = (req, res, next) => {
     function queryRun(personnel) {
         var query = req.query;
@@ -983,6 +1040,7 @@ const getBrands = (req, res, next) => {
             isArray: false,
             includeSiblings: {
                 items: {
+                    _id: 1,
                     brand: 1,
                     price: 1,
                     size: 1
@@ -1174,4 +1232,5 @@ module.exports = {
     getAll,
     getBrands,
     getById,
+    update
 };

@@ -571,7 +571,7 @@ module.exports = [
         module: ACL_MODULES.SHELF_SHARES,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },
@@ -586,7 +586,7 @@ module.exports = [
         module: ACL_MODULES.PRICE_SURVEY,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },

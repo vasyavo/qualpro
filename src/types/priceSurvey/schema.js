@@ -46,7 +46,6 @@ const schema = new Schema({
     },
     items: {
         type: [{
-            _id: false,
             brand: {
                 type: ObjectId,
                 ref: CONTENT_TYPES.BRAND,
