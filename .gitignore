@@ -63,3 +63,7 @@ restore-staging-db.sh
 
 # QuotaGuard Tunnel
 /bin/qgtunnel
+
+# Qual Pro repositories
+/qualpro-spa-custom-reports
+/src/stories/customReports/frontend

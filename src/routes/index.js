@@ -80,6 +80,10 @@ module.exports = function(app) {
         });
     });
 
+    app.get('/custom-reports', csrfProtection, (req, res, next) => {
+        res.sendfile('./src/stories/customReports/frontend/index.html');
+    });
+
     // endpoint for handling api documents
     app.get('/docs', (req, res, next) => {
         res.render(path.join(process.cwd(), '/API_documentation/qualPro_API.html').normalize());
