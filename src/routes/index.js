@@ -80,9 +80,7 @@ module.exports = function(app) {
         });
     });
 
-    app.get('/custom-reports', csrfProtection, (req, res, next) => {
-        res.sendfile('./src/stories/customReports/frontend/index.html');
-    });
+    app.use('/custom-reports', express.static('src/stories/customReports/frontend/'));
 
     // endpoint for handling api documents
     app.get('/docs', (req, res, next) => {
