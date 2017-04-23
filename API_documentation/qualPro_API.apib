@@ -72,6 +72,37 @@ Http Code | Error Type           |  Error                             | Details
     + ar (string)
     + en: CARREFOUR (string)
 
+## Position
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
+## Personnel
++ _id: `5818b01a13187de020871b63` (string)
++ position: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
+## RetailSegment
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
+## SubRegion
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
+## Region
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
 ## File
 + _id: `5818b01a13187de020871b63` (string)
 + name: `57dbf068843d1c6e3a162bd9.jpg`(string)
@@ -211,6 +242,54 @@ Http Code | Error Type           |  Error                             | Details
 + after
     + files (array[VisibilityFormAfterBeforeDone])
 
+## CustomAchievementReportData
++ total: `5` (number)
++ _id: `5818b01a13187de020871b63` (string)
++ description
+    + en: `example desc` (string)
+    + ar: `example desc` (string)
++ additionalComment
+    + en: `example comment` (string)
+    + ar: `example comment` (string)
++ startDate: `2017-01-29T21:11:25.325Z` (string)
++ endDate: `2017-01-29T21:11:25.325Z` (string)
++ country: `583720173a90064c13696622` (string)
++ region: `583720173a90064c13696627` (string)
++ subRegion: `583720183a90064c13696658` (string)
++ retailSegment: `5837200e3a90064c1369631b` (string)
++ outlet: `583720123a90064c1369647d` (string)
++ branch: `58377150552b7be417097f98` (string)
++ archived: false (boolean)
++ attachments: (array)
+    + `589a00c3677fe800655a9ff9`
+    + `589a00c3677fe800655a9ffd`
+    + `589a00c3677fe800655a9ffb`
++ createdBy
+    + date: `2017-01-29T21:11:25.325Z` (string)
+    + user
+        + _id: `5837202b3a90064c13697a26` (string)
+        + name
+            + en: `HASSAN GAMAL IBRAHIM` (string)
+            + ar: (string)
+        + position: `583720173a90064c1369661b` (string)
++ editedBy
+    + date: `2017-02-07T17:15:47.675Z` (string)
+    + user: `5837202b3a90064c13697a26` (string)
+
+## CustomAchievementReportFilters
++ countries (array[Country])
++ regions (array[Region])
++ subRegions (array[SubRegion])
++ retailSegments (array[RetailSegment])
++ outlets (array[Outlet])
++ branches (array[Branch])
++ personnels (array[Personnel])
++ positions (array[Position])
+
+## GetPreviews
++ previews (array)
+    + `5818b01a13187de020871b63` (string)
+
 ## Preview
 + _id: `5818b01a13187de020871b63` (string)
 + base64: `data:image/png;base64,iVBORw0KGg....` (string)
@@ -218,9 +297,6 @@ Http Code | Error Type           |  Error                             | Details
 + isDefault: false (boolean)
 + itemId: `5818b01a13187de020871b63` (string)
 
-## GetPreviews
-+ previews (array)
-    + `5818b01a13187de020871b63` (string)
 
 # Group ContactUs
 
@@ -507,5 +583,49 @@ Group Get Preview For Sync
     + Attributes (GetPreviews)
 + Response 200 (application/json)
     + Attributes (array[Preview])
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+# Group Custom reports
+
+## Group Achievement report [/customReports/achievementReport]
+
+### Get all data [GET]
+Group Get achievement data
+
++ Parameters
+    + page: (number)
+    + count (number)
+    + filter (object)
+        + country (Array) - array of countries id
+        + region (Array) - array of regions id
+        + subRegion (Array) - array of subRegions id
+        + retailSegment (Array) - array of retailSegments id
+        + outlet (Array) - array of outlets id
+        + branch (Array) - array of branches id
+        + personnel (Array) - array of personnels id
+        + position (Array) - array of positions id
++ Response 200 (application/json)
+    + Attributes
+        + total (number)
+        + data (array[CustomAchievementReportData])
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+### Get filters data [GET]
+Group Get achievement filters data
+
++ Parameters
+    + filter (object)
+        + country (Array) - array of countries id
+        + region (Array) - array of regions id
+        + subRegion (Array) - array of subRegions id
+        + retailSegment (Array) - array of retailSegments id
+        + outlet (Array) - array of outlets id
+        + branch (Array) - array of branches id
+        + personnel (Array) - array of personnels id
+        + position (Array) - array of positions id
++ Response 200 (application/json)
+    + Attributes (CustomAchievementReportFilters)
 + Response 400 (application/json)
     + Attributes (GenericError)
