@@ -47,4 +47,5 @@ module.exports = {
     PRICE_REPORT: 1001,
     COMMENT: 1010,
     VISIBILITY_FORM: 1110,
+    IMPORT_EXPORT: 46,
 };
