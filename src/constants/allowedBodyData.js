@@ -270,11 +270,11 @@ allowedParams[CONTENT_TYPES.PROMOTIONSITEMS] = {
     },
     1: {
         create: ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText'],
-        update: []
+        update: ['dateStart', 'dateEnd', 'rsp', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'comment']
     },
     2: {
         create: ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText'],
-        update: []
+        update: ['dateStart', 'dateEnd', 'rsp', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'comment']
     },
     3: {
         create: ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText'],
@@ -297,13 +297,15 @@ allowedParams[CONTENT_TYPES.PROMOTIONSITEMS] = {
         update: []
     },
     8: {
-        create: []
+        create: [],
+        update: ['dateStart', 'dateEnd', 'rsp', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'comment']
     },
     9: {
-        create: []
+        create: [],
+        update: ['dateStart', 'dateEnd', 'rsp', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'comment']
     },
     10: {
-        create:  ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText']
+        create: ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText']
     }
 };
 
@@ -1211,11 +1213,11 @@ allowedParams[CONTENT_TYPES.COMPETITORPROMOTION] = {
     },
     1: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
-        update: []
+        update: ['promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd']
     },
     2: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
-        update: []
+        update: ['promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd']
     },
     3: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
@@ -1239,11 +1241,11 @@ allowedParams[CONTENT_TYPES.COMPETITORPROMOTION] = {
     },
     8: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
-        update: []
+        update: ['promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd']
     },
     9: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
-        update: []
+        update: ['promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd']
     },
     10: {
         create: ['description', 'packingType', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'promotion', 'price', 'packing', 'expiry', 'displayType', 'dateStart', 'dateEnd', 'commentText'],
