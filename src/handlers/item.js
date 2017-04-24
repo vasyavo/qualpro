@@ -46,9 +46,10 @@ const Item = function () {
         retailSegment: 1,
     };
 
-    const logToHistory = (payload, userId) => {
+    const logToHistory = (payload, userId, itemId) => {
         const body = {
             headers: {
+                itemId,
                 contentType: 'item',
                 actionType: 'itemChanged',
                 user: userId,
@@ -271,7 +272,7 @@ const Item = function () {
                     res.status(201).send(model);
                 });
 
-                logToHistory(model.toJSON(), userId);
+                logToHistory(model.toJSON(), userId, model._id);
             });
         }
 
@@ -1046,7 +1047,7 @@ const Item = function () {
                     res.status(200).send(model);
                 });
 
-                logToHistory(body, userId);
+                logToHistory(body, userId, model._id);
             });
         }
 

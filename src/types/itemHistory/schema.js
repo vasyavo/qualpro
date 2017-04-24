@@ -7,10 +7,10 @@ const schema = new Schema({
     headers: {
         contentType: { type: String, enum: ['item'] },
         actionType: { type: String, enum: ['itemChanged'] },
+        itemId: { type: ObjectId },
         user: {
             type: ObjectId,
             ref: CONTENT_TYPES.PERSONNEL,
-            default: null,
         },
         date: {
             type: Date,

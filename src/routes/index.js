@@ -63,8 +63,6 @@ module.exports = function(app) {
 
     var promotionsRouter = require('./promotions')();
 
-    var itemHistoryRouter = require('./itemHistory')();
-
     var displayTypeRouter = require('./displayType')();
 
     app.use(addRequestId);
@@ -145,8 +143,6 @@ module.exports = function(app) {
     app.use('/notes', noteRouter);
 
     app.use('/promotions', promotionsRouter);
-
-    app.use('/itemHistory', itemHistoryRouter);
 
     app.use('/accessRole', accessRoleRouter);
 
