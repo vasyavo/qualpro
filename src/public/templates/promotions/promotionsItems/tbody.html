@@ -45,7 +45,7 @@
     <td class="noPadding promotionTableList">
         <ul class="promotionList markedList">
             <% branches.closingStock.forEach(function(elem, index) { %>
-            <% if ((index !==1) || (index === 1 && ++index !== branches.closingStock.length)) { %>
+            <% if ((index !== 1) || (index === 1 && ++index !== branches.closingStock.length)) { %>
             <li><%- elem %></li>
             <% } %>
             <% }) %>
@@ -87,6 +87,10 @@
             <% } %>
         </div>
         <% } %>
+    </td>
+    <td>
+        <button id="edit" data-id="<%- branches._id %>">Edit</button>
+        <button id="delete" data-id="<%- branches._id %>">Delete</button>
     </td>
 </tr>
 <% } %>

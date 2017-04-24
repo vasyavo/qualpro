@@ -13,10 +13,11 @@ define([
     'collections/file/collection',
     'views/fileDialog/fileDialog',
     'constants/contentType',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'views/promotions/editPromotionItem'
 ], function (Backbone, $, _, BaseDialog, template, tbodyTemplate, paginationTemplate, FilePreviewTemplate,
-             Collection, dataService, CONSTANTS, FileCollection, FileDialogPreviewView, CONTENT_TYPES,
-             ERROR_MESSAGES) {
+             Collection, dataService, CONSTANTS, FileCollection, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES,
+             EditPromotionItemView) {
 
     var PromotionsItemsView = BaseDialog.extend({
         contentType        : CONTENT_TYPES.PROMOTIONSITEMS,
@@ -36,7 +37,8 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #edit': 'editTableItemData',
         },
 
         initialize: function (options) {
@@ -61,12 +63,40 @@ define([
                 this.render();
             }, this);
 
-            this.collection.on('showMore', function (collection) {
+            this.collection.on('showMore', function () {
                 this.renderTbody();
             }, this);
-            this.collection.on('reset', function (collection) {
+            this.collection.on('reset', function () {
                 this.renderTbody();
             }, this);
+        },
+
+        editTableItemData: function (event) {
+            var target = $(event.target);
+            var branchId = target.attr('data-id');
+            var stopMapping = false;
+            var searchedBranch = null;
+
+            this.collection.toJSON().some(function(outlet) {
+                outlet.branches.some(function (branch) {
+                    if (branch._id === branchId) {
+                        searchedBranch = branch;
+
+                        stopMapping = true;
+                    }
+
+                    return stopMapping;
+                });
+
+                return stopMapping;
+            });
+
+            if (searchedBranch) {
+                this.editPromotionItemView = new EditPromotionItemView({
+                    translation: this.translation,
+                    branch: searchedBranch,
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
