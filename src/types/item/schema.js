@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const Schema = require('mongoose').Schema;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType');
-const ItemHistoryModel = require('./../itemHistory/model');
 
 const ObjectId = Schema.Types.ObjectId;
 
@@ -128,43 +127,6 @@ schema.pre('save', function(next) {
     this.rspMin = Math.round(this.rspMin * 100);
     this.rspMax = Math.round(this.rspMax * 100);
     this.pptPerCase = Math.round(this.pptPerCase * 100);
-
-    next();
-});
-
-schema.pre('update', function(next) {
-    if (this._update.$set && this._update.$set.ppt) {
-        const item = this._conditions._id;
-        const price = this._update.$set.ppt;
-        const rspMin = this._update.$set.rspMin;
-        const rspMax = this._update.$set.rspMax;
-        const pptPerCase = this._update.$set.pptPerCase;
-        const createdBy = this._update.$set.editedBy;
-
-        this.update({}, {
-            $set: {
-                ppt: Math.round(price * 100),
-                rspMin: Math.round(rspMin * 100),
-                rspMax: Math.round(rspMax * 100),
-                pptPerCase: Math.round(pptPerCase * 100),
-            },
-        });
-
-        return ItemHistoryModel.create({
-            item,
-            ppt: price,
-            rspMin,
-            rspMax,
-            pptPerCase,
-            createdBy,
-        }, (err) => {
-            if (err) {
-                return next(err);
-            }
-
-            next();
-        });
-    }
 
     next();
 });
