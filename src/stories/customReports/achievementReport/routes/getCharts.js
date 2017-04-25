@@ -5,7 +5,6 @@ const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const AchievementFormModel = require('./../../../../types/achievementForm/model');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 
@@ -15,9 +14,6 @@ module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
         const query = req.query;
         const queryFilter = query.filter || {};
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
@@ -97,52 +93,33 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
-                _id: null,
-                total: { $sum: 1 },
-                setAchievementForm: { $push: '$$ROOT' },
+                _id: '$createdBy.user._id',
+                achievementCount: { $sum: 1 },
+                personnel: { $first: '$createdBy.user' },
             },
-        });
-
-        pipeline.push({
-            $unwind: '$setAchievementForm',
-        });
-
-        pipeline.push({
-            $project: {
-                _id: '$setAchievementForm._id',
-                description: '$setAchievementForm.description',
-                additionalComment: '$setAchievementForm.additionalComment',
-                startDate: '$setAchievementForm.startDate',
-                endDate: '$setAchievementForm.endDate',
-                personnel: '$setAchievementForm.personnel',
-                country: '$setAchievementForm.country',
-                region: '$setAchievementForm.region',
-                subRegion: '$setAchievementForm.subRegion',
-                retailSegment: '$setAchievementForm.retailSegment',
-                outlet: '$setAchievementForm.outlet',
-                branch: '$setAchievementForm.branch',
-                attachments: '$setAchievementForm.attachments',
-                archived: '$setAchievementForm.archived',
-                createdBy: '$setAchievementForm.createdBy',
-                editedBy: '$setAchievementForm.editedBy',
-                total: 1,
-            },
-        });
-
-        pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
         });
 
         pipeline.push({
             $group: {
                 _id: null,
-                total: { $first: '$total' },
+                labels: { $addToSet: '$achievementCount' },
                 data: {
-                    $push: '$$ROOT',
+                    $push: {
+                        value: '$achievementCount',
+                        label: '$personnel.name',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                lineChart: {
+                    data: '$data',
+                    labels: '$labels',
+                },
+                pieChart: {
+                    data: '$data',
                 },
             },
         });
@@ -164,8 +141,10 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result.length ?
-            result[0] : { data: [], total: 0 };
+        const response = result[0];
+
+        response.lineChart.labels.sort();
+        response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
 
         res.status(200).send(response);
     });

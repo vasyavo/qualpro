@@ -41,11 +41,13 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if ($generalMatch.$and.length) {
-            pipeline.push({
-                $match: $generalMatch,
-            });
-        }
+        $generalMatch.$and.push({
+            archived: false,
+        });
+
+        pipeline.push({
+            $match: $generalMatch,
+        });
 
         pipeline.push({
             $lookup: {
