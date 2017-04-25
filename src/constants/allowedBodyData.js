@@ -1307,11 +1307,11 @@ allowedParams[CONTENT_TYPES.NEWPRODUCTLAUNCH] = {
     },
     1: {
         create: ['additionalComment', 'category', 'packingType', 'category_name', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
-        update: []
+        update: ['origin', 'packing', 'price', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd', 'additionalComment']
     },
     2: {
         create: ['additionalComment', 'category', 'packingType', 'category_name', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
-        update: []
+        update: ['origin', 'packing', 'price', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd', 'additionalComment']
     },
     3: {
         create: ['additionalComment', 'category', 'packingType', 'category_name', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
@@ -1335,11 +1335,11 @@ allowedParams[CONTENT_TYPES.NEWPRODUCTLAUNCH] = {
     },
     8: {
         create: ['additionalComment', 'category', 'packingType', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
-        update: []
+        update: ['origin', 'packing', 'price', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd', 'additionalComment']
     },
     9: {
         create: ['additionalComment', 'category', 'packingType', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],
-        update: []
+        update: ['origin', 'packing', 'price', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd', 'additionalComment']
     },
     10: {
         create: ['additionalComment', 'category', 'packingType', 'variant', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'origin', 'price', 'packing', 'location', 'displayType', 'distributor', 'shelfLifeStart', 'shelfLifeEnd'],

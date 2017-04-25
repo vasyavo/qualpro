@@ -196,6 +196,39 @@ var NewProductLaunch = function() {
         });
     };
 
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+
+        const queryRun = (body, callback) => {
+            body.editedBy = {
+                user: userId,
+                date: Date.now()
+            };
+            NewProductLaunchModel.findByIdAndUpdate(id, body, { new: true }, callback)
+        };
+
+        async.waterfall([
+            (cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.NEWPRODUCTLAUNCH, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
+        });
+    };
+
     this.getAll = function(req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
