@@ -160,17 +160,21 @@ define([
                     $loader.addClass('smallLogo').removeClass('ellipseAnimated');
                 }
 
-                var importExportModel = new ImportExportModel();
+                require(['translations/' + App.currentUser.currentLanguage + '/importExport'], function (translation) {
+                    var importExportModel = new ImportExportModel();
 
-                var importExportTopBar = new ImportExportTopBarView({
-                    model: importExportModel,
-                });
-                $('#topBarHolder').html(importExportTopBar.render().$el);
+                    var importExportTopBar = new ImportExportTopBarView({
+                        model: importExportModel,
+                        translation: translation,
+                    });
+                    $('#topBarHolder').html(importExportTopBar.render().$el);
 
-                var importExportOverview = new ImportExportOverview({
-                    model: importExportModel,
+                    var importExportOverview = new ImportExportOverview({
+                        model: importExportModel,
+                        translation: translation,
+                    });
+                    $('#contentHolder').html(importExportOverview.render().$el);
                 });
-                $('#contentHolder').html(importExportOverview.render().$el);
             });
         },
 

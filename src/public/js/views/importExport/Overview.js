@@ -11,10 +11,20 @@ define(function (require) {
 
     return Marionette.View.extend({
 
+        initialize: function (options) {
+            this.translation = options.translation;
+        },
+
         className: 'row import-buttons',
 
-        template: function () {
-            return Template;
+        template: function (ops) {
+            return _.template(Template)(ops);
+        },
+
+        templateContext: function () {
+            return {
+                translation: this.translation,
+            };
         },
 
         ui: {
@@ -72,12 +82,13 @@ define(function (require) {
         },
 
         onRender: function () {
+            var that = this;
             var ui = this.ui;
             var currentLanguage = App.currentUser.currentLanguage;
 
             ui.locations.dropzone({
                 url: 'import/locations',
-                paramName: 'file',
+                paramName: 'source',
                 maxFilesize: 5,
                 uploadMultiple: false,
                 previewsContainer: false,
@@ -95,9 +106,11 @@ define(function (require) {
                     done();
                 },
                 success: function (file, response) {
-                    debugger;
+                    response.totalErrors = 1;
                     if (response.totalErrors) {
-                        this.importErrorsView = new ImportErrorsView();
+                        this.importErrorsView = new ImportErrorsView({
+                            translation: that.translation,
+                        });
                     } else {
                         App.render({
                             type: 'notification',
@@ -105,9 +118,9 @@ define(function (require) {
                         });
                     }
                 },
-                error: function (file, errorMessage, response) {
+                error: function (file, error) {
                     App.renderErrors([
-                        ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
                     ]);
                 }
             });
@@ -182,6 +195,7 @@ define(function (require) {
 
         actionChanged: function () {
             var ui = this.ui;
+            var translation = this.translation;
             var action = this.model.get('action');
 
             if (action === 'export') {
@@ -190,20 +204,20 @@ define(function (require) {
                 ui.itemPrices[0].dropzone.disable();
                 ui.competitorList[0].dropzone.disable();
 
-                ui.locationsButtonTitle.html('Export Locations');
-                ui.personnelsButtonTitle.html('Export Personnel');
-                ui.itemPricesButtonTitle.html('Export Items&Prices');
-                ui.competitorListButtonTitle.html('Export Competitor list');
+                ui.locationsButtonTitle.html(translation.exportLocationsTitle);
+                ui.personnelsButtonTitle.html(translation.exportPersonnelTitle);
+                ui.itemPricesButtonTitle.html(translation.exportItemsPricesTitle);
+                ui.competitorListButtonTitle.html(translation.exportCompetitorListTitle);
             } else {
                 ui.locations[0].dropzone.enable();
                 ui.personnels[0].dropzone.enable();
                 ui.itemPrices[0].dropzone.enable();
                 ui.competitorList[0].dropzone.enable();
 
-                ui.locationsButtonTitle.html('Import Locations');
-                ui.personnelsButtonTitle.html('Import Personnel');
-                ui.itemPricesButtonTitle.html('Import Items&Prices');
-                ui.competitorListButtonTitle.html('Import Competitor list');
+                ui.locationsButtonTitle.html(translation.importLocationsTitle);
+                ui.personnelsButtonTitle.html(translation.importPersonnelTitle);
+                ui.itemPricesButtonTitle.html(translation.importItemsPricesTitle);
+                ui.competitorListButtonTitle.html(translation.importCompetitorListTitle);
             }
         }
 
