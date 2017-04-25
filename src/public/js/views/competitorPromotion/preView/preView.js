@@ -19,11 +19,13 @@ define([
     'constants/contentType',
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'constants/aclRoleIndexes',
+    'views/competitorPromotion/edit'
 ], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService, CONTENT_TYPES,
-             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
+             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORPROMOTION,
@@ -49,7 +51,8 @@ define([
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
-            'click #goToBtn'                  : 'goTo'
+            'click #goToBtn'                  : 'goTo',
+            'click #edit' : 'showEditView',
         },
 
         initialize: function (options) {
@@ -64,6 +67,13 @@ define([
 
             self.makeRender();
             self.render();
+        },
+
+        showEditView: function () {
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -334,15 +344,30 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var currentConfig = this.activityList ? levelConfig[this.contentType].activityList.preview : [];
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = levelConfig[this.contentType].activityList.preview;
+            } else {
+                currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
 
             jsonModel.displayTypeString = jsonModel.displayType.map((item) => {
                 return item.name.currentLanguage;
             }).join(', ');
 
+            var currentUserPermittedToEdit = ([
+                ACL_ROLES.MASTER_ADMIN,
+                ACL_ROLES.COUNTRY_ADMIN,
+                ACL_ROLES.MASTER_UPLOADER,
+                ACL_ROLES.COUNTRY_UPLOADER,
+            ].includes(App.currentUser.accessRole.level)
+            && App.currentUser.workAccess);
+
             formString = this.$el.html(this.template({
                 model      : jsonModel,
-                translation: self.translation
+                translation: self.translation,
+                permittedToEdit: currentUserPermittedToEdit,
             }));
 
             this.$el = formString.dialog({
@@ -382,7 +407,7 @@ define([
                 }
             });
 
-            if (App.currentUser.workAccess && this.activityList) {
+            if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template

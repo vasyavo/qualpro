@@ -4,9 +4,9 @@ define(function (require) {
     var moment = require('moment');
     var _ = require('underscore');
     var Backbone = require('backbone');
-    var Template = require('text!../../../templates/promotions/edit-promotion-item.html');
-    var DisplayTypeCollection = require('collections/displayType/collection');
     var Populate = require('populate');
+    var DisplayTypeCollection = require('collections/displayType/collection');
+    var Template = require('text!../../../templates/promotions/edit-promotion-item.html');
 
     return Backbone.View.extend({
 
