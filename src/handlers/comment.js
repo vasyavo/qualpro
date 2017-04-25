@@ -216,6 +216,10 @@ var Comment = function () {
                             ActivityLog.emit('reporting:competitor-promotion-activities:comment-added', eventPayload);
                         }
 
+                        if (context === CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY) {
+                            ActivityLog.emit('marketing:al-alali-branding-and-monthly-display:commend-added', eventPayload);
+                        }
+
                         cb(null, comment);
                     });
                 },
