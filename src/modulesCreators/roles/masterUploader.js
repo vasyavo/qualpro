@@ -407,7 +407,7 @@ module.exports = [
         module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },
