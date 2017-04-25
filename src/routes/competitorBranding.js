@@ -22,5 +22,10 @@ module.exports = function () {
         })
     }, handler.getById);
 
+    router.put('/:id([0-9a-fA-F]{24})', function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err) {
+            err ? next(err) : next();
+        })
+    }, handler.update);
     return router;
 };

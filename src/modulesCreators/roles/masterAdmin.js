@@ -481,7 +481,7 @@ module.exports = [
         module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },
@@ -496,7 +496,7 @@ module.exports = [
         module: ACL_MODULES.ACHIEVEMENT_FORM,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },
