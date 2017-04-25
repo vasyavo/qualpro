@@ -104,7 +104,9 @@ define([
                     model.editTableItemData(promotionItemId, data);
 
                     model.on('promotion-item-data-edited', function () {
-                        that.collection.trigger('showMore');
+                        that.collection.getPage(that.collection.currentPage, {
+                            promotion: that.promotion,
+                        });
                         that.editPromotionItemView.$el.dialog('close').dialog('destroy').remove();
                     });
                 });

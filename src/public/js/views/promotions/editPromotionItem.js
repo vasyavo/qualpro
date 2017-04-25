@@ -39,30 +39,6 @@ define(function (require) {
             var model = this.editableBranch;
             var dateStart = moment(model.dateStart, 'DD.MM.YYYY');
             var dateEnd = moment(model.dateEnd, 'DD.MM.YYYY');
-            var $startDate = this.$el.find('#dateStart');
-            var $dueDate = this.$el.find('#dateEnd');
-
-            var startDateObj = {
-                changeMonth: true,
-                changeYear : true,
-                maxDate : new Date(dateEnd),
-                yearRange  : '-20y:c+10y',
-                defaultDate: new Date(dateStart),
-                onClose    : function (selectedDate) {
-                    $dueDate.datepicker('option', 'minDate', selectedDate);
-                }
-            };
-
-            var endDateObj = {
-                changeMonth: true,
-                changeYear : true,
-                minDate : new Date(dateStart),
-                yearRange  : '-20y:c+10y',
-                defaultDate: new Date(dateEnd),
-                onClose    : function (selectedDate) {
-                    $startDate.datepicker('option', 'maxDate', selectedDate);
-                }
-            };
 
             var layout = $(this.template({
                 translation: this.translation,
@@ -83,11 +59,11 @@ define(function (require) {
                                 sellIn: [ui.sellIn.val()],
                                 sellOut: [ui.sellOut.val()],
                                 closingStock: [ui.closingStock.val()],
-                                dateStart: ui.dateStart.val(),
-                                dateEnd: ui.dateEnd.val(),
+                                dateStart: moment(ui.dateStart.val(), 'DD.MM.YYYY').toDate(),
+                                dateEnd: moment(ui.dateEnd.val(), 'DD.MM.YYYY').toDate(),
                                 displayType: [that.$el.find('#displayTypeDd').attr('data-id')],
                                 comment: {
-                                    _id: ui.comment.attr('data-id'),
+                                    id: ui.comment.attr('data-id'),
                                     text: ui.comment.val(),
                                 }
                             };
@@ -115,10 +91,37 @@ define(function (require) {
                 });
             }, this);
 
+            var $startDate = this.$el.find('#date-start');
+            var $dueDate = this.$el.find('#date-end');
+
+            var startDateObj = {
+                changeMonth: true,
+                changeYear : true,
+                maxDate : new Date(dateEnd),
+                yearRange  : '-20y:c+10y',
+                defaultDate: new Date(dateStart),
+                onClose    : function (selectedDate) {
+                    $dueDate.datepicker('option', 'minDate', selectedDate);
+                }
+            };
+
+            var endDateObj = {
+                changeMonth: true,
+                changeYear : true,
+                minDate : new Date(dateStart),
+                yearRange  : '-20y:c+10y',
+                defaultDate: new Date(dateEnd),
+                onClose    : function (selectedDate) {
+                    $startDate.datepicker('option', 'maxDate', selectedDate);
+                }
+            };
+
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
 
             this.delegateEvents(this.events);
+
+            return this;
         }
 
     });

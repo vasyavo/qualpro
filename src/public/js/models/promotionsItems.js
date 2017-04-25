@@ -103,7 +103,7 @@ define([
                     ]);
                 }
 
-                dataService.putData('/promotionItems/' + promotionItemId, data, function (err) {
+                dataService.putData('/promotionsItems/' + promotionItemId, data, function (err) {
                     if (err) {
                         return App.renderErrors([
                             err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
