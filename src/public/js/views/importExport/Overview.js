@@ -110,6 +110,7 @@ define(function (require) {
                     if (response.totalErrors) {
                         this.importErrorsView = new ImportErrorsView({
                             translation: that.translation,
+                            models: response.result,
                         });
                     } else {
                         App.render({
@@ -127,7 +128,7 @@ define(function (require) {
 
             ui.personnels.dropzone({
                 url: 'import/personnels',
-                paramName: 'file',
+                paramName: 'source',
                 maxFilesize: 5,
                 uploadMultiple: false,
                 previewsContainer: false,
@@ -143,12 +144,30 @@ define(function (require) {
                     }
 
                     done();
+                },
+                success: function (file, response) {
+                    if (response.totalErrors) {
+                        this.importErrorsView = new ImportErrorsView({
+                            translation: that.translation,
+                            models: response.result,
+                        });
+                    } else {
+                        App.render({
+                            type: 'notification',
+                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
+                        });
+                    }
+                },
+                error: function (file, error) {
+                    App.renderErrors([
+                        error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
                 }
             });
 
             ui.itemPrices.dropzone({
                 url: 'import/itemPrices',
-                paramName: 'file',
+                paramName: 'source',
                 maxFilesize: 5,
                 uploadMultiple: false,
                 previewsContainer: false,
@@ -164,12 +183,30 @@ define(function (require) {
                     }
 
                     done();
+                },
+                success: function (file, response) {
+                    if (response.totalErrors) {
+                        this.importErrorsView = new ImportErrorsView({
+                            translation: that.translation,
+                            models: response.result,
+                        });
+                    } else {
+                        App.render({
+                            type: 'notification',
+                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
+                        });
+                    }
+                },
+                error: function (file, error) {
+                    App.renderErrors([
+                        error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
                 }
             });
 
             ui.competitorList.dropzone({
                 url: 'import/competitorList',
-                paramName: 'file',
+                paramName: 'source',
                 maxFilesize: 5,
                 uploadMultiple: false,
                 previewsContainer: false,
@@ -185,6 +222,24 @@ define(function (require) {
                     }
 
                     done();
+                },
+                success: function (file, response) {
+                    if (response.totalErrors) {
+                        this.importErrorsView = new ImportErrorsView({
+                            translation: that.translation,
+                            models: response.result,
+                        });
+                    } else {
+                        App.render({
+                            type: 'notification',
+                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
+                        });
+                    }
+                },
+                error: function (file, error) {
+                    App.renderErrors([
+                        error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
                 }
             });
         },
