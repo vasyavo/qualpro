@@ -28,6 +28,7 @@ define(function (require) {
                 sellOut: view.find('#sell-out'),
                 dateStart: view.find('#date-start'),
                 dateEnd: view.find('#date-end'),
+                comment: view.find('#comment'),
             };
         },
 
@@ -85,10 +86,13 @@ define(function (require) {
                                 dateStart: ui.dateStart.val(),
                                 dateEnd: ui.dateEnd.val(),
                                 displayType: [that.$el.find('#displayTypeDd').attr('data-id')],
+                                comment: {
+                                    _id: ui.comment.attr('data-id'),
+                                    text: ui.comment.val(),
+                                }
                             };
 
-                            that.trigger('edit-promotion-item', data);
-                            that.$el.dialog('close').dialog('destroy').remove();
+                            that.trigger('edit-promotion-item', data, model.promotionItemId);
                         }
                     }
                 }

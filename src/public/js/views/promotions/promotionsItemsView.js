@@ -14,10 +14,11 @@ define([
     'views/fileDialog/fileDialog',
     'constants/contentType',
     'constants/errorMessages',
-    'views/promotions/editPromotionItem'
+    'views/promotions/editPromotionItem',
+    'models/promotionsItems'
 ], function (Backbone, $, _, BaseDialog, template, tbodyTemplate, paginationTemplate, FilePreviewTemplate,
              Collection, dataService, CONSTANTS, FileCollection, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES,
-             EditPromotionItemView) {
+             EditPromotionItemView, PromotionItemModel) {
 
     var PromotionsItemsView = BaseDialog.extend({
         contentType        : CONTENT_TYPES.PROMOTIONSITEMS,
@@ -72,6 +73,7 @@ define([
         },
 
         editTableItemData: function (event) {
+            var that = this;
             var target = $(event.target);
             var branchId = target.attr('data-id');
             var stopMapping = false;
@@ -95,6 +97,16 @@ define([
                 this.editPromotionItemView = new EditPromotionItemView({
                     translation: this.translation,
                     branch: searchedBranch,
+                });
+
+                this.editPromotionItemView.on('edit-promotion-item', function (data, promotionItemId) {
+                    var model = new PromotionItemModel();
+                    model.editTableItemData(promotionItemId, data);
+
+                    model.on('promotion-item-data-edited', function () {
+                        that.collection.trigger('showMore');
+                        that.editPromotionItemView.$el.dialog('close').dialog('destroy').remove();
+                    });
                 });
             }
         },
