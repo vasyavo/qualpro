@@ -621,14 +621,20 @@ var Promotions = function () {
                         user: req.session.uId,
                         date: Date.now()
                     };
-                    CommentModel.findByIdAndUpdate(body.comment.id, { body: body.comment.text, editedBy }, { new: true }, cb)
+                    if (body.comment) {
+                        CommentModel.findByIdAndUpdate(body.comment.id, { body: body.comment.text, editedBy }, { new: true }, cb)
+                    } else {
+                        cb();
+                    }
                 },
                 (comment) => {
                     body.editedBy = {
                         user: req.session.uId,
                         date: Date.now()
                     };
-                    body.comment = comment._id;
+                    if (comment) {
+                        body.comment = comment._id;
+                    }
                     PromotionItemModel.findByIdAndUpdate(id, body, { new: true }, callback)
                 }
             ]);

@@ -228,7 +228,7 @@ var CompetitorBranding = function() {
         const id = req.params.id;
 
         const queryRun = (body, callback) => {
-            bodyeditedBy = {
+            body.editedBy = {
                 user: userId,
                 date: Date.now()
             };
