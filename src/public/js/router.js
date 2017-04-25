@@ -151,7 +151,7 @@ define([
                 }
 
                 if (!that.wrapperView) {
-                    that.main('documents');
+                    that.main('importExport');
                 }
 
                 var $loader = $('#alaliLogo');

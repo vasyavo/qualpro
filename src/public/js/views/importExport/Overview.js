@@ -1,9 +1,11 @@
 define(function (require) {
 
     var Marionette = require('marionette');
-    var Template = require('text!../../../templates/importExport/overview.html');
-    var MS_EXEL_CONTENT_TYPES = require('../../constants/otherConstants').MS_EXCEL_CONTENT_TYPES;
-    var ERROR_MESSAGES = require('../../constants/errorMessages');
+    var ImportErrorsView = require('views/importExport/ImportErrors');
+    var Template = require('text!templates/importExport/overview.html');
+    var MS_EXEL_CONTENT_TYPES = require('constants/otherConstants').MS_EXCEL_CONTENT_TYPES;
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var INFO_MESSAGES = require('constants/infoMessages');
 
     require('dropzone');
 
@@ -91,6 +93,22 @@ define(function (require) {
                     }
 
                     done();
+                },
+                success: function (file, response) {
+                    debugger;
+                    if (response.totalErrors) {
+                        this.importErrorsView = new ImportErrorsView();
+                    } else {
+                        App.render({
+                            type: 'notification',
+                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
+                        });
+                    }
+                },
+                error: function (file, errorMessage, response) {
+                    App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
                 }
             });
 
