@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const async = require('async');
+const Ajv = require('ajv');
 const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
@@ -9,11 +10,29 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 
+const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
+    const timeFilterSchema = {
+        type: 'object',
+        properties: {
+            from: {
+                type: 'string',
+            },
+            to: {
+                type: 'string',
+            },
+        },
+        required: [
+            'from',
+            'to',
+        ],
+    };
+
     const queryRun = (personnel, callback) => {
         const query = req.query;
+        const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
@@ -24,6 +43,19 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
+
+        if (timeFilter) {
+            const timeFilterValidate = ajv.compile(timeFilterSchema);
+            const timeFilterValid = timeFilterValidate(timeFilter);
+
+            if (!timeFilterValid) {
+                const err = new Error(timeFilterValidate.errors[0].message);
+
+                err.status = 400;
+
+                return next(err);
+            }
+        }
 
         filters.forEach((filterName) => {
             if (queryFilter[filterName] && queryFilter[filterName][0]) {
@@ -43,6 +75,17 @@ module.exports = (req, res, next) => {
                     $in: _.union(queryFilter[CONTENT_TYPES.PERSONNEL], personnel._id),
                 },
             });
+        }
+
+        if (timeFilter) {
+            $generalMatch.$and = [
+                {
+                    'createdBy.date': { $gt: new Date(timeFilter.from) },
+                },
+                {
+                    'createdBy.date': { $lt: new Date(timeFilter.to) },
+                },
+            ];
         }
 
         if ($generalMatch.$and.length) {
