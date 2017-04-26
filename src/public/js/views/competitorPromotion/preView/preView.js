@@ -84,7 +84,7 @@ define([
 
                 model.edit(competitorPromotionId, data);
 
-                model.on('competitor-promotion-edited', function () {
+                model.on('competitor-promotion-edited', function (response) {
                     var view = that.$el;
 
                     view.find('#promotion').html(data.promotion);
@@ -93,6 +93,12 @@ define([
                     view.find('#expiry').html(moment(data.expiry).format('DD.MM.YYYY'));
                     view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
                     view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+
+                    var displayTypeString = response.displayType.map(function (item) {
+                        return item.name[App.currentUser.currentLanguage];
+                    }).join(', ');
+
+                    view.find('#display-type').html(displayTypeString);
 
                     that.editView.$el.dialog('close').dialog('destroy').remove();
 
