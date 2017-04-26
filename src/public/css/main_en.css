@@ -11378,3 +11378,6 @@ label[for=searchInputnoCT]::after {
 .competitorBrandingPreview  {
   height: calc(100% - 160px);
 }
+.competitorBrandingPreview.promo-evaluation  {
+  height: calc(100% - 210px);
+}
