@@ -55,7 +55,8 @@
                                 <span><%= translation.packing %></span>
                             </div>
                             <div class="cell textEllipsis hoverFullText">
-                                <span id="packing"><%= model.packing || '' %> <%- model.packingType || '' %></span>
+                                <span id="packing"><%= model.packing || '' %></span>
+                                <span id="packing-type"><%- model.packingType || '' %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -136,7 +137,7 @@
                                 <span><%= translation.startDate %></span>
                             </div>
                             <div class="cell textEllipsis hoverFullText">
-                                <span><%= model.dateStart %></span>
+                                <span id="date-start"><%= model.dateStart %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -144,7 +145,7 @@
                                 <span><%= translation.endDate %></span>
                             </div>
                             <div class="cell textEllipsis hoverFullText">
-                                <span><%= model.dateEnd %></span>
+                                <span id="date-end"><%= model.dateEnd %></span>
                             </div>
                         </div>
                     </div>

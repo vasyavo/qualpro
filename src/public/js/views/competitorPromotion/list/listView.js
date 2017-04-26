@@ -45,6 +45,11 @@ define(function(require) {
             this.preView.on('modelChanged', function (count) {
                 self.changeCommentCount(count, $targetRow);
             });
+            this.preView.on('update-list-view', function () {
+                self.collection.getPage(self.collection.currentPage, {
+                    filter: self.filter,
+                });
+            });
         },
 
         changeCommentCount: function (count, $targetRow) {

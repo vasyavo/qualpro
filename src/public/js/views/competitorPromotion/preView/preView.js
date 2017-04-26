@@ -2,6 +2,7 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/competitorPromotion/preView.html',
     'text!templates/file/preView.html',
     'text!templates/objectives/comments/comment.html',
@@ -21,11 +22,12 @@ define([
     'views/fileDialog/fileDialog',
     'constants/errorMessages',
     'constants/aclRoleIndexes',
-    'views/competitorPromotion/edit'
-], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+    'views/competitorPromotion/edit',
+    'models/competitorPromotion'
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService, CONTENT_TYPES,
-             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView) {
+             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView, CompetitorPromotionModel) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORPROMOTION,
@@ -70,9 +72,32 @@ define([
         },
 
         showEditView: function () {
+            var that = this;
+
             this.editView = new EditView({
                 translation: this.translation,
                 editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-competitor-promotion-item', function (data, competitorPromotionId) {
+                var model = new CompetitorPromotionModel();
+
+                model.edit(competitorPromotionId, data);
+
+                model.on('competitor-promotion-edited', function () {
+                    var view = that.$el;
+
+                    view.find('#promotion').html(data.promotion);
+                    view.find('#price').html(data.price);
+                    view.find('#packing').html(data.packing);
+                    view.find('#expiry').html(moment(data.expiry).format('DD.MM.YYYY'));
+                    view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                    view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('update-list-view');
+                });
             });
         },
 

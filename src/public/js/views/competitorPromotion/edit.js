@@ -34,6 +34,8 @@ define(function (require) {
         render: function () {
             var that = this;
             var model = this.editableModel;
+            var dateStart = moment(model.dateStart, 'DD.MM.YYYY');
+            var dateEnd = moment(model.dateEnd, 'DD.MM.YYYY');
 
             var layout = $(this.template({
                 translation: this.translation,
@@ -52,8 +54,8 @@ define(function (require) {
                                 price: ui.price.val(),
                                 packing: ui.weight.val(),
                                 expiry: moment(ui.expiry.val()).toDate(),
-                                dateStart: moment(ui.dateStart.val(), 'DD.MM.YYYY').toDate(),
-                                dateEnd: moment(ui.dateEnd.val(), 'DD.MM.YYYY').toDate(),
+                                dateStart: moment(ui.dateStart.val()).toDate(),
+                                dateEnd: moment(ui.dateEnd.val()).toDate(),
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 promotion: ui.description.val(),
                             };
@@ -63,6 +65,43 @@ define(function (require) {
                     }
                 }
             });
+
+            var $startDate = that.$el.find('#date-start');
+            var $dueDate = that.$el.find('#date-end');
+            var $expiryDate = that.$el.find('#date-expiry');
+
+            var startDateObj = {
+                changeMonth: true,
+                changeYear : true,
+                maxDate : new Date(dateEnd),
+                yearRange  : '-20y:c+10y',
+                defaultDate: new Date(dateStart),
+                onClose    : function (selectedDate) {
+                    $dueDate.datepicker('option', 'minDate', selectedDate);
+                }
+            };
+
+            var endDateObj = {
+                changeMonth: true,
+                changeYear : true,
+                minDate : new Date(dateStart),
+                yearRange  : '-20y:c+10y',
+                defaultDate: new Date(dateEnd),
+                onClose    : function (selectedDate) {
+                    $startDate.datepicker('option', 'maxDate', selectedDate);
+                }
+            };
+
+            var expiryDateObj = {
+                changeMonth: true,
+                changeYear : true,
+                yearRange  : '-20y:c+10y',
+                defaultDate: new Date(dateEnd),
+            };
+
+            $startDate.datepicker(startDateObj);
+            $dueDate.datepicker(endDateObj);
+            $expiryDate.datepicker(expiryDateObj);
 
             this.displayTypeCollection = new DisplayTypeCollection();
             this.displayTypeCollection.on('reset', function () {
