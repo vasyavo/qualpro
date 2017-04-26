@@ -232,7 +232,7 @@ var CompetitorBranding = function() {
                 user: userId,
                 date: Date.now()
             };
-            CompetitorPromotionModel.findByIdAndUpdate(id, body, { new: true }, callback)
+            CompetitorPromotionModel.findByIdAndUpdate(id, body, { new: true }).populate('displayType').exec(callback);
         };
 
         async.waterfall([
