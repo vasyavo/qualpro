@@ -68,6 +68,45 @@ module.exports = {
                 retailSegment: 'Retail Segment',
                 outlet       : 'Outlet',
             }
+        },
+
+        PERSONNEL: {
+            sheetName: 'Personnel',
+            header   : [
+                'id',
+                'enFirstName',
+                'arFirstName',
+                'enLastName',
+                'arLastName',
+                'country',
+                'region',
+                'subRegion',
+                'branch',
+                'email',
+                'phoneNumber',
+                'manager',
+                'position',
+                'accessRole',
+                'dateJoined'
+            ],
+
+            headerRow: {
+                id         : 'ID',
+                enFirstName: 'First Name (EN)',
+                arFirstName: 'First Name (AR)',
+                enLastName : 'Last Name (EN)',
+                arLastName : 'Last Name (AR)',
+                country    : 'Country',
+                region     : 'Region',
+                subRegion  : 'Sub-Region',
+                branch     : 'Branch',
+                email      : 'Email',
+                phoneNumber: 'Phone Number',
+                manager    : 'Manager',
+                position   : 'Position',
+                accessRole : 'Access role',
+                dateJoined : 'Date of joining'
+            }
         }
     }
 };

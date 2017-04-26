@@ -12,4 +12,9 @@ router.get('/locations',
     wrap(require('./routes/exportLocations'))
 );
 
+router.get('/personnels',
+    checkAuth,
+    wrap(require('./routes/exportPersonnels'))
+);
+
 module.exports = router;

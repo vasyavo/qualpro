@@ -17,4 +17,10 @@ router.post('/locations',
     wrap(require('./routes/importLocations'))
 );
 
+router.post('/personnels',
+    checkAuth,
+    upload.single('source'),
+    wrap(require('./routes/importPersonnels'))
+);
+
 module.exports = router;
