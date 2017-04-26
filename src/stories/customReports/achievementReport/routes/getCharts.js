@@ -41,13 +41,11 @@ module.exports = (req, res, next) => {
             });
         }
 
-        $generalMatch.$and.push({
-            archived: false,
-        });
-
-        pipeline.push({
-            $match: $generalMatch,
-        });
+        if ($generalMatch.$and.length) {
+            pipeline.push({
+                $match: $generalMatch,
+            });
+        }
 
         pipeline.push({
             $lookup: {
@@ -145,6 +143,7 @@ module.exports = (req, res, next) => {
 
         response.lineChart.labels.sort();
         response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
+        response.pieChart.data = _.sortBy(response.lineChart.data, ['value']);
 
         res.status(200).send(response);
     });

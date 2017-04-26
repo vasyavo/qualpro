@@ -45,13 +45,11 @@ module.exports = (req, res, next) => {
             });
         }
 
-        $generalMatch.$and.push({
-            archived: false,
-        });
-
-        pipeline.push({
-            $match: $generalMatch,
-        });
+        if ($generalMatch.$and.length) {
+            pipeline.push({
+                $match: $generalMatch,
+            });
+        }
 
         pipeline.push({
             $lookup: {

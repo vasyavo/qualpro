@@ -18,7 +18,7 @@ module.exports = (filterNames, queryFilter, personnel) => {
                         [filterName]: { $eq: null },
                     },
                     {
-                        'createdBy.user': { $eq: personnel._id },
+                        [filterName]: { $eq: [] },
                     },
                 ],
             });

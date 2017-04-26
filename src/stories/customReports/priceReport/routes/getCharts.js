@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const ItemHistoryModel = require('./../../../../types/itemHistory/model');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 
@@ -48,9 +48,6 @@ module.exports = (req, res, next) => {
         const query = req.query;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const pipeline = [];
 
         const queryFilterValidate = ajv.compile(filterSchema);
@@ -103,6 +100,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 payload: 1,
+                itemId: '$headers.itemId',
                 year: { $year: '$headers.date' },
             },
         });
@@ -111,15 +109,58 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: '$year',
                 ppt: { $avg: '$payload.ppt' },
+                itemId: { $first: '$itemId' },
             },
         });
 
         pipeline.push({
-            $skip: skip,
+            $lookup: {
+                from: 'items',
+                localField: 'itemId',
+                foreignField: '_id',
+                as: 'item',
+            },
         });
 
         pipeline.push({
-            $limit: limit,
+            $addFields: {
+                item: {
+                    $let: {
+                        vars: {
+                            item: { $arrayElemAt: ['$item', 0] },
+                        },
+                        in: {
+                            _id: '$$item._id',
+                            name: '$$item.name',
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                data: {
+                    $push: {
+                        value: '$ppt',
+                        label: '$item.name',
+                    },
+                },
+                labels: { $addToSet: '$_id' },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                lineChart: {
+                    data: '$data',
+                    labels: '$labels',
+                },
+                pieChart: {
+                    data: '$data',
+                },
+            },
         });
 
         ItemHistoryModel.aggregate(pipeline)
@@ -139,6 +180,12 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result);
+        const response = result[0];
+
+        response.lineChart.labels.sort();
+        response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
+        response.pieChart.data = _.sortBy(response.lineChart.data, ['value']);
+
+        res.status(200).send(response);
     });
 };

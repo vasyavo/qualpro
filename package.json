@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "abstract-scheduler": "git+https://d6e7978abd2d2f3cbea3d54216daf6b8f7bd156d:x-oauth-basic@github.com/foxtrapplimited/abstract-scheduler.git#0.6",
+    "ajv": "^5.0.0",
     "async": "2.1.2",
     "aws-sdk": "2.2.42",
     "bcryptjs": "2.2.2",
