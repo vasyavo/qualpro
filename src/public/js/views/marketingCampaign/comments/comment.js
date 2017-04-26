@@ -33,7 +33,8 @@ define([
             'click #viewComments'    : 'showComments',
             'click #sendComment'     : 'sendComment',
             'click #attachFiles'     : 'showAttachDialog',
-            'click #downloadFile'    : 'stopPropagation'
+            'click #downloadFile'    : 'stopPropagation',
+            'click #showAllDescription': 'onShowAllDescriptionInComment'
         },
 
         initialize: function (options) {
@@ -276,6 +277,13 @@ define([
                 }
             });
 
+        },
+
+        onShowAllDescriptionInComment: function (e) {
+            var $target = $(e.target);
+            var $descriptionBlock = $target.closest('.commentDescription').find('#commentBody');
+
+            $descriptionBlock.toggleClass('showAllDescription');
         },
 
         render: function () {
