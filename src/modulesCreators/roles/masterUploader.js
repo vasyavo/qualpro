@@ -617,7 +617,7 @@ module.exports = [
         module: ACL_MODULES.COMMENT,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },

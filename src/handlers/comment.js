@@ -348,6 +348,44 @@ var Comment = function () {
         });
     };
 
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+
+        const queryRun = (body, callback) => {
+            body.editedBy = {
+                user: userId,
+                date: Date.now()
+            };
+            body.body = body.commentText;
+            CommentModel.findByIdAndUpdate(id, body, { new: true }, callback)
+        };
+
+        async.waterfall([
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.COMMENT, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.COMMENT, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
+        });
+    };
+
     function getAllPipeline(options) {
         var aggregateHelper = options.aggregateHelper;
         var queryObject = options.queryObject;
