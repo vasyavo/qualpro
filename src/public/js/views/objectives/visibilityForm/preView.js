@@ -16,7 +16,9 @@ define([
         template: _.template(PreviewTemplate),
 
         events: {
-            'click .showPreview': 'showFilePreviewDialog'
+            'click .showPreview.no-branches': 'openNoBranch',
+            'click .showPreview.branches.before': 'openBeforeInBranch',
+            'click .showPreview.branches.after': 'openAfterInBranch',
         },
 
         initialize: function (options) {
@@ -41,27 +43,61 @@ define([
             });
         },
 
-        showFilePreviewDialog: _.debounce(function (e) {
+        openNoBranch: _.debounce(function (e) {
             var $el = $(e.target);
-            var haveBefore = $el.hasClass('before');
+            var isBefore = $el.hasClass('before');
             var before = this.model.get('before') || {};
             var after = this.model.get('after') || {};
             var fileCollection;
-            var fileModel;
 
-            if (haveBefore) {
+            if (isBefore) {
                 fileCollection = new FileCollection([before.files], true);
             } else {
                 fileCollection = new FileCollection([after.files], true);
             }
 
-            fileModel = fileCollection.at(0);
+            var fileModel = fileCollection.at(0);
 
             this.fileDialogView = new FileDialogPreviewView({
                 fileModel  : fileModel,
-                bucket     : 'visibilityForm',
                 translation: this.translation
-            }); //TODO: change bucket from constants
+            });
+        }, 1000, true),
+
+        openBeforeInBranch: _.debounce(function (e) {
+            var $el = $(e.target);
+            var branchId = $el.attr('branch-id');
+
+            var branches = this.model.get('branches');
+            var branch = _.find(branches, function(item) {
+                return item.branchId === branchId;
+            });
+
+            var fileCollection = new FileCollection(branch.before.files, true);
+            var fileModel = fileCollection.at(0);
+
+            this.fileDialogView = new FileDialogPreviewView({
+                fileModel: fileModel,
+                translation: this.translation
+            });
+        }, 1000, true),
+
+        openAfterInBranch: _.debounce(function (e) {
+            var $el = $(e.target);
+            var branchId = $el.attr('branch-id');
+
+            var branches = this.model.get('branches');
+            var branch = _.find(branches, function(item) {
+                return item.branchId === branchId;
+            });
+
+            var fileCollection = new FileCollection(branch.after.files, true);
+            var fileModel = fileCollection.at(0);
+
+            this.fileDialogView = new FileDialogPreviewView({
+                fileModel: fileModel,
+                translation: this.translation
+            });
         }, 1000, true),
 
         render: function () {
@@ -82,9 +118,9 @@ define([
                 var fileType = beforeFile.contentType.substr(0, 5);
 
                 if (fileType === 'video') {
-                    container = '<video class="showPreview before" width="400" controls><source src="' + beforeFile.url + '"></video>';
+                    container = '<video class="showPreview no-branches before" width="400" controls><source src="' + beforeFile.url + '"></video>';
                 } else {
-                    container = '<img class="imgResponsive showPreview before" src="' + beforeFile.url + '">';
+                    container = '<img class="imgResponsive showPreview no-branches before" src="' + beforeFile.url + '">';
                 }
 
                 self.branches.map(function (item) {
@@ -107,9 +143,9 @@ define([
                                 var afterFileType = afterFile.contentType.substr(0, 5);
 
                                 if (afterFileType === 'video') {
-                                    afterFileContainer = '<video class="showPreview before" width="400" controls><source src="' + afterFile.url + '"></video>';
+                                    afterFileContainer = '<video branch-id="' + branch.branchId + '" class="showPreview branches after" width="400" controls><source src="' + afterFile.url + '"></video>';
                                 } else {
-                                    afterFileContainer = '<img class="imgResponsive showPreview before" src="' + afterFile.url + '">';
+                                    afterFileContainer = '<img  branch-id="' + branch.branchId + '" class="imgResponsive showPreview branches after" src="' + afterFile.url + '">';
                                 }
 
                                 item.afterFileContainer = afterFileContainer;
@@ -137,9 +173,9 @@ define([
                         var beforeFileType = beforeFile.contentType.substr(0, 5);
 
                         if (beforeFileType === 'video') {
-                            beforeFileContainer = '<video class="showPreview before" width="400" controls><source src="' + beforeFile.url + '"></video>';
+                            beforeFileContainer = '<video branch-id="' + branchModel._id + '" class="showPreview branches before" width="400" controls><source src="' + beforeFile.url + '"></video>';
                         } else {
-                            beforeFileContainer = '<img class="imgResponsive showPreview before" src="' + beforeFile.url + '">';
+                            beforeFileContainer = '<img branch-id="' + branchModel._id + '" class="imgResponsive showPreview branches before" src="' + beforeFile.url + '">';
                         }
 
                         branchModel.beforeFileContainer = beforeFileContainer;
@@ -155,9 +191,9 @@ define([
                         var afterFileType = afterFile.contentType.substr(0, 5);
 
                         if (afterFileType === 'video') {
-                            afterFileContainer = '<video class="showPreview before" width="400" controls><source src="' + afterFile.url + '"></video>';
+                            afterFileContainer = '<video branch-id="' + branchModel._id + '" class="showPreview branches after" width="400" controls><source src="' + afterFile.url + '"></video>';
                         } else {
-                            afterFileContainer = '<img class="imgResponsive showPreview before" src="' + afterFile.url + '">';
+                            afterFileContainer = '<img branch-id="' + branchModel._id + '" class="imgResponsive showPreview branches after" src="' + afterFile.url + '">';
                         }
 
                         branchModel.afterFileContainer = afterFileContainer;
