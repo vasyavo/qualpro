@@ -28,6 +28,11 @@ define([
         noTranslation: 'no Translation',
         skipped      : 'Skipped',
         commentText  : 'Comment Text',
+        edit         : 'Edit',
+        saveBtn : 'Save',
+
+        // edit
+        competitorBrandingEditTitle: 'Edit competitor branding',
 
         // topBar
         all        : 'Competitor branding & display report',

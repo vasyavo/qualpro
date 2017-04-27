@@ -1,0 +1,86 @@
+<div class="form-holder personnelInfo promotionEdit largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.competitorBrandingEditTitle %></span>
+    </div>
+    <div class="promotionForm">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.displayType %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="displayTypeDd" href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.startDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="date-start"
+                                           class="hasDatepicker"
+                                           value="<%= model.dateStart %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.endDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="date-end"
+                                           class="hasDatepicker"
+                                           value="<%= model.dateEnd %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right flexColumnStart">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%= translation.description %></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="comment-container">
+                                <textarea type="text"
+                                          id="description-en"
+                                          class="objectivesTextarea"
+                                          required
+                                          maxlength="150"
+                                          placeholder="<%= translation.description %>"><%- model.description.en %>
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer" id="descriptionArContainer" style="display: none;">
+                            <textarea class="objectivesTextarea"
+                                      id="description-ar"
+                                      data-parent="description"
+                                      data-property="ar"
+                                      value=""
+                                      placeholder="<%= translation.description %>"
+                                      maxlength="150"><%- model.description.ar %>
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -19,11 +19,12 @@ define([
     'constants/contentType',
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'views/competitorBranding/edit'
 ], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORBRANDING,
@@ -49,7 +50,8 @@ define([
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
-            'click #goToBtn'                  : 'goTo'
+            'click #goToBtn'                  : 'goTo',
+            'click #edit' : 'showEditView'
         },
 
         initialize: function (options) {
@@ -62,6 +64,15 @@ define([
 
             this.makeRender();
             this.render();
+        },
+
+        showEditView: function () {
+            var that = this;
+
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -342,7 +353,13 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var currentConfig = this.activityList ? levelConfig[this.contentType].activityList.preview : [];
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = levelConfig[this.contentType].activityList.preview;
+            } else {
+                currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
 
             formString = this.$el.html(this.template({
                 jsonModel : jsonModel,
@@ -385,7 +402,7 @@ define([
                 }
             });
 
-            if (App.currentUser.workAccess && this.activityList) {
+            if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template
