@@ -11461,3 +11461,16 @@ label[for=searchInputnoCT]::after {
 .font-blue {
   color: #59b5f5;
 }
+.errors-block {
+  width: 700px;
+  padding: 10px 20px;
+}
+.errors-block h3 {
+  text-align: center;
+}
+.errors-block ol {
+  padding-left: 20px;
+}
+.errors-block li {
+  list-style: decimal;
+}
