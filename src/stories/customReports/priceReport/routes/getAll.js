@@ -122,6 +122,14 @@ module.exports = (req, res, next) => {
             $limit: limit,
         });
 
+        pipeline.push({
+            $group: {
+                _id: null,
+                total: { $sum: 1 },
+                data: { $push: '$$ROOT' },
+            },
+        });
+
         ItemHistoryModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -139,6 +147,9 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result);
+        const response = result.length ?
+            result[0] : { data: [], total: 0 };
+
+        res.status(200).send(response);
     });
 };

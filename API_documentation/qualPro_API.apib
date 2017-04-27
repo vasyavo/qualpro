@@ -103,6 +103,18 @@ Http Code | Error Type           |  Error                             | Details
     + ar (string)
     + en: Customer success (string)
 
+## Item
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
+## Variant
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
 ## File
 + _id: `5818b01a13187de020871b63` (string)
 + name: `57dbf068843d1c6e3a162bd9.jpg`(string)
@@ -242,6 +254,10 @@ Http Code | Error Type           |  Error                             | Details
 + after
     + files (array[VisibilityFormAfterBeforeDone])
 
+## CustomPriceReportData
++ _id: `2017` (number)
++ ppt: `1750` (number)
+
 ## CustomAchievementReportData
 + total: `5` (number)
 + _id: `5818b01a13187de020871b63` (string)
@@ -285,6 +301,28 @@ Http Code | Error Type           |  Error                             | Details
 + branches (array[Branch])
 + personnels (array[Personnel])
 + positions (array[Position])
+
+## CustomPriceReportFilters
++ countries (array[Country])
++ variants (array[Variant])
++ categories (array[Category])
++ items (array[Item])
+
+## chartItem
++ value: `1` (number)
++ label
+    + en: `name` (string)
+    + ar: `name` (string)
+
+## CustomAchievementReportCharts
++ lineChart
+    + data (array[chartItem])
+    + labels (array)
+        + 1
+        + 3
+        + 7
++ pieChart
+    + data (array[chartItem])
 
 ## GetPreviews
 + previews (array)
@@ -586,25 +624,26 @@ Group Get Preview For Sync
 + Response 400 (application/json)
     + Attributes (GenericError)
 
-# Group Custom reports
+# Group Achievement Custom Report
 
-## Group Achievement report [/customReports/achievementReport]
-
-### Get all data [GET]
-Group Get achievement data
+## Get all data  [/customReports/achievementReport]
+### Get achievement data [GET]
 
 + Parameters
-    + page: (number)
-    + count (number)
-    + filter (object)
-        + country (Array) - array of countries id
-        + region (Array) - array of regions id
-        + subRegion (Array) - array of subRegions id
-        + retailSegment (Array) - array of retailSegments id
-        + outlet (Array) - array of outlets id
-        + branch (Array) - array of branches id
-        + personnel (Array) - array of personnels id
-        + position (Array) - array of positions id
+    + page: (number, optional)
+    + count (number, optional)
+    + filter (object, optional)
+        + country (array, optional) - array of countries id
+        + region (array, optional) - array of regions id
+        + subRegion (array, optional) - array of subRegions id
+        + retailSegment (array, optional) - array of retailSegments id
+        + outlet (array, optional) - array of outlets id
+        + branch (array, optional) - array of branches id
+        + personnel (array, optional) - array of personnels id
+        + position (array, optional) - array of positions id
+    + timeFilter (object, optional)
+        + from (required) - time period from date
+        + to (required) - time period to date
 + Response 200 (application/json)
     + Attributes
         + total (number)
@@ -612,20 +651,92 @@ Group Get achievement data
 + Response 400 (application/json)
     + Attributes (GenericError)
 
-### Get filters data [GET]
-Group Get achievement filters data
+## Get filters data [/customReports/achievementReport/filters]
+### Get achievement filters data [GET]
 
 + Parameters
-    + filter (object)
-        + country (Array) - array of countries id
-        + region (Array) - array of regions id
-        + subRegion (Array) - array of subRegions id
-        + retailSegment (Array) - array of retailSegments id
-        + outlet (Array) - array of outlets id
-        + branch (Array) - array of branches id
-        + personnel (Array) - array of personnels id
-        + position (Array) - array of positions id
+    + filter (object, optional)
+        + country (array, optional) - array of countries id
+        + region (array, optional) - array of regions id
+        + subRegion (array, optional) - array of subRegions id
+        + retailSegment (array, optional) - array of retailSegments id
+        + outlet (array, optional) - array of outlets id
+        + branch (array, optional) - array of branches id
+        + personnel (array, optional) - array of personnels id
+        + position (array, optional) - array of positions id
+    + timeFilter (object, optional)
+           + from (required) - time period from date
+           + to (required) - time period to date
 + Response 200 (application/json)
     + Attributes (CustomAchievementReportFilters)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get charts data [/customReports/achievementReport/charts]
+### Get achievement charts data [GET]
+
++ Parameters
+    + filter (object, optional)
+        + country (array, optional) - array of countries id
+        + region (array, optional) - array of regions id
+        + subRegion (array, optional) - array of subRegions id
+        + retailSegment (array, optional) - array of retailSegments id
+        + outlet (array, optional) - array of outlets id
+        + branch (array, optional) - array of branches id
+        + personnel (array, optional) - array of personnels id
+        + position (array, optional) - array of positions id
+    + timeFilter (object, optional)
+           + from (required) - time period from date
+           + to (required) - time period to date
++ Response 200 (application/json)
+    + Attributes (CustomAchievementReportCharts)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+# Group Price Custom Report
+
+## Get all data  [/customReports/priceReport]
+### Get price report data [GET]
+
++ Parameters
+    + page: (number, optional)
+    + count (number, optional)
+    + filter (object, optional)
+        + item (array, optional) - array of items id
+    + timeFilter (object, optional)
+        + from (required) - time period from date
+        + to (required) - time period to date
++ Response 200 (application/json)
+    + Attributes
+        + total (number)
+        + data (array[CustomPriceReportData])
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get filters data [/customReports/priceReport/filters]
+### Get priceReport filters data [GET]
+
++ Parameters
+    + filter (object, optional)
+        + country (array, optional) - array of countries id
+        + category (array, optional) - array of categories id
+        + variant (array, optional) - array of variants id
+        + item (array, optional) - array of items id
++ Response 200 (application/json)
+    + Attributes (CustomPriceReportFilters)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get charts data [/customReports/priceReport/charts]
+### Get priceReport charts data [GET]
+
++ Parameters
+    + filter (object, optional)
+        + item (array, optional) - array of items id
+    + timeFilter (object, optional)
+        + from (required) - time period from date
+        + to (required) - time period to date
++ Response 200 (application/json)
+    + Attributes (CustomAchievementReportCharts)
 + Response 400 (application/json)
     + Attributes (GenericError)
