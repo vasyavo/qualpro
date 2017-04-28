@@ -2,6 +2,7 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/competitorBranding/preview.html',
     'text!templates/file/preView.html',
     'text!templates/objectives/comments/comment.html',
@@ -20,11 +21,12 @@ define([
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
     'constants/errorMessages',
-    'views/competitorBranding/edit'
-], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+    'views/competitorBranding/edit',
+    'models/competitorBranding'
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, CompetitorBrandingModel) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORBRANDING,
@@ -72,6 +74,30 @@ define([
             this.editView = new EditView({
                 translation: this.translation,
                 editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-competitor-branding-item', function (data, competitorBrandingId) {
+                var model = new CompetitorBrandingModel();
+
+                model.edit(competitorBrandingId, data);
+
+                model.on('competitor-branding-edited', function (response) {
+                    var view = that.$el;
+
+                    view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                    view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+
+                    var displayTypeString = response.displayType.map(function (item) {
+                        return item.name[App.currentUser.currentLanguage];
+                    }).join(', ');
+
+                    view.find('#display-type').html(displayTypeString);
+                    view.find('#description').html(data.description[App.currentUser.currentLanguage]);
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('update-list-view');
+                });
             });
         },
 

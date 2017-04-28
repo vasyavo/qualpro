@@ -3,9 +3,11 @@ define([
         'validation',
         'custom',
         'constants/otherConstants',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages',
+        'dataService'
     ],
-    function (parent, validation, custom, CONSTANTS, CONTENT_TYPES) {
+    function (parent, validation, custom, CONSTANTS, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults: {},
             attachmentsKey: 'attachments',
@@ -60,6 +62,40 @@ define([
                 }).join(', ');
 
                 model.location = model.countryString + '>' + model.regionString + '>' + model.subRegionString + '>' + model.retailSegmentString + '>' + model.outletString + '>' + model.branchString;
+            },
+
+            edit: function (competitorBrandingId, data) {
+                var that = this;
+                var currentLanguage = App.currentUser.currentLanguage;
+                var errors = 0;
+
+                if (!data.dateStart) {
+                    ++errors;
+                }
+
+                if (!data.dateEnd) {
+                    ++errors;
+                }
+
+                if (!data.displayType || !data.displayType.length) {
+                    ++errors;
+                }
+
+                if (errors) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.fillAllInputFields[currentLanguage],
+                    ]);
+                }
+
+                dataService.putData('/competitorBranding/' + competitorBrandingId, data, function (err, response) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('competitor-branding-edited', response);
+                });
             }
         });
 
