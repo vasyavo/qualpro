@@ -22,4 +22,9 @@ router.get('/competitor-items',
     wrap(require('./routes/exportCompetitorItems'))
 );
 
+router.get('/items',
+    checkAuth,
+    wrap(require('./routes/exportItems'))
+);
+
 module.exports = router;

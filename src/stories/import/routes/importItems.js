@@ -1,12 +1,12 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('mz/fs');
-const importCompetitorItems = require('../../massUpload/import/competitorItem');
+const importItems = require('../../massUpload/import/item');
 const logger = require('../../../utils/logger');
 const responseSender = require('../../../utils/errorSender');
 const {ALLOWED_MIME} = require('../../../constants/import');
 
-module.exports = function* importCompetitorItem(req, res, next) {
+module.exports = function* importItem(req, res, next) {
     const {
         file
     } = req;
@@ -23,7 +23,7 @@ module.exports = function* importCompetitorItem(req, res, next) {
 
     let data;
     try {
-        data = yield* importCompetitorItems(filePath);
+        data = yield* importItems(filePath);
     } catch (ex) {
         logger.error(`Error to import location. Details: ${ex}`);
         return responseSender.badRequest(next, `Error occurs while importing. ${ex}`);

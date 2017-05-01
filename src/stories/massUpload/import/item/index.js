@@ -1,17 +1,16 @@
 const loader = require('../utils/loadSheetFromFile');
 const importOrigin = require('./methods/importOrigin');
-const importBrand = require('./methods/importBrand');
 const importCategory = require('./methods/importCategory');
-const importCompetitorVariant = require('./methods/importCompetitorVariant');
-const importCompetitorItem = require('./methods/importCompetitorItem');
+const importVariant = require('./methods/importVariant');
+const importItem = require('./methods/importItem');
 const logger = require('../../../../utils/logger');
 const {
     SHEETS: {
         ORIGIN,
         BRAND,
         CATEGORY,
-        COMPETITOR_VARIANT,
-        COMPETITOR_ITEM,
+        VARIANT,
+        ITEM,
     }
 } = require('../../../../constants/import');
 
@@ -23,25 +22,20 @@ const loadWorkbookOptions = {
             header   : ORIGIN.header,
             headerRow: ORIGIN.headerRow
         }, {
-            returnAs : 'brandData',
-            sheetName: BRAND.sheetName,
-            header   : BRAND.header,
-            headerRow: BRAND.headerRow
-        }, {
             returnAs : 'categoryData',
             sheetName: CATEGORY.sheetName,
             header   : CATEGORY.header,
             headerRow: CATEGORY.headerRow
         }, {
             returnAs : 'competitorVariantData',
-            sheetName: COMPETITOR_VARIANT.sheetName,
-            header   : COMPETITOR_VARIANT.header,
-            headerRow: COMPETITOR_VARIANT.headerRow
+            sheetName: VARIANT.sheetName,
+            header   : VARIANT.header,
+            headerRow: VARIANT.headerRow
         }, {
             returnAs : 'competitorItemData',
-            sheetName: COMPETITOR_ITEM.sheetName,
-            header   : COMPETITOR_ITEM.header,
-            headerRow: COMPETITOR_ITEM.headerRow
+            sheetName: ITEM.sheetName,
+            header   : ITEM.header,
+            headerRow: ITEM.headerRow
         }
     ]
 };
@@ -58,7 +52,6 @@ module.exports = function* importer(filePath) {
 
     const {
         originData = [],
-        brandData = [],
         categoryData = [],
         competitorVariantData = [],
         competitorItemData = []
@@ -73,21 +66,6 @@ module.exports = function* importer(filePath) {
     } catch (ex) {
         result.push({
             sheet : ORIGIN.sheetName,
-            errors: [ex]
-        });
-
-        throw ex;
-    }
-
-    // import brands
-    try {
-        const data = yield* importBrand(brandData);
-
-        data.sheet = BRAND.sheetName;
-        result.push(data);
-    } catch (ex) {
-        result.push({
-            sheet : BRAND.sheetName,
             errors: [ex]
         });
 
@@ -109,30 +87,30 @@ module.exports = function* importer(filePath) {
         throw ex;
     }
 
-    // import competitor variants
+    // import variants
     try {
-        const data = yield* importCompetitorVariant(competitorVariantData);
+        const data = yield* importVariant(competitorVariantData);
 
-        data.sheet = COMPETITOR_VARIANT.sheetName;
+        data.sheet = VARIANT.sheetName;
         result.push(data);
     } catch (ex) {
         result.push({
-            sheet : COMPETITOR_VARIANT.sheetName,
+            sheet : VARIANT.sheetName,
             errors: [ex]
         });
 
         throw ex;
     }
 
-    // import competitor items
+    // import items
     try {
-        const data = yield* importCompetitorItem(competitorItemData);
+        const data = yield* importItem(competitorItemData);
 
-        data.sheet = COMPETITOR_ITEM.sheetName;
+        data.sheet = ITEM.sheetName;
         result.push(data);
     } catch (ex) {
         result.push({
-            sheet : COMPETITOR_ITEM.sheetName,
+            sheet : ITEM.sheetName,
             errors: [ex]
         });
 

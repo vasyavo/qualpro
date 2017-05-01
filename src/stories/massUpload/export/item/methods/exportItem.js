@@ -1,6 +1,6 @@
-const CompetitorItemModel = require('../../../../../types/competitorItem/model');
+const ItemModel = require('../../../../../types/item/model');
 
-function*  getCompetitiorItmesForExport() {
+function*  getItemForExport() {
     const pipeLine = [{
         $lookup: {
             from        : 'origins',
@@ -15,19 +15,19 @@ function*  getCompetitiorItmesForExport() {
         }
     }, {
         $lookup: {
-            from        : 'brands',
+            from        : 'categories',
             foreignField: '_id',
-            localField  : 'brand',
-            as          : 'brand'
+            localField  : 'category',
+            as          : 'category'
         }
     }, {
         $unwind: {
-            path                      : '$brand',
+            path                      : '$category',
             preserveNullAndEmptyArrays: true
         }
     }, {
         $lookup: {
-            from        : 'competitorVariants',
+            from        : 'variants',
             foreignField: '_id',
             localField  : 'variant',
             as          : 'variant'
@@ -51,25 +51,27 @@ function*  getCompetitiorItmesForExport() {
         }
     }, {
         $project: {
-            _id    : 0,
-            id     : {$ifNull: ['$_id', '']},
-            enName : {$ifNull: ['$name.en', '']},
-            arName : {$ifNull: ['$name.ar', '']},
-            size   : {$ifNull: ['$packing', '']},
-            origin : {$ifNull: ['$origin.name.en', '']},
-            brand  : {$ifNull: ['$brand.name.en', '']},
-            variant: {$ifNull: ['$variant.name.en', '']},
-            country: {$ifNull: ['$country.name.en', '']},
+            _id     : 0,
+            id      : {$ifNull: ['$_id', '']},
+            enName  : {$ifNull: ['$name.en', '']},
+            arName  : {$ifNull: ['$name.ar', '']},
+            packing : {$ifNull: ['$packing', '']},
+            barcode : {$ifNull: ['$barCode', '']},
+            PPT     : {$ifNull: ['$ppt', '']},
+            origin  : {$ifNull: ['$origin.name.en', '']},
+            category: {$ifNull: ['$category.name.en', '']},
+            variant : {$ifNull: ['$variant.name.en', '']},
+            country : {$ifNull: ['$country.name.en', '']},
         }
     }];
 
-    return yield CompetitorItemModel.aggregate(pipeLine).allowDiskUse().exec()
+    return yield ItemModel.aggregate(pipeLine).allowDiskUse().exec()
 }
 
 module.exports = function* exporter() {
     let result;
     try {
-        result = yield* getCompetitiorItmesForExport();
+        result = yield* getItemForExport();
     } catch (ex) {
         throw ex;
     }

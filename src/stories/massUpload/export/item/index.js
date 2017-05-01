@@ -1,18 +1,16 @@
-const exportCountry = require('../item/methods/exportCountry');
-const exportOrigin = require('../item/methods/exportOrigin');
-const exportCategory = require('../item/methods/exportCategory');
-const exportBrand = require('./methods/exportBrand');
-const exportCompetitorVariant = require('./methods/exportCompetitorVariant');
-const exportCompetitorItem = require('./methods/exportCompetitorItem');
+const exportCountry = require('./methods/exportCountry');
+const exportOrigin = require('./methods/exportOrigin');
+const exportCategory = require('./methods/exportCategory');
+const exportVariant = require('./methods/exportVariant');
+const exportItem = require('./methods/exportItem');
 const logger = require('../../../../utils/logger');
 const {
     SHEETS: {
         COUNTRY,
         ORIGIN,
-        BRAND,
         CATEGORY,
-        COMPETITOR_VARIANT,
-        COMPETITOR_ITEM
+        VARIANT,
+        ITEM
     }
 } = require('../../../../constants/import');
 
@@ -51,22 +49,6 @@ module.exports = function* exporter() {
         throw ex;
     }
 
-    // export brand
-    try {
-        const data = yield* exportBrand();
-        const opt = {
-            data,
-            sheetName: BRAND.sheetName,
-            header   : BRAND.header,
-            headerRow: BRAND.headerRow
-        };
-
-        sheetOpts.push(opt);
-    } catch (ex) {
-        logger.error(`Error to export brands. Details: ${ex}`);
-        throw ex;
-    }
-
     // export category
     try {
         const data = yield* exportCategory();
@@ -83,35 +65,35 @@ module.exports = function* exporter() {
         throw ex;
     }
 
-    // export competitor variant
+    // export variant
     try {
-        const data = yield* exportCompetitorVariant();
+        const data = yield* exportVariant();
         const opt = {
             data,
-            sheetName: COMPETITOR_VARIANT.sheetName,
-            header   : COMPETITOR_VARIANT.header,
-            headerRow: COMPETITOR_VARIANT.headerRow
+            sheetName: VARIANT.sheetName,
+            header   : VARIANT.header,
+            headerRow: VARIANT.headerRow
         };
 
         sheetOpts.push(opt);
     } catch (ex) {
-        logger.error(`Error to export competitor variant. Details: ${ex}`);
+        logger.error(`Error to export variant. Details: ${ex}`);
         throw ex;
     }
 
     // export competitor item
     try {
-        const data = yield* exportCompetitorItem();
+        const data = yield* exportItem();
         const opt = {
             data,
-            sheetName: COMPETITOR_ITEM.sheetName,
-            header   : COMPETITOR_ITEM.header,
-            headerRow: COMPETITOR_ITEM.headerRow
+            sheetName: ITEM.sheetName,
+            header   : ITEM.header,
+            headerRow: ITEM.headerRow
         };
 
         sheetOpts.push(opt);
     } catch (ex) {
-        logger.error(`Error to export competitor items. Details: ${ex}`);
+        logger.error(`Error to export items. Details: ${ex}`);
         throw ex;
     }
 

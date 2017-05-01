@@ -29,4 +29,10 @@ router.post('/competitor-items',
     wrap(require('./routes/importCompetitorItems'))
 );
 
+router.post('/items',
+    checkAuth,
+    upload.single('source'),
+    wrap(require('./routes/importItems'))
+);
+
 module.exports = router;
