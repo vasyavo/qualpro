@@ -35,6 +35,19 @@ module.exports = {
             }
         },
 
+        COUNTRY: {
+            sheetName: 'Countries',
+            header   : ['id', 'enName', 'arName', 'currency', 'type', 'parent'],
+            headerRow: {
+                id      : 'ID',
+                enName  : 'Name (EN)',
+                arName  : 'Name (AR)',
+                currency: 'Currency',
+                type    : 'Type',
+                parent  : 'Parent',
+            }
+        },
+
         RETAIL_SEGMENT: {
             sheetName: 'Retail Segment',
             header   : ['id', 'enName', 'arName'],
@@ -106,6 +119,184 @@ module.exports = {
                 position   : 'Position',
                 accessRole : 'Access role',
                 dateJoined : 'Date of joining'
+            }
+        },
+
+        POSITION: {
+            sheetName: 'Position',
+            header   : [
+                'id',
+                'enName',
+                'arName'
+            ],
+
+            headerRow: {
+                id    : 'ID',
+                enName: 'Name (EN)',
+                arName: 'Name (AR)'
+            }
+        },
+
+        ROLE: {
+            sheetName: 'Role',
+            header   : [
+                'id',
+                'enName',
+                'arName'
+            ],
+
+            headerRow: {
+                id    : 'ID',
+                enName: 'Name (EN)',
+                arName: 'Name (AR)'
+            }
+        },
+
+        ORIGIN: {
+            sheetName: 'Origin',
+            header   : [
+                'id',
+                'enName',
+                'arName'
+            ],
+
+            headerRow: {
+                id    : 'ID',
+                enName: 'Name (EN)',
+                arName: 'Name (AR)'
+            }
+        },
+
+        BRAND: {
+            sheetName: 'Brand',
+            header   : [
+                'id',
+                'enName',
+                'arName'
+            ],
+
+            headerRow: {
+                id    : 'ID',
+                enName: 'Name (EN)',
+                arName: 'Name (AR)'
+            }
+        },
+
+        CATEGORY: {
+            sheetName: 'Category',
+            header   : [
+                'id',
+                'enName',
+                'arName'
+            ],
+
+            headerRow: {
+                id    : 'ID',
+                enName: 'Name (EN)',
+                arName: 'Name (AR)'
+            }
+        },
+
+        VARIANT: {
+            sheetName: 'Variant',
+            header   : [
+                'id',
+                'enName',
+                'arName',
+                'category'
+            ],
+
+            headerRow: {
+                id      : 'ID',
+                enName  : 'Name (EN)',
+                arName  : 'Name (AR)',
+                category: 'Category'
+            }
+        },
+
+        COMPETITOR_VARIANT: {
+            sheetName: 'Competitor Variant',
+            header   : [
+                'id',
+                'enName',
+                'arName',
+                'category'
+            ],
+
+            headerRow: {
+                id      : 'ID',
+                enName  : 'Name (EN)',
+                arName  : 'Name (AR)',
+                category: 'Category'
+            }
+        },
+
+        ITEM: {
+            sheetName: 'Item',
+            header   : [
+                'id',
+                'enName',
+                'arName',
+                'barcode',
+                'packing',
+                'PPT',
+                'origin',
+                'category',
+                'variant',
+                'country'
+            ],
+
+            headerRow: {
+                id      : 'ID',
+                enName  : 'Name (EN)',
+                arName  : 'Name (AR)',
+                barcode : 'Barcode',
+                packing : 'Packing',
+                PPT     : 'PPT',
+                origin  : 'Origin',
+                category: 'Category',
+                variant : 'Variant',
+                country : 'Country'
+            }
+        },
+
+        COMPETITOR_ITEM: {
+            sheetName: 'Competitor Item',
+            header   : [
+                'id',
+                'enName',
+                'arName',
+                'size',
+                'origin',
+                'brand',
+                'variant',
+                'country'
+            ],
+
+            headerRow: {
+                id     : 'ID',
+                enName : 'Name (EN)',
+                arName : 'Name (AR)',
+                size   : 'Size',
+                origin : 'Origin',
+                brand  : 'Brand',
+                variant: 'Variant',
+                country: 'Country'
+            }
+        },
+
+        DISPLAY: {
+            sheetName: 'Display',
+            header   : [
+                'id',
+                'enName',
+                'arName'
+            ],
+
+            headerRow: {
+                id    : 'ID',
+                enName: 'Name (EN)',
+                arName: 'Name (AR)'
             }
         }
     }

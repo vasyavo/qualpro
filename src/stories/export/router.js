@@ -17,4 +17,9 @@ router.get('/personnels',
     wrap(require('./routes/exportPersonnels'))
 );
 
+router.get('/competitor-items',
+    checkAuth,
+    wrap(require('./routes/exportCompetitorItems'))
+);
+
 module.exports = router;

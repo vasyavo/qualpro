@@ -1,6 +1,6 @@
 const PersonnelModel = require('../../../../../types/personnel/model');
 
-function*  getBranchForExport() {
+function*  getPositionForExport() {
     const pipeLine = [{
         $lookup: {
             from        : 'domains',
@@ -134,7 +134,7 @@ function*  getBranchForExport() {
 module.exports = function* exporter() {
     let result;
     try {
-        result = yield* getBranchForExport();
+        result = yield* getPositionForExport();
     } catch (ex) {
         throw ex;
     }

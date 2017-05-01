@@ -23,4 +23,10 @@ router.post('/personnels',
     wrap(require('./routes/importPersonnels'))
 );
 
+router.post('/competitor-items',
+    checkAuth,
+    upload.single('source'),
+    wrap(require('./routes/importCompetitorItems'))
+);
+
 module.exports = router;

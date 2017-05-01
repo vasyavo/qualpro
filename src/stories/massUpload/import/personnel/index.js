@@ -1,9 +1,10 @@
 const loader = require('../utils/loadSheetFromFile');
+const importPosition = require('./methods/importPosition');
 const importPersonnel = require('./methods/importPersonnel');
-const logger = require('../../../../utils/logger');
 const {
     SHEETS: {
-        PERSONNEL
+        PERSONNEL,
+        POSITION
     }
 } = require('../../../../constants/import');
 
@@ -14,6 +15,11 @@ const loadWorkbookOptions = {
             sheetName: PERSONNEL.sheetName,
             header   : PERSONNEL.header,
             headerRow: PERSONNEL.headerRow
+        }, {
+            returnAs : 'positionData',
+            sheetName: POSITION.sheetName,
+            header   : POSITION.header,
+            headerRow: POSITION.headerRow
         }
     ]
 };
@@ -29,8 +35,24 @@ module.exports = function* importer(filePath) {
     }
 
     const {
-        personnelData = []
+        personnelData = [],
+        positionData = [],
     } = workbookData;
+
+    // import position
+    try {
+        const data = yield* importPosition(positionData);
+
+        data.sheet = POSITION.sheetName;
+        result.push(data);
+    } catch (ex) {
+        result.push({
+            sheet : POSITION.sheetName,
+            errors: [ex]
+        });
+
+        throw ex;
+    }
 
     // import personnel
     try {

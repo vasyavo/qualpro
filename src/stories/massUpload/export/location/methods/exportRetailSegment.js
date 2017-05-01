@@ -1,6 +1,6 @@
 const RetailSegment = require('../../../../../types/retailSegment/model');
 
-function*  getOutletForExport() {
+function*  getRetailSegmentForExport() {
     const pipeLine = [{
         $project: {
             _id   : 0,
@@ -16,7 +16,7 @@ function*  getOutletForExport() {
 module.exports = function* exporter() {
     let result;
     try {
-        result = yield* getOutletForExport();
+        result = yield* getRetailSegmentForExport();
     } catch (ex) {
         throw ex;
     }
