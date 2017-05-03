@@ -72,7 +72,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
                 'createdBy.user': {
-                    $in: _.union(queryFilter[CONTENT_TYPES.PERSONNEL], personnel._id),
+                    $in: queryFilter[CONTENT_TYPES.PERSONNEL],
                 },
             });
         }
