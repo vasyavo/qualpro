@@ -148,6 +148,8 @@ function* createOrUpdate(payload) {
         throw ex;
     }
 
+    const ppt = isNaN(PPT) ? 0 : parseInt(PPT);
+
     const query = {
         'name.en': enName,
         archived : false,
@@ -156,7 +158,7 @@ function* createOrUpdate(payload) {
     const modify = {
         $set: {
             barCode : barcode,
-            ppt     : PPT,
+            ppt     : ppt,
             packing : packing,
             origin  : originId,
             category: categoryId,

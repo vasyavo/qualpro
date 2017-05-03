@@ -7,7 +7,6 @@ const logger = require('../../../../utils/logger');
 const {
     SHEETS: {
         ORIGIN,
-        BRAND,
         CATEGORY,
         VARIANT,
         ITEM,
@@ -27,12 +26,12 @@ const loadWorkbookOptions = {
             header   : CATEGORY.header,
             headerRow: CATEGORY.headerRow
         }, {
-            returnAs : 'competitorVariantData',
+            returnAs : 'variantData',
             sheetName: VARIANT.sheetName,
             header   : VARIANT.header,
             headerRow: VARIANT.headerRow
         }, {
-            returnAs : 'competitorItemData',
+            returnAs : 'itemData',
             sheetName: ITEM.sheetName,
             header   : ITEM.header,
             headerRow: ITEM.headerRow
@@ -53,8 +52,8 @@ module.exports = function* importer(filePath) {
     const {
         originData = [],
         categoryData = [],
-        competitorVariantData = [],
-        competitorItemData = []
+        variantData = [],
+        itemData = []
     } = workbookData;
 
     // import origins
@@ -89,7 +88,7 @@ module.exports = function* importer(filePath) {
 
     // import variants
     try {
-        const data = yield* importVariant(competitorVariantData);
+        const data = yield* importVariant(variantData);
 
         data.sheet = VARIANT.sheetName;
         result.push(data);
@@ -104,7 +103,7 @@ module.exports = function* importer(filePath) {
 
     // import items
     try {
-        const data = yield* importItem(competitorItemData);
+        const data = yield* importItem(itemData);
 
         data.sheet = ITEM.sheetName;
         result.push(data);
