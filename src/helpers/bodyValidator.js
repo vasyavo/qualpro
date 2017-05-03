@@ -288,6 +288,10 @@ validationFunctions[CONTENT_TYPE.CONSUMER_SURVEY] = function(value, key, allowed
     return _.includes(allowedObject, key);
 };
 
+validationFunctions[CONTENT_TYPE.BRANDING_AND_MONTHLY_DISPLAY] = function(value, key, allowedObject) {
+    return _.includes(allowedObject, key);
+};
+
 const validateEachBody = (options, callback) => {
     let resultArray = [];
     const {

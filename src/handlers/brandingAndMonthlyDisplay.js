@@ -7,6 +7,7 @@ const logger = require('../utils/logger');
 const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDisplay/model');
 const DomainModel = require('./../types/domain/model');
 const access = require('../helpers/access')();
+const bodyValidator = require('../helpers/bodyValidator');
 const joiValidate = require('../helpers/joiValidate');
 const ACL_MODULES = require('./../constants/aclModulesNames');
 const extractBody = require('./../utils/extractBody');
@@ -394,6 +395,43 @@ const getById = (req, res, next) => {
         }
 
         res.status(200).send(report);
+    });
+};
+
+const update = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const requestBody = req.body;
+    const id = req.params.id;
+
+    const queryRun = (body, callback) => {
+        body.editedBy = {
+            user: userId,
+            date: Date.now()
+        };
+        BrandingAndMonthlyDisplayModel.findByIdAndUpdate(id, body, { new: true }).populate('displayType').exec(callback);
+    };
+
+    async.waterfall([
+        (cb) => {
+            access.getEditAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY, 'update', cb);
+        },
+
+        (body, cb) => {
+            queryRun(body, cb);
+        },
+
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+
+        res.status(200).send(body);
     });
 };
 
@@ -930,4 +968,5 @@ module.exports = {
     create,
     getById,
     getAll,
+    update,
 };
