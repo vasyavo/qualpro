@@ -16,6 +16,7 @@ module.exports = function () {
     router.post('/', handler.create);
 
     router.patch('/:id([0-9a-fA-F]{24})', handler.update);
+    router.put('/answer/:id([0-9a-fA-F]{24})', handler.updateAnswer);
 
     /**
      * __Type__ 'POST'
