@@ -51,17 +51,20 @@ function*  getItemForExport() {
         }
     }, {
         $project: {
-            _id     : 0,
-            id      : {$ifNull: ['$_id', '']},
-            enName  : {$ifNull: ['$name.en', '']},
-            arName  : {$ifNull: ['$name.ar', '']},
-            packing : {$ifNull: ['$packing', '']},
-            barcode : {$ifNull: ['$barCode', '']},
-            PPT     : {$ifNull: ['$ppt', '']},
-            origin  : {$ifNull: ['$origin.name.en', '']},
-            category: {$ifNull: ['$category.name.en', '']},
-            variant : {$ifNull: ['$variant.name.en', '']},
-            country : {$ifNull: ['$country.name.en', '']},
+            _id       : 0,
+            id        : {$ifNull: ['$_id', '']},
+            enName    : {$ifNull: ['$name.en', '']},
+            arName    : {$ifNull: ['$name.ar', '']},
+            packing   : {$ifNull: ['$packing', '']},
+            barcode   : {$ifNull: ['$barCode', '']},
+            ppt       : {$divide: [{$ifNull: ['$ppt', 0]}, 100]},
+            pptPerCase: {$divide: [{$ifNull: ['$pptPerCase', 0]}, 100]},
+            rspMin    : {$divide: [{$ifNull: ['$rspMin', 0]}, 100]},
+            rspMax    : {$divide: [{$ifNull: ['$rspMax', 0]}, 100]},
+            origin    : {$ifNull: ['$origin.name.en', '']},
+            category  : {$ifNull: ['$category.name.en', '']},
+            variant   : {$ifNull: ['$variant.name.en', '']},
+            country   : {$ifNull: ['$country.name.en', '']},
         }
     }];
 

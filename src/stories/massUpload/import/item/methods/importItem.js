@@ -111,7 +111,10 @@ function* createOrUpdate(payload) {
         arName,
         barcode,
         packing,
-        PPT,
+        ppt,
+        pptPerCase,
+        rspMin,
+        rspMax,
         category,
         origin,
         variant,
@@ -148,7 +151,10 @@ function* createOrUpdate(payload) {
         throw ex;
     }
 
-    const ppt = isNaN(PPT) ? 0 : parseInt(PPT);
+    const pptNum = isNaN(ppt) ? 0 : parseFloat(ppt);
+    const pptPerCaseNum = isNaN(pptPerCase) ? 0 : parseFloat(pptPerCase);
+    const rspMinNum = isNaN(rspMin) ? 0 : parseFloat(rspMin);
+    const rspMaxNum = isNaN(rspMax) ? 0 : parseFloat(rspMax);
 
     const query = {
         'name.en': enName,
@@ -157,13 +163,16 @@ function* createOrUpdate(payload) {
 
     const modify = {
         $set: {
-            barCode : barcode,
-            ppt     : ppt,
-            packing : packing,
-            origin  : originId,
-            category: categoryId,
-            variant : variantId,
-            country : countryId,
+            barCode   : barcode,
+            ppt       : pptNum,
+            pptPerCase: pptPerCaseNum,
+            rspMin    : rspMinNum,
+            rspMax    : rspMaxNum,
+            packing   : packing,
+            origin    : originId,
+            category  : categoryId,
+            variant   : variantId,
+            country   : countryId,
 
             name: {
                 en: enName,

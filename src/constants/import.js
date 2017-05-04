@@ -239,7 +239,10 @@ module.exports = {
                 'arName',
                 'barcode',
                 'packing',
-                'PPT',
+                'ppt',
+                'rspMin',
+                'rspMax',
+                'pptPerCase',
                 'origin',
                 'category',
                 'variant',
@@ -247,16 +250,19 @@ module.exports = {
             ],
 
             headerRow: {
-                id      : 'ID',
-                enName  : 'Name (EN)',
-                arName  : 'Name (AR)',
-                barcode : 'Barcode',
-                packing : 'Packing',
-                PPT     : 'PPT',
-                origin  : 'Origin',
-                category: 'Category',
-                variant : 'Variant',
-                country : 'Country'
+                id        : 'ID',
+                enName    : 'Name (EN)',
+                arName    : 'Name (AR)',
+                barcode   : 'Barcode',
+                packing   : 'Packing',
+                ppt       : 'PPT',
+                rspMin    : 'RSP (Minimum)',
+                rspMax    : 'RSP (Maximum)',
+                pptPerCase: 'PPT (Case)',
+                origin    : 'Origin',
+                category  : 'Category',
+                variant   : 'Variant',
+                country   : 'Country'
             }
         },
 
