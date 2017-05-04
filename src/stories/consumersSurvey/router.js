@@ -24,6 +24,7 @@ router.get('/', (req, res, next) => {
     rout(req, res, next);
 });
 router.get('/sync', require('./routes/sync'));
+router.put('/answer/:id([0-9a-fA-F]{24})', require('./routes/editAnswer'));
 router.get('/answer', require('./routes/getAnswers'));
 router.get('/:id', require('./routes/getOne'));
 

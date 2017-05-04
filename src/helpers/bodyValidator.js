@@ -296,6 +296,10 @@ validationFunctions[CONTENT_TYPE.QUESTIONNARIES_ANSWER] = function(value, key, a
     return _.includes(allowedObject, key);
 };
 
+validationFunctions[CONTENT_TYPE.CONSUMER_SURVEY_ANSWER] = function(value, key, allowedObject) {
+    return _.includes(allowedObject, key);
+};
+
 const validateEachBody = (options, callback) => {
     let resultArray = [];
     const {
