@@ -1,9 +1,11 @@
 define([
         'models/parrent',
         'validation',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages',
+        'dataService'
     ],
-    function (parent, validation, CONTENT_TYPES) {
+    function (parent, validation, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults      : {},
             attachmentsKey: 'attachments',
@@ -36,6 +38,20 @@ define([
 
             urlRoot: function () {
                 return CONTENT_TYPES.COMPETITORPROMOTION;
+            },
+
+            edit: function (competitorPromotionId, data) {
+                var that = this;
+
+                dataService.putData('/competitorPromotion/' + competitorPromotionId, data, function (err, response) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('competitor-promotion-edited', response);
+                });
             }
         });
 

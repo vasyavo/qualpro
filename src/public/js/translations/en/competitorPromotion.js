@@ -5,6 +5,7 @@ define([
     ],
     function (_, paginationTranslation, filtersTranslation) {
         var translation = {
+            competitorPromotionEditTitle : 'Edit competitor promotion activities',
             all         : 'Competitor promotion activities',
             title       : 'Competitors promo evaluation report',
             category    : 'Category',
@@ -29,11 +30,14 @@ define([
             files       : 'Files',
             attach      : 'Attach',
             send        : 'Send',
+            saveBtn : 'Save',
             location    : 'Location',
             commentText : 'Comment Text',
             okBtn       : 'Ok',
+            edit        : 'Edit',
             dialogTitle : 'Comment attachments',
-            goToBtn : 'Go to'
+            goToBtn : 'Go to',
+            weight : 'Weight',
         };
         return _.extend({}, paginationTranslation, filtersTranslation, translation);
     });

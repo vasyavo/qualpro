@@ -13,10 +13,12 @@ define([
     'collections/file/collection',
     'views/fileDialog/fileDialog',
     'constants/contentType',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'views/promotions/editPromotionItem',
+    'models/promotionsItems'
 ], function (Backbone, $, _, BaseDialog, template, tbodyTemplate, paginationTemplate, FilePreviewTemplate,
-             Collection, dataService, CONSTANTS, FileCollection, FileDialogPreviewView, CONTENT_TYPES,
-             ERROR_MESSAGES) {
+             Collection, dataService, CONSTANTS, FileCollection, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES,
+             EditPromotionItemView, PromotionItemModel) {
 
     var PromotionsItemsView = BaseDialog.extend({
         contentType        : CONTENT_TYPES.PROMOTIONSITEMS,
@@ -36,7 +38,8 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #edit': 'editTableItemData',
         },
 
         initialize: function (options) {
@@ -61,12 +64,53 @@ define([
                 this.render();
             }, this);
 
-            this.collection.on('showMore', function (collection) {
+            this.collection.on('showMore', function () {
                 this.renderTbody();
             }, this);
-            this.collection.on('reset', function (collection) {
+            this.collection.on('reset', function () {
                 this.renderTbody();
             }, this);
+        },
+
+        editTableItemData: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var branchId = target.attr('data-id');
+            var stopMapping = false;
+            var searchedBranch = null;
+
+            this.collection.toJSON().some(function(outlet) {
+                outlet.branches.some(function (branch) {
+                    if (branch._id === branchId) {
+                        searchedBranch = branch;
+
+                        stopMapping = true;
+                    }
+
+                    return stopMapping;
+                });
+
+                return stopMapping;
+            });
+
+            if (searchedBranch) {
+                this.editPromotionItemView = new EditPromotionItemView({
+                    translation: this.translation,
+                    branch: searchedBranch,
+                });
+
+                this.editPromotionItemView.on('edit-promotion-item', function (data, promotionItemId) {
+                    var model = new PromotionItemModel();
+                    model.editTableItemData(promotionItemId, data);
+
+                    model.on('promotion-item-data-edited', function () {
+                        that.collection.getPage(that.collection.currentPage, {
+                            promotion: that.promotion,
+                        });
+                        that.editPromotionItemView.$el.dialog('close').dialog('destroy').remove();
+                    });
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
