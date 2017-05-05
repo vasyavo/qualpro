@@ -27,5 +27,12 @@ module.exports = function () {
             err ? next(err) : next();
         })
     }, handler.update);
+    
+    router.delete('/:id([0-9a-fA-F]{24})', function(req, res, next) {
+        access.getArchiveAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, function(err) {
+            err ? next(err) : next();
+        })
+    }, handler.removeItem);
+    
     return router;
 };
