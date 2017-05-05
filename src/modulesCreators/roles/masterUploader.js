@@ -481,7 +481,7 @@ module.exports = [
     {
         module: ACL_MODULES.ACHIEVEMENT_FORM,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
