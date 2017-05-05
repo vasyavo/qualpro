@@ -676,7 +676,7 @@ module.exports = [
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true

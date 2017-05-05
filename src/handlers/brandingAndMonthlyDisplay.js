@@ -5,6 +5,7 @@ const CONTENT_TYPES = require('../public/js/constants/contentType');
 const FileHandler = require('../handlers/file');
 const logger = require('../utils/logger');
 const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDisplay/model');
+const EventModel = require('./../types/event/model');
 const DomainModel = require('./../types/domain/model');
 const access = require('../helpers/access')();
 const bodyValidator = require('../helpers/bodyValidator');
@@ -110,6 +111,71 @@ const create = (req, res, next) => {
 
             logger.error(err);
         }
+    });
+};
+
+const removeItem = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const id = req.params.id;
+    
+    const queryRun = (callback) => {
+        async.waterfall([
+            
+            (cb) => {
+                BrandingAndMonthlyDisplayModel.findOne({ _id : id }).lean().exec(cb);
+            },
+            (removeItem, cb) => {
+                const eventModel = new EventModel();
+                const options = {
+                    headers: {
+                        contentType: "BrandingAndMonthlyDisplay",
+                        actionType : "remove",
+                        user       : userId,
+                    },
+                    payload: removeItem
+                };
+                eventModel.set(options);
+                eventModel.save((err) => {
+                    cb(null, err);
+                });
+            },
+            (err) => {
+                if (err) {
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+                    
+                    return logger.error(err);
+                }
+    
+                BrandingAndMonthlyDisplayModel.findOneAndRemove({_id: id}, callback)
+            },
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
+    };
+    
+    async.waterfall([
+        
+        (cb) => {
+            access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
+        },
+        
+        (allowed, personnel, cb) => {
+            queryRun(cb);
+        }
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+        
+        res.status(200).send(body);
     });
 };
 
@@ -969,4 +1035,5 @@ module.exports = {
     getById,
     getAll,
     update,
+    removeItem,
 };
