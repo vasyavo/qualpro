@@ -10,6 +10,7 @@
         MARKETING_CAMPAIGN : 'marketingCampaign',
         MARKETING_CAMPAIGN_ITEM : 'marketingCampaignItem',
         CATEGORY : 'category',
+        EVENT : 'event',
         PRODUCT : 'product',
         PROMOTIONS : 'promotions',
         PROMOTIONSITEMS : 'promotionsItems',

@@ -585,7 +585,7 @@ module.exports = [
     {
         module: ACL_MODULES.PRICE_SURVEY,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
