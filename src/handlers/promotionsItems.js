@@ -481,7 +481,6 @@ var Promotions = function () {
         const userId = session.uId;
         const accessRoleLevel = session.level;
         const id = req.params.id;
-        const itemId = req.params.itemId;
         
         const queryRun = (callback) => {
             async.waterfall([
