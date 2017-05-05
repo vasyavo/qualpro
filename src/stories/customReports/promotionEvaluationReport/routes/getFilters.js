@@ -619,6 +619,6 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result);
+        res.status(200).send(result[0]);
     });
 };
