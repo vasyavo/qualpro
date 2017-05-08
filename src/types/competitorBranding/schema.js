@@ -76,11 +76,9 @@ const schema = new Schema({
     },
     dateStart: {
         type: Date,
-        required: true,
     },
     dateEnd: {
         type: Date,
-        required: true,
     },
     comments: {
         type: [{
