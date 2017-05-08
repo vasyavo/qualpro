@@ -6,6 +6,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const QuestionnaryModel = require('./../types/questionnaries/model');
 const QuestionnaryAnswerModel = require('./../types/questionnariesAnswer/model');
 const PersonnelModel = require('./../types/personnel/model');
+const EventModel = require('./../types/event/model');
 const ACL_CONSTANTS = require('../constants/aclRolesNames');
 const ACL_MODULES = require('../constants/aclModulesNames');
 const CONTENT_TYPES = require('../public/js/constants/contentType');
@@ -1455,7 +1456,71 @@ const QuestionnaryHandler = function () {
             res.status(200).send(body);
         });
     };
-
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    QuestionnaryAnswerModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "QuestionnaryAnswer",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    QuestionnaryAnswerModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, cb);
+            },
+            
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
+    };
 
     this.getAnswers = function (req, res, next) {
         function queryRun(personnel) {

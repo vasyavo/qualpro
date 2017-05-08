@@ -616,7 +616,7 @@ module.exports = [
     {
         module: ACL_MODULES.COMMENT,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
@@ -631,7 +631,7 @@ module.exports = [
     {
         module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
