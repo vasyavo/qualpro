@@ -11,6 +11,7 @@ var AchievementForm = function () {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var AchievementFormModel = require('./../types/achievementForm/model');
+    var EventModel = require('./../types/event/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
     var access = require('../helpers/access')();
@@ -141,7 +142,71 @@ var AchievementForm = function () {
             }
         });
     };
-
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    AchievementFormModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "AchievementForm",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    AchievementFormModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.ACHIEVEMENT_FORM, cb);
+            },
+    
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
+    };
+    
     this.update = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;

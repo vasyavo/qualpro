@@ -5,6 +5,7 @@ var Promotions = function () {
     var async = require('async');
     var _ = require('lodash');
     var logger = require('../utils/logger');
+    var EventModel = require('./../types/event/model');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -472,6 +473,71 @@ var Promotions = function () {
             }
 
             queryRun(personnel);
+        });
+    };
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    PromotionItemModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "PromotionItems",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err, model) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    PromotionItemModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, cb);
+            },
+            
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
         });
     };
 

@@ -10,6 +10,7 @@ var CompetitorBranding = function() {
     var ACL_MODULES = require('../constants/aclModulesNames');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var CompetitorBrandingModel = require('./../types/competitorBranding/model');
+    var EventModel = require('./../types/event/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
     var access = require('../helpers/access')();
@@ -155,6 +156,66 @@ var CompetitorBranding = function() {
             queryRun(saveData);
         });
 
+    };
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    CompetitorBrandingModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "CompetitorBranding",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    CompetitorBrandingModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            (cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
     };
 
     this.update = (req, res, next) => {

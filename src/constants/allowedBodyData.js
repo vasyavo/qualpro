@@ -1664,4 +1664,145 @@ allowedParams[CONTENT_TYPES.CONSUMER_SURVEY] = {
     }
 };
 
+allowedParams[CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY] = {
+    0: {
+        create: [],
+        update: []
+    },
+    1: {
+        create: [],
+        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+    },
+    2: {
+        create: [],
+        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+    },
+    3: {
+        create: [],
+        update: []
+    },
+    4: {
+        create: [],
+        update: []
+    },
+    5: {
+        create: [],
+        update: []
+    },
+    6: {
+        create: [],
+        update: []
+    },
+    7: {
+        create: [],
+        update: []
+    },
+    8: {
+        create: [],
+        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+    },
+    9: {
+        create: [],
+        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+    },
+    10 : {
+        create: [],
+        update: []
+    }
+};
+
+allowedParams[CONTENT_TYPES.QUESTIONNARIES_ANSWER] = {
+    0: {
+        create: [],
+        update: []
+    },
+    1: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    2: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    3: {
+        create: [],
+        update: []
+    },
+    4: {
+        create: [],
+        update: []
+    },
+    5: {
+        create: [],
+        update: []
+    },
+    6: {
+        create: [],
+        update: []
+    },
+    7: {
+        create: [],
+        update: []
+    },
+    8: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    9: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    10 : {
+        create: [],
+        update: []
+    }
+};
+
+allowedParams[CONTENT_TYPES.CONSUMER_SURVEY_ANSWER] = {
+    0: {
+        create: [],
+        update: []
+    },
+    1: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    2: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    3: {
+        create: [],
+        update: []
+    },
+    4: {
+        create: [],
+        update: []
+    },
+    5: {
+        create: [],
+        update: []
+    },
+    6: {
+        create: [],
+        update: []
+    },
+    7: {
+        create: [],
+        update: []
+    },
+    8: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    9: {
+        create: [],
+        update: ['optionIndex', 'text']
+    },
+    10 : {
+        create: [],
+        update: []
+    }
+};
+
 module.exports = allowedParams;
