@@ -4821,6 +4821,7 @@ input[type=number]::-webkit-outer-spin-button {
   max-width: 100%;
   height: auto;
   max-height: calc(100vh - 222px);
+  padding: 20px;
 }
 .videoPreviewTitle .download {
   float: right;
@@ -5553,7 +5554,6 @@ form.visibilityContainer.inStoreForm {
   height: calc(100% - 20px);
 }
 .breadcrumbsContainerWrap {
-  position: absolute;
   top: -25px;
   display: -webkit-box;
   display: -moz-box;
@@ -11383,7 +11383,9 @@ label[for=searchInputnoCT]::after {
 .competitorBrandingPreview  {
   height: calc(100% - 160px);
 }
-
+.competitorBrandingPreview.promo-evaluation  {
+    height: calc(100% - 210px);
+}
 .row {
   display: flex;
   flex-wrap: wrap;

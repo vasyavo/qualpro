@@ -251,7 +251,13 @@ const BranchHandler = function () {
                 },
             ];
 
-            pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());
+            pipeLine.push({
+                $group: {
+                    _id: null,
+                    data: { $push: '$$ROOT' },
+                    total: { $sum: 1 },
+                }
+            });
 
             aggregation = BrandModel.aggregate(pipeLine);
 

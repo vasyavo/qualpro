@@ -1873,13 +1873,7 @@ const Documents = function () {
                     return res.status(200).send(response);
                 }
 
-                fillImagesIntoResult(response, (err, result) => {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    res.status(200).send(result);
-                });
+                res.status(200).send(response);
             });
         }
 

@@ -114,9 +114,7 @@
     "migrations:up": "chmod +x migrations.sh && ./migrations.sh up",
     "migrations:down": "chmod +x migrations.sh && ./migrations.sh down",
     "utils:import": "node src/stories/import/index.js",
-    "utils:passwords": "node src/utils/setDefaultPasswordToPersonnel",
-    "utils:disable-bahrain": "node src/utils/disableBahrain",
-    "utils:after-import": "node src/utils/updateAfterImportBahrain"
+    "utils:passwords": "node src/utils/setDefaultPasswordToPersonnel"
   },
   "pre-push": [
     "test",
