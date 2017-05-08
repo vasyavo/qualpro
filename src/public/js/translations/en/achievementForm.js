@@ -28,6 +28,7 @@ define([
         goToBtn : 'Go to',
         edit : 'Edit',
         additionalComment: 'Additional Comment',
+        achievementFormEditTitle: 'Edit Achievement Form'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });

@@ -1,0 +1,152 @@
+<div class="form-holder personnelInfo promotionEdit largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.newProductLaunchEditTitle %></span>
+    </div>
+    <div class="promotionForm">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.origin %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="originDd" href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.packing %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="packing"
+                                       class="objectivesInput"
+                                       value="<%= model.packing %>"
+                                       required
+                                       maxlength="50"
+                                       placeholder="Input opening stock"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.price %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="price"
+                                       class="objectivesInput"
+                                       value="<%= model.packing %>"
+                                       required
+                                       maxlength="50"
+                                       placeholder="Input opening stock"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.displayType %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="displayTypeDd" href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.startDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="date-start"
+                                           class="hasDatepicker"
+                                           value="<%= model.shelfLifeStart %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.endDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="date-end"
+                                           class="hasDatepicker"
+                                           value="<%= model.shelfLifeEnd %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right flexColumnStart">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%- translation.distributor %></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="additionalComment<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="comment-container">
+                                <textarea type="text"
+                                          id="description-en"
+                                          class="objectivesTextarea"
+                                          required
+                                          maxlength="150"
+                                          placeholder="<%= translation.description %>"><%- model.distributor.en %>
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer" id="additionalCommentArContainer" style="display: none;">
+                            <textarea class="objectivesTextarea"
+                                      id="description-ar"
+                                      data-parent="description"
+                                      data-property="ar"
+                                      value=""
+                                      placeholder="<%= translation.description %>"
+                                      maxlength="150"><%- model.distributor.ar %>
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%- translation.comment %></span>
+                                <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
+                                   data-id="distributor<%= anotherLanguage.capitalizer('firstCaps') %>Container"
+                                   href="javascript:;">
+                                </a>
+                            </div>
+                            <div id="distributor-container">
+                                <textarea type="text"
+                                          id="distributor-en"
+                                          class="objectivesTextarea"
+                                          required
+                                          maxlength="150"
+                                          placeholder="<%= translation.description %>"><%- model.additionalComment.en %>
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="objectivesPaddingBlock borderBottom descriptionArContainer" id="distributorArContainer" style="display: none;">
+                            <textarea class="objectivesTextarea"
+                                      id="distributor-ar"
+                                      data-parent="description"
+                                      data-property="ar"
+                                      value=""
+                                      placeholder="<%= translation.description %>"
+                                      maxlength="150"><%- model.additionalComment.ar %>
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

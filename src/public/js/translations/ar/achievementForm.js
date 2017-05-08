@@ -27,7 +27,8 @@ define([
         all          : 'استمارة الإنجازات',
         goToBtn : '', //todo
         edit         : 'تعديل بيانات',
-        additionalComment: '',
+        additionalComment: '', // todo
+        achievementFormEditTitle: '', // todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });

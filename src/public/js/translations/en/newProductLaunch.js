@@ -31,8 +31,13 @@ define([
         displayType  : 'Display type',
         distributor  : 'Distributor',
         shelfLife    : 'Shelf life',
+        startDate : 'Start date',
+        endDate : 'End date',
 
-        goToBtn : 'Go to'
+        goToBtn : 'Go to',
+        edit : 'Edit',
+        newProductLaunchEditTitle: 'Edit New Product Launch',
+
     };
     return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
 });
