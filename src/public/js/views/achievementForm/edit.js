@@ -3,10 +3,8 @@ define(function (require) {
     var moment = require('moment');
     var _ = require('underscore');
     var Backbone = require('backbone');
-    var Populate = require('populate');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
-    var DisplayTypeCollection = require('collections/displayType/collection');
-    var Template = require('text!templates/competitorBranding/edit.html');
+    var Template = require('text!templates/achievementForm/edit.html');
 
     return Backbone.View.extend({
 
@@ -25,6 +23,8 @@ define(function (require) {
                 dateEnd: view.find('#date-end'),
                 descriptionEn: view.find('#description-en'),
                 descriptionAr: view.find('#description-ar'),
+                additionalCommentEn: view.find('#additional-comment-en'),
+                additionalCommentAr: view.find('#additional-comment-ar'),
             };
         },
 
@@ -33,8 +33,8 @@ define(function (require) {
         render: function () {
             var that = this;
             var model = this.editableModel;
-            var dateStart = moment(model.dateStart, 'DD.MM.YYYY');
-            var dateEnd = moment(model.dateEnd, 'DD.MM.YYYY');
+            var dateStart = moment(model.startDate, 'DD.MM.YYYY');
+            var dateEnd = moment(model.endDate, 'DD.MM.YYYY');
             var currentLanguage = App.currentUser.currentLanguage || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
@@ -53,17 +53,22 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var startDate = ui.dateStart.val();
+                            var endDate = ui.dateEnd.val();
                             var data = {
-                                dateStart: moment(ui.dateStart.val()).toDate(),
-                                dateEnd: moment(ui.dateEnd.val()).toDate(),
-                                displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
+                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
+                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
                                 description: {
                                     en: ui.descriptionEn.val(),
                                     ar: ui.descriptionAr.val(),
                                 },
+                                additionalComment: {
+                                    en: ui.additionalCommentEn.val(),
+                                    ar: ui.additionalCommentAr.val(),
+                                },
                             };
 
-                            that.trigger('edit-competitor-branding-item', data, model._id);
+                            that.trigger('edit-achievement-form-item', data, model._id);
                         }
                     }
                 }
@@ -96,24 +101,6 @@ define(function (require) {
 
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
-
-            this.displayTypeCollection = new DisplayTypeCollection();
-            this.displayTypeCollection.on('reset', function () {
-                const defaultDisplayTypes = model.displayType.map(function (item) {
-                    return that.displayTypeCollection.findWhere({_id : item._id}).toJSON();
-                });
-
-                Populate.inputDropDown({
-                    selector    : '#displayTypeDd',
-                    context     : that,
-                    contentType : 'displayType',
-                    displayText : 'display type',
-                    displayModel: defaultDisplayTypes,
-                    collection  : that.displayTypeCollection.toJSON(),
-                    multiSelect: true,
-                    forPosition : true
-                });
-            }, this);
 
             arabicInput(this);
 
