@@ -78,6 +78,12 @@ Http Code | Error Type           |  Error                             | Details
     + ar (string)
     + en: Customer success (string)
 
+## Publisher
++ _id: `5818b01a13187de020871b63` (string)
++ name
+    + ar (string)
+    + en: Customer success (string)
+
 ## Personnel
 + _id: `5818b01a13187de020871b63` (string)
 + position: `5818b01a13187de020871b63` (string)
@@ -258,6 +264,44 @@ Http Code | Error Type           |  Error                             | Details
 + _id: `2017` (number)
 + ppt: `1750` (number)
 
+## CustomPromotionEvaluationReportData
++ _id: `5818b01a13187de020871b63` (string)
++ total: `1750` (number)
++ promotionType
+    + en: `test`
+    + ar: ''
++ comments (array)
+    + `589a00c3677fe800655a9ff9`
+    + `589a00c3677fe800655a9ff9`
++ ppt: `12` (number)
++ dateStart: `2017-01-29T21:11:25.325Z` (string)
++ dateEnd: `2017-01-29T21:11:25.325Z` (string)
++ createdBy
+    + date: `2017-01-29T21:11:25.325Z` (string)
+    + user
+        + _id: `5837202b3a90064c13697a26` (string)
+        + position: `583720173a90064c1369661b` (string)
++ branch
+    + _id: `5837202b3a90064c13697a26` (string)
+    + name
+        + en: `test` (string)
+        + ar: `test` (string)
++ itemDateStart: `2017-01-29T21:11:25.325Z` (string)
++ itemDateEnd: `2017-01-29T21:11:25.325Z` (string)
++ opening (array)
+    + `0`
++ sellIn (array)
+    + `200`
+    + `200`
++ closingStock (array)
+    + `50`
+    + `50`
++ sellOut (array)
+    + `150`
+    + `150`
++ displayType (array)
+    + `583720093a90064c1369617c`
+
 ## CustomAchievementReportData
 + total: `5` (number)
 + _id: `5818b01a13187de020871b63` (string)
@@ -308,7 +352,21 @@ Http Code | Error Type           |  Error                             | Details
 + categories (array[Category])
 + items (array[Item])
 
-## chartItem
+## CustomPromotionEvaluationReportDataFilters
++ countries (array[Country])
++ regions (array[Region])
++ subRegions (array[SubRegion])
++ branches (array[Branch])
++ retailSegments (array[RetailSegment])
++ displayTypes (array[DisplayType])
++ categories (array[Category])
++ statuses (array)
+    + `active`
++ publishers (array[Publisher])
++ positions (array[Position])
++ personnels (array[Personnel])
+
+## CustomAchievementReportChartsItem
 + value: `1` (number)
 + label
     + en: `name` (string)
@@ -316,13 +374,31 @@ Http Code | Error Type           |  Error                             | Details
 
 ## CustomAchievementReportCharts
 + lineChart
-    + data (array[chartItem])
+    + data (array[CustomAchievementReportChartsItem])
     + labels (array)
         + 1
         + 3
         + 7
 + pieChart
-    + data (array[chartItem])
+    + data (array[CustomAchievementReportChartsItem])
+
+## CustomPromotionEvaluationReportChartsItem
++ value
+    + count: `1` (string)
+    + promotion: `5818b01a13187de020871b63` (string)
++ label
+    + en: `name` (string)
+    + ar: `name` (string)
+
+## CustomPromotionEvaluationReportCharts
++ lineChart
+    + data (array[CustomPromotionEvaluationReportChartsItem])
+    + labels (array)
+        + 1
+        + 3
+        + 7
++ pieChart
+    + data (array[CustomPromotionEvaluationReportChartsItem])
 
 ## GetPreviews
 + previews (array)
@@ -738,5 +814,81 @@ Group Get Preview For Sync
         + to (required) - time period to date
 + Response 200 (application/json)
     + Attributes (CustomAchievementReportCharts)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+# Group Promotion Evaluation Custom Report
+
+## Get all data  [/customReports/promotionEvaluationReport]
+### Get Promotion Evaluation report data [GET]
+
++ Parameters
+    + page: (number, optional)
+    + count (number, optional)
+    + filter (object, optional)
+        + country (array, optional) - array of country id
+        + region (array, optional) - array of region id
+        + subRegion (array, optional) - array of sub region id
+        + retailSegment (array, optional) - array of retail segment id
+        + branch (array, optional) - array of branch id
+        + category (array, optional) - array of category id
+        + displayType (array, optional) - array of displayType id
+        + status (array, optional) - array of status const
+        + publisher (array, optional) - array of publisher id
+        + position (array, optional) - array of position id
+        + personnel (array, optional) - array of personnel id
+    + timeFilter (object, optional)
+        + from (required) - time period from date
+        + to (required) - time period to date
++ Response 200 (application/json)
+    + Attributes
+        + total (number)
+        + data (array[CustomPromotionEvaluationReportData])
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get filters data [/customReports/promotionEvaluationReport/filters]
+### Get Promotion Evaluation filters data [GET]
+
++ Parameters
+    + filter (object, optional)
+        + country (array, optional) - array of country id
+        + region (array, optional) - array of region id
+        + subRegion (array, optional) - array of sub region id
+        + retailSegment (array, optional) - array of retail segment id
+        + branch (array, optional) - array of branch id
+        + category (array, optional) - array of category id
+        + displayType (array, optional) - array of displayType id
+        + status (array, optional) - array of status const
+        + publisher (array, optional) - array of publisher id
+        + position (array, optional) - array of position id
+        + personnel (array, optional) - array of personnel id
++ Response 200 (application/json)
+    + Attributes (CustomPromotionEvaluationReportDataFilters)
++ Response 400 (application/json)
+    + Attributes (GenericError)
+
+## Get charts data [/customReports/promotionEvaluationReport/charts]
+### Get Promotion Evaluation charts data [GET]
+
++ Parameters
+    + filter (object, optional)
+        + country (array, optional) - array of country id
+        + region (array, optional) - array of region id
+        + subRegion (array, optional) - array of sub region id
+        + retailSegment (array, optional) - array of retail segment id
+        + branch (array, optional) - array of branch id
+        + category (array, optional) - array of category id
+        + displayType (array, optional) - array of displayType id
+        + status (array, optional) - array of status const
+        + publisher (array, optional) - array of publisher id
+        + position (array, optional) - array of position id
+        + personnel (array, optional) - array of personnel id
+    + timeFilter (object, optional)
+        + from (required) - time period from date
+        + to (required) - time period to date
+    + analyzeBy (required) - analyze by param
++ Response 200 (application/json)
+    + Attributes (CustomPromotionEvaluationReportCharts)
 + Response 400 (application/json)
     + Attributes (GenericError)
