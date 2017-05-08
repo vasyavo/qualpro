@@ -13,10 +13,11 @@ define([
     'constants/contentType',
     'js-cookie',
     'views/documents/list',
-    'views/documents/topBar'
+    'views/documents/topBar',
+    'services/pubnub',
 ], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
              forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView) {
+             DocumentsListView, DocumentsTopBarView, PubNubClient) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -28,6 +29,7 @@ define([
         routes: {
             home : 'any',
             'login(/:confirmed)' : 'login',
+            'logout' : 'logout',
             forgotPass : 'forgotPass',
             'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
             'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
@@ -54,6 +56,23 @@ define([
             });
 
             custom.applyDefaults();
+        },
+
+        logout: function () {
+            var self = this;
+
+            $.get('/logout', function () {
+                var userId = App.currentUser._id;
+
+                PubNubClient.unsubscribe({
+                    userId: userId
+                });
+
+                App.socket.emit('logout');
+                delete App.currentUser;
+                self.changeStyle('en');
+                Backbone.history.navigate('/login', {trigger: true});
+            });
         },
 
         documentsHomePage : function (filter) {
