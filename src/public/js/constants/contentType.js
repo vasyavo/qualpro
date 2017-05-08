@@ -73,6 +73,7 @@
         DISPLAYTYPE : 'displayType',
         MODULE : 'module',
         SESSION : 'session',
+        IMPORT_EXPORT: 'importExport',
 
         PRICESURVEY : 'priceSurvey',
         SHELFSHARESANALYSIS : 'shelfSharesAnalysis',

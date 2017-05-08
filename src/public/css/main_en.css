@@ -595,8 +595,10 @@ a {
 .filetype-xls:after,
 .filetype-m4v:after,
 .filetype-m4a:after,
-.filetype-pptx:after {
+.filetype-pptx:after,
+.icon-office:after {
   font-family: 'icomoon';
+  font-style: normal;
 }
 .filetype-csv:after {
   content: '\e94b';
@@ -855,6 +857,9 @@ a {
 }
 .logOut:after {
   content: '\e950';
+}
+.icon-office:after {
+  content: '\e946';
 }
 .contactUs:after {
   display: block;
@@ -11379,5 +11384,95 @@ label[for=searchInputnoCT]::after {
   height: calc(100% - 160px);
 }
 .competitorBrandingPreview.promo-evaluation  {
-  height: calc(100% - 210px);
+    height: calc(100% - 210px);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.col-3 {
+  width: 25%;
+  padding: 0 15px;
+}
+.import-export-topbar {
+  background: #f3f3f3;
+  padding: 10px 30px;
+  border: 1px solid #d0d0d0;
+  border-bottom: none;
+}
+.radio-switch {
+  border: 1px solid #d9e0e3;
+  display: inline-block;
+}
+.radio-switch label {
+  padding: 10px 30px;
+  display: inline-block;
+}
+.radio-switch input[type="radio"] {
+  display: none;
+}
+.radio-switch input[type="radio"] + label {
+  background: #fff;
+  cursor: pointer;
+}
+.radio-switch input[type="radio"]:checked + label {
+  background: #d9e0e3;
+}
+.import-buttons {
+  text-align: center;
+  padding: 10px 15px;
+}
+.import-button {
+  width: 100%;
+  margin: 20px 0;
+  padding: 25px 0 15px;
+  font-weight: bold;
+  font-size: 18px;
+  background-color: #f3f3f3;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 0 5px -1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 0 5px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px -1px rgba(0, 0, 0, 0.2);
+}
+.import-button:hover {
+  -webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.2);
+}
+.import-button i {
+  font-size: 40px;
+  font-weight: normal;
+  pointer-events: none;
+}
+.import-button span {
+  display: block;
+  font-size: 14px;
+  pointer-events: none;
+}
+.font-yellow {
+  color: #f6d959;
+}
+.font-green {
+  color: #80d8c7;
+}
+.font-red {
+  color: #ed8080;
+}
+.font-blue {
+  color: #59b5f5;
+}
+.errors-block {
+  width: 700px;
+  padding: 10px 20px;
+}
+.errors-block h3 {
+  text-align: center;
+}
+.errors-block ol {
+  padding-left: 20px;
+}
+.errors-block li {
+  list-style: decimal;
 }
