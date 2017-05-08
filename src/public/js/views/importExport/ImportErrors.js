@@ -9,6 +9,7 @@ define(function (require) {
 
         initialize: function (options) {
             this.translation = options.translation;
+            this.models = options.models;
 
             this.render();
         },
@@ -20,6 +21,7 @@ define(function (require) {
 
             var layout = $(this.template({
                 translation: this.translation,
+                models: this.models,
             }));
 
             this.$el = layout.dialog({

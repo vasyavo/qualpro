@@ -68,7 +68,7 @@ define(function (require) {
             var action = model.get('action');
 
             if (action === 'export') {
-                model.exportData('itemPrices');
+                model.exportData('items');
             }
         },
 
@@ -77,7 +77,7 @@ define(function (require) {
             var action = model.get('action');
 
             if (action === 'export') {
-                model.exportData('competitorList');
+                model.exportData('competitor-items');
             }
         },
 
@@ -106,7 +106,6 @@ define(function (require) {
                     done();
                 },
                 success: function (file, response) {
-                    response.totalErrors = 1;
                     if (response.totalErrors) {
                         this.importErrorsView = new ImportErrorsView({
                             translation: that.translation,
@@ -166,7 +165,7 @@ define(function (require) {
             });
 
             ui.itemPrices.dropzone({
-                url: 'import/itemPrices',
+                url: 'import/items',
                 paramName: 'source',
                 maxFilesize: 5,
                 uploadMultiple: false,
@@ -205,7 +204,7 @@ define(function (require) {
             });
 
             ui.competitorList.dropzone({
-                url: 'import/competitorList',
+                url: 'import/competitor-items',
                 paramName: 'source',
                 maxFilesize: 5,
                 uploadMultiple: false,

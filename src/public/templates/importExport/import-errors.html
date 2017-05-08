@@ -8,14 +8,16 @@
     <div id="main" class="competitorBrandingPreview">
         <div class="blockObjective scrollingForm">
             <div class="errors-block">
-                <h3>Locations Errors</h3>
-                <ol>
-                    <li>But the second case is different. We need some way to update the state in our application – If data flows from parent to child, this can’t work – or can it?</li>
-                    <li>Error 2</li>
-                    <li>Error 3</li>
-                    <li>Error 4</li>
-                    <li>Error 5</li>
-                </ol>
+                <% _.each(models, function(model) { %>
+                    <% if (model.numErrors) { %>
+                        <h3><%- model.sheet %> Sheet</h3>
+                        <ol>
+                            <% model.errors.forEach(function(error) { %>
+                                <li><%- error %></li>
+                            <% }); %>
+                        </ol>
+                    <% } %>
+                <% }); %>
             </div>
         </div>
     </div>
