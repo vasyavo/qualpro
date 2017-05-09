@@ -80,7 +80,7 @@ module.exports = function(app) {
     });
 
     if (config.reactDevelopment) {
-        app.use('/reporting/*', proxy({
+        app.use('/reporting', proxy({
             target: config.externalUiUrls.customReports,
             changeOrigin: true,
             ws: true,
