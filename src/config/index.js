@@ -111,6 +111,10 @@ config.session = {
 config.previewUrlRoot = '/preview/';
 
 config.importPath = process.env.IMPORT_PATH;
+config.reactDevelopment = process.env.REACT_DEVELOPMENT || false;
+config.externalUiUrls = {
+    customReports: process.env.CUSTOM_REPORTS_UI_URL || 'http://localhost:4000',
+};
 
 // import this file at begin of server.js
 module.exports = config;
