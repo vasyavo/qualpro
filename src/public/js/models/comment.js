@@ -3,8 +3,10 @@ define([
     'validation',
     'constants/contentType',
     'moment',
-    'locales'
-], function (parent, validation, CONTENT_TYPES, moment, locales) {
+    'locales',
+    'constants/errorMessages',
+    'dataService',
+], function (parent, validation, CONTENT_TYPES, moment, locales, ERROR_MESSAGES, dataService) {
     var Model = parent.extend({
         defaults      : {},
         attachmentsKey: 'attachments',
@@ -50,6 +52,23 @@ define([
             }
 
             return model;
+        },
+
+        editBody: function (commentId, newCommentBody) {
+            var that = this;
+
+            dataService.putData('/comment/' + commentId, {
+                commentText: newCommentBody,
+            }, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        'Edit comment',
+                    ]);
+                }
+
+                that.trigger('comment-edited');
+            });
         }
     });
 

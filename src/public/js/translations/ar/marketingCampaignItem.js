@@ -10,7 +10,9 @@ define([
         comment           : 'التعليق',
 
         // body
-        createdBy: ' تم إنشاؤها بواسطة'
+        createdBy: ' تم إنشاؤها بواسطة',
+        edit         : 'تعديل بيانات',
+        editCommentViewTitle: '', // todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });
