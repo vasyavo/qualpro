@@ -251,12 +251,13 @@ const modules = [
     },
 
     {
-        _id     : 24,
-        name    : {en: 'Custom Reports', ar: 'قائمة التقارير'},
-        href    : 'customReports',
-        sequence: 24,
-        parrent : null,
-        visible : false
+        _id          : 24,
+        name         : {en: 'Custom Reports', ar: 'قائمة التقارير'},
+        href         : 'custom-reports',
+        hrefNotInHash: true,
+        sequence     : 24,
+        parrent      : null,
+        visible      : true
     },
 
     {
@@ -495,7 +496,7 @@ const modules = [
         sequence: 45,
         parrent : 16,
         visible : true
-    }
+    },
 ];
 
 const q = async.queue((module, cb) => {

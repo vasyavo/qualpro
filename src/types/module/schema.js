@@ -14,6 +14,7 @@ const schema = new Schema({
         },
     },
     sequence: Number,
+    hrefNotInHash: Boolean,
     href: {
         type: String,
         default: '',

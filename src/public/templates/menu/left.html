@@ -1,7 +1,7 @@
 <ul class="scrollable">
     <% rootModules.forEach(function(rootModule){%>
         <li id="<%= rootModule._id %>" class="parentLeft">
-            <a href="#qualPro/<%=rootModule.href%>" class="mainMenu"><%= rootModule.name[currentLanguage]||rootModule.name[anotherLanguage] +'ppp' %></a>
+            <a href="<%= rootModule.hrefNotInHash ? '/' + rootModule.href : '#qualPro/' + rootModule.href %>" class="mainMenu"><%= rootModule.name[currentLanguage]||rootModule.name[anotherLanguage] +'ppp' %></a>
 
                 <% if(getChild(rootModule._id)){%>
                     <ul class="down">
