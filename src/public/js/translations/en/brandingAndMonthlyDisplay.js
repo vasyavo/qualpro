@@ -29,6 +29,11 @@ define([
         skipped      : 'Skipped',
         commentText  : 'Comment Text',
         missedData   : 'Missed data',
+        edit: 'Edit',
+
+        // edit
+        saveBtn: 'Save',
+        brandingAndMonthlyDisplayEditTitle: 'Edit branding and monthly display report',
 
         // topBar
         all        : 'al alali Branding & Monthly display',
