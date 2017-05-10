@@ -31,8 +31,12 @@ define([
         displayType  : 'نوع العرض ',
         distributor  : 'الموزع ',
         shelfLife    : 'تاريخ الانتاج / تاريخ الانتهاء',
+        startDate : '', // todo
+        endDate : '', // todo
 
-        goToBtn : '' //todo
+        goToBtn : '', // todo
+        edit         : 'تعديل بيانات',
+        newProductLaunchEditTitle : '', // todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
 });

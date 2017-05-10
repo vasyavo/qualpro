@@ -673,6 +673,195 @@ define([
         }
     };
 
+    var competitorBrandingAndDisplayConfig = {
+        1: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        2: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        8: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        9: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
+
+    var achievementFormConfig = {
+        1: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        2: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        8: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        9: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
+
+    var newProductLunchConfig = {
+        1: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        2: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        8: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        9: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'edit',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ],
+        },
+        activityList: {
+            preview: [
+                {
+                    selector       : '#topButtons',
+                    insertType     : 'append',
+                    elementId      : 'goToBtn',
+                    template       : 'text!templates/objectives/preview/goToBtn.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                }
+            ]
+        }
+    };
+
     var defaultActivityListGoToButton = {
         activityList: {
             preview: [
@@ -699,9 +888,9 @@ define([
     config[CONTENT_TYPES.PROMOTIONS] = promotionsConfig;
     config[CONTENT_TYPES.CONSUMER_SURVEY] = consumersSurveyConfig;
     config[CONTENT_TYPES.COMPETITORPROMOTION] = competitorPromotionActivities;
-    config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = defaultActivityListGoToButton;
-    config[CONTENT_TYPES.COMPETITORBRANDING] = defaultActivityListGoToButton;
-    config[CONTENT_TYPES.ACHIEVEMENTFORM] = defaultActivityListGoToButton;
+    config[CONTENT_TYPES.COMPETITORBRANDING] = competitorBrandingAndDisplayConfig;
+    config[CONTENT_TYPES.ACHIEVEMENTFORM] = achievementFormConfig;
+    config[CONTENT_TYPES.NEWPRODUCTLAUNCH] = newProductLunchConfig;
     config[CONTENT_TYPES.NOTIFICATIONS] = defaultActivityListGoToButton;
 
     return config;

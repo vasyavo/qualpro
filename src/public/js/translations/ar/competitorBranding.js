@@ -29,6 +29,11 @@ define([
         noTranslation: ' لا يوجد ترجمة ',
         skipped      : 'تخطي',
         commentText  : 'التعليق',
+        edit         : 'تعديل بيانات',
+        saveBtn : '', // todo ar
+
+        // edit
+        competitorBrandingEditTitle: '', // todo ar
 
         // topBar
         all        : ' العلامات التجارية وتقارير العرض للمنافسين',

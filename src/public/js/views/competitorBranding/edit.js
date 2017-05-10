@@ -1,10 +1,12 @@
 define(function (require) {
 
     var moment = require('moment');
+    var _ = require('underscore');
     var Backbone = require('backbone');
     var Populate = require('populate');
+    var arabicInput = require('helpers/implementShowHideArabicInputIn');
     var DisplayTypeCollection = require('collections/displayType/collection');
-    var Template = require('text!templates/competitorPromotion/edit.html');
+    var Template = require('text!templates/competitorBranding/edit.html');
 
     return Backbone.View.extend({
 
@@ -19,12 +21,10 @@ define(function (require) {
         defineUiElements : function () {
             var view = this.$el;
             this.ui = {
-                price: view.find('#price'),
-                weight: view.find('#weight'),
-                expiry: view.find('#date-expiry'),
                 dateStart: view.find('#date-start'),
                 dateEnd: view.find('#date-end'),
-                description: view.find('#description'),
+                descriptionEn: view.find('#description-en'),
+                descriptionAr: view.find('#description-ar'),
             };
         },
 
@@ -35,10 +35,14 @@ define(function (require) {
             var model = this.editableModel;
             var dateStart = moment(model.dateStart, 'DD.MM.YYYY');
             var dateEnd = moment(model.dateEnd, 'DD.MM.YYYY');
+            var currentLanguage = App.currentUser.currentLanguage || 'en';
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
             var layout = $(this.template({
                 translation: this.translation,
                 model: model,
+                currentLanguage: currentLanguage,
+                anotherLanguage: anotherLanguage,
             }));
 
             this.$el = layout.dialog({
@@ -50,16 +54,16 @@ define(function (require) {
                         click : function () {
                             var ui = that.ui;
                             var data = {
-                                price: ui.price.val(),
-                                packing: ui.weight.val(),
-                                expiry: moment(ui.expiry.val()).toDate(),
                                 dateStart: moment(ui.dateStart.val()).toDate(),
                                 dateEnd: moment(ui.dateEnd.val()).toDate(),
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
-                                promotion: ui.description.val(),
+                                description: {
+                                    en: ui.descriptionEn.val(),
+                                    ar: ui.descriptionAr.val(),
+                                },
                             };
 
-                            that.trigger('edit-competitor-promotion-item', data, model._id);
+                            that.trigger('edit-competitor-branding-item', data, model._id);
                         }
                     }
                 }
@@ -67,7 +71,6 @@ define(function (require) {
 
             var $startDate = that.$el.find('#date-start');
             var $dueDate = that.$el.find('#date-end');
-            var $expiryDate = that.$el.find('#date-expiry');
 
             var startDateObj = {
                 changeMonth: true,
@@ -91,16 +94,8 @@ define(function (require) {
                 }
             };
 
-            var expiryDateObj = {
-                changeMonth: true,
-                changeYear : true,
-                yearRange  : '-20y:c+10y',
-                defaultDate: new Date(dateEnd),
-            };
-
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
-            $expiryDate.datepicker(expiryDateObj);
 
             this.displayTypeCollection = new DisplayTypeCollection();
             this.displayTypeCollection.on('reset', function () {
@@ -119,6 +114,14 @@ define(function (require) {
                     forPosition : true
                 });
             }, this);
+
+            arabicInput(this);
+
+            this.$el.find('.objectivesTextarea').each(function (index, element) {
+                var $element = $(element);
+
+                $element.ckeditor({language: $element.attr('data-property')});
+            });
         }
 
     });
