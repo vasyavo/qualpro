@@ -9,6 +9,7 @@ const checkAuth = require('./../utils/isAuth');
 const addRequestId = require('express-request-id')();
 const config = require('./../config');
 const express = require('express');
+const proxy = require('http-proxy-middleware');
 
 module.exports = function(app) {
     var redis = require('../helpers/redisClient');
@@ -78,7 +79,15 @@ module.exports = function(app) {
         });
     });
 
-    app.use('/custom-reports', express.static('src/stories/customReports/frontend/'));
+    if (config.reactDevelopment) {
+        app.use('/reporting', proxy({
+            target: config.externalUiUrls.customReports,
+            changeOrigin: true,
+            ws: true,
+        }));
+    } else {
+        app.use('/reporting', express.static(path.join(config.workingDirectory, 'src/stories/customReports/frontend')));
+    }
 
     // endpoint for handling api documents
     app.get('/docs', (req, res, next) => {
