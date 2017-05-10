@@ -269,7 +269,7 @@ var NewProductLaunch = function() {
                 user: userId,
                 date: Date.now()
             };
-            NewProductLaunchModel.findByIdAndUpdate(id, body, { new: true }, callback)
+            NewProductLaunchModel.findByIdAndUpdate(id, body, { new: true }).populate('origin').populate('displayType').exec(callback)
         };
 
         async.waterfall([
