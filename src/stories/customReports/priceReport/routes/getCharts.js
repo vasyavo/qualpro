@@ -180,11 +180,23 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result[0];
+        let response = result[0];
 
-        response.lineChart.labels.sort();
-        response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
-        response.pieChart.data = _.sortBy(response.lineChart.data, ['value']);
+        if (response) {
+            response.lineChart.labels.sort();
+            response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
+            response.pieChart.data = _.sortBy(response.lineChart.data, ['value']);
+        } else {
+            response = {
+                lineChart: {
+                    labels: [],
+                    data: [],
+                },
+                pieChart: {
+                    data: [],
+                },
+            };
+        }
 
         res.status(200).send(response);
     });

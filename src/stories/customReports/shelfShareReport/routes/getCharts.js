@@ -199,7 +199,7 @@ module.exports = (req, res, next) => {
                 pieChart: {
                     data: '$data',
                 },
-                barChart: {
+                lineChart: {
                     data: '$data',
                 },
             },
@@ -222,10 +222,22 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result[0];
+        let response = result[0];
 
-        response.pieChart.data = _.sortBy(response.pieChart.data, ['value']);
+        if (response) {
+            response.pieChart.data = _.sortBy(response.pieChart.data, ['value']);
+            response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
+        } else {
+            response = {
+                lineChart: {
+                    data: [],
+                },
+                pieChart: {
+                    data: [],
+                },
+            };
+        }
 
-        res.status(200).send(result);
+        res.status(200).send(response);
     });
 };
