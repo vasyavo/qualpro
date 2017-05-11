@@ -32,45 +32,47 @@ module.exports = function * (options) {
         setBranch,
     }) || [];
 
-    const result = yield PersonnelModel.aggregate([
-        {
-            $match: {
-                _id: {
-                    $in: setEveryoneInLocation.map((personnelId) => ObjectId(personnelId)),
+    if (setRetailSegment && setRetailSegment[0]) {
+        const result = yield PersonnelModel.aggregate([
+            {
+                $match: {
+                    _id: {
+                        $in: setEveryoneInLocation.map((personnelId) => ObjectId(personnelId)),
+                    },
                 },
             },
-        },
-        {
-            $lookup: {
-                from: 'branches',
-                localField: 'branch',
-                foreignField: '_id',
-                as: 'branch',
-            },
-        },
-        {
-            $project: {
-                retailSegments: '$branch.retailSegment',
-            },
-        },
-        {
-            $match: {
-                retailSegments: {
-                    $in: setRetailSegment,
+            {
+                $lookup: {
+                    from: 'branches',
+                    localField: 'branch',
+                    foreignField: '_id',
+                    as: 'branch',
                 },
             },
-        },
-        {
-            $group: {
-                _id: null,
-                personnels: {
-                    $push: '$_id',
+            {
+                $project: {
+                    retailSegments: '$branch.retailSegment',
                 },
             },
-        },
-    ]).exec();
+            {
+                $match: {
+                    retailSegments: {
+                        $in: setRetailSegment,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    personnels: {
+                        $push: '$_id',
+                    },
+                },
+            },
+        ]).exec();
 
-    setEveryoneInLocation = result && result[0] && result[0].personnels || [];
+        setEveryoneInLocation = result && result[0] && result[0].personnels || [];
+    }
 
     const newActivity = new ActivityModel();
 
