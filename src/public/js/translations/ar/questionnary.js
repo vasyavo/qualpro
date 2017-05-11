@@ -49,6 +49,8 @@ define([
         questionaryPreview: 'عرض بيانات الاستطلاع',
         okBtn             : 'موافق',
 
+        //edit answer
+        editAnswerViewTitle: '', // todo
 
         // top Bar
         all   : 'استطلاع العلالى',

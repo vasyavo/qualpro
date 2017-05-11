@@ -399,7 +399,7 @@ define([
                 model.branchString = model.branch.name[currentLanguage];
                 model.outletString = model.outlet.name[currentLanguage];
                 model.retailSegmentString = model.retailSegment.name[currentLanguage];
-                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(item => {
+                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(function(item) {
                     return item.name[currentLanguage];
                 }).join(',') : '';
                 model.dateStart = moment(model.dateStart).format('DD.MM.YYYY');

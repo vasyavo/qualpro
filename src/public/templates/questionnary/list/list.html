@@ -7,7 +7,7 @@ var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
     <div class="listnailsHolder scrollable">
         <div class="listTable">
             <% collection.forEach(function(model, index){ %>
-            <div class="questionnarieListWrap flexRow listRow" data-id="<%= model._id %>">
+            <div id="question-block-<%- model._id %>" class="questionnarieListWrap flexRow listRow" data-id="<%= model._id %>">
                 <div class="leftPart flexGrow">
                     <div class="questionnarieRow">
                         <span class="fontSuperBig"><%= model.title.currentLanguage || model.title[anotherLanguage] %></span>

@@ -79,6 +79,11 @@
             }
         ],
 
+        AVAILABLE_QUESTION_TYPES: {
+            singleChoice: 'singleChoice',
+            multiChoice: 'multiChoice',
+            fullAnswer: 'fullAnswer'
+        },
         QUESTION_TYPE: [
             {
                 _id : 'singleChoice',

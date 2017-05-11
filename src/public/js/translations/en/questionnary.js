@@ -48,6 +48,9 @@ define([
         questionaryPreview: 'Questionnaire Preview',
         okBtn             : 'Ok',
 
+        //edit answer
+        editAnswerViewTitle: 'Edit answer of question',
+
         // top Bar
         all   : 'al alali Questionnaire',
         newBtn: 'New Questionnaire',

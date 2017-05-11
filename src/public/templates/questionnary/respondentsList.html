@@ -12,7 +12,10 @@
     </div>
     <div class="questionsStatusBlock questionnaireMultiEllipsis noShrink">
         <div class="questionsStatus <%= question.type._id === 'fullAnswer' ? 'answer' : question.type._id === 'singleChoice' ? 'question' : ''%>">
-            <span class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
+            <span id="answer-area-<%- answer._id %>" class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
         </div>
+    </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer">Edit</button>
     </div>
 </div>
