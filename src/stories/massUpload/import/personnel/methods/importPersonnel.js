@@ -254,6 +254,7 @@ function* createOrUpdate(payload) {
         phoneNumber,
         dateJoined
     } = options;
+    const query = {};
 
     let mainDeps;
     try {
@@ -280,10 +281,12 @@ function* createOrUpdate(payload) {
 
     if (email) {
         rawOpt.email = email;
+        query.email = email;
     }
 
     if (phoneNumber) {
         rawOpt.phoneNumber = phoneNumber;
+        query.phoneNumber = phoneNumber;
     }
 
     if (dateJoined) {
@@ -295,11 +298,6 @@ function* createOrUpdate(payload) {
     }
 
     const setObj = Object.assign(rawOpt, mainDeps);
-
-    const query = {
-        'firstName.en': enFirstName,
-        'lastName.en' : enLastName
-    };
 
     const modify = {
         $set: setObj,
