@@ -18,6 +18,7 @@ define([
 
         events: {
             'click #edit' : 'handleEditClick',
+            'click #delete' : 'handleDeleteClick',
         },
 
         initialize: function (options) {
@@ -70,8 +71,26 @@ define([
 
                 model.on('price-survey-value-edited', function () {
                     that.$el.find('#' + that.editablePriceSurveyId).html('' + newPrice);
-                    that.trigger('price-survey-value-edited');
+                    that.trigger('update-list-view');
                 });
+            });
+        },
+
+        handleDeleteClick: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var priceSurveyItemId = target.attr('data-id');
+            var model = new PriceSurveyBrandModel();
+
+            var priceSurveyIdToDelete = target.attr('data-id');
+            var priceSurveyItemIdToDelete = target.attr('data-item-id');
+
+            model.deleteItem(priceSurveyIdToDelete, priceSurveyItemIdToDelete);
+
+            model.on('price-survey-item-deleted', function () {
+                that.$el.dialog('close').dialog('destroy').remove();
+
+                that.trigger('update-list-view');
             });
         },
 

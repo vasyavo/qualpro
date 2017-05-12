@@ -98,7 +98,7 @@ define(function(require) {
                     translation: self.translation
                 });
 
-                self.brandPreview.on('price-survey-value-edited', function () {
+                self.brandPreview.on('update-list-view', function () {
                     self.collection.getPage(self.collection.currentPage, {
                         filter: self.filter,
                     });
