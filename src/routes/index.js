@@ -70,20 +70,6 @@ module.exports = function(app) {
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
-
-    app.use('/', (req, res, next) => {
-        const {
-            id: requestId,
-            session: {uId : userId} = {uId: null},
-            headers:{
-                cookie
-            }
-        } = req;
-
-        logger.info(`DEBUG:: userId: ${userId} --- URL: ${req.method} ${req.originalUrl} --- cookies: ${JSON.stringify(cookie)} --- requestId: ${requestId}`);
-        next()
-    });
-
     app.get('/', csrfProtection, (req, res, next) => {
         res.render('index.html', {
             csrfToken: req.csrfToken(),
