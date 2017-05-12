@@ -14,7 +14,7 @@ define([
     'text!templates/consumersSurvey/questionMultiselect.html',
     'models/consumersSurvey',
     'models/question',
-    'models/questionnaryAnswer',
+    'models/consumersSurveyAnswer',
     'collections/consumersSurvey/questionCollection',
     'collections/consumersSurveyAnswers/collection',
     'constants/otherConstants',
@@ -26,7 +26,7 @@ define([
     'views/questionnary/editAnswer',
 ], function (Backbone, _, $, lodash, moment, PreViewTemplate, npsQuestionTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
              QuestionFullAnswerTemplate, QuestionSingleSelectTemplate, QuestionMultiselectTemplate,
-             Model, QuestionModel, QuestionnaryAnswerModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
+             Model, QuestionModel, QuestionAnswerModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
              BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG, ACL_ROLES, EditAnswerView) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.CONSUMER_SURVEY,
@@ -104,7 +104,7 @@ define([
                 fullAnswer: answerForQuestion.text,
             });
             this.editAnswerView.on('edit-answer', function (data) {
-                var model = new QuestionnaryAnswerModel();
+                var model = new QuestionAnswerModel();
 
                 model.edit(answerForQuestion._id, data);
 
