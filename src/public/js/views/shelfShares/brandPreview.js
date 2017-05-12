@@ -18,6 +18,7 @@ define([
 
         events: {
             'click #edit': 'handleEditClick',
+            'click #delete' : 'handleDeleteClick',
         },
 
         initialize: function (options) {
@@ -67,8 +68,25 @@ define([
 
                 model.on('shelf-shares-value-edited', function () {
                     that.$el.find('#' + that.editableShelfSharesId).html('' + value);
-                    that.trigger('shelf-shares-value-edited');
+                    that.trigger('update-list-view');
                 });
+            });
+        },
+
+        handleDeleteClick: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var model = new ShelfSharesBrandModel();
+
+            var shelfSharesIdToDelete = target.attr('data-id');
+            var shelfSharesItemIdToDelete = target.attr('data-item-id');
+
+            model.deleteItem(shelfSharesIdToDelete, shelfSharesItemIdToDelete);
+
+            model.on('shelf-shares-value-deleted', function () {
+                that.$el.find('#shelf-share-item-block-' + shelfSharesItemIdToDelete).remove();
+
+                that.trigger('update-list-view');
             });
         },
 

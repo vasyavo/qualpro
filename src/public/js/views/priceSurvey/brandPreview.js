@@ -79,7 +79,6 @@ define([
         handleDeleteClick: function (event) {
             var that = this;
             var target = $(event.target);
-            var priceSurveyItemId = target.attr('data-id');
             var model = new PriceSurveyBrandModel();
 
             var priceSurveyIdToDelete = target.attr('data-id');

@@ -28,11 +28,26 @@ define([
                     if (err) {
                         return App.renderErrors([
                             ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
-                            'Edit shelf shares value',
+                            'Edit shelf share item value',
                         ]);
                     }
 
                     that.trigger('shelf-shares-value-edited');
+                });
+            },
+
+            deleteItem: function (priceSurveyId, itemId) {
+                var that = this;
+
+                dataService.deleteData('/shelfShares/' + priceSurveyId + '/item/' + itemId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                            'Delete shelf share item',
+                        ]);
+                    }
+
+                    that.trigger('shelf-shares-value-deleted');
                 });
             }
         });
