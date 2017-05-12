@@ -1,8 +1,10 @@
 define([
     'models/parrent',
     'validation',
-    'constants/otherConstants'
-], function (parent, validation, CONSTANTS) {
+    'constants/otherConstants',
+    'constants/errorMessages',
+    'dataService'
+], function (parent, validation, CONSTANTS, ERROR_MESSAGES, dataService) {
     var Model = parent.extend({
 
         defaults: {
@@ -35,7 +37,22 @@ define([
             });
 
             return model;
-        }
+        },
+
+        edit: function (answerId, data) {
+            var that = this;
+
+            dataService.putData('/consumersSurvey/answer/' + answerId, data, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        'Edit answer of question',
+                    ]);
+                }
+
+                that.trigger('answer-edited');
+            });
+        },
     });
 
     return Model;

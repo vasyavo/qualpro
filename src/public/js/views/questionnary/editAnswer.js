@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('underscore');
     var Backbone = require('backbone');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
-    var AVAILABLE_QUESTION_TYPES = require('constants/otherConstants').AVAILABLE_QUESTION_TYPES;
+    var AVAILABLE_CONSUMER_SURVEY_TYPES = require('constants/otherConstants').AVAILABLE_CONSUMER_SURVEY_TYPES;
     var WrapperTemplate = require('text!templates/questionnary/editAnswer/wrapper.html');
     var FullAnswerTemplate = require('text!templates/questionnary/editAnswer/full-answer.html');
     var MultiSelectAnswerTemplate = require('text!templates/questionnary/editAnswer/multi-select-answer.html');
@@ -97,7 +97,7 @@ define(function (require) {
                             var data = {};
                             var valid = false;
 
-                            if (that.questionType === AVAILABLE_QUESTION_TYPES.fullAnswer) {
+                            if (that.questionType === AVAILABLE_CONSUMER_SURVEY_TYPES.fullAnswer) {
                                 data.text = {
                                     en: that.ui.descriptionEn.val(),
                                     ar: that.ui.descriptionAr.val(),
@@ -118,7 +118,7 @@ define(function (require) {
                 }
             });
 
-            if (this.questionType === AVAILABLE_QUESTION_TYPES.fullAnswer) {
+            if (this.questionType === AVAILABLE_CONSUMER_SURVEY_TYPES.fullAnswer) {
                 this.$el.find('#answer-container').html(this.fullAnswerTemplate({
                     answer: that.fullAnswer,
                     translation: this.translation,
@@ -127,7 +127,7 @@ define(function (require) {
                 }));
             }
 
-            if (this.questionType === AVAILABLE_QUESTION_TYPES.multiChoice) {
+            if (this.questionType === AVAILABLE_CONSUMER_SURVEY_TYPES.multiChoice) {
                 this.$el.find('#answer-container').html(this.multiSelectAnswerTemplate({
                     questionOptions: this.questionOptions,
                 }));
@@ -137,7 +137,7 @@ define(function (require) {
                 });
             }
 
-            if (this.questionType === AVAILABLE_QUESTION_TYPES.singleChoice) {
+            if ([AVAILABLE_CONSUMER_SURVEY_TYPES.singleChoice, AVAILABLE_CONSUMER_SURVEY_TYPES.nps].includes(this.questionType)) {
                 this.$el.find('#answer-container').html(this.singleSelectAnswerTemplate({
                     questionOptions: this.questionOptions,
                 }));

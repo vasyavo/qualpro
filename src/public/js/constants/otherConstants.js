@@ -116,6 +116,12 @@
             }
         ],
 
+        AVAILABLE_CONSUMER_SURVEY_TYPES: {
+            singleChoice: 'singleChoice',
+            multiChoice: 'multiChoice',
+            fullAnswer: 'fullAnswer',
+            nps: 'NPS',
+        },
         CONSUMER_SURVEY_QUESTION_TYPE : [
             {
                 _id : 'singleChoice',

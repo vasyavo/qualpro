@@ -11,4 +11,7 @@
             <span class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
         </div>
     </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer" data-customer-name="<%- answer.customer.name %>">Edit</button>
+    </div>
 </div>

@@ -49,6 +49,9 @@ define([
         questionaryPreview: 'Consumer Survey Preview',
         okBtn             : 'Ok',
 
+        //edit answer
+        editAnswerViewTitle: 'Edit answer of question',
+
         // top Bar
         all   : 'al alali Consumer Survey',
         newBtn: 'New Consumer Survey',

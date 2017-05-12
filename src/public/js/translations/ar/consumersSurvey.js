@@ -49,6 +49,9 @@ define([
         questionaryPreview: 'معاينة استطلاع العملاء',
         okBtn             : 'موافق',
 
+        //edit answer
+        editAnswerViewTitle: '', // todo
+
         // top Bar
         all   : 'استطلاع العملاء الخاص بالعلالي',
         newBtn: 'استطلاع عملاء جديد',

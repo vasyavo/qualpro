@@ -10,4 +10,7 @@
             <%= answerText.currentLanguage %>
         </div>
     </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer" data-question-id="<%- question._id %>" data-customer-name="<%- customerName %>">Edit</button>
+    </div>
 </div>

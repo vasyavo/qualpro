@@ -95,16 +95,6 @@ define([
                 model.on('answer-edited', function () {
                     that.editAnswerView.$el.dialog('close').dialog('destroy').remove();
 
-                    if (selectedQuestion.type._id === OTHER_CONSTANTS.AVAILABLE_QUESTION_TYPES.fullAnswer) {
-                        that.$el.find('#answer-area-' + answerForQuestion._id).html(data.text[currentLanguage]);
-                        that.$el.find('#respondent-full-answer-' + answerForQuestion._id).html(data.text[currentLanguage]);
-                    } else {
-                        var newSelectedOptionIndex = optionIndex.map(function (item) {
-                            return ++item;
-                        });
-                        that.$el.find('#answer-area-' + answerForQuestion._id).html(newSelectedOptionIndex.join(', '));
-                    }
-
                     that.trigger('re-render', answerForQuestion.questionnaryId);
                     that.trigger('update-list-view');
 
