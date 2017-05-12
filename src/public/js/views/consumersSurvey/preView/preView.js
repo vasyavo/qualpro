@@ -80,16 +80,6 @@ define([
                 return item._id === selectedQuestionId;
             });
 
-            var searchAnswerQuery = {
-                questionId: selectedQuestionId,
-            };
-
-            if (customer) {
-                searchAnswerQuery.customer = {
-                    name: customer,
-                };
-            }
-
             var answerForQuestion = this.answersCollection.findWhere(function (model) {
                 return model.get('questionId') === selectedQuestionId && model.get('customer').name === customer;
             });

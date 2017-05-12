@@ -72,11 +72,15 @@ define([
             var that = this;
             var currentLanguage = App.currentUser.currentLanguage;
             var target = $(event.target);
+            var personnelId = target.attr('data-personnel-id');
             var selectedQuestionId = target.attr('data-question-id') || this.answersCollection.questionId;
             var selectedQuestion = this.model.get('questions').find(function (item) {
                 return item._id === selectedQuestionId;
             });
-            var answerForQuestion = this.answersCollection.findWhere({questionId: selectedQuestionId});
+            var answerForQuestion = this.answersCollection.findWhere({
+                questionId: selectedQuestionId,
+                personnelId: personnelId,
+            });
             answerForQuestion = answerForQuestion.toJSON();
 
             this.editAnswerView = new EditAnswerView({
@@ -467,6 +471,7 @@ define([
                     question     : respondentQuestion,
                     answerIndexes: respondentAnswerOptionsIndexes,
                     translation  : self.translation,
+                    personnelId: personnelId,
                     allowEdit: false,
                 };
 
@@ -474,6 +479,7 @@ define([
                     question   : respondentQuestion,
                     answerText : respondentAnswerText,
                     translation: self.translation,
+                    personnelId: personnelId,
                     answerId: respondentAnswer._id,
                     allowEdit: false,
                 };
