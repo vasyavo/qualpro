@@ -141,11 +141,9 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
+                label: { $first: '$item.name' },
                 data: {
-                    $push: {
-                        value: '$ppt',
-                        label: '$item.name',
-                    },
+                    $push: '$ppt',
                 },
                 labels: { $addToSet: '$_id' },
             },
@@ -154,11 +152,21 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 lineChart: {
-                    data: '$data',
+                    dataSets: [
+                        {
+                            label: '$label',
+                            data: '$data',
+                        },
+                    ],
                     labels: '$labels',
                 },
                 pieChart: {
-                    data: '$data',
+                    dataSets: [
+                        {
+                            label: '$label',
+                            data: '$data',
+                        },
+                    ],
                 },
             },
         });
@@ -184,16 +192,14 @@ module.exports = (req, res, next) => {
 
         if (response) {
             response.lineChart.labels.sort();
-            response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
-            response.pieChart.data = _.sortBy(response.lineChart.data, ['value']);
         } else {
             response = {
                 lineChart: {
                     labels: [],
-                    data: [],
+                    dataSets: [],
                 },
                 pieChart: {
-                    data: [],
+                    dataSets: [],
                 },
             };
         }
