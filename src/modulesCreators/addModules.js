@@ -253,7 +253,7 @@ const modules = [
     {
         _id          : 24,
         name         : {en: 'Custom Reports', ar: 'قائمة التقارير'},
-        href         : 'custom-reports',
+        href         : 'reporting',
         hrefNotInHash: true,
         sequence     : 24,
         parrent      : null,
