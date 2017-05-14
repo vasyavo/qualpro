@@ -10,6 +10,6 @@ npm install
 npm run build
 cd ../
 mkdir -p ./src/stories/customReports/frontend
-cp -a "./${REPOSITORY_NAME}/build/" ./src/stories/customReports/frontend
+cp -a "./${REPOSITORY_NAME}/build/." ./src/stories/customReports/frontend
 rm -rf "./${REPOSITORY_NAME}"
 echo "Done!"
