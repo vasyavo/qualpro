@@ -5,9 +5,7 @@ REPOSITORY_NAME="qualpro-spa-custom-reports"
 
 git clone "https://${GITHUB_BASIC_TOKEN}:x-oauth-basic@github.com/foxtrapplimited/${REPOSITORY_NAME}"
 cd "${REPOSITORY_NAME}/"
-git checkout master
-npm install
-npm run build
+git checkout build
 cd ../
 mkdir -p ./src/stories/customReports/frontend
 cp -a "./${REPOSITORY_NAME}/build/" ./src/stories/customReports/frontend
