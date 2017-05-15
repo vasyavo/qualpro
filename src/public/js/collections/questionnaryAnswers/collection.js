@@ -29,7 +29,7 @@ define([
                 var valid = true;
 
                 answers.forEach(function (answer) {
-                    if (_.isEqual(answer.branch, item.branch)) {
+                    if (_.isEqual(answer.branch, item.branch) && answer.personnelId === item.personnelId) {
                         valid = false;
                     }
                 });

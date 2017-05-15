@@ -408,6 +408,7 @@ define([
             var self = this;
             var $respondentsList = this.$el.find('#questionFullList');
             var branches = self.answersCollection.branches;
+            var personnelId = self.answersCollection.personnelId;
             var answers = this.answersCollection.getSelected({modelKey: 'selectedForPersonnel'});
             var respondentQuestionsIds = _.pluck(answers, 'questionId');
             var respondentQuestions = _.filter(this.model.get('questions'), function (question) {
@@ -418,7 +419,7 @@ define([
 
             respondentQuestions.forEach(function (respondentQuestion) {
                 var respondentAnswer = _.find(self.answersCollection.toJSON(), function (answer) {
-                    return answer.questionId === respondentQuestion._id && _.isEqual(branches, answer.branch)
+                    return answer.questionId === respondentQuestion._id && _.isEqual(branches, answer.branch) && personnelId === answer.personnelId;
                 });
                 var respondentAnswerOptionsIndexes = respondentAnswer.optionIndex;
                 var respondentAnswerText = respondentAnswer.text;
