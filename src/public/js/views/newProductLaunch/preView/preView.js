@@ -27,6 +27,7 @@ define([
             'click #downloadFile'    : 'stopPropagation',
             'click #goToBtn'         : 'goTo',
             'click #edit' : 'showEditView',
+            'click #delete' : 'deleteNewProductLaunch',
         },
 
         initialize: function (options) {
@@ -80,6 +81,19 @@ define([
 
                     that.trigger('update-list-view');
                 });
+            });
+        },
+
+        deleteNewProductLaunch: function () {
+            var that = this;
+            var model = new NewProductLaunchModel();
+
+            model.delete(this.model.get('_id'));
+
+            model.on('new-product-launch-deleted', function () {
+                that.trigger('update-list-view');
+
+                that.$el.dialog('close').dialog('destroy').remove();
             });
         },
 

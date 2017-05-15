@@ -66,6 +66,20 @@ define([
                 });
             },
 
+            delete: function (newProductLaunchId) {
+                var that = this;
+
+                dataService.deleteData('/newProductLaunch/' + newProductLaunchId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('new-product-launch-deleted');
+                });
+            }
+
         });
 
         return Model;

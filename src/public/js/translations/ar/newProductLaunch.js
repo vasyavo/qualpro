@@ -36,6 +36,7 @@ define([
 
         goToBtn : '', // todo
         edit         : 'تعديل بيانات',
+        delete: '', // todo
         newProductLaunchEditTitle : '', // todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);

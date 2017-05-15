@@ -36,6 +36,7 @@ define([
 
         goToBtn : 'Go to',
         edit : 'Edit',
+        delete: 'Delete',
         newProductLaunchEditTitle: 'Edit New Product Launch',
 
     };
