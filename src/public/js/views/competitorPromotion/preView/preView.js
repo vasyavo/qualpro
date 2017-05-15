@@ -55,6 +55,7 @@ define([
             'click #downloadFile'             : 'stopPropagation',
             'click #goToBtn'                  : 'goTo',
             'click #edit' : 'showEditView',
+            'click #delete' : 'deleteCompetitorPromotion',
         },
 
         initialize: function (options) {
@@ -104,6 +105,19 @@ define([
 
                     that.trigger('update-list-view');
                 });
+            });
+        },
+
+        deleteCompetitorPromotion: function () {
+            var  that = this;
+            var model = new CompetitorPromotionModel();
+
+            model.delete(that.model.get('_id'));
+
+            model.on('competitor-promotion-deleted', function () {
+                that.trigger('update-list-view');
+
+                that.$el.dialog('close').dialog('destroy').remove();
             });
         },
 

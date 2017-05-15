@@ -52,7 +52,21 @@ define([
 
                     that.trigger('competitor-promotion-edited', response);
                 });
-            }
+            },
+
+            delete: function (competitorPromotionId) {
+                var that = this;
+
+                dataService.deleteData('/competitorPromotion/' + competitorPromotionId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('competitor-promotion-deleted');
+                });
+            },
         });
 
         return Model;

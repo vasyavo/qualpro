@@ -34,6 +34,7 @@ define([
             location    : 'الموقع',
             okBtn       : 'موافق',
             edit     : 'تعديل بيانات',
+            delete: '',
             dialogTitle : ' التعليقات والمرفقات',
             goToBtn : '', //todo ar
             weight : '', // todo ar

@@ -620,6 +620,14 @@ define([
                     template       : 'text!templates/objectives/preview/editButton.html',
                     forAll         : true,
                     forAllWithoutMy: false
+                },
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'delete',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/deleteButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
                 }
             ]
         },
@@ -630,6 +638,14 @@ define([
                     elementId      : 'edit',
                     insertType     : 'append',
                     template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                },
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'delete',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/deleteButton.html',
                     forAll         : true,
                     forAllWithoutMy: false
                 }
@@ -644,6 +660,14 @@ define([
                     template       : 'text!templates/objectives/preview/editButton.html',
                     forAll         : true,
                     forAllWithoutMy: false
+                },
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'delete',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/deleteButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
                 }
             ]
         },
@@ -654,6 +678,14 @@ define([
                     elementId      : 'edit',
                     insertType     : 'append',
                     template       : 'text!templates/objectives/preview/editButton.html',
+                    forAll         : true,
+                    forAllWithoutMy: false
+                },
+                {
+                    selector       : '#topButtons',
+                    elementId      : 'delete',
+                    insertType     : 'append',
+                    template       : 'text!templates/objectives/preview/deleteButton.html',
                     forAll         : true,
                     forAllWithoutMy: false
                 }

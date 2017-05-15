@@ -35,6 +35,7 @@ define([
             commentText : 'Comment Text',
             okBtn       : 'Ok',
             edit        : 'Edit',
+            delete: 'Delete',
             dialogTitle : 'Comment attachments',
             goToBtn : 'Go to',
             weight : 'Weight',
