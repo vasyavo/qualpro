@@ -6,6 +6,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const moment = require('moment');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -101,13 +102,13 @@ module.exports = (req, res, next) => {
             $project: {
                 payload: 1,
                 itemId: '$headers.itemId',
-                year: { $year: '$headers.date' },
+                date: '$headers.date',
             },
         });
 
         pipeline.push({
             $group: {
-                _id: '$year',
+                _id: '$date',
                 ppt: { $avg: '$payload.ppt' },
                 itemId: { $first: '$itemId' },
             },
@@ -145,7 +146,11 @@ module.exports = (req, res, next) => {
                 data: {
                     $push: '$ppt',
                 },
-                labels: { $addToSet: '$_id' },
+                labels: {
+                    $push: {
+                        $dateToString: { format: '%Y-%m-%d', date: '$_id' },
+                    },
+                },
             },
         });
 
@@ -208,6 +213,10 @@ module.exports = (req, res, next) => {
             response.lineChart.labels.unshift(response.lineChart.labels[0]);
             response.lineChart.dataSets[0].data.unshift(0);
         }
+
+        response.lineChart.labels = response.lineChart.labels.map((item) => {
+            return moment(item).format('MMMM, YYYY');
+        });
 
         res.status(200).send(response);
     });
