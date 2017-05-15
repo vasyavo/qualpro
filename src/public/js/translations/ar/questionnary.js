@@ -13,6 +13,7 @@ define([
         aboutSKUFormat   : 'فيما يتعلق برمز الهوية',
         addNewBtn        : 'أضف سلعة جديدة',
         deleteBtn        : 'حذف السلعة',
+        delete: '', // todo
         questions        : 'الاسئلة',
         type             : 'نوع الاستطلاع',
         options          : 'خيارات',

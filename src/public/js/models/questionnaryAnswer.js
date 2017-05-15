@@ -53,6 +53,21 @@ define([
                 that.trigger('answer-edited');
             });
         },
+
+        delete: function (answerId) {
+            var that = this;
+
+            dataService.deleteData('/questionnary/answer/' + answerId, {}, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        'Delete answer of question',
+                    ]);
+                }
+
+                that.trigger('answer-deleted');
+            });
+        }
     });
 
     return Model;

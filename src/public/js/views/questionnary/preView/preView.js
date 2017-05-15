@@ -45,6 +45,7 @@ define([
             'keyup #respondentSearchInput'               : 'respondentSearchData',
             'click #goToBtn'                             : 'goTo',
             'click .edit-answer': 'showEditAnswerView',
+            'click .delete-answer': 'deleteAnswer',
         },
 
         initialize: function (options) {
@@ -104,6 +105,19 @@ define([
 
                     that.$el.dialog('close').dialog('destroy').remove();
                 });
+            });
+        },
+
+        deleteAnswer: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var answerId = target.attr('data-id');
+            var model = new QuestionnaryAnswerModel();
+
+            model.delete(answerId);
+
+            model.on('answer-deleted', function () {
+                that.$el.find('#respondent-answer-container-' + answerId).remove();
             });
         },
 
@@ -472,6 +486,7 @@ define([
                     answerIndexes: respondentAnswerOptionsIndexes,
                     translation  : self.translation,
                     personnelId: personnelId,
+                    answerId: respondentAnswer._id,
                     allowEdit: false,
                 };
 
