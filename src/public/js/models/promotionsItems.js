@@ -112,6 +112,20 @@ define([
 
                     that.trigger('promotion-item-data-edited');
                 });
+            },
+
+            deletePromotionItem: function (itemId) {
+                var that = this;
+
+                dataService.deleteData('/promotionsItems/' + itemId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('promotion-item-deleted');
+                });
             }
 
         });

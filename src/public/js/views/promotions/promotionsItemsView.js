@@ -40,6 +40,7 @@ define([
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
             'click #edit': 'editTableItemData',
+            'click .delete': 'deleteTableItem',
         },
 
         initialize: function (options) {
@@ -75,13 +76,13 @@ define([
         editTableItemData: function (event) {
             var that = this;
             var target = $(event.target);
-            var branchId = target.attr('data-id');
+            var promotionItemId = target.attr('data-id');
             var stopMapping = false;
             var searchedBranch = null;
 
             this.collection.toJSON().some(function(outlet) {
                 outlet.branches.some(function (branch) {
-                    if (branch._id === branchId) {
+                    if (branch.promotionItemId === promotionItemId) {
                         searchedBranch = branch;
 
                         stopMapping = true;
@@ -111,6 +112,19 @@ define([
                     });
                 });
             }
+        },
+
+        deleteTableItem: function () {
+            var that = this;
+            var target = $(event.target);
+            var promotionItemId = target.attr('data-id');
+            var model = new PromotionItemModel();
+
+            model.deletePromotionItem(promotionItemId);
+
+            model.on('promotion-item-deleted', function () {
+                that.$el.dialog('close').dialog('destroy').remove();
+            });
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
