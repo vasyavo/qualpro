@@ -11,4 +11,8 @@
             <% }); %>
         </ol>
     </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer" data-question-id="<%- question._id %>" data-customer-name="<%- customerName %>"><%- translation.editBtn %></button>
+        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.delete %></button>
+    </div>
 </div>

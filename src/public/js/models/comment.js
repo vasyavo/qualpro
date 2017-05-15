@@ -69,7 +69,22 @@ define([
 
                 that.trigger('comment-edited');
             });
-        }
+        },
+
+        delete: function (commentId) {
+            var that = this;
+
+            dataService.deleteData('/comment/' + commentId, {}, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        'Delete comment',
+                    ]);
+                }
+
+                that.trigger('comment-deleted');
+            });
+        },
     });
 
     return Model;

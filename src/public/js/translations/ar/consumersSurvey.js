@@ -13,6 +13,7 @@ define([
         aboutSKUFormat   : 'SKU حول',
         addNewBtn        : 'أضف سلعة جديدة',
         deleteBtn        : 'حذف السلعة',
+        delete: '', // todo
         questions        : ' استطلاعات',
         type             : ' نوع السؤال',
         options          : 'الخيارات',
