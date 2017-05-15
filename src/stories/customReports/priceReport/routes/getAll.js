@@ -6,6 +6,7 @@ const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const moment = require('moment');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -103,14 +104,37 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 payload: 1,
-                year: { $year: '$headers.date' },
+                date: {
+                    $dateToString: { format: '%Y-%m-%d', date: '$headers.date' },
+                },
             },
         });
 
         pipeline.push({
             $group: {
-                _id: '$year',
+                _id: '$date',
                 ppt: { $avg: '$payload.ppt' },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                total: { $sum: 1 },
+                setPrice: { $push: '$$ROOT' },
+            },
+        });
+
+        pipeline.push({
+            $unwind: '$setPrice',
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 0,
+                date: '$setPrice._id',
+                price: '$setPrice.ppt',
+                total: 1,
             },
         });
 
@@ -125,8 +149,10 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
-                total: { $sum: 1 },
-                data: { $push: '$$ROOT' },
+                total: { $first: '$total' },
+                data: {
+                    $push: '$$ROOT',
+                },
             },
         });
 
@@ -149,6 +175,12 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach((item) => {
+            delete item.total;
+
+            item.date = moment(item.date).format('MMMM, YYYY');
+        });
 
         res.status(200).send(response);
     });
