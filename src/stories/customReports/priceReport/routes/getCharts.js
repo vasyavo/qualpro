@@ -204,6 +204,11 @@ module.exports = (req, res, next) => {
             };
         }
 
+        if (response.lineChart.labels.length === 1) {
+            response.lineChart.labels.unshift(response.lineChart.labels[0]);
+            response.lineChart.dataSets[0].data.unshift(0);
+        }
+
         res.status(200).send(response);
     });
 };
