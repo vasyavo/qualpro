@@ -27,6 +27,7 @@ define([
         all          : 'استمارة الإنجازات',
         goToBtn : '', //todo
         edit         : 'تعديل بيانات',
+        delete: '', // todo
         additionalComment: '', // todo
         achievementFormEditTitle: '', // todo
     };

@@ -108,7 +108,7 @@ define([
                         ]);
                     }
 
-                    that.trigger('competitor-branding-deleted', {});
+                    that.trigger('competitor-branding-deleted');
                 });
             }
         });

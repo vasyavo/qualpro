@@ -65,6 +65,20 @@ define([
 
                 that.trigger('achievement-form-edited');
             });
+        },
+
+        delete: function (achievementFormId) {
+            var that = this;
+
+            dataService.deleteData('/achievementForm/' + achievementFormId, {}, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
+                }
+
+                that.trigger('achievement-form-deleted');
+            });
         }
     });
 

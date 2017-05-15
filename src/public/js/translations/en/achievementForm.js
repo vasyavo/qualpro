@@ -27,6 +27,7 @@ define([
         all          : 'Achievement form',
         goToBtn : 'Go to',
         edit : 'Edit',
+        delete: 'Delete',
         additionalComment: 'Additional Comment',
         achievementFormEditTitle: 'Edit Achievement Form'
     };

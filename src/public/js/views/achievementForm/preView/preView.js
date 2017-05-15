@@ -26,6 +26,7 @@ define([
             'click #downloadFile'     : 'stopPropagation',
             'click #goToBtn'          : 'goTo',
             'click #edit' : 'showEditView',
+            'click #delete' : 'deleteAchievementForm',
         },
 
         initialize: function (options) {
@@ -73,6 +74,19 @@ define([
 
                     that.trigger('update-list-view');
                 });
+            });
+        },
+
+        deleteAchievementForm: function () {
+            var that = this;
+            var model = new AchievementFormModel();
+
+            model.delete(this.model.get('_id'));
+
+            model.on('achievement-form-deleted', function () {
+                that.trigger('update-list-view');
+
+                that.$el.dialog('close').dialog('destroy').remove();
             });
         },
 
