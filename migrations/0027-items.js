@@ -10,13 +10,20 @@ exports.up = function(db, next) {
         (personnel, cb) => {
             db.collection('items').aggregate([
                 {
+                    $match: {
+                        ppt: {
+                            $gt: 0,
+                        },
+                    },
+                },
+                {
                     $project: {
                         headers: {
-                            itemId: '_id',
+                            itemId: '$_id',
                             contentType: 'item',
                             actionType: 'itemChanged',
                             user: personnel._id,
-                            date: new Date(),
+                            date: '$createdBy.date',
                         },
                         payload: '$$ROOT',
                     },
