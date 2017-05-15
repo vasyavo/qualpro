@@ -58,6 +58,8 @@ const Item = function () {
             payload,
         };
 
+        payload.ppt = +payload.ppt;
+
         const itemHistoryModel = new ItemHistoryModel(body);
 
         itemHistoryModel.save();
