@@ -53,6 +53,7 @@ define([
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
             'click #edit': 'showEditView',
+            'click #delete': 'deleteBrandingAndMonthlyDisplay',
         },
 
         initialize: function (options) {
@@ -96,6 +97,19 @@ define([
 
                     that.trigger('update-list-view');
                 });
+            });
+        },
+
+        deleteBrandingAndMonthlyDisplay: function () {
+            var that = this;
+            var model = new BrandingAndMonthlyDislpayModel();
+
+            model.delete(this.model.get('_id'));
+
+            model.on('branding-and-monthly-display-deleted', function () {
+                that.trigger('update-list-view');
+
+                that.$el.dialog('close').dialog('destroy').remove();
             });
         },
 

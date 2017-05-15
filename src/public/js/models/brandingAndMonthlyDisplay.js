@@ -92,6 +92,20 @@ define([
 
                     that.trigger('branding-and-monthly-display-edited', response);
                 });
+            },
+
+            delete: function (brandingAndMonthlyDisplayId) {
+                var that = this;
+
+                dataService.deleteData('/brandingAndMonthlyDisplay/' + brandingAndMonthlyDisplayId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('branding-and-monthly-display-deleted');
+                });
             }
         });
 

@@ -30,6 +30,7 @@ define([
         commentText  : '', // todo
         missedData   : '', // todo
         edit         : 'تعديل بيانات',
+        delete: '', // todo
 
         // edit
         saveBtn: '', // todo

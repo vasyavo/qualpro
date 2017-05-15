@@ -30,6 +30,7 @@ define([
         commentText  : 'Comment Text',
         missedData   : 'Missed data',
         edit: 'Edit',
+        delete: 'Delete',
 
         // edit
         saveBtn: 'Save',
