@@ -24,12 +24,18 @@ define([
         getAnswerFromPersonnels: function () {
             var collection = this.toJSON();
             var answers = [];
-            var personnelsIds = [];
 
-            collection.forEach(function (answer) {
-                if (personnelsIds.indexOf(answer.personnel._id) === -1 && answer.selectedForPersonnel) {
-                    personnelsIds.push(answer.personnel._id);
-                    answers.push(answer);
+            collection.forEach(function (item) {
+                var valid = true;
+
+                answers.forEach(function (answer) {
+                    if (_.isEqual(answer.branch, item.branch)) {
+                        valid = false;
+                    }
+                });
+
+                if (valid) {
+                    answers.push(item);
                 }
             });
 
