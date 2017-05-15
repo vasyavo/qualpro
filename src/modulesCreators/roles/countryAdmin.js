@@ -654,5 +654,20 @@ module.exports = [
             write: true,
             read: true
         }
+    },
+    {
+        module: ACL_MODULES.IMPORT_EXPORT,
+        cms: {
+            archive: false,
+            edit: false,
+            write: true,
+            read: true
+        },
+        mobile: {
+            archive: false,
+            edit: false,
+            write: false,
+            read: false
+        }
     }
 ];

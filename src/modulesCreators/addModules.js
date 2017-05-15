@@ -497,6 +497,15 @@ const modules = [
         parrent : 16,
         visible : true
     },
+
+    {
+        _id     : 46,
+        name    : {en: 'Import/Export', ar: ''}, // todo insert ar translation
+        href    : CONSTANTS.IMPORT_EXPORT,
+        sequence: 46,
+        parrent : null,
+        visible : true
+    }
 ];
 
 const q = async.queue((module, cb) => {
