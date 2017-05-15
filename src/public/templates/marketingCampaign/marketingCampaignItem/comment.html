@@ -1,5 +1,5 @@
 <% collection.forEach(function(comment){ %>
-<div class="commentWrap" data-id="<%- comment._id %>">
+<div id="comment-container-<%- comment._id %>" class="commentWrap" data-id="<%- comment._id %>">
     <div class="userBlock">
         <div class="flexRowStart">
             <img src="preview/<%- comment.createdBy.user.imageSrc %>" alt="image" class="userImgBig imgCircle"/>
@@ -28,6 +28,7 @@
         <span class="dateTime fontSmall"><%- comment.createdBy.diffDate || comment.createdBy.date %></span>
         <span>
             <button class="edit-comment" data-id="<%- comment._id %>" data-body="<%- comment.body %>"><%- translation.edit %></button>
+            <button class="delete-comment" data-id="<%- comment._id %>"><%- translation.delete %></button>
         </span>
     </div>
 </div>

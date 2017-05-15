@@ -11,6 +11,7 @@ define([
         // body
         createdBy: 'Created By',
         edit: 'Edit',
+        delete: 'Delete',
         editCommentViewTitle: 'Edit comment of marketing campaign',
     };
     return _.extend({}, paginationTranslation, filtersTranslation, brandingAndDisplayTranslation);

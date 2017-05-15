@@ -36,6 +36,7 @@ define([
             'click #attachFiles'     : 'showAttachDialog',
             'click #downloadFile'    : 'stopPropagation',
             'click .edit-comment' : 'editComment',
+            'click .delete-comment' : 'deleteComment',
             'click .showDescription' : 'toggleCommentBody',
         },
 
@@ -77,6 +78,20 @@ define([
             var commentId = target.attr('data-id');
 
             this.$el.find('.comment-body-wrapper-' + commentId).toggleClass('showAllDescription');
+        },
+
+        deleteComment: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var commentId = target.attr('data-id');
+            var model = new CommentModel();
+
+            model.delete(commentId);
+
+            model.on('comment-deleted', function () {
+                debugger;
+                that.$el.find('#comment-container-' + commentId).remove();
+            });
         },
 
         editComment: function (event) {
