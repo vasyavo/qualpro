@@ -30,6 +30,7 @@ define([
         skipped      : 'تخطي',
         commentText  : 'التعليق',
         edit         : 'تعديل بيانات',
+        delete: '', // todo
         saveBtn : '', // todo ar
 
         // edit

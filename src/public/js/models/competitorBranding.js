@@ -96,6 +96,20 @@ define([
 
                     that.trigger('competitor-branding-edited', response);
                 });
+            },
+
+            delete: function (competitorBrandingId) {
+                var that = this;
+
+                dataService.deleteData('/competitorBranding/' + competitorBrandingId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('competitor-branding-deleted', {});
+                });
             }
         });
 

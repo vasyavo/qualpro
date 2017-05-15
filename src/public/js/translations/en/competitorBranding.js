@@ -29,6 +29,7 @@ define([
         skipped      : 'Skipped',
         commentText  : 'Comment Text',
         edit         : 'Edit',
+        delete: 'Delete',
         saveBtn : 'Save',
 
         // edit

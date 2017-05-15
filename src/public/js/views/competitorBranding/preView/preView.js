@@ -53,7 +53,8 @@ define([
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
             'click #goToBtn'                  : 'goTo',
-            'click #edit' : 'showEditView'
+            'click #edit' : 'showEditView',
+            'click #delete' : 'deleteCompetitorBranding'
         },
 
         initialize: function (options) {
@@ -94,10 +95,23 @@ define([
                     view.find('#display-type').html(displayTypeString);
                     view.find('#description').html(data.description[App.currentUser.currentLanguage]);
 
-                    that.editView.$el.dialog('close').dialog('destroy').remove();
-
                     that.trigger('update-list-view');
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
                 });
+            });
+        },
+
+        deleteCompetitorBranding: function () {
+            var that = this;
+            var model = new CompetitorBrandingModel();
+
+            model.delete(this.model.get('_id'));
+
+            model.on('competitor-branding-deleted', function () {
+                that.trigger('update-list-view');
+
+                that.$el.dialog('close').dialog('destroy').remove();
             });
         },
 
