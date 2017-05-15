@@ -691,13 +691,13 @@ module.exports = [
     {
         module: ACL_MODULES.COMMENT,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
         },
         mobile: {
-            archive: false,
+            archive: true,
             edit: false,
             write: true,
             read: true
