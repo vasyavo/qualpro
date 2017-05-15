@@ -13,6 +13,7 @@ define([
         aboutSKUFormat   : 'About SKU format',
         addNewBtn        : 'Add new Item',
         deleteBtn        : 'Delete Item',
+        delete: 'Delete',
         questions        : 'Surveys',
         type             : 'Type',
         options          : 'Options',

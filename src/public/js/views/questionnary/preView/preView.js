@@ -49,7 +49,6 @@ define([
         },
 
         initialize: function (options) {
-
             this.model = options.model;
             this.translation = options.translation;
             this.activityList = options.activityList;

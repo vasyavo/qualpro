@@ -49,6 +49,7 @@ define([
             'keyup #respondentSearchInput'               : 'respondentSearchData',
             'click #goToBtn'                             : 'goTo',
             'click .edit-answer': 'showEditAnswerView',
+            'click .delete-answer': 'deleteAnswer',
         },
 
         initialize: function (options) {
@@ -106,6 +107,19 @@ define([
 
                     that.$el.dialog('close').dialog('destroy').remove();
                 });
+            });
+        },
+
+        deleteAnswer: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var answerId = target.attr('data-id');
+            var model = new QuestionAnswerModel();
+
+            model.delete(answerId);
+
+            model.on('answer-deleted', function () {
+                that.$el.find('#respondent-answer-container-' + answerId).remove();
             });
         },
 
@@ -391,6 +405,7 @@ define([
                     answerIndexes: respondentAnswerOptionsIndexes,
                     translation  : self.translation,
                     customerName: respondentAnswer.customer.name,
+                    answerId: respondentAnswer._id,
                     allowEdit: false,
                 };
 
@@ -403,9 +418,19 @@ define([
                     allowEdit: false,
                 };
 
+                var npsAnswerTemplateOptions = {
+                    question     : respondentQuestion,
+                    answerIndexes: respondentAnswerOptionsIndexes,
+                    translation  : self.translation,
+                    answerId: respondentAnswer._id,
+                    customerName: respondentAnswer.customer.name,
+                    allowEdit: false,
+                };
+
                 if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
                     templateOptions.allowEdit = true;
                     fullAnswerTemplateOptions.allowEdit = true;
+                    npsAnswerTemplateOptions.allowEdit = true;
                 }
 
                 if (respondentQuestion.type._id === 'multiChoice') {
@@ -415,11 +440,7 @@ define([
                 } else if (respondentQuestion.type._id === 'fullAnswer') {
                     $respondentsList.append(self.questionFullAnswerTemplate(fullAnswerTemplateOptions));
                 } else if (respondentQuestion.type === 'NPS') {
-                    $respondentsList.append(self.npsQuestionTemplate({
-                        question     : respondentQuestion,
-                        answerIndexes: respondentAnswerOptionsIndexes,
-                        translation  : self.translation
-                    }));
+                    $respondentsList.append(self.npsQuestionTemplate(npsAnswerTemplateOptions));
                 }
             });
         },
