@@ -36,12 +36,12 @@ define(function (require) {
             var dateStart = moment(model.dateStart, 'DD.MM.YYYY');
             var dateEnd = moment(model.dateEnd, 'DD.MM.YYYY');
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -49,12 +49,15 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
+                            var expiryDate = that.$el.find('#dateExpiry').val();
                             var data = {
                                 price: ui.price.val(),
                                 packing: ui.weight.val(),
-                                expiry: moment(ui.expiry.val()).toDate(),
-                                dateStart: moment(ui.dateStart.val()).toDate(),
-                                dateEnd: moment(ui.dateEnd.val()).toDate(),
+                                expiry: expiryDate ? moment(expiryDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
+                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 promotion: ui.description.val(),
                             };
@@ -65,9 +68,9 @@ define(function (require) {
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
-            var $expiryDate = that.$el.find('#date-expiry');
+            var $startDate = that.$el.find('#dateStart');
+            var $dueDate = that.$el.find('#dateEnd');
+            var $expiryDate = that.$el.find('#dateExpiry');
 
             var startDateObj = {
                 changeMonth: true,

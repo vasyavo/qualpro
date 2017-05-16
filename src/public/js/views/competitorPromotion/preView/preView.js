@@ -91,9 +91,18 @@ define([
                     view.find('#promotion').html(data.promotion);
                     view.find('#price').html(data.price);
                     view.find('#packing').html(data.packing);
-                    view.find('#expiry').html(moment(data.expiry).format('DD.MM.YYYY'));
-                    view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
-                    view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+
+                    if (data.expiry) {
+                        view.find('#expiry').html(moment(data.expiry).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateStart) {
+                        view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateEnd) {
+                        view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                    }
 
                     var displayTypeString = response.displayType.map(function (item) {
                         return item.name[App.currentUser.currentLanguage];
