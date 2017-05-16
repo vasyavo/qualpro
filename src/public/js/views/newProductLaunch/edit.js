@@ -43,14 +43,14 @@ define(function (require) {
             var currentLanguage = App.currentUser.currentLanguage || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
                 currentLanguage: currentLanguage,
                 anotherLanguage: anotherLanguage,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -58,11 +58,11 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
-                            var startDate = ui.dateStart.val();
-                            var endDate = ui.dateEnd.val();
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                shelfLifeStart: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
-                                shelfLifeEnd: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
+                                shelfLifeStart: startDate ? moment(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                shelfLifeEnd: endDate ? moment(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 packing: ui.packing.val(),
                                 price: ui.price.val(),
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
@@ -83,8 +83,8 @@ define(function (require) {
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
+            var $startDate = that.$el.find('#dateStart');
+            var $dueDate = that.$el.find('#dateEnd');
 
             var startDateObj = {
                 changeMonth: true,
