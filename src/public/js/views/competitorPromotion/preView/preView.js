@@ -135,18 +135,25 @@ define([
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
             var fileModel = this.previewFiles.get(fileModelId);
-
-            this.fileDialogView = new FileDialogPreviewView({
-                fileModel  : fileModel,
-                bucket     : this.contentType,
+            var options = {
+                fileModel: fileModel,
                 translation: this.translation
-            });
+            };
+
+            if (!fileModel) {
+                fileModel = this.fileCollection.get(fileModelId);
+                options.fileModel = fileModel;
+            }
+
+            this.fileDialogView = new FileDialogPreviewView(options);
             this.fileDialogView.on('download', function (options) {
                 var url = options.url;
                 var originalName = options.originalName;
-                var $fileElement;
+
                 $thumbnail.append('<a class="hidden" id="downloadFile" href="' + url + '" download="' + originalName + '"></a>');
-                $fileElement = $thumbnail.find('#downloadFile');
+
+                var $fileElement = $thumbnail.find('#downloadFile');
+
                 $fileElement[0].click();
                 $fileElement.remove();
             });
@@ -268,7 +275,7 @@ define([
                         }
 
                         $target.addClass('loadFile');
-
+                        self.fileCollection = new FileCollection(filesCollection);
                         self.showFilesInComment($showFilesBlock, filesCollection);
                     });
                 } else {

@@ -362,6 +362,7 @@ const getById = (req, res, next) => {
                 'attachments.name': 1,
                 'attachments.preview': 1,
                 'attachments.originalName': 1,
+                'attachments.contentType': 1,
                 'categories._id': 1,
                 'categories.name': 1,
                 'subRegion._id': 1,
