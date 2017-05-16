@@ -97,7 +97,9 @@ define([
                 description  : {
                     en: $curEl.find('.objectivesTextarea[data-property="en"]').val(),
                     ar: $curEl.find('.objectivesTextarea[data-property="ar"]').val()
-                }
+                },
+                type: $curEl.selectedNotificationType,
+                typeDescription: $curEl.find('#other-type-description').val(),
             };
 
             this.model.setFieldsNames(this.translation);
@@ -522,10 +524,30 @@ define([
                 }
             });
 
+            self.$el.find('#other-type-description').hide();
+            this.selectedNotificationType = CONSTANTS.NOTIFICATION_TYPES[0]._id;
+
+            populate.inputDropDown({
+                selector    : '#typeDd',
+                context     : this,
+                contentType : 'type',
+                displayModel: CONSTANTS.NOTIFICATION_TYPES[0],
+                collection  : CONSTANTS.NOTIFICATION_TYPES
+            });
+
+            this.on('changeItem', function (selectedItem) {
+                var selectedNotificationType = selectedItem.model._id;
+                this.selectedNotificationType = selectedNotificationType;
+
+                if (selectedNotificationType === CONSTANTS.NOTIFICATION_TYPE_OTHER) {
+                    self.$el.find('#other-type-description').show();
+                } else {
+                    self.$el.find('#other-type-description').hide();
+                }
+            });
+
             $curEl = this.$el;
-
             $curEl.find('#' + idToHide).hide();
-
             $curEl.find('#mainForm').on('submit', {body: this.body, context: this}, this.formSubmit);
 
             implementShowHideArabicInputIn(this);

@@ -28,6 +28,34 @@
             METALSTAND: 'metalStand'
         },
 
+        NOTIFICATION_TYPES: [
+            {
+                _id    : 'target',
+                name   : {
+                    en: 'Target',
+                    ar: '' // todo
+                },
+                sortKey: 0
+            },
+            {
+                _id    : 'salary',
+                name   : {
+                    en: 'Salary',
+                    ar: '' // todo
+                },
+                sortKey: 1
+            },
+            {
+                _id    : 'other',
+                name   : {
+                    en: 'Other',
+                    ar: '' // todo
+                },
+                sortKey: 2
+            }
+        ],
+        NOTIFICATION_TYPE_OTHER: 'other',
+
         OBJECTIVES_TYPE: [
             {
                 _id    : 'weekly',
