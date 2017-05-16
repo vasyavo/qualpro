@@ -2419,22 +2419,6 @@ const Filters = function() {
                     {
                         $or: [
                             {
-                                personnels: personnel._id,
-                            },
-                            {
-                                personnels: [],
-                            },
-                            {
-                                personnels: null,
-                            },
-                            {
-                                'createdBy.user': { $eq: personnelId },
-                            },
-                        ],
-                    },
-                    {
-                        $or: [
-                            {
                                 'createdBy.user': personnelId,
                                 status: {
                                     $in: ['draft', 'expired'],
