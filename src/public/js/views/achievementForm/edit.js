@@ -38,14 +38,14 @@ define(function (require) {
             var currentLanguage = App.currentUser.currentLanguage || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
                 currentLanguage: currentLanguage,
                 anotherLanguage: anotherLanguage,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -53,8 +53,8 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
-                            var startDate = ui.dateStart.val();
-                            var endDate = ui.dateEnd.val();
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
                             var data = {
                                 dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
                                 dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
@@ -74,10 +74,10 @@ define(function (require) {
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
+            var $startDate = this.$el.find('#dateStart');
+            var $dueDate = this.$el.find('#dateEnd');
 
-            var startDateObj = {
+            $startDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
                 maxDate : new Date(dateEnd),
@@ -86,9 +86,8 @@ define(function (require) {
                 onClose    : function (selectedDate) {
                     $dueDate.datepicker('option', 'minDate', selectedDate);
                 }
-            };
-
-            var endDateObj = {
+            });
+            $dueDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
                 minDate : new Date(dateStart),
@@ -97,10 +96,7 @@ define(function (require) {
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }
-            };
-
-            $startDate.datepicker(startDateObj);
-            $dueDate.datepicker(endDateObj);
+            });
 
             arabicInput(this);
 
