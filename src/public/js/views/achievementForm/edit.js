@@ -56,8 +56,8 @@ define(function (require) {
                             var startDate = that.$el.find('#dateStart').val();
                             var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
-                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
+                                startDate: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
+                                endDate: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
                                 description: {
                                     en: ui.descriptionEn.val(),
                                     ar: ui.descriptionAr.val(),
