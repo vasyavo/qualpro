@@ -25,7 +25,11 @@ define([
         noTranslation: ' لا يوجد ترجمة',
         files        : 'الملفات',
         all          : 'استمارة الإنجازات',
-        goToBtn : '' //todo
+        goToBtn : '', //todo
+        edit         : 'تعديل بيانات',
+        delete: '', // todo
+        additionalComment: '', // todo
+        achievementFormEditTitle: '', // todo
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });

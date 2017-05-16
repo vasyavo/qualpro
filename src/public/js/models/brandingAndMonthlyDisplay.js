@@ -3,9 +3,11 @@ define([
         'validation',
         'custom',
         'constants/otherConstants',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages',
+        'dataService',
     ],
-    function (parent, validation, custom, CONSTANTS, CONTENT_TYPES) {
+    function (parent, validation, custom, CONSTANTS, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults      : {},
             attachmentsKey: 'attachments',
@@ -75,6 +77,35 @@ define([
                 model.location = location.filter(function (value) {
                     return value;
                 }).join(' > ');
+            },
+
+            edit: function (brandingAndMonthlyDisplay, data) {
+                var that = this;
+                var currentLanguage = App.currentUser.currentLanguage;
+
+                dataService.putData('/brandingAndMonthlyDisplay/' + brandingAndMonthlyDisplay, data, function (err, response) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('branding-and-monthly-display-edited', response);
+                });
+            },
+
+            delete: function (brandingAndMonthlyDisplayId) {
+                var that = this;
+
+                dataService.deleteData('/brandingAndMonthlyDisplay/' + brandingAndMonthlyDisplayId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('branding-and-monthly-display-deleted');
+                });
             }
         });
 

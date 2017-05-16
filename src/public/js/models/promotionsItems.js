@@ -3,9 +3,11 @@ define([
         'models/parrent',
         'custom',
         'constants/otherConstants',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages',
+        'dataService'
     ],
-    function (_, parent, custom, CONSTANTS, CONTENT_TYPES) {
+    function (_, parent, custom, CONSTANTS, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults      : {},
             attachmentsKey: 'comment.attachments',
@@ -52,7 +54,80 @@ define([
                 });
 
                 return model;
+            },
+
+            editTableItemData: function (promotionItemId, data) {
+                var that = this;
+                var errors = 0;
+                var currentLanguage = App.currentUser.currentLanguage || 'en';
+
+                if (!data.rsp) {
+                    ++errors;
+                }
+
+                if (!data.dateStart) {
+                    ++errors;
+                }
+
+                if (!data.dateEnd) {
+                    ++errors;
+                }
+
+                if (!data.opening || !data.opening.length || !data.opening[0]) {
+                    ++errors;
+                }
+
+                if (!data.sellIn || !data.sellIn.length || !data.sellIn[0]) {
+                    ++errors;
+                }
+
+                if (!data.sellOut || !data.sellOut.length || !data.sellOut[0]) {
+                    ++errors;
+                }
+
+                if (!data.closingStock || !data.closingStock.length || !data.closingStock[0]) {
+                    ++errors;
+                }
+
+                if (!data.displayType || !data.displayType.length || !data.displayType[0]) {
+                    ++errors;
+                }
+
+                if (!data.comment || !data.comment.text) {
+                    ++errors;
+                }
+
+                if (errors) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.fillAllInputFields[currentLanguage],
+                    ]);
+                }
+
+                dataService.putData('/promotionsItems/' + promotionItemId, data, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('promotion-item-data-edited');
+                });
+            },
+
+            deletePromotionItem: function (itemId) {
+                var that = this;
+
+                dataService.deleteData('/promotionsItems/' + itemId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('promotion-item-deleted');
+                });
             }
+
         });
 
         return Model;

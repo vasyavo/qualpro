@@ -5,6 +5,7 @@ var Promotions = function () {
     var async = require('async');
     var _ = require('lodash');
     var logger = require('../utils/logger');
+    var EventModel = require('./../types/event/model');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -13,6 +14,7 @@ var Promotions = function () {
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     var PromotionItemModel = require('./../types/promotionItem/model');
+    var CommentModel = require('./../types/comment/model');
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var ObjectId = mongoose.Types.ObjectId;
@@ -397,20 +399,21 @@ var Promotions = function () {
                     _id     : '$outlet._id',
                     branches: {
                         $push: {
-                            dateStart   : '$dateStart',
-                            dateEnd     : '$dateEnd',
-                            rsp         : '$rsp',
-                            status      : '$status',
-                            opening     : '$opening',
-                            sellIn      : '$sellIn',
-                            closingStock: '$closingStock',
-                            sellOut     : '$sellOut',
-                            displayType : '$displayType',
-                            comment     : '$comment',
-                            createdBy   : '$createdBy',
-                            editedBy    : '$editedBy',
-                            name        : '$branch.name',
-                            _id         : '$branch._id'
+                            dateStart      : '$dateStart',
+                            dateEnd        : '$dateEnd',
+                            rsp            : '$rsp',
+                            status         : '$status',
+                            opening        : '$opening',
+                            sellIn         : '$sellIn',
+                            closingStock   : '$closingStock',
+                            sellOut        : '$sellOut',
+                            displayType    : '$displayType',
+                            comment        : '$comment',
+                            createdBy      : '$createdBy',
+                            editedBy       : '$editedBy',
+                            name           : '$branch.name',
+                            promotionItemId: '$_id',
+                            _id            : '$branch._id'
                         }
                     },
                     name    : {$first: '$outlet.name'},
@@ -470,6 +473,71 @@ var Promotions = function () {
             }
 
             queryRun(personnel);
+        });
+    };
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    PromotionItemModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "PromotionItems",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err, model) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    PromotionItemModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, cb);
+            },
+            
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
         });
     };
 
@@ -537,10 +605,10 @@ var Promotions = function () {
 
                 (model, cb) => {
                     const saveObj = {
-                        text: body.commentText,
+                        text       : body.commentText,
                         objectiveId: model._id,
                         userId,
-                        files: req.files,
+                        files      : req.files,
                         createdBy,
                     };
 
@@ -600,8 +668,63 @@ var Promotions = function () {
             ActivityLog.emit('reporting:al-alali-promo-evaluation:item-published', {
                 actionOriginator: userId,
                 accessRoleLevel,
-                body: model.toJSON(),
+                body            : model.toJSON(),
             });
+        });
+    };
+
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+
+        const queryRun = (body, callback) => {
+            async.waterfall([
+                (cb) => {
+                    const editedBy = {
+                        user: req.session.uId,
+                        date: Date.now()
+                    };
+                    if (body.comment) {
+                        CommentModel.findByIdAndUpdate(body.comment.id, { body: body.comment.text, editedBy }, { new: true }, cb)
+                    } else {
+                        cb();
+                    }
+                },
+                (comment) => {
+                    body.editedBy = {
+                        user: req.session.uId,
+                        date: Date.now()
+                    };
+                    if (comment) {
+                        body.comment = comment._id;
+                    }
+                    PromotionItemModel.findByIdAndUpdate(id, body, { new: true }, callback)
+                }
+            ]);
+        };
+
+        async.waterfall([
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.PROMOTIONSITEMS, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
         });
     };
 };

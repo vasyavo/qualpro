@@ -65,10 +65,14 @@ define(function () {
             data       : JSON.stringify(data),
             type       : method,
             success    : function (response) {
-                callback(null, response);
+                if (callback) {
+                    callback(null, response);
+                }
             },
             error: function (jxhr) {
-                callback(jxhr);
+                if (callback) {
+                    callback(jxhr);
+                }
             }
         });
     };

@@ -165,6 +165,8 @@ module.exports = function () {
      * @instance
      */
     router.post('/', multipartMiddleware, handler.create);
+    router.put('/:id([0-9a-fA-F]{24})', handler.update);
+    router.delete('/:id([0-9a-fA-F]{24})', handler.removeItem);
 
     return router;
 };

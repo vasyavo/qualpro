@@ -5,6 +5,7 @@ define([
     ],
     function (_, paginationTranslation, filtersTranslation) {
         var translation = {
+            competitorPromotionEditTitle : '', // todo ar
             all         : ' أنشطة ترويج المنافسين',
             title       : 'تقرير تقيم أنشطة ترويج المنافسين',
             category    : 'الفئة',
@@ -29,10 +30,14 @@ define([
             files       : 'الملفات',
             attach      : 'ارفاق',
             send        : 'ارسال',
+            saveBtn : '', // todo ar
             location    : 'الموقع',
             okBtn       : 'موافق',
+            edit     : 'تعديل بيانات',
+            delete: '', // todo
             dialogTitle : ' التعليقات والمرفقات',
-            goToBtn : '' //todo
+            goToBtn : '', //todo ar
+            weight : '', // todo ar
         };
 
         return _.extend({}, paginationTranslation, filtersTranslation, translation);

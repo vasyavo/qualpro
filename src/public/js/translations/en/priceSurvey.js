@@ -28,6 +28,9 @@ define([
             branch   : 'Branch',
             value    : 'Value',
             employee : 'Employee',
+            options  : 'Options',
+
+            saveBtn  : 'Save',
 
             // topBar
             all: 'Price Survey'

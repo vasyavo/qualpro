@@ -406,8 +406,8 @@ module.exports = [
     {
         module: ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY,
         cms: {
-            archive: false,
-            edit: false,
+            archive: true,
+            edit: true,
             write: true,
             read: true
         },
@@ -466,8 +466,8 @@ module.exports = [
     {
         module: ACL_MODULES.NEW_PRODUCT_LAUNCH,
         cms: {
-            archive: false,
-            edit: false,
+            archive: true,
+            edit: true,
             write: true,
             read: true
         },
@@ -481,8 +481,8 @@ module.exports = [
     {
         module: ACL_MODULES.ACHIEVEMENT_FORM,
         cms: {
-            archive: false,
-            edit: false,
+            archive: true,
+            edit: true,
             write: true,
             read: true
         },
@@ -511,8 +511,8 @@ module.exports = [
     {
         module: ACL_MODULES.SHELF_SHARES,
         cms: {
-            archive: false,
-            edit: false,
+            archive: true,
+            edit: true,
             write: false,
             read: false
         },
@@ -526,8 +526,8 @@ module.exports = [
     {
         module: ACL_MODULES.PRICE_SURVEY,
         cms: {
-            archive: false,
-            edit: false,
+            archive: true,
+            edit: true,
             write: true,
             read: true
         },
@@ -616,8 +616,8 @@ module.exports = [
     {
         module: ACL_MODULES.COMMENT,
         cms: {
-            archive: false,
-            edit: false,
+            archive: true,
+            edit: true,
             write: true,
             read: true
         },
@@ -631,7 +631,7 @@ module.exports = [
     {
         module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
@@ -662,7 +662,7 @@ module.exports = [
     {
         module: ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
