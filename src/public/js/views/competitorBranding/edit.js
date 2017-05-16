@@ -38,14 +38,14 @@ define(function (require) {
             var currentLanguage = App.currentUser.currentLanguage || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
                 currentLanguage: currentLanguage,
                 anotherLanguage: anotherLanguage,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -53,9 +53,11 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                dateStart: moment(ui.dateStart.val()).toDate(),
-                                dateEnd: moment(ui.dateEnd.val()).toDate(),
+                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 description: {
                                     en: ui.descriptionEn.val(),
@@ -69,8 +71,8 @@ define(function (require) {
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
+            var $startDate = that.$el.find('#dateStart');
+            var $dueDate = that.$el.find('#dateEnd');
 
             var startDateObj = {
                 changeMonth: true,
