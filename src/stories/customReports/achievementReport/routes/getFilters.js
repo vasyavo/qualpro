@@ -294,6 +294,53 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result[0]);
+        const response = result[0];
+
+        response.analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'SubRegion',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Employee',
+                    ar: '',
+                },
+                value: 'employee',
+            },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
+            },
+        ];
+
+        res.status(200).send(response);
     });
 };
