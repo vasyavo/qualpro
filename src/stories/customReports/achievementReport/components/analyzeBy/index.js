@@ -1,12 +1,10 @@
 const analyzeByMethods = {
+    employee: require('./analyzeByEmployee'),
     country: require('./analyzeByCountry'),
     region: require('./analyzeByRegion'),
     subRegion: require('./analyzeBySubRegion'),
-    branch: require('./analyzeByBranch'),
-    category: require('./analyzeByCategory'),
-    publisher: require('./analyzeByPublisher'),
+    branch: require('./analyzeByBanch'),
     position: require('./analyzeByPosition'),
-    personnel: require('./analyzeByPersonnel'),
 };
 
 module.exports = (pipeline, analyzeBy) => {
@@ -14,5 +12,5 @@ module.exports = (pipeline, analyzeBy) => {
         return analyzeByMethods[analyzeBy](pipeline);
     }
 
-    return analyzeByMethods.country(pipeline);
+    return analyzeByMethods.employee(pipeline);
 };

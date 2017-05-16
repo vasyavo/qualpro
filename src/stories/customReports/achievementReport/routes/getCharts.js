@@ -8,6 +8,7 @@ const generalFiler = require('./../../utils/generalFilter');
 const AchievementFormModel = require('./../../../../types/achievementForm/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const applyAnalyzeBy = require('./../components/analyzeBy/index');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -32,6 +33,7 @@ module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
         const query = req.query;
         const timeFilter = query.timeFilter;
+        const analyzeByParam = query.analyzeBy;
         const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
@@ -132,13 +134,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $group: {
-                _id: '$createdBy.user._id',
-                achievementCount: { $sum: 1 },
-                personnel: { $first: '$createdBy.user' },
-            },
-        });
+        applyAnalyzeBy(pipeline, analyzeByParam);
 
         pipeline.push({
             $group: {
@@ -147,7 +143,7 @@ module.exports = (req, res, next) => {
                 dataSets: {
                     $push: {
                         data: ['$achievementCount'],
-                        label: '$personnel.name',
+                        label: '$label',
                     },
                 },
             },
