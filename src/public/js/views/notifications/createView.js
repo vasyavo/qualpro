@@ -98,7 +98,7 @@ define([
                     en: $curEl.find('.objectivesTextarea[data-property="en"]').val(),
                     ar: $curEl.find('.objectivesTextarea[data-property="ar"]').val()
                 },
-                type: $curEl.selectedNotificationType,
+                type: self.selectedNotificationType,
                 typeDescription: $curEl.find('#other-type-description').val(),
             };
 
