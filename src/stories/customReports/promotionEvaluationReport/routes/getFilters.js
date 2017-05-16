@@ -619,6 +619,58 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
+        result[0].analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'SubRegion',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Product',
+                    ar: '',
+                },
+                value: 'category',
+            },
+            {
+                name: {
+                    en: 'Employee',
+                    ar: '',
+                },
+                value: 'employee',
+            },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
+            },
+        ];
+
         res.status(200).send(result[0]);
     });
 };
