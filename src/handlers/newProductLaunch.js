@@ -102,6 +102,14 @@ var NewProductLaunch = function() {
                         body.shelfLife = _.escape(body.shelfLife);
                     }
 
+                    if (!body.brand._id) {
+                        body.brand._id = ObjectId();
+                    }
+
+                    if (!body.variant._id) {
+                        body.variant._id = ObjectId();
+                    }
+
                     newProductLaunch = {
                         additionalComment : body.additionalComment,
                         category : body.category,
