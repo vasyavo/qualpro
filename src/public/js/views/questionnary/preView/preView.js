@@ -384,10 +384,12 @@ define([
             var $el = $(e.target);
             var $curEl = this.$el;
             var personnelId;
+            var branches;
             var self = this;
 
             $questionContainer = $questionContainer || $el.closest('.questionsList');
             personnelId = $questionContainer.attr('data-id');
+            branches = JSON.parse($questionContainer.attr('data-branch'));
 
             if (e && e.preventDefault) {
                 e.preventDefault();
@@ -398,12 +400,14 @@ define([
             $questionContainer.addClass('questionsListActive');
 
             self.answersCollection.personnelId = personnelId;
+            self.answersCollection.branches = branches;
             self.renderRespondentsQuestions();
         },
 
         renderRespondentsQuestions: function () {
             var self = this;
             var $respondentsList = this.$el.find('#questionFullList');
+            var branches = self.answersCollection.branches;
             var personnelId = self.answersCollection.personnelId;
             var answers = this.answersCollection.getSelected({modelKey: 'selectedForPersonnel'});
             var respondentQuestionsIds = _.pluck(answers, 'questionId');
@@ -414,9 +418,8 @@ define([
             $respondentsList.html('');
 
             respondentQuestions.forEach(function (respondentQuestion) {
-                var respondentAnswer = _.findWhere(self.answersCollection.toJSON(), {
-                    questionId : respondentQuestion._id,
-                    personnelId: personnelId
+                var respondentAnswer = _.find(self.answersCollection.toJSON(), function (answer) {
+                    return answer.questionId === respondentQuestion._id && _.isEqual(branches, answer.branch) && personnelId === answer.personnelId;
                 });
                 var respondentAnswerOptionsIndexes = respondentAnswer.optionIndex;
                 var respondentAnswerText = respondentAnswer.text;
