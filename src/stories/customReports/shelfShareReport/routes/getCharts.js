@@ -186,9 +186,9 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
-                data: {
+                dataSets: {
                     $push: {
-                        value: '$percent',
+                        data: ['$percent'],
                         label: '$name',
                     },
                 },
@@ -198,10 +198,10 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 pieChart: {
-                    data: '$data',
+                    dataSets: '$dataSets',
                 },
                 barChart: {
-                    data: '$data',
+                    dataSets: '$dataSets',
                 },
             },
         });
@@ -225,16 +225,13 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (response) {
-            response.pieChart.data = _.sortBy(response.pieChart.data, ['value']);
-            response.barChart.data = _.sortBy(response.barChart.data, ['value']);
-        } else {
+        if (!response) {
             response = {
                 barChart: {
-                    data: [],
+                    dataSets: [],
                 },
                 pieChart: {
-                    data: [],
+                    dataSets: [],
                 },
             };
         }
