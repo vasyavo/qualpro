@@ -9,6 +9,8 @@ const logger = require('../../../../../utils/logger');
 function* getSubRegionId(name) {
     const search = {
         type     : 'subRegion',
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : `^${_.escapeRegExp(name)}$`,
             $options: 'i'
@@ -33,6 +35,8 @@ function* getSubRegionId(name) {
 
 function* getRetailSegmentId(name) {
     const search = {
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : `^${_.escapeRegExp(name)}$`,
             $options: 'i'
@@ -57,6 +61,8 @@ function* getRetailSegmentId(name) {
 
 function* getOutletId(name) {
     const search = {
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : `^${_.escapeRegExp(name)}$`,
             $options: 'i'
@@ -80,7 +86,7 @@ function* getOutletId(name) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
@@ -90,6 +96,10 @@ function* createOrUpdate(payload) {
         retailSegment,
         outlet
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
 
     let subRegionId;
     try {
@@ -119,7 +129,6 @@ function* createOrUpdate(payload) {
         retailSegment: retailSegmentId,
         subRegion    : subRegionId,
         outlet       : outletId,
-        archived     : false
     };
 
     const modify = {

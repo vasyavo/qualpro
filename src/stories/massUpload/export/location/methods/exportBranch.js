@@ -2,6 +2,11 @@ const BranchModel = require('../../../../../types/branch/model');
 
 function*  getBranchForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'domains',
             foreignField: '_id',

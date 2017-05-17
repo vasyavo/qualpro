@@ -2,6 +2,11 @@ const DomainModel = require('../../../../../types/domain/model');
 
 function*  getDomainForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'domains',
             foreignField: '_id',

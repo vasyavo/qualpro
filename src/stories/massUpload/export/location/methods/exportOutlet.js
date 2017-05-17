@@ -2,6 +2,11 @@ const OutletModel = require('../../../../../types/outlet/model');
 
 function*  getOutletForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $project: {
             _id   : 0,
             id    : '$_id',

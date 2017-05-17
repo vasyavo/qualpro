@@ -2,6 +2,11 @@ const RetailSegment = require('../../../../../types/retailSegment/model');
 
 function*  getRetailSegmentForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $project: {
             _id   : 0,
             id    : '$_id',

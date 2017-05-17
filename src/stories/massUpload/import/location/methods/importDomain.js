@@ -5,7 +5,13 @@ const CurrencyModel = require('../../../../../types/currency/model');
 const logger = require('../../../../../utils/logger');
 
 function normalizeString(str) {
-    return str.trim().toLowerCase().replace(' ', '');
+    let normalized = '';
+
+    if (_.isString(str)) {
+        normalized = str.trim().toLowerCase().replace(' ', '');
+    }
+
+    return normalized;
 }
 
 function mapDomainType(rawType) {
@@ -41,8 +47,10 @@ function* getParentDomainId(childType, parentName) {
     }
 
     const search = {
-        type     : parentType,
-        'name.en': {
+        type       : parentType,
+        topArchived: false,
+        archived   : false,
+        'name.en'  : {
             $regex  : `^${_.escapeRegExp(parentName)}$`,
             $options: 'i'
         }
@@ -63,7 +71,7 @@ function* getParentDomainId(childType, parentName) {
 }
 
 function* createOrUpdate(currencies, payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
@@ -71,6 +79,11 @@ function* createOrUpdate(currencies, payload) {
         type,
         parent
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
     const parsedType = mapDomainType(type);
 
     let parentProp;
@@ -87,7 +100,6 @@ function* createOrUpdate(currencies, payload) {
     const query = {
         'name.en': enName,
         type     : parsedType,
-        archived : false,
     };
 
     const modify = {
@@ -145,6 +157,18 @@ module.exports = function* importer(data) {
     const countries = data.filter(elem => normalizeString(elem.type) === 'country');
     const regions = data.filter(elem => normalizeString(elem.type) === 'region');
     const subRegions = data.filter(elem => normalizeString(elem.type) === 'sub-region');
+
+    // separate array with not valid type
+    const validTypes = ['country', 'region', 'sub-region'];
+    const elementsWithNotValidType = data.filter(elem => !validTypes.includes(normalizeString(elem.type)));
+
+    for (const element of elementsWithNotValidType) {
+        const msg = `Error to import location id: ${element.id}. \n Details: Type should be one of [${validTypes.join(', ')}]`;
+
+        logger.warn(msg);
+        errors.push(msg);
+        numErrors += 1;
+    }
 
     for (const element of countries) {
         try {

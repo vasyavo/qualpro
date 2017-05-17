@@ -2,6 +2,10 @@ const PersonnelModel = require('../../../../../types/personnel/model');
 
 function*  getPositionForExport() {
     const pipeLine = [{
+        $match: {
+            archived: false
+        }
+    }, {
         $lookup: {
             from        : 'domains',
             foreignField: '_id',

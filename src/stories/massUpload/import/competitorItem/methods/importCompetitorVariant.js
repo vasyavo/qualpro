@@ -7,6 +7,7 @@ const logger = require('../../../../../utils/logger');
 
 function* getCategoryId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -30,12 +31,16 @@ function* getCategoryId(name) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
         category,
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
 
     let categoryId;
     try {

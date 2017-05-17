@@ -4,11 +4,15 @@ const CategoryModel = require('../../../../../types/category/model');
 const logger = require('../../../../../utils/logger');
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
 
     const query = {
         'name.en': enName

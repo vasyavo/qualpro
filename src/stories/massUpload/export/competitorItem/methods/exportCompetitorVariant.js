@@ -2,6 +2,11 @@ const CompetitorVariantModel = require('../../../../../types/competitorVariant/m
 
 function*  getCompetitorVariantForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'categories',
             foreignField: '_id',

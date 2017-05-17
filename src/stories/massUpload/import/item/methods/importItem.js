@@ -33,6 +33,7 @@ function* getOriginId(name) {
 
 function* getCategoryId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -57,6 +58,7 @@ function* getCategoryId(name) {
 
 function* getVariantId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -81,6 +83,7 @@ function* getVariantId(name) {
 
 function* getCountryId(name) {
     const search = {
+        archived : false,
         type     : 'country',
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
@@ -105,7 +108,7 @@ function* getCountryId(name) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
@@ -120,6 +123,10 @@ function* createOrUpdate(payload) {
         variant,
         country
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
 
     let originId;
     if (origin) {
@@ -158,7 +165,6 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en': enName,
-        archived : false,
     };
 
     const modify = {

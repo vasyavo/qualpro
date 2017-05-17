@@ -15,6 +15,8 @@ function getStringForRegex(str) {
 function* getDomainId(name, type = 'country') {
     const search = {
         type,
+        topArchived : false,
+        archived : false,
         'name.en': {
             $regex  : getStringForRegex(name),
             $options: 'i'
@@ -39,6 +41,8 @@ function* getDomainId(name, type = 'country') {
 
 function* getBranchId(name) {
     const search = {
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : getStringForRegex(name),
             $options: 'i'
@@ -244,7 +248,7 @@ function* getMainDependencies(options) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enFirstName,
         arFirstName,

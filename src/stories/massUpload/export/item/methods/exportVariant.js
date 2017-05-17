@@ -2,6 +2,11 @@ const VariantModel = require('../../../../../types/variant/model');
 
 function*  getVariantForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'categories',
             foreignField: '_id',
