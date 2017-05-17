@@ -18,7 +18,6 @@ define([
     'models/file',
     'helpers/implementShowHideArabicInputIn',
     'views/objectives/visibilityForm/editView',
-    'views/objectives/visibilityForm/editViewWithoutBranches',
     'constants/otherConstants',
     'moment',
     'async',
@@ -27,7 +26,7 @@ define([
 ], function (Backbone, _, $, CreateTemplate, FormTemplate, FileTemplate, BaseView,
              FileDialogView, LinkFormView, PersonnelListForSelectionView, TreeView, Model,
              populate, objectivesCollection, FilterCollection, FileCollection, FileModel,
-             implementShowHideArabicInputIn, VisibilityEditView, VisibilityFormViewWithoutBranches,
+             implementShowHideArabicInputIn, VisibilityFormEditView,
              CONSTANTS, moment, async, CONTENT_TYPES, ERROR_MESSAGES) {
 
     var CreateView = BaseView.extend({
@@ -157,36 +156,12 @@ define([
                 ar: _.unescape($curEl.find('.objectivesTextarea[data-property="ar"]').val())
             };
 
-            if (this.assigneWithoutBranches) {
-                this.visibilityForm = new VisibilityFormViewWithoutBranches({
-                    translation : self.translation,
-                    description : description[App.currentUser.currentLanguage],
-                    locationString : self.locations.location,
-                    previewOfSelectedFile : self.fileForVFWithoutBranches.preview
-                });
-
-                this.visibilityForm.on('save', function (fileModel) {
-                    self.fileForVFWithoutBranches = fileModel;
-                });
-
-                this.visibilityForm.on('delete-file', function () {
-                    self.fileForVFWithoutBranches = {};
-                });
-            } else {
-                this.visibilityForm = new VisibilityEditView({
-                    forCreate           : true,
-                    savedVisibilityModel: this.savedVisibilityModel,
-                    outlets             : this.outletsForVisibility,
-                    description         : description,
-                    oldAjaxObj          : this.visibilityFormAjax,
-                    translation         : self.translation
-                });
-
-                this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                    self.visibilityFormAjax = ajaxObj;
-                    self.savedVisibilityModel = ajaxObj.model;
-                });
-            }
+            this.visibilityForm = new VisibilityFormEditView({
+                translation : self.translation,
+                description : description[App.currentUser.currentLanguage],
+                locationString : self.locations.location,
+                outlets: this.outletsForVisibility,
+            });
         },
 
         saveObjective: function (options, cb) {
