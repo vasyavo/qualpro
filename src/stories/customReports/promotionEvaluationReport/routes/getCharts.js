@@ -150,7 +150,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                lineChart: {
+                barChart: {
                     data: '$data',
                     labels: '$labels',
                 },
@@ -180,12 +180,12 @@ module.exports = (req, res, next) => {
         let response = result[0];
 
         if (response) {
-            response.lineChart.labels.sort();
-            response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
-            response.pieChart.data = _.sortBy(response.lineChart.data, ['value']);
+            response.barChart.labels.sort();
+            response.barChart.data = _.sortBy(response.barChart.data, ['value']);
+            response.pieChart.data = _.sortBy(response.barChart.data, ['value']);
         } else {
             response = {
-                lineChart: {
+                barChart: {
                     labels: [],
                     data: [],
                 },

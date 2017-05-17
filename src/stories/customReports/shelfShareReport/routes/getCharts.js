@@ -200,7 +200,7 @@ module.exports = (req, res, next) => {
                 pieChart: {
                     data: '$data',
                 },
-                lineChart: {
+                barChart: {
                     data: '$data',
                 },
             },
@@ -227,10 +227,10 @@ module.exports = (req, res, next) => {
 
         if (response) {
             response.pieChart.data = _.sortBy(response.pieChart.data, ['value']);
-            response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
+            response.barChart.data = _.sortBy(response.barChart.data, ['value']);
         } else {
             response = {
-                lineChart: {
+                barChart: {
                     data: [],
                 },
                 pieChart: {

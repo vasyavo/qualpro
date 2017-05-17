@@ -156,7 +156,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                lineChart: {
+                barChart: {
                     dataSets: [
                         {
                             label: '$label',
@@ -196,10 +196,10 @@ module.exports = (req, res, next) => {
         let response = result[0];
 
         if (response) {
-            response.lineChart.labels.sort();
+            response.barChart.labels.sort();
         } else {
             response = {
-                lineChart: {
+                barChart: {
                     labels: [],
                     dataSets: [],
                 },
@@ -209,12 +209,12 @@ module.exports = (req, res, next) => {
             };
         }
 
-        if (response.lineChart.labels.length === 1) {
-            response.lineChart.labels.unshift(response.lineChart.labels[0]);
-            response.lineChart.dataSets[0].data.unshift(0);
+        if (response.barChart.labels.length === 1) {
+            response.barChart.labels.unshift(response.barChart.labels[0]);
+            response.barChart.dataSets[0].data.unshift(0);
         }
 
-        response.lineChart.labels = response.lineChart.labels.map((item) => {
+        response.barChart.labels = response.barChart.labels.map((item) => {
             return moment(item).format('MMMM, YYYY');
         });
 
