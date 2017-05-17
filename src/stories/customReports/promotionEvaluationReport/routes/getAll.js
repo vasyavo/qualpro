@@ -221,15 +221,29 @@ module.exports = (req, res, next) => {
             },
         });
 
+
+        pipeline.push({
+            $lookup: {
+                from: 'displayTypes',
+                localField: 'promotion.displayType',
+                foreignField: '_id',
+                as: 'displayType',
+            },
+        });
+
         pipeline.push({
             $project: {
                 _id: '$promotion._id',
                 promotionType: 1,
                 comments: 1,
                 ppt: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                createdBy: 1,
+                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
+                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
+                createdBy: {
+                    user: 1,
+                    date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
+                },
+                displayType: 1,
                 branch: {
                     $let: {
                         vars: {
@@ -241,13 +255,12 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                itemDateStart: '$promotion.dateStart',
-                itemDateEnd: '$promotion.dateEnd',
+                itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
+                itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
                 opening: '$promotion.opening',
                 sellIn: '$promotion.sellIn',
                 closingStock: '$promotion.closingStock',
                 sellOut: '$promotion.sellOut',
-                displayType: '$promotion.displayType',
                 total: 1,
             },
         });
