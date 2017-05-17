@@ -619,6 +619,67 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result[0]);
+        const response = result[0];
+
+        response.analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'SubRegion',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Category',
+                    ar: '',
+                },
+                value: 'category',
+            },
+            {
+                name: {
+                    en: 'Publisher',
+                    ar: '',
+                },
+                value: 'publisher',
+            },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
+            },
+            {
+                name: {
+                    en: 'Personnel',
+                    ar: '',
+                },
+                value: 'personnel',
+            },
+        ];
+
+        res.status(200).send(response);
     });
 };
