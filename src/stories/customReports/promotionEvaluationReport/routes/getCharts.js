@@ -70,10 +70,10 @@ module.exports = (req, res, next) => {
                 $match: {
                     $and: [
                         {
-                            'createdBy.date': { $gt: moment(timeFilter.from, 'DD/MM/YYYY')._d },
+                            'createdBy.date': { $gt: moment(timeFilter.from, 'MM/DD/YYYY')._d },
                         },
                         {
-                            'createdBy.date': { $lt: moment(timeFilter.to, 'DD/MM/YYYY')._d },
+                            'createdBy.date': { $lt: moment(timeFilter.to, 'MM/DD/YYYY')._d },
                         },
                     ],
                 },

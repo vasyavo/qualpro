@@ -86,10 +86,10 @@ module.exports = (req, res, next) => {
         if (timeFilter) {
             $generalMatch.$and = [
                 {
-                    'headers.date': { $gt: moment(timeFilter.from, 'DD/MM/YYYY')._d },
+                    'headers.date': { $gt: moment(timeFilter.from, 'MM/DD/YYYY')._d },
                 },
                 {
-                    'headers.date': { $lt: moment(timeFilter.to, 'DD/MM/YYYY')._d },
+                    'headers.date': { $lt: moment(timeFilter.to, 'MM/DD/YYYY')._d },
                 },
             ];
         }
