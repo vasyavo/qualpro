@@ -619,7 +619,9 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        result[0].analyzeBy = [
+        const response = result[0];
+
+        response.analyzeBy = [
             {
                 name: {
                     en: 'Country',
@@ -650,17 +652,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Product',
+                    en: 'Category',
                     ar: '',
                 },
                 value: 'category',
             },
             {
                 name: {
-                    en: 'Employee',
+                    en: 'Publisher',
                     ar: '',
                 },
-                value: 'employee',
+                value: 'publisher',
             },
             {
                 name: {
@@ -669,8 +671,15 @@ module.exports = (req, res, next) => {
                 },
                 value: 'position',
             },
+            {
+                name: {
+                    en: 'Personnel',
+                    ar: '',
+                },
+                value: 'personnel',
+            },
         ];
 
-        res.status(200).send(result[0]);
+        res.status(200).send(response);
     });
 };
