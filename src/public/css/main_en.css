@@ -11476,3 +11476,22 @@ label[for=searchInputnoCT]::after {
 .errors-block li {
   list-style: decimal;
 }
+.before--title-container {
+  text-align: center;
+  color: orange;
+  padding: 10px 0 5px 0;
+}
+.visibilityContainerWrap .attachments {
+  margin: -10px;
+  padding: 1px;
+}
+.full-width {
+  width: 100%!important;
+}
+.remove-attachment {
+  position: absolute;
+  right: 6px;
+  font-style: normal;
+  padding: 0 5px;
+  cursor: pointer;
+}
