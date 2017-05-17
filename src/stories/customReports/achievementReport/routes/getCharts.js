@@ -9,6 +9,7 @@ const AchievementFormModel = require('./../../../../types/achievementForm/model'
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const applyAnalyzeBy = require('./../components/analyzeBy/index');
+const moment = require('moment');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -78,10 +79,10 @@ module.exports = (req, res, next) => {
         if (timeFilter) {
             $generalMatch.$and = [
                 {
-                    'createdBy.date': { $gt: new Date(timeFilter.from) },
+                    'createdBy.date': { $gt: moment(timeFilter.from, 'DD/MM/YYYY')._d },
                 },
                 {
-                    'createdBy.date': { $lt: new Date(timeFilter.to) },
+                    'createdBy.date': { $lt: moment(timeFilter.to, 'DD/MM/YYYY')._d },
                 },
             ];
         }
@@ -151,7 +152,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                lineChart: {
+                barChart: {
                     dataSets: '$dataSets',
                     labels: '$labels',
                 },
@@ -181,10 +182,10 @@ module.exports = (req, res, next) => {
         let response = result[0];
 
         if (response) {
-            response.lineChart.labels.sort();
+            response.barChart.labels.sort();
         } else {
             response = {
-                lineChart: {
+                barChart: {
                     labels: [],
                     dataSets: [],
                 },

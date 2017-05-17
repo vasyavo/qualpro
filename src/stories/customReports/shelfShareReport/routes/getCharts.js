@@ -8,6 +8,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
+const moment = require('moment');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -92,10 +93,10 @@ module.exports = (req, res, next) => {
                 $match: {
                     $and: [
                         {
-                            'createdBy.date': { $gt: new Date(timeFilter.from) },
+                            'createdBy.date': { $gt: moment(timeFilter.from, 'DD/MM/YYYY')._d },
                         },
                         {
-                            'createdBy.date': { $lt: new Date(timeFilter.to) },
+                            'createdBy.date': { $lt: moment(timeFilter.to, 'DD/MM/YYYY')._d },
                         },
                     ],
                 },
@@ -185,9 +186,9 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
-                data: {
+                dataSets: {
                     $push: {
-                        value: '$percent',
+                        data: ['$percent'],
                         label: '$name',
                     },
                 },
@@ -197,10 +198,10 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 pieChart: {
-                    data: '$data',
+                    dataSets: '$dataSets',
                 },
-                lineChart: {
-                    data: '$data',
+                barChart: {
+                    dataSets: '$dataSets',
                 },
             },
         });
@@ -224,16 +225,13 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (response) {
-            response.pieChart.data = _.sortBy(response.pieChart.data, ['value']);
-            response.lineChart.data = _.sortBy(response.lineChart.data, ['value']);
-        } else {
+        if (!response) {
             response = {
-                lineChart: {
-                    data: [],
+                barChart: {
+                    dataSets: [],
                 },
                 pieChart: {
-                    data: [],
+                    dataSets: [],
                 },
             };
         }

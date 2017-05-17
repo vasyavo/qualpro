@@ -8,6 +8,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
+const moment = require('moment');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -145,10 +146,10 @@ module.exports = (req, res, next) => {
                 $match: {
                     $and: [
                         {
-                            'promotion.createdBy.date': { $gt: new Date(timeFilter.from) },
+                            'promotion.createdBy.date': { $gt: moment(timeFilter.from, 'DD/MM/YYYY')._d },
                         },
                         {
-                            'promotion.createdBy.date': { $lt: new Date(timeFilter.to) },
+                            'promotion.createdBy.date': { $lt: moment(timeFilter.to, 'DD/MM/YYYY')._d },
                         },
                     ],
                 },
