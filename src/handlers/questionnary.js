@@ -1070,18 +1070,6 @@ const QuestionnaryHandler = function () {
                     }
 
                     pipeLine.push({
-                        $match: {
-                            'accessRole.level': {
-                                $nin: [
-                                    ACL_CONSTANTS.MASTER_ADMIN,
-                                    ACL_CONSTANTS.MASTER_UPLOADER,
-                                    ACL_CONSTANTS.COUNTRY_UPLOADER
-                                    ]
-                            }
-                        }
-                    });
-
-                    pipeLine.push({
                         $group: {
                             _id            : null,
                             personnelsIds  : {$addToSet: '$_id'},
