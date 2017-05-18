@@ -2,6 +2,7 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'lodash',
     'text!templates/objectives/create.html',
     'text!templates/objectives/form/form.html',
     'text!templates/file/preView.html',
@@ -23,7 +24,7 @@ define([
     'async',
     'constants/contentType',
     'constants/errorMessages'
-], function (Backbone, _, $, CreateTemplate, FormTemplate, FileTemplate, BaseView,
+], function (Backbone, _, $, lodash, CreateTemplate, FormTemplate, FileTemplate, BaseView,
              FileDialogView, LinkFormView, PersonnelListForSelectionView, TreeView, Model,
              populate, objectivesCollection, FilterCollection, FileCollection, FileModel,
              implementShowHideArabicInputIn, VisibilityFormEditView,
@@ -161,6 +162,11 @@ define([
                 description : description[App.currentUser.currentLanguage],
                 locationString : self.locations.location,
                 outlets: this.outletsForVisibility,
+                initialData: this.visibilityFormData ? this.visibilityFormData : null
+            });
+
+            this.visibilityForm.on('save', function (data) {
+                self.visibilityFormData = data;
             });
         },
 

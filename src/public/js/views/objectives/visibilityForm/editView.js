@@ -14,8 +14,17 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
+            var initialData = options.initialData;
             this.translation = options.translation;
             this.allowedFileTypes = CONSTANTS.IMAGE_CONTENT_TYPES.concat(CONSTANTS.VIDEO_CONTENT_TYPES);
+
+            if (initialData) {
+                debugger;
+                this.applyToAll = initialData.applyToAll;
+                this.selectedFiles = initialData.files;
+            } else {
+                this.selectedFiles = [];
+            }
 
             this.templateOptions = {
                 translation: this.translation,
@@ -27,6 +36,12 @@ define(function (require) {
 
             this.render();
             this.defineUIElements();
+
+            if (!this.applyToAll) {
+                this.ui.applyToAllButton[0].checked = true;
+            }
+
+            this.ui.applyToAllButton.click();
         },
 
         defineUIElements: function () {
@@ -34,12 +49,11 @@ define(function (require) {
 
             this.ui = {
                 fileInput: view.find('#file-input'),
+                applyToAllButton: view.find('#apply-to-all'),
             };
         },
 
         template: _.template(Template),
-
-        selectedFiles: [],
 
         events: {
             'click .select-file': 'handleSelectFileClick',
@@ -158,7 +172,15 @@ define(function (require) {
         },
 
         save: function () {
+            if (this.selectedFiles.length) {
+                this.trigger('save', {
+                    files: this.selectedFiles.slice(),
+                    applyToAll: this.applyToAll
+                });
+            }
 
+            this.$el.dialog('close').dialog('destroy').remove();
+            this.remove();
         },
 
         render: function () {
