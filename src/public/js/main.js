@@ -43,6 +43,7 @@ require.config({
         lodash               : './libs/lodash/lodash',
         marionette : './libs/backbone.marionette/lib/backbone.marionette',
         dropzone: './libs/dropzone/dist/dropzone-amd-module',
+        shortId : './libs/js-shortid/dist/js-shortid',
     },
     shim : {
         jqueryui : ['jQuery'],

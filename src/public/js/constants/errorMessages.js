@@ -340,6 +340,10 @@
             en: 'Select only one file',
             ar: '' //todo
         },
+        selectFileOnlyForOneBranch: {
+            en: 'You should select file only for one branch',
+            ar: '' // todo
+        },
         notSaved : {
             en: 'Not saved',
             ar: '' //todo

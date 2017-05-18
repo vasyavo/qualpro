@@ -37,6 +37,7 @@
     "lodash": "4.17.3",
     "backbone.marionette": "marionette#3.1.0",
     "backbone.radio": "2.0.0",
-    "dropzone": "4.3.0"
+    "dropzone": "4.3.0",
+    "js-shortid": "0.1.1"
   }
 }
