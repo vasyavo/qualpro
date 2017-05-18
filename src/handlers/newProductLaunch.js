@@ -88,9 +88,11 @@ var NewProductLaunch = function() {
                     }
                     if (body.brand && body.brand.name) {
                         body.brand.name = _.escape(body.brand.name);
+                        body.brand.custom = 1;
                     }
                     if (body.variant && body.variant.name) {
                         body.variant.name = _.escape(body.variant.name);
+                        body.variant.custom = 1;
                     }
                     if (body.price) {
                         body.price = _.escape(body.price);

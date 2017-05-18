@@ -38,6 +38,10 @@ const schema = new Schema({
             type: String,
             default: '',
         },
+        custom: {
+            type: Number,
+            default: 0,
+        },
     },
     variant: {
         _id: {
@@ -47,6 +51,10 @@ const schema = new Schema({
         name: {
             type: String,
             default: '',
+        },
+        custom: {
+            type: Number,
+            default: 0,
         },
     },
     country: {
