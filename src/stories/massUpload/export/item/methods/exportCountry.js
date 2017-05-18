@@ -3,12 +3,16 @@ const DomainModel = require('../../../../../types/domain/model');
 function*  getCountriesForExport() {
     const pipeLine = [{
         $match: {
-            type: 'country',
+            type    : 'country',
             archived: false
         }
     }, {
         $sort: {
             'name.en': 1
+        }
+    }, {
+        $sort: {
+            'createdBy.date': 1
         }
     }, {
         $project: {

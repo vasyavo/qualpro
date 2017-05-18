@@ -288,7 +288,7 @@ function* createOrUpdate(payload) {
         query.email = email;
     }
 
-    if (phoneNumber) {
+    if (!email && phoneNumber) {
         rawOpt.phoneNumber = phoneNumber;
         query.phoneNumber = phoneNumber;
     }

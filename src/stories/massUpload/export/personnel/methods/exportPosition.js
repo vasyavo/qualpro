@@ -2,6 +2,10 @@ const PositionModel = require('../../../../../types/position/model');
 
 function*  getPositionForExport() {
     const pipeLine = [{
+        $sort: {
+            'createdBy.date': 1
+        }
+    }, {
         $project: {
             _id   : 0,
             id    : {$ifNull: ['$_id', '']},

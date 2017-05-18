@@ -70,6 +70,10 @@ function*  getPositionForExport() {
             preserveNullAndEmptyArrays: true
         }
     }, {
+        $sort: {
+            'createdBy.date': 1
+        }
+    }, {
         $project: {
             _id        : 0,
             id         : {$ifNull: ['$_id', '']},

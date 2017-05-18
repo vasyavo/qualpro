@@ -125,7 +125,6 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en'    : enName,
-        'name.ar'    : arName,
         retailSegment: retailSegmentId,
         subRegion    : subRegionId,
         outlet       : outletId,
@@ -153,6 +152,7 @@ function* createOrUpdate(payload) {
                 user: null,
                 date: new Date()
             },
+
 
             editedBy: {
                 user: null,
