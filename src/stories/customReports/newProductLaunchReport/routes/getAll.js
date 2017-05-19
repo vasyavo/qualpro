@@ -31,7 +31,7 @@ module.exports = (req, res, next) => {
         ],
     };
 
-    const queryRun = (personnel, callback) => { // TODO add const moment = require('moment'); filter
+    const queryRun = (personnel, callback) => { // TODO add shelfLife filter
         const query = req.query;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
