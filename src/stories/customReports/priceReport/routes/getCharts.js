@@ -200,11 +200,11 @@ module.exports = (req, res, next) => {
 
         if (response.lineChart.labels.length === 1) {
             response.lineChart.labels.push(moment(new Date()).format('MMMM, YYYY'));
-            response.lineChart.dataSets[0].data.push(0);
+            response.lineChart.dataSets[0].data.push(response.lineChart.dataSets[0].data[0]);
         }
 
-        response.lineChart.labels = response.lineChart.labels.map((item) => {
-            return moment(item).format('MMMM, YYYY');
+        response.lineChart.labels = response.lineChart.labels.map(item => {
+            return moment(new Date(item)).format('MMMM, YYYY');
         });
 
         res.status(200).send(response);
