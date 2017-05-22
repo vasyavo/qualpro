@@ -24,15 +24,17 @@ module.exports = (pipeline) => {
         $project: {
             _id: 1,
             count: 1,
-            promotion: 1,
-            name: {
+            domain: {
                 $let: {
                     vars: {
                         branch: { $arrayElemAt: ['$branch', 0] },
                     },
                     in: {
-                        en: '$$branch.name.en',
-                        ar: '$$branch.name.ar',
+                        _id: '$$branch._id',
+                        name: {
+                            en: '$$branch.name.en',
+                            ar: '$$branch.name.ar',
+                        },
                     },
                 },
             },

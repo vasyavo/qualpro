@@ -41,16 +41,18 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             _id: '$_id.personnel',
-            promotion: '$_id.promotion',
             count: 1,
-            name: {
+            domain: {
                 $let: {
                     vars: {
                         personnel: { $arrayElemAt: ['$personnel', 0] },
                     },
                     in: {
-                        en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                        ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
+                        _id: '$$personnel._id',
+                        name: {
+                            en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
+                            ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
+                        },
                     },
                 },
             },

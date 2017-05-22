@@ -23,14 +23,14 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             _id: 1,
-            promotion: 1,
             count: 1,
-            name: {
-                $let: {
-                    vars: {
-                        subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                    },
-                    in: {
+            domain: {
+                vars: {
+                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                },
+                in: {
+                    _id: '$$subRegion._id',
+                    name: {
                         en: '$$subRegion.name.en',
                         ar: '$$subRegion.name.ar',
                     },

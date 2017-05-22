@@ -135,27 +135,22 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
-                dataSets: {
-                    $push: {
-                        data: [{
-                            count: '$count',
-                            promotion: '$promotion',
-                        }],
-                        label: '$name',
+                data: {
+                    $addToSet: {
+                        _id: '$domain._id',
+                        name: '$domain.name',
+                        count: '$count',
                     },
                 },
-                labels: { $addToSet: '$count' },
+                labels: { $addToSet: '$domain.name' },
             },
         });
 
         pipeline.push({
             $project: {
                 barChart: {
-                    dataSets: '$dataSets',
+                    data: '$data',
                     labels: '$labels',
-                },
-                pieChart: {
-                    dataSets: '$dataSets',
                 },
             },
         });
@@ -180,15 +175,19 @@ module.exports = (req, res, next) => {
         let response = result[0];
 
         if (response) {
-            response.barChart.labels.sort();
+            response = {
+                barChart: {
+                    labels: _.sortBy(response.barChart.labels, 'en'),
+                    datasets: [{
+                        data: _.sortBy(response.barChart.data, domain => domain.name.en),
+                    }],
+                },
+            };
         } else {
             response = {
                 barChart: {
                     labels: [],
-                    dataSets: [],
-                },
-                pieChart: {
-                    dataSets: [],
+                    datasets: [],
                 },
             };
         }

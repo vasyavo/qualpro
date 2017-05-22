@@ -20,15 +20,17 @@ module.exports = (pipeline) => {
         $project: {
             _id: 1,
             count: 1,
-            promotion: 1,
-            name: {
+            domain: {
                 $let: {
                     vars: {
                         publisher: { $arrayElemAt: ['$publisher', 0] },
                     },
                     in: {
-                        en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
-                        ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
+                        _id: '$$publisher._id',
+                        name: {
+                            en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
+                            ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
+                        },
                     },
                 },
             },

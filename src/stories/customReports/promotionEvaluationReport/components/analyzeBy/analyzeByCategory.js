@@ -19,16 +19,18 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             _id: 1,
-            promotion: 1,
             count: 1,
-            name: {
+            domain: {
                 $let: {
                     vars: {
                         category: { $arrayElemAt: ['$category', 0] },
                     },
                     in: {
-                        en: '$$category.name.en',
-                        ar: '$$category.name.ar',
+                        _id: '$$category._id',
+                        name: {
+                            en: '$$category.name.en',
+                            ar: '$$category.name.ar',
+                        },
                     },
                 },
             },

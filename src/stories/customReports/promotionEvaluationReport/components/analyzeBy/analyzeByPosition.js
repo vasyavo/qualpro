@@ -20,15 +20,17 @@ module.exports = (pipeline) => {
         $project: {
             _id: 1,
             count: 1,
-            promotion: 1,
-            name: {
+            domain: {
                 $let: {
                     vars: {
                         publisherPosition: { $arrayElemAt: ['$publisherPosition', 0] },
                     },
                     in: {
-                        en: '$$publisherPosition.name.en',
-                        ar: '$$publisherPosition.name.ar',
+                        _id: '$$publisherPosition._id',
+                        name: {
+                            en: '$$publisherPosition.name.en',
+                            ar: '$$publisherPosition.name.ar',
+                        },
                     },
                 },
             },
