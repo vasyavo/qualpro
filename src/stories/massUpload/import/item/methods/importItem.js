@@ -7,6 +7,9 @@ const DomainModel = require('../../../../../types/domain/model');
 const ItemModel = require('../../../../../types/item/model');
 const logger = require('../../../../../utils/logger');
 
+const intNumberRegExp = /[0-9]+/;
+const priceQualProRegExp = /(^[0-9]+(\.[0-9]{1,2})?)$/;
+
 function* getOriginId(name) {
     const search = {
         'name.en': {
@@ -126,6 +129,26 @@ function* createOrUpdate(payload) {
 
     if (!enName) {
         throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
+    if (!intNumberRegExp.test(barcode)) {
+        throw new Error(`Validation failed, Barcode should be a number.`);
+    }
+
+    if (!priceQualProRegExp.test(ppt)) {
+        throw new Error(`Validation failed, PPT is not valid.`);
+    }
+
+    if (!priceQualProRegExp.test(pptPerCase)) {
+        throw new Error(`Validation failed, PPT (Case) is not valid.`);
+    }
+
+    if (!priceQualProRegExp.test(rspMin)) {
+        throw new Error(`Validation failed, RSP (Minimum) is not valid.`);
+    }
+
+    if (!priceQualProRegExp.test(rspMax)) {
+        throw new Error(`Validation failed, RSP (Maximum) is not valid.`);
     }
 
     let originId;

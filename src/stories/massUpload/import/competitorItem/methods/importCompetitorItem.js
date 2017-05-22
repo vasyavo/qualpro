@@ -7,6 +7,8 @@ const DomainModel = require('../../../../../types/domain/model');
 const CompetitorItemModel = require('../../../../../types/competitorItem/model');
 const logger = require('../../../../../utils/logger');
 
+const intNumberRegExp = /[0-9]+/;
+
 function* getOriginId(name) {
     const search = {
         'name.en': {
@@ -121,6 +123,10 @@ function* createOrUpdate(payload) {
 
     if (!enName) {
         throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
+    if (!intNumberRegExp.test(size)) {
+        throw new Error(`Validation failed, Weight should be a number.`);
     }
 
     let originId;
