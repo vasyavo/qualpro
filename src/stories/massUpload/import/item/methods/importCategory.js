@@ -49,6 +49,10 @@ function* createOrUpdate(payload) {
     try {
         yield CategoryModel.update(query, modify, opt);
     } catch (ex) {
+        if(ex.code === 11000){
+            throw new Error('Category with such Name (AR) already exists');
+        }
+
         throw ex;
     }
 }
