@@ -199,8 +199,8 @@ module.exports = (req, res, next) => {
         }
 
         if (response.lineChart.labels.length === 1) {
-            response.lineChart.labels.unshift(response.lineChart.labels[0]);
-            response.lineChart.dataSets[0].data.unshift(0);
+            response.lineChart.labels.push(moment(new Date()).format('MMMM, YYYY'));
+            response.lineChart.dataSets[0].data.push(0);
         }
 
         response.lineChart.labels = response.lineChart.labels.map((item) => {
