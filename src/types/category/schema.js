@@ -18,6 +18,10 @@ const schema = new Schema({
         type: Boolean,
         default: false,
     },
+    information: [{
+        type: ObjectId,
+        ref: CONTENT_TYPES.FILES,
+    }],
     topArchived: {
         type: Boolean,
         default: false,

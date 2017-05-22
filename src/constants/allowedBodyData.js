@@ -441,15 +441,15 @@ allowedParams[CONTENT_TYPES.BRAND] = {
 allowedParams[CONTENT_TYPES.CATEGORY] = {
     0: {
         create: ['topArchived', 'archived', 'name'],
-        update: ['topArchived', 'archived', 'name']
+        update: ['topArchived', 'archived', 'name', 'products', 'information']
     },
     1: {
         create: ['topArchived', 'archived', 'name'],
-        update: ['topArchived', 'archived', 'name']
+        update: ['topArchived', 'archived', 'name', 'products', 'information']
     },
     2: {
         create: ['topArchived', 'archived', 'name'],
-        update: ['topArchived', 'archived', 'name']
+        update: ['topArchived', 'archived', 'name', 'products', 'information']
     },
     3: {
         create: ['topArchived', 'archived', 'name'],
