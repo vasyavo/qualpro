@@ -30,5 +30,17 @@ module.exports = function () {
         })
     }, handler.getById);
 
+    router.put('/:id([0-9a-fA-F]{24})', function(req, res, next) {
+        access.getEditAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function(err) {
+            err ? next(err) : next();
+        })
+    }, handler.update);
+
+    router.delete('/:id([0-9a-fA-F]{24})', function(req, res, next) {
+            access.getArchiveAccess(req, ACL_MODULES.NEW_PRODUCT_LAUNCH, function(err) {
+                err ? next(err) : next();
+            })
+        }, handler.removeItem);
+
     return router;
 };

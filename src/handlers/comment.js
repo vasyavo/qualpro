@@ -9,6 +9,7 @@ const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDis
 const MarketingCampaignItemModel = require('./../types/marketingCampaignItem/model');
 const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
 const ContactUsModel = require('../types/contactUs/model');
+const EventModel = require('../types/event/model');
 const redis = require('./../helpers/redisClient');
 
 var Comment = function () {
@@ -350,6 +351,109 @@ var Comment = function () {
 
                 queryRun(saveData);
             });
+        });
+    };
+
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+
+        const queryRun = (body, callback) => {
+            body.editedBy = {
+                user: userId,
+                date: Date.now()
+            };
+            body.body = body.commentText;
+            CommentModel.findByIdAndUpdate(id, body, { new: true }, callback)
+        };
+
+        async.waterfall([
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.COMMENT, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.COMMENT, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
+        });
+    };
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    CommentModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "Comment",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    CommentModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.COMMENT, cb);
+            },
+            
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
         });
     };
 

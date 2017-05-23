@@ -9,7 +9,10 @@ define([
         employee          : 'Employee',
         comment           : 'Comment',
         // body
-        createdBy: 'Created By'
+        createdBy: 'Created By',
+        edit: 'Edit',
+        delete: 'Delete',
+        editCommentViewTitle: 'Edit comment of marketing campaign',
     };
     return _.extend({}, paginationTranslation, filtersTranslation, brandingAndDisplayTranslation);
 });

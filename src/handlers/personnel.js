@@ -1352,8 +1352,6 @@ const Personnel = function () {
                     ACL_CONSTANTS.CASH_VAN,
                 ];
                 const notAllowedLevelsMobile = [
-                    ACL_CONSTANTS.MASTER_UPLOADER,
-                    ACL_CONSTANTS.COUNTRY_UPLOADER,
                 ];
 
                 if (notAllowedLevelsCMS.indexOf(level) !== -1 && !req.isMobile) {

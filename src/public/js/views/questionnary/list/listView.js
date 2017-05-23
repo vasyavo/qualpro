@@ -52,6 +52,19 @@ define(function(require) {
             this.preView.on('updatePreview', function (model) {
                 self.collection.add(model, {merge: true});
             });
+            this.preView.on('re-render', function (questionId) {
+                var questionBlock = $('#question-block-' + questionId);
+                questionBlock.click();
+                questionBlock.click();
+            });
+            this.preView.on('update-list-view', function () {
+                self.collection.fetch({
+                    reset: true,
+                    success: function (response) {
+                        self.showMoreContent(response);
+                    }
+                });
+            });
         },
 
         showMoreContent: function (newModels) {

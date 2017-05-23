@@ -20,11 +20,13 @@ define([
     'constants/contentType',
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
-    'constants/errorMessages'
+    'constants/errorMessages',
+    'views/brandingAndMonthlyDisplay/edit',
+    'models/brandingAndMonthlyDisplay',
 ], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, BrandingAndMonthlyDislpayModel) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
@@ -49,7 +51,9 @@ define([
             'click .commentBottom .attachment': 'onShowFilesInComment',
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
-            'click #downloadFile'             : 'stopPropagation'
+            'click #downloadFile'             : 'stopPropagation',
+            'click #edit': 'showEditView',
+            'click #delete': 'deleteBrandingAndMonthlyDisplay',
         },
 
         initialize: function (options) {
@@ -63,6 +67,57 @@ define([
             this.render();
         },
 
+        showEditView: function () {
+            var that = this;
+
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-branding-and-monthly-display', function (data, brandingAndMonthlyDisplay) {
+                var model = new BrandingAndMonthlyDislpayModel();
+
+                model.edit(brandingAndMonthlyDisplay, data);
+
+                model.on('branding-and-monthly-display-edited', function (response) {
+                    var view = that.$el;
+
+                    if (data.dateStart) {
+                        view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateEnd) {
+                        view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                    }
+
+                    var displayTypeString = response.displayType.map(function (item) {
+                        return item.name[App.currentUser.currentLanguage];
+                    }).join(', ');
+
+                    view.find('#display-type').html(displayTypeString);
+                    view.find('#description').html(data.description[App.currentUser.currentLanguage]);
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('update-list-view');
+                });
+            });
+        },
+
+        deleteBrandingAndMonthlyDisplay: function () {
+            var that = this;
+            var model = new BrandingAndMonthlyDislpayModel();
+
+            model.delete(this.model.get('_id'));
+
+            model.on('branding-and-monthly-display-deleted', function () {
+                that.trigger('update-list-view');
+
+                that.$el.dialog('close').dialog('destroy').remove();
+            });
+        },
+
         showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
@@ -71,7 +126,7 @@ define([
             var options = {
                 fileModel  : fileModel,
                 bucket     : 'competitors',
-                translation: this.translation
+                translation: this.translation,
             };
             if(!fileModel){
                 fileModel = this.fileCollection.get(fileModelId);
@@ -339,6 +394,14 @@ define([
 
         render: function () {
             var self = this;
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = levelConfig[this.contentType].activityList.preview;
+            } else {
+                currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
+
             dataService.getData(`${CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY}/${this.model.get('_id')}`, {}, (err, model) => {
                 if (err) {
                     return App.renderErrors([ERROR_MESSAGES.readError]);
@@ -355,7 +418,9 @@ define([
                 model.branchString = model.branch.name[currentLanguage];
                 model.outletString = model.outlet.name[currentLanguage];
                 model.retailSegmentString = model.retailSegment.name[currentLanguage];
-                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType[0].name[currentLanguage] : '';
+                model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(function(item) {
+                    return item.name[currentLanguage];
+                }).join(',') : '';
                 model.dateStart = moment(model.dateStart).format('DD.MM.YYYY');
                 model.dateEnd = moment(model.dateEnd).format('DD.MM.YYYY');
                 model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;
@@ -402,6 +467,29 @@ define([
                         $('body').css({overflow: 'inherit'});
                     }
                 });
+
+                if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
+                    currentConfig.forEach(function (config) {
+                        require([
+                                config.template
+                            ],
+                            function (template) {
+                                var container = self.$el.find(config.selector);
+
+                                template = _.template(template);
+
+                                if (!container.find('#' + config.elementId).length) {
+                                    container[config.insertType](template({
+                                        elementId  : config.elementId,
+                                        translation: self.translation
+                                    }));
+                                }
+                            });
+
+                    });
+                } else {
+                    this.$el.find('.objectivesTopBtnBlockSmall').hide();
+                }
 
                 self.$el.find('#commentForm').on('submit', {
                     body   : self.commentBody,

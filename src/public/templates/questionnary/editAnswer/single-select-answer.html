@@ -1,0 +1,10 @@
+<% _.each(questionOptions, function(option, index) { %>
+    <input
+        id="answer-option-<%- index %>"
+        name="single-select-radio"
+        type="radio"
+        value="<%- index %>"
+
+    >
+    <label for="answer-option-<%- index %>"><%- option.currentLanguage %></label>
+<% }); %>

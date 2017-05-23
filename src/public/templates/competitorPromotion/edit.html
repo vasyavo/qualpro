@@ -1,0 +1,112 @@
+<div class="form-holder personnelInfo promotionEdit largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.competitorPromotionEditTitle %></span>
+    </div>
+    <div class="promotionForm">
+        <div class="blockObjective scrollingForm">
+            <div class="block-left noTranslate borderRight">
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.rsp %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="price"
+                                       class="objectivesInput"
+                                       value="<%= model.price %>"
+                                       required
+                                       maxlength="32"
+                                       placeholder="Input rsp"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell alignTop">
+                                <span><%= translation.weight %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <input type="text"
+                                       id="weight"
+                                       class="objectivesInput"
+                                       value="<%= model.packing %>"
+                                       required
+                                       maxlength="32"
+                                       placeholder="Input opening stock"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%= translation.displayType %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="displayTypeDd" href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.expiry %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateExpiry"
+                                           class="hasDatepicker"
+                                           value="<%= model.expiry %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.startDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateStart"
+                                           value="<%= model.dateStart %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.endDate %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <div class="calendarWrap">
+                                    <input type="text"
+                                           id="dateEnd"
+                                           value="<%= model.dateEnd %>"
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block-right flexColumnStart">
+                <div class="scrollable">
+                    <div class="description">
+                        <div class="objectivesPaddingBlock borderBottom">
+                            <div class="descriptionBlock floatBlock">
+                                <span class="description fontBold mandatory"><%= translation.description %></span>
+                            </div>
+                            <div id="comment-container">
+                                <textarea type="text"
+                                          id="description"
+                                          class="objectivesTextarea"
+                                          required
+                                          maxlength="150"
+                                          placeholder="<%= translation.description %>"><%- model.promotion %>
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
