@@ -372,8 +372,20 @@
             en: 'Weight is required',
             ar: '' // todo
         },
+        weightIsNotANumber: {
+            en: 'Weight is not a number',
+            ar: '' // todo
+        },
         priceRequired: {
             en: 'Price is required',
+            ar: '' // todo
+        },
+        rspRequired: {
+            en: 'RSP is required',
+            ar: '' // todo
+        },
+        rspIsNotANumber: {
+            en: 'RSP is not a number',
             ar: '' // todo
         },
         distributorRequired: {
