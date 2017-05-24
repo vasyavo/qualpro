@@ -176,9 +176,7 @@ define(function (require) {
 
             this.originCollection = new OriginCollection();
             this.originCollection.on('reset', function () {
-                const defaultOrigin = [model.origin].map(function (item) {
-                    return that.originCollection.findWhere({_id : item._id}).toJSON();
-                });
+                const defaultOrigin = [model.origin];
 
                 Populate.inputDropDown({
                     selector    : '#originDd',
