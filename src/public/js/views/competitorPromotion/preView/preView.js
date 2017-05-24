@@ -89,6 +89,13 @@ define([
                 model.on('competitor-promotion-edited', function (response) {
                     var view = that.$el;
 
+                    response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
+                    response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
+
+                    that.model.set(response, {
+                        merge: true
+                    });
+
                     view.find('#promotion').html(data.promotion);
                     view.find('#price').html(data.price);
                     view.find('#packing').html(data.packing);
