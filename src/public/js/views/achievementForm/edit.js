@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('underscore');
     var Backbone = require('backbone');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/achievementForm/edit.html');
 
     return Backbone.View.extend({
@@ -53,6 +54,7 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var valid = true;
                             var startDate = that.$el.find('#dateStart').val();
                             var endDate = that.$el.find('#dateEnd').val();
                             var data = {
@@ -68,7 +70,23 @@ define(function (require) {
                                 },
                             };
 
-                            that.trigger('edit-achievement-form-item', data, model._id);
+                            if (!data.description.en && !data.description.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.enterDescription[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.additionalComment.en && !data.additionalComment.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.additionalCommentRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (valid) {
+                                that.trigger('edit-achievement-form-item', data, model._id);
+                            }
                         }
                     }
                 }
