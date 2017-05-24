@@ -751,8 +751,8 @@ const QuestionnaryHandler = function () {
                             ],
                         });
                     }
-
-                    $generalMatch.$and.push({
+                    // remove for onLeave functionality
+                   /* $generalMatch.$and.push({
                         $or: [
                             {
                                 personnels: personnel._id,
@@ -767,7 +767,7 @@ const QuestionnaryHandler = function () {
                                 'createdBy.user': { $eq: personnel._id },
                             },
                         ],
-                    });
+                    });*/
 
                     pipeline.push({
                         $match: $generalMatch,

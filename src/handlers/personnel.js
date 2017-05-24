@@ -311,6 +311,12 @@ const Personnel = function () {
                             lastName: '$$item.lastName',
                             accessRole: '$$item.accessRole',
                             position: '$$item.position',
+                            country: '$$item.country',
+                            region: '$$item.region',
+                            subRegion: '$$item.subRegion',
+                            branch: '$$item.branch',
+                            retailSegment: '$$item.retailSegment',
+                            outlet: '$$item.outlet',
                             onLeave: '$$item.vacation.onLeave',
                         },
                     },
@@ -379,6 +385,48 @@ const Personnel = function () {
 
                 callback(null, personnel);
             });
+    };
+
+    const getLocationsAndBranches = (personnel, cb) => {
+        async.waterfall([
+            (cb) => {
+                require('./../stories/personnel/reusable-components/getLocation')({
+                    setCountry: personnel.country,
+                    setRegion: personnel.region,
+                    setSubRegion: personnel.subRegion,
+                }, cb);
+            },
+            (result, cb) => {
+                const groups = result.length ?
+                    result.slice().pop() : {
+                        setCountry: [],
+                        setRegion: [],
+                        setSubRegion: [],
+                    };
+                personnel.country = groups.setCountry;
+                personnel.region = groups.setRegion;
+                personnel.subRegion = groups.setSubRegion;
+                cb(null);
+            },
+            (cb) => {
+                require('./../stories/personnel/reusable-components/getBranches')({
+                    setSubRegion: personnel.subRegion,
+                    setBranch: personnel.branch,
+                }, cb);
+            },
+            (result, cb) => {
+                const groups = result.length ?
+                    result.slice().pop() : {
+                        setBranch: [],
+                        setRetailSegment: [],
+                        setOutlet: [],
+                    };
+                personnel.branch = groups.setBranch;
+                personnel.retailSegment = groups.setRetailSegment;
+                personnel.outlet = groups.setOutlet;
+                cb(null, personnel);
+            },
+        ], cb);
     };
 
     this.getForDD = function(req, res, next) {
@@ -1597,54 +1645,23 @@ const Personnel = function () {
 
                     personnel.workAccess = (personnel.accessRole.level < 3) || !personnel.vacation.onLeave;
 
-                    async.waterfall([
+                    getLocationsAndBranches(personnel, cb);
+                },
 
-                        (cb) => {
-                            require('./../stories/personnel/reusable-components/getLocation')({
-                                setCountry: personnel.country,
-                                setRegion: personnel.region,
-                                setSubRegion: personnel.subRegion,
-                            }, cb);
-                        },
-
-                        (result, cb) => {
-                            const groups = result.length ?
-                                result.slice().pop() : {
-                                    setCountry: [],
-                                    setRegion: [],
-                                    setSubRegion: [],
-                                };
-
-                            personnel.country = groups.setCountry;
-                            personnel.region = groups.setRegion;
-                            personnel.subRegion = groups.setSubRegion;
-
-                            cb(null);
-                        },
-
-                        (cb) => {
-                            require('./../stories/personnel/reusable-components/getBranches')({
-                                setSubRegion: personnel.subRegion,
-                                setBranch: personnel.branch,
-                            }, cb);
-                        },
-
-                        (result, cb) => {
-                            const groups = result.length ?
-                                result.slice().pop() : {
-                                    setBranch: [],
-                                    setRetailSegment: [],
-                                    setOutlet: [],
-                                };
-
-                            personnel.branch = groups.setBranch;
-                            personnel.retailSegment = groups.setRetailSegment;
-                            personnel.outlet = groups.setOutlet;
-
-                            cb(null, personnel);
-                        },
-
-                    ], cb);
+                (personnel, cb) => {
+                    async.forEachOf(personnel.covered, function (object, item, eachCb) {
+                        getLocationsAndBranches(personnel.covered[item], function (err, personnelWithLoc) {
+                            personnel.country = _.union(personnel.country, personnelWithLoc.country);
+                            personnel.region = _.union(personnel.region, personnelWithLoc.region);
+                            personnel.subRegion = _.union(personnel.subRegion, personnelWithLoc.subRegion);
+                            personnel.branch = _.union(personnel.branch, personnelWithLoc.branch);
+                            personnel.retailSegment = _.union(personnel.retailSegment, personnelWithLoc.retailSegment);
+                            personnel.outlet = _.union(personnel.outlet, personnelWithLoc.outlet);
+                            eachCb();
+                        });
+                    }, function() {
+                        cb(null, personnel);
+                    });
                 },
 
             ], callback);
