@@ -359,6 +359,10 @@
         afterPartNotFilled : {
             en : 'Visibility form after part in not filled',
             ar : '' //todo
+        },
+        filesNotUploaded: {
+            en: 'Files not uploaded',
+            ar: ''
         }
     };
 

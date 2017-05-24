@@ -16,10 +16,10 @@ define(function (require) {
         initialize: function (options) {
             var initialData = options.initialData;
             this.translation = options.translation;
+            this.withoutBranches = options.withoutBranches;
             this.allowedFileTypes = CONSTANTS.IMAGE_CONTENT_TYPES.concat(CONSTANTS.VIDEO_CONTENT_TYPES);
 
             if (initialData) {
-                debugger;
                 this.applyToAll = initialData.applyToAll;
                 this.selectedFiles = initialData.files;
             } else {
@@ -29,13 +29,26 @@ define(function (require) {
             this.templateOptions = {
                 translation: this.translation,
                 description: options.description,
-                locationString: options.locationString,
                 outlets: options.outlets,
                 allowed : this.allowedFileTypes.join(', ')
             };
 
+            if (this.withoutBranches) {
+                this.templateOptions.outlets = [{
+                    name: '',
+                    branches: [{
+                        _id: 'vfwithoutbranch',
+                        name: options.locationString
+                    }]
+                }];
+            }
+
             this.render();
             this.defineUIElements();
+
+            if (this.withoutBranches) {
+                this.ui.applyToAllContainer.hide();
+            }
 
             if (!this.applyToAll) {
                 this.ui.applyToAllButton[0].checked = true;
@@ -50,6 +63,7 @@ define(function (require) {
             this.ui = {
                 fileInput: view.find('#file-input'),
                 applyToAllButton: view.find('#apply-to-all'),
+                applyToAllContainer: view.find('div.apply-to-all'),
             };
         },
 
