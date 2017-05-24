@@ -8,7 +8,7 @@ const ItemModel = require('../../../../../types/item/model');
 const logger = require('../../../../../utils/logger');
 
 const intNumberRegExp = /[0-9]+/;
-const priceQualProRegExp = /(^[0-9]+(\.[0-9]{1,2})?)$/;
+const priceQualProRegExp = /(^[0-9]+(\.[0-9]{1,3})?)$/;
 
 function* getOriginId(name) {
     const search = {
