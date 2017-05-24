@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const striptags = require('striptags');
 const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
@@ -298,8 +299,8 @@ module.exports = (req, res, next) => {
 
         response.data.forEach(item => {
             item.promotionType = {
-                en: _.unescape(item.promotionType.en),
-                ar: _.unescape(item.promotionType.ar),
+                en: striptags(_.unescape(item.promotionType.en)),
+                ar: striptags(_.unescape(item.promotionType.ar)),
             };
         });
 
