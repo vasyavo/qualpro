@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -294,6 +295,13 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.promotionType = {
+                en: _.unescape(item.promotionType.en),
+                ar: _.unescape(item.promotionType.ar),
+            };
+        });
 
         res.status(200).send(response);
     });

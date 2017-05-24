@@ -186,22 +186,18 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
-                dataSets: {
-                    $push: {
-                        data: ['$percent'],
-                        label: '$name',
-                    },
+                data: {
+                    $addToSet: '$percent',
                 },
+                labels: { $addToSet: '$name' },
             },
         });
 
         pipeline.push({
             $project: {
-                pieChart: {
-                    dataSets: '$dataSets',
-                },
                 barChart: {
-                    dataSets: '$dataSets',
+                    data: '$data',
+                    labels: '$labels',
                 },
             },
         });
@@ -223,19 +219,28 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        let response = result[0];
+        const response = result[0];
 
-        if (!response) {
-            response = {
-                barChart: {
-                    dataSets: [],
-                },
-                pieChart: {
-                    dataSets: [],
-                },
+        if (response) {
+            response.barChart = {
+                labels: response.barChart.labels,
+                datasets: [{
+                    data: response.barChart.data.map(percent => parseFloat(percent).toFixed(2)),
+                }],
             };
+
+            response.pieChart = response.barChart;
+
+            return res.status(200).send(response);
         }
 
-        res.status(200).send(response);
+        res.status(200).send({
+            barChart: {
+                datasets: [],
+            },
+            pieChart: {
+                datasets: [],
+            },
+        });
     });
 };
