@@ -363,6 +363,10 @@
         afterPartNotFilled : {
             en : 'Visibility form after part in not filled',
             ar : '' //todo
+        },
+        displayTypeRequired: {
+            en : 'Display type is required',
+            ar: '' // todo
         }
     };
 
