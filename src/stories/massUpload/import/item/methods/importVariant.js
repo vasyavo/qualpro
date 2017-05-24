@@ -49,8 +49,7 @@ function* createOrUpdate(payload) {
     }
 
     const query = {
-        'name.en': enName,
-        archived : false,
+        'name.en': enName
     };
 
     const modify = {
