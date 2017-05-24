@@ -25,14 +25,16 @@ module.exports = (pipeline) => {
             _id: 1,
             count: 1,
             domain: {
-                vars: {
-                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                },
-                in: {
-                    _id: '$$subRegion._id',
-                    name: {
-                        en: '$$subRegion.name.en',
-                        ar: '$$subRegion.name.ar',
+                $let: {
+                    vars: {
+                        subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                    },
+                    in: {
+                        _id: '$$subRegion._id',
+                        name: {
+                            en: '$$subRegion.name.en',
+                            ar: '$$subRegion.name.ar',
+                        },
                     },
                 },
             },
