@@ -23,10 +23,11 @@ define([
     'constants/errorMessages',
     'views/brandingAndMonthlyDisplay/edit',
     'models/brandingAndMonthlyDisplay',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, BrandingAndMonthlyDislpayModel) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, BrandingAndMonthlyDislpayModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
@@ -106,16 +107,18 @@ define([
         },
 
         deleteBrandingAndMonthlyDisplay: function () {
-            var that = this;
-            var model = new BrandingAndMonthlyDislpayModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteBrandingAndMonthlyReport[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new BrandingAndMonthlyDislpayModel();
 
-            model.delete(this.model.get('_id'));
+                model.delete(this.model.get('_id'));
 
-            model.on('branding-and-monthly-display-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('branding-and-monthly-display-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
