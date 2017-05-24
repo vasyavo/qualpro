@@ -85,11 +85,11 @@ define([
                     var view = that.$el;
 
                     if (data.dateStart) {
-                        view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
                     }
 
                     if (data.dateEnd) {
-                        view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
                     }
 
                     var displayTypeString = response.displayType.map(function (item) {
@@ -424,8 +424,8 @@ define([
                 model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(function(item) {
                     return item.name[currentLanguage];
                 }).join(',') : '';
-                model.dateStart = moment(model.dateStart).format('DD.MM.YYYY');
-                model.dateEnd = moment(model.dateEnd).format('DD.MM.YYYY');
+                model.dateStart = moment.utc(model.dateStart).format('DD.MM.YYYY');
+                model.dateEnd = moment.utc(model.dateEnd).format('DD.MM.YYYY');
                 model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;
                 model.regionString = (model.region) ? model.region.name[currentLanguage] : self.translation.missedData;
                 model.subRegionString = (model.subRegion) ? model.subRegion.name[currentLanguage] : self.translation.missedData;

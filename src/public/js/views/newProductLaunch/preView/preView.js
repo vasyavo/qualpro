@@ -62,7 +62,7 @@ define([
                     var view = that.$el;
 
                     if (data.shelfLifeStart && data.shelfLifeEnd) {
-                        view.find('#shelfLife').html(moment(data.shelfLifeStart).format('DD.MM.YYYY') + '-' + moment(data.shelfLifeEnd).format('DD.MM.YYYY'));
+                        view.find('#shelfLife').html(moment.utc(data.shelfLifeStart).format('DD.MM.YYYY') + '-' + moment.utc(data.shelfLifeEnd).format('DD.MM.YYYY'));
                     }
 
                     view.find('#packing').html(data.packing);

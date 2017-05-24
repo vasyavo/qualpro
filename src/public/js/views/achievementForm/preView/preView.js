@@ -57,15 +57,15 @@ define([
 
                 model.on('achievement-form-edited', function () {
                     var view = that.$el;
-                    var startDate = data.dateStart;
-                    var endDate = data.dateEnd;
+                    var startDate = data.startDate;
+                    var endDate = data.endDate;
 
                     if (startDate) {
-                        view.find('#date-start').html(moment(startDate).format('DD.MM.YYYY'));
+                        view.find('#date-start').html(moment.utc(startDate).format('DD.MM.YYYY'));
                     }
 
                     if (endDate) {
-                        view.find('#date-end').html(moment(endDate).format('DD.MM.YYYY'));
+                        view.find('#date-end').html(moment.utc(endDate).format('DD.MM.YYYY'));
                     }
 
                     view.find('#description').html(data.description[App.currentUser.currentLanguage]);

@@ -61,8 +61,8 @@ define(function (require) {
                             var startDate = that.$el.find('#dateStart').val();
                             var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                shelfLifeStart: startDate ? moment(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
-                                shelfLifeEnd: endDate ? moment(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
+                                shelfLifeStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                shelfLifeEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 packing: ui.packing.val(),
                                 price: ui.price.val(),
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),

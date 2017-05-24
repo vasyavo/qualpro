@@ -55,9 +55,9 @@ define(function (require) {
                             var data = {
                                 price: ui.price.val(),
                                 packing: ui.weight.val(),
-                                expiry: expiryDate ? moment(expiryDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
-                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
-                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
+                                expiry: expiryDate ? moment.utc(expiryDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
+                                dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 promotion: ui.description.val(),
                             };
