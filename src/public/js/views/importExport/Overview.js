@@ -6,7 +6,7 @@ define(function (require) {
     var Template = require('text!templates/importExport/overview.html');
     var MS_EXEL_CONTENT_TYPES = require('constants/otherConstants').MS_EXCEL_CONTENT_TYPES;
     var ERROR_MESSAGES = require('constants/errorMessages');
-    var INFO_MESSAGES = require('constants/infoMessages');
+    var INFO_MESSAGES = require('constants/InfoMessages');
 
     require('dropzone');
 
