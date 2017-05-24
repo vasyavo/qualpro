@@ -28,6 +28,66 @@
             METALSTAND: 'metalStand'
         },
 
+        NOTIFICATION_TYPES: [
+            {
+                _id    : 'target',
+                name   : {
+                    en: 'Target',
+                    ar: '' // todo
+                },
+                sortKey: 0
+            },
+            {
+                _id    : 'salary',
+                name   : {
+                    en: 'Salary',
+                    ar: '' // todo
+                },
+                sortKey: 1
+            },
+            {
+                _id    : 'out_of_stock',
+                name   : {
+                    en: 'Out of stock',
+                    ar: '' // todo
+                },
+                sortKey: 2
+            },
+            {
+                _id    : 'new_arrivals',
+                name   : {
+                    en: 'New arrivals',
+                    ar: '' // todo
+                },
+                sortKey: 3
+            },
+            {
+                _id    : 'annual_leave',
+                name   : {
+                    en: 'Annual leave',
+                    ar: '' // todo
+                },
+                sortKey: 4
+            },
+            {
+                _id    : 'near_expiry_products',
+                name   : {
+                    en: 'Near expiry products',
+                    ar: '' // todo
+                },
+                sortKey: 5
+            },
+            {
+                _id    : 'other',
+                name   : {
+                    en: 'Other',
+                    ar: '' // todo
+                },
+                sortKey: 6
+            }
+        ],
+        NOTIFICATION_TYPE_OTHER: 'other',
+
         OBJECTIVES_TYPE: [
             {
                 _id    : 'weekly',

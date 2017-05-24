@@ -41,7 +41,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.CUSTOMER,
@@ -55,7 +55,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.TRADE_CHANNEL,
@@ -69,7 +69,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.PERSONNEL,
@@ -84,7 +84,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.OBJECTIVE,
@@ -124,9 +124,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     }, {
         module: ACL_MODULES.PLANOGRAM,
@@ -138,9 +138,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     }, {
         module: ACL_MODULES.COMPETITOR_LIST,
@@ -154,7 +154,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.PROFILE,
@@ -196,12 +196,12 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.AL_ALALI_MARKETING,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
@@ -266,7 +266,7 @@ module.exports = [
             upload: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.VISIBILITY,
@@ -294,7 +294,7 @@ module.exports = [
             upload: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.EMPLOYEES_PERFORMANCE,
@@ -329,10 +329,10 @@ module.exports = [
             read: true
         },
         mobile: {
-            archive: false,
-            edit: false,
-            write: false,
-            read: false
+            archive: true,
+            edit: true,
+            write: true,
+            read: true
         }
     }, {
         module: ACL_MODULES.NOTIFICATION,
@@ -344,7 +344,7 @@ module.exports = [
         mobile: {
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.SETTINGS,
@@ -413,39 +413,39 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
         module: ACL_MODULES.AL_ALALI_PROMO_EVALUATION,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
         module: ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT,
         cms: {
-            archive: false,
+            archive: true,
             edit: true,
             write: true,
             read: true
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
@@ -473,9 +473,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
@@ -488,9 +488,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
@@ -513,14 +513,14 @@ module.exports = [
         cms: {
             archive: true,
             edit: true,
-            write: false,
-            read: false
+            write: true,
+            read: true
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
@@ -533,9 +533,9 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit: false,
-            write: false,
-            read: false
+            edit: true,
+            write: true,
+            read: true
         }
     },
     {
@@ -580,7 +580,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     },
     {
@@ -595,7 +595,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     },
     {
@@ -610,7 +610,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     },
     {
