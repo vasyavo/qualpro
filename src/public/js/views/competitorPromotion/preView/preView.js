@@ -94,15 +94,15 @@ define([
                     view.find('#packing').html(data.packing);
 
                     if (data.expiry) {
-                        view.find('#expiry').html(moment(data.expiry).format('DD.MM.YYYY'));
+                        view.find('#expiry').html(moment.utc(data.expiry).format('DD.MM.YYYY'));
                     }
 
                     if (data.dateStart) {
-                        view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
                     }
 
                     if (data.dateEnd) {
-                        view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
                     }
 
                     var displayTypeString = response.displayType.map(function (item) {
