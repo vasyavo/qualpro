@@ -2,6 +2,7 @@ define(function (require) {
 
     var _ = require('underscore');
     var Backbone = require('backbone');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/priceSurvey/edit-price-survey-value.html');
 
     return Backbone.View.extend({
@@ -40,8 +41,14 @@ define(function (require) {
                         click : function () {
                             var newPrice = that.ui.valueInput.val();
 
-                            that.trigger('new-price-submitted', newPrice);
-                            that.$el.dialog('close').dialog('destroy').remove();
+                            if (newPrice && newPrice > 0 && !isNaN(Number(newPrice))) {
+                                that.trigger('new-price-submitted', newPrice);
+                                that.$el.dialog('close').dialog('destroy').remove();
+                            } else {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.enterCorrectValue[App.currentUser.currentLanguage]
+                                ]);
+                            }
                         }
                     }
                 }

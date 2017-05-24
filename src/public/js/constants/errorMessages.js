@@ -395,6 +395,10 @@
         additionalCommentRequired: {
             en: 'Additional comment is required',
             ar: '' // todo
+        },
+        enterCorrectValue: {
+            en: 'Enter correct value',
+            ar: '' // todo
         }
     };
 
