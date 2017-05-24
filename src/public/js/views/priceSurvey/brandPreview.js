@@ -8,8 +8,9 @@ define([
     'constants/contentType',
     'dataService',
     'views/priceSurvey/editPriceSurveyValue',
-    'models/priceSurveyBrand'
-], function ($, _, PreviewTemplate, PreviewBodyTemplate, BrandCollection, BaseView, CONTENT_TYPES, dataService, EditPriceSurveyValueView, PriceSurveyBrandModel) {
+    'models/priceSurveyBrand',
+    'constants/infoMessages'
+], function ($, _, PreviewTemplate, PreviewBodyTemplate, BrandCollection, BaseView, CONTENT_TYPES, dataService, EditPriceSurveyValueView, PriceSurveyBrandModel, INFO_MESSAGES) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.PRICESURVEY,
 
@@ -77,20 +78,22 @@ define([
         },
 
         handleDeleteClick: function (event) {
-            var that = this;
-            var target = $(event.target);
-            var model = new PriceSurveyBrandModel();
+            if (confirm(INFO_MESSAGES.confirmDeletePriceSurveyItem[App.currentUser.currentLanguage])) {
+                var that = this;
+                var target = $(event.target);
+                var model = new PriceSurveyBrandModel();
 
-            var priceSurveyIdToDelete = target.attr('data-id');
-            var priceSurveyItemIdToDelete = target.attr('data-item-id');
+                var priceSurveyIdToDelete = target.attr('data-id');
+                var priceSurveyItemIdToDelete = target.attr('data-item-id');
 
-            model.deleteItem(priceSurveyIdToDelete, priceSurveyItemIdToDelete);
+                model.deleteItem(priceSurveyIdToDelete, priceSurveyItemIdToDelete);
 
-            model.on('price-survey-item-deleted', function () {
-                that.$el.dialog('close').dialog('destroy').remove();
+                model.on('price-survey-item-deleted', function () {
+                    that.$el.dialog('close').dialog('destroy').remove();
 
-                that.trigger('update-list-view');
-            });
+                    that.trigger('update-list-view');
+                });
+            }
         },
 
         brandSearch: function (value) {

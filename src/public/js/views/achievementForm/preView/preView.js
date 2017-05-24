@@ -12,8 +12,9 @@ define([
     'constants/levelConfig',
     'views/achievementForm/edit',
     'models/achievementForm',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FilePreviewTemplate,
-             FileCollection, BaseView, FileDialogPreviewView, Model, LEVEL_CONFIG, EditView, AchievementFormModel) {
+             FileCollection, BaseView, FileDialogPreviewView, Model, LEVEL_CONFIG, EditView, AchievementFormModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: 'achievementForm',
@@ -78,16 +79,18 @@ define([
         },
 
         deleteAchievementForm: function () {
-            var that = this;
-            var model = new AchievementFormModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteAchievementFormReport[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new AchievementFormModel();
 
-            model.delete(this.model.get('_id'));
+                model.delete(this.model.get('_id'));
 
-            model.on('achievement-form-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('achievement-form-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {

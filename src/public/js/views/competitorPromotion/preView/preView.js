@@ -23,11 +23,12 @@ define([
     'constants/errorMessages',
     'constants/aclRoleIndexes',
     'views/competitorPromotion/edit',
-    'models/competitorPromotion'
+    'models/competitorPromotion',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService, CONTENT_TYPES,
-             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView, CompetitorPromotionModel) {
+             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView, CompetitorPromotionModel, INFO_MESSAGES) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORPROMOTION,
@@ -118,16 +119,18 @@ define([
         },
 
         deleteCompetitorPromotion: function () {
-            var  that = this;
-            var model = new CompetitorPromotionModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteCompetitorPromotionActivity[App.currentUser.currentLanguage])) {
+                var  that = this;
+                var model = new CompetitorPromotionModel();
 
-            model.delete(that.model.get('_id'));
+                model.delete(that.model.get('_id'));
 
-            model.on('competitor-promotion-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('competitor-promotion-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {

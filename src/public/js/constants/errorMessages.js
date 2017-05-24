@@ -348,6 +348,14 @@
             en: 'Description expected',
             ar: '' //todo
         },
+        enterComment : {
+            en: 'Comment expected',
+            ar: '' //todo
+        },
+        answerRequired: {
+            en: 'Answer is required',
+            ar: '' // todo
+        },
         nothingToShow : {
             en : 'Nothing to show',
             ar : '' //todo
