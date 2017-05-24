@@ -7,6 +7,7 @@ define(function (require) {
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
     var DisplayTypeCollection = require('collections/displayType/collection');
     var OriginCollection = require('collections/origin/collection');
+    var ERROR_MESSAGE = require('constants/errorMessages');
     var Template = require('text!templates/newProductLaunch/edit.html');
 
     return Backbone.View.extend({
@@ -58,6 +59,7 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var valid = true;
                             var startDate = that.$el.find('#dateStart').val();
                             var endDate = that.$el.find('#dateEnd').val();
                             var data = {
@@ -77,7 +79,50 @@ define(function (require) {
                                 },
                             };
 
-                            that.trigger('edit-new-product-lunch', data, model._id);
+                            if (data.displayType) {
+                                data.displayType = data.displayType.filter(function (item) {
+                                    return item;
+                                });
+                            }
+
+                            if (!data.packing) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.weightRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.price) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.priceRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.displayType.length) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.displayTypeRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.distributor.en && !data.distributor.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.distributorRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.additionalComment.en && !data.additionalComment.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.additionalCommentRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (valid) {
+                                that.trigger('edit-new-product-lunch', data, model._id);
+                            }
                         }
                     }
                 }
