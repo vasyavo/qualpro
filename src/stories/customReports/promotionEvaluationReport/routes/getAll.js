@@ -168,6 +168,144 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'branches',
+                    localField: 'promotion.branch',
+                    foreignField: '_id',
+                    as: 'branch',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        $let: {
+                            vars: {
+                                branch: { $arrayElemAt: ['$branch', 0] },
+                            },
+                            in: {
+                                _id: '$$branch._id',
+                                name: {
+                                    en: '$$branch.name.en',
+                                    ar: '$$branch.name.ar',
+                                },
+                                subRegion: '$$branch.subRegion',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'domains',
+                    localField: 'branch.subRegion',
+                    foreignField: '_id',
+                    as: 'subRegion',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                    },
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            },
+                            in: {
+                                _id: '$$subRegion._id',
+                                name: {
+                                    en: '$$subRegion.name.en',
+                                    ar: '$$subRegion.name.ar',
+                                },
+                                parent: '$$subRegion.parent',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'domains',
+                    localField: 'subRegion.parent',
+                    foreignField: '_id',
+                    as: 'region',
+                },
+            },
+            {
+                $addFields: {
+                    subRegion: {
+                        _id: '$subRegion._id',
+                        name: '$subRegion.name',
+                    },
+                    region: {
+                        $let: {
+                            vars: {
+                                region: { $arrayElemAt: ['$region', 0] },
+                            },
+                            in: {
+                                _id: '$$region._id',
+                                name: {
+                                    en: '$$region.name.en',
+                                    ar: '$$region.name.ar',
+                                },
+                                parent: '$$region.parent',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'domains',
+                    localField: 'region.parent',
+                    foreignField: '_id',
+                    as: 'country',
+                },
+            },
+            {
+                $addFields: {
+                    region: {
+                        _id: '$region._id',
+                        name: '$region.name',
+                    },
+                    country: {
+                        $let: {
+                            vars: {
+                                country: { $arrayElemAt: ['$country', 0] },
+                            },
+                            in: {
+                                _id: '$$country._id',
+                                name: {
+                                    en: '$$country.name.en',
+                                    ar: '$$country.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $addFields: {
+                    country: {
+                        _id: '$country._id',
+                        name: '$country.name',
+                    },
+                    location: {
+                        $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
+                    },
+                },
+            },
+            {
+                $sort: {
+                    location: 1,
+                },
+            },
+        ]);
+
         pipeline.push({
             $group: {
                 _id: null,
@@ -186,6 +324,10 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: '$setPromotions._id',
+                country: '$setPromotions.country',
+                region: '$setPromotions.region',
+                subRegion: '$setPromotions.subRegion',
+                branch: '$setPromotions.branch',
                 promotionType: '$setPromotions.promotionType',
                 comments: '$setPromotions.comments',
                 ppt: '$setPromotions.ppt',
@@ -203,15 +345,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $limit: limit,
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'promotion.branch',
-                foreignField: '_id',
-                as: 'branch',
-            },
         });
 
         pipeline.push({
@@ -236,6 +369,10 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: '$promotion._id',
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
                 promotionType: 1,
                 comments: 1,
                 ppt: 1,
@@ -246,17 +383,6 @@ module.exports = (req, res, next) => {
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
                 displayType: 1,
-                branch: {
-                    $let: {
-                        vars: {
-                            item: { $arrayElemAt: ['$branch', 0] },
-                        },
-                        in: {
-                            _id: '$$item._id',
-                            name: '$$item.name',
-                        },
-                    },
-                },
                 itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
                 itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
                 opening: '$promotion.opening',
