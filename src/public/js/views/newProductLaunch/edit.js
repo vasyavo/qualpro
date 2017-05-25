@@ -174,7 +174,9 @@ define(function (require) {
                 });
             }, this);
 
-            this.originCollection = new OriginCollection();
+            this.originCollection = new OriginCollection({
+                count: 250
+            });
             this.originCollection.on('reset', function () {
                 const defaultOrigin = [model.origin];
 
