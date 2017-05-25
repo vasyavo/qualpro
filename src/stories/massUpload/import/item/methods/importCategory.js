@@ -14,6 +14,10 @@ function* createOrUpdate(payload) {
         throw new Error(`Validation failed, Name(EN) is required.`);
     }
 
+    if (!arName) {
+        throw new Error(`Validation failed, Name(AR) is required.`);
+    }
+
     const query = {
         'name.en': enName
     };
