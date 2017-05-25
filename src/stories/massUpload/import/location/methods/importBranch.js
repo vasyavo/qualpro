@@ -101,6 +101,22 @@ function* createOrUpdate(payload) {
         throw new Error(`Validation failed, Name(EN) is required.`);
     }
 
+    if (!arName) {
+        throw new Error(`Validation failed, Name(AR) is required.`);
+    }
+
+    if (!subRegion) {
+        throw new Error(`Validation failed, Sub-Region is required.`);
+    }
+
+    if (!outlet) {
+        throw new Error(`Validation failed, Outlet is required.`);
+    }
+
+    if (!retailSegment) {
+        throw new Error(`Validation failed, Retail segment is required.`);
+    }
+
     let subRegionId;
     try {
         subRegionId = yield* getSubRegionId(subRegion);
@@ -125,6 +141,7 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en'    : enName,
+        'name.ar'    : arName,
         retailSegment: retailSegmentId,
         subRegion    : subRegionId,
         outlet       : outletId,
@@ -171,6 +188,10 @@ function* createOrUpdate(payload) {
     try {
         yield BranchModel.update(query, modify, opt);
     } catch (ex) {
+        if(ex.code === 11000){
+            throw new Error('Branch duplicates some existing branch in the database');
+        }
+
         throw ex;
     }
 }
