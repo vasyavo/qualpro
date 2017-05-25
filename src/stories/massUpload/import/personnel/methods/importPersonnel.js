@@ -8,6 +8,9 @@ const AccessRoleModel = require('../../../../../types/accessRole/model');
 const PersonnelModel = require('../../../../../types/personnel/model');
 const logger = require('../../../../../utils/logger');
 
+const phoneRegExp = /^[0-9\+]?([0-9-\s()])+[0-9()]$/;
+const emailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 function getStringForRegex(str) {
     return _.trim(_.escapeRegExp(str))
 }
@@ -267,6 +270,14 @@ function* createOrUpdate(payload) {
         throw ex;
     }
 
+    if (!enFirstName) {
+        throw new Error(`Validation failed, First Name(EN) is required.`);
+    }
+
+    if (!enLastName) {
+        throw new Error(`Validation failed, Last Name(EN) is required.`);
+    }
+
     const rawOpt = {
         firstName: {
             en: enFirstName,
@@ -284,8 +295,16 @@ function* createOrUpdate(payload) {
     }
 
     if (email) {
+        if (!emailRegExp.test(email)) {
+            throw new Error(`Validation failed, email is not valid.`);
+        }
+
         rawOpt.email = email;
         query.email = email;
+    }
+
+    if (phoneNumber && !phoneRegExp.test(phoneNumber)) {
+        throw new Error(`Validation failed, phone number is not valid.`);
     }
 
     if (!email && phoneNumber) {
