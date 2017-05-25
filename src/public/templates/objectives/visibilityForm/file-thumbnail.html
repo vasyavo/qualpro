@@ -5,7 +5,11 @@
                 <i class="remove-attachment" data-file-id="<%- _id %>">x</i>
                 <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
                     <div class="thumbnail_js thumbnailBody">
-                        <img src="<%- base64 %>" class="bannerImage mCS_img_loaded">
+                        <% if (/image/.test(fileType)) { %>
+                            <img src="<%- base64 %>" class="bannerImage mCS_img_loaded">
+                        <% } else { %>
+                            <div class="iconThumbnail video_icon"></div>
+                        <% } %>
                     </div>
                 </div>
             </div>
