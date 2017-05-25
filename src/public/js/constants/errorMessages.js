@@ -363,6 +363,10 @@
         filesNotUploaded: {
             en: 'Files not uploaded',
             ar: ''
+        },
+        visibilityFormNotLoaded: {
+            en: 'Visibility form not loaded',
+            ar: '' // todo
         }
     };
 

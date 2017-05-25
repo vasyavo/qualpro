@@ -257,7 +257,7 @@ define([
                 function (model, cb) {
                     if (context.visibilityFormData && context.visibilityFormData.files.length) {
                         var filesData = new FormData();
-                        debugger;
+
                         context.visibilityFormData.files.forEach(function (fileObj, index) {
                             filesData.append(index, fileObj.file);
                         });
