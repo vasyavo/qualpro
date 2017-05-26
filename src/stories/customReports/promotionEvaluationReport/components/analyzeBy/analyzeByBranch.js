@@ -45,7 +45,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'domains',
-            localField: 'branch.subRegion',
+            localField: 'domain.subRegion',
             foreignField: '_id',
             as: 'subRegion',
         },
@@ -143,13 +143,24 @@ module.exports = (pipeline) => {
             },
             labels: {
                 $addToSet: {
+                    _id: '$domain._id', // <-- important fix magical duplication
                     en: {
-                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$domain.name.en'],
+                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' -> ', '$domain.name.en'],
                     },
                     ar: {
-                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$domain.name.ar'],
+                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' -> ', '$domain.name.ar'],
                     },
                 },
+            },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            data: 1,
+            labels: {
+                en: 1,
+                ar: 1,
             },
         },
     });
