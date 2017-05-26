@@ -129,6 +129,20 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $addFields: {
+            location: {
+                _id: '$domain._id', // <-- important fix magical duplication
+                en: {
+                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' -> ', '$domain.name.en'],
+                },
+                ar: {
+                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' -> ', '$domain.name.ar'],
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
@@ -139,25 +153,65 @@ module.exports = (pipeline) => {
                     country: '$country',
                     region: '$region',
                     subRegion: '$subRegion',
+                    location: '$location',
                 },
             },
             labels: {
-                $addToSet: {
-                    _id: '$domain._id', // <-- important fix magical duplication
-                    en: {
-                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' -> ', '$domain.name.en'],
-                    },
-                    ar: {
-                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' -> ', '$domain.name.ar'],
-                    },
-                },
+                $addToSet: '$location',
             },
         },
     });
 
     pipeline.push({
+        $unwind: '$data',
+    });
+
+    pipeline.push({
+        $sort: {
+            'data.location.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                labels: '$labels',
+            },
+            data: { $push: '$data' },
+        },
+    });
+
+    pipeline.push({
         $project: {
+            _id: 0,
+            labels: '$_id.labels',
             data: 1,
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$labels',
+    });
+
+    pipeline.push({
+        $sort: {
+            'labels.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                data: '$data',
+            },
+            labels: { $push: '$labels' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            data: '$_id.data',
             labels: {
                 en: 1,
                 ar: 1,

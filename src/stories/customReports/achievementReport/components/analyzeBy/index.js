@@ -3,7 +3,7 @@ const analyzeByMethods = {
     country: require('./analyzeByCountry'),
     region: require('./analyzeByRegion'),
     subRegion: require('./analyzeBySubRegion'),
-    branch: require('./analyzeByBanch'),
+    branch: require('./analyzeByBranch'),
     position: require('./analyzeByPosition'),
 };
 
