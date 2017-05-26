@@ -71,6 +71,25 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $addFields: {
+            location: {
+                en: {
+                    $concat: ['$country.name.en', ' / ', '$domain.name.en'],
+                },
+                ar: {
+                    $concat: ['$country.name.ar', ' / ', '$domain.name.ar'],
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $sort: {
+            location: 1,
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
@@ -82,14 +101,7 @@ module.exports = (pipeline) => {
                 },
             },
             labels: {
-                $addToSet: {
-                    en: {
-                        $concat: ['$country.name.en', ' / ', '$domain.name.en'],
-                    },
-                    ar: {
-                        $concat: ['$country.name.ar', ' / ', '$domain.name.ar'],
-                    },
-                },
+                $addToSet: '$location',
             },
         },
     });
