@@ -21,10 +21,11 @@ define([
     'constants/levelConfig',
     'constants/aclRoleIndexes',
     'views/questionnary/editAnswer',
+    'constants/infoMessages'
 ], function (Backbone, _, $, PreViewTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
              QuestionFullAnswerTemplate, QuestionSingleSelectTemplate, QuestionMultiselectTemplate,
              Model, QuestionModel, QuestionnaryAnswerModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
-             BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG, ACL_ROLES, EditAnswerView) {
+             BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG, ACL_ROLES, EditAnswerView, INFO_MESSAGES) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.QUESTIONNARIES,
 
@@ -108,16 +109,18 @@ define([
         },
 
         deleteAnswer: function (event) {
-            var that = this;
-            var target = $(event.target);
-            var answerId = target.attr('data-id');
-            var model = new QuestionnaryAnswerModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteAnswer[App.currentUser.currentLanguage])) {
+                var that = this;
+                var target = $(event.target);
+                var answerId = target.attr('data-id');
+                var model = new QuestionnaryAnswerModel();
 
-            model.delete(answerId);
+                model.delete(answerId);
 
-            model.on('answer-deleted', function () {
-                that.$el.find('#respondent-answer-container-' + answerId).remove();
-            });
+                model.on('answer-deleted', function () {
+                    that.$el.find('#respondent-answer-container-' + answerId).remove();
+                });
+            }
         },
 
         duplicateQuestionnary: function () {

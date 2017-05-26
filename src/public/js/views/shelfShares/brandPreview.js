@@ -8,8 +8,9 @@ define([
     'constants/contentType',
     'dataService',
     'views/shelfShares/editValue',
-    'models/shelfSharesBrand'
-], function ($, _, PreviewTemplate, PreviewBodyTemplate, ShelfSharesBrandCollection, BaseView, CONTENT_TYPES, dataService, EditShelfSharesValueView, ShelfSharesBrandModel) {
+    'models/shelfSharesBrand',
+    'constants/infoMessages'
+], function ($, _, PreviewTemplate, PreviewBodyTemplate, ShelfSharesBrandCollection, BaseView, CONTENT_TYPES, dataService, EditShelfSharesValueView, ShelfSharesBrandModel, INFO_MESSAGES) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.SHELFSHARES,
 
@@ -74,20 +75,22 @@ define([
         },
 
         handleDeleteClick: function (event) {
-            var that = this;
-            var target = $(event.target);
-            var model = new ShelfSharesBrandModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteShelfShareItem[App.currentUser.currentLanguage])) {
+                var that = this;
+                var target = $(event.target);
+                var model = new ShelfSharesBrandModel();
 
-            var shelfSharesIdToDelete = target.attr('data-id');
-            var shelfSharesItemIdToDelete = target.attr('data-item-id');
+                var shelfSharesIdToDelete = target.attr('data-id');
+                var shelfSharesItemIdToDelete = target.attr('data-item-id');
 
-            model.deleteItem(shelfSharesIdToDelete, shelfSharesItemIdToDelete);
+                model.deleteItem(shelfSharesIdToDelete, shelfSharesItemIdToDelete);
 
-            model.on('shelf-shares-value-deleted', function () {
-                that.$el.find('#shelf-share-item-block-' + shelfSharesItemIdToDelete).remove();
+                model.on('shelf-shares-value-deleted', function () {
+                    that.$el.find('#shelf-share-item-block-' + shelfSharesItemIdToDelete).remove();
 
-                that.trigger('update-list-view');
-            });
+                    that.trigger('update-list-view');
+                });
+            }
         },
 
         brandSearch: function (value) {
