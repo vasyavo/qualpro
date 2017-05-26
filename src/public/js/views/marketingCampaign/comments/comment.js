@@ -17,10 +17,11 @@ define([
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
     'views/marketingCampaign/comments/edit',
+    'constants/infoMessages'
 ], function (Backbone, $, _, BaseDialog, FilePreviewTemplate, CommentViewTemplate, CommentTemplate,
              NewCommentTemplate, CommentCollection, CommentModel, FileModel, CONSTANTS,
              FileCollection, CONTENT_TYPES, ERROR_MESSAGES, FileDialogView, FileDialogPreviewView,
-             EditCommentView) {
+             EditCommentView, INFO_MESSAGES) {
 
     var CommentView = BaseDialog.extend({
         contentType        : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
@@ -69,6 +70,7 @@ define([
             this.collection.on('reset', function () {
                 self.collection.changeUrl(false);
                 self.render();
+                self.commentsCount = self.collection.length;
             });
             _.bindAll(this, 'render');
         },
@@ -81,17 +83,21 @@ define([
         },
 
         deleteComment: function (event) {
-            var that = this;
-            var target = $(event.target);
-            var commentId = target.attr('data-id');
-            var model = new CommentModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteComment[App.currentUser.currentLanguage])) {
+                var that = this;
+                var target = $(event.target);
+                var commentId = target.attr('data-id');
+                var model = new CommentModel();
 
-            model.delete(commentId);
+                model.delete(commentId);
 
-            model.on('comment-deleted', function () {
-                debugger;
-                that.$el.find('#comment-container-' + commentId).remove();
-            });
+                model.on('comment-deleted', function () {
+                    that.commentsCount--;
+
+                    that.$el.find('#comment-container-' + commentId).remove();
+                    that.trigger('comment-deleted');
+                });
+            }
         },
 
         editComment: function (event) {
@@ -321,6 +327,8 @@ define([
                         context.showFilesInComment(options);
                     }
                     context.newFileCollection = new FileCollection();
+
+                    context.commentsCount++;
                 }
             });
 
