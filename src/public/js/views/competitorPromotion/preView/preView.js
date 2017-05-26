@@ -23,11 +23,12 @@ define([
     'constants/errorMessages',
     'constants/aclRoleIndexes',
     'views/competitorPromotion/edit',
-    'models/competitorPromotion'
+    'models/competitorPromotion',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService, CONTENT_TYPES,
-             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView, CompetitorPromotionModel) {
+             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView, CompetitorPromotionModel, INFO_MESSAGES) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORPROMOTION,
@@ -88,20 +89,28 @@ define([
                 model.on('competitor-promotion-edited', function (response) {
                     var view = that.$el;
 
+                    response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
+                    response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
+                    response.expiry = moment.utc(response.expiry).format('DD.MM.YYYY');
+
+                    that.model.set(response, {
+                        merge: true
+                    });
+
                     view.find('#promotion').html(data.promotion);
                     view.find('#price').html(data.price);
                     view.find('#packing').html(data.packing);
 
                     if (data.expiry) {
-                        view.find('#expiry').html(moment(data.expiry).format('DD.MM.YYYY'));
+                        view.find('#expiry').html(moment.utc(data.expiry).format('DD.MM.YYYY'));
                     }
 
                     if (data.dateStart) {
-                        view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
                     }
 
                     if (data.dateEnd) {
-                        view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
                     }
 
                     var displayTypeString = response.displayType.map(function (item) {
@@ -118,16 +127,18 @@ define([
         },
 
         deleteCompetitorPromotion: function () {
-            var  that = this;
-            var model = new CompetitorPromotionModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteCompetitorPromotionActivity[App.currentUser.currentLanguage])) {
+                var  that = this;
+                var model = new CompetitorPromotionModel();
 
-            model.delete(that.model.get('_id'));
+                model.delete(that.model.get('_id'));
 
-            model.on('competitor-promotion-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('competitor-promotion-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {

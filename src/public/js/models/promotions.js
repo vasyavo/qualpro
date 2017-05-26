@@ -125,7 +125,6 @@ define([
             model.status.name.currentLanguage = model.status.name[currentLanguage];
             model.statusClass = status._id + 'Status';
 
-
             model.countryString = model.country ? model.country.name.currentLanguage : '';
             model.categoryString = model.category ? model.category.name.currentLanguage : '';
             model.regionString = this.modelMapper('region', model);
