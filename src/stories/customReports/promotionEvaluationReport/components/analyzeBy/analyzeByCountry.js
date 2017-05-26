@@ -36,4 +36,18 @@ module.exports = (pipeline) => {
             },
         },
     });
+
+    pipeline.push({
+        $group: {
+            _id: null,
+            data: {
+                $addToSet: {
+                    _id: '$domain._id',
+                    name: '$domain.name',
+                    count: '$count',
+                },
+            },
+            labels: { $addToSet: '$domain.name' },
+        },
+    });
 };

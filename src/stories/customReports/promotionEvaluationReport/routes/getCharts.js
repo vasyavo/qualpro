@@ -133,20 +133,6 @@ module.exports = (req, res, next) => {
         applyAnalyzeBy(pipeline, analyzeByParam);
 
         pipeline.push({
-            $group: {
-                _id: null,
-                data: {
-                    $addToSet: {
-                        _id: '$domain._id',
-                        name: '$domain.name',
-                        count: '$count',
-                    },
-                },
-                labels: { $addToSet: '$domain.name' },
-            },
-        });
-
-        pipeline.push({
             $project: {
                 barChart: {
                     data: '$data',
