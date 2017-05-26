@@ -84,12 +84,6 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
-        $sort: {
-            location: 1,
-        },
-    });
-
-    pipeline.push({
         $group: {
             _id: null,
             data: {
@@ -98,11 +92,68 @@ module.exports = (pipeline) => {
                     name: '$domain.name',
                     count: '$count',
                     country: '$country',
+                    location: '$location',
                 },
             },
             labels: {
                 $addToSet: '$location',
             },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$data',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'data.location.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                labels: '$labels',
+            },
+            data: { $push: '$data' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            labels: '$_id.labels',
+            data: 1,
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$labels',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'labels.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                data: '$data',
+            },
+            labels: { $push: '$labels' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            data: '$_id.data',
+            labels: 1,
         },
     });
 };

@@ -103,32 +103,22 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $addFields: {
-                createdBy: {
-                    user: {
-                        $let: {
-                            vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
-                            },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
-                                },
-                                position: '$$user.position',
-                            },
-                        },
-                    },
-                    date: '$createdBy.date',
-                },
+            $project: {
+                _id: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
+                category: 1,
+                publisher: { $arrayElemAt: ['$createdBy.user._id', 0] },
+                publisherPosition: { $arrayElemAt: ['$createdBy.user.position', 0] },
             },
         });
 
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
+                    publisherPosition: {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
@@ -138,26 +128,10 @@ module.exports = (req, res, next) => {
         applyAnalyzeBy(pipeline, analyzeByParam);
 
         pipeline.push({
-            $group: {
-                _id: null,
-                labels: { $addToSet: '$achievementCount' },
-                dataSets: {
-                    $push: {
-                        data: ['$achievementCount'],
-                        label: '$label',
-                    },
-                },
-            },
-        });
-
-        pipeline.push({
             $project: {
                 barChart: {
-                    dataSets: '$dataSets',
+                    data: '$data',
                     labels: '$labels',
-                },
-                pieChart: {
-                    dataSets: '$dataSets',
                 },
             },
         });
@@ -181,9 +155,7 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (response) {
-            response.barChart.labels.sort();
-        } else {
+        if (!response) {
             response = {
                 barChart: {
                     labels: [],

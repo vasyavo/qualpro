@@ -1,31 +1,53 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$createdBy.user.position',
-            achievementCount: { $sum: 1 },
-            label: { $first: '$createdBy.user.position' },
+            _id: '$publisherPosition',
+            achievement: { $first: '$_id' },
+            count: { $sum: 1 },
         },
     });
 
     pipeline.push({
         $lookup: {
             from: 'positions',
-            localField: 'label',
+            localField: '_id',
             foreignField: '_id',
-            as: 'label',
+            as: 'publisherPosition',
         },
     });
 
     pipeline.push({
-        $addFields: {
-            label: {
+        $project: {
+            _id: 1,
+            count: 1,
+            domain: {
                 $let: {
                     vars: {
-                        label: { $arrayElemAt: ['$label', 0] },
+                        publisherPosition: { $arrayElemAt: ['$publisherPosition', 0] },
                     },
-                    in: '$$label.name',
+                    in: {
+                        _id: '$$publisherPosition._id',
+                        name: {
+                            en: '$$publisherPosition.name.en',
+                            ar: '$$publisherPosition.name.ar',
+                        },
+                    },
                 },
             },
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: null,
+            data: {
+                $addToSet: {
+                    _id: '$domain._id',
+                    name: '$domain.name',
+                    count: '$count',
+                },
+            },
+            labels: { $addToSet: '$domain.name' },
         },
     });
 };

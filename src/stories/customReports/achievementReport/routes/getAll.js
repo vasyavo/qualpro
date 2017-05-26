@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
-const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
@@ -136,6 +135,144 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'branches',
+                    localField: 'branch',
+                    foreignField: '_id',
+                    as: 'branch',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        $let: {
+                            vars: {
+                                branch: { $arrayElemAt: ['$branch', 0] },
+                            },
+                            in: {
+                                _id: '$$branch._id',
+                                name: {
+                                    en: '$$branch.name.en',
+                                    ar: '$$branch.name.ar',
+                                },
+                                subRegion: '$$branch.subRegion',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'domains',
+                    localField: 'branch.subRegion',
+                    foreignField: '_id',
+                    as: 'subRegion',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                    },
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            },
+                            in: {
+                                _id: '$$subRegion._id',
+                                name: {
+                                    en: '$$subRegion.name.en',
+                                    ar: '$$subRegion.name.ar',
+                                },
+                                parent: '$$subRegion.parent',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'domains',
+                    localField: 'subRegion.parent',
+                    foreignField: '_id',
+                    as: 'region',
+                },
+            },
+            {
+                $addFields: {
+                    subRegion: {
+                        _id: '$subRegion._id',
+                        name: '$subRegion.name',
+                    },
+                    region: {
+                        $let: {
+                            vars: {
+                                region: { $arrayElemAt: ['$region', 0] },
+                            },
+                            in: {
+                                _id: '$$region._id',
+                                name: {
+                                    en: '$$region.name.en',
+                                    ar: '$$region.name.ar',
+                                },
+                                parent: '$$region.parent',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'domains',
+                    localField: 'region.parent',
+                    foreignField: '_id',
+                    as: 'country',
+                },
+            },
+            {
+                $addFields: {
+                    region: {
+                        _id: '$region._id',
+                        name: '$region.name',
+                    },
+                    country: {
+                        $let: {
+                            vars: {
+                                country: { $arrayElemAt: ['$country', 0] },
+                            },
+                            in: {
+                                _id: '$$country._id',
+                                name: {
+                                    en: '$$country.name.en',
+                                    ar: '$$country.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $addFields: {
+                    country: {
+                        _id: '$country._id',
+                        name: '$country.name',
+                    },
+                    location: {
+                        $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
+                    },
+                },
+            },
+            {
+                $sort: {
+                    location: 1,
+                },
+            },
+        ]);
 
         pipeline.push({
             $group: {

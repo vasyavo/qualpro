@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const async = require('async');
-const _ = require('lodash');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const PromotionModel = require('./../../../../types/promotion/model');
@@ -163,9 +162,9 @@ module.exports = (req, res, next) => {
         if (response) {
             response = {
                 barChart: {
-                    labels: _.sortBy(response.barChart.labels, 'en'),
+                    labels: response.barChart.labels,
                     datasets: [{
-                        data: _.sortBy(response.barChart.data, domain => domain.name.en),
+                        data: response.barChart.data,
                     }],
                 },
             };
