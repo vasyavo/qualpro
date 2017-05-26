@@ -47,32 +47,21 @@ const access = () => {
                                 cond: { $eq: ['$$item.vacation.onLeave', true] },
                             },
                         },
-                        coversWithNull: {
-                            $filter: {
-                                input: { $ifNull: ['$covers', []] },
-                                as: 'item',
-                                cond: { $and: [
-                                    { $eq: ['$$item.vacation.onLeave', true] },
-                                    { $eq: ['$$item.country', []] },
-                                ] },
-                            },
-                        },
                     },
                 },
                 {
                     $project: {
                         _id: 1,
                         accessRole: 1,
-                        coversWithNull: 1,
                         result: {
                             $reduce: {
                                 input: '$covers',
                                 initialValue: { country: '$country', branch: '$branch', subRegion: '$subRegion', region: '$region' },
                                 in: {
-                                    country: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.country' } },
-                                    branch: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.branch' } },
-                                    subRegion: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.subRegion' } },
-                                    region: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.region' } },
+                                    country: { $cond: { if: { $eq: ['$$this.country', []] }, then: [], else: {$setUnion: ['$$value.country', '$$this.country']} } },
+                                    branch: { $cond: { if: { $eq: ['$$this.branch', []] }, then: [], else: {$setUnion: ['$$value.branch', '$$this.branch']} } },
+                                    subRegion: { $cond: { if: { $eq: ['$$this.subRegion', []] }, then: [], else: {$setUnion: ['$$value.subRegion', '$$this.subRegion']} } },
+                                    region: { $cond: { if: { $eq: ['$$this.region', []] }, then: [], else: {$setUnion: ['$$value.region', '$$this.region']} } },
                                 },
                             },
                         },
