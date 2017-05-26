@@ -45,7 +45,7 @@
                     </div>
                     <%  if (permittedToEditAfterPart) { %>
                         <textarea id="after-description-text-area-<%- branch._id %>" rows="5" cols="60"><%= branch.afterDescription %></textarea>
-                        <div class="attachments-container"></div>
+                        <div class="attachments-<%- branch._id %>"></div>
                         <input id="file-input" type="file" class="hidden">
                     <% } else { %>
                         <ul class="files-container">

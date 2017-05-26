@@ -1,6 +1,7 @@
 define(function (require) {
 
     var _ = require('underscore');
+    var shortId = require('shortId');
     var Backbone = require('backbone');
     var CONSTANTS = require('constants/otherConstants');
     var ERROR_MESSAGES = require('constants/errorMessages');
@@ -35,10 +36,14 @@ define(function (require) {
             };
         },
 
+        selectedFiles: [],
+
         template: _.template(Template),
 
         events: {
             'click .select-file': 'handleSelectFileClick',
+            'change #file-input': 'handleFileSelected',
+            'click .remove-attachment': 'handleDeleteFileClick'
         },
 
         handleSelectFileClick: function (event) {
@@ -78,6 +83,19 @@ define(function (require) {
 
                 that.$el.find('.attachments-' + that.workingBranch).prepend(fileThumbnail);
             };
+        },
+
+        handleDeleteFileClick: function (event) {
+            var target = $(event.target);
+            var fileId = target.attr('data-file-id');
+            var selectedFiles = this.selectedFiles;
+
+            var fileIndex = selectedFiles.findIndex(function (item) {
+                return item._id === fileId;
+            });
+
+            selectedFiles.splice(fileIndex, 1);
+            this.$el.find('#file-thumbnail-' + fileId).remove();
         },
 
         render: function () {
@@ -189,21 +207,29 @@ define(function (require) {
                 }
             });
 
-            if (this.withoutBranches) {
-                this.model.after.files.forEach(function (item) {
-                    var fileThumbnail = _.template(FileThumbnailTemplate)({
-                        fileType: item.contentType,
-                        fileName: item.originalName,
-                        base64: item.url,
-                        _id: item._id
+            if (this.permittedToEditAfterPart) {
+                if (this.withoutBranches) {
+                    that.selectedFiles = this.model.after.files.map(function (item) {
+                        return {
+                            fileType: item.contentType,
+                            fileName: item.originalName,
+                            base64: item.url,
+                            _id: item._id,
+                            branchId: 'withoutbranch',
+                            uploaded: true
+                        };
                     });
-                    that.$el.find('.attachments-container').append(fileThumbnail);
-                });
 
-                var newFileThumbnail = _.template(NewFileThumbnailTemplate)({
-                    branchId: 'withoutbranch'
-                });
-                that.$el.find('.attachments-container').append(newFileThumbnail);
+                    that.selectedFiles.forEach(function (item) {
+                        var fileThumbnail = _.template(FileThumbnailTemplate)(item);
+                        that.$el.find('.attachments-container').append(fileThumbnail);
+                    });
+
+                    var newFileThumbnail = _.template(NewFileThumbnailTemplate)({
+                        branchId: 'withoutbranch'
+                    });
+                    that.$el.find('.attachments-withoutbranch').append(newFileThumbnail);
+                }
             }
 
             this.$el.find('.files-container').lightSlider({
