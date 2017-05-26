@@ -155,14 +155,20 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (!response) {
+        if (response) {
+            response = {
+                barChart: {
+                    labels: response.barChart.labels,
+                    datasets: [{
+                        data: response.barChart.data,
+                    }],
+                },
+            };
+        } else {
             response = {
                 barChart: {
                     labels: [],
-                    dataSets: [],
-                },
-                pieChart: {
-                    dataSets: [],
+                    datasets: [],
                 },
             };
         }
