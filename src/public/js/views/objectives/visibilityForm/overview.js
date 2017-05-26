@@ -4,6 +4,8 @@ define(function (require) {
     var shortId = require('shortId');
     var async = require('async');
     var Backbone = require('backbone');
+    var FileDialogPreview = require('views/fileDialog/fileDialog');
+    var FileModel = require('models/file');
     var dataService = require('dataService');
     var CONSTANTS = require('constants/otherConstants');
     var ERROR_MESSAGES = require('constants/errorMessages');
@@ -41,12 +43,37 @@ define(function (require) {
 
         selectedFiles: [],
 
+        arrayOfFilesPreview: [],
+
         template: _.template(Template),
 
         events: {
             'click .select-file': 'handleSelectFileClick',
             'change #file-input': 'handleFileSelected',
-            'click .remove-attachment': 'handleDeleteFileClick'
+            'click .remove-attachment': 'handleDeleteFileClick',
+            'click .file-preview': 'handleFileClick'
+        },
+
+        handleFileClick: function (event) {
+            var target = $(event.currentTarget);
+            var fileId = target.attr('data-file-id');
+
+            var fileObject = this.arrayOfFilesPreview.find(function (item) {
+                return item._id === fileId && item.uploaded;
+            });
+
+            if (fileObject) {
+                fileObject.originalName = fileObject.fileName;
+                fileObject.url = fileObject.base64;
+
+                var fileModel = new FileModel(fileObject);
+                fileModel.set('type', fileModel.getTypeFromContentType(fileObject.fileType));
+
+                new FileDialogPreview({
+                    fileModel: fileModel,
+                    translation: this.translation
+                });
+            }
         },
 
         handleSelectFileClick: function (event) {
@@ -111,12 +138,12 @@ define(function (require) {
 
                     if (fileType === 'video') {
                         return {
-                            container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                            container: '<video class="file-preview showPreview no-branches before" width="400" data-file-id="' + fileObj._id + '" controls><source src="' + fileObj.url + '"></video>',
                             fileName: fileObj.originalName
                         };
                     } else {
                         return {
-                            container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                            container: '<img class="file-preview imgResponsive showPreview no-branches before" data-file-id="' + fileObj._id + '" src="' + fileObj.url + '">',
                             fileName: fileObj.originalName
                         };
                     }
@@ -127,12 +154,12 @@ define(function (require) {
 
                     if (fileType === 'video') {
                         return {
-                            container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                            container: '<video class="file-preview showPreview no-branches before" data-file-id="' + fileObj._id + '" width="400" controls><source src="' + fileObj.url + '"></video>',
                             fileName: fileObj.originalName
                         };
                     } else {
                         return {
-                            container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                            container: '<img class="file-preview imgResponsive showPreview no-branches before" data-file-id="' + fileObj._id + '" src="' + fileObj.url + '">',
                             fileName: fileObj.originalName
                         };
                     }
@@ -152,7 +179,7 @@ define(function (require) {
                         return item.branchId === branch._id;
                     });
 
-                    branch.afterDescription = branchFromVFData.after.description;
+                    branch.afterDescription = branchFromVFData ? branchFromVFData.after.description : '';
                     branch.beforeDescription = that.beforeDescription;
 
                     branch.beforeFileContainers = branchFromVFData ? branchFromVFData.before.files.map(function (fileObj) {
@@ -160,12 +187,12 @@ define(function (require) {
 
                         if (fileType === 'video') {
                             return {
-                                container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                                container: '<video class="file-preview showPreview no-branches before" data-file-id="' + fileObj._id + '" width="400" controls><source src="' + fileObj.url + '"></video>',
                                 fileName: fileObj.originalName
                             };
                         } else {
                             return {
-                                container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                                container: '<img class="file-preview imgResponsive showPreview no-branches before" data-file-id="' + fileObj._id + '" src="' + fileObj.url + '">',
                                 fileName: fileObj.originalName
                             };
                         }
@@ -176,12 +203,12 @@ define(function (require) {
 
                         if (fileType === 'video') {
                             return {
-                                container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                                container: '<video class="file-preview showPreview no-branches before" data-file-id="' + fileObj._id + '" width="400" controls><source src="' + fileObj.url + '"></video>',
                                 fileName: fileObj.originalName
                             };
                         } else {
                             return {
-                                container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                                container: '<img class="file-preview imgResponsive showPreview no-branches before" data-file-id="' + fileObj._id + '" src="' + fileObj.url + '">',
                                 fileName: fileObj.originalName
                             };
                         }
@@ -205,6 +232,10 @@ define(function (require) {
                     save: {
                         text : that.translation.okBtn,
                         click: function () {
+                            if (!that.permittedToEditAfterPart) {
+                                return that.$el.dialog('close').dialog('destroy').remove();
+                            }
+
                             async.waterfall([
                                 function (cb) {
                                     var newSelectedFiles = that.selectedFiles.filter(function (item) {
@@ -243,57 +274,55 @@ define(function (require) {
                                 function (uploadedFilesObject, cb) {
                                     var visibilityFormRequestData = null;
 
-                                    if (uploadedFilesObject.files.length || that.selectedFiles.length) {
-                                        if (that.withoutBranches) {
-                                            var afterDescription = that.$el.find('#after-description-text-area-withoutbranch').val().trim();
-                                            var arrayOfFileId = [];
+                                    if (that.withoutBranches) {
+                                        var afterDescription = that.$el.find('#after-description-text-area-withoutbranch').val().trim();
+                                        var arrayOfFileId = [];
 
-                                            that.selectedFiles.forEach(function (item) {
-                                                if (item.uploaded) {
-                                                    arrayOfFileId.push(item._id);
-                                                }
-                                            });
-
-                                            uploadedFilesObject.files.forEach(function (item) {
+                                        that.selectedFiles.forEach(function (item) {
+                                            if (item.uploaded) {
                                                 arrayOfFileId.push(item._id);
-                                            });
+                                            }
+                                        });
 
-                                            visibilityFormRequestData = {
-                                                after: {
-                                                    files: arrayOfFileId,
-                                                    description: afterDescription
-                                                },
-                                            };
-                                        } else {
-                                            visibilityFormRequestData = {
-                                                branches: that.selectedFiles.map(function (item) {
-                                                    var afterDescription = that.$el.find('#after-description-text-area-' + item.branchId).val().trim();
-                                                    var arrayOfFilesDependsOnBranch = that.selectedFiles.filter(function (fileObj) {
-                                                        return fileObj.branchId === item.branchId;
+                                        uploadedFilesObject.files.forEach(function (item) {
+                                            arrayOfFileId.push(item._id);
+                                        });
+
+                                        visibilityFormRequestData = {
+                                            after: {
+                                                files: arrayOfFileId,
+                                                description: afterDescription
+                                            },
+                                        };
+                                    } else {
+                                        visibilityFormRequestData = {
+                                            branches: that.branches.map(function (branch) {
+                                                var afterDescription = that.$el.find('#after-description-text-area-' + branch._id).val().trim();
+                                                var arrayOfFilesDependsOnBranch = that.selectedFiles.filter(function (fileObj) {
+                                                    return fileObj.branchId === branch._id;
+                                                });
+
+                                                var arrayOfFileIds = arrayOfFilesDependsOnBranch.map(function (fileObj) {
+                                                    if (fileObj.uploaded) {
+                                                        return fileObj._id;
+                                                    }
+
+                                                    var searchedUploadedFile = uploadedFilesObject.files.find(function (obj) {
+                                                        return obj.originalName === fileObj.fileName;
                                                     });
 
-                                                    var arrayOfFileIds = arrayOfFilesDependsOnBranch.map(function (fileObj) {
-                                                        if (fileObj.uploaded) {
-                                                            return fileObj._id;
-                                                        }
+                                                    return searchedUploadedFile._id;
+                                                });
 
-                                                        var searchedUploadedFile = uploadedFilesObject.files.find(function (obj) {
-                                                            return obj.originalName === fileObj.fileName;
-                                                        });
-
-                                                        return searchedUploadedFile._id;
-                                                    });
-
-                                                    return {
-                                                        branchId: item.branchId,
-                                                        after: {
-                                                            files: arrayOfFileIds,
-                                                            description: afterDescription
-                                                        }
-                                                    };
-                                                })
-                                            };
-                                        }
+                                                return {
+                                                    branchId: branch._id,
+                                                    after: {
+                                                        files: arrayOfFileIds,
+                                                        description: afterDescription
+                                                    }
+                                                };
+                                            })
+                                        };
                                     }
 
                                     if (visibilityFormRequestData) {
@@ -304,6 +333,8 @@ define(function (require) {
                                             dataType: 'json',
                                             data: JSON.stringify(visibilityFormRequestData),
                                             success: function () {
+                                                that.trigger('visibility-form-updated', visibilityFormRequestData);
+
                                                 cb(null);
                                             },
                                             error: function () {
@@ -327,10 +358,21 @@ define(function (require) {
                     }
                 }
             });
+debugger;
+            if (this.withoutBranches) {
+                that.selectedFiles = this.model.after.files.map(function (item) {
+                    return {
+                        fileType: item.contentType,
+                        fileName: item.originalName,
+                        base64: item.url,
+                        _id: item._id,
+                        branchId: 'withoutbranch',
+                        uploaded: true
+                    };
+                });
 
-            if (this.permittedToEditAfterPart) {
-                if (this.withoutBranches) {
-                    that.selectedFiles = this.model.after.files.map(function (item) {
+                that.arrayOfFilesPreview = that.selectedFiles.concat(
+                    this.model.before.files.map(function (item) {
                         return {
                             fileType: item.contentType,
                             fileName: item.originalName,
@@ -339,19 +381,57 @@ define(function (require) {
                             branchId: 'withoutbranch',
                             uploaded: true
                         };
+                    })
+                );
+
+                that.selectedFiles.forEach(function (item) {
+                    var fileThumbnail = _.template(FileThumbnailTemplate)(item);
+                    that.$el.find('.attachments-withoutbranch').append(fileThumbnail);
+                });
+            } else {
+                this.model.branches.forEach(function (branch) {
+                    branch.after.files.forEach(function (fileObj) {
+                        that.selectedFiles.push({
+                            fileType: fileObj.contentType,
+                            fileName: fileObj.originalName,
+                            base64: fileObj.url,
+                            _id: fileObj._id,
+                            branchId: branch._id,
+                            uploaded: true
+                        });
                     });
 
-                    that.selectedFiles.forEach(function (item) {
-                        var fileThumbnail = _.template(FileThumbnailTemplate)(item);
-                        that.$el.find('.attachments-withoutbranch').append(fileThumbnail);
+                    branch.before.files.forEach(function (fileObj) {
+                        that.arrayOfFilesPreview.push({
+                            fileType: fileObj.contentType,
+                            fileName: fileObj.originalName,
+                            base64: fileObj.url,
+                            _id: fileObj._id,
+                            branchId: branch._id,
+                            uploaded: true
+                        });
                     });
+                });
 
-                    var newFileThumbnail = _.template(NewFileThumbnailTemplate)({
-                        branchId: 'withoutbranch'
-                    });
-                    that.$el.find('.attachments-withoutbranch').append(newFileThumbnail);
-                }
+                that.arrayOfFilesPreview = that.arrayOfFilesPreview.concat(that.selectedFiles);
+
+                that.selectedFiles.forEach(function (item) {
+                    var fileThumbnail = _.template(FileThumbnailTemplate)(item);
+                    that.$el.find('.attachments-' + item._id).append(fileThumbnail);
+                });
             }
+
+            var arrayOfBranchesId = this.branches.map(function (branch) {
+                return branch.name[App.currentUser.currentLanguage];
+            });
+            arrayOfBranchesId.push('withoutbranch');
+
+            arrayOfBranchesId.forEach(function (branchId) {
+                var newFileThumbnail = _.template(NewFileThumbnailTemplate)({
+                    branchId: branchId
+                });
+                that.$el.find('.attachments-' + branchId).append(newFileThumbnail);
+            });
 
             this.$el.find('.files-container').lightSlider({
                 item: 1,
@@ -359,7 +439,8 @@ define(function (require) {
                 slideMargin: 10,
                 pager: false,
                 enableDrag: false,
-                adaptiveHeight: true
+                adaptiveHeight: true,
+                enableTouch: true
             });
 
             this.delegateEvents(this.events);

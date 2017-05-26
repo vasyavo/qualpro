@@ -6,9 +6,9 @@
                 <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
                     <div class="thumbnail_js thumbnailBody">
                         <% if (/image/.test(fileType)) { %>
-                            <img src="<%- base64 %>" class="bannerImage mCS_img_loaded">
+                            <img src="<%- base64 %>" class="bannerImage mCS_img_loaded file-preview" data-file-id="<%- _id %>">
                         <% } else { %>
-                            <div class="iconThumbnail video_icon"></div>
+                            <div class="iconThumbnail video_icon file-preview" data-file-id="<%- _id %>"></div>
                         <% } %>
                     </div>
                 </div>

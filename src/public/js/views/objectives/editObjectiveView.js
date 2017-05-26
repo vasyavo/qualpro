@@ -562,11 +562,9 @@ define([
                             files: []
                         }
                     };
-                    var arrayOfUploadedFilesId = uploadedFilesObject.files.map(function (item) {
-                        return item._id;
-                    });
+                    var visibilityFormDataFiles = context.visibilityFormData ? context.visibilityFormData.files : [];
 
-                    if (uploadedFilesObject.files.length || context.visibilityFormData.files.length) {
+                    if (uploadedFilesObject.files.length || visibilityFormDataFiles.length) {
                         if (context.assigneWithoutBranches) {
                             var arrayOfFileId = [];
 
