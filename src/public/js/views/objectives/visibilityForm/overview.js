@@ -2,7 +2,9 @@ define(function (require) {
 
     var _ = require('underscore');
     var shortId = require('shortId');
+    var async = require('async');
     var Backbone = require('backbone');
+    var dataService = require('dataService');
     var CONSTANTS = require('constants/otherConstants');
     var ERROR_MESSAGES = require('constants/errorMessages');
     var FileThumbnailTemplate = require('text!templates/objectives/visibilityForm/file-thumbnail.html');
@@ -21,6 +23,7 @@ define(function (require) {
             this.withoutBranches = options.withoutBranches;
             this.beforeDescription = options.beforeDescription;
             this.permittedToEditAfterPart = options.permittedToEditAfterPart;
+            this.formId = this.model._id;
 
             this.allowedFileTypes = CONSTANTS.IMAGE_CONTENT_TYPES.concat(CONSTANTS.VIDEO_CONTENT_TYPES);
 
@@ -140,7 +143,8 @@ define(function (require) {
                     name: this.location,
                     beforeFileContainers: beforeFileContainers,
                     afterFileContainers: afterFileContainers,
-                    beforeDescription: that.beforeDescription
+                    beforeDescription: that.beforeDescription,
+                    afterDescription: that.model.after.description
                 }];
             } else {
                 branches = this.branches.map(function (branch) {
@@ -201,7 +205,124 @@ define(function (require) {
                     save: {
                         text : that.translation.okBtn,
                         click: function () {
-                            that.$el.dialog('close').dialog('destroy').remove();
+                            async.waterfall([
+                                function (cb) {
+                                    var newSelectedFiles = that.selectedFiles.filter(function (item) {
+                                        return !item.uploaded;
+                                    });
+
+                                    if (newSelectedFiles.length) {
+                                        var formData = new FormData();
+
+                                        newSelectedFiles.forEach(function (item, index) {
+                                            formData.append(index, item.file);
+                                        });
+
+                                        $.ajax({
+                                            url: '/file',
+                                            method: 'POST',
+                                            data: formData,
+                                            contentType: false,
+                                            processData: false,
+                                            success: function (response) {
+                                                cb(null, response);
+                                            },
+                                            error: function () {
+                                                App.renderErrors([
+                                                    ERROR_MESSAGES.filesNotUploaded[App.currentUser.currentLanguage]
+                                                ]);
+                                            }
+                                        });
+                                    } else {
+                                        cb(null, {
+                                            files: []
+                                        })
+                                    }
+                                },
+
+                                function (uploadedFilesObject, cb) {
+                                    var visibilityFormRequestData = null;
+
+                                    if (uploadedFilesObject.files.length || that.selectedFiles.length) {
+                                        if (that.withoutBranches) {
+                                            var afterDescription = that.$el.find('#after-description-text-area-withoutbranch').val().trim();
+                                            var arrayOfFileId = [];
+
+                                            that.selectedFiles.forEach(function (item) {
+                                                if (item.uploaded) {
+                                                    arrayOfFileId.push(item._id);
+                                                }
+                                            });
+
+                                            uploadedFilesObject.files.forEach(function (item) {
+                                                arrayOfFileId.push(item._id);
+                                            });
+
+                                            visibilityFormRequestData = {
+                                                after: {
+                                                    files: arrayOfFileId,
+                                                    description: afterDescription
+                                                },
+                                            };
+                                        } else {
+                                            visibilityFormRequestData = {
+                                                branches: that.selectedFiles.map(function (item) {
+                                                    var afterDescription = that.$el.find('#after-description-text-area-' + item.branchId).val().trim();
+                                                    var arrayOfFilesDependsOnBranch = that.selectedFiles.filter(function (fileObj) {
+                                                        return fileObj.branchId === item.branchId;
+                                                    });
+
+                                                    var arrayOfFileIds = arrayOfFilesDependsOnBranch.map(function (fileObj) {
+                                                        if (fileObj.uploaded) {
+                                                            return fileObj._id;
+                                                        }
+
+                                                        var searchedUploadedFile = uploadedFilesObject.files.find(function (obj) {
+                                                            return obj.originalName === fileObj.fileName;
+                                                        });
+
+                                                        return searchedUploadedFile._id;
+                                                    });
+
+                                                    return {
+                                                        branchId: item.branchId,
+                                                        after: {
+                                                            files: arrayOfFileIds,
+                                                            description: afterDescription
+                                                        }
+                                                    };
+                                                })
+                                            };
+                                        }
+                                    }
+
+                                    if (visibilityFormRequestData) {
+                                        $.ajax({
+                                            url: 'form/visibility/after/' + that.formId,
+                                            method: 'PATCH',
+                                            contentType: 'application/json',
+                                            dataType: 'json',
+                                            data: JSON.stringify(visibilityFormRequestData),
+                                            success: function () {
+                                                cb(null);
+                                            },
+                                            error: function () {
+                                                cb(null);
+                                            }
+                                        });
+                                    } else {
+                                        cb(null);
+                                    }
+                                }
+                            ], function (err) {
+                                if (err) {
+                                    return App.renderErrors([
+                                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage]
+                                    ]);
+                                }
+
+                                that.$el.dialog('close').dialog('destroy').remove();
+                            });
                         }
                     }
                 }
@@ -222,7 +343,7 @@ define(function (require) {
 
                     that.selectedFiles.forEach(function (item) {
                         var fileThumbnail = _.template(FileThumbnailTemplate)(item);
-                        that.$el.find('.attachments-container').append(fileThumbnail);
+                        that.$el.find('.attachments-withoutbranch').append(fileThumbnail);
                     });
 
                     var newFileThumbnail = _.template(NewFileThumbnailTemplate)({

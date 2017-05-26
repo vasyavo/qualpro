@@ -669,7 +669,7 @@ define([
                     }
 
                     $.ajax({
-                        url: 'form/visibility/before/' + form._id,
+                        url: '/form/visibility/before/' + form._id,
                         method: 'PUT',
                         contentType: 'application/json',
                         dataType: 'json',
