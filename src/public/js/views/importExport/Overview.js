@@ -15,6 +15,7 @@ define(function (require) {
         initialize: function (options) {
             this.translation = options.translation;
 
+            App.EventBus.off('import-finished');
             App.EventBus.on('import-finished', this.onImportFinished, this);
         },
 
