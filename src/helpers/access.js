@@ -47,21 +47,32 @@ const access = () => {
                                 cond: { $eq: ['$$item.vacation.onLeave', true] },
                             },
                         },
+                        coversWithNull: {
+                            $filter: {
+                                input: { $ifNull: ['$covers', []] },
+                                as: 'item',
+                                cond: { $and: [
+                                    { $eq: ['$$item.vacation.onLeave', true] },
+                                    { $eq: ['$$item.country', []] },
+                                ] },
+                            },
+                        },
                     },
                 },
                 {
                     $project: {
                         _id: 1,
                         accessRole: 1,
+                        coversWithNull: 1,
                         result: {
                             $reduce: {
                                 input: '$covers',
                                 initialValue: { country: '$country', branch: '$branch', subRegion: '$subRegion', region: '$region' },
                                 in: {
-                                    country: { $setUnion: ['$$value.country', '$$this.country'] },
-                                    branch: { $setUnion: ['$$value.branch', '$$this.branch'] },
-                                    subRegion: { $setUnion: ['$$value.subRegion', '$$this.subRegion'] },
-                                    region: { $setUnion: ['$$value.region', '$$this.region'] },
+                                    country: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.country' } },
+                                    branch: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.branch' } },
+                                    subRegion: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.subRegion' } },
+                                    region: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.region' } },
                                 },
                             },
                         },

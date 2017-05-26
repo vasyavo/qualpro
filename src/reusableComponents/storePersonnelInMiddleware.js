@@ -36,10 +36,21 @@ module.exports = (req, res, next) => {
                             cond: { $eq: ['$$item.vacation.onLeave', true] },
                         },
                     },
+                    coversWithNull: {
+                        $filter: {
+                            input: { $ifNull: ['$covers', []] },
+                            as: 'item',
+                            cond: { $and: [
+                                { $eq: ['$$item.vacation.onLeave', true] },
+                                { $eq: ['$$item.country', []] },
+                            ] },
+                        },
+                    },
                 },
             },
             {
                 $project: {
+                    coversWithNull: 1,
                     result: {
                         $reduce: {
                             input: '$covers',
@@ -57,10 +68,10 @@ module.exports = (req, res, next) => {
 
             {
                 $project: {
-                    country: '$result.country',
-                    branch: '$result.branch',
-                    subRegion: '$result.subRegion',
-                    region: '$result.region',
+                    country: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.country' } },
+                    branch: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.branch' } },
+                    subRegion: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.subRegion' } },
+                    region: { $cond: { if: { $ne: ['$coversWithNull', []] }, then: [], else: '$result.region' } },
                 },
             },
 
