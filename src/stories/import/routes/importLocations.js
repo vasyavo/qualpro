@@ -4,12 +4,20 @@ const fs = require('mz/fs');
 const importLocation = require('../../massUpload/import/location');
 const logger = require('../../../utils/logger');
 const responseSender = require('../../../utils/errorSender');
+const publishImportResult = require('../utils/publishImportResult');
 const {ALLOWED_MIME} = require('../../../constants/import');
 
 module.exports = function* importTactic(req, res, next) {
     const {
-        file
+        file,
+        query: {
+            channel
+        }
     } = req;
+
+    if (!channel) {
+        return responseSender.badRequest(next, 'Please specify chanel to subscribe');
+    }
 
     if (!file || !file.size) {
         return responseSender.badRequest(next, 'Source file is required');
@@ -19,6 +27,8 @@ module.exports = function* importTactic(req, res, next) {
         return responseSender.badRequest(next, `Invalid mime-type - ${file.mimetype}`);
     }
 
+    res.status(200).send({success: 'Ok'});
+
     const filePath = file.path;
 
     let data;
@@ -26,7 +36,9 @@ module.exports = function* importTactic(req, res, next) {
         data = yield* importLocation(filePath);
     } catch (ex) {
         logger.error(`Error to import location. Details: ${ex}`);
-        return responseSender.badRequest(next, `Error occurs while importing. ${ex}`);
+        data = {
+            rootError: `Error occurs while importing. ${ex}`,
+        }
     }
 
     try {
@@ -35,5 +47,5 @@ module.exports = function* importTactic(req, res, next) {
         logger.warn(`Error occurs while removing file: ${ex}`);
     }
 
-    res.status(200).send(data);
+    publishImportResult(channel, data);
 };

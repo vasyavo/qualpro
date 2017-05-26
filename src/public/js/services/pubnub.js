@@ -1,17 +1,18 @@
-define(function(require) {
+define(function (require) {
 
     var PubNub = require('https://cdn.pubnub.com/sdk/javascript/pubnub.4.4.0.min.js');
 
     var client = new PubNub({
         subscribeKey: PUBNUB_SUBSCRIBE_KEY,
-        ssl: true,
+        ssl         : true,
     });
 
     function subscribe(options) {
         var userId = options.userId;
+        App.currentDeviceChannel = userId + '-' + Date.now() + '-' + Math.round(Math.random() * 100000);
 
         client.subscribe({
-            channels: [userId],
+            channels: [App.currentDeviceChannel, userId],
         });
     }
 
@@ -19,14 +20,14 @@ define(function(require) {
         var userId = options.userId;
 
         client.unsubscribe({
-            channels: [userId]
+            channels: [App.currentDeviceChannel, userId]
         })
     }
 
     return {
-        client: client,
-        subscribe: subscribe,
-        unsubscribe: unsubscribe
+        client               : client,
+        subscribe            : subscribe,
+        unsubscribe          : unsubscribe
     };
 
 });
