@@ -47,6 +47,7 @@ define([
 
         initialize: function (options) {
             var currentLanguage = App.currentUser.currentLanguage;
+            this.currentLanguage = currentLanguage;
 
             this.brandingAndDisplay = options.brandingAndDisplay;
             this.translation = options.translation;
@@ -93,6 +94,21 @@ define([
             this.commentDialog = new CommentFiewDialog({
                 id         : this.brandingItemId,
                 translation: self.translation
+            });
+            this.commentDialog.on('comment-deleted', function () {
+                if (self.commentDialog.commentsCount < 1) {
+                    dataService.deleteData('/marketingCampaignItem/' + self.brandingItemId, {}, function (err) {
+                        if (err) {
+                            return App.renderErrors([
+                                ERROR_MESSAGES.somethingWentWrong[self.currentLanguage]
+                            ]);
+                        }
+
+                        self.trigger('re-render');
+                        self.$el.dialog('close').dialog('destroy').remove();
+                        self.commentDialog.$el.dialog('close').dialog('destroy').remove();
+                    });
+                }
             });
         },
 

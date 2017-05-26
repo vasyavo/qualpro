@@ -70,6 +70,7 @@ define([
             this.collection.on('reset', function () {
                 self.collection.changeUrl(false);
                 self.render();
+                self.commentsCount = self.collection.length;
             });
             _.bindAll(this, 'render');
         },
@@ -91,7 +92,10 @@ define([
                 model.delete(commentId);
 
                 model.on('comment-deleted', function () {
+                    that.commentsCount--;
+
                     that.$el.find('#comment-container-' + commentId).remove();
+                    that.trigger('comment-deleted');
                 });
             }
         },
@@ -323,6 +327,8 @@ define([
                         context.showFilesInComment(options);
                     }
                     context.newFileCollection = new FileCollection();
+
+                    context.commentsCount++;
                 }
             });
 
@@ -343,8 +349,7 @@ define([
                 }
             });
             this.files = new FileCollection(commentFiles);
-
-
+debugger;
             $formString.html(this.commentViewTemplate({
                 collection : jsonCollection,
                 translation: this.translation
