@@ -254,7 +254,7 @@ define([
                             ]);
                         }
                         var resultFileObjects = [];
-debugger;
+
                         if (response.before.files.length) {
                             resultFileObjects = response.before.files.map(function (fileObj) {
                                 return {
@@ -526,7 +526,7 @@ debugger;
                     var newFiles = (context.visibilityFormData && context.visibilityFormData.files.length) ? context.visibilityFormData.files.filter(function (fileObj) {
                         return !fileObj.uploaded;
                     }) : [];
-debugger;
+
                     if (newFiles.length) {
                         var filesData = new FormData();
 
@@ -565,7 +565,7 @@ debugger;
                     var arrayOfUploadedFilesId = uploadedFilesObject.files.map(function (item) {
                         return item._id;
                     });
-debugger;
+
                     if (uploadedFilesObject.files.length || context.visibilityFormData.files.length) {
                         if (context.assigneWithoutBranches) {
                             var arrayOfFileId = [];
@@ -627,8 +627,6 @@ debugger;
                         } else {
                             visibilityFormRequestData = {
                                 branches: context.visibilityFormData.files.map(function (item) {
-                                    var files = [];
-
                                     var arrayOfFilesDependsOnBranch = context.visibilityFormData.files.filter(function (fileObj) {
                                         return fileObj.branchId === item.branchId;
                                     });

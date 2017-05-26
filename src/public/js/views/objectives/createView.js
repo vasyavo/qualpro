@@ -298,7 +298,7 @@ define([
                         if (context.assigneWithoutBranches) {
                             visibilityFormRequestData = {
                                 before: {
-                                    files: [arrayOfUploadedFilesId]
+                                    files: arrayOfUploadedFilesId
                                 }
                             };
                         } else if (context.visibilityFormData.applyToAll) {

@@ -44,6 +44,7 @@ require.config({
         marionette : './libs/backbone.marionette/lib/backbone.marionette',
         dropzone: './libs/dropzone/dist/dropzone-amd-module',
         shortId : './libs/js-shortid/dist/js-shortid',
+        lightSlider: './libs/lightslider/dist/js/lightslider'
     },
     shim : {
         jqueryui : ['jQuery'],

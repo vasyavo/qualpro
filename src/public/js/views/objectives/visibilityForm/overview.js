@@ -1,0 +1,223 @@
+define(function (require) {
+
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var CONSTANTS = require('constants/otherConstants');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var FileThumbnailTemplate = require('text!templates/objectives/visibilityForm/file-thumbnail.html');
+    var NewFileThumbnailTemplate = require('text!templates/objectives/visibilityForm/new-file-thumbnail.html');
+    var Template = require('text!templates/objectives/visibilityForm/preview.html');
+
+    require('lightSlider');
+
+    return Backbone.View.extend({
+
+        initialize: function (options) {
+            this.translation = options.translation;
+            this.model = options.visibilityFormData;
+            this.branches = options.branches;
+            this.location = options.location;
+            this.withoutBranches = options.withoutBranches;
+            this.beforeDescription = options.beforeDescription;
+            this.permittedToEditAfterPart = options.permittedToEditAfterPart;
+
+            this.allowedFileTypes = CONSTANTS.IMAGE_CONTENT_TYPES.concat(CONSTANTS.VIDEO_CONTENT_TYPES);
+
+            this.render();
+            this.defineUIElements();
+        },
+
+        defineUIElements: function () {
+            var view = this.$el;
+
+            this.ui = {
+                fileInput: view.find('#file-input'),
+            };
+        },
+
+        template: _.template(Template),
+
+        events: {
+            'click .select-file': 'handleSelectFileClick',
+        },
+
+        handleSelectFileClick: function (event) {
+            var target = $(event.currentTarget);
+
+            this.workingBranch = target.attr('data-branch-id');
+            this.ui.fileInput.click();
+        },
+
+        handleFileSelected: function (event) {
+            var that = this;
+            var file = event.target.files[0];
+            var fileReader = new FileReader();
+
+            if (!this.allowedFileTypes.includes(file.type)) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.forbiddenTypeOfFile[App.currentUser.currentLanguage]
+                ]);
+            }
+
+            fileReader.readAsDataURL(file);
+            fileReader.onload = function(fileReaderEvent) {
+                var fileAsBase64String = fileReaderEvent.target.result;
+                var fileType = fileAsBase64String.substr(0, 10);
+                var fileObject = {
+                    _id: shortId.gen(),
+                    base64: fileAsBase64String,
+                    fileType: fileType,
+                    fileName: file.name,
+                    file: file,
+                    branchId: that.workingBranch,
+                };
+
+                that.selectedFiles.push(fileObject);
+
+                var fileThumbnail = _.template(FileThumbnailTemplate)(fileObject);
+
+                that.$el.find('.attachments-' + that.workingBranch).prepend(fileThumbnail);
+            };
+        },
+
+        render: function () {
+            var that = this;
+            var branches = [];
+
+            if (this.withoutBranches) {
+                var beforeFileContainers = this.model.before.files.map(function (fileObj) {
+                    var fileType = fileObj.contentType.substr(0, 5);
+
+                    if (fileType === 'video') {
+                        return {
+                            container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                            fileName: fileObj.originalName
+                        };
+                    } else {
+                        return {
+                            container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                            fileName: fileObj.originalName
+                        };
+                    }
+                });
+
+                var afterFileContainers = this.model.after.files.map(function (fileObj) {
+                    var fileType = fileObj.contentType.substr(0, 5);
+
+                    if (fileType === 'video') {
+                        return {
+                            container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                            fileName: fileObj.originalName
+                        };
+                    } else {
+                        return {
+                            container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                            fileName: fileObj.originalName
+                        };
+                    }
+                });
+
+                branches = [{
+                    _id: 'withoutbranch',
+                    name: this.location,
+                    beforeFileContainers: beforeFileContainers,
+                    afterFileContainers: afterFileContainers,
+                    beforeDescription: that.beforeDescription
+                }];
+            } else {
+                branches = this.branches.map(function (branch) {
+                    var branchFromVFData = that.model.branches.find(function (item) {
+                        return item.branchId === branch._id;
+                    });
+
+                    branch.afterDescription = branchFromVFData.after.description;
+                    branch.beforeDescription = that.beforeDescription;
+
+                    branch.beforeFileContainers = branchFromVFData ? branchFromVFData.before.files.map(function (fileObj) {
+                        var fileType = fileObj.contentType.substr(0, 5);
+
+                        if (fileType === 'video') {
+                            return {
+                                container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                                fileName: fileObj.originalName
+                            };
+                        } else {
+                            return {
+                                container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                                fileName: fileObj.originalName
+                            };
+                        }
+                    }) : [];
+
+                    branch.afterFileContainers = branchFromVFData ? branchFromVFData.after.files.map(function (fileObj) {
+                        var fileType = fileObj.contentType.substr(0, 5);
+
+                        if (fileType === 'video') {
+                            return {
+                                container: '<video class="showPreview no-branches before" width="400" controls><source src="' + fileObj.url + '"></video>',
+                                fileName: fileObj.originalName
+                            };
+                        } else {
+                            return {
+                                container: '<img class="imgResponsive showPreview no-branches before" src="' + fileObj.url + '">',
+                                fileName: fileObj.originalName
+                            };
+                        }
+                    }) : [];
+
+                    return branch;
+                });
+            }
+
+            var layout = this.template({
+                translation : this.translation,
+                branches: branches,
+                permittedToEditAfterPart: this.permittedToEditAfterPart
+            });
+
+            this.$el = $(layout).dialog({
+                showCancelBtn: false,
+                width        : 'auto',
+                dialogClass  : 'create-dialog visibilityFormHeight',
+                buttons      : {
+                    save: {
+                        text : that.translation.okBtn,
+                        click: function () {
+                            that.$el.dialog('close').dialog('destroy').remove();
+                        }
+                    }
+                }
+            });
+
+            if (this.withoutBranches) {
+                this.model.after.files.forEach(function (item) {
+                    var fileThumbnail = _.template(FileThumbnailTemplate)({
+                        fileType: item.contentType,
+                        fileName: item.originalName,
+                        base64: item.url,
+                        _id: item._id
+                    });
+                    that.$el.find('.attachments-container').append(fileThumbnail);
+                });
+
+                var newFileThumbnail = _.template(NewFileThumbnailTemplate)({
+                    branchId: 'withoutbranch'
+                });
+                that.$el.find('.attachments-container').append(newFileThumbnail);
+            }
+
+            this.$el.find('.files-container').lightSlider({
+                item: 1,
+                loop: true,
+                slideMargin: 10,
+                pager: false,
+                enableDrag: false,
+                adaptiveHeight: true
+            });
+
+            this.delegateEvents(this.events);
+        }
+
+    });
+
+});
