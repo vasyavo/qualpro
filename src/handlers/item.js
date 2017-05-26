@@ -164,7 +164,7 @@ const Item = function () {
         pipeLine.push({
             $project: aggregateHelper.getProjection({
                 ppt: {
-                    $divide: ['$ppt', 100]
+                    $divide: ['$ppt', 1000]
                 }
             })
         });
@@ -546,16 +546,16 @@ const Item = function () {
                 pipeLine.push({
                     $project: aggregationHelper.getProjection({
                         ppt: {
-                            $divide: ['$ppt', 100]
+                            $divide: ['$ppt', 1000]
                         },
                         pptPerCase: {
-                            $divide: ['$pptPerCase', 100]
+                            $divide: ['$pptPerCase', 1000]
                         },
                         rspMin: {
-                            $divide: ['$rspMin', 100]
+                            $divide: ['$rspMin', 1000]
                         },
                         rspMax: {
-                            $divide: ['$rspMax', 100]
+                            $divide: ['$rspMax', 1000]
                         }
                     })
                 });
@@ -678,16 +678,16 @@ const Item = function () {
                 pipeLine.push({
                     $project: aggregationHelper.getProjection({
                         ppt: {
-                            $divide: ['$ppt', 100]
+                            $divide: ['$ppt', 1000]
                         },
                         pptPerCase: {
-                            $divide: ['$pptPerCase', 100]
+                            $divide: ['$pptPerCase', 1000]
                         },
                         rspMin: {
-                            $divide: ['$rspMin', 100]
+                            $divide: ['$rspMin', 1000]
                         },
                         rspMax: {
-                            $divide: ['$rspMax', 100]
+                            $divide: ['$rspMax', 1000]
                         }
                     })
                 });

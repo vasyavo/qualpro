@@ -171,7 +171,7 @@ var ItemHistory = function () {
                 pipeLine.push({
                     $project: aggregationHelper.getProjection({
                         ppt: {
-                            $divide: ['$ppt', 100]
+                            $divide: ['$ppt', 1000]
                         }
                     })
                 });
