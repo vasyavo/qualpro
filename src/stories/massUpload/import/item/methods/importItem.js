@@ -188,6 +188,7 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en': enName,
+        country  : countryId,
     };
 
     const modify = {
