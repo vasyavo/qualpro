@@ -4,6 +4,7 @@ define(function (require) {
     var Backbone = require('backbone');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
     var AVAILABLE_CONSUMER_SURVEY_TYPES = require('constants/otherConstants').AVAILABLE_CONSUMER_SURVEY_TYPES;
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var WrapperTemplate = require('text!templates/questionnary/editAnswer/wrapper.html');
     var FullAnswerTemplate = require('text!templates/questionnary/editAnswer/full-answer.html');
     var MultiSelectAnswerTemplate = require('text!templates/questionnary/editAnswer/multi-select-answer.html');
@@ -98,15 +99,27 @@ define(function (require) {
                             var valid = false;
 
                             if (that.questionType === AVAILABLE_CONSUMER_SURVEY_TYPES.fullAnswer) {
-                                data.text = {
+                                var descriptionObj = {
                                     en: that.ui.descriptionEn.val(),
                                     ar: that.ui.descriptionAr.val(),
                                 };
-                                valid = true;
+
+                                if (descriptionObj.ar || descriptionObj.en) {
+                                    data.text = descriptionObj;
+                                    valid = true;
+                                } else {
+                                    App.renderErrors([
+                                        ERROR_MESSAGES.answerRequired[currentLanguage]
+                                    ]);
+                                }
                             } else {
                                 if (that.selectedOptions.length) {
                                     data.optionIndex = that.selectedOptions;
                                     valid = true;
+                                } else {
+                                    App.renderErrors([
+                                        ERROR_MESSAGES.answerRequired[currentLanguage]
+                                    ]);
                                 }
                             }
 

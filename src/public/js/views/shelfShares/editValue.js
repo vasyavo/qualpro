@@ -2,6 +2,7 @@ define(function (require) {
 
     var _ = require('underscore');
     var Backbone = require('backbone');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/shelfShares/edit-value.html');
 
     return Backbone.View.extend({
@@ -40,8 +41,14 @@ define(function (require) {
                         click : function () {
                             var value = that.ui.valueInput.val();
 
-                            that.trigger('new-value-submitted', value);
-                            that.$el.dialog('close').dialog('destroy').remove();
+                            if (value && value > 0 && !isNaN(Number(value))) {
+                                that.trigger('new-value-submitted', value);
+                                that.$el.dialog('close').dialog('destroy').remove();
+                            } else {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.enterCorrectValue[App.currentUser.currentLanguage]
+                                ]);
+                            }
                         }
                     }
                 }

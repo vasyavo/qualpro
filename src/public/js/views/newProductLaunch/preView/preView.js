@@ -12,9 +12,10 @@ define([
     'constants/levelConfig',
     'views/newProductLaunch/edit',
     'models/newProductLaunch',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FilePreviewTemplate,
              FileCollection, BaseView, FileDialogPreviewView,
-             CONTENT_TYPES, LEVEL_CONFIG, EditView, NewProductLaunchModel) {
+             CONTENT_TYPES, LEVEL_CONFIG, EditView, NewProductLaunchModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
@@ -61,7 +62,7 @@ define([
                     var view = that.$el;
 
                     if (data.shelfLifeStart && data.shelfLifeEnd) {
-                        view.find('#shelfLife').html(moment(data.shelfLifeStart).format('DD.MM.YYYY') + '-' + moment(data.shelfLifeEnd).format('DD.MM.YYYY'));
+                        view.find('#shelfLife').html(moment.utc(data.shelfLifeStart).format('DD.MM.YYYY') + '-' + moment.utc(data.shelfLifeEnd).format('DD.MM.YYYY'));
                     }
 
                     view.find('#packing').html(data.packing);
@@ -85,16 +86,18 @@ define([
         },
 
         deleteNewProductLaunch: function () {
-            var that = this;
-            var model = new NewProductLaunchModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteNewProductLaunch[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new NewProductLaunchModel();
 
-            model.delete(this.model.get('_id'));
+                model.delete(this.model.get('_id'));
 
-            model.on('new-product-launch-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('new-product-launch-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {

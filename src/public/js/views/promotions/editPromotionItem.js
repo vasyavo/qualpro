@@ -61,8 +61,8 @@ define(function (require) {
                                 sellIn: [ui.sellIn.val()],
                                 sellOut: [ui.sellOut.val()],
                                 closingStock: [ui.closingStock.val()],
-                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
-                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
+                                dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').toDate() : '',
+                                dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').toDate() : '',
                                 displayType: [that.$el.find('#displayTypeDd').attr('data-id')],
                                 comment: {
                                     id: ui.comment.attr('data-id'),
