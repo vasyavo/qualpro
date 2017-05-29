@@ -11379,7 +11379,7 @@ label[for=searchInputnoCT]::after {
   height: calc(100% - 160px);
 }
 .planograms .addBtn:after,
-.planograms .deleleBtn:after {
+.planograms .deleteBtn:after {
   display: inline-block;
   margin: 0 5px;
   font-family: 'icomoon';
@@ -11389,9 +11389,6 @@ label[for=searchInputnoCT]::after {
 .planograms .addBtn:after {
   content: '\e933'
 }
-.planograms .deleleBtn:after {
+.planograms .deleteBtn:after {
   content: '\e928';
-}
-.planograms .deleteBtn {
-  margin-right: 25px;
 }
