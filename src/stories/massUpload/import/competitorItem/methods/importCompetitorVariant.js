@@ -24,7 +24,7 @@ function* getCategoryId(name) {
     }
 
     if (!data) {
-        throw new Error(`Can not found sub-region: ${name}`);
+        throw new Error(`Can not found category: ${name}`);
     }
 
     return data;
