@@ -1651,17 +1651,22 @@ const Personnel = function () {
                 (personnel, cb) => {
                     async.forEachOf(personnel.covered, function (object, item, eachCb) {
                         getLocationsAndBranches(personnel.covered[item], function (err, personnelWithLoc) {
-                            personnel.country = _.union(personnel.country, personnelWithLoc.country);
-                            personnel.region = _.union(personnel.region, personnelWithLoc.region);
-                            personnel.subRegion = _.union(personnel.subRegion, personnelWithLoc.subRegion);
-                            personnel.branch = _.union(personnel.branch, personnelWithLoc.branch);
-                            personnel.retailSegment = _.union(personnel.retailSegment, personnelWithLoc.retailSegment);
-                            personnel.outlet = _.union(personnel.outlet, personnelWithLoc.outlet);
+                            if (personnel.accessRole !== 7 && personnelWithLoc.country.length) {
+                                personnel.country = (personnelWithLoc.country.length) ? _.union(personnel.country, personnelWithLoc.country) : [];
+                            }
+                            personnel.region = (personnelWithLoc.region.length) ? _.union(personnel.region, personnelWithLoc.region) : [];
+                            personnel.subRegion = (personnelWithLoc.subRegion.length) ? _.union(personnel.subRegion, personnelWithLoc.subRegion) : [];
+                            personnel.branch = (personnelWithLoc.branch.length) ? _.union(personnel.branch, personnelWithLoc.branch) : [];
+                            personnel.retailSegment = (personnelWithLoc.retailSegment.length) ? _.union(personnel.retailSegment, personnelWithLoc.retailSegment) : [];
+                            personnel.outlet = (personnelWithLoc.outlet.length) ?  _.union(personnel.outlet, personnelWithLoc.outlet) : [];
                             eachCb();
                         });
                     }, function() {
                         cb(null, personnel);
                     });
+                },
+                (personnel, cb) => {
+                    getLocationsAndBranches(personnel, cb);
                 },
 
             ], callback);
