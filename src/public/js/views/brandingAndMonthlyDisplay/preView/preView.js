@@ -84,6 +84,10 @@ define([
                 model.on('branding-and-monthly-display-edited', function (response) {
                     var view = that.$el;
 
+                    response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
+                    response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
+                    that.model.set(response, {merge: true});
+
                     if (data.dateStart) {
                         view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
                     }

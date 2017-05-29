@@ -69,6 +69,7 @@ define([
 
                 model.on('shelf-shares-value-edited', function () {
                     that.$el.find('#' + that.editableShelfSharesId).html('' + value);
+                    target.attr('data-value', value);
                     that.trigger('update-list-view');
                 });
             });

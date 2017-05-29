@@ -72,6 +72,7 @@ define([
 
                 model.on('price-survey-value-edited', function () {
                     that.$el.find('#' + that.editablePriceSurveyId).html('' + newPrice);
+                    target.attr('data-value', newPrice);
                     that.trigger('update-list-view');
                 });
             });
