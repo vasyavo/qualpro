@@ -5,9 +5,11 @@ define([
         'views/baseTopBar',
         'views/planogram/manageView',
         'constants/contentType',
+        'constants/errorMessages',
+        'dataService',
         'views/planogram/manageProductsInformation'
     ],
-    function (_, topBarTemplate, pagination, baseTopBar, manageView, CONTENT_TYPES, ManageProductsInformationView) {
+    function (_, topBarTemplate, pagination, baseTopBar, manageView, CONTENT_TYPES, ERROR_MESSAGES, dataService, ManageProductsInformationView) {
         var TopBarView = baseTopBar.extend({
             contentType       : CONTENT_TYPES.PLANOGRAM,
             template          : _.template(topBarTemplate),
@@ -24,9 +26,21 @@ define([
             },
 
             showManageProductsView: function () {
-                new ManageProductsInformationView({
-                    translation: this.translation
+                var that = this;
+
+                dataService.getData('/category', {}, function (err, response) {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage]
+                        ]);
+                    }
+
+                    new ManageProductsInformationView({
+                        translation: that.translation,
+                        categories: response
+                    });
                 });
+
                 this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
             },
 
@@ -34,6 +48,7 @@ define([
                 new manageView({
                     translation: this.translation
                 });
+
                 this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
             }, 1000, true)
         });
