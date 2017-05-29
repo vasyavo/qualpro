@@ -419,6 +419,7 @@ define([
                         arrayOfAssigneeId.includes(App.currentUser._id)
                         && [CONSTANTS.OBJECTIVE_STATUSES.IN_PROGRESS, CONSTANTS.OBJECTIVE_STATUSES.RE_OPENED].includes(modelJSON.status._id)
                         && modelJSON.objectiveType === 'individual'
+                        && App.currentUser.workAccess
                     );
 
                     self.visibilityFormPreview = new VisibilityForm({

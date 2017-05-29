@@ -358,7 +358,7 @@ define(function (require) {
                     }
                 }
             });
-debugger;
+
             if (this.withoutBranches) {
                 that.selectedFiles = this.model.after.files.map(function (item) {
                     return {
