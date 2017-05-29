@@ -45,11 +45,8 @@ define(function(require) {
                 translation: this.translation
             });
             this.preView.on('update-list-view', function () {
-                that.collection.fetch({
-                    reset: true,
-                    success: function (response) {
-                        that.showMoreContent(response);
-                    }
+                that.collection.getPage(that.collection.currentPage, {
+                    filter: that.filter,
                 });
             });
         },

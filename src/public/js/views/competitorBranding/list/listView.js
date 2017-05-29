@@ -48,11 +48,8 @@ define(function(require) {
                 self.changeCommentCount(count, $targetRow);
             });
             this.preView.on('update-list-view', function () {
-                self.collection.fetch({
-                    reset: true,
-                    success: function (response) {
-                        self.showMoreContent(response);
-                    }
+                self.collection.getPage(self.collection.currentPage, {
+                    filter: self.filter,
                 });
             });
         },
