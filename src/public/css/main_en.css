@@ -11476,3 +11476,6 @@ label[for=searchInputnoCT]::after {
 .errors-block li {
   list-style: decimal;
 }
+.other-type-description {
+  height: 30px;
+}
