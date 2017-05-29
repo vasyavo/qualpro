@@ -166,7 +166,7 @@ function* createOrUpdate(payload) {
     const modify = {
         $set: {
             packing: size,
-            origin : originId,
+            origin : [originId],
             brand  : brandId,
             variant: variantId,
             country: countryId,
