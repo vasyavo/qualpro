@@ -17,7 +17,7 @@ define([
     'helpers/implementShowHideArabicInputIn',
     'constants/otherConstants',
     'moment',
-    'views/visibilityForm/editView',
+    'views/objectives/visibilityForm/editView',
     'async',
     'constants/contentType',
     'constants/errorMessages'
@@ -64,6 +64,7 @@ define([
             this.currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
             this.files = new FileCollection();
             this.model = new Model();
+            this.assigneWithoutBranches = true;
             this.makeRender();
             this.render();
 
@@ -96,18 +97,15 @@ define([
             var self = this;
 
             this.visibilityForm = new VisibilityEditView({
-                forCreate           : true,
-                savedVisibilityModel: this.savedVisibilityModel,
-                branchName          : this.branchesForVisibility.join(', '),
-                description         : description,
-                oldAjaxObj          : this.visibilityFormAjax,
-                translation         : self.translation
+                translation : self.translation,
+                description : description[App.currentUser.currentLanguage],
+                withoutBranches: true,
+                locationString : self.locations.location,
+                initialData: this.visibilityFormData ? this.visibilityFormData : null
             });
-            this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                self.visibilityFormAjax = ajaxObj;
-                self.savedVisibilityModel = ajaxObj.model;
+            this.visibilityForm.on('save', function (data) {
+                self.visibilityFormData = data;
             });
-
         },
 
         saveObjective: function (options, cb) {
@@ -187,79 +185,123 @@ define([
                 },
 
                 function (model, cb) {
-                    var visibilityFormAjax = context.visibilityFormAjax;
-                    var VFData = null;
-                    var file = null;
+                    if (context.visibilityFormData && context.visibilityFormData.files.length) {
+                        var filesData = new FormData();
 
-                    if (visibilityFormAjax) {
-                        VFData = context.visibilityFormAjax.data;
-                    }
+                        context.visibilityFormData.files.forEach(function (fileObj, index) {
+                            filesData.append(index, fileObj.file);
+                        });
 
-                    if (VFData) {
-                        file = context.visibilityFormAjax.data.get('inputBefore');
-                    }
-
-                    if (file) {
                         $.ajax({
-                            url : '/file',
-                            method : 'POST',
-                            data : VFData,
+                            url: '/file',
+                            method: 'POST',
+                            data: filesData,
                             contentType: false,
                             processData: false,
-                            success : function (response) {
+                            success: function (response) {
                                 cb(null, model, response);
                             },
-                            error : function () {
-                                cb(true);
+                            error: function () {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.filesNotUploaded[currentLanguage]
+                                ]);
                             }
                         });
                     } else {
                         cb(null, model, {
-                            files : []
+                            files: [],
                         });
                     }
                 },
 
-                function (model, files, cb) {
-                    if (!context.visibilityFormAjax) {
+                function (model, uploadedFilesObject, cb) {
+                    var visibilityFormRequestData = {
+                        before: {
+                            files: []
+                        }
+                    };
+                    var arrayOfUploadedFilesId = uploadedFilesObject.files.map(function (item) {
+                        return item._id;
+                    });
+
+                    if (uploadedFilesObject.files.length) {
+                        if (context.assigneWithoutBranches) {
+                            visibilityFormRequestData = {
+                                before: {
+                                    files: arrayOfUploadedFilesId
+                                }
+                            };
+                        } else if (context.visibilityFormData.applyToAll) {
+                            visibilityFormRequestData = {
+                                branches: context.branchesForVisibility.map(function (item) {
+                                    return {
+                                        branchId: item._id,
+                                        before: {
+                                            files: arrayOfUploadedFilesId
+                                        },
+                                        after: {
+                                            files: [],
+                                            description: ''
+                                        }
+                                    };
+                                })
+                            };
+                        } else {
+                            visibilityFormRequestData = {
+                                branches: context.visibilityFormData.files.map(function (item) {
+                                    var files = [];
+
+                                    var arrayOfFilesDependsOnBranch = context.visibilityFormData.files.filter(function (fileObj) {
+                                        return fileObj.branchId === item.branchId;
+                                    });
+
+                                    var arrayOfFileIds = arrayOfFilesDependsOnBranch.map(function (fileObj) {
+                                        var searchedUploadedFile = uploadedFilesObject.files.find(function (obj) {
+                                            return obj.originalName === fileObj.fileName;
+                                        });
+
+                                        return searchedUploadedFile._id;
+                                    });
+
+                                    return {
+                                        branchId: item.branchId,
+                                        before: {
+                                            files: arrayOfFileIds
+                                        },
+                                        after: {
+                                            files: [],
+                                            description: ''
+                                        }
+                                    };
+                                })
+                            };
+                        }
+                    }
+
+                    var form = model.get('form');
+
+                    if (!form || !form._id || !form.contentType) {
                         return cb(null, model);
                     }
 
-                    context.visibilityFormAjax.success = function () {
-                        cb(null, model);
-                    };
+                    if (form.contentType !== 'visibility') {
+                        return cb(null, model);
+                    }
 
-                    context.visibilityFormAjax.error = function () {
-                        cb(true);
-                    };
-
-                    var form = model.get('form');
-                    var formId = form._id;
-                    var formType = form.contentType;
-
-                    context.visibilityFormAjax.url = 'form/visibility/before/' + formId;
-
-                    delete context.visibilityFormAjax.model;
-
-                    context.visibilityFormAjax.contentType = 'application/json';
-                    context.visibilityFormAjax.dataType = 'json';
-
-                    context.visibilityFormAjax.data = JSON.stringify({
-                        before : {
-                            files : files.files.map(function (item) {
-                                return item._id;
-                            })
+                    $.ajax({
+                        url: 'form/visibility/before/' + form._id,
+                        method: 'PUT',
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        data: JSON.stringify(visibilityFormRequestData),
+                        success: function () {
+                            cb(null, model);
+                        },
+                        error: function () {
+                            cb(null, model);
                         }
                     });
-
-                    if (formType === 'visibility') {
-                        $.ajax(context.visibilityFormAjax);
-                    }
-                    else {
-                        cb(null, model);
-                    }
-                }
-
+                },
             ], function (err, model) {
                 if (err) {
                     return App.render({type: 'error', message: ERROR_MESSAGES.inStoreNotSaved[currentLanguage]});
@@ -379,6 +421,7 @@ define([
             this.locations.retailSegment = data.retailSegment;
             this.locations.outlet = data.outlet;
             this.locations.branch = data.branch;
+            this.locations.location = data.location;
 
             this.branchesForVisibility = _.filter(this.branchesForVisibility, function (branch) {
                 return self.locations.branch.indexOf(branch._id) !== -1;
