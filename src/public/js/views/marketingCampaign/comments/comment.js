@@ -117,6 +117,7 @@ define([
 
                 model.on('comment-edited', function () {
                     that.$el.find('#comment-body-' + commentId).html(newCommentBody);
+                    target.attr('data-body', newCommentBody);
 
                     that.editCommentView.$el.dialog('close').dialog('destroy').remove();
                 });

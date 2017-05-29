@@ -55,10 +55,14 @@ define([
 
                 model.edit(achievementFormId, data);
 
-                model.on('achievement-form-edited', function () {
+                model.on('achievement-form-edited', function (response) {
                     var view = that.$el;
                     var startDate = data.startDate;
                     var endDate = data.endDate;
+
+                    response.startDate = moment.utc(response.startDate).format('DD.MM.YYYY');
+                    response.endDate = moment.utc(response.endDate).format('DD.MM.YYYY');
+                    that.model.set(response, {merge: true});
 
                     if (startDate) {
                         view.find('#date-start').html(moment.utc(startDate).format('DD.MM.YYYY'));
