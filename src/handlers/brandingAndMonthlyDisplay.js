@@ -898,6 +898,9 @@ const getAll = (req, res, next) => {
 
         const getCount = (cb) => {
             BrandingAndMonthlyDisplayModel.aggregate()
+                .append({
+                    $match: $generalMatch,
+                })
                 .append(condition.formCondition)
                 .lookup({
                     from: `${CONTENT_TYPES.PERSONNEL}s`,
