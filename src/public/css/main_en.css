@@ -11495,3 +11495,18 @@ label[for=searchInputnoCT]::after {
   padding: 0 5px;
   cursor: pointer;
 }
+.visibility-outlet-item {
+  overflow: hidden;
+  border-bottom: 1px solid #e2e2e2;
+  margin-bottom: 10px;
+}
+.add-attachment {
+  display: inline-block;
+  padding: 25px;
+  box-shadow: 0 0 8px 3px #e2e2e2;
+  margin-bottom: 10px;
+  margin-left: 5px;
+}
+.apply-to-all {
+  padding: 0 20px;
+}
