@@ -1,0 +1,37 @@
+<div class="form-holder">
+    <div class="title">
+        <h3><%- translation.editCommentViewTitle %></h3>
+    </div>
+    <div class="shelfShareDialog">
+        <table>
+            <colgroup>
+                <col width="250px">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th><%- translation.comment %></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="1" class="colspanFix">
+                        <div class="scrollable">
+                            <table class="list">
+                                <colgroup>
+                                    <col width="250px">
+                                </colgroup>
+                                <tbody id="mainContent" class="shelfShareTableBody">
+                                    <tr>
+                                        <td>
+                                            <textarea id="new-comment-body" cols="120" rows="10"><%- initialValue %></textarea>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

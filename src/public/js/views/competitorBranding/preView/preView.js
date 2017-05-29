@@ -2,6 +2,7 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/competitorBranding/preview.html',
     'text!templates/file/preView.html',
     'text!templates/objectives/comments/comment.html',
@@ -19,11 +20,14 @@ define([
     'constants/contentType',
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
-    'constants/errorMessages'
-], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+    'constants/errorMessages',
+    'views/competitorBranding/edit',
+    'models/competitorBranding',
+    'constants/infoMessages'
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, CompetitorBrandingModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORBRANDING,
@@ -49,7 +53,9 @@ define([
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
-            'click #goToBtn'                  : 'goTo'
+            'click #goToBtn'                  : 'goTo',
+            'click #edit' : 'showEditView',
+            'click #delete' : 'deleteCompetitorBranding'
         },
 
         initialize: function (options) {
@@ -62,6 +68,59 @@ define([
 
             this.makeRender();
             this.render();
+        },
+
+        showEditView: function () {
+            var that = this;
+
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-competitor-branding-item', function (data, competitorBrandingId) {
+                var model = new CompetitorBrandingModel();
+
+                model.edit(competitorBrandingId, data);
+
+                model.on('competitor-branding-edited', function (response) {
+                    var view = that.$el;
+
+                    if (data.dateStart) {
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateEnd) {
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
+                    }
+
+                    var displayTypeString = response.displayType.map(function (item) {
+                        return item.name[App.currentUser.currentLanguage];
+                    }).join(', ');
+
+                    view.find('#display-type').html(displayTypeString);
+                    view.find('#description').html(data.description[App.currentUser.currentLanguage]);
+
+                    that.trigger('update-list-view');
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+                });
+            });
+        },
+
+        deleteCompetitorBranding: function () {
+            if (confirm(INFO_MESSAGES.confirmDeleteCompetitorBrandingAndDisplay[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new CompetitorBrandingModel();
+
+                model.delete(this.model.get('_id'));
+
+                model.on('competitor-branding-deleted', function () {
+                    that.trigger('update-list-view');
+
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -342,7 +401,13 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var currentConfig = this.activityList ? levelConfig[this.contentType].activityList.preview : [];
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = levelConfig[this.contentType].activityList.preview;
+            } else {
+                currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
 
             formString = this.$el.html(this.template({
                 jsonModel : jsonModel,
@@ -385,7 +450,7 @@ define([
                 }
             });
 
-            if (App.currentUser.workAccess && this.activityList) {
+            if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template

@@ -19,6 +19,7 @@ define([
         status             : 'Status',
         opening            : 'Opening',
         sellIn             : 'Sell In',
+        openingStock       : 'Opening Stock',
         clothingStock      : 'Closing Stock',
         sellOut            : 'Sell Out',
         comment            : 'Comment',
@@ -45,6 +46,7 @@ define([
         saveBtn            : 'Save',
         duplicatePromotion : 'Duplicate Promotion',
         editPromotion      : 'Edit Promotion',
+        editPromotionItem : 'Edit Promotion Item',
         // preview
         okBtn              : 'Ok',
         preViewTitle       : 'View Promotion',
@@ -68,6 +70,7 @@ define([
             en: 'Add arabic translation',
             ar: 'Add english translation'
         },
+        options: 'Options',
 
         dialogTitle: 'Promotion files',
         attachBtn  : 'Attach',

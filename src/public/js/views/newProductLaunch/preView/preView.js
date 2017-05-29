@@ -2,15 +2,20 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/newProductLaunch/preview.html',
     'text!templates/file/preView.html',
     'collections/file/collection',
     'views/baseDialog',
     'views/fileDialog/fileDialog',
     'constants/contentType',
-    'constants/levelConfig'
-], function (Backbone, _, $, PreviewTemplate, FilePreviewTemplate,
-             FileCollection, BaseView, FileDialogPreviewView, CONTENT_TYPES, LEVEL_CONFIG) {
+    'constants/levelConfig',
+    'views/newProductLaunch/edit',
+    'models/newProductLaunch',
+    'constants/infoMessages'
+], function (Backbone, _, $, moment, PreviewTemplate, FilePreviewTemplate,
+             FileCollection, BaseView, FileDialogPreviewView,
+             CONTENT_TYPES, LEVEL_CONFIG, EditView, NewProductLaunchModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
@@ -22,6 +27,8 @@ define([
             'click .masonryThumbnail': 'showFilePreviewDialog',
             'click #downloadFile'    : 'stopPropagation',
             'click #goToBtn'         : 'goTo',
+            'click #edit' : 'showEditView',
+            'click #delete' : 'deleteNewProductLaunch',
         },
 
         initialize: function (options) {
@@ -35,6 +42,62 @@ define([
 
             self.makeRender();
             self.render();
+        },
+
+        showEditView: function () {
+            var that = this;
+
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-new-product-lunch', function (data, newProductLaunchId) {
+                var currentLanguage = App.currentUser.currentLanguage;
+                var model = new NewProductLaunchModel();
+
+                model.edit(newProductLaunchId, data);
+
+                model.on('new-product-launch-edited', function (response) {
+                    var view = that.$el;
+
+                    if (data.shelfLifeStart && data.shelfLifeEnd) {
+                        view.find('#shelfLife').html(moment.utc(data.shelfLifeStart).format('DD.MM.YYYY') + '-' + moment.utc(data.shelfLifeEnd).format('DD.MM.YYYY'));
+                    }
+
+                    view.find('#packing').html(data.packing);
+                    view.find('#price').html(data.price);
+                    view.find('#additionalComment').html(data.additionalComment[currentLanguage]);
+                    view.find('#distributor').html(data.distributor[currentLanguage]);
+
+                    var displayTypeString = response.displayType.map(function (item) {
+                        return item.name[App.currentUser.currentLanguage];
+                    }).join(', ');
+                    view.find('#displayType').html(displayTypeString);
+
+                    var originString = response.origin.name[currentLanguage];
+                    view.find('#origin').html(originString);
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('update-list-view');
+                });
+            });
+        },
+
+        deleteNewProductLaunch: function () {
+            if (confirm(INFO_MESSAGES.confirmDeleteNewProductLaunch[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new NewProductLaunchModel();
+
+                model.delete(this.model.get('_id'));
+
+                model.on('new-product-launch-deleted', function () {
+                    that.trigger('update-list-view');
+
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -80,7 +143,13 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview;
+            } else {
+                currentConfig = LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level] ? LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
 
             formString = this.$el.html(this.template({
                 model      : jsonModel,
@@ -120,7 +189,7 @@ define([
                 }
             });
 
-            if (App.currentUser.workAccess && this.activityList) {
+            if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template

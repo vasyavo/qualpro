@@ -1,5 +1,23 @@
 const Schema = require('mongoose').Schema;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType');
+const {
+    TARGET,
+    SALARY,
+    OUT_OF_STOCK,
+    NEW_ARRIVALS,
+    ANNUAL_LEAVE,
+    NEAR_EXPIRY_PRODUCTS,
+    OTHER
+} = require('../../constants/notificationTypes');
+const notificationTypes = [
+    TARGET,
+    SALARY,
+    OUT_OF_STOCK,
+    NEW_ARRIVALS,
+    ANNUAL_LEAVE,
+    NEAR_EXPIRY_PRODUCTS,
+    OTHER
+];
 
 const ObjectId = Schema.Types.ObjectId;
 
@@ -88,6 +106,15 @@ const schema = new Schema({
             default: Date.now,
         },
     },
+    type: {
+        type    : String,
+        enum    : notificationTypes,
+        required: true
+    },
+    typeDescription: {
+        type   : String,
+        default: '',
+    }
 }, {
     autoIndex: false,
     collection: CONTENT_TYPES.NOTIFICATIONS,

@@ -47,6 +47,14 @@ define(function(require) {
             this.preView.on('modelChanged', function (count) {
                 self.changeCommentCount(count, $targetRow);
             });
+            this.preView.on('update-list-view', function () {
+                self.collection.fetch({
+                    reset: true,
+                    success: function (response) {
+                        self.showMoreContent(response);
+                    }
+                });
+            });
         },
 
         changeCommentCount: function (count, $targetRow) {

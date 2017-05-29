@@ -1,5 +1,6 @@
 const async = require('async');
 const _ = require('lodash');
+const logger = require('../../../utils/logger');
 const ActivityLog = require('./../../push-notifications/activityLog');
 const access = require('../../../helpers/access')();
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
@@ -8,6 +9,7 @@ const ACL_MODULES = require('../../../constants/aclModulesNames');
 const FilterMapper = require('../../../helpers/filterMapper');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
 const PriceSurveyModel = require('./../../../types/priceSurvey/model');
+const EventModel = require('./../../../types/event/model');
 const bodyValidator = require('../../../helpers/bodyValidator');
 const ObjectId = require('mongoose').Types.ObjectId;
 
@@ -398,6 +400,152 @@ const create = (req, res, next) => {
     });
 };
 
+const update = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const requestBody = req.body;
+    const id = req.params.id;
+    const itemId = req.params.itemId;
+
+    const queryRun = (body, callback) => {
+        async.waterfall([
+            (cb) => {
+                PriceSurveyModel.findOne({ _id : id }).lean().exec(cb);
+            },
+            (model) => {
+                if (model && model.items) {
+                    model.items.forEach((item) => {
+                        if (item._id.toString() === itemId) {
+                            item.price = _.escape(body.price)
+                        }
+                    });
+
+                    const data = {
+                        items : model.items,
+                        editedBy: {
+                            user: userId,
+                            date: new Date()
+                        }
+                    };
+                    PriceSurveyModel.findByIdAndUpdate(id, data, { new: true }, callback)
+                }
+            },
+        ]);
+    };
+
+    async.waterfall([
+
+        (cb) => {
+            access.getEditAccess(req, ACL_MODULES.PRICE_SURVEY, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.PRICESURVEY, 'update', cb);
+        },
+
+        (body, cb) => {
+            queryRun(body, cb);
+        },
+
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+
+        res.status(200).send(body);
+    });
+};
+
+const removeItem = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const requestBody = req.body;
+    const id = req.params.id;
+    const itemId = req.params.itemId;
+
+    const queryRun = (callback) => {
+        async.waterfall([
+
+            (cb) => {
+                PriceSurveyModel.findOne({ _id : id }).lean().exec(cb);
+            },
+            (model, cb) => {
+                if (model && model.items) {
+                    let removeItem;
+                    const priceItems = model.items.filter((item) => {
+                        if (item._id.toString() !== itemId) {
+                            return item;
+                        } else {
+                            removeItem = item;
+                        }
+                    });
+
+                    const data = {
+                        items : priceItems,
+                        editedBy: {
+                            user: userId,
+                            date: new Date()
+                        }
+                    };
+                    cb(null, removeItem, data);
+                }
+            },
+            (removeItem, data, cb) => {
+                const eventModel = new EventModel();
+                const options = {
+                    headers: {
+                        contentType: "PriceSurvey",
+                        actionType : "remove",
+                        user       : userId,
+                        reportId   : id
+                    },
+                    payload: removeItem
+                };
+                eventModel.set(options);
+                eventModel.save((err, model) => {
+                    cb(null, err, model, data);
+                });
+            },
+            (err, model, data) => {
+                if (err) {
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+
+                    return logger.error(err);
+                }
+
+                PriceSurveyModel.findByIdAndUpdate(id, data, { new: true }, callback)
+            },
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+    
+            res.status(200).send(body);
+        });
+    };
+
+    async.waterfall([
+
+        (cb) => {
+            access.getArchiveAccess(req, ACL_MODULES.PRICE_SURVEY, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            queryRun(cb);
+        }
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+
+        res.status(200).send(body);
+    });
+};
+
 const getAll = (req, res, next) => {
     function queryRun(personnel) {
         var query = req.query;
@@ -653,7 +801,8 @@ const getAll = (req, res, next) => {
                     categoryId: '$category._id',
                     variantId: '$variant._id',
                     branchId: '$branch._id',
-                    size: '$size'
+                    size: '$size',
+                    price: '$price',
                 },
 
                 currency: { $first: '$currency' },
@@ -677,6 +826,7 @@ const getAll = (req, res, next) => {
                 variant: 1,
                 branch: 1,
                 size: 1,
+                price: '$_id.price',
                 minPrice: 1,
                 maxPrice: 1,
                 avgPrice: 1,
@@ -703,6 +853,7 @@ const getAll = (req, res, next) => {
                 variant: '$data.variant',
                 branch: '$data.branch',
                 size: '$data.size',
+                price: '$data.price',
                 minPrice: '$data.minPrice',
                 maxPrice: '$data.maxPrice',
                 avgPrice: '$data.avgPrice',
@@ -736,6 +887,7 @@ const getAll = (req, res, next) => {
                 },
                 branchCount: { $sum: 1 },
                 totalMinPrice: { $min: '$minPrice' },
+                arrayOfPrice: { $push: '$price' },
                 totalMaxPrice: { $max: '$maxPrice' },
                 totalAvgPrice: { $avg: '$avgPrice' },
                 currency: { $first: '$currency' },
@@ -751,6 +903,7 @@ const getAll = (req, res, next) => {
                 variant: 1,
                 branches: 1,
                 size: 1,
+                arrayOfPrice: 1,
                 totalMinPrice: 1,
                 totalMaxPrice: 1,
                 totalAvgPrice: 1,
@@ -774,6 +927,7 @@ const getAll = (req, res, next) => {
                         variant: '$variant',
                         branches: '$branches',
                         size: '$size',
+                        arrayOfPrice: '$arrayOfPrice',
                         totalMinPrice: '$totalMinPrice',
                         totalMaxPrice: '$totalMaxPrice',
                         totalAvgPrice: '$totalAvgPrice',
@@ -870,6 +1024,22 @@ const getAll = (req, res, next) => {
 
             response = response && response[0] ? response[0] : { data: [], total: 0 };
 
+            response.data.map(function (priceSurvey) {
+                return priceSurvey.brands.map(function (brand) {
+                    return brand.variants.map(function (variant) {
+                        variant.arrayOfPrice = variant.arrayOfPrice.sort(function(a, b) { return a - b; });
+                        const half = Math.floor(variant.arrayOfPrice.length / 2);
+
+                        if (variant.arrayOfPrice.length % 2) {
+                            variant.totalMedPrice = variant.arrayOfPrice[half];
+                        } else {
+                            variant.totalMedPrice = (variant.arrayOfPrice[half - 1] + variant.arrayOfPrice[half]) / 2.0;
+                        }
+
+                        return variant;
+                    });
+                });
+            });
 
             // res.status(200).send(response);
 
@@ -983,6 +1153,7 @@ const getBrands = (req, res, next) => {
             isArray: false,
             includeSiblings: {
                 items: {
+                    _id: 1,
                     brand: 1,
                     price: 1,
                     size: 1
@@ -1174,4 +1345,6 @@ module.exports = {
     getAll,
     getBrands,
     getById,
+    update,
+    removeItem
 };

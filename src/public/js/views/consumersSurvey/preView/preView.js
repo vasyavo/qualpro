@@ -14,17 +14,21 @@ define([
     'text!templates/consumersSurvey/questionMultiselect.html',
     'models/consumersSurvey',
     'models/question',
+    'models/consumersSurveyAnswer',
     'collections/consumersSurvey/questionCollection',
     'collections/consumersSurveyAnswers/collection',
     'constants/otherConstants',
     'views/baseDialog',
     'constants/contentType',
     'd3',
-    'constants/levelConfig'
+    'constants/levelConfig',
+    'constants/aclRoleIndexes',
+    'views/questionnary/editAnswer',
+    'constants/infoMessages'
 ], function (Backbone, _, $, lodash, moment, PreViewTemplate, npsQuestionTemplate, QuestionListTemplate, RespondentsListTemplate, RespondentsFullListTemplate,
              QuestionFullAnswerTemplate, QuestionSingleSelectTemplate, QuestionMultiselectTemplate,
-             Model, QuestionModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
-             BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG) {
+             Model, QuestionModel, QuestionAnswerModel, QuestionCollection, QuestionnaryAnswersCollection, OTHER_CONSTANTS,
+             BaseView, CONTENT_TYPES, d3, LEVEL_CONFIG, ACL_ROLES, EditAnswerView, INFO_MESSAGES) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.CONSUMER_SURVEY,
 
@@ -44,7 +48,9 @@ define([
             'click #edit'                                : 'editQuestionnary',
             'keyup #searchInput'                         : 'searchData',
             'keyup #respondentSearchInput'               : 'respondentSearchData',
-            'click #goToBtn'                             : 'goTo'
+            'click #goToBtn'                             : 'goTo',
+            'click .edit-answer': 'showEditAnswerView',
+            'click .delete-answer': 'deleteAnswer',
         },
 
         initialize: function (options) {
@@ -65,6 +71,59 @@ define([
                 this.renderFullRespondentsList();
                 this.respondentClick({}, $curEl.find('#respondentsFullList .questionsList:first'));
             }, this);
+        },
+
+        showEditAnswerView: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var customer = target.attr('data-customer-name');
+            var selectedQuestionId = target.attr('data-question-id') || this.answersCollection.questionId;
+            var selectedQuestion = this.model.get('questions').find(function (item) {
+                return item._id === selectedQuestionId;
+            });
+
+            var answerForQuestion = this.answersCollection.findWhere(function (model) {
+                return model.get('questionId') === selectedQuestionId && model.get('customer').name === customer;
+            });
+            answerForQuestion = answerForQuestion.toJSON();
+
+            this.editAnswerView = new EditAnswerView({
+                translation: this.translation,
+                questionType: selectedQuestion.type._id || selectedQuestion.type,
+                questionOptions: selectedQuestion.options,
+                questionText: selectedQuestion.title.currentLanguage,
+                selectedOptionIndexes: answerForQuestion.optionIndex,
+                fullAnswer: answerForQuestion.text,
+            });
+            this.editAnswerView.on('edit-answer', function (data) {
+                var model = new QuestionAnswerModel();
+
+                model.edit(answerForQuestion._id, data);
+
+                model.on('answer-edited', function () {
+                    that.editAnswerView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('re-render', answerForQuestion.questionnaryId);
+                    that.trigger('update-list-view');
+
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            });
+        },
+
+        deleteAnswer: function (event) {
+            if (confirm(INFO_MESSAGES.confirmDeleteAnswer[App.currentUser.currentLanguage]))  {
+                var that = this;
+                var target = $(event.target);
+                var answerId = target.attr('data-id');
+                var model = new QuestionAnswerModel();
+
+                model.delete(answerId);
+
+                model.on('answer-deleted', function () {
+                    that.$el.find('#respondent-answer-container-' + answerId).remove();
+                });
+            }
         },
 
         duplicateQuestionnary: function () {
@@ -323,6 +382,7 @@ define([
 
         renderRespondentsQuestions: function () {
             var self = this;
+            var currentUserAccessRole = App.currentUser.accessRole.level;
             var $respondentsList = this.$el.find('#questionFullList');
             var answers = this.answersCollection.getSelected({
                 modelKey: 'selectedForPersonnel'
@@ -343,30 +403,47 @@ define([
 
                 respondentQuestion = _.clone(respondentQuestion);
 
+                var templateOptions = {
+                    question     : respondentQuestion,
+                    answerIndexes: respondentAnswerOptionsIndexes,
+                    translation  : self.translation,
+                    customerName: respondentAnswer.customer.name,
+                    answerId: respondentAnswer._id,
+                    allowEdit: false,
+                };
+
+                var fullAnswerTemplateOptions = {
+                    question   : respondentQuestion,
+                    answerText : respondentAnswerText,
+                    translation: self.translation,
+                    answerId: respondentAnswer._id,
+                    customerName: respondentAnswer.customer.name,
+                    allowEdit: false,
+                };
+
+                var npsAnswerTemplateOptions = {
+                    question     : respondentQuestion,
+                    answerIndexes: respondentAnswerOptionsIndexes,
+                    translation  : self.translation,
+                    answerId: respondentAnswer._id,
+                    customerName: respondentAnswer.customer.name,
+                    allowEdit: false,
+                };
+
+                if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
+                    templateOptions.allowEdit = true;
+                    fullAnswerTemplateOptions.allowEdit = true;
+                    npsAnswerTemplateOptions.allowEdit = true;
+                }
+
                 if (respondentQuestion.type._id === 'multiChoice') {
-                    $respondentsList.append(self.questionMultiselectTemplate({
-                        question     : respondentQuestion,
-                        answerIndexes: respondentAnswerOptionsIndexes,
-                        translation  : self.translation
-                    }));
+                    $respondentsList.append(self.questionMultiselectTemplate(templateOptions));
                 } else if (respondentQuestion.type._id === 'singleChoice') {
-                    $respondentsList.append(self.questionSingleSelectTemplate({
-                        question     : respondentQuestion,
-                        answerIndexes: respondentAnswerOptionsIndexes,
-                        translation  : self.translation
-                    }));
+                    $respondentsList.append(self.questionSingleSelectTemplate(templateOptions));
                 } else if (respondentQuestion.type._id === 'fullAnswer') {
-                    $respondentsList.append(self.questionFullAnswerTemplate({
-                        question   : respondentQuestion,
-                        answerText : respondentAnswerText,
-                        translation: self.translation
-                    }));
+                    $respondentsList.append(self.questionFullAnswerTemplate(fullAnswerTemplateOptions));
                 } else if (respondentQuestion.type === 'NPS') {
-                    $respondentsList.append(self.npsQuestionTemplate({
-                        question     : respondentQuestion,
-                        answerIndexes: respondentAnswerOptionsIndexes,
-                        translation  : self.translation
-                    }));
+                    $respondentsList.append(self.npsQuestionTemplate(npsAnswerTemplateOptions));
                 }
             });
         },
@@ -445,22 +522,30 @@ define([
 
         renderRespondents: function () {
             var self = this;
+            var currentUserAccessRole = App.currentUser.accessRole.level;
             var $respondentsList = this.$el.find('#respondentsList');
             var answers = this.answersCollection.getSelected({modelKey: 'selected'});
             var respondentList = '';
             var questions = this.model.get('questions');
             var question = _.findWhere(questions, {_id: self.answersCollection.questionId});
+            var templateOptions = {
+                question   : question,
+                translation: self.translation,
+                allowEdit: false,
+            };
+
+            if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
+                templateOptions.allowEdit = true;
+            }
 
             $respondentsList.html('');
 
             answers.forEach(function (answer) {
                 answer.location = self.setLocation(answer);
 
-                respondentList += self.respondentsListTemplate({
-                    answer     : answer,
-                    question   : question,
-                    translation: self.translation
-                });
+                templateOptions.answer = answer;
+
+                respondentList += self.respondentsListTemplate(templateOptions);
             });
 
             $respondentsList.append(respondentList);

@@ -2,15 +2,19 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/achievementForm/preview.html',
     'text!templates/file/preView.html',
     'collections/file/collection',
     'views/baseDialog',
     'views/fileDialog/fileDialog',
     'models/achievementForm',
-    'constants/levelConfig'
-], function (Backbone, _, $, PreviewTemplate, FilePreviewTemplate,
-             FileCollection, BaseView, FileDialogPreviewView, Model, LEVEL_CONFIG) {
+    'constants/levelConfig',
+    'views/achievementForm/edit',
+    'models/achievementForm',
+    'constants/infoMessages'
+], function (Backbone, _, $, moment, PreviewTemplate, FilePreviewTemplate,
+             FileCollection, BaseView, FileDialogPreviewView, Model, LEVEL_CONFIG, EditView, AchievementFormModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: 'achievementForm',
@@ -21,7 +25,9 @@ define([
         events: {
             'click .fileThumbnailItem': 'showFilePreviewDialog',
             'click #downloadFile'     : 'stopPropagation',
-            'click #goToBtn'          : 'goTo'
+            'click #goToBtn'          : 'goTo',
+            'click #edit' : 'showEditView',
+            'click #delete' : 'deleteAchievementForm',
         },
 
         initialize: function (options) {
@@ -34,6 +40,57 @@ define([
 
             self.makeRender();
             self.render();
+        },
+
+        showEditView: function () {
+            var that = this;
+
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-achievement-form-item', function (data, achievementFormId) {
+                var model = new AchievementFormModel();
+
+                model.edit(achievementFormId, data);
+
+                model.on('achievement-form-edited', function () {
+                    var view = that.$el;
+                    var startDate = data.startDate;
+                    var endDate = data.endDate;
+
+                    if (startDate) {
+                        view.find('#date-start').html(moment.utc(startDate).format('DD.MM.YYYY'));
+                    }
+
+                    if (endDate) {
+                        view.find('#date-end').html(moment.utc(endDate).format('DD.MM.YYYY'));
+                    }
+
+                    view.find('#description').html(data.description[App.currentUser.currentLanguage]);
+                    view.find('#additionalComment').html(data.additionalComment[App.currentUser.currentLanguage]);
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('update-list-view');
+                });
+            });
+        },
+
+        deleteAchievementForm: function () {
+            if (confirm(INFO_MESSAGES.confirmDeleteAchievementFormReport[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new AchievementFormModel();
+
+                model.delete(this.model.get('_id'));
+
+                model.on('achievement-form-deleted', function () {
+                    that.trigger('update-list-view');
+
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -80,7 +137,13 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview;
+            } else {
+                currentConfig = LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level] ? LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
 
             formString = this.$el.html(this.template({model: jsonModel, translation: this.translation}));
 
@@ -116,7 +179,7 @@ define([
                 }
             });
 
-            if (App.currentUser.workAccess && this.activityList) {
+            if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template
