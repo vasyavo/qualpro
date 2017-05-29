@@ -225,57 +225,11 @@ define([
                     });
 
                     if (uploadedFilesObject.files.length) {
-                        if (context.assigneWithoutBranches) {
-                            visibilityFormRequestData = {
-                                before: {
-                                    files: arrayOfUploadedFilesId
-                                }
-                            };
-                        } else if (context.visibilityFormData.applyToAll) {
-                            visibilityFormRequestData = {
-                                branches: context.branchesForVisibility.map(function (item) {
-                                    return {
-                                        branchId: item._id,
-                                        before: {
-                                            files: arrayOfUploadedFilesId
-                                        },
-                                        after: {
-                                            files: [],
-                                            description: ''
-                                        }
-                                    };
-                                })
-                            };
-                        } else {
-                            visibilityFormRequestData = {
-                                branches: context.visibilityFormData.files.map(function (item) {
-                                    var files = [];
-
-                                    var arrayOfFilesDependsOnBranch = context.visibilityFormData.files.filter(function (fileObj) {
-                                        return fileObj.branchId === item.branchId;
-                                    });
-
-                                    var arrayOfFileIds = arrayOfFilesDependsOnBranch.map(function (fileObj) {
-                                        var searchedUploadedFile = uploadedFilesObject.files.find(function (obj) {
-                                            return obj.originalName === fileObj.fileName;
-                                        });
-
-                                        return searchedUploadedFile._id;
-                                    });
-
-                                    return {
-                                        branchId: item.branchId,
-                                        before: {
-                                            files: arrayOfFileIds
-                                        },
-                                        after: {
-                                            files: [],
-                                            description: ''
-                                        }
-                                    };
-                                })
-                            };
-                        }
+                        visibilityFormRequestData = {
+                            before: {
+                                files: arrayOfUploadedFilesId
+                            }
+                        };
                     }
 
                     var form = model.get('form');
