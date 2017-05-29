@@ -11378,3 +11378,20 @@ label[for=searchInputnoCT]::after {
 .competitorBrandingPreview  {
   height: calc(100% - 160px);
 }
+.planograms .addBtn:after,
+.planograms .deleleBtn:after {
+  display: inline-block;
+  margin: 0 5px;
+  font-family: 'icomoon';
+  font-size: 16px;
+  font-size: 1rem;
+}
+.planograms .addBtn:after {
+  content: '\e933'
+}
+.planograms .deleleBtn:after {
+  content: '\e928';
+}
+.planograms .deleteBtn {
+  margin-right: 25px;
+}
