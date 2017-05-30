@@ -17,17 +17,19 @@ module.exports = (req, res, next) => {
     const timeFilterSchema = {
         type: 'object',
         properties: {
-            from: {
-                type: 'string',
-            },
-            to: {
-                type: 'string',
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
             },
         },
-        required: [
-            'from',
-            'to',
-        ],
     };
 
     const queryRun = (personnel, callback) => {
@@ -46,7 +48,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate(timeFilter);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -77,20 +79,34 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (timeFilter) {
-            $generalMatch.$and = [
-                {
-                    'createdBy.date': { $gt: moment(timeFilter.from, 'MM/DD/YYYY')._d },
-                },
-                {
-                    'createdBy.date': { $lt: moment(timeFilter.to, 'MM/DD/YYYY')._d },
-                },
-            ];
-        }
-
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
+            });
+        }
+
+        const $timeMatch = {};
+        $timeMatch.$or = [];
+
+        if (timeFilter) {
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
+                    $and: [
+                        {
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
             });
         }
 

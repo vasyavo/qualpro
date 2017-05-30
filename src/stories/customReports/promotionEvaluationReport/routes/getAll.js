@@ -19,17 +19,19 @@ module.exports = (req, res, next) => {
     const timeFilterSchema = {
         type: 'object',
         properties: {
-            from: {
-                type: 'string',
-            },
-            to: {
-                type: 'string',
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
             },
         },
-        required: [
-            'from',
-            'to',
-        ],
     };
 
     const queryRun = (personnel, callback) => {
@@ -49,7 +51,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate(timeFilter);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -143,18 +145,29 @@ module.exports = (req, res, next) => {
             $unwind: '$promotion',
         });
 
+        const $timeMatch = {};
+
+        $timeMatch.$or = [];
+
         if (timeFilter) {
-            pipeline.push({
-                $match: {
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
                     $and: [
                         {
-                            'promotion.createdBy.date': { $gt: moment(timeFilter.from, 'MM/DD/YYYY')._d },
+                            'promotion.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
                         },
                         {
-                            'promotion.createdBy.date': { $lt: moment(timeFilter.to, 'MM/DD/YYYY')._d },
+                            'promotion.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
                         },
                     ],
-                },
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
             });
         }
 
