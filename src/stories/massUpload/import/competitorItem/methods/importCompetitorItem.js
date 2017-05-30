@@ -161,6 +161,9 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en': enName,
+        packing  : size,
+        brand    : brandId,
+        country  : countryId,
     };
 
     const modify = {
