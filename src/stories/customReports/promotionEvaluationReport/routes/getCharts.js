@@ -129,7 +129,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        applyAnalyzeBy(pipeline, analyzeByParam);
+        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter);
 
         pipeline.push({
             $project: {

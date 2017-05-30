@@ -1,4 +1,6 @@
-module.exports = (pipeline) => {
+const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
+
+module.exports = (pipeline, queryFilter) => {
     pipeline.push({
         $unwind: '$branch',
     });
@@ -10,6 +12,14 @@ module.exports = (pipeline) => {
             count: { $sum: 1 },
         },
     });
+
+    if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+        pipeline.push({
+            $match: {
+                _id: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {
@@ -42,6 +52,14 @@ module.exports = (pipeline) => {
         },
     });
 
+    if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+        pipeline.push({
+            $match: {
+                'domain.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+            },
+        });
+    }
+
     pipeline.push({
         $lookup: {
             from: 'domains',
@@ -71,6 +89,14 @@ module.exports = (pipeline) => {
         },
     });
 
+    if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+        pipeline.push({
+            $match: {
+                'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+            },
+        });
+    }
+
     pipeline.push({
         $lookup: {
             from: 'domains',
@@ -99,6 +125,14 @@ module.exports = (pipeline) => {
             },
         },
     });
+
+    if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+        pipeline.push({
+            $match: {
+                'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {
