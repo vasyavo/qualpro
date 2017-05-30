@@ -2,9 +2,10 @@ define([
         'models/parrent',
         'validation',
         'constants/contentType',
-        'constants/errorMessages'
+        'constants/errorMessages',
+        'dataService'
     ],
-    function (parent, validation, CONTENT_TYPES, ERROR_MESSAGES) {
+    function (parent, validation, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults: {},
 
@@ -32,25 +33,20 @@ define([
                 return CONTENT_TYPES.CATEGORY;
             },
 
-            uploadProductInformation: function (file) {
+            updateCategoryInformation: function (category, arrayOfFilesId) {
                 var that = this;
-                var formData = new FormData();
-                formData.append('file', file);
 
-                $.ajax({
-                    url : '/file',
-                    method : 'POST',
-                    data : formData,
-                    contentType: false,
-                    processData: false,
-                    success : function (response) {
-                        that.trigger('file-uploaded', response);
-                    },
-                    error : function () {
-                        App.renderErrors([
-                            ERROR_MESSAGES.fileIsNotUploaded[App.currentUser.currentLanguage]
+                dataService.putData('/category', {
+                    products: [category],
+                    information: arrayOfFilesId
+                }, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage]
                         ]);
                     }
+
+                    that.trigger('category-information-updated');
                 });
             }
         });

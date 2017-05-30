@@ -2,10 +2,13 @@ define(function (require) {
 
     var $ = require('jquery');
     var _ = require('underscore');
+    var moment = require('moment');
     var Backbone = require('backbone');
     var FileModel = require('models/file');
     var CategoryModel = require('models/category');
+    var CONSTANTS = require('constants/otherConstants');
     var ERROR_MESSAGES = require('constants/errorMessages');
+    var FullSizeFileOverview = require('views/fileDialog/fileDialog');
     var Template = require('text!templates/planogram/manage-products-information.html');
     var FileThumbnailTemplate = require('text!templates/planogram/file-thumbnail.html');
 
@@ -25,22 +28,107 @@ define(function (require) {
 
             this.render();
             this.defineUIElements();
+
+            this.ui.deleteButton.hide();
         },
 
         defineUIElements: function () {
             var view = this.$el;
 
             this.ui = {
-                fileInput: view.find('#file-input')
+                fileInput: view.find('#file-input'),
+                deleteButton: view.find('#delete')
             };
         },
 
         template: _.template(Template),
 
+        checkedFiles: [],
+
         events: {
             'click .category-table-item': 'handleCategoryClick',
             'click #add-file': 'handleAddFileClick',
-            'change #file-input': 'handleFileSelected'
+            'change #file-input': 'handleFileSelected',
+            'click .thumbnailBody': 'handleFileClick',
+            'click .customCheckbox': 'handleFileCheckboxClick',
+            'click #delete': 'handleDeleteButtonClick'
+        },
+
+        handleFileCheckboxClick: function (event) {
+            var target = $(event.currentTarget);
+            var fileId = target.attr('data-file-id');
+            var checked = event.currentTarget.checked;
+
+            if (checked) {
+                this.checkedFiles.push(fileId);
+            } else {
+                var fileIdIndex = this.checkedFiles.findIndex(function (item) {
+                    return item === fileId;
+                });
+
+                this.checkedFiles.splice(fileIdIndex, 1);
+            }
+
+            if (this.checkedFiles.length) {
+                this.ui.deleteButton.show();
+            } else {
+                this.ui.deleteButton.hide();
+            }
+        },
+
+        handleDeleteButtonClick: function () {
+            if (confirm('Are you sure you want delete this files?')) {
+                var that = this;
+                var checkedFiles = this.checkedFiles;
+                var categoryObject = this.categories.find(function (category) {
+                    return category._id === that.workingCategory;
+                });
+                var arrayOfFilesId = categoryObject.information.filter(function (file) {
+                    return !checkedFiles.includes(file._id);
+                });
+
+                var categoryModel = new CategoryModel();
+                categoryModel.updateCategoryInformation(that.workingCategory, arrayOfFilesId);
+                categoryModel.on('category-information-updated', function () {
+                    categoryObject.information = categoryObject.information.filter(function (file) {
+                        if (checkedFiles.includes(file._id)) {
+                            that.$el.find('#file-thumbnail-' + file._id).remove();
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    });
+
+                    that.checkedFiles = [];
+                    that.ui.deleteButton.hide();
+                });
+            }
+        },
+
+        handleFileClick: function (event) {
+            var that = this;
+            var target = $(event.currentTarget);
+            var fileId = target.attr('data-file-id');
+            var fileModel = new FileModel({
+                _id: fileId
+            });
+            fileModel.id = fileId;
+
+            this.fullSizeFileOverview = new FullSizeFileOverview({
+                fileModel  : fileModel,
+                translation: this.translation
+            });
+            this.fullSizeFileOverview.on('download', function (options) {
+                var url = options.url;
+                var originalName = options.originalName;
+                var attachmentsContainer = that.$el.find('.attachments');
+
+                attachmentsContainer.append('<a id="download-file" class="hidden" href="' + url + '" download="' + originalName + '"></a>');
+
+                var fileElement = attachmentsContainer.find('#download-file');
+                fileElement[0].click();
+                fileElement.remove();
+            });
         },
 
         handleCategoryClick: function (event) {
@@ -59,25 +147,31 @@ define(function (require) {
                 var content;
 
                 if (/image/.test(fileObj.contentType)) {
-                    content = document.createElement('img');
-                    content.src = '/preview/' + fileObj.preview;
+                    if (fileObj.new) {
+                        content = fileObj.content;
+                    } else {
+                        content = '<img src="preview/' + fileObj.preview + '">';
+                    }
                 } else {
                     var fileModel = new FileModel();
-                    var fileType = fileModel.getTypeFromContentType(file.type);
+                    var fileType = fileModel.getTypeFromContentType(fileObj.contentType);
 
-                    content = document.createElement('div');
-                    content.className = 'iconThumbnail ' + fileType;
+                    content = '<div class="iconThumbnail ' + fileType + '"></div>';
                 }
 
                 var fileThimbnail = _.template(FileThumbnailTemplate)({
                     _id: fileObj._id,
                     content: content,
                     fileName: fileObj.originalName,
-                    date: fileObj.createBy.date
+                    date: moment.utc(fileObj.createdBy.date).format('DD.MM.YYYY')
                 });
 
                 attachmentsContainer.append(fileThimbnail);
             });
+
+            this.ui.deleteButton.hide();
+
+            this.checkedFiles = [];
 
             this.workingCategory = categoryId;
         },
@@ -105,10 +199,60 @@ define(function (require) {
                 });
             }
 
-            var newCategoryModel = new CategoryModel();
-            newCategoryModel.uploadProductInformation(file);
-            newCategoryModel.on('file-uploaded', function (response) {
+            var fileModel = new FileModel();
+            fileModel.uploadFile(file);
+            fileModel.on('file-uploaded', function (response) {
+                var uploadedFileId = response.files[0]._id;
+                var categoryObject = that.categories.find(function (category) {
+                    return category._id === that.workingCategory;
+                });
+                var arrayOfFilesId = categoryObject.information.map(function (fileObj) {
+                    return fileObj._id;
+                });
+                arrayOfFilesId.push(uploadedFileId);
 
+                var categoryModel = new CategoryModel();
+                categoryModel.updateCategoryInformation(that.workingCategory, arrayOfFilesId);
+                categoryModel.on('category-information-updated', function () {
+                    var fileReader = new FileReader();
+                    fileReader.readAsDataURL(file);
+                    fileReader.onload = function (event) {
+                        var content;
+
+                        if (/image/.test(file.type)) {
+                            var fileAsBase64String = event.target.result;
+
+                            content = '<img src="' + fileAsBase64String + '">';
+                        } else {
+                            var fileModel = new FileModel();
+                            var fileType = fileModel.getTypeFromContentType(file.type);
+
+                            content = '<div class="iconThumbnail ' + fileType + '"></div>';
+                        }
+
+                        var fileCreationDate = moment().format('DD.MM.YYYY');
+
+                        categoryObject.information.push({
+                            _id: uploadedFileId,
+                            content: content,
+                            originalName: file.name,
+                            contentType: file.type,
+                            createdBy: {
+                                date: fileCreationDate
+                            },
+                            new: true
+                        });
+
+                        var fileThumbnail = _.template(FileThumbnailTemplate)({
+                            _id: uploadedFileId,
+                            content: content,
+                            fileName: file.name,
+                            date: fileCreationDate
+                        });
+
+                        that.$el.find('.attachments').append(fileThumbnail);
+                    };
+                });
             });
         },
 

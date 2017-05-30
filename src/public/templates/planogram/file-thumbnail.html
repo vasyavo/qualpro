@@ -1,11 +1,11 @@
-<div class="documentItem thumbnail">
+<div id="file-thumbnail-<%- _id %>" class="documentItem thumbnail">
     <div class="documentBody">
-        <input type="checkbox" class="customCheckbox file-checkbox" data-file-id="<%- _id %>">
-        <label class="checkboxLabel"></label>
+        <input id="file-checkbox-<%- _id %>" type="checkbox" class="customCheckbox file-checkbox" data-file-id="<%- _id %>">
+        <label for="file-checkbox-<%- _id %>" class="checkboxLabel"></label>
         <div id="item" class="bannerWrap">
             <div class="bannerMin">
                 <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
-                    <div class="thumbnail_js thumbnailBody"><%- content %></div>
+                    <div class="thumbnail_js thumbnailBody" data-file-id="<%- _id %>"><%= content %></div>
                 </div>
             </div>
             <span class="textSmall floatRight"></span>
