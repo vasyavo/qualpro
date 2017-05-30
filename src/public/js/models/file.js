@@ -2,9 +2,10 @@ define([
         'backbone',
         'validation',
         'constants/otherConstants',
-        'dataService'
+        'dataService',
+        'constants/errorMessages'
     ],
-    function (Backbone, validation, otherConstants, dataService) {
+    function (Backbone, validation, otherConstants, dataService, ERROR_MESSAGES) {
         var Model = Backbone.Model.extend({
             idAttribute: '_id',
 
@@ -75,6 +76,28 @@ define([
                 model.type = this.getTypeFromContentType(model.contentType);
 
                 return model;
+            },
+
+            uploadFile: function (file) {
+                var that = this;
+                var formData = new FormData();
+                formData.append('file', file);
+
+                $.ajax({
+                    url : '/file',
+                    method : 'POST',
+                    data : formData,
+                    contentType: false,
+                    processData: false,
+                    success : function (response) {
+                        that.trigger('file-uploaded', response);
+                    },
+                    error : function () {
+                        App.renderErrors([
+                            ERROR_MESSAGES.fileIsNotUploaded[App.currentUser.currentLanguage]
+                        ]);
+                    }
+                });
             }
 
         });

@@ -42,6 +42,10 @@ define([
                     }
 
                     self.fileUrl = result.url;
+                    self.fileModel.set('originalName', result.originalName);
+                    self.fileModel.set('type', self.fileModel.getTypeFromContentType(result.contentType));
+                    self.fileModel.set('contentType', result.contentType);
+                    self.fileOrifginalName = result.originalName;
                     self.render();
                 });
             } else {

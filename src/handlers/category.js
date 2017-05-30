@@ -191,7 +191,7 @@ var Category = function () {
             delete data.page;
             delete data.count;
 
-            CategoryModel.find(data)
+            CategoryModel.find(data).populate('information')
                 .exec(function (err, result) {
                     if (err) {
                         return next(err);

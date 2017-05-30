@@ -948,7 +948,7 @@ label[for=searchInputcountry]:after {
 .loginPanel .aditionalInfo .question:hover:after {
   left: 3px;
 }
-.actionBtn .triUp:after {
+.actionBtn .triUp:after, .action-manage-btn .triUp:after {
   position: absolute;
   right: 12px;
   font-size: 12px;
@@ -11494,4 +11494,18 @@ label[for=searchInputnoCT]::after {
   font-style: normal;
   padding: 0 5px;
   cursor: pointer;
+}
+.planograms .addBtn:after,
+.planograms .deleteBtn:after {
+    display: inline-block;
+    margin: 0 5px;
+    font-family: 'icomoon';
+    font-size: 16px;
+    font-size: 1rem;
+}
+.planograms .addBtn:after {
+    content: '\e933'
+}
+.planograms .deleteBtn:after {
+    content: '\e928';
 }

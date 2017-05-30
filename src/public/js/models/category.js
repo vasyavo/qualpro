@@ -1,9 +1,11 @@
 define([
         'models/parrent',
         'validation',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages',
+        'dataService'
     ],
-    function (parent, validation, CONTENT_TYPES) {
+    function (parent, validation, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults: {},
 
@@ -29,6 +31,23 @@ define([
 
             urlRoot: function () {
                 return CONTENT_TYPES.CATEGORY;
+            },
+
+            updateCategoryInformation: function (category, arrayOfFilesId) {
+                var that = this;
+
+                dataService.putData('/category', {
+                    products: [category],
+                    information: arrayOfFilesId
+                }, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage]
+                        ]);
+                    }
+
+                    that.trigger('category-information-updated');
+                });
             }
         });
 
