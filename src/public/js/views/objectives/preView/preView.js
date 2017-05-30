@@ -21,8 +21,7 @@ define([
     'helpers/objectivesStatusHelper',
     'dataService',
     'views/objectives/distributionFormView',
-    'views/objectives/visibilityForm/preView',
-    'views/objectives/visibilityForm/previewWithoutBranches',
+    'views/objectives/visibilityForm/overview',
     'text!templates/objectives/updatedPreview.html',
     'text!templates/objectives/taskFlowTemplate.html',
     'models/objectives',
@@ -38,7 +37,7 @@ define([
 ], function (Backbone, _, $, PreviewTemplate, FormTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, FileDialogView, EffortsDialog, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, objectivesStatusHelper, dataService, DistributionForm,
-             VisibilityForm, VisibilityFormWithoutBranches, UpdatedPreview, TaskFlowTemplate, ObjectivesModel, ObjectiveCollection,
+             VisibilityForm, UpdatedPreview, TaskFlowTemplate, ObjectivesModel, ObjectiveCollection,
              EditObjectiveView, DefFilters, VisibilityEditView, moment, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
 
     var PreviewView = BaseView.extend({
@@ -381,11 +380,9 @@ define([
         },
 
         openForm: function () {
+            var self = this;
             var modelJSON = this.model.toJSON();
             var form = modelJSON.form;
-            var id = form._id;
-            var self = this;
-            var contentType = form.contentType;
             var branchesForVisibility = _.map(modelJSON.branch, function (branch) {
                 return {
                     name : branch.name.currentLanguage,
@@ -399,53 +396,57 @@ define([
                 return false;
             }
 
-            if (contentType === 'distribution') {
+            if (form.contentType === 'distribution') {
                 this.distributionForm = new DistributionForm({
-                    id         : id,
+                    id: id,
                     translation: this.translation
                 });
             } else {
-                if (App.currentUser.workAccess && (modelJSON.assignedTo[0]._id === App.currentUser._id ||
-                    App.currentUser.covered && App.currentUser.covered[modelJSON.assignedTo[0]._id])
-                    && (modelJSON.objectiveType === 'individual') && (modelJSON.status._id === CONSTANTS.OBJECTIVE_STATUSES.DRAFT)) {
-                    this.visibilityForm = new VisibilityEditView({
-                        id                  : id,
-                        editAfter           : true,
-                        savedVisibilityModel: this.savedVisibilityModel,
-                        branchName          : branchesForVisibility.join(', '),
-                        description         : modelJSON.description,
-                        oldAjaxObj          : this.visibilityFormAjax,
-                        translation         : self.translation
-                    });
-                    this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                        self.visibilityFormAjax = ajaxObj;
-                        self.savedVisibilityModel = ajaxObj.model;
-                    });
-                } else {
-                    var assigneAccessRole = modelJSON.assignedTo[0].accessRole.level;
-                    var userAccessRolesWithBranches = [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN];
-                    var withoutBranches = assigneAccessRole === 4 && branchesForVisibility.length !== 0 ? false : userAccessRolesWithBranches.indexOf(assigneAccessRole) === -1;
-
-                    if (withoutBranches) {
-                        this.visibilityForm = new VisibilityFormWithoutBranches({
-                            assigneId : modelJSON.assignedTo[0]._id,
-                            formId : id,
-                            location : modelJSON.location,
-                            translation : self.translation,
-                            beforeDescription : modelJSON.description.currentLanguage
-                        });
-                        this.visibilityForm.on('after-part-filled', function () {
-                            self.afterPartFilled = true;
-                        });
-                    } else {
-                        this.visibilityForm = new VisibilityForm({
-                            id : id,
-                            branches : branchesForVisibility,
-                            description : modelJSON.description,
-                            translation : self.translation
-                        });
+                dataService.getData('/form/visibility/' + form._id, {}, function (err, response) {
+                    if (err) {
+                        return App.renderErrors([
+                            ERROR_MESSAGES.somethingWentWrong[self.currentLanguage]
+                        ]);
                     }
-                }
+
+                    var withoutBranches = !branchesForVisibility.length;
+
+                    var arrayOfAssigneeId = modelJSON.assignedTo.map(function (item) {
+                        return item._id;
+                    });
+
+                    var permittedToEditAfterPart = (
+                        arrayOfAssigneeId.includes(App.currentUser._id)
+                        && [CONSTANTS.OBJECTIVE_STATUSES.IN_PROGRESS, CONSTANTS.OBJECTIVE_STATUSES.RE_OPENED].includes(modelJSON.status._id)
+                        && modelJSON.objectiveType === 'individual'
+                        && App.currentUser.workAccess
+                    );
+
+                    self.visibilityFormPreview = new VisibilityForm({
+                        translation: self.translation,
+                        visibilityFormData: response,
+                        branches: branchesForVisibility,
+                        location: modelJSON.location,
+                        withoutBranches: withoutBranches,
+                        beforeDescription: modelJSON.description.currentLanguage,
+                        permittedToEditAfterPart: permittedToEditAfterPart
+                    });
+                    self.visibilityFormPreview.on('visibility-form-updated', function (vfData) {
+                        if (withoutBranches) {
+                            if (vfData.after.description) {
+                                self.afterPartFilled = true;
+                            }
+                        } else {
+                            self.afterPartFilled = true;
+
+                            vfData.branches.forEach(function (branch) {
+                                if (!branch.after.description) {
+                                    self.afterPartFilled = false;
+                                }
+                            });
+                        }
+                    });
+                });
             }
         },
 

@@ -22,11 +22,12 @@ define([
     'views/fileDialog/fileDialog',
     'constants/errorMessages',
     'views/competitorBranding/edit',
-    'models/competitorBranding'
+    'models/competitorBranding',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, CompetitorBrandingModel) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, CompetitorBrandingModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORBRANDING,
@@ -85,8 +86,13 @@ define([
                 model.on('competitor-branding-edited', function (response) {
                     var view = that.$el;
 
-                    view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
-                    view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                    if (data.dateStart) {
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateEnd) {
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
+                    }
 
                     var displayTypeString = response.displayType.map(function (item) {
                         return item.name[App.currentUser.currentLanguage];
@@ -103,16 +109,18 @@ define([
         },
 
         deleteCompetitorBranding: function () {
-            var that = this;
-            var model = new CompetitorBrandingModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteCompetitorBrandingAndDisplay[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new CompetitorBrandingModel();
 
-            model.delete(this.model.get('_id'));
+                model.delete(this.model.get('_id'));
 
-            model.on('competitor-branding-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('competitor-branding-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {

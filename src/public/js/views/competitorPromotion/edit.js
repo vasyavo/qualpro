@@ -4,6 +4,7 @@ define(function (require) {
     var Backbone = require('backbone');
     var Populate = require('populate');
     var DisplayTypeCollection = require('collections/displayType/collection');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/competitorPromotion/edit.html');
 
     return Backbone.View.extend({
@@ -32,16 +33,17 @@ define(function (require) {
 
         render: function () {
             var that = this;
+            var currentLanguage = App.currentUser.currentLanguage;
             var model = this.editableModel;
             var dateStart = moment(model.dateStart, 'DD.MM.YYYY');
             var dateEnd = moment(model.dateEnd, 'DD.MM.YYYY');
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -49,25 +51,79 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var valid = true;
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
+                            var expiryDate = that.$el.find('#dateExpiry').val();
                             var data = {
                                 price: ui.price.val(),
                                 packing: ui.weight.val(),
-                                expiry: moment(ui.expiry.val()).toDate(),
-                                dateStart: moment(ui.dateStart.val()).toDate(),
-                                dateEnd: moment(ui.dateEnd.val()).toDate(),
+                                expiry: expiryDate ? moment.utc(expiryDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
+                                dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 promotion: ui.description.val(),
                             };
 
-                            that.trigger('edit-competitor-promotion-item', data, model._id);
+                            if (data.displayType) {
+                                data.displayType = data.displayType.filter(function (item) {
+                                    return item;
+                                });
+                            }
+
+                            if (!data.price) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.rspRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (isNaN(Number(data.price))) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.rspIsNotANumber[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.packing) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.weightRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (isNaN(Number(data.packing))) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.weightIsNotANumber[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.displayType.length) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.displayTypeRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.promotion) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.enterDescription[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (valid) {
+                                that.trigger('edit-competitor-promotion-item', data, model._id);
+                            }
                         }
                     }
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
-            var $expiryDate = that.$el.find('#date-expiry');
+            var $startDate = that.$el.find('#dateStart');
+            var $dueDate = that.$el.find('#dateEnd');
+            var $expiryDate = that.$el.find('#dateExpiry');
 
             var startDateObj = {
                 changeMonth: true,

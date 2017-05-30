@@ -135,10 +135,10 @@ schema.pre('save', function(next) {
 schema.pre('update', function(next) {
     if (this._update.$set && this._update.$set.ppt) {
         const item = this._conditions._id;
-        const price = this._update.$set.ppt;
-        const rspMin = this._update.$set.rspMin;
-        const rspMax = this._update.$set.rspMax;
-        const pptPerCase = this._update.$set.pptPerCase;
+        const price = this._update.$set.ppt || 0;
+        const rspMin = this._update.$set.rspMin || 0;
+        const rspMax = this._update.$set.rspMax || 0;
+        const pptPerCase = this._update.$set.pptPerCase || 0;
         const createdBy = this._update.$set.editedBy;
 
         this.update({}, {

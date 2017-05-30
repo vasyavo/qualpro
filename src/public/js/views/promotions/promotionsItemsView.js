@@ -15,10 +15,11 @@ define([
     'constants/contentType',
     'constants/errorMessages',
     'views/promotions/editPromotionItem',
-    'models/promotionsItems'
+    'models/promotionsItems',
+    'constants/infoMessages'
 ], function (Backbone, $, _, BaseDialog, template, tbodyTemplate, paginationTemplate, FilePreviewTemplate,
              Collection, dataService, CONSTANTS, FileCollection, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES,
-             EditPromotionItemView, PromotionItemModel) {
+             EditPromotionItemView, PromotionItemModel, INFO_MESSAGES) {
 
     var PromotionsItemsView = BaseDialog.extend({
         contentType        : CONTENT_TYPES.PROMOTIONSITEMS,
@@ -115,16 +116,18 @@ define([
         },
 
         deleteTableItem: function () {
-            var that = this;
-            var target = $(event.target);
-            var promotionItemId = target.attr('data-id');
-            var model = new PromotionItemModel();
+            if (confirm(INFO_MESSAGES.confirmDeletePromoEvaluationItem[App.currentUser.currentLanguage])) {
+                var that = this;
+                var target = $(event.target);
+                var promotionItemId = target.attr('data-id');
+                var model = new PromotionItemModel();
 
-            model.deletePromotionItem(promotionItemId);
+                model.deletePromotionItem(promotionItemId);
 
-            model.on('promotion-item-deleted', function () {
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                model.on('promotion-item-deleted', function () {
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {

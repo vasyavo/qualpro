@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('underscore');
     var Backbone = require('backbone');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/achievementForm/edit.html');
 
     return Backbone.View.extend({
@@ -38,14 +39,14 @@ define(function (require) {
             var currentLanguage = App.currentUser.currentLanguage || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
                 currentLanguage: currentLanguage,
                 anotherLanguage: anotherLanguage,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -53,11 +54,12 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
-                            var startDate = ui.dateStart.val();
-                            var endDate = ui.dateEnd.val();
+                            var valid = true;
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                dateStart: startDate ? moment(startDate, 'DD.MM.YYYY').toDate() : '',
-                                dateEnd: endDate ? moment(endDate, 'DD.MM.YYYY').toDate() : '',
+                                startDate: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                endDate: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 description: {
                                     en: ui.descriptionEn.val(),
                                     ar: ui.descriptionAr.val(),
@@ -68,16 +70,32 @@ define(function (require) {
                                 },
                             };
 
-                            that.trigger('edit-achievement-form-item', data, model._id);
+                            if (!data.description.en && !data.description.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.enterDescription[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.additionalComment.en && !data.additionalComment.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.additionalCommentRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (valid) {
+                                that.trigger('edit-achievement-form-item', data, model._id);
+                            }
                         }
                     }
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
+            var $startDate = this.$el.find('#dateStart');
+            var $dueDate = this.$el.find('#dateEnd');
 
-            var startDateObj = {
+            $startDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
                 maxDate : new Date(dateEnd),
@@ -86,9 +104,8 @@ define(function (require) {
                 onClose    : function (selectedDate) {
                     $dueDate.datepicker('option', 'minDate', selectedDate);
                 }
-            };
-
-            var endDateObj = {
+            });
+            $dueDate.datepicker({
                 changeMonth: true,
                 changeYear : true,
                 minDate : new Date(dateStart),
@@ -97,10 +114,7 @@ define(function (require) {
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }
-            };
-
-            $startDate.datepicker(startDateObj);
-            $dueDate.datepicker(endDateObj);
+            });
 
             arabicInput(this);
 

@@ -166,47 +166,47 @@ allowedParams[CONTENT_TYPES.SHELFSHARES] = {
 allowedParams[CONTENT_TYPES.NOTIFICATIONS] = {
     0: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     1: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     2: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     3: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     4: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     5: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     6: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     7: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     8: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     9: {
         create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-            'outlet', 'branch', 'position', 'recipients', 'description']
+            'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     },
     10 : {
     create: ['createdBy', 'country', 'region', 'subRegion', 'retailSegment',
-        'outlet', 'branch', 'position', 'recipients', 'description']
+        'outlet', 'branch', 'position', 'recipients', 'description', 'type', 'typeDescription']
     }
 };
 

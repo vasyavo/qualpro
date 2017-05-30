@@ -217,6 +217,10 @@ var Comment = function () {
                             ActivityLog.emit('reporting:competitor-promotion-activities:comment-added', eventPayload);
                         }
 
+                        if (context === CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY) {
+                            ActivityLog.emit('marketing:al-alali-branding-and-monthly-display:commend-added', eventPayload);
+                        }
+
                         cb(null, comment);
                     });
                 },
@@ -237,14 +241,14 @@ var Comment = function () {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                         from         : 'files',
                         key          : 'attachments',
-                        addProjection: ['contentType', 'originalName']
+                        addProjection: ['contentType', 'originalName', 'preview']
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                         from           : 'personnels',
                         key            : 'createdBy.user',
                         isArray        : false,
-                        addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['accessRole']),
+                        addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['accessRole']),
                         includeSiblings: {createdBy: {date: 1}}
                     }));
 
@@ -261,7 +265,8 @@ var Comment = function () {
                                         _id      : 1,
                                         position : 1,
                                         firstName: 1,
-                                        lastName : 1
+                                        lastName : 1,
+                                        imageSrc: 1
                                     }
                                 }
                             }

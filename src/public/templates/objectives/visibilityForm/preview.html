@@ -1,14 +1,14 @@
 <div class="dialogCategotyWrap visibilityContainer inStoreForm">
     <div class="title">
-        <span class="titleDescription"><%= translation.titlePreviewVisibility %></span>
+        <span class="titleDescription"><%- translation.titlePreviewVisibility %></span>
     </div>
     <div class="visibilityContainerWrap scrollable">
         <div class="visibilityContainer flexRow">
             <div class="banner_inner bannerFullWidth no-padding-bottom">
-                <div class="beforeTitle fontBold fontDefault"><%= translation.before %></div>
+                <div class="beforeTitle fontBold fontDefault"><%- translation.before %></div>
             </div>
             <div class="banner_inner bannerFullWidth no-padding-bottom">
-                <div class="afterTitle fontBold fontDefault"><%= translation.after %></div>
+                <div class="afterTitle fontBold fontDefault"><%- translation.after %></div>
             </div>
         </div>
         <% _.each(branches, function(branch) { %>
@@ -16,17 +16,25 @@
             <div class="banner_inner bannerFullWidth">
                 <div class="scrollable">
                     <div class="banner_inner_top borderBottom">
-                        <span class="fontDefault"><%= branch.name %></span>
+                        <span class="fontDefault"><%- branch.name %></span>
                     </div>
-                    <div class="bannerBig">
-                        <div id="imageMy-<%- branch._id %>" class="bannerImage"><%= branch.beforeFileContainer %></div>
-                        <div class="bannerDescription picSquare bannerIcon">
-                            <span class="fontMedium image-name-<%- branch._id %>"><%- branch.beforeFileName %></span>
-                        </div>
+                    <div style="width: 440px">
+                        <ul class="files-container">
+                            <% _.each(branch.beforeFileContainers, function(containerObject) { %>
+                                <li>
+                                    <div class="bannerBig">
+                                        <div id="imageMy-<%- branch._id %>" class="bannerImage"><%= containerObject.container %></div>
+                                        <div class="bannerDescription picSquare bannerIcon">
+                                            <span class="fontMedium image-name-<%- branch._id %>"><%- containerObject.fileName %></span>
+                                        </div>
+                                    </div>
+                                </li>
+                            <% }); %>
+                        </ul>
                     </div>
                     <div class="banner_textBlock">
-                        <p class="uploadDescription fontDefault"><%= translation.description %></p>
-                        <div id="beforeText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= model.before.description %></div>
+                        <p class="uploadDescription fontDefault"><%- translation.description %></p>
+                        <div id="beforeText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= branch.beforeDescription %></div>
                     </div>
                 </div>
             </div>
@@ -35,16 +43,30 @@
                     <div class="banner_inner_top borderBottom">
                         <span class="branchName"><%- branch.name %></span>
                     </div>
-                    <div class="bannerBig">
-                        <div id="imageAfter"><%= branch.afterFileContainer %></div>
-                        <div class="bannerDescription picSquare bannerIcon">
-                            <span class="fontMedium"><%- branch.afterFileName %></span>
+                    <%  if (permittedToEditAfterPart) { %>
+                        <textarea id="after-description-text-area-<%- branch._id %>" rows="5" cols="60"><%= branch.afterDescription %></textarea>
+                        <div class="attachments-<%- branch._id %>"></div>
+                        <input id="file-input" type="file" class="hidden">
+                    <% } else { %>
+                        <div style="width: 440px">
+                            <ul class="files-container">
+                                <% _.each(branch.afterFileContainers, function(containerObject) { %>
+                                    <li>
+                                        <div class="bannerBig">
+                                            <div><%= containerObject.container %></div>
+                                            <div class="bannerDescription picSquare bannerIcon">
+                                                <span class="fontMedium"><%- containerObject.fileName %></span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <% }); %>
+                            </ul>
                         </div>
-                    </div>
-                    <div class="banner_textBlock afterTextBlock">
-                        <p class="uploadDescription fontDefault"><%= translation.description %></p>
-                        <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= branch.afterDescription %></div>
-                    </div>
+                        <div class="banner_textBlock afterTextBlock">
+                            <p class="uploadDescription fontDefault"><%- translation.description %></p>
+                            <div id="afterText" class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= branch.afterDescription %></div>
+                        </div>
+                    <% } %>
                 </div>
             </div>
         </div>

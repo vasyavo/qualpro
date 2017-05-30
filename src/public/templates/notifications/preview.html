@@ -121,6 +121,15 @@
                                 <span id="date" class="hoverFullText textEllipsis"><%= jsonModel.createdBy.date || '' %></span>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.type %></span>
+                            </div>
+                            <div class="notificationText">
+                                <span id="type" class="hoverFullText textEllipsis"><%- jsonModel.type || '' %></span>
+                                <p><%- jsonModel.typeDescription || '' %></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

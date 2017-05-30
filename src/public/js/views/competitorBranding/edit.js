@@ -6,6 +6,7 @@ define(function (require) {
     var Populate = require('populate');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
     var DisplayTypeCollection = require('collections/displayType/collection');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/competitorBranding/edit.html');
 
     return Backbone.View.extend({
@@ -38,14 +39,14 @@ define(function (require) {
             var currentLanguage = App.currentUser.currentLanguage || 'en';
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
-            var layout = $(this.template({
+            var layout = this.template({
                 translation: this.translation,
                 model: model,
                 currentLanguage: currentLanguage,
                 anotherLanguage: anotherLanguage,
-            }));
+            });
 
-            this.$el = layout.dialog({
+            this.$el = $(layout).dialog({
                 width : 'auto',
                 dialogClass : 'create-dialog',
                 buttons : {
@@ -53,9 +54,12 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var ui = that.ui;
+                            var valid = true;
+                            var startDate = that.$el.find('#dateStart').val();
+                            var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                dateStart: moment(ui.dateStart.val()).toDate(),
-                                dateEnd: moment(ui.dateEnd.val()).toDate(),
+                                dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
+                                dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 description: {
                                     en: ui.descriptionEn.val(),
@@ -63,14 +67,36 @@ define(function (require) {
                                 },
                             };
 
-                            that.trigger('edit-competitor-branding-item', data, model._id);
+                            if (data.displayType) {
+                                data.displayType = data.displayType.filter(function (item) {
+                                    return item;
+                                });
+                            }
+
+                            if (!data.description.en && !data.description.ar) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.enterDescription[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.displayType.length) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.displayTypeRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (valid) {
+                                that.trigger('edit-competitor-branding-item', data, model._id);
+                            }
                         }
                     }
                 }
             });
 
-            var $startDate = that.$el.find('#date-start');
-            var $dueDate = that.$el.find('#date-end');
+            var $startDate = that.$el.find('#dateStart');
+            var $dueDate = that.$el.find('#dateEnd');
 
             var startDateObj = {
                 changeMonth: true,
