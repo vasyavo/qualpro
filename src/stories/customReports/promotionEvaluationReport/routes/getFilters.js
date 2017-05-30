@@ -638,7 +638,7 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'SubRegion',
+                    en: 'Sub Region',
                     ar: '',
                 },
                 value: 'subRegion',
