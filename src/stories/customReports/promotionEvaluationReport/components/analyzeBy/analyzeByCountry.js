@@ -1,4 +1,6 @@
-module.exports = (pipeline) => {
+const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
+
+module.exports = (pipeline, queryFilter) => {
     pipeline.push({
         $group: {
             _id: '$country',
@@ -6,6 +8,14 @@ module.exports = (pipeline) => {
             count: { $sum: 1 },
         },
     });
+
+    if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+        pipeline.push({
+            $match: {
+                _id: { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {

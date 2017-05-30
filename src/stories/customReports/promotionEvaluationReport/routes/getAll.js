@@ -168,143 +168,183 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push(...[
-            {
-                $lookup: {
-                    from: 'branches',
-                    localField: 'promotion.branch',
-                    foreignField: '_id',
-                    as: 'branch',
+        if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+            pipeline.push({
+                $match: {
+                    'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: 'promotion.branch',
+                foreignField: '_id',
+                as: 'branch',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: {
+                                en: '$$branch.name.en',
+                                ar: '$$branch.name.ar',
+                            },
+                            subRegion: '$$branch.subRegion',
+                        },
+                    },
                 },
             },
-            {
-                $addFields: {
-                    branch: {
-                        $let: {
-                            vars: {
-                                branch: { $arrayElemAt: ['$branch', 0] },
+        });
+
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+            pipeline.push({
+                $match: {
+                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: 'branch.subRegion',
+                foreignField: '_id',
+                as: 'subRegion',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                branch: {
+                    _id: '$branch._id',
+                    name: '$branch.name',
+                },
+                subRegion: {
+                    $let: {
+                        vars: {
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                        },
+                        in: {
+                            _id: '$$subRegion._id',
+                            name: {
+                                en: '$$subRegion.name.en',
+                                ar: '$$subRegion.name.ar',
                             },
-                            in: {
-                                _id: '$$branch._id',
-                                name: {
-                                    en: '$$branch.name.en',
-                                    ar: '$$branch.name.ar',
-                                },
-                                subRegion: '$$branch.subRegion',
+                            parent: '$$subRegion.parent',
+                        },
+                    },
+                },
+            },
+        });
+
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $match: {
+                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: 'subRegion.parent',
+                foreignField: '_id',
+                as: 'region',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                subRegion: {
+                    _id: '$subRegion._id',
+                    name: '$subRegion.name',
+                },
+                region: {
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$region', 0] },
+                        },
+                        in: {
+                            _id: '$$region._id',
+                            name: {
+                                en: '$$region.name.en',
+                                ar: '$$region.name.ar',
+                            },
+                            parent: '$$region.parent',
+                        },
+                    },
+                },
+            },
+        });
+
+
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $match: {
+                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: 'region.parent',
+                foreignField: '_id',
+                as: 'country',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                region: {
+                    _id: '$region._id',
+                    name: '$region.name',
+                },
+                country: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: {
+                                en: '$$country.name.en',
+                                ar: '$$country.name.ar',
                             },
                         },
                     },
                 },
             },
-            {
-                $lookup: {
-                    from: 'domains',
-                    localField: 'branch.subRegion',
-                    foreignField: '_id',
-                    as: 'subRegion',
+        });
+
+        pipeline.push({
+            $addFields: {
+                country: {
+                    _id: '$country._id',
+                    name: '$country.name',
+                },
+                location: {
+                    $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
                 },
             },
-            {
-                $addFields: {
-                    branch: {
-                        _id: '$branch._id',
-                        name: '$branch.name',
-                    },
-                    subRegion: {
-                        $let: {
-                            vars: {
-                                subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                            },
-                            in: {
-                                _id: '$$subRegion._id',
-                                name: {
-                                    en: '$$subRegion.name.en',
-                                    ar: '$$subRegion.name.ar',
-                                },
-                                parent: '$$subRegion.parent',
-                            },
-                        },
-                    },
-                },
+        });
+
+        pipeline.push({
+            $sort: {
+                location: 1,
             },
-            {
-                $lookup: {
-                    from: 'domains',
-                    localField: 'subRegion.parent',
-                    foreignField: '_id',
-                    as: 'region',
-                },
-            },
-            {
-                $addFields: {
-                    subRegion: {
-                        _id: '$subRegion._id',
-                        name: '$subRegion.name',
-                    },
-                    region: {
-                        $let: {
-                            vars: {
-                                region: { $arrayElemAt: ['$region', 0] },
-                            },
-                            in: {
-                                _id: '$$region._id',
-                                name: {
-                                    en: '$$region.name.en',
-                                    ar: '$$region.name.ar',
-                                },
-                                parent: '$$region.parent',
-                            },
-                        },
-                    },
-                },
-            },
-            {
-                $lookup: {
-                    from: 'domains',
-                    localField: 'region.parent',
-                    foreignField: '_id',
-                    as: 'country',
-                },
-            },
-            {
-                $addFields: {
-                    region: {
-                        _id: '$region._id',
-                        name: '$region.name',
-                    },
-                    country: {
-                        $let: {
-                            vars: {
-                                country: { $arrayElemAt: ['$country', 0] },
-                            },
-                            in: {
-                                _id: '$$country._id',
-                                name: {
-                                    en: '$$country.name.en',
-                                    ar: '$$country.name.ar',
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            {
-                $addFields: {
-                    country: {
-                        _id: '$country._id',
-                        name: '$country.name',
-                    },
-                    location: {
-                        $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
-                    },
-                },
-            },
-            {
-                $sort: {
-                    location: 1,
-                },
-            },
-        ]);
+        });
 
         pipeline.push({
             $group: {
