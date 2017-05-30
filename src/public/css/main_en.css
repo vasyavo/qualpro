@@ -943,7 +943,7 @@ label[for=searchInputcountry]:after {
 .loginPanel .aditionalInfo .question:hover:after {
   left: 3px;
 }
-.actionBtn .triUp:after {
+.actionBtn .triUp:after, .action-manage-btn .triUp:after {
   position: absolute;
   right: 12px;
   font-size: 12px;

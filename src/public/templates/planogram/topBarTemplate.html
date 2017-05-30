@@ -23,7 +23,7 @@
 
     <% if (((level <=2) || ( (level >= 8) && (level <= 9)))  && App.currentUser.workAccess ) { %>
     <span id="createBtn" class="createBtn" data-translation="newPlanogram"><%- translation.newPlanogram %></span>
-    <div class="actionHolder actionBtn">
+    <div class="actionHolder action-manage-btn">
         <span id="manage-block" class="dropDown downArrow triUp"><%- translation.manage %></span>
         <ul id="manage-dropdown" class="dropDownContent">
             <li id="manageBtn" class="editBtn"><%- translation.configurations %></li>
