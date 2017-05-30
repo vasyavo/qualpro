@@ -28,7 +28,6 @@ define([
     'collections/objectives/collection',
     'views/objectives/editObjectiveView',
     'helpers/defFilterLogic',
-    'views/visibilityForm/editView',
     'moment',
     'views/fileDialog/fileDialog',
     'constants/contentType',
@@ -38,7 +37,7 @@ define([
              FileCollection, FileModel, CommentModel, BaseView, FileDialogView, EffortsDialog, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, objectivesStatusHelper, dataService, DistributionForm,
              VisibilityForm, UpdatedPreview, TaskFlowTemplate, ObjectivesModel, ObjectiveCollection,
-             EditObjectiveView, DefFilters, VisibilityEditView, moment, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
+             EditObjectiveView, DefFilters, moment, FileDialogPreviewView, CONTENT_TYPES, ERROR_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.OBJECTIVES,

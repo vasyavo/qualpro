@@ -440,7 +440,7 @@ define(function (require) {
                 pager: false,
                 enableDrag: false,
                 adaptiveHeight: true,
-                enableTouch: true
+                enableTouch: true,
             });
 
             this.delegateEvents(this.events);

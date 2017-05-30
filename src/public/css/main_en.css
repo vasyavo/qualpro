@@ -11495,3 +11495,9 @@ label[for=searchInputnoCT]::after {
   padding: 0 5px;
   cursor: pointer;
 }
+a.lSPrev {
+  background-color: black;
+}
+a.lSNext {
+  background-color: black;
+}
