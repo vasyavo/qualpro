@@ -100,6 +100,19 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $addFields: {
+            location: {
+                en: {
+                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$domain.name.en'],
+                },
+                ar: {
+                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$domain.name.ar'],
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
@@ -109,18 +122,68 @@ module.exports = (pipeline) => {
                     count: '$count',
                     country: '$country',
                     region: '$region',
+                    location: '$location',
                 },
             },
             labels: {
-                $addToSet: {
-                    en: {
-                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$domain.name.en'],
-                    },
-                    ar: {
-                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$domain.name.ar'],
-                    },
-                },
+                $addToSet: '$location',
             },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$data',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'data.location.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                labels: '$labels',
+            },
+            data: { $push: '$data' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            labels: '$_id.labels',
+            data: 1,
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$labels',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'labels.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                data: '$data',
+            },
+            labels: { $push: '$labels' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            data: '$_id.data',
+            labels: 1,
         },
     });
 };

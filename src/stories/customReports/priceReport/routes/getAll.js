@@ -15,17 +15,19 @@ module.exports = (req, res, next) => {
     const timeFilterSchema = {
         type: 'object',
         properties: {
-            from: {
-                type: 'string',
-            },
-            to: {
-                type: 'string',
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
             },
         },
-        required: [
-            'from',
-            'to',
-        ],
     };
 
     const filterSchema = {
@@ -67,7 +69,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate(timeFilter);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -86,15 +88,22 @@ module.exports = (req, res, next) => {
             'headers.actionType': 'itemChanged',
         };
 
+        $generalMatch.$or = [];
+
         if (timeFilter) {
-            $generalMatch.$and = [
-                {
-                    'headers.date': { $gt: moment(timeFilter.from, 'MM/DD/YYYY')._d },
-                },
-                {
-                    'headers.date': { $lt: moment(timeFilter.to, 'MM/DD/YYYY')._d },
-                },
-            ];
+            timeFilter.map((frame) => {
+                $generalMatch.$or.push({
+                    $and: [
+                        {
+                            'headers.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'headers.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
         }
 
         pipeline.push({
