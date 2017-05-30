@@ -300,6 +300,142 @@ const Personnel = function () {
                 as: 'covered',
             },
         }, {
+            $unwind: {
+                path                      : '$covered',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'domains',
+                localField  : 'covered.country',
+                foreignField: '_id',
+                as          : 'covered.country',
+            },
+        }, {
+            $addFields: {
+                'covered.country.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from        : 'domains',
+                localField  : 'covered.region',
+                foreignField: '_id',
+                as          : 'covered.region',
+            },
+        }, {
+            $addFields: {
+                'covered.region.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from        : 'domains',
+                localField  : 'covered.subRegion',
+                foreignField: '_id',
+                as          : 'covered.subRegion',
+            },
+        }, {
+            $addFields: {
+                'covered.subRegion.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from        : 'branches',
+                localField  : 'covered.branch',
+                foreignField: '_id',
+                as          : 'covered.branch',
+            },
+        }, {
+            $addFields: {
+                'covered.branch.imageSrc': null,
+            },
+        }, {
+            $group: {
+                _id: {
+                    _id             : '$_id',
+                    email           : '$email',
+                    firstName       : '$firstName',
+                    lastName        : '$lastName',
+                    accessRole      : '$accessRole',
+                    position        : '$position',
+                    country         : '$country',
+                    region          : '$region',
+                    subRegion       : '$subRegion',
+                    branch          : '$branch',
+                    retailSegment   : '$retailSegment',
+                    outlet          : '$outlet',
+                    vacation        : '$vacation',
+                    createdBy       : '$createdBy',
+                    editedBy        : '$editedBy',
+                    archived        : '$archived',
+                    beforeAccess    : '$beforeAccess',
+                    confirmed       : '$confirmed',
+                    currentLanguage : '$currentLanguage',
+                    dateJoined      : '$dateJoined',
+                    description     : '$description',
+                    groups          : '$groups',
+                    imageSrc        : '$imageSrc',
+                    lasMonthEvaluate: '$lasMonthEvaluate',
+                    lastAccess      : '$lastAccess',
+                    manager         : '$manager',
+                    phoneNumber     : '$phoneNumber',
+                    status          : '$status',
+                    super           : '$super',
+                    temp            : '$temp',
+                    whoCanRW        : '$whoCanRW',
+                    xlsManager      : '$xlsManager',
+                },
+
+                covered: {$push: '$covered'}
+            }
+        }, {
+            $project: {
+                _id             : '$_id._id',
+                firstName       : '$_id.firstName',
+                lastName        : '$_id.lastName',
+                accessRole      : '$_id.accessRole',
+                position        : '$_id.position',
+                country         : '$_id.country',
+                region          : '$_id.region',
+                subRegion       : '$_id.subRegion',
+                branch          : '$_id.branch',
+                retailSegment   : '$_id.retailSegment',
+                outlet          : '$_id.outlet',
+                vacation        : '$_id.vacation',
+                createdBy       : '$_id.createdBy',
+                editedBy        : '$_id.editedBy',
+                archived        : '$_id.archived',
+                beforeAccess    : '$_id.beforeAccess',
+                confirmed       : '$_id.confirmed',
+                currentLanguage : '$_id.currentLanguage',
+                dateJoined      : '$_id.dateJoined',
+                description     : '$_id.description',
+                groups          : '$_id.groups',
+                imageSrc        : '$_id.imageSrc',
+                lasMonthEvaluate: '$_id.lasMonthEvaluate',
+                lastAccess      : '$_id.lastAccess',
+                manager         : '$_id.manager',
+                phoneNumber     : '$_id.phoneNumber',
+                status          : '$_id.status',
+                super           : '$_id.super',
+                temp            : '$_id.temp',
+                whoCanRW        : '$_id.whoCanRW',
+                xlsManager      : '$_id.xlsManager',
+
+                covered: 1
+            }
+        }, {
+            $addFields: {
+                covered: {
+                    $filter: {
+                        input: '$covered',
+                        as: 'item',
+                        cond: {
+                            $gt: ['$$item._id', '']
+                        },
+                    },
+                },
+            },
+        }, {
             $addFields: {
                 covered: {
                     $map: {
