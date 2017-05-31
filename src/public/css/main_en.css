@@ -3142,8 +3142,12 @@ input:not([type="checkbox"]):not(.readonlyVisible):not(.hasDatepicker):read-only
 #personnelTasks .stretchWrap .absoluteContent {
   width: 100%;
 }
-.competitorBranding-dialog {
+.competitorBranding-dialog,
+.achievement-form-edit {
   height: 90%!important;
+}
+.achievement-form-edit .form-holder {
+  height: calc(100% - 74px)!important;
 }
 .competitorBranding-dialog .ui-dialog-content {
   height: calc(100% - 75px) !important;
