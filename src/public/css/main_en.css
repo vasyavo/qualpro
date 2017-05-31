@@ -7001,9 +7001,8 @@ ul.newSelectList .miniStylePagination {
   bottom: 0;
   left: 0;
 }
-.bannerBlock {
-  position: absolute;
-  right: 20%;
+.bannerBlock .noShrink {
+  padding-left: 20px;
 }
 .previewLocation .locationPath {
   padding: 10px;
@@ -8681,6 +8680,7 @@ table:not(.ui-datepicker-calendar) thead tr td {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  max-width: 30%;
 }
 .locationTop .bannerWrap.secondaryWrap {
   min-width: 180px;
