@@ -151,11 +151,11 @@ allowedParams[CONTENT_TYPES.SHELFSHARES] = {
         create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands']
     },
     8: {
-        create: [],
+        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands'],
         update: ['length']
     },
     9: {
-        create: [],
+        create: ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'category', 'totalBrandsLength', 'brands'],
         update: ['length']
     },
     10: {
@@ -297,11 +297,11 @@ allowedParams[CONTENT_TYPES.PROMOTIONSITEMS] = {
         update: []
     },
     8: {
-        create: [],
+        create: ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText'],
         update: ['dateStart', 'dateEnd', 'rsp', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'comment']
     },
     9: {
-        create: [],
+        create: ['outlet', 'dateStart', 'dateEnd', 'rsp', 'status', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'promotion', 'branch', 'commentText'],
         update: ['dateStart', 'dateEnd', 'rsp', 'opening', 'sellIn', 'closingStock', 'sellOut', 'displayType', 'comment']
     },
     10: {
@@ -441,15 +441,15 @@ allowedParams[CONTENT_TYPES.BRAND] = {
 allowedParams[CONTENT_TYPES.CATEGORY] = {
     0: {
         create: ['topArchived', 'archived', 'name'],
-        update: ['topArchived', 'archived', 'name']
+        update: ['topArchived', 'archived', 'name', 'products', 'information']
     },
     1: {
         create: ['topArchived', 'archived', 'name'],
-        update: ['topArchived', 'archived', 'name']
+        update: ['topArchived', 'archived', 'name', 'products', 'information']
     },
     2: {
         create: ['topArchived', 'archived', 'name'],
-        update: ['topArchived', 'archived', 'name']
+        update: ['topArchived', 'archived', 'name', 'products', 'information']
     },
     3: {
         create: ['topArchived', 'archived', 'name'],
@@ -1428,7 +1428,7 @@ allowedParams[CONTENT_TYPES.PRICESURVEY] = {
         update: ['price']
     },
     9: {
-        create: [],
+        create: ['category', 'variant', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'items', 'total'],
         update: ['price']
     },
     10: {

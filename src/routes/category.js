@@ -209,6 +209,7 @@ module.exports = function() {
      * @instance
      */
 
+    router.put('/', handler.updateMany);
     router.put('/:id([0-9a-fA-F]{24})', handler.update);
 
     /**

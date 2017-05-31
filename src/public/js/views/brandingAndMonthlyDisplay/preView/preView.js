@@ -23,10 +23,11 @@ define([
     'constants/errorMessages',
     'views/brandingAndMonthlyDisplay/edit',
     'models/brandingAndMonthlyDisplay',
+    'constants/infoMessages'
 ], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService,
-             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, BrandingAndMonthlyDislpayModel) {
+             CONTENT_TYPES, FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, EditView, BrandingAndMonthlyDislpayModel, INFO_MESSAGES) {
 
     var PreviewView = BaseView.extend({
         contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
@@ -84,11 +85,11 @@ define([
                     var view = that.$el;
 
                     if (data.dateStart) {
-                        view.find('#date-start').html(moment(data.dateStart).format('DD.MM.YYYY'));
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
                     }
 
                     if (data.dateEnd) {
-                        view.find('#date-end').html(moment(data.dateEnd).format('DD.MM.YYYY'));
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
                     }
 
                     var displayTypeString = response.displayType.map(function (item) {
@@ -106,16 +107,18 @@ define([
         },
 
         deleteBrandingAndMonthlyDisplay: function () {
-            var that = this;
-            var model = new BrandingAndMonthlyDislpayModel();
+            if (confirm(INFO_MESSAGES.confirmDeleteBrandingAndMonthlyReport[App.currentUser.currentLanguage])) {
+                var that = this;
+                var model = new BrandingAndMonthlyDislpayModel();
 
-            model.delete(this.model.get('_id'));
+                model.delete(this.model.get('_id'));
 
-            model.on('branding-and-monthly-display-deleted', function () {
-                that.trigger('update-list-view');
+                model.on('branding-and-monthly-display-deleted', function () {
+                    that.trigger('update-list-view');
 
-                that.$el.dialog('close').dialog('destroy').remove();
-            });
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -421,8 +424,8 @@ define([
                 model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(function(item) {
                     return item.name[currentLanguage];
                 }).join(',') : '';
-                model.dateStart = moment(model.dateStart).format('DD.MM.YYYY');
-                model.dateEnd = moment(model.dateEnd).format('DD.MM.YYYY');
+                model.dateStart = moment.utc(model.dateStart).format('DD.MM.YYYY');
+                model.dateEnd = moment.utc(model.dateEnd).format('DD.MM.YYYY');
                 model.countryString = (model.createdBy.country.length) ? model.createdBy.country[0].name[currentLanguage] : self.translation.missedData;
                 model.regionString = (model.region) ? model.region.name[currentLanguage] : self.translation.missedData;
                 model.subRegionString = (model.subRegion) ? model.subRegion.name[currentLanguage] : self.translation.missedData;

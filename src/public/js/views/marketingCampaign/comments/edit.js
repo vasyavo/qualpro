@@ -2,6 +2,7 @@ define(function (require) {
 
     var _ = require('underscore');
     var Backbone = require('backbone');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/marketingCampaign/marketingCampaignItem/edit-comment.html');
 
     return Backbone.View.extend({
@@ -39,6 +40,12 @@ define(function (require) {
                         text : that.translation.saveBtn,
                         click : function () {
                             var value = that.ui.commentBody.val().trim();
+
+                            if (!value) {
+                                return App.renderErrors([
+                                    ERROR_MESSAGES.enterComment[App.currentUser.currentLanguage]
+                                ]);
+                            }
 
                             that.trigger('edit-comment', value);
                         }

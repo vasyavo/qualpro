@@ -18,6 +18,8 @@ var Category = function () {
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
 
+    var ObjectId = mongoose.Types.ObjectId;
+
     var $defProjection = {
         _id        : 1,
         name       : 1,
@@ -189,7 +191,7 @@ var Category = function () {
             delete data.page;
             delete data.count;
 
-            CategoryModel.find(data)
+            CategoryModel.find(data).populate('information')
                 .exec(function (err, result) {
                     if (err) {
                         return next(err);
@@ -269,6 +271,53 @@ var Category = function () {
             }
 
             bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.CATEGORY, 'update', function (err, saveData) {
+                if (err) {
+                    return next(err);
+                }
+
+                queryRun(saveData);
+            });
+        });
+    };
+
+    this.updateMany = function (req, res, next) {
+        function queryRun(body) {
+            const ids = body.products.map(function (product) {
+                return ObjectId(product);
+            });
+            delete body.products;
+
+            body.editedBy = {
+                user: req.session.uId,
+                date: Date.now(),
+            };
+
+            CategoryModel.update({ _id: { $in: ids } }, body, {
+                multi: true,
+            }, (err, result) => {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send(result);
+            });
+        }
+
+        access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, (err, allowed) => {
+            const body = req.body;
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!allowed) {
+                err = new Error();
+                err.status = 403;
+
+                return next(err);
+            }
+
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.CATEGORY, 'update', (err, saveData) => {
                 if (err) {
                     return next(err);
                 }
