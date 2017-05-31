@@ -684,9 +684,7 @@ const Notifications = function () {
                 },
 
                 (result, cb) => {
-                    const body = result.length ?
-                        result[0] : { data: [], total: 0 };
-
+                    const body = _.get(result, '[0].data[0]') || {};
                     if (body.description) {
                         body.desciption = {
                             ar: _.unescape(body.description.ar),
