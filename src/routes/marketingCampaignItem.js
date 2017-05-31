@@ -13,6 +13,7 @@ module.exports = function () {
 
     router.post('/', multipartMiddleware, handler.create);
     router.get('/', handler.getAll);
+    router.delete('/:id([0-9a-fA-F]{24})', handler.removeItem);
 
     return router;
 };

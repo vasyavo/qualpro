@@ -56,14 +56,14 @@ define([
             var that = this;
             var currentLanguage = App.currentUser.currentLanguage;
 
-            dataService.putData('/achievementForm/' + achievementFormId, data, function (err) {
+            dataService.putData('/achievementForm/' + achievementFormId, data, function (err, response) {
                 if (err) {
                     return App.renderErrors([
                         err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
                     ]);
                 }
 
-                that.trigger('achievement-form-edited');
+                that.trigger('achievement-form-edited', response);
             });
         },
 

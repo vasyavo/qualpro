@@ -71,11 +71,15 @@ define([
         },
 
         brandingAndDisplayItems: function () {
+            var that = this;
             var id = this.model.id;
 
             this.brandingAndDisplayItemsView = new brandingAndDisplayItemsView({
                 brandingAndDisplay: id,
                 translation       : this.translation
+            });
+            this.brandingAndDisplayItemsView.on('re-render', function () {
+                that.$el.find('#brandingAndDisplayItems').click();
             });
         },
 

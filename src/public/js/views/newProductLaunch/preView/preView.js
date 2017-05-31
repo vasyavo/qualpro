@@ -61,6 +61,10 @@ define([
                 model.on('new-product-launch-edited', function (response) {
                     var view = that.$el;
 
+                    response.shelfLifeStart = moment.utc(response.shelfLifeStart).format('DD.MM.YYYY');
+                    response.shelfLifeEnd = moment.utc(response.shelfLifeEnd).format('DD.MM.YYYY');
+                    that.model.set(response, {merge: true});
+
                     if (data.shelfLifeStart && data.shelfLifeEnd) {
                         view.find('#shelfLife').html(moment.utc(data.shelfLifeStart).format('DD.MM.YYYY') + '-' + moment.utc(data.shelfLifeEnd).format('DD.MM.YYYY'));
                     }

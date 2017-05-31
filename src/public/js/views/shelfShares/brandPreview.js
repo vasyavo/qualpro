@@ -9,8 +9,9 @@ define([
     'dataService',
     'views/shelfShares/editValue',
     'models/shelfSharesBrand',
-    'constants/infoMessages'
-], function ($, _, PreviewTemplate, PreviewBodyTemplate, ShelfSharesBrandCollection, BaseView, CONTENT_TYPES, dataService, EditShelfSharesValueView, ShelfSharesBrandModel, INFO_MESSAGES) {
+    'constants/infoMessages',
+    'constants/aclRoleIndexes'
+], function ($, _, PreviewTemplate, PreviewBodyTemplate, ShelfSharesBrandCollection, BaseView, CONTENT_TYPES, dataService, EditShelfSharesValueView, ShelfSharesBrandModel, INFO_MESSAGES, ACL_ROLES) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.SHELFSHARES,
 
@@ -69,6 +70,7 @@ define([
 
                 model.on('shelf-shares-value-edited', function () {
                     that.$el.find('#' + that.editableShelfSharesId).html('' + value);
+                    target.attr('data-value', value);
                     that.trigger('update-list-view');
                 });
             });
@@ -121,9 +123,13 @@ define([
         },
 
         render: function () {
+            var permittedToManage = [ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(App.currentUser.accessRole.level);
             var jsonCollection = this.collection.toJSON();
+            var optionsCol = '<th>' + this.translation.options + '</th>';
             var formString = this.template({
-                translation: this.translation
+                translation: this.translation,
+                permittedToManage: permittedToManage,
+                optionsCol: optionsCol
             });
 
             this.$el = $(formString).dialog({
@@ -143,7 +149,8 @@ define([
 
             this.$el.find('#mainContent').html(this.previewBodyTemplate({
                 collection : jsonCollection,
-                translation: this.translation
+                translation: this.translation,
+                permittedToManage: permittedToManage
             }));
 
             this.delegateEvents(this.events);

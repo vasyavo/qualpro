@@ -91,6 +91,7 @@ define([
 
                     response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
                     response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
+                    response.expiry = moment.utc(response.expiry).format('DD.MM.YYYY');
 
                     that.model.set(response, {
                         merge: true
