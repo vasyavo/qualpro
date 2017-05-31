@@ -48,7 +48,7 @@ define(function (require) {
 
             this.$el = $(layout).dialog({
                 width : 'auto',
-                dialogClass : 'create-dialog',
+                dialogClass : 'create-dialog achievement-form-edit',
                 buttons : {
                     save : {
                         text : that.translation.saveBtn,
