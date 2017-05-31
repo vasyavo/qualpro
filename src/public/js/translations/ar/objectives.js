@@ -105,7 +105,8 @@ define([
             ar: 'إضافة الترجمة الانجليزية'
         },
 
-        dialogTitle: 'ملفات الاهداف'
+        dialogTitle: 'ملفات الاهداف',
+        countOfAttachedFiles: '' // todo
     };
 
     return _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

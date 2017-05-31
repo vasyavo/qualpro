@@ -14,25 +14,27 @@
             <div class=scrollable">
                 <% _.each(outlets, function(outlet) { %>
                     <% _.each(outlet.branches, function(branch) { %>
-                        <div class="banner_inner_top">
-                            <span class="fontDefault"><%- outlet.name %> -> <%- branch.name %></span>
-                        </div>
-                        <div class="banner_textBlock full-width">
-                            <p class="uploadDescription fontDefault">Description</p>
-                            <div class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= description %></div>
-                        </div>
-                        <div class="attachments-<%- branch._id %> attachments-container" data-branch-id="<%- branch._id %>">
-                            <div class="documentItem thumbnail select-file" data-branch-id="<%- branch._id %>">
-                                <div class="documentBody">
-                                    <div class="bannerWrap">
-                                        <div class="bannerMin">
-                                            <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
-                                                <div class="thumbnail_js thumbnailBody">
-                                                    <i>+</i>
+                        <div class="visibility-outlet-item">
+                            <div class="banner_inner_top">
+                                <span class="fontDefault"><%- outlet.name %> -> <%- branch.name %></span>
+                            </div>
+                            <div class="banner_textBlock full-width">
+                                <p class="uploadDescription fontDefault">Description</p>
+                                <div class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= description %></div>
+                            </div>
+                            <div class="attachments-<%- branch._id %> attachments-container" data-branch-id="<%- branch._id %>">
+                                <div class="documentItem thumbnail select-file" data-branch-id="<%- branch._id %>">
+                                    <div class="documentBody">
+                                        <div class="bannerWrap">
+                                            <div class="bannerMin">
+                                                <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                                                    <div class="thumbnail_js thumbnailBody">
+                                                        <i class="fa fa-plus"></i>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <span class="textSmall floatRight"></span>
                                         </div>
-                                        <span class="textSmall floatRight"></span>
                                     </div>
                                 </div>
                             </div>
