@@ -115,6 +115,12 @@ define([
                 self.render();
             }
 
+            dataService.getData('/form/visibility/' + this.model.get('form')._id, {}, function (err, response) {
+                if (response.after.description) {
+                    self.afterPartFilled = true;
+                }
+            });
+
             this.on('updatePreview', function (model) {
                 self.model = model;
                 self.dontShowDialog = true;
@@ -232,6 +238,12 @@ define([
                     ]);
                 }
 
+                if (response.after.description) {
+                    self.afterPartFilled = true;
+                } else {
+                    self.afterPartFilled = false;
+                }
+
                 var arrayOfAssigneeId = modelJSON.assignedTo.map(function (item) {
                     return item._id;
                 });
@@ -242,8 +254,6 @@ define([
                     && modelJSON.objectiveType === 'individual'
                     && App.currentUser.workAccess
                 );
-
-
 
                 self.visibilityFormPreview = new VisibilityForm({
                     translation: self.translation,
@@ -257,6 +267,8 @@ define([
                 self.visibilityFormPreview.on('visibility-form-updated', function (vfData) {
                     if (vfData.after.description) {
                         self.afterPartFilled = true;
+                    } else {
+                        self.afterPartFilled = false;
                     }
                 });
             });

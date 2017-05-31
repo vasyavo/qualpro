@@ -110,6 +110,24 @@ define([
                 });
             });
 
+            var withoutBranches = !this.model.get('branch').length;
+
+            dataService.getData('/form/visibility/' + this.model.get('form')._id, {}, function (err, response) {
+                if (withoutBranches) {
+                    if (response.after.description) {
+                        self.afterPartFilled = true;
+                    }
+                } else {
+                    self.afterPartFilled = true;
+
+                    response.branches.forEach(function (branch) {
+                        if (!branch.after.description) {
+                            self.afterPartFilled = false;
+                        }
+                    });
+                }
+            });
+
             this.progressChanged = false;
 
             this.on('updatePreview', function (model) {
@@ -410,6 +428,22 @@ define([
 
                     var withoutBranches = !branchesForVisibility.length;
 
+                    if (withoutBranches) {
+                        if (response.after.description) {
+                            self.afterPartFilled = true;
+                        } else {
+                            self.afterPartFilled = false;
+                        }
+                    } else {
+                        self.afterPartFilled = true;
+
+                        response.branches.forEach(function (branch) {
+                            if (!branch.after.description) {
+                                self.afterPartFilled = false;
+                            }
+                        });
+                    }
+
                     var arrayOfAssigneeId = modelJSON.assignedTo.map(function (item) {
                         return item._id;
                     });
@@ -431,9 +465,12 @@ define([
                         permittedToEditAfterPart: permittedToEditAfterPart
                     });
                     self.visibilityFormPreview.on('visibility-form-updated', function (vfData) {
+
                         if (withoutBranches) {
                             if (vfData.after.description) {
                                 self.afterPartFilled = true;
+                            } else {
+                                self.afterPartFilled = false;
                             }
                         } else {
                             self.afterPartFilled = true;
