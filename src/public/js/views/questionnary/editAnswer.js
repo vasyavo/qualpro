@@ -9,6 +9,7 @@ define(function (require) {
     var FullAnswerTemplate = require('text!templates/questionnary/editAnswer/full-answer.html');
     var MultiSelectAnswerTemplate = require('text!templates/questionnary/editAnswer/multi-select-answer.html');
     var SingleSelectAnswerTemplate = require('text!templates/questionnary/editAnswer/single-select-answer.html');
+    var NpsAnswerTemplate = require('text!templates/questionnary/editAnswer/nps-answer.html');
 
     return Backbone.View.extend({
 
@@ -51,6 +52,8 @@ define(function (require) {
 
         singleSelectAnswerTemplate: _.template(SingleSelectAnswerTemplate),
 
+        npsAnswerTemplate: _.template(NpsAnswerTemplate),
+
         selectedOptions: [],
 
         handleSingleSelectOptionClick : function (event) {
@@ -69,7 +72,7 @@ define(function (require) {
                 selectedOptions.push(option);
             } else {
                 var index = selectedOptions.findIndex(function (item) {
-                    return item === option;
+                    return parseInt(item) === parseInt(option);
                 });
 
                 selectedOptions.splice(index, 1);
@@ -150,8 +153,18 @@ define(function (require) {
                 });
             }
 
-            if ([AVAILABLE_CONSUMER_SURVEY_TYPES.singleChoice, AVAILABLE_CONSUMER_SURVEY_TYPES.nps].includes(this.questionType)) {
+            if (this.questionType === AVAILABLE_CONSUMER_SURVEY_TYPES.singleChoice) {
                 this.$el.find('#answer-container').html(this.singleSelectAnswerTemplate({
+                    questionOptions: this.questionOptions,
+                }));
+
+                this.selectedOptionIndexes.forEach(function (item) {
+                    that.$el.find('#answer-option-' + item).prop('checked', true);
+                });
+            }
+
+            if (this.questionType === AVAILABLE_CONSUMER_SURVEY_TYPES.nps) {
+                this.$el.find('#answer-container').html(this.npsAnswerTemplate({
                     questionOptions: this.questionOptions,
                 }));
 

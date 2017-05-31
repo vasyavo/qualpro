@@ -1,42 +1,48 @@
-<div class="dialogCategotyWrap visibilityContainer inStoreForm">
+<div class="dialogCategotyWrap visibilityContainer inStoreForm ui-dialog-content ui-widget-content">
     <div class="title">
-        <span class="titleDescription"><%= translation.titleEditVisibility %></span>
+        <span class="titleDescription"><%- translation.titleEditVisibility %></span>
     </div>
-    <form id="mainVisForm" class="visibilityContainer flexRow inStoreForm">
-        <div class="banner_inner bannerFullWidth">
-            <div class="beforeTitle fontBold fontDefault borderBottom"><%= translation.before %></div>
-            <% if ( (outlets && outlets.length > 1) || (outlets && outlets.length === 1 && outlets[0] && outlets[0].branches && outlets[0].branches.length > 1 ) ) { %>
+    <div class="visibilityContainerWrap scrollable">
+        <div class="beforeTitle fontBold fontDefault before--title-container borderBottom">
+            BEFORE
+        </div>
+        <div class="apply-to-all">
             <input type="checkbox" id="apply-to-all">
-            <span>apply file to all branches</span>
-            <% } %>
-
-            <div class="scrollable partType beforeEdit">
+            <label for="apply-to-all">Apply to all</label>
+        </div>
+        <div class="banner_inner bannerFullWidth borderBottom">
+            <div class=scrollable">
                 <% _.each(outlets, function(outlet) { %>
-                <div class="banner_inner_top">
-                    <span class="fontDefault"><%= outlet.name %></span>
-                </div>
-                    <% outlet.branches.forEach(function(branch) { %>
-                <div class="bannerBig">
-                    <div class="close left arrowLeft <%- (branch.fileContainer) ? '' : 'hidden' %>" id="removeFile-<%- branch._id %>"></div>
-                    <div id="imageMy-<%- branch._id %>" class="bannerImage"><%= (branch.fileContainer) ? branch.fileContainer : '' %></div>
-                    <div class="bannerDescription picSquare bannerIcon">
-                        <p class="uploadValue fontMedium"><%= translation.addBeforeMedia %></p>
-                        <input type="file"
-                               id="branch-photo-<%- branch._id %>"
-                               class="uploadInput"
-                               name="files"
-                               accept="<%= allowed %>"
-                        />
-                    </div>
-                </div>
-                <div class="banner_textBlock">
-                    <p class="uploadDescription fontDefault"><%- branch.name %></p>
-                    <p class="uploadDescription fontDefault"><%= translation.description %></p>
-                    <div id="beforeForm"><%- description %></div>
-                </div>
+                    <% _.each(outlet.branches, function(branch) { %>
+                        <div class="visibility-outlet-item">
+                            <div class="banner_inner_top">
+                                <span class="fontDefault"><%- outlet.name %> -> <%- branch.name %></span>
+                            </div>
+                            <div class="banner_textBlock full-width">
+                                <p class="uploadDescription fontDefault">Description</p>
+                                <div class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= description %></div>
+                            </div>
+                            <div class="attachments-<%- branch._id %> attachments-container" data-branch-id="<%- branch._id %>">
+                                <div class="documentItem thumbnail select-file" data-branch-id="<%- branch._id %>">
+                                    <div class="documentBody">
+                                        <div class="bannerWrap">
+                                            <div class="bannerMin">
+                                                <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                                                    <div class="thumbnail_js thumbnailBody">
+                                                        <i class="fa fa-plus"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="textSmall floatRight"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     <% }); %>
                 <% }); %>
             </div>
+            <input id="file-input" type="file" class="hidden">
         </div>
-    </form>
+    </div>
 </div>

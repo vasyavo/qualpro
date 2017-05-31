@@ -12,36 +12,36 @@
                 <col width="150px">
                 <col width="150px">
                 <col width="150px">
-                <col width="150px">
+                <%= permittedToManage ? '<col width="150px">' : '' %>
             </colgroup>
             <thead>
-            <tr>
-                <th><%= translation.timeStamp %></th>
-                <th><%= translation.branch %></th>
-                <th><%= translation.value %></th>
-                <th><%= translation.employee %></th>
-                <th><%= translation.options %></th>
-            </tr>
+                <tr>
+                    <th><%- translation.timeStamp %></th>
+                    <th><%- translation.branch %></th>
+                    <th><%- translation.value %></th>
+                    <th><%- translation.employee %></th>
+                    <%= permittedToManage ? optionsCol : '' %>
+                </tr>
             </thead>
             <tbody>
-            <tr>
-                <td colspan="5" class="colspanFix">
-                    <div class="scrollable">
-                        <table class="list">
-                            <colgroup>
-                                <col width="150px">
-                                <col width="150px">
-                                <col width="150px">
-                                <col width="150px">
-                                <col width="150px">
-                            </colgroup>
-                            <tbody id="mainContent" class="shelfShareTableBody">
-                            <!--BODY-->
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
+                <tr>
+                    <td colspan="5" class="colspanFix">
+                        <div class="scrollable">
+                            <table class="list">
+                                <colgroup>
+                                    <col width="150px">
+                                    <col width="150px">
+                                    <col width="150px">
+                                    <col width="150px">
+                                    <%= permittedToManage ? '<col width="150px">' : '' %>
+                                </colgroup>
+                                <tbody id="mainContent" class="shelfShareTableBody">
+                                <!--BODY-->
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>

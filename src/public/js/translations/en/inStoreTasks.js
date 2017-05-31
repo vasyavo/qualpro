@@ -65,7 +65,8 @@ define([
         // form
         form       : 'Forms',
         goToBtn    : 'Go to',
-        dialogTitle: 'InStore-Reporting files'
+        dialogTitle: 'InStore-Reporting files',
+        countOfAttachedFiles: 'Count of attached files'
     };
 
     return _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

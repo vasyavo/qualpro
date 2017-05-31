@@ -37,7 +37,7 @@
                                 <input type="text"
                                        id="price"
                                        class="objectivesInput"
-                                       value="<%= model.packing %>"
+                                       value="<%= model.price %>"
                                        required
                                        maxlength="50"
                                        placeholder="Input opening stock"/>
@@ -93,7 +93,7 @@
                             </div>
                             <div id="comment-container">
                                 <textarea type="text"
-                                          id="description-en"
+                                          id="distributor-en"
                                           class="objectivesTextarea"
                                           required
                                           maxlength="150"
@@ -103,10 +103,9 @@
                         </div>
                         <div class="objectivesPaddingBlock borderBottom descriptionArContainer" id="additionalCommentArContainer" style="display: none;">
                             <textarea class="objectivesTextarea"
-                                      id="description-ar"
+                                      id="distributor-ar"
                                       data-parent="description"
                                       data-property="ar"
-                                      value=""
                                       placeholder="<%= translation.description %>"
                                       maxlength="150"><%- model.distributor.ar %>
                             </textarea>
@@ -123,7 +122,7 @@
                             </div>
                             <div id="distributor-container">
                                 <textarea type="text"
-                                          id="distributor-en"
+                                          id="description-en"
                                           class="objectivesTextarea"
                                           required
                                           maxlength="150"
@@ -133,10 +132,9 @@
                         </div>
                         <div class="objectivesPaddingBlock borderBottom descriptionArContainer" id="distributorArContainer" style="display: none;">
                             <textarea class="objectivesTextarea"
-                                      id="distributor-ar"
+                                      id="description-ar"
                                       data-parent="description"
                                       data-property="ar"
-                                      value=""
                                       placeholder="<%= translation.description %>"
                                       maxlength="150"><%- model.additionalComment.ar %>
                             </textarea>

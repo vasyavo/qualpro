@@ -626,7 +626,7 @@ const getAll = (req, res, next) => {
         let mongoQuery = BrandingAndMonthlyDisplayModel.aggregate();
 
         if ($generalMatch.$and.length) {
-            mongoQuery = mongoQuery.append({
+            mongoQuery.append({
                 $match: $generalMatch,
             });
         }
@@ -897,7 +897,16 @@ const getAll = (req, res, next) => {
             .allowDiskUse(true);
 
         const getCount = (cb) => {
-            BrandingAndMonthlyDisplayModel.aggregate()
+            let mongoQuery = BrandingAndMonthlyDisplayModel.aggregate();
+
+            if ($generalMatch.$and.length) {
+                mongoQuery.append({
+                    $match: $generalMatch,
+                });
+            }
+
+
+            mongoQuery
                 .append(condition.formCondition)
                 .lookup({
                     from: `${CONTENT_TYPES.PERSONNEL}s`,

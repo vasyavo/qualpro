@@ -11,19 +11,25 @@
            class="changeContentView filterType"
            data-archived-type="false"
            data-translation="all"
-           id="all"><%= translation.all%>
+           id="all"><%= translation.all %>
         </a>
         <a href="javascript:;"
            class="changeContentView filterType"
            data-archived-type="true"
            data-translation="archive"
-           id="archived"><%= translation.archive%>
+           id="archived"><%= translation.archive %>
         </a>
     </div>
 
     <% if (((level <=2) || ( (level >= 8) && (level <= 9)))  && App.currentUser.workAccess ) { %>
-    <span id="createBtn" class="createBtn" data-translation="newPlanogram"><%= translation.newPlanogram %></span>
-    <span id="manageBtn" class="linkBtn" data-translation="manageConfigurations"><%= translation.manageConfigurations %></span>
+    <span id="createBtn" class="createBtn" data-translation="newPlanogram"><%- translation.newPlanogram %></span>
+    <div class="actionHolder action-manage-btn">
+        <span id="manage-block" class="dropDown downArrow triUp"><%- translation.manage %></span>
+        <ul id="manage-dropdown" class="dropDownContent">
+            <li id="manageBtn" class="editBtn"><%- translation.configurations %></li>
+            <li id="namage-products" class="editBtn"><%- translation.productsInformation %></li>
+        </ul>
+    </div>
 
     <% if (viewType === 'thumbnails') { %>
     <div class="checkboxArea">
@@ -33,39 +39,15 @@
     <% } %>
 
     <div id="actionHolder" class="actionHolder actionBtn hidden">
-        <span class="dropDown downArrow triUp" data-translation="action"><%= translation.action%></span>
+        <span class="dropDown downArrow triUp" data-translation="action"><%= translation.action %></span>
         <ul class="dropDownContent">
-            <li id="archiveBtn" data-archived-type="false" class="archiveBtn" data-translation="disable"><%= translation.disable%></li>
-            <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn" data-translation="unDisable"><%= translation.unDisable%></li>
+            <li id="archiveBtn" data-archived-type="false" class="archiveBtn" data-translation="disable"><%= translation.disable %></li>
+            <li id="unArchiveBtn" data-archived-type="true" class="archiveBtn" data-translation="unDisable"><%= translation.unDisable %></li>
         </ul>
     </div>
 
     <% } %>
-<!--
-
-    <div id="contentViewSwitcher" class="contentViewSwitcher">
-        <ul class="btn-list">
-            <li>
-                <a href="javascript:;"
-                   class="tiles changeContentView <%= (viewType === 'thumbnails') ? '' : 'viewBarBtnActive'%>"
-                   data-view-type="thumbnails"
-                   id="thumbBtn">
-                </a>
-            </li>
-            <li>
-                <a href="javascript:;"
-                   class="listView changeContentView <%= (viewType === 'list') ? '' : 'viewBarBtnActive'%>"
-                   data-view-type="list"
-                   id="listBtn">
-                </a>
-            </li>
-        </ul>
-    </div>
-
--->
 
     <div id="paginationHolder" class="paginationHolder">
     </div>
-
-
 </div>
