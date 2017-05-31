@@ -382,7 +382,6 @@ module.exports = (req, res, next) => {
                 subRegion: '$setPromotions.subRegion',
                 branch: '$setPromotions.branch',
                 promotionType: '$setPromotions.promotionType',
-                comments: '$setPromotions.comments',
                 ppt: '$setPromotions.ppt',
                 dateStart: '$setPromotions.dateStart',
                 dateEnd: '$setPromotions.dateEnd',
@@ -403,12 +402,11 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'comments',
-                localField: 'comments',
+                localField: 'promotion.comment',
                 foreignField: '_id',
-                as: 'comments',
+                as: 'promotionComment',
             },
         });
-
 
         pipeline.push({
             $lookup: {
@@ -427,7 +425,7 @@ module.exports = (req, res, next) => {
                 subRegion: 1,
                 branch: 1,
                 promotionType: 1,
-                comments: 1,
+                promotionComment: { $arrayElemAt: ['$promotionComment', 0] },
                 ppt: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
@@ -443,6 +441,32 @@ module.exports = (req, res, next) => {
                 closingStock: '$promotion.closingStock',
                 sellOut: '$promotion.sellOut',
                 total: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'promotionComment.attachments',
+                foreignField: '_id',
+                as: 'promotionAttachments',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                promotionAttachments: {
+                    $map: {
+                        input: '$promotionAttachments',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            originalName: '$$item.originalName',
+                            contentType: '$$item.contentType',
+                            preview: '$$item.preview',
+                        },
+                    },
+                },
             },
         });
 

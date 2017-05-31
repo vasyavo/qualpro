@@ -333,6 +333,42 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'attachments',
+                foreignField: '_id',
+                as: 'attachments',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                description: 1,
+                additionalComment: 1,
+                startDate: 1,
+                endDate: 1,
+                personnel: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                attachments: {
+                    _id: 1,
+                    originalName: 1,
+                    contentType: 1,
+                    preview: 1,
+                },
+                archived: 1,
+                createdBy: 1,
+                editedBy: 1,
+                total: 1,
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 total: { $first: '$total' },

@@ -140,14 +140,24 @@ module.exports = (req, res, next) => {
                 $unwind: '$brands',
             });
 
+        if (queryFilter.brand && queryFilter.brand.length) {
             pipeline.push({
-                $lookup: {
-                    from: 'brands',
-                    localField: 'brands.brand',
-                    foreignField: '_id',
-                    as: 'brand',
+                $match: {
+                    'brands.brand': {
+                        $in: queryFilter.brand,
+                    },
                 },
             });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brands.brand',
+                foreignField: '_id',
+                as: 'brand',
+            },
+        });
 
             pipeline.push({
                 $project: {

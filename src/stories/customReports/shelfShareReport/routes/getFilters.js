@@ -157,6 +157,16 @@ module.exports = (req, res, next) => {
             $unwind: '$brands',
         });
 
+        if (queryFilter.brand && queryFilter.brand.length) {
+            pipeline.push({
+                $match: {
+                    'brands.brand': {
+                        $in: queryFilter.brand,
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $group: {
                 _id: null,
