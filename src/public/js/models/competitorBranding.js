@@ -69,14 +69,6 @@ define([
                 var currentLanguage = App.currentUser.currentLanguage;
                 var errors = 0;
 
-                if (!data.dateStart) {
-                    ++errors;
-                }
-
-                if (!data.dateEnd) {
-                    ++errors;
-                }
-
                 if (!data.displayType || !data.displayType.length) {
                     ++errors;
                 }
