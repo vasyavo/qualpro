@@ -171,7 +171,9 @@ define(function (require) {
                     beforeFileContainers: beforeFileContainers,
                     afterFileContainers: afterFileContainers,
                     beforeDescription: that.beforeDescription,
-                    afterDescription: that.model.after.description
+                    afterDescription: that.model.after.description,
+                    countOfAttachedFilesInBefore: that.model.before.files.length,
+                    countOfAttachedFilesInAfter: that.model.after.files.length
                 }];
             } else {
                 branches = this.branches.map(function (branch) {
@@ -181,6 +183,8 @@ define(function (require) {
 
                     branch.afterDescription = branchFromVFData ? branchFromVFData.after.description : '';
                     branch.beforeDescription = that.beforeDescription;
+                    branch.countOfAttachedFilesInBefore = branchFromVFData.before.files.length;
+                    branch.countOfAttachedFilesInAfter = branchFromVFData.after.files.length;
 
                     branch.beforeFileContainers = branchFromVFData ? branchFromVFData.before.files.map(function (fileObj) {
                         var fileType = fileObj.contentType.substr(0, 5);
