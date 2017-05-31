@@ -948,7 +948,7 @@ label[for=searchInputcountry]:after {
 .loginPanel .aditionalInfo .question:hover:after {
   left: 3px;
 }
-.actionBtn .triUp:after {
+.actionBtn .triUp:after, .action-manage-btn .triUp:after {
   position: absolute;
   right: 12px;
   font-size: 12px;
@@ -7001,8 +7001,9 @@ ul.newSelectList .miniStylePagination {
   bottom: 0;
   left: 0;
 }
-.bannerBlock .noShrink {
-  padding-left: 20px;
+.bannerBlock {
+  position: absolute;
+  right: 20%;
 }
 .previewLocation .locationPath {
   padding: 10px;
@@ -8680,7 +8681,6 @@ table:not(.ui-datepicker-calendar) thead tr td {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  max-width: 30%;
 }
 .locationTop .bannerWrap.secondaryWrap {
   min-width: 180px;
@@ -11476,6 +11476,60 @@ label[for=searchInputnoCT]::after {
 .errors-block li {
   list-style: decimal;
 }
+.before--title-container {
+  text-align: center;
+  color: orange;
+  padding: 10px 0 5px 0;
+}
+.visibilityContainerWrap .attachments {
+  margin: -10px;
+  padding: 1px;
+}
+.full-width {
+  width: 100%!important;
+}
+.remove-attachment {
+  position: absolute;
+  right: 6px;
+  font-style: normal;
+  padding: 0 5px;
+  cursor: pointer;
+}
+.planograms .addBtn:after,
+.planograms .deleteBtn:after {
+    display: inline-block;
+    margin: 0 5px;
+    font-family: 'icomoon';
+    font-size: 16px;
+    font-size: 1rem;
+}
+.planograms .addBtn:after {
+    content: '\e933'
+}
+.planograms .deleteBtn:after {
+    content: '\e928';
+}
+.visibility-outlet-item {
+    overflow: hidden;
+    border-bottom: 1px solid #e2e2e2;
+    margin-bottom: 10px;
+}
+.add-attachment {
+    display: inline-block;
+    padding: 25px;
+    box-shadow: 0 0 8px 3px #e2e2e2;
+    margin-bottom: 10px;
+    margin-left: 5px;
+}
+.apply-to-all {
+    padding: 0 20px;
+}
+a.lSPrev {
+    background-color: black;
+}
+a.lSNext {
+    background-color: black;
+}
 .other-type-description {
-  height: 30px!important;
+    height: 30px!important;
 }

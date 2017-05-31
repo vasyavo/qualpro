@@ -1,0 +1,22 @@
+<div id="file-thumbnail-<%- _id %>" class="documentItem thumbnail">
+    <div class="documentBody">
+        <div id="item" class="bannerWrap">
+            <div class="bannerMin">
+                <i class="remove-attachment" data-file-id="<%- _id %>">x</i>
+                <div class="bannerImage fileThumbnailItem brandItem masonryThumbnail">
+                    <div class="thumbnail_js thumbnailBody">
+                        <% if (/image/.test(fileType)) { %>
+                            <img src="<%- base64 %>" class="bannerImage mCS_img_loaded file-preview" data-file-id="<%- _id %>">
+                        <% } else { %>
+                            <div class="iconThumbnail video_icon file-preview" data-file-id="<%- _id %>"></div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <span class="textSmall floatRight"></span>
+        </div>
+    </div>
+    <div class="documentFooter">
+        <span class="documentDescription hoverFullText fontGray"><%- fileName %></span>
+    </div>
+</div>

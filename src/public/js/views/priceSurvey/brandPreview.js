@@ -9,8 +9,9 @@ define([
     'dataService',
     'views/priceSurvey/editPriceSurveyValue',
     'models/priceSurveyBrand',
-    'constants/infoMessages'
-], function ($, _, PreviewTemplate, PreviewBodyTemplate, BrandCollection, BaseView, CONTENT_TYPES, dataService, EditPriceSurveyValueView, PriceSurveyBrandModel, INFO_MESSAGES) {
+    'constants/infoMessages',
+    'constants/aclRoleIndexes'
+], function ($, _, PreviewTemplate, PreviewBodyTemplate, BrandCollection, BaseView, CONTENT_TYPES, dataService, EditPriceSurveyValueView, PriceSurveyBrandModel, INFO_MESSAGES, ACL_ROLES) {
     var preView = BaseView.extend({
         contentType: CONTENT_TYPES.PRICESURVEY,
 
@@ -129,8 +130,12 @@ define([
 
         render: function () {
             var jsonCollection = this.collection.toJSON();
+            var permittedToManage = [ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(App.currentUser.accessRole.level);
+            var optionsCol = '<th>' + this.translation.options + '</th>';
             var formString = this.template({
-                translation: this.translation
+                translation: this.translation,
+                permittedToManage: permittedToManage,
+                optionsCol: optionsCol
             });
 
             this.$el = $(formString).dialog({
@@ -150,7 +155,8 @@ define([
 
             this.$el.find('#mainContent').html(this.previewBodyTemplate({
                 collection : jsonCollection,
-                translation: this.translation
+                translation: this.translation,
+                permittedToManage: permittedToManage
             }));
 
             this.delegateEvents(this.events);

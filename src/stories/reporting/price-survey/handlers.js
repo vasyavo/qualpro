@@ -801,7 +801,8 @@ const getAll = (req, res, next) => {
                     categoryId: '$category._id',
                     variantId: '$variant._id',
                     branchId: '$branch._id',
-                    size: '$size'
+                    size: '$size',
+                    price: '$price',
                 },
 
                 currency: { $first: '$currency' },
@@ -825,6 +826,7 @@ const getAll = (req, res, next) => {
                 variant: 1,
                 branch: 1,
                 size: 1,
+                price: '$_id.price',
                 minPrice: 1,
                 maxPrice: 1,
                 avgPrice: 1,
@@ -851,6 +853,7 @@ const getAll = (req, res, next) => {
                 variant: '$data.variant',
                 branch: '$data.branch',
                 size: '$data.size',
+                price: '$data.price',
                 minPrice: '$data.minPrice',
                 maxPrice: '$data.maxPrice',
                 avgPrice: '$data.avgPrice',
@@ -884,6 +887,7 @@ const getAll = (req, res, next) => {
                 },
                 branchCount: { $sum: 1 },
                 totalMinPrice: { $min: '$minPrice' },
+                arrayOfPrice: { $push: '$price' },
                 totalMaxPrice: { $max: '$maxPrice' },
                 totalAvgPrice: { $avg: '$avgPrice' },
                 currency: { $first: '$currency' },
@@ -899,6 +903,7 @@ const getAll = (req, res, next) => {
                 variant: 1,
                 branches: 1,
                 size: 1,
+                arrayOfPrice: 1,
                 totalMinPrice: 1,
                 totalMaxPrice: 1,
                 totalAvgPrice: 1,
@@ -922,6 +927,7 @@ const getAll = (req, res, next) => {
                         variant: '$variant',
                         branches: '$branches',
                         size: '$size',
+                        arrayOfPrice: '$arrayOfPrice',
                         totalMinPrice: '$totalMinPrice',
                         totalMaxPrice: '$totalMaxPrice',
                         totalAvgPrice: '$totalAvgPrice',
@@ -1018,6 +1024,22 @@ const getAll = (req, res, next) => {
 
             response = response && response[0] ? response[0] : { data: [], total: 0 };
 
+            response.data.map(function (priceSurvey) {
+                return priceSurvey.brands.map(function (brand) {
+                    return brand.variants.map(function (variant) {
+                        variant.arrayOfPrice = variant.arrayOfPrice.sort(function(a, b) { return a - b; });
+                        const half = Math.floor(variant.arrayOfPrice.length / 2);
+
+                        if (variant.arrayOfPrice.length % 2) {
+                            variant.totalMedPrice = variant.arrayOfPrice[half];
+                        } else {
+                            variant.totalMedPrice = (variant.arrayOfPrice[half - 1] + variant.arrayOfPrice[half]) / 2.0;
+                        }
+
+                        return variant;
+                    });
+                });
+            });
 
             // res.status(200).send(response);
 

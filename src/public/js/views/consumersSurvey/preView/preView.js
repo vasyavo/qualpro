@@ -117,11 +117,14 @@ define([
                 var target = $(event.target);
                 var answerId = target.attr('data-id');
                 var model = new QuestionAnswerModel();
+                var answerModel = this.answersCollection.get(answerId);
 
                 model.delete(answerId);
 
                 model.on('answer-deleted', function () {
-                    that.$el.find('#respondent-answer-container-' + answerId).remove();
+                    that.trigger('re-render', answerModel.get('questionnaryId'));
+
+                    that.$el.dialog('close').dialog('destroy').remove();
                 });
             }
         },
