@@ -124,10 +124,10 @@ const schema = new Schema({
 });
 
 schema.pre('save', function(next) {
-    this.ppt = Math.round(this.ppt * 100);
-    this.rspMin = Math.round(this.rspMin * 100);
-    this.rspMax = Math.round(this.rspMax * 100);
-    this.pptPerCase = Math.round(this.pptPerCase * 100);
+    this.ppt = Math.round(this.ppt * 1000);
+    this.rspMin = Math.round(this.rspMin * 1000);
+    this.rspMax = Math.round(this.rspMax * 1000);
+    this.pptPerCase = Math.round(this.pptPerCase * 1000);
 
     next();
 });
@@ -143,10 +143,10 @@ schema.pre('update', function(next) {
 
         this.update({}, {
             $set: {
-                ppt: Math.round(price * 100),
-                rspMin: Math.round(rspMin * 100),
-                rspMax: Math.round(rspMax * 100),
-                pptPerCase: Math.round(pptPerCase * 100),
+                ppt: Math.round(price * 1000),
+                rspMin: Math.round(rspMin * 1000),
+                rspMax: Math.round(rspMax * 1000),
+                pptPerCase: Math.round(pptPerCase * 1000),
             },
         });
 

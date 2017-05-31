@@ -2,6 +2,15 @@ const CategoryModel = require('../../../../../types/category/model');
 
 function* getCategoryForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
+        $sort: {
+            'createdBy.date': 1
+        }
+    }, {
         $project: {
             _id   : 0,
             id    : {$ifNull: ['$_id', '']},

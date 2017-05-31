@@ -4,11 +4,19 @@ const CategoryModel = require('../../../../../types/category/model');
 const logger = require('../../../../../utils/logger');
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
+    if (!arName) {
+        throw new Error(`Validation failed, Name(AR) is required.`);
+    }
 
     const query = {
         'name.en': enName
@@ -45,6 +53,10 @@ function* createOrUpdate(payload) {
     try {
         yield CategoryModel.update(query, modify, opt);
     } catch (ex) {
+        if(ex.code === 11000){
+            throw new Error('Category with such Name (AR) already exists');
+        }
+
         throw ex;
     }
 }
@@ -60,7 +72,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import category id ${element.id}. \n Details: ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import category id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

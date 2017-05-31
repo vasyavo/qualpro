@@ -274,10 +274,6 @@ const QuestionnaryHandler = function () {
 
                 updater.$inc = personnelAnswerExists ? {countBranches: -1} : {countAnswered: 1, countBranches: -1};
 
-                if (questionnary.countBranches * 1 - 1 <= 0) {
-                    updater.status = 'completed';
-                }
-
                 updater.editedBy = createdBy;
 
                 QuestionnaryModel.findByIdAndUpdate(data.questionnaryId, updater, function (err) {
@@ -1073,18 +1069,6 @@ const QuestionnaryHandler = function () {
                         });
 
                     }
-
-                    pipeLine.push({
-                        $match: {
-                            'accessRole.level': {
-                                $nin: [
-                                    ACL_CONSTANTS.MASTER_ADMIN,
-                                    ACL_CONSTANTS.MASTER_UPLOADER,
-                                    ACL_CONSTANTS.COUNTRY_UPLOADER
-                                    ]
-                            }
-                        }
-                    });
 
                     pipeLine.push({
                         $group: {

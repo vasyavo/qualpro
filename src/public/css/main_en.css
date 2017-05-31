@@ -11530,3 +11530,6 @@ a.lSPrev {
 a.lSNext {
     background-color: black;
 }
+.other-type-description {
+    height: 30px!important;
+}

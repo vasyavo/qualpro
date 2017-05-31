@@ -52,6 +52,23 @@ function sheetFromCollection(collection, fields) {
     return ws;
 }
 
+/**
+ * @typedef {Object} SheetOpt
+ * @property {string} sheetName - Name of the sheet.
+ * @property {Array} data - Array of data that need to put to the sheet.
+ * @property {Array} header - Array of output field names (keys in object) (order is important - should be the same as sheet column order).
+ * @property {Object} headerRow - Object - first (header) row to the sheet.
+ */
+
+/**
+ * Parse sheets from workbook and return JSON result.
+ * @function
+ * @param {Object} opt - An options.
+ * @param {SheetOpt[]} opt.sheets - An array of sheets parsing options.
+ *
+ * @returns {Object} An object that contains data of each sheet
+ *
+ */
 module.exports = function (options) {
     const {
         sheets

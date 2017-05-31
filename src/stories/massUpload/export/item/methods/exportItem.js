@@ -2,6 +2,11 @@ const ItemModel = require('../../../../../types/item/model');
 
 function*  getItemForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'origins',
             foreignField: '_id',
@@ -48,6 +53,10 @@ function*  getItemForExport() {
         $unwind: {
             path                      : '$country',
             preserveNullAndEmptyArrays: true
+        }
+    }, {
+        $sort: {
+            'createdBy.date': 1
         }
     }, {
         $project: {

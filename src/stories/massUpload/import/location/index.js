@@ -1,7 +1,7 @@
 const loader = require('../utils/loadSheetFromFile');
 const importDomain = require('./methods/importDomain');
 const importRetailSegment = require('./methods/importRetailSegment');
-const importOutlet = require('./methods/importRetailSegment');
+const importOutlet = require('./methods/importOutlet');
 const importBranch = require('./methods/importBranch');
 const logger = require('../../../../utils/logger');
 const {

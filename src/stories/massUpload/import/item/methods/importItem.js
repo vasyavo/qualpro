@@ -7,6 +7,9 @@ const DomainModel = require('../../../../../types/domain/model');
 const ItemModel = require('../../../../../types/item/model');
 const logger = require('../../../../../utils/logger');
 
+const intNumberRegExp = /[0-9]+/;
+const priceQualProRegExp = /(^[0-9]+(\.[0-9]{1,3})?)$/;
+
 function* getOriginId(name) {
     const search = {
         'name.en': {
@@ -33,6 +36,7 @@ function* getOriginId(name) {
 
 function* getCategoryId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -57,6 +61,7 @@ function* getCategoryId(name) {
 
 function* getVariantId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -81,6 +86,7 @@ function* getVariantId(name) {
 
 function* getCountryId(name) {
     const search = {
+        archived : false,
         type     : 'country',
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
@@ -105,7 +111,7 @@ function* getCountryId(name) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
@@ -120,6 +126,30 @@ function* createOrUpdate(payload) {
         variant,
         country
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
+    if (!intNumberRegExp.test(barcode)) {
+        throw new Error(`Validation failed, Barcode should be a number.`);
+    }
+
+    if (!priceQualProRegExp.test(ppt)) {
+        throw new Error(`Validation failed, PPT is not valid.`);
+    }
+
+    if (!priceQualProRegExp.test(pptPerCase)) {
+        throw new Error(`Validation failed, PPT (Case) is not valid.`);
+    }
+
+    if (!priceQualProRegExp.test(rspMin)) {
+        throw new Error(`Validation failed, RSP (Minimum) is not valid.`);
+    }
+
+    if (!priceQualProRegExp.test(rspMax)) {
+        throw new Error(`Validation failed, RSP (Maximum) is not valid.`);
+    }
 
     let originId;
     if (origin) {
@@ -158,7 +188,7 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en': enName,
-        archived : false,
+        country  : countryId,
     };
 
     const modify = {
@@ -218,7 +248,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import item id ${element.id}. \n Details: ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import item id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

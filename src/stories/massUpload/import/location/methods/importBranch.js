@@ -9,6 +9,8 @@ const logger = require('../../../../../utils/logger');
 function* getSubRegionId(name) {
     const search = {
         type     : 'subRegion',
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : `^${_.escapeRegExp(name)}$`,
             $options: 'i'
@@ -33,6 +35,8 @@ function* getSubRegionId(name) {
 
 function* getRetailSegmentId(name) {
     const search = {
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : `^${_.escapeRegExp(name)}$`,
             $options: 'i'
@@ -57,6 +61,8 @@ function* getRetailSegmentId(name) {
 
 function* getOutletId(name) {
     const search = {
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : `^${_.escapeRegExp(name)}$`,
             $options: 'i'
@@ -80,7 +86,7 @@ function* getOutletId(name) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
@@ -90,6 +96,26 @@ function* createOrUpdate(payload) {
         retailSegment,
         outlet
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
+    if (!arName) {
+        throw new Error(`Validation failed, Name(AR) is required.`);
+    }
+
+    if (!subRegion) {
+        throw new Error(`Validation failed, Sub-Region is required.`);
+    }
+
+    if (!outlet) {
+        throw new Error(`Validation failed, Outlet is required.`);
+    }
+
+    if (!retailSegment) {
+        throw new Error(`Validation failed, Retail segment is required.`);
+    }
 
     let subRegionId;
     try {
@@ -119,7 +145,6 @@ function* createOrUpdate(payload) {
         retailSegment: retailSegmentId,
         subRegion    : subRegionId,
         outlet       : outletId,
-        archived     : false
     };
 
     const modify = {
@@ -145,6 +170,7 @@ function* createOrUpdate(payload) {
                 date: new Date()
             },
 
+
             editedBy: {
                 user: null,
                 date: new Date()
@@ -162,6 +188,10 @@ function* createOrUpdate(payload) {
     try {
         yield BranchModel.update(query, modify, opt);
     } catch (ex) {
+        if(ex.code === 11000){
+            throw new Error('Branch duplicates some existing branch in the database');
+        }
+
         throw ex;
     }
 }
@@ -177,7 +207,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import branch id: ${element.id}. \n Details: ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import branch id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

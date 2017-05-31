@@ -2,6 +2,11 @@ const CompetitorItemModel = require('../../../../../types/competitorItem/model')
 
 function*  getCompetitiorItmesForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'origins',
             foreignField: '_id',
@@ -48,6 +53,10 @@ function*  getCompetitiorItmesForExport() {
         $unwind: {
             path                      : '$country',
             preserveNullAndEmptyArrays: true
+        }
+    }, {
+        $sort: {
+            'createdBy.date': 1
         }
     }, {
         $project: {

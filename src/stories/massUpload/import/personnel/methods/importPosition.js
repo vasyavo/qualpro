@@ -4,11 +4,15 @@ const PositionModel = require('../../../../../types/position/model');
 const logger = require('../../../../../utils/logger');
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
 
     const query = {
         'name.en': enName
@@ -60,7 +64,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import position id ${element.id}. \n Details: ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import position id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

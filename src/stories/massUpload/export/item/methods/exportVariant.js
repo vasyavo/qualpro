@@ -2,6 +2,11 @@ const VariantModel = require('../../../../../types/variant/model');
 
 function*  getVariantForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
         $lookup: {
             from        : 'categories',
             foreignField: '_id',
@@ -12,6 +17,10 @@ function*  getVariantForExport() {
         $unwind: {
             path                      : '$category',
             preserveNullAndEmptyArrays: true
+        }
+    }, {
+        $sort: {
+            'createdBy.date': 1
         }
     }, {
         $project: {

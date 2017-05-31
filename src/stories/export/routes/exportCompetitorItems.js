@@ -12,7 +12,7 @@ module.exports = function* exportCompetitorItems(req, res, next) {
     }
 
     const data = generateSheet(options);
-    const fileName = `competitor-items-${moment().format('DD-MM-YYYY_HHmmss')}.xlsx`;
+    const fileName = `competitor-list-${moment().format('DD-MM-YYYY_HHmmss')}.xlsx`;
     res.writeHead(200, {
         'Content-Type'       : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-disposition': `attachment;filename=${fileName}`,

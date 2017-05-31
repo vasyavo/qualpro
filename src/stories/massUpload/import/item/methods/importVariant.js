@@ -23,19 +23,23 @@ function* getCategoryId(name) {
     }
 
     if (!data) {
-        throw new Error(`Can not found sub-region: ${name}`);
+        throw new Error(`Can not found category: ${name}`);
     }
 
     return data;
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
         category,
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
 
     let categoryId;
     try {
@@ -45,8 +49,7 @@ function* createOrUpdate(payload) {
     }
 
     const query = {
-        'name.en': enName,
-        archived : false,
+        'name.en': enName
     };
 
     const modify = {
@@ -96,7 +99,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import variant id ${element.id}. \n Details: ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import variant id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

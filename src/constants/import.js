@@ -283,7 +283,7 @@ module.exports = {
                 id     : 'ID',
                 enName : 'Name (EN)',
                 arName : 'Name (AR)',
-                size   : 'Size',
+                size   : 'Weight',
                 origin : 'Origin',
                 brand  : 'Brand',
                 variant: 'Variant',

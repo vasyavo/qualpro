@@ -1186,8 +1186,6 @@ define([
                 changeMonth: true,
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
-                minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateStart, 'DD.MM.YYYY').toDate(),
                 onClose    : function (selectedDate) {
                     $endDate.datepicker('option', 'minDate', selectedDate);
@@ -1199,7 +1197,6 @@ define([
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
-                maxDate    : new Date(dateEnd),
                 defaultDate: moment(jsonModel.dateEnd, 'DD.MM.YYYY').toDate(),
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);

@@ -8,6 +8,9 @@ const AccessRoleModel = require('../../../../../types/accessRole/model');
 const PersonnelModel = require('../../../../../types/personnel/model');
 const logger = require('../../../../../utils/logger');
 
+const phoneRegExp = /^[0-9\+]?([0-9-\s()])+[0-9()]$/;
+const emailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 function getStringForRegex(str) {
     return _.trim(_.escapeRegExp(str))
 }
@@ -15,6 +18,8 @@ function getStringForRegex(str) {
 function* getDomainId(name, type = 'country') {
     const search = {
         type,
+        topArchived : false,
+        archived : false,
         'name.en': {
             $regex  : getStringForRegex(name),
             $options: 'i'
@@ -39,6 +44,8 @@ function* getDomainId(name, type = 'country') {
 
 function* getBranchId(name) {
     const search = {
+        archived : false,
+        topArchived : false,
         'name.en': {
             $regex  : getStringForRegex(name),
             $options: 'i'
@@ -244,7 +251,7 @@ function* getMainDependencies(options) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enFirstName,
         arFirstName,
@@ -254,12 +261,21 @@ function* createOrUpdate(payload) {
         phoneNumber,
         dateJoined
     } = options;
+    const query = {};
 
     let mainDeps;
     try {
         mainDeps = yield* getMainDependencies(options);
     } catch (ex) {
         throw ex;
+    }
+
+    if (!enFirstName) {
+        throw new Error(`Validation failed, First Name(EN) is required.`);
+    }
+
+    if (!enLastName) {
+        throw new Error(`Validation failed, Last Name(EN) is required.`);
     }
 
     const rawOpt = {
@@ -279,11 +295,21 @@ function* createOrUpdate(payload) {
     }
 
     if (email) {
+        if (!emailRegExp.test(email)) {
+            throw new Error(`Validation failed, email is not valid.`);
+        }
+
         rawOpt.email = email;
+        query.email = email;
     }
 
-    if (phoneNumber) {
+    if (phoneNumber && !phoneRegExp.test(phoneNumber)) {
+        throw new Error(`Validation failed, phone number is not valid.`);
+    }
+
+    if (!email && phoneNumber) {
         rawOpt.phoneNumber = phoneNumber;
+        query.phoneNumber = phoneNumber;
     }
 
     if (dateJoined) {
@@ -295,11 +321,6 @@ function* createOrUpdate(payload) {
     }
 
     const setObj = Object.assign(rawOpt, mainDeps);
-
-    const query = {
-        'firstName.en': enFirstName,
-        'lastName.en' : enLastName
-    };
 
     const modify = {
         $set: setObj,
@@ -342,7 +363,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import personnel id: ${element.id}. \n ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import personnel id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

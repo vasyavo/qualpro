@@ -2,10 +2,12 @@ const _ = require('lodash');
 const trimObjectValues = require('../../utils/trimObjectValues');
 const OriginModel = require('../../../../../types/origin/model');
 const BrandModel = require('../../../../../types/brand/model');
-const VariantModel = require('../../../../../types/variant/model');
+const CompetitorVariantModel = require('../../../../../types/competitorVariant/model');
 const DomainModel = require('../../../../../types/domain/model');
 const CompetitorItemModel = require('../../../../../types/competitorItem/model');
 const logger = require('../../../../../utils/logger');
+
+const intNumberRegExp = /[0-9]+/;
 
 function* getOriginId(name) {
     const search = {
@@ -33,6 +35,7 @@ function* getOriginId(name) {
 
 function* getBrandId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -57,6 +60,7 @@ function* getBrandId(name) {
 
 function* getVariantId(name) {
     const search = {
+        archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
@@ -65,7 +69,7 @@ function* getVariantId(name) {
 
     let data;
     try {
-        data = yield VariantModel.findOne(search, {_id: 1})
+        data = yield CompetitorVariantModel.findOne(search, {_id: 1})
             .lean()
             .then(data => data && data._id);
     } catch (ex) {
@@ -81,6 +85,7 @@ function* getVariantId(name) {
 
 function* getCountryId(name) {
     const search = {
+        archived : false,
         type     : 'country',
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
@@ -105,7 +110,7 @@ function* getCountryId(name) {
 }
 
 function* createOrUpdate(payload) {
-    const options = trimObjectValues(payload);
+    const options = trimObjectValues(payload, {includeValidation: true});
     const {
         enName,
         arName,
@@ -115,6 +120,14 @@ function* createOrUpdate(payload) {
         variant,
         country
     } = options;
+
+    if (!enName) {
+        throw new Error(`Validation failed, Name(EN) is required.`);
+    }
+
+    if (!intNumberRegExp.test(size)) {
+        throw new Error(`Validation failed, Weight should be a number.`);
+    }
 
     let originId;
     if (origin) {
@@ -148,13 +161,15 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en': enName,
-        archived : false,
+        packing  : size,
+        brand    : brandId,
+        country  : countryId,
     };
 
     const modify = {
         $set: {
             packing: size,
-            origin : originId,
+            origin : [originId],
             brand  : brandId,
             variant: variantId,
             country: countryId,
@@ -203,7 +218,8 @@ module.exports = function* importer(data) {
 
             numImported += 1;
         } catch (ex) {
-            const msg = `Error to import competitor item id ${element.id}. \n Details: ${ex}`;
+            const rowNum = !isNaN(element.__rowNum__) ? (element.__rowNum__ + 1) : '-';
+            const msg = `Error to import competitor item id: ${element.id || '-'} row: ${rowNum}. \n Details: ${ex}`;
 
             logger.warn(msg);
             errors.push(msg);

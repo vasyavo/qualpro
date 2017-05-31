@@ -70,7 +70,6 @@ module.exports = function(app) {
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
-
     app.get('/', csrfProtection, (req, res, next) => {
         res.render('index.html', {
             csrfToken: req.csrfToken(),

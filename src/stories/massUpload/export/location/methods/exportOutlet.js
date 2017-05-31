@@ -2,6 +2,15 @@ const OutletModel = require('../../../../../types/outlet/model');
 
 function*  getOutletForExport() {
     const pipeLine = [{
+        $match: {
+            archived   : false,
+            topArchived: false
+        }
+    }, {
+        $sort: {
+            'createdBy.date': 1
+        }
+    }, {
         $project: {
             _id   : 0,
             id    : '$_id',

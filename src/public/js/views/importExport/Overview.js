@@ -1,6 +1,7 @@
 define(function (require) {
 
     var Marionette = require('marionette');
+    var PubNubClient = require('services/pubnub');
     var ImportErrorsView = require('views/importExport/ImportErrors');
     var Template = require('text!templates/importExport/overview.html');
     var MS_EXEL_CONTENT_TYPES = require('constants/otherConstants').MS_EXCEL_CONTENT_TYPES;
@@ -13,12 +14,43 @@ define(function (require) {
 
         initialize: function (options) {
             this.translation = options.translation;
+
+            App.EventBus.off('import-finished');
+            App.EventBus.on('import-finished', this.onImportFinished, this);
         },
 
         className: 'row import-buttons',
 
         template: function (ops) {
             return _.template(Template)(ops);
+        },
+
+        onImportFinished: function (response) {
+            var that = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+
+            App.$preLoader.fadeFn({
+                visibleState: false
+            });
+
+            if (response.rootError) {
+                App.renderErrors([
+                    response.rootError,
+                ]);
+                return;
+            }
+
+            if (response.totalErrors) {
+                this.importErrorsView = new ImportErrorsView({
+                    translation: that.translation,
+                    models     : response.result,
+                });
+            } else {
+                App.render({
+                    type   : 'notification',
+                    message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
+                });
+            }
         },
 
         templateContext: function () {
@@ -28,20 +60,20 @@ define(function (require) {
         },
 
         ui: {
-            locations: '#locations',
-            personnels: '#personnels',
-            itemPrices: '#item-prices',
-            competitorList: '#competitor-list',
-            locationsButtonTitle: '#locations-button-title',
-            personnelsButtonTitle: '#personnels-button-title',
-            itemPricesButtonTitle: '#item-prices-button-title',
+            locations                : '#locations',
+            personnels               : '#personnels',
+            itemPrices               : '#item-prices',
+            competitorList           : '#competitor-list',
+            locationsButtonTitle     : '#locations-button-title',
+            personnelsButtonTitle    : '#personnels-button-title',
+            itemPricesButtonTitle    : '#item-prices-button-title',
             competitorListButtonTitle: '#competitor-list-button-title',
         },
 
         events: {
-            'click @ui.locations': 'exportLocations',
-            'click @ui.personnels': 'exportPersonnels',
-            'click @ui.itemPrices': 'exportItemPrices',
+            'click @ui.locations'     : 'exportLocations',
+            'click @ui.personnels'    : 'exportPersonnels',
+            'click @ui.itemPrices'    : 'exportItemPrices',
             'click @ui.competitorList': 'exportCompetitorList',
         },
 
@@ -87,12 +119,12 @@ define(function (require) {
             var currentLanguage = App.currentUser.currentLanguage;
 
             ui.locations.dropzone({
-                url: 'import/locations',
-                paramName: 'source',
-                maxFilesize: 5,
-                uploadMultiple: false,
+                url              : 'import/locations?channel=' + App.currentDeviceChannel,
+                paramName        : 'source',
+                maxFilesize      : 5,
+                uploadMultiple   : false,
                 previewsContainer: false,
-                accept: function (file, done) {
+                accept           : function (file, done) {
                     if (!MS_EXEL_CONTENT_TYPES.includes(file.type)) {
                         var errorMessage = ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage];
 
@@ -103,22 +135,14 @@ define(function (require) {
                         return done(errorMessage);
                     }
 
+                    App.$preLoader.fadeFn({
+                        visibleState: true,
+                        transparent: true
+                    });
+
                     done();
                 },
-                success: function (file, response) {
-                    if (response.totalErrors) {
-                        this.importErrorsView = new ImportErrorsView({
-                            translation: that.translation,
-                            models: response.result,
-                        });
-                    } else {
-                        App.render({
-                            type: 'notification',
-                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
-                        });
-                    }
-                },
-                error: function (file, error) {
+                error            : function (file, error) {
                     App.renderErrors([
                         error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
                     ]);
@@ -126,12 +150,12 @@ define(function (require) {
             });
 
             ui.personnels.dropzone({
-                url: 'import/personnels',
-                paramName: 'source',
-                maxFilesize: 5,
-                uploadMultiple: false,
+                url              : 'import/personnels?channel=' + App.currentDeviceChannel,
+                paramName        : 'source',
+                maxFilesize      : 5,
+                uploadMultiple   : false,
                 previewsContainer: false,
-                accept: function (file, done) {
+                accept           : function (file, done) {
                     if (!MS_EXEL_CONTENT_TYPES.includes(file.type)) {
                         var errorMessage = ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage];
 
@@ -142,22 +166,14 @@ define(function (require) {
                         return done(errorMessage);
                     }
 
+                    App.$preLoader.fadeFn({
+                        visibleState: true,
+                        transparent: true
+                    });
+
                     done();
                 },
-                success: function (file, response) {
-                    if (response.totalErrors) {
-                        this.importErrorsView = new ImportErrorsView({
-                            translation: that.translation,
-                            models: response.result,
-                        });
-                    } else {
-                        App.render({
-                            type: 'notification',
-                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
-                        });
-                    }
-                },
-                error: function (file, error) {
+                error            : function (file, error) {
                     App.renderErrors([
                         error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
                     ]);
@@ -165,12 +181,12 @@ define(function (require) {
             });
 
             ui.itemPrices.dropzone({
-                url: 'import/items',
-                paramName: 'source',
-                maxFilesize: 5,
-                uploadMultiple: false,
+                url              : 'import/items?channel=' + App.currentDeviceChannel,
+                paramName        : 'source',
+                maxFilesize      : 5,
+                uploadMultiple   : false,
                 previewsContainer: false,
-                accept: function (file, done) {
+                accept           : function (file, done) {
                     if (!MS_EXEL_CONTENT_TYPES.includes(file.type)) {
                         var errorMessage = ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage];
 
@@ -181,22 +197,14 @@ define(function (require) {
                         return done(errorMessage);
                     }
 
+                    App.$preLoader.fadeFn({
+                        visibleState: true,
+                        transparent: true
+                    });
+
                     done();
                 },
-                success: function (file, response) {
-                    if (response.totalErrors) {
-                        this.importErrorsView = new ImportErrorsView({
-                            translation: that.translation,
-                            models: response.result,
-                        });
-                    } else {
-                        App.render({
-                            type: 'notification',
-                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
-                        });
-                    }
-                },
-                error: function (file, error) {
+                error            : function (file, error) {
                     App.renderErrors([
                         error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
                     ]);
@@ -204,12 +212,12 @@ define(function (require) {
             });
 
             ui.competitorList.dropzone({
-                url: 'import/competitor-items',
-                paramName: 'source',
-                maxFilesize: 5,
-                uploadMultiple: false,
+                url              : 'import/competitor-items?channel=' + App.currentDeviceChannel,
+                paramName        : 'source',
+                maxFilesize      : 5,
+                uploadMultiple   : false,
                 previewsContainer: false,
-                accept: function (file, done) {
+                accept           : function (file, done) {
                     if (!MS_EXEL_CONTENT_TYPES.includes(file.type)) {
                         var errorMessage = ERROR_MESSAGES.forbiddenTypeOfFile[currentLanguage];
 
@@ -220,22 +228,14 @@ define(function (require) {
                         return done(errorMessage);
                     }
 
+                    App.$preLoader.fadeFn({
+                        visibleState: true,
+                        transparent: true
+                    });
+
                     done();
                 },
-                success: function (file, response) {
-                    if (response.totalErrors) {
-                        this.importErrorsView = new ImportErrorsView({
-                            translation: that.translation,
-                            models: response.result,
-                        });
-                    } else {
-                        App.render({
-                            type: 'notification',
-                            message: INFO_MESSAGES.fileSuccessfullyImported[currentLanguage],
-                        });
-                    }
-                },
-                error: function (file, error) {
+                error            : function (file, error) {
                     App.renderErrors([
                         error.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
                     ]);

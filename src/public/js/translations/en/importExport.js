@@ -1,7 +1,7 @@
 define({
     // default
     importErrorsPreviewTitle: 'Import Errors',
-    dragOrClickTitle: 'Drag files or click here',
+    dragOrClickTitle: 'Click here',
 
     //import
     importLocationsTitle: 'Import Locations',
