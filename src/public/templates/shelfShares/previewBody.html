@@ -4,7 +4,7 @@
     <td><%= model.branch.name.currentLanguage %></td>
     <td id="<%- model._id %>"><%= model.length %>m</td>
     <td><%= model.employee.name.currentLanguage %></td>
-    <td>
+    <td class="<%= permittedToManage ? '' : 'hidden' %>">
         <button id="edit" data-id="<%- model._id %>" data-item-id="<%- model.brands._id %>" data-value="<%- model.length %>">Edit</button>
         <button id="delete" data-id="<%- model._id %>" data-item-id="<%- model.brands._id %>">Delete</button>
     </td>
