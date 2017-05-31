@@ -19,6 +19,9 @@ define([
         goToBtn             : 'Go to',
         editBtn             : 'Edit',
         displayType         : 'Display Type',
+        manage: 'Manage',
+        productsInformation: 'Products information',
+        manageProductsInformation: 'Manage products information',
 
         // list
         created: 'Created',
@@ -41,7 +44,8 @@ define([
         // preview
         viewPlanogram   : 'View Planogram',
         photo           : 'Photo',
-        previewPlanogram: 'Preview Planogram'
+        previewPlanogram: 'Preview Planogram',
+        close: 'Close'
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);

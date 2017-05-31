@@ -75,7 +75,7 @@ const getAll = Joi.object().keys({
         retailSegment : objectIdsCollection,
         branch : objectIdsCollection,
         country : Joi.object().keys({
-            values : Joi.array().items(customJoi.objectId().toObjectId()).max(1)
+            values : Joi.array().items(customJoi.objectId().toObjectId())
         }),
         region : objectIdsCollection,
         subRegion : objectIdsCollection,
