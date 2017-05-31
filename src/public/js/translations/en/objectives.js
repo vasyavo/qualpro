@@ -108,7 +108,8 @@ define([
             ar: 'Add english translation'
         },
 
-        dialogTitle: 'Objectives files'
+        dialogTitle: 'Objectives files',
+        countOfAttachedFiles: 'Count of attached files'
     };
 
     return _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

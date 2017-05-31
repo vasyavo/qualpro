@@ -581,7 +581,7 @@ module.exports = [
         module: ACL_MODULES.AL_ALALI_QUESTIONNAIRE,
         cms: {
             archive: false,
-            edit: false,
+            edit: true,
             write: false,
             read: true
         },

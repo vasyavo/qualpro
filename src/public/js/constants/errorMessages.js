@@ -344,6 +344,10 @@
             en: 'Not saved',
             ar: '' //todo
         },
+        selectFileOnlyForOneBranch: {
+            en: 'You should select file only for one branch',
+            ar: '' // todo
+        },
         enterDescription: {
             en: 'Description expected',
             ar: '' //todo

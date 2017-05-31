@@ -7,8 +7,9 @@ define([
     'collections/file/collection',
     'views/fileDialog/fileDialog',
     'text!templates/notifications/preview.html',
-    'constants/levelConfig'
-], function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPreviewView, PreviewTemplate, LEVEL_CONFIG) {
+    'constants/levelConfig',
+    'constants/otherConstants'
+], function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPreviewView, PreviewTemplate, LEVEL_CONFIG, CONSTANTS) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.NOTIFICATIONS,
@@ -50,6 +51,14 @@ define([
             var self = this;
             var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
             jsonModel.currentLanguage = this.language;
+
+            if (jsonModel.type) {
+                var notificationTypeObject = CONSTANTS.NOTIFICATION_TYPES.find(function (type) {
+                    return type._id === jsonModel.type;
+                });
+
+                jsonModel.type = notificationTypeObject.name[this.language];
+            }
 
             formString = this.$el.html(this.template({
                 jsonModel: jsonModel,
