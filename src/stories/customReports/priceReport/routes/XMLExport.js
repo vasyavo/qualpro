@@ -1,9 +1,9 @@
+const conversion = require('html-to-xlsx')();
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const ItemHistoryModel = require('./../../../../types/itemHistory/model');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
@@ -51,9 +51,6 @@ module.exports = (req, res, next) => {
         const query = req.query;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const pipeline = [];
 
         const queryFilterValidate = ajv.compile(filterSchema);
@@ -131,41 +128,10 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $group: {
-                _id: null,
-                total: { $sum: 1 },
-                setPrice: { $push: '$$ROOT' },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$setPrice',
-        });
-
-        pipeline.push({
             $project: {
                 _id: 0,
-                date: '$setPrice._id',
-                price: '$setPrice.ppt',
-                total: 1,
-            },
-        });
-
-        pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
-        });
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                total: { $first: '$total' },
-                data: {
-                    $push: '$$ROOT',
-                },
+                date: '$_id',
+                price: '$ppt',
             },
         });
 
@@ -186,15 +152,85 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result.length ?
-            result[0] : { data: [], total: 0 };
+        /*
+         *   result example:
+         *        [
+         *            {
+         *                "date": "2016-11-24",
+         *                "price": 323
+         *            }
+         *        ]
+         *
+         *    htmlTable example:
+         *       <table>
+         *           <thead>
+         *               <tr>
+         *                   <th>Price</th>
+         *                   <th>Date</th>
+         *               </tr>
+         *           </thead>
+         *           <tbody>
+         *               <tr>
+         *                   <td>323</td>
+         *                   <td>November, 2016</td>
+         *               </tr>
+         *           </tbody>
+         *       </table>
+         */
 
-        response.data.forEach((item) => {
-            delete item.total;
+        let htmlTable = '<table>';
+
+        let thead = '<thead>';
+        let tbody = '<tbody>';
+
+        let headTr = '<tr>';
+
+        headTr += '<th>Price</th>';
+        headTr += '<th>Date</th>';
+
+        headTr += '</tr>';
+
+        result.forEach((item) => {
+            let bodyTr = '<tr>';
 
             item.date = moment(item.date).format('MMMM, YYYY');
+
+            bodyTr += `<td>${item.price}</td>`;
+            bodyTr += `<td>${item.date}</td>`;
+
+            bodyTr += '</tr>';
+
+            tbody += bodyTr;
         });
 
-        res.status(200).send(response);
+        tbody += '</tbody>';
+
+        thead += headTr;
+        thead += '</thead>';
+
+        htmlTable += thead + tbody;
+        htmlTable += '</table>';
+
+        conversion(htmlTable, (err, stream) => {
+            if (err) {
+                return next(err);
+            }
+
+            const bufs = [];
+
+            stream.on('data', (data) => {
+                bufs.push(data);
+            });
+
+            stream.on('end', () => {
+                const buf = Buffer.concat(bufs);
+
+                res.set({
+                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Disposition': `attachment; filename="priceReportExport_${new Date()}.xls"`,
+                    'Content-Length': buf.length,
+                }).status(200).send(buf);
+            });
+        });
     });
 };
