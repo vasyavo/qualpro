@@ -183,8 +183,8 @@ define(function (require) {
 
                     branch.afterDescription = branchFromVFData ? branchFromVFData.after.description : '';
                     branch.beforeDescription = that.beforeDescription;
-                    branch.countOfAttachedFilesInBefore = branchFromVFData.before.files.length;
-                    branch.countOfAttachedFilesInAfter = branchFromVFData.after.files.length;
+                    branch.countOfAttachedFilesInBefore = branchFromVFData ? branchFromVFData.before.files.length : 0;
+                    branch.countOfAttachedFilesInAfter = branchFromVFData ? branchFromVFData.after.files.length : 0;
 
                     branch.beforeFileContainers = branchFromVFData ? branchFromVFData.before.files.map(function (fileObj) {
                         var fileType = fileObj.contentType.substr(0, 5);

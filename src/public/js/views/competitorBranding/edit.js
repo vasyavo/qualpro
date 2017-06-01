@@ -58,8 +58,8 @@ define(function (require) {
                             var startDate = that.$el.find('#dateStart').val();
                             var endDate = that.$el.find('#dateEnd').val();
                             var data = {
-                                dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
-                                dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
+                                dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : null,
+                                dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : null,
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
                                 description: {
                                     en: ui.descriptionEn.val(),
@@ -101,9 +101,7 @@ define(function (require) {
             var startDateObj = {
                 changeMonth: true,
                 changeYear : true,
-                maxDate : new Date(dateEnd),
                 yearRange  : '-20y:c+10y',
-                defaultDate: new Date(dateStart),
                 onClose    : function (selectedDate) {
                     $dueDate.datepicker('option', 'minDate', selectedDate);
                 }
@@ -112,9 +110,7 @@ define(function (require) {
             var endDateObj = {
                 changeMonth: true,
                 changeYear : true,
-                minDate : new Date(dateStart),
                 yearRange  : '-20y:c+10y',
-                defaultDate: new Date(dateEnd),
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }
@@ -122,6 +118,16 @@ define(function (require) {
 
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
+
+            if(dateEnd){
+                startDateObj.maxDate = new Date(dateEnd);
+                endDateObj.defaultDate = new Date(dateEnd);
+            }
+
+            if(dateStart){
+                endDateObj.minDate = new Date(dateStart);
+                startDateObj.defaultDate = new Date(dateStart);
+            }
 
             this.displayTypeCollection = new DisplayTypeCollection();
             this.displayTypeCollection.on('reset', function () {

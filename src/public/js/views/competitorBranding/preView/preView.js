@@ -86,8 +86,8 @@ define([
                 model.on('competitor-branding-edited', function (response) {
                     var view = that.$el;
 
-                    response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
-                    response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
+                    response.dateStart = response.dateStart ? moment.utc(response.dateStart).format('DD.MM.YYYY') : '';
+                    response.dateEnd = response.dateEnd ? moment.utc(response.dateEnd).format('DD.MM.YYYY') : '';
                     that.model.set(response, {merge: true});
 
                     if (data.dateStart) {

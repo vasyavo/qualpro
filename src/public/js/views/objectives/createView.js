@@ -682,7 +682,6 @@ define([
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
-                maxDate    : new Date(endDate),
                 defaultDate: new Date(dateStart),
                 onClose    : function (selectedDate) {
                     $endDate.datepicker('option', 'minDate', selectedDate);
@@ -694,8 +693,6 @@ define([
                 changeYear : true,
                 yearRange  : '-20y:c+10y',
                 minDate    : new Date(dateStart),
-                maxDate    : new Date(endDate),
-                defaultDate: new Date(endDate),
                 onClose    : function (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }

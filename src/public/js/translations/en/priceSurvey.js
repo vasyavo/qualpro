@@ -10,6 +10,7 @@ define([
             mid: 'mid',
             min: 'min',
             avg: 'avg',
+            median: 'med',
 
             // header
             total   : 'Total',
