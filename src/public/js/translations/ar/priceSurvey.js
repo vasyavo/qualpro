@@ -10,6 +10,7 @@ define([
             mid: ' منتصف',
             min: 'الأدنى',
             avg: ' متوسط ',
+            median: '', // todo
 
             // header
             total   : 'المجموع الكلى',
