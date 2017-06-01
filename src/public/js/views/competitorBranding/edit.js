@@ -119,6 +119,10 @@ define(function (require) {
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
 
+            $startDate.on('click', function () {
+                $(this).datepicker('show');
+            });
+
             if(dateEnd){
                 startDateObj.maxDate = new Date(dateEnd);
                 endDateObj.defaultDate = new Date(dateEnd);
