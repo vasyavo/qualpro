@@ -477,9 +477,9 @@ define([
 
             $thumbnail.remove();
             --this.updateCount;
-
+debugger;
             this.attachments = _.without(this.attachments, fileId);
-            if (!file.uploaded) {
+            if (!file.get('uploaded')) {
                 this.files.remove(file, {silent: true});
                 this.$el.find('#' + file.cid).remove();
             } else {
@@ -650,7 +650,6 @@ define([
         },
 
         showLinkedForm: function (form) {
-
             this.$el.find('#objectiveFormThumbnail').append(this.formTemplate({
                 name       : form.contentType.capitalizer('firstCaps') + ' Form',
                 id         : form._id,
@@ -669,7 +668,7 @@ define([
             var files;
             var change;
             this.checkForEmptyInput(this.files, this.$el);
-
+debugger;
             files = this.files.toJSON();
             attachments = _.pluck(model.attachments, '_id');
             selectedFiles = _.where(files, {selected: true});
@@ -682,8 +681,6 @@ define([
                 } else {
                     this.updateCount = null;
                 }
-            } else {
-                this.attachments = [];
             }
 
             if (!Object.keys(this.body).length && !this.updateCount && !this.visibilityFormDataChanged) {
