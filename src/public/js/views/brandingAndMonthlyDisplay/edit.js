@@ -123,6 +123,10 @@ define(function (require) {
             $startDate.datepicker(startDateObj);
             $dueDate.datepicker(endDateObj);
 
+            $startDate.on('click', function () {
+                $(this).datepicker('show');
+            });
+
             this.displayTypeCollection = new DisplayTypeCollection();
             this.displayTypeCollection.on('reset', function () {
                 const defaultDisplayTypes = model.displayType.map(function (item) {
