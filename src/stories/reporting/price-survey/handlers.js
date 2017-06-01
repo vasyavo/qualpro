@@ -523,7 +523,7 @@ const removeItem = (req, res, next) => {
             if (err) {
                 return next(err);
             }
-    
+
             res.status(200).send(body);
         });
     };
@@ -812,6 +812,7 @@ const getAll = (req, res, next) => {
                 variant: { $first: '$variant' },
                 branch: { $first: '$branch' },
                 size: { $first: '$size' },
+                totalPrice: { $push: '$price' },
                 minPrice: { $min: '$price' },
                 maxPrice: { $max: '$price' },
                 avgPrice: { $avg: '$price' }
@@ -827,6 +828,7 @@ const getAll = (req, res, next) => {
                 branch: 1,
                 size: 1,
                 price: '$_id.price',
+                totalPrice: 1,
                 minPrice: 1,
                 maxPrice: 1,
                 avgPrice: 1,
@@ -854,6 +856,7 @@ const getAll = (req, res, next) => {
                 branch: '$data.branch',
                 size: '$data.size',
                 price: '$data.price',
+                totalPrice: '$data.totalPrice',
                 minPrice: '$data.minPrice',
                 maxPrice: '$data.maxPrice',
                 avgPrice: '$data.avgPrice',
@@ -882,6 +885,7 @@ const getAll = (req, res, next) => {
                         minPrice: '$minPrice',
                         maxPrice: '$maxPrice',
                         avgPrice: '$avgPrice',
+                        price: '$totalPrice',
                         currency: '$currency'
                     }
                 },
@@ -1020,8 +1024,6 @@ const getAll = (req, res, next) => {
                     return model;
                 });
             }
-            console.log(response[0]);
-
             response = response && response[0] ? response[0] : { data: [], total: 0 };
 
             response.data.map(function (priceSurvey) {
@@ -1035,7 +1037,17 @@ const getAll = (req, res, next) => {
                         } else {
                             variant.totalMedPrice = (variant.arrayOfPrice[half - 1] + variant.arrayOfPrice[half]) / 2.0;
                         }
+                        variant.branches = variant.branches.map(function (branch) {
+                            branch.price = branch.price.sort(function(a, b) { return a - b; });
+                            const half = Math.floor(branch.price.length / 2);
 
+                            if (branch.price.length % 2) {
+                                branch.medPrice = branch.price[half];
+                            } else {
+                                branch.medPrice = (branch.price[half - 1] + branch.price[half]) / 2.0;
+                            }
+                            return branch;
+                        });
                         return variant;
                     });
                 });
