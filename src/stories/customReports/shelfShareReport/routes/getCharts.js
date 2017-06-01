@@ -267,18 +267,27 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const responseData = result[0];
-        const response = { barChart: { datasets: [] } };
+        const resultSet = result[0];
 
-        if (responseData) {
-            const keys = Object.keys(responseData);
-            response.barChart = {
-                datasets: [],
+        if (resultSet) {
+            const timeFrame = Object.keys(resultSet);
+
+            const response = {
+                barChart: {
+                    labels: [],
+                    datasets: [],
+                },
+                pieChart: {
+                    labels: [],
+                    datasets: [],
+                },
             };
-            keys.forEach((key) => {
-                if (responseData[key]) {
-                    const chartData = responseData[key][0];
-                    if (key === 'timePeriod') {
+
+            timeFrame.forEach((timePeriod) => {
+                const chartData = resultSet[timePeriod][0];
+
+                if (resultSet[timePeriod] && chartData) {
+                    if (timePeriod === 'timePeriod') {
                         response.pieChart = {
                             labels: chartData.barChart.labels,
                             datasets: [{
