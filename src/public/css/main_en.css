@@ -7006,8 +7006,8 @@ ul.newSelectList .miniStylePagination {
   left: 0;
 }
 .bannerBlock {
-  position: absolute;
-  right: 20%;
+  /*position: absolute;*/
+  /*right: 20%;*/
 }
 .previewLocation .locationPath {
   padding: 10px;
@@ -8449,6 +8449,9 @@ table:not(.ui-datepicker-calendar) thead tr td {
   color: #000000;
   font-size: 12px;
   font-size: 0.75rem;
+}
+.dates:empty {
+  display: none;
 }
 .count {
   min-width: 20px;

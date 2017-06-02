@@ -92,28 +92,31 @@ define(function (require) {
                 }
             });
 
-            var $startDate = this.$el.find('#dateStart');
-            var $dueDate = this.$el.find('#dateEnd');
+            var startDateElement = this.$el.find('#dateStart');
+            var dueDateElement = this.$el.find('#dateEnd');
 
-            $startDate.datepicker({
+            $(startDateElement).datepicker({
                 changeMonth: true,
                 changeYear : true,
                 maxDate : new Date(dateEnd),
                 yearRange  : '-20y:c+10y',
                 defaultDate: new Date(dateStart),
                 onClose    : function (selectedDate) {
-                    $dueDate.datepicker('option', 'minDate', selectedDate);
+                    dueDateElement.datepicker('option', 'minDate', selectedDate);
                 }
             });
-            $dueDate.datepicker({
+            $(dueDateElement).datepicker({
                 changeMonth: true,
                 changeYear : true,
                 minDate : new Date(dateStart),
                 yearRange  : '-20y:c+10y',
                 defaultDate: new Date(dateEnd),
                 onClose    : function (selectedDate) {
-                    $startDate.datepicker('option', 'maxDate', selectedDate);
+                    startDateElement.datepicker('option', 'maxDate', selectedDate);
                 }
+            });
+            startDateElement.on('click', function () {
+                $(this).datepicker('show');
             });
 
             arabicInput(this);
