@@ -1,9 +1,11 @@
 define([
         'models/parrent',
         'validation',
-        'constants/contentType'
+        'constants/contentType',
+        'constants/errorMessages',
+        'dataService',
     ],
-    function (parent, validation, CONTENT_TYPES) {
+    function (parent, validation, CONTENT_TYPES, ERROR_MESSAGES, dataService) {
         var Model = parent.extend({
             defaults      : {},
             attachmentsKey: 'attachments',
@@ -47,7 +49,37 @@ define([
                 }).join(', ');
 
                 return model;
+            },
+
+            edit: function (newProductLaunchId, data) {
+                var that = this;
+                var currentLanguage = App.currentUser.currentLanguage;
+
+                dataService.putData('/newProductLaunch/' + newProductLaunchId, data, function (err, response) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('new-product-launch-edited', response);
+                });
+            },
+
+            delete: function (newProductLaunchId) {
+                var that = this;
+
+                dataService.deleteData('/newProductLaunch/' + newProductLaunchId, {}, function (err) {
+                    if (err) {
+                        return App.renderErrors([
+                            err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                        ]);
+                    }
+
+                    that.trigger('new-product-launch-deleted');
+                });
             }
+
         });
 
         return Model;

@@ -324,37 +324,85 @@
             en: 'elements was deleted',
             ar: 'تم حذف العناصر'
         },
-        statusNotChanged : {
+        statusNotChanged: {
             en: 'Status not changed',
             ar: '' //todo translation
         },
-        commentNotAdded : {
+        commentNotAdded: {
             en: 'Comment not added',
             ar: '' //todo
         },
-        fileNotSelected : {
+        fileNotSelected: {
             en: 'File not selected',
             ar: '' //todo
         },
-        selectOneFile : {
+        selectOneFile: {
             en: 'Select only one file',
             ar: '' //todo
         },
-        notSaved : {
+        notSaved: {
             en: 'Not saved',
             ar: '' //todo
         },
-        enterDescription : {
+        selectFileOnlyForOneBranch: {
+            en: 'You should select file only for one branch',
+            ar: '' // todo
+        },
+        enterDescription: {
             en: 'Description expected',
             ar: '' //todo
         },
-        nothingToShow : {
-            en : 'Nothing to show',
-            ar : '' //todo
+        enterComment: {
+            en: 'Comment expected',
+            ar: '' //todo
         },
-        afterPartNotFilled : {
-            en : 'Visibility form after part in not filled',
-            ar : '' //todo
+        answerRequired: {
+            en: 'Answer is required',
+            ar: '' // todo
+        },
+        nothingToShow: {
+            en: 'Nothing to show',
+            ar: '' //todo
+        },
+        afterPartNotFilled: {
+            en: 'Visibility form after part in not filled',
+            ar: '' //todo
+        },
+        displayTypeRequired: {
+            en: 'Display type is required',
+            ar: '' // todo
+        },
+        weightRequired: {
+            en: 'Weight is required',
+            ar: '' // todo
+        },
+        weightIsNotANumber: {
+            en: 'Weight is not a number',
+            ar: '' // todo
+        },
+        priceRequired: {
+            en: 'Price is required',
+            ar: '' // todo
+        },
+        rspRequired: {
+            en: 'RSP is required',
+            ar: '' // todo
+        },
+        rspIsNotANumber: {
+            en: 'RSP is not a number',
+            ar: '' // todo
+        },
+        distributorRequired: {
+            en: 'Distributor is required',
+            ar: '' // todo
+        },
+        additionalCommentRequired: {
+            en: 'Additional comment is required',
+            ar: '' // todo
+        },
+        enterCorrectValue: {
+            en: 'Enter correct value',
+            ar: '' // todo
         }
     };
 

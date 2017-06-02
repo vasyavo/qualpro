@@ -17,6 +17,7 @@
             <% var outlet        = [];%>
             <% var position      = [];%>
             <% var name          = [];%>
+            <% var type          = [];%>
             <% jsonModel.country.forEach(function(item){ %>
                 <% country.push(item.name[jsonModel.currentLanguage]); %>
             <% }); %>
@@ -119,6 +120,15 @@
                             </div>
                             <div class="cell textEllipsis">
                                 <span id="date" class="hoverFullText textEllipsis"><%= jsonModel.createdBy.date || '' %></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.type %></span>
+                            </div>
+                            <div class="cell">
+                                <span id="type" class="hoverFullText textEllipsis"><%- jsonModel.type || '' %></span>
+                                <p><%- jsonModel.typeDescription || '' %></p>
                             </div>
                         </div>
                     </div>

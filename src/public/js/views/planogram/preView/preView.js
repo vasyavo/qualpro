@@ -11,13 +11,8 @@ define([
     'models/planogram',
     'views/fileDialog/fileDialog',
     'models/file',
-    'populate',
-    'common',
-    'constants/otherConstants',
-    'constants/validation',
     'js-cookie'
-], function (Backbone, $, _, CONSTANTS, template, baseDialog, EditView, planogramModel, FileDialogPreviewView,
-             FileModel, populate, common) {
+], function (Backbone, $, _, CONSTANTS, template, baseDialog, EditView, planogramModel, FileDialogPreviewView, FileModel) {
 
     var PreView = baseDialog.extend({
         contentType   : CONSTANTS.PLANOGRAM,
@@ -28,19 +23,43 @@ define([
         events: {
             'click #editPlanogram': 'openEditView',
             'click #imgPreView'   : 'showFilePreviewDialog',
-            'click #goToBtn'      : 'goTo'
+            'click #goToBtn'      : 'goTo',
+            'click .file-thumbnail': 'openFullSizeFile'
         },
 
         initialize: function (options) {
-
             this.activityList = options.activityList;
             this.model = options.model;
             this.translation = options.translation;
-            //this.contentType = CONSTANTS.PLANOGRAM;
 
             this.makeRender();
             this.render();
         },
+
+        openFullSizeFile: _.debounce(function (event) {
+            var that = this;
+            var fileId = $(event.currentTarget).attr('data-file-id');
+            var fileModel = new FileModel({
+                _id: fileId
+            });
+            fileModel.id = fileId;
+
+            this.fullSizeFileOverview = new FileDialogPreviewView({
+                translation: this.translation,
+                fileModel: fileModel
+            });
+            this.fullSizeFileOverview.on('download', function (options) {
+                var url = options.url;
+                var originalName = options.originalName;
+                var attachmentsContainer = that.$el.find('#product-information-container');
+
+                attachmentsContainer.append('<a id="download-file" class="hidden" href="' + url +  '" download="' + originalName + '"></a>');
+
+                var fileElement = attachmentsContainer.find('#download-file');
+                fileElement[0].click();
+                fileElement.remove();
+            });
+        }, 1000, true),
 
         showFilePreviewDialog: _.debounce(function () {
             var fileModel = new FileModel(this.model.attributes.fileID, {parse: true});
@@ -75,7 +94,10 @@ define([
         },
 
         render: function () {
+            var that = this;
             var modelJSON = this.model.toJSON();
+
+
 
             modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
                 return item.name.currentLanguage;
@@ -101,6 +123,22 @@ define([
                     }
                 }
             });
+
+            modelJSON.productInfo.forEach(function (fileObject) {
+                var content;
+
+                if (/image/.test(fileObject.contentType)) {
+                    content = '<img class="file-thumbnail" src="/preview/' + fileObject.preview + '" width="75" data-file-id="' + fileObject._id + '">';
+                } else {
+                    var fileModel = new FileModel();
+                    var fileType = fileModel.getTypeFromContentType(fileObject.contentType);
+
+                    content = '<div class="file-thumbnail iconThumbnail ' + fileType + '" data-file-id="' + fileObject._id + '"></div>';
+                }
+
+                that.$el.find('#product-information').append(content);
+            });
+
             this.delegateEvents(this.events);
 
             return this;

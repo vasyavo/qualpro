@@ -13,6 +13,7 @@ define([
         aboutSKUFormat   : 'About SKU format',
         addNewBtn        : 'Add new Item',
         deleteBtn        : 'Delete Item',
+        delete: 'Delete',
         questions        : 'Questions',
         type             : 'Type',
         options          : 'Options',
@@ -47,6 +48,9 @@ define([
         goToBtn           : 'Go to',
         questionaryPreview: 'Questionnaire Preview',
         okBtn             : 'Ok',
+
+        //edit answer
+        editAnswerViewTitle: 'Edit answer of question',
 
         // top Bar
         all   : 'al alali Questionnaire',

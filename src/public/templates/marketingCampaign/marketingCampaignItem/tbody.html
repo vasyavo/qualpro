@@ -6,22 +6,21 @@
     <td class="noPadding promotionTableList">
         <ul class="promotionList markedList">
             <% outlet.branches.forEach(function(elem) { %>
-            <li class="hoverFullText"><%= elem.branch.name.currentLanguage %></li>
+                <li class="hoverFullText block-<%- elem._id %>"><%- elem.branch.name.currentLanguage %></li>
             <% }) %>
         </ul>
     </td>
     <td class="noPadding promotionTableList">
         <ul class="promotionList markedList">
             <% outlet.branches.forEach(function(elem) { %>
-            <li><%= elem.createdBy.user.firstName.currentLanguage + ' ' + elem.createdBy.user.lastName.currentLanguage%>
-            </li>
+                <li class="block-<%- elem._id %>"><%= elem.createdBy.user.firstName.currentLanguage + ' ' + elem.createdBy.user.lastName.currentLanguage%></li>
             <% }) %>
         </ul>
     </td>
     <td class="noPadding promotionTableList">
         <ul class="promotionList markedList markedListHover">
             <% outlet.branches.forEach(function(elem) { %>
-            <li data-id="<%= elem._id%>" id="viewComments"><%= translation.viewDetails %></li>
+                <li data-id="<%- elem._id %>" id="viewComments" class="block-<%- elem._id %>"><%= translation.viewDetails %></li>
             <% }) %>
         </ul>
     </td>

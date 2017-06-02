@@ -41,7 +41,10 @@ require.config({
         minigrid             : './libs/minigrid/dist/minigrid.min',
         socketio             : '/socket.io/socket.io.js',
         lodash               : './libs/lodash/lodash',
-        marionette : './libs/backbone.marionette/lib/backbone.marionette'
+        marionette : './libs/backbone.marionette/lib/backbone.marionette',
+        dropzone: './libs/dropzone/dist/dropzone-amd-module',
+        shortId : './libs/js-shortid/dist/js-shortid',
+        lightSlider: './libs/lightslider/dist/js/lightslider'
     },
     shim : {
         jqueryui : ['jQuery'],
@@ -73,10 +76,11 @@ require.config({
 
 require([
     'backbone',
+    'Underscore',
     'jQuery',
     'app',
     'minigrid'
-], function (Backbone, $, app, MiniGrid) {
+], function (Backbone, _, $, app, MiniGrid) {
     var Store = function () {
         this.save = function (name, data) {
             localStorage.setItem(name, JSON.stringify(data));
@@ -93,6 +97,8 @@ require([
     App.storage = new Store();
 
     App.errorContainer = $('#errorHandler');
+
+    App.EventBus = _.extend({}, Backbone.Events);
 
     /**
      *

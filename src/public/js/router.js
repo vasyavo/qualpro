@@ -14,10 +14,13 @@ define([
     'js-cookie',
     'views/documents/list',
     'views/documents/topBar',
+    'views/importExport/Overview',
+    'views/importExport/TopBar',
+    'models/importExport',
+    'constants/aclRoleIndexes',
     'services/pubnub',
-], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView,
-             forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView, PubNubClient) {
+], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView, forgotPassView, dataService, custom, CONSTANTS, Cookies,
+             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView, ImportExportModel, ACL_ROLES, PubNubClient) {
 
     var appRouter = Backbone.Router.extend({
 
@@ -33,6 +36,7 @@ define([
             forgotPass : 'forgotPass',
             'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
             'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
+            'qualPro/importExport' : 'goToImportExportView',
             'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)' : 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
             'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
@@ -140,6 +144,55 @@ define([
                     $('#contentHolder').html(documentsListView.render().$el);
 
                     documentsCollection.getFirstPage();
+                });
+            });
+        },
+
+        goToImportExportView: function () {
+            var that = this;
+
+            this.checkLogin(function (success) {
+                if (!success) {
+                    return that.redirectTo();
+                }
+
+                var currentUserAccessRole = App.currentUser.accessRole.level;
+                if (![ACL_ROLES.MASTER_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
+                    return Backbone.history.navigate('qualPro', true);
+                }
+
+                if (that.view) {
+                    that.view.undelegateEvents();
+                }
+
+                if (that.wrapperView) {
+                    that.wrapperView.undelegateEvents();
+                }
+
+                if (!that.wrapperView) {
+                    that.main('importExport');
+                }
+
+                var $loader = $('#alaliLogo');
+                if (!$loader.hasClass('smallLogo')) {
+                    $loader.addClass('animated');
+                    $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+                }
+
+                require(['translations/' + App.currentUser.currentLanguage + '/importExport'], function (translation) {
+                    var importExportModel = new ImportExportModel();
+
+                    var importExportTopBar = new ImportExportTopBarView({
+                        model: importExportModel,
+                        translation: translation,
+                    });
+                    $('#topBarHolder').html(importExportTopBar.render().$el);
+
+                    var importExportOverview = new ImportExportOverview({
+                        model: importExportModel,
+                        translation: translation,
+                    });
+                    $('#contentHolder').html(importExportOverview.render().$el);
                 });
             });
         },
@@ -772,6 +825,7 @@ define([
         topBarView.bind('createEvent', contentView.createItem, contentView);
         topBarView.bind('editEvent', contentView.editItem, contentView);
         topBarView.bind('disableEvent', contentView.archiveItems, contentView);
+        topBarView.bind('update-list-view', contentView.updateListView, contentView);
 
         topBarView.bind('sendPass', contentView.sendPass, contentView);
         topBarView.bind('addSupervisor', contentView.addSupervisor, contentView);

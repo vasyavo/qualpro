@@ -300,6 +300,140 @@ const Personnel = function () {
                 as: 'covered',
             },
         }, {
+            $unwind: {
+                path                      : '$covered',
+                preserveNullAndEmptyArrays: true
+            }
+        }, {
+            $lookup: {
+                from        : 'domains',
+                localField  : 'covered.country',
+                foreignField: '_id',
+                as          : 'covered.country',
+            },
+        }, {
+            $addFields: {
+                'covered.country.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from        : 'domains',
+                localField  : 'covered.region',
+                foreignField: '_id',
+                as          : 'covered.region',
+            },
+        }, {
+            $addFields: {
+                'covered.region.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from        : 'domains',
+                localField  : 'covered.subRegion',
+                foreignField: '_id',
+                as          : 'covered.subRegion',
+            },
+        }, {
+            $addFields: {
+                'covered.subRegion.imageSrc': null,
+            },
+        }, {
+            $lookup: {
+                from        : 'branches',
+                localField  : 'covered.branch',
+                foreignField: '_id',
+                as          : 'covered.branch',
+            },
+        }, {
+            $addFields: {
+                'covered.branch.imageSrc': null,
+            },
+        }, {
+            $group: {
+                _id: {
+                    _id             : '$_id',
+                    position        : '$position',
+                    avgRating       : '$avgRating',
+                    manager         : '$manager',
+                    lastAccess      : '$lastAccess',
+                    firstName       : '$firstName',
+                    lastName        : '$lastName',
+                    email           : '$email',
+                    phoneNumber     : '$phoneNumber',
+                    accessRole      : '$accessRole',
+                    createdBy       : '$createdBy',
+                    editedBy        : '$editedBy',
+                    vacation        : '$vacation',
+                    status          : '$status',
+                    region          : '$region',
+                    subRegion       : '$subRegion',
+                    retailSegment   : '$retailSegment',
+                    outlet          : '$outlet',
+                    branch          : '$branch',
+                    country         : '$country',
+                    currentLanguage : '$currentLanguage',
+                    super           : '$super',
+                    archived        : '$archived',
+                    temp            : '$temp',
+                    confirmed       : '$confirmed',
+                    translated      : '$translated',
+                    dateJoined      : '$dateJoined',
+                    beforeAccess    : '$beforeAccess',
+                    lasMonthEvaluate: '$lasMonthEvaluate',
+                    covered         : '$covered',
+                    token           : '$token',
+                },
+
+                covered: {$push: '$covered'}
+            }
+        }, {
+            $project: {
+                _id             : '$_id._id',
+                position        : '$_id.position',
+                avgRating       : '$_id.avgRating',
+                manager         : '$_id.manager',
+                lastAccess      : '$_id.lastAccess',
+                firstName       : '$_id.firstName',
+                lastName        : '$_id.lastName',
+                email           : '$_id.email',
+                phoneNumber     : '$_id.phoneNumber',
+                accessRole      : '$_id.accessRole',
+                createdBy       : '$_id.createdBy',
+                editedBy        : '$_id.editedBy',
+                vacation        : '$_id.vacation',
+                status          : '$_id.status',
+                region          : '$_id.region',
+                subRegion       : '$_id.subRegion',
+                retailSegment   : '$_id.retailSegment',
+                outlet          : '$_id.outlet',
+                branch          : '$_id.branch',
+                country         : '$_id.country',
+                currentLanguage : '$_id.currentLanguage',
+                super           : '$_id.super',
+                archived        : '$_id.archived',
+                temp            : '$_id.temp',
+                confirmed       : '$_id.confirmed',
+                translated      : '$_id.translated',
+                dateJoined      : '$_id.dateJoined',
+                beforeAccess    : '$_id.beforeAccess',
+                lasMonthEvaluate: '$_id.lasMonthEvaluate',
+                token           : '$_id.token',
+
+                covered: 1
+            }
+        }, {
+            $addFields: {
+                covered: {
+                    $filter: {
+                        input: '$covered',
+                        as: 'item',
+                        cond: {
+                            $gt: ['$$item._id', '']
+                        },
+                    },
+                },
+            },
+        }, {
             $addFields: {
                 covered: {
                     $map: {
@@ -311,6 +445,12 @@ const Personnel = function () {
                             lastName: '$$item.lastName',
                             accessRole: '$$item.accessRole',
                             position: '$$item.position',
+                            country: '$$item.country',
+                            region: '$$item.region',
+                            subRegion: '$$item.subRegion',
+                            branch: '$$item.branch',
+                            retailSegment: '$$item.retailSegment',
+                            outlet: '$$item.outlet',
                             onLeave: '$$item.vacation.onLeave',
                         },
                     },
@@ -379,6 +519,48 @@ const Personnel = function () {
 
                 callback(null, personnel);
             });
+    };
+
+    const getLocationsAndBranches = (personnel, cb) => {
+        async.waterfall([
+            (cb) => {
+                require('./../stories/personnel/reusable-components/getLocation')({
+                    setCountry: personnel.country,
+                    setRegion: personnel.region,
+                    setSubRegion: personnel.subRegion,
+                }, cb);
+            },
+            (result, cb) => {
+                const groups = result.length ?
+                    result.slice().pop() : {
+                        setCountry: [],
+                        setRegion: [],
+                        setSubRegion: [],
+                    };
+                personnel.country = groups.setCountry;
+                personnel.region = groups.setRegion;
+                personnel.subRegion = groups.setSubRegion;
+                cb(null);
+            },
+            (cb) => {
+                require('./../stories/personnel/reusable-components/getBranches')({
+                    setSubRegion: personnel.subRegion,
+                    setBranch: personnel.branch,
+                }, cb);
+            },
+            (result, cb) => {
+                const groups = result.length ?
+                    result.slice().pop() : {
+                        setBranch: [],
+                        setRetailSegment: [],
+                        setOutlet: [],
+                    };
+                personnel.branch = groups.setBranch;
+                personnel.retailSegment = groups.setRetailSegment;
+                personnel.outlet = groups.setOutlet;
+                cb(null, personnel);
+            },
+        ], cb);
     };
 
     this.getForDD = function(req, res, next) {
@@ -1352,8 +1534,6 @@ const Personnel = function () {
                     ACL_CONSTANTS.CASH_VAN,
                 ];
                 const notAllowedLevelsMobile = [
-                    ACL_CONSTANTS.MASTER_UPLOADER,
-                    ACL_CONSTANTS.COUNTRY_UPLOADER,
                 ];
 
                 if (notAllowedLevelsCMS.indexOf(level) !== -1 && !req.isMobile) {
@@ -1599,54 +1779,28 @@ const Personnel = function () {
 
                     personnel.workAccess = (personnel.accessRole.level < 3) || !personnel.vacation.onLeave;
 
-                    async.waterfall([
+                    getLocationsAndBranches(personnel, cb);
+                },
 
-                        (cb) => {
-                            require('./../stories/personnel/reusable-components/getLocation')({
-                                setCountry: personnel.country,
-                                setRegion: personnel.region,
-                                setSubRegion: personnel.subRegion,
-                            }, cb);
-                        },
-
-                        (result, cb) => {
-                            const groups = result.length ?
-                                result.slice().pop() : {
-                                    setCountry: [],
-                                    setRegion: [],
-                                    setSubRegion: [],
-                                };
-
-                            personnel.country = groups.setCountry;
-                            personnel.region = groups.setRegion;
-                            personnel.subRegion = groups.setSubRegion;
-
-                            cb(null);
-                        },
-
-                        (cb) => {
-                            require('./../stories/personnel/reusable-components/getBranches')({
-                                setSubRegion: personnel.subRegion,
-                                setBranch: personnel.branch,
-                            }, cb);
-                        },
-
-                        (result, cb) => {
-                            const groups = result.length ?
-                                result.slice().pop() : {
-                                    setBranch: [],
-                                    setRetailSegment: [],
-                                    setOutlet: [],
-                                };
-
-                            personnel.branch = groups.setBranch;
-                            personnel.retailSegment = groups.setRetailSegment;
-                            personnel.outlet = groups.setOutlet;
-
-                            cb(null, personnel);
-                        },
-
-                    ], cb);
+                (personnel, cb) => {
+                    async.forEachOf(personnel.covered, function (object, item, eachCb) {
+                        getLocationsAndBranches(personnel.covered[item], function (err, personnelWithLoc) {
+                            if (personnel.accessRole !== 7 && personnelWithLoc.country.length) {
+                                personnel.country = (personnelWithLoc.country.length) ? _.union(personnel.country, personnelWithLoc.country) : [];
+                            }
+                            personnel.region = (personnelWithLoc.region.length) ? _.union(personnel.region, personnelWithLoc.region) : [];
+                            personnel.subRegion = (personnelWithLoc.subRegion.length) ? _.union(personnel.subRegion, personnelWithLoc.subRegion) : [];
+                            personnel.branch = (personnelWithLoc.branch.length) ? _.union(personnel.branch, personnelWithLoc.branch) : [];
+                            personnel.retailSegment = (personnelWithLoc.retailSegment.length) ? _.union(personnel.retailSegment, personnelWithLoc.retailSegment) : [];
+                            personnel.outlet = (personnelWithLoc.outlet.length) ?  _.union(personnel.outlet, personnelWithLoc.outlet) : [];
+                            eachCb();
+                        });
+                    }, function() {
+                        cb(null, personnel);
+                    });
+                },
+                (personnel, cb) => {
+                    getLocationsAndBranches(personnel, cb);
                 },
 
             ], callback);

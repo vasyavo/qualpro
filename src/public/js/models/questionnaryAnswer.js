@@ -1,8 +1,10 @@
 define([
     'models/parrent',
     'validation',
-    'constants/otherConstants'
-], function (parent, validation, CONSTANTS) {
+    'constants/otherConstants',
+    'constants/errorMessages',
+    'dataService',
+], function (parent, validation, CONSTANTS, ERROR_MESSAGES, dataService) {
     var Model = parent.extend({
 
         defaults: {
@@ -35,6 +37,36 @@ define([
             });
 
             return model;
+        },
+
+        edit: function (answerId, data) {
+            var that = this;
+
+            dataService.putData('/questionnary/answer/' + answerId, data, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        'Edit answer of question',
+                    ]);
+                }
+
+                that.trigger('answer-edited');
+            });
+        },
+
+        delete: function (answerId) {
+            var that = this;
+
+            dataService.deleteData('/questionnary/answer/' + answerId, {}, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                        'Delete answer of question',
+                    ]);
+                }
+
+                that.trigger('answer-deleted');
+            });
         }
     });
 

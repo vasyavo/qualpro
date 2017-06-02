@@ -22,7 +22,62 @@ const access = () => {
                     foreignField: '_id',
                     as: 'accessRole'
                 }},
-                { $unwind: '$accessRole' }
+                { $unwind: '$accessRole' },
+                {
+                    $lookup: {
+                        from: 'personnels',
+                        localField: '_id',
+                        foreignField: 'vacation.cover',
+                        as: 'covers',
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        accessRole: 1,
+                        email: 1,
+                        country: 1,
+                        branch: 1,
+                        subRegion: 1,
+                        region: 1,
+                        covers: {
+                            $filter: {
+                                input: { $ifNull: ['$covers', []] },
+                                as: 'item',
+                                cond: { $eq: ['$$item.vacation.onLeave', true] },
+                            },
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        accessRole: 1,
+                        result: {
+                            $reduce: {
+                                input: '$covers',
+                                initialValue: { country: '$country', branch: '$branch', subRegion: '$subRegion', region: '$region' },
+                                in: {
+                                    country: { $cond: { if: { $eq: ['$$this.country', []] }, then: [], else: {$setUnion: ['$$value.country', '$$this.country']} } },
+                                    branch: { $cond: { if: { $eq: ['$$this.branch', []] }, then: [], else: {$setUnion: ['$$value.branch', '$$this.branch']} } },
+                                    subRegion: { $cond: { if: { $eq: ['$$this.subRegion', []] }, then: [], else: {$setUnion: ['$$value.subRegion', '$$this.subRegion']} } },
+                                    region: { $cond: { if: { $eq: ['$$this.region', []] }, then: [], else: {$setUnion: ['$$value.region', '$$this.region']} } },
+                                },
+                            },
+                        },
+                    },
+                },
+
+                {
+                    $project: {
+                        _id: 1,
+                        accessRole: 1,
+                        country: '$result.country',
+                        branch: '$result.branch',
+                        subRegion: '$result.subRegion',
+                        region: '$result.region',
+                    },
+                }
             ];
 
             PersonnelModel.aggregate(pipeline, cb);

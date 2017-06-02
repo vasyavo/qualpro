@@ -77,7 +77,7 @@
 
                     <div class="row">
                         <div class="cell">
-                            <span><%=translation.position%></span>
+                            <span><%- translation.position %></span>
                         </div>
                         <div class="cell">
                             <a id="positionDd" class=""
@@ -85,15 +85,30 @@
                             </a>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="cell">
-                            <span><%=translation.employee%></span>
+                            <span><%- translation.employee %></span>
                         </div>
                         <div class="cell">
                             <a id="personnelDd" class=""
                                href="javascript:;">Select
                             </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">
+                            <span><%- translation.type %></span>
+                        </div>
+                        <div class="cell mandatory">
+                            <a id="typeDd" class=""
+                               href="javascript:;">Select
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="cell"></div>
+                        <div class="cell">
+                            <input id="other-type-description" type="text">
                         </div>
                     </div>
                 </div>
@@ -103,7 +118,7 @@
                     <div class="description">
                         <div class="objectivesPaddingBlock borderBottom">
                             <div class="descriptionBlock floatBlock">
-                                <span class="description fontBold mandatory"><%=translation.description%></span>
+                                <span class="description fontBold mandatory"><%- translation.description %></span>
                                 <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
                                    data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
                                    href="javascript:;">

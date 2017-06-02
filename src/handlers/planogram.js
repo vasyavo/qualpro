@@ -28,6 +28,7 @@ var planogramsHandler = function() {
         country : 1,
         retailSegment : 1,
         product : 1,
+        productInfo : 1,
         fileID : 1,
         configuration : 1,
         editedBy : 1,
@@ -219,7 +220,8 @@ var planogramsHandler = function() {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from : 'categories',
             key : 'product',
-            isArray : false
+            isArray : false,
+            addProjection : ['archived', 'information']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
@@ -234,6 +236,29 @@ var planogramsHandler = function() {
             isArray : true
         }));
 
+        pipeLine.push({
+            $project : {
+                _id : 1,
+                country : 1,
+                retailSegment : 1,
+                product : 1,
+                fileID : 1,
+                configuration : 1,
+                editedBy : 1,
+                createdBy : 1,
+                archived : 1,
+                displayType : 1,
+                productInfo: '$product.information',
+            }
+        });
+    
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'files',
+            key : 'productInfo',
+            isArray : true,
+            addProjection : ['originalName', 'preview', 'contentType', ]
+        }));
+        
         aggregation = PlanogramModel.aggregate(pipeLine);
 
         aggregation.options = {
@@ -468,7 +493,30 @@ var planogramsHandler = function() {
             from : 'categories',
             key : 'product',
             isArray : false,
-            addProjection : ['archived']
+            addProjection : ['archived', 'information']
+        }));
+
+        pipeLine.push({
+            $project : {
+                _id : 1,
+                country : 1,
+                retailSegment : 1,
+                product : 1,
+                fileID : 1,
+                configuration : 1,
+                editedBy : 1,
+                createdBy : 1,
+                archived : 1,
+                displayType : 1,
+                productInfo: '$product.information',
+            }
+        });
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from : 'files',
+            key : 'productInfo',
+            isArray : true,
+            addProjection : ['originalName', 'preview', 'contentType', ]
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({

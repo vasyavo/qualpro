@@ -60,16 +60,8 @@ module.exports = function (req, res, next) {
                     date: new Date(),
                 };
 
-                if (attachments && attachments.length) {
-                    attachments = attachments.objectID();
-
-                    updateObject.attachments = attachments.concat(filesIds);
-                } else {
-                    delete updateObject.attachments;
-
-                    fullUpdate.$addToSet = {};
-                    fullUpdate.$addToSet.attachments = { $each: filesIds };
-                }
+                attachments = attachments.objectID();
+                updateObject.attachments = attachments.concat(filesIds);
 
                 ObjectiveModel.findOne({ _id: inStoreTaskId }, (err, inStoreTaskModel) => {
                     let error;

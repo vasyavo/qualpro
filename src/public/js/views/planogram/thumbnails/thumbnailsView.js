@@ -39,6 +39,14 @@ define(function(require) {
             this.makeRender(options);
         },
 
+        updateListView: function () {
+            var that = this;
+
+            this.collection.getPage(this.collection.currentPage, {
+                filter: that.filter,
+            });
+        },
+
         render: function () {
             var $currentEl = this.$el;
             var self = this;

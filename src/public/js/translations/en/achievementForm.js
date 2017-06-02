@@ -25,7 +25,11 @@ define([
         noTranslation: 'No translation',
         files        : 'Files',
         all          : 'Achievement form',
-        goToBtn : 'Go to'
+        goToBtn : 'Go to',
+        edit : 'Edit',
+        delete: 'Delete',
+        additionalComment: 'Additional Comment',
+        achievementFormEditTitle: 'Edit Achievement Form'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });

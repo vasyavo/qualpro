@@ -21,6 +21,9 @@ define([
         branch   : 'الفرع',
         value    : 'القيمة',
         employee : 'الموظف',
+        options  : 'الخيارات',
+
+        saveBtn       : 'حفظ',
 
         //top Bar
         all: ' حصة الرف'

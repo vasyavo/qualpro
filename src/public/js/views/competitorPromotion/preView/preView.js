@@ -2,6 +2,7 @@ define([
     'backbone',
     'Underscore',
     'jQuery',
+    'moment',
     'text!templates/competitorPromotion/preView.html',
     'text!templates/file/preView.html',
     'text!templates/objectives/comments/comment.html',
@@ -19,11 +20,15 @@ define([
     'constants/contentType',
     'views/objectives/fileDialogView',
     'views/fileDialog/fileDialog',
-    'constants/errorMessages'
-], function (Backbone, _, $, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
+    'constants/errorMessages',
+    'constants/aclRoleIndexes',
+    'views/competitorPromotion/edit',
+    'models/competitorPromotion',
+    'constants/infoMessages'
+], function (Backbone, _, $, moment, PreviewTemplate, FileTemplate, CommentTemplate, NewCommentTemplate,
              FileCollection, FileModel, CommentModel, BaseView, CommentCollection,
              populate, CONSTANTS, levelConfig, implementShowHideArabicInputIn, dataService, CONTENT_TYPES,
-             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES) {
+             FileDialogView, FileDialogPreviewView, ERROR_MESSAGES, ACL_ROLES, EditView, CompetitorPromotionModel, INFO_MESSAGES) {
 
     var PreView = BaseView.extend({
         contentType: CONTENT_TYPES.COMPETITORPROMOTION,
@@ -49,7 +54,9 @@ define([
             'click #showAllDescription'       : 'onShowAllDescriptionInComment',
             'click .masonryThumbnail'         : 'showFilePreviewDialog',
             'click #downloadFile'             : 'stopPropagation',
-            'click #goToBtn'                  : 'goTo'
+            'click #goToBtn'                  : 'goTo',
+            'click #edit' : 'showEditView',
+            'click #delete' : 'deleteCompetitorPromotion',
         },
 
         initialize: function (options) {
@@ -66,23 +73,98 @@ define([
             self.render();
         },
 
+        showEditView: function () {
+            var that = this;
+
+            this.editView = new EditView({
+                translation: this.translation,
+                editableModel: this.model.toJSON(),
+            });
+
+            this.editView.on('edit-competitor-promotion-item', function (data, competitorPromotionId) {
+                var model = new CompetitorPromotionModel();
+
+                model.edit(competitorPromotionId, data);
+
+                model.on('competitor-promotion-edited', function (response) {
+                    var view = that.$el;
+
+                    response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
+                    response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
+                    response.expiry = moment.utc(response.expiry).format('DD.MM.YYYY');
+
+                    that.model.set(response, {
+                        merge: true
+                    });
+
+                    view.find('#promotion').html(data.promotion);
+                    view.find('#price').html(data.price);
+                    view.find('#packing').html(data.packing);
+
+                    if (data.expiry) {
+                        view.find('#expiry').html(moment.utc(data.expiry).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateStart) {
+                        view.find('#date-start').html(moment.utc(data.dateStart).format('DD.MM.YYYY'));
+                    }
+
+                    if (data.dateEnd) {
+                        view.find('#date-end').html(moment.utc(data.dateEnd).format('DD.MM.YYYY'));
+                    }
+
+                    var displayTypeString = response.displayType.map(function (item) {
+                        return item.name[App.currentUser.currentLanguage];
+                    }).join(', ');
+
+                    view.find('#display-type').html(displayTypeString);
+
+                    that.editView.$el.dialog('close').dialog('destroy').remove();
+
+                    that.trigger('update-list-view');
+                });
+            });
+        },
+
+        deleteCompetitorPromotion: function () {
+            if (confirm(INFO_MESSAGES.confirmDeleteCompetitorPromotionActivity[App.currentUser.currentLanguage])) {
+                var  that = this;
+                var model = new CompetitorPromotionModel();
+
+                model.delete(that.model.get('_id'));
+
+                model.on('competitor-promotion-deleted', function () {
+                    that.trigger('update-list-view');
+
+                    that.$el.dialog('close').dialog('destroy').remove();
+                });
+            }
+        },
+
         showFilePreviewDialog: _.debounce(function (e) {
             var $el = $(e.target);
             var $thumbnail = $el.closest('.masonryThumbnail');
             var fileModelId = $thumbnail.attr('data-id');
             var fileModel = this.previewFiles.get(fileModelId);
-
-            this.fileDialogView = new FileDialogPreviewView({
-                fileModel  : fileModel,
-                bucket     : this.contentType,
+            var options = {
+                fileModel: fileModel,
                 translation: this.translation
-            });
+            };
+
+            if (!fileModel) {
+                fileModel = this.fileCollection.get(fileModelId);
+                options.fileModel = fileModel;
+            }
+
+            this.fileDialogView = new FileDialogPreviewView(options);
             this.fileDialogView.on('download', function (options) {
                 var url = options.url;
                 var originalName = options.originalName;
-                var $fileElement;
+
                 $thumbnail.append('<a class="hidden" id="downloadFile" href="' + url + '" download="' + originalName + '"></a>');
-                $fileElement = $thumbnail.find('#downloadFile');
+
+                var $fileElement = $thumbnail.find('#downloadFile');
+
                 $fileElement[0].click();
                 $fileElement.remove();
             });
@@ -204,7 +286,7 @@ define([
                         }
 
                         $target.addClass('loadFile');
-
+                        self.fileCollection = new FileCollection(filesCollection);
                         self.showFilesInComment($showFilesBlock, filesCollection);
                     });
                 } else {
@@ -334,15 +416,30 @@ define([
             var jsonModel = this.model.toJSON();
             var formString;
             var self = this;
-            var currentConfig = this.activityList ? levelConfig[this.contentType].activityList.preview : [];
+            var currentConfig;
+
+            if (this.activityList) {
+                currentConfig = levelConfig[this.contentType].activityList.preview;
+            } else {
+                currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
+            }
 
             jsonModel.displayTypeString = jsonModel.displayType.map((item) => {
                 return item.name.currentLanguage;
             }).join(', ');
 
+            var currentUserPermittedToEdit = ([
+                ACL_ROLES.MASTER_ADMIN,
+                ACL_ROLES.COUNTRY_ADMIN,
+                ACL_ROLES.MASTER_UPLOADER,
+                ACL_ROLES.COUNTRY_UPLOADER,
+            ].includes(App.currentUser.accessRole.level)
+            && App.currentUser.workAccess);
+
             formString = this.$el.html(this.template({
                 model      : jsonModel,
-                translation: self.translation
+                translation: self.translation,
+                permittedToEdit: currentUserPermittedToEdit,
             }));
 
             this.$el = formString.dialog({
@@ -382,7 +479,7 @@ define([
                 }
             });
 
-            if (App.currentUser.workAccess && this.activityList) {
+            if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
                     require([
                             config.template

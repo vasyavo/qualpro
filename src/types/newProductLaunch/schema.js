@@ -102,7 +102,7 @@ const schema = new Schema({
     },
     packingType: {
         type: String,
-        enum: ['GM', 'ML', ''],
+        enum: ['GM Net Weight', 'ML', ''],
         default: '',
     },
     location: {

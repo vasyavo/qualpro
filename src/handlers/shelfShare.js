@@ -3,6 +3,8 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 var ShelfShareHandler = function () {
     var _ = require('underscore');
+    var logger = require('../utils/logger');
+    var EventModel = require('./../types/event/model');
     var mongoose = require('mongoose');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -130,6 +132,7 @@ var ShelfShareHandler = function () {
                 isArray        : false,
                 includeSiblings: {
                     brands: {
+                        _id    : 1,
                         brand  : 1,
                         length : 1,
                         percent: 1
@@ -827,6 +830,151 @@ var ShelfShareHandler = function () {
             });
 
             res.status(200).send(model);
+        });
+    };
+
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        const itemId = req.params.itemId;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    ShelfShareModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (model, cb) => {
+                    if (model && model.brands) {
+                        let removeItem;
+                        const shelfItems = model.brands.filter((brand) => {
+                            if (brand._id.toString() !== itemId) {
+                                return brand;
+                            } else {
+                                removeItem = brand;
+                            }
+                        });
+                        
+                        const data = {
+                            brands : shelfItems,
+                            editedBy: {
+                                user: userId,
+                                date: new Date()
+                            }
+                        };
+                        cb(null, removeItem, data);
+                    }
+                },
+                (removeItem, data, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "ShelfShare",
+                            actionType : "remove",
+                            user       : userId,
+                            reportId   : id
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err, model) => {
+                        cb(null, err, model, data);
+                    });
+                },
+                (err, model, data) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+                    
+                    ShelfShareModel.findByIdAndUpdate(id, data, { new: true }, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            
+            (cb) => {
+                access.getArchiveAccess(req, ACL_MODULES.SHELF_SHARES, cb);
+            },
+            
+            (allowed, personnel, cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
+    };
+
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+        const itemId = req.params.itemId;
+
+        const queryRun = (body, callback) => {
+            async.waterfall([
+                (cb) => {
+                    ShelfShareModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (model) => {
+                    if (model && model.brands) {
+                        model.brands.forEach((brand) => {
+                            if (brand._id.toString() === itemId) {
+                                brand.length = _.escape(body.length)
+                            }
+                        });
+
+                        const data = {
+                            brands : model.brands,
+                            editedBy: {
+                                user: userId,
+                                date: new Date()
+                            }
+                        };
+                        ShelfShareModel.findByIdAndUpdate(id, data, { new: true }, callback)
+                    }
+                },
+            ]);
+        };
+
+        async.waterfall([
+
+            (cb) => {
+                access.getEditAccess(req, ACL_MODULES.SHELF_SHARES, cb);
+            },
+
+            (allowed, personnel, cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.SHELFSHARES, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
         });
     };
 

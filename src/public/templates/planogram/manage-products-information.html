@@ -1,0 +1,45 @@
+<div class="form-holder personnelInfo promotionEdit largeHeightPreview">
+    <div class="title">
+        <span class="titleDescription"><%- translation.manageProductsInformation %></span>
+    </div>
+    <div class="promotionForm planograms">
+        <div class="blockObjective scrollingForm">
+            <div class="visibilityContainer flexRow">
+                <div class="banner_inner bannerFullWidth">
+                    <div class="scrollable">
+                        <div class="dialogCategoryTitle">
+                            <span class="categoryTitle">Category</span>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% _.each(categories, function(category) { %>
+                                    <tr class="category-table-item" data-category-id="<%- category._id %>">
+                                        <td><%- category.name[currentLanguage] %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="banner_inner bannerFullWidth">
+                    <div class="scrollable">
+                        <div class="dialogCategoryTitle">
+                            <span class="categoryTitle">Category</span>
+                            <div class="categoryButtonWrap">
+                                <a id="add-file" class="addBtn" style="display: inline;"></a>
+                                <a id="delete" class="deleteBtn" style="display: inline;"></a>
+                            </div>
+                        </div>
+                        <input id="file-input" type="file" class="hidden">
+                        <div class="attachments"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

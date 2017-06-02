@@ -10,6 +10,7 @@ define([
             mid: ' منتصف',
             min: 'الأدنى',
             avg: ' متوسط ',
+            median: '', // todo
 
             // header
             total   : 'المجموع الكلى',
@@ -28,6 +29,9 @@ define([
             branch   : 'الفرع',
             value    : 'القيمة',
             employee : 'الموظف',
+            options  : 'الخيارات',
+
+            saveBtn       : 'حفظ',
 
             // topBar
 

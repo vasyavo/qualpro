@@ -34,7 +34,6 @@ module.exports = function(app) {
     var positionRouter = require('./position')();
     var ratingRouter = require('./rating')();
     var filtersRouter = require('./filters')();
-    var importRouter = require('./import')();
     var planogramRouter = require('./planogram')();
     var questionnaryRouter = require('./questionnary')();
     var shelfShareRouter = require('./shelfShares')();
@@ -69,7 +68,6 @@ module.exports = function(app) {
     app.use(addRequestId);
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
-
 
     app.get('/', csrfProtection, (req, res, next) => {
         res.render('index.html', {
@@ -127,7 +125,8 @@ module.exports = function(app) {
     app.use('/position', positionRouter);
     app.use('/rating', ratingRouter);
     app.use('/filters', filtersRouter);
-    app.use('/import', importRouter);
+    app.use('/import', require('../stories/import/router'));
+    app.use('/export', require('../stories/export/router'));
 
     app.use('/category', categoryRouter);
     app.use('/variant', variantRouter);
