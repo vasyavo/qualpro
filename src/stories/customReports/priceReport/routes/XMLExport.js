@@ -193,11 +193,11 @@ module.exports = (req, res, next) => {
 
                         return `
                             <tr>
-                                <td>${price}</td>
+                                <td>${item.price}</td>
                                 <td>${itemDate}</td>
                             </tr>
                         `;
-                    })}
+                    }).join('')}
                 </tbody>
             </table>
         `;
