@@ -67,32 +67,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
-
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY], queryFilter, personnel);
-
-        if (queryFilter.brand && queryFilter.brand.length) {
-            $generalMatch.$and.push({
-                'brands.brand': {
-                    $in: queryFilter.brand,
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
-            $generalMatch.$and.push({
-                'createdBy.user': {
-                    $in: queryFilter[CONTENT_TYPES.PERSONNEL],
-                },
-            });
-        }
-
-        if ($generalMatch.$and.length) {
-            pipeline.push({
-                $match: $generalMatch,
-            });
-        }
-
         const $timeMatch = {};
 
         $timeMatch.$or = [];
@@ -116,6 +90,32 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+        locationFiler(pipeline, personnel, queryFilter);
+
+        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY], queryFilter, personnel);
+
+        if (queryFilter.brand && queryFilter.brand.length) {
+            $generalMatch.$and.push({
+                'brands.brand': {
+                    $in: queryFilter.brand,
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+            $generalMatch.$and.push({
+                'createdBy.user': {
+                    $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                },
+            });
+        }
+
+        if ($generalMatch.$and.length) {
+            pipeline.push({
+                $match: $generalMatch,
             });
         }
 
