@@ -806,6 +806,7 @@ define([
         topBarView.bind('createEvent', contentView.createItem, contentView);
         topBarView.bind('editEvent', contentView.editItem, contentView);
         topBarView.bind('disableEvent', contentView.archiveItems, contentView);
+        topBarView.bind('update-list-view', contentView.updateListView, contentView);
 
         topBarView.bind('sendPass', contentView.sendPass, contentView);
         topBarView.bind('addSupervisor', contentView.addSupervisor, contentView);

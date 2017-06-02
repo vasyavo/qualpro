@@ -133,7 +133,7 @@ define(function (require) {
 
         handleCategoryClick: function (event) {
             var that = this;
-            var target = $(event.target);
+            var target = $(event.currentTarget);
             var categoryId = target.attr('data-category-id');
             var categoryObject = this.categories.find(function (category) {
                 return category._id === categoryId;
@@ -168,6 +168,9 @@ define(function (require) {
 
                 attachmentsContainer.append(fileThimbnail);
             });
+
+            this.$el.find('.category-table-item').removeClass('clicked');
+            target.addClass('clicked');
 
             this.ui.deleteButton.hide();
 
@@ -273,6 +276,7 @@ define(function (require) {
                     save : {
                         text : that.translation.close,
                         click : function () {
+                            that.trigger('update-list-view');
                             that.$el.dialog('close').dialog('destroy').remove();
                         }
                     }

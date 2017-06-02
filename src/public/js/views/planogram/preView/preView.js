@@ -11,13 +11,8 @@ define([
     'models/planogram',
     'views/fileDialog/fileDialog',
     'models/file',
-    'populate',
-    'common',
-    'constants/otherConstants',
-    'constants/validation',
     'js-cookie'
-], function (Backbone, $, _, CONSTANTS, template, baseDialog, EditView, planogramModel, FileDialogPreviewView,
-             FileModel, populate, common) {
+], function (Backbone, $, _, CONSTANTS, template, baseDialog, EditView, planogramModel, FileDialogPreviewView, FileModel) {
 
     var PreView = baseDialog.extend({
         contentType   : CONSTANTS.PLANOGRAM,
@@ -101,6 +96,8 @@ define([
         render: function () {
             var that = this;
             var modelJSON = this.model.toJSON();
+
+
 
             modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
                 return item.name.currentLanguage;
