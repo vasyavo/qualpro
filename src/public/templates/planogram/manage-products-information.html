@@ -18,8 +18,8 @@
                             </thead>
                             <tbody>
                                 <% _.each(categories, function(category) { %>
-                                    <tr>
-                                        <td class="category-table-item" data-category-id="<%- category._id %>"><%- category.name[currentLanguage] %></td>
+                                    <tr class="category-table-item" data-category-id="<%- category._id %>">
+                                        <td><%- category.name[currentLanguage] %></td>
                                     </tr>
                                 <% }); %>
                             </tbody>
