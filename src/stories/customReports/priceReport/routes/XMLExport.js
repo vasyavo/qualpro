@@ -178,40 +178,32 @@ module.exports = (req, res, next) => {
          *       </table>
          */
 
-        let htmlTable = '<table>';
+        /* eslint-disable */
+        const verstka = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Price</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.map(item => {
+                        const itemDate = moment(item.date).format('MMMM, YYYY');
 
-        let thead = '<thead>';
-        let tbody = '<tbody>';
+                        return `
+                            <tr>
+                                <td>${itemDate}</td>
+                                <td>${item.date}</td>
+                            </tr>
+                        `;
+                    })}
+                </tbody>
+            </table>
+        `;
+        /* eslint-enable */
 
-        let headTr = '<tr>';
-
-        headTr += '<th>Price</th>';
-        headTr += '<th>Date</th>';
-
-        headTr += '</tr>';
-
-        result.forEach((item) => {
-            let bodyTr = '<tr>';
-
-            item.date = moment(item.date).format('MMMM, YYYY');
-
-            bodyTr += `<td>${item.price}</td>`;
-            bodyTr += `<td>${item.date}</td>`;
-
-            bodyTr += '</tr>';
-
-            tbody += bodyTr;
-        });
-
-        tbody += '</tbody>';
-
-        thead += headTr;
-        thead += '</thead>';
-
-        htmlTable += thead + tbody;
-        htmlTable += '</table>';
-
-        conversion(htmlTable, (err, stream) => {
+        conversion(verstka, (err, stream) => {
             if (err) {
                 return next(err);
             }
