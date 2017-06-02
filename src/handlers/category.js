@@ -3,10 +3,10 @@ var Category = function () {
     var async = require('async');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var CategoryModel = require('./../types/category/model');;
+    var CategoryModel = require('./../types/category/model');
     var VariantModel = require('./../types/variant/model');
     var ItemModel = require('./../types/item/model');
-
+    var PlanogramModel = require('./../types/planogram/model');
     var xssFilters = require('xss-filters');
     var access = require('../helpers/access')();
     var Archiver = require('../helpers/archiver');
@@ -287,10 +287,16 @@ var Category = function () {
             });
             delete body.products;
 
-            body.editedBy = {
+            const editedBy = {
                 user: req.session.uId,
                 date: Date.now(),
             };
+
+            body.editedBy = editedBy;
+
+            PlanogramModel.update({ product: { $in: ids } }, { editedBy: editedBy }, {
+                multi: true,
+            });
 
             CategoryModel.update({ _id: { $in: ids } }, body, {
                 multi: true,
