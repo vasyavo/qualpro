@@ -1,7 +1,6 @@
 const conversion = require('html-to-xlsx')();
 const mongoose = require('mongoose');
 const async = require('async');
-const _ = require('lodash');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
@@ -33,6 +32,7 @@ module.exports = (req, res, next) => {
             },
         },
     };
+    let currentLanguage;
 
     const queryRun = (personnel, callback) => {
         const query = req.query;
@@ -44,6 +44,8 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
+
+        currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -335,12 +337,12 @@ module.exports = (req, res, next) => {
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.country.name.en}</td>
-                                <td>${item.region.name.en}</td>
-                                <td>${item.subRegion.name.en}</td>
-                                <td>${item.createdBy.user.name.en}</td>
-                                <td>${emojiStrip(item.description.en)}</td>
-                                <td>${emojiStrip(item.additionalComment.en)}</td>
+                                <td>${item.country.name[currentLanguage]}</td>
+                                <td>${item.region.name[currentLanguage]}</td>
+                                <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${emojiStrip(item.description[currentLanguage])}</td>
+                                <td>${emojiStrip(item.additionalComment[currentLanguage])}</td>
                             </tr>
                         `;
                     }).join('')}
