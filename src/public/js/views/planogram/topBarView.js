@@ -35,9 +35,12 @@ define([
                         ]);
                     }
 
-                    new ManageProductsInformationView({
+                    that.manageProductInfoView = new ManageProductsInformationView({
                         translation: that.translation,
                         categories: response
+                    });
+                    that.manageProductInfoView.on('update-list-view', function () {
+                        that.trigger('update-list-view');
                     });
                 });
 

@@ -276,6 +276,7 @@ define(function (require) {
                     save : {
                         text : that.translation.close,
                         click : function () {
+                            that.trigger('update-list-view');
                             that.$el.dialog('close').dialog('destroy').remove();
                         }
                     }
