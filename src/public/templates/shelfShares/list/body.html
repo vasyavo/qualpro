@@ -11,7 +11,7 @@
             <td class="noPadding">
                 <% if (model.brands[i]) { %>
                     <ul class="shelfShareList">
-                        <li><%= model.brands[i].name.currentLanguage %></li>
+                        <li><%= (model.brands[i] && model.brands[i].name) ? model.brands[i].name.currentLanguage : '' %></li>
                         <li>
                             <div class="flexRow">
                                 <span><%= translation.max %></span>

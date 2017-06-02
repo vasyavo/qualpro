@@ -1,4 +1,4 @@
-const conversion = require('html-to-xlsx')();
+const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');

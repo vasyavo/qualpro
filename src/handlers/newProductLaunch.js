@@ -9,6 +9,7 @@ var NewProductLaunch = function() {
     var CONSTANTS = require('../constants/mainConstants');
     var AggregationHelper = require('../helpers/aggregationCreater');
     var NewProductLaunchModel = require('./../types/newProductLaunch/model');
+    var EventModel = require('./../types/event/model');
     var FileHandler = require('../handlers/file');
     var fileHandler = new FileHandler();
     var access = require('../helpers/access')();
@@ -104,6 +105,14 @@ var NewProductLaunch = function() {
                         body.shelfLife = _.escape(body.shelfLife);
                     }
 
+                    if (!body.brand._id) {
+                        body.brand._id = ObjectId();
+                    }
+
+                    if (!body.variant._id) {
+                        body.variant._id = ObjectId();
+                    }
+
                     newProductLaunch = {
                         additionalComment : body.additionalComment,
                         category : body.category,
@@ -195,6 +204,99 @@ var NewProductLaunch = function() {
             }
 
             queryRun(saveData);
+        });
+    };
+    
+    this.removeItem = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const id = req.params.id;
+        
+        const queryRun = (callback) => {
+            async.waterfall([
+                
+                (cb) => {
+                    NewProductLaunchModel.findOne({ _id : id }).lean().exec(cb);
+                },
+                (removeItem, cb) => {
+                    const eventModel = new EventModel();
+                    const options = {
+                        headers: {
+                            contentType: "NewProductLaunch",
+                            actionType : "remove",
+                            user       : userId,
+                        },
+                        payload: removeItem
+                    };
+                    eventModel.set(options);
+                    eventModel.save((err) => {
+                        cb(null, err);
+                    });
+                },
+                (err) => {
+                    if (err) {
+                        if (!res.headersSent) {
+                            next(err);
+                        }
+                        
+                        return logger.error(err);
+                    }
+    
+                    NewProductLaunchModel.findOneAndRemove({_id: id}, callback)
+                },
+            ], (err, body) => {
+                if (err) {
+                    return next(err);
+                }
+                
+                res.status(200).send(body);
+            });
+        };
+        
+        async.waterfall([
+            (cb) => {
+                queryRun(cb);
+            }
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
+    };
+    
+    this.update = (req, res, next) => {
+        const session = req.session;
+        const userId = session.uId;
+        const accessRoleLevel = session.level;
+        const requestBody = req.body;
+        const id = req.params.id;
+
+        const queryRun = (body, callback) => {
+            body.editedBy = {
+                user: userId,
+                date: Date.now()
+            };
+            NewProductLaunchModel.findByIdAndUpdate(id, body, { new: true }).populate('origin').populate('displayType').exec(callback)
+        };
+
+        async.waterfall([
+            (cb) => {
+                bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.NEWPRODUCTLAUNCH, 'update', cb);
+            },
+
+            (body, cb) => {
+                queryRun(body, cb);
+            },
+
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(body);
         });
     };
 

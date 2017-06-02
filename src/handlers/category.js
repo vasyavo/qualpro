@@ -3,10 +3,10 @@ var Category = function () {
     var async = require('async');
     var ACL_MODULES = require('../constants/aclModulesNames');
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
-    var CategoryModel = require('./../types/category/model');;
+    var CategoryModel = require('./../types/category/model');
     var VariantModel = require('./../types/variant/model');
     var ItemModel = require('./../types/item/model');
-
+    var PlanogramModel = require('./../types/planogram/model');
     var xssFilters = require('xss-filters');
     var access = require('../helpers/access')();
     var Archiver = require('../helpers/archiver');
@@ -17,6 +17,8 @@ var Category = function () {
     var _ = require('underscore');
     var FilterMapper = require('../helpers/filterMapper');
     var AggregationHelper = require('../helpers/aggregationCreater');
+
+    var ObjectId = mongoose.Types.ObjectId;
 
     var $defProjection = {
         _id        : 1,
@@ -189,7 +191,7 @@ var Category = function () {
             delete data.page;
             delete data.count;
 
-            CategoryModel.find(data)
+            CategoryModel.find(data).populate('information')
                 .exec(function (err, result) {
                     if (err) {
                         return next(err);
@@ -269,6 +271,59 @@ var Category = function () {
             }
 
             bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.CATEGORY, 'update', function (err, saveData) {
+                if (err) {
+                    return next(err);
+                }
+
+                queryRun(saveData);
+            });
+        });
+    };
+
+    this.updateMany = function (req, res, next) {
+        function queryRun(body) {
+            const ids = body.products.map(function (product) {
+                return ObjectId(product);
+            });
+            delete body.products;
+
+            const editedBy = {
+                user: req.session.uId,
+                date: Date.now(),
+            };
+
+            body.editedBy = editedBy;
+
+            PlanogramModel.update({ product: { $in: ids } }, { editedBy: editedBy }, {
+                multi: true,
+            });
+
+            CategoryModel.update({ _id: { $in: ids } }, body, {
+                multi: true,
+            }, (err, result) => {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(200).send(result);
+            });
+        }
+
+        access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, (err, allowed) => {
+            const body = req.body;
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!allowed) {
+                err = new Error();
+                err.status = 403;
+
+                return next(err);
+            }
+
+            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.CATEGORY, 'update', (err, saveData) => {
                 if (err) {
                     return next(err);
                 }

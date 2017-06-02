@@ -1,0 +1,9 @@
+<% _.each(questionOptions, function(option, index) { %>
+    <input
+        id="answer-option-<%- index %>"
+        class="answer-checkbox"
+        type="checkbox"
+        value="<%- index %>"
+    >
+    <label for="answer-option-<%- index %>"><%- option.currentLanguage %></label>
+<% }); %>

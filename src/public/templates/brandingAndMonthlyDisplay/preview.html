@@ -2,6 +2,9 @@
     <div class="title">
         <span class="titleDescription"><%= translation.titlePreview %></span>
     </div>
+    <div class="objectivesTopBtnBlockSmall borderBottom">
+        <div id="topButtons" class="buttonsWrap"></div>
+    </div>
     <div id="main" class="competitorBrandingPreview">
         <div class="blockObjective borderBottom">
             <div class="block-left borderRight">
@@ -68,7 +71,7 @@
                                 <span><%= translation.displayType %></span>
                             </div>
                             <div class="cell">
-                                <span class="hoverFullText"><%= jsonModel.displayTypeString || translation.skipped %></span>
+                                <span id="display-type" class="hoverFullText"><%= jsonModel.displayTypeString || translation.skipped %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -76,7 +79,7 @@
                                 <span><%= translation.startDate %></span>
                             </div>
                             <div class="cell">
-                                <span><%= jsonModel.dateStart %></span>
+                                <span id="date-start"><%= jsonModel.dateStart %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -84,7 +87,7 @@
                                 <span><%= translation.endDate %></span>
                             </div>
                             <div class="cell">
-                                <span><%= jsonModel.dateEnd %></span>
+                                <span id="date-end"><%= jsonModel.dateEnd %></span>
                             </div>
                         </div>
 
@@ -96,7 +99,7 @@
                     <div class="scrollable">
                         <div class="objectivesPaddingBlock borderBottom">
                             <div class="descriptionBlock floatBlock">
-                                <span><%= translation.description %></span>
+                                <span><%- translation.description %></span>
                             </div>
                             <span id="description" class="descriptionValue heightDescription fontBold fontMedium mCustomScrollbar"><%= jsonModel.descriptionString || translation.noTranslation  %></span>
                         </div>

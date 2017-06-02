@@ -13,6 +13,7 @@ define([
         aboutSKUFormat   : 'About SKU format',
         addNewBtn        : 'Add new Item',
         deleteBtn        : 'Delete Item',
+        delete: 'Delete',
         questions        : 'Surveys',
         type             : 'Type',
         options          : 'Options',
@@ -48,6 +49,9 @@ define([
         goToBtn           : 'Go to',
         questionaryPreview: 'Consumer Survey Preview',
         okBtn             : 'Ok',
+
+        //edit answer
+        editAnswerViewTitle: 'Edit answer of question',
 
         // top Bar
         all   : 'al alali Consumer Survey',

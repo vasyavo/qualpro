@@ -44,7 +44,8 @@ define([
         addTranslation       : {
             en: 'Add arabic translation',
             ar: 'Add english translation'
-        }
+        },
+        type: 'Type',
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });

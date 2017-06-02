@@ -5,8 +5,10 @@ const CONTENT_TYPES = require('../public/js/constants/contentType');
 const FileHandler = require('../handlers/file');
 const logger = require('../utils/logger');
 const BrandingAndMonthlyDisplayModel = require('./../types/brandingAndMonthlyDisplay/model');
+const EventModel = require('./../types/event/model');
 const DomainModel = require('./../types/domain/model');
 const access = require('../helpers/access')();
+const bodyValidator = require('../helpers/bodyValidator');
 const joiValidate = require('../helpers/joiValidate');
 const ACL_MODULES = require('./../constants/aclModulesNames');
 const extractBody = require('./../utils/extractBody');
@@ -109,6 +111,71 @@ const create = (req, res, next) => {
 
             logger.error(err);
         }
+    });
+};
+
+const removeItem = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const id = req.params.id;
+    
+    const queryRun = (callback) => {
+        async.waterfall([
+            
+            (cb) => {
+                BrandingAndMonthlyDisplayModel.findOne({ _id : id }).lean().exec(cb);
+            },
+            (removeItem, cb) => {
+                const eventModel = new EventModel();
+                const options = {
+                    headers: {
+                        contentType: "BrandingAndMonthlyDisplay",
+                        actionType : "remove",
+                        user       : userId,
+                    },
+                    payload: removeItem
+                };
+                eventModel.set(options);
+                eventModel.save((err) => {
+                    cb(null, err);
+                });
+            },
+            (err) => {
+                if (err) {
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+                    
+                    return logger.error(err);
+                }
+    
+                BrandingAndMonthlyDisplayModel.findOneAndRemove({_id: id}, callback)
+            },
+        ], (err, body) => {
+            if (err) {
+                return next(err);
+            }
+            
+            res.status(200).send(body);
+        });
+    };
+    
+    async.waterfall([
+        
+        (cb) => {
+            access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
+        },
+        
+        (allowed, personnel, cb) => {
+            queryRun(cb);
+        }
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+        
+        res.status(200).send(body);
     });
 };
 
@@ -295,6 +362,7 @@ const getById = (req, res, next) => {
                 'attachments.name': 1,
                 'attachments.preview': 1,
                 'attachments.originalName': 1,
+                'attachments.contentType': 1,
                 'categories._id': 1,
                 'categories.name': 1,
                 'subRegion._id': 1,
@@ -394,6 +462,43 @@ const getById = (req, res, next) => {
         }
 
         res.status(200).send(report);
+    });
+};
+
+const update = (req, res, next) => {
+    const session = req.session;
+    const userId = session.uId;
+    const accessRoleLevel = session.level;
+    const requestBody = req.body;
+    const id = req.params.id;
+
+    const queryRun = (body, callback) => {
+        body.editedBy = {
+            user: userId,
+            date: Date.now()
+        };
+        BrandingAndMonthlyDisplayModel.findByIdAndUpdate(id, body, { new: true }).populate('displayType').exec(callback);
+    };
+
+    async.waterfall([
+        (cb) => {
+            access.getEditAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
+        },
+
+        (allowed, personnel, cb) => {
+            bodyValidator.validateBody(requestBody, accessRoleLevel, CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY, 'update', cb);
+        },
+
+        (body, cb) => {
+            queryRun(body, cb);
+        },
+
+    ], (err, body) => {
+        if (err) {
+            return next(err);
+        }
+
+        res.status(200).send(body);
     });
 };
 
@@ -521,7 +626,7 @@ const getAll = (req, res, next) => {
         let mongoQuery = BrandingAndMonthlyDisplayModel.aggregate();
 
         if ($generalMatch.$and.length) {
-            mongoQuery = mongoQuery.append({
+            mongoQuery.append({
                 $match: $generalMatch,
             });
         }
@@ -792,7 +897,16 @@ const getAll = (req, res, next) => {
             .allowDiskUse(true);
 
         const getCount = (cb) => {
-            BrandingAndMonthlyDisplayModel.aggregate()
+            let mongoQuery = BrandingAndMonthlyDisplayModel.aggregate();
+
+            if ($generalMatch.$and.length) {
+                mongoQuery.append({
+                    $match: $generalMatch,
+                });
+            }
+
+
+            mongoQuery
                 .append(condition.formCondition)
                 .lookup({
                     from: `${CONTENT_TYPES.PERSONNEL}s`,
@@ -930,4 +1044,6 @@ module.exports = {
     create,
     getById,
     getAll,
+    update,
+    removeItem,
 };

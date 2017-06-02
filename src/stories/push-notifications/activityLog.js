@@ -83,6 +83,7 @@ activityLog.on('reporting:al-alali-promo-evaluation:item-published', require('./
 activityLog.on('reporting:al-alali-promo-evaluation:item-expired', require('./methods/reporting/al-alali-promo-evaluation/itemExpired'));
 
 activityLog.on('marketing:al-alali-branding-and-monthly-display:published', require('./methods/marketing/al-alali-branding-and-monthly-display/published'));
+activityLog.on('marketing:al-alali-branding-and-monthly-display:commend-added', require('./methods/marketing/al-alali-branding-and-monthly-display/commentAdded'));
 
 activityLog.on('marketing:al-alali-marketing-campaigns:draft-created', require('./methods/marketing/al-alali-marketing-campaigns/draftCreated'));
 activityLog.on('marketing:al-alali-marketing-campaigns:published', require('./methods/marketing/al-alali-marketing-campaigns/published'));

@@ -22,6 +22,9 @@ define([
             branch   : 'Branch',
             value    : 'Value',
             employee : 'Employee',
+            options  : 'Options',
+
+            saveBtn  : 'Save',
 
             // top Bar
             all: 'Shelf shares'

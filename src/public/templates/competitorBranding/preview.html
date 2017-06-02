@@ -79,7 +79,7 @@
                                 <span><%= translation.displayType %></span>
                             </div>
                             <div class="cell">
-                                <span class="hoverFullText"><%= jsonModel.displayTypeString || translation.noTranslation %></span>
+                                <span id="display-type" class="hoverFullText"><%= jsonModel.displayTypeString || translation.noTranslation %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -87,7 +87,7 @@
                                 <span><%= translation.startDate %></span>
                             </div>
                             <div class="cell">
-                                <span><%= jsonModel.dateStart %></span>
+                                <span id="date-start"><%= jsonModel.dateStart || '' %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -95,7 +95,7 @@
                                 <span><%= translation.endDate %></span>
                             </div>
                             <div class="cell">
-                                <span><%= jsonModel.dateEnd %></span>
+                                <span id="date-end"><%= jsonModel.dateEnd || '' %></span>
                             </div>
                         </div>
 

@@ -2,8 +2,10 @@ define([
     'models/parrent',
     'validation',
     'constants/contentType',
-    'custom'
-], function (parent, validation, CONTENT_TYPES, custom) {
+    'custom',
+    'constants/errorMessages',
+    'dataService',
+], function (parent, validation, CONTENT_TYPES, custom, ERROR_MESSAGES, dataService) {
     var Model = parent.extend({
         defaults      : {},
         attachmentsKey: 'attachments',
@@ -48,6 +50,35 @@ define([
             model.location = model.countryString + '>' + model.regionString + '>' + model.subRegionString + '>' + model.retailSegmentString + '>' + model.outletString + '>' + model.branchString;
 
             return model;
+        },
+
+        edit: function (achievementFormId, data) {
+            var that = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+
+            dataService.putData('/achievementForm/' + achievementFormId, data, function (err, response) {
+                if (err) {
+                    return App.renderErrors([
+                        err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
+                }
+
+                that.trigger('achievement-form-edited', response);
+            });
+        },
+
+        delete: function (achievementFormId) {
+            var that = this;
+
+            dataService.deleteData('/achievementForm/' + achievementFormId, {}, function (err) {
+                if (err) {
+                    return App.renderErrors([
+                        err.message || ERROR_MESSAGES.somethingWentWrong[currentLanguage],
+                    ]);
+                }
+
+                that.trigger('achievement-form-deleted');
+            });
         }
     });
 

@@ -32,6 +32,7 @@ define(function(require) {
         },
 
         listRowClick: function (e) {
+            var that = this;
             var targetEl = $(e.target);
             var $targetRow = targetEl.closest('.listRow');
             var id = $targetRow.attr('data-id');
@@ -40,6 +41,11 @@ define(function(require) {
             e.stopPropagation();
 
             this.preView = new PreView({model: model, translation: this.translation});
+            this.preView.on('update-list-view', function () {
+                that.collection.getPage(that.collection.currentPage, {
+                    filter: that.filter,
+                });
+            });
         },
 
         showMoreContent: function (newModels) {

@@ -14,6 +14,25 @@ const bodyValidator = require('./../helpers/bodyValidator');
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 const redis = require('./../helpers/redisClient');
+const errorSender = require('./../utils/errorSender');
+const {
+    TARGET,
+    SALARY,
+    OUT_OF_STOCK,
+    NEW_ARRIVALS,
+    ANNUAL_LEAVE,
+    NEAR_EXPIRY_PRODUCTS,
+    OTHER
+} = require('../constants/notificationTypes');
+const allowedNotificationTypes = [
+    TARGET,
+    SALARY,
+    OUT_OF_STOCK,
+    NEW_ARRIVALS,
+    ANNUAL_LEAVE,
+    NEAR_EXPIRY_PRODUCTS,
+    OTHER
+];
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -24,20 +43,22 @@ const Notifications = function () {
     const fileHandler = new FileHandler();
 
     let $defProjection = {
-        _id          : 1,
-        createdBy    : 1,
-        recipients   : 1,
-        description  : 1,
-        creationDate : 1,
-        country      : 1,
-        region       : 1,
-        subRegion    : 1,
-        branch       : 1,
-        position     : 1,
-        retailSegment: 1,
-        outlet       : 1,
-        length       : 1,
-        attachments  : 1
+        _id            : 1,
+        type           : 1,
+        typeDescription: 1,
+        createdBy      : 1,
+        recipients     : 1,
+        description    : 1,
+        creationDate   : 1,
+        country        : 1,
+        region         : 1,
+        subRegion      : 1,
+        branch         : 1,
+        position       : 1,
+        retailSegment  : 1,
+        outlet         : 1,
+        length         : 1,
+        attachments    : 1
     };
 
     function redisNotifications(options, callback) {
@@ -356,28 +377,32 @@ const Notifications = function () {
         if(isMobile){
             pipeLine.push({
                 $project: {
-                    _id        : 1,
-                    country    : 1,
-                    createdBy  : 1,
-                    editedBy   : 1,
-                    description: 1,
-                    position   : 1,
-                    recipients : 1,
-                    attachments: 1
+                    _id            : 1,
+                    country        : 1,
+                    createdBy      : 1,
+                    editedBy       : 1,
+                    description    : 1,
+                    position       : 1,
+                    recipients     : 1,
+                    attachments    : 1,
+                    type           : {$ifNull: ['$type', OTHER]},
+                    typeDescription: {$ifNull: ['$typeDescription', '']},
                 }
             });
         } else {
             //because only 6 elements shows on UI
             pipeLine.push({
                 $project: {
-                    _id        : 1,
-                    country    : 1,
-                    createdBy  : 1,
-                    editedBy   : 1,
-                    description: 1,
-                    position   : 1,
-                    recipients : {$slice: ['$recipients', 6]},
-                    attachments: 1
+                    _id            : 1,
+                    country        : 1,
+                    createdBy      : 1,
+                    editedBy       : 1,
+                    description    : 1,
+                    position       : 1,
+                    recipients     : {$slice: ['$recipients', 6]},
+                    attachments    : 1,
+                    type           : {$ifNull: ['$type', OTHER]},
+                    typeDescription: {$ifNull: ['$typeDescription', '']},
                 }
             });
         }
@@ -587,18 +612,27 @@ const Notifications = function () {
                     ar: _.unescape(body.description.ar),
                 };
             }
+            if (!body.type || !allowedNotificationTypes.includes(body.type)) {
+                return errorSender.badRequest(next, 'Not valid incoming parameters: type');
+            }
+
+            if (body.type === OTHER && !body.typeDescription) {
+                return errorSender.badRequest(next, 'Not valid incoming parameters: typeDescription is required');
+            }
 
             Object.keys(body).forEach(key => {
-                const itValue = body[key];
+                if (!['description', 'type', 'typeDescription'].includes(key)) {
+                    const itValue = body[key];
 
-                if (_.isString(itValue)) {
-                    const parts = itValue.split(',');
-                    const compactParts = _.compact(parts);
+                    if (_.isString(itValue)) {
+                        const parts = itValue.split(',');
+                        const compactParts = _.compact(parts);
 
-                    body[key] = compactParts.objectID();
-                } else if (itValue === '') {
-                    // glitch for props such as description which is an object
-                    body[key] = [];
+                        body[key] = compactParts.objectID();
+                    } else if (itValue === '') {
+                        // glitch for props such as description which is an object
+                        body[key] = [];
+                    }
                 }
             });
 
@@ -650,9 +684,7 @@ const Notifications = function () {
                 },
 
                 (result, cb) => {
-                    const body = result.length ?
-                        result[0] : { data: [], total: 0 };
-
+                    const body = _.get(result, '[0].data[0]') || {};
                     if (body.description) {
                         body.desciption = {
                             ar: _.unescape(body.description.ar),

@@ -1,4 +1,4 @@
-<div class="respondentsItemWrap borderBottom">
+<div id="respondent-answer-container-<%- answerId %>" class="respondentsItemWrap borderBottom">
     <div class="respondentsItem">
         <div class="itemTitle"><%= translation.type %>: <%= question.type.name.currentLanguage %></div>
         <div><%= question.title.currentLanguage %>
@@ -6,8 +6,12 @@
     </div>
     <div class="respondentsItem">
         <div class="itemTitle"><%= question.type.name.currentLanguage %></div>
-        <div class="respondentsInfo">
+        <div id="respondent-full-answer-<%- answerId %>" class="respondentsInfo">
             <%= answerText.currentLanguage %>
         </div>
+    </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer" data-question-id="<%- question._id %>" data-personnel-id="<%- personnelId %>"><%- translation.editBtn %></button>
+        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.delete %></button>
     </div>
 </div>

@@ -21,13 +21,13 @@ define([
     'constants/levelConfig',
     'helpers/implementShowHideArabicInputIn',
     'dataService',
-    'views/visibilityForm/preView/preView',
+    'views/objectives/visibilityForm/overview',
     'text!templates/inStoreTasks/updatedPreview.html',
     'text!templates/inStoreTasks/taskFlowTemplate.html',
     'models/inStoreTasks',
     'views/filter/treeView',
     'views/personnel/listForSelection',
-    'views/visibilityForm/editView',
+    'views/objectives/visibilityForm/editView',
     'views/fileDialog/fileDialog',
     'constants/contentType',
     'helpers/objectivesStatusHelper',
@@ -114,6 +114,12 @@ define([
                 self.makeRender();
                 self.render();
             }
+
+            dataService.getData('/form/visibility/' + this.model.get('form')._id, {}, function (err, response) {
+                if (response.after.description) {
+                    self.afterPartFilled = true;
+                }
+            });
 
             this.on('updatePreview', function (model) {
                 self.model = model;
@@ -225,29 +231,47 @@ define([
                 return branch.name.currentLanguage;
             });
 
-            if (modelJSON.assignedTo[0]._id === App.currentUser._id && modelJSON.status._id !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
+            dataService.getData('/form/visibility/' + form._id, {}, function (err, response) {
+                if (err) {
+                    return App.renderErrors([
+                        ERROR_MESSAGES.somethingWentWrong[self.currentLanguage]
+                    ]);
+                }
 
-                this.visibilityForm = new VisibilityEditView({
-                    id                  : id,
-                    editAfter           : true,
-                    savedVisibilityModel: this.savedVisibilityModel,
-                    branchName          : branchesForVisibility.join(', '),
-                    description         : modelJSON.description,
-                    oldAjaxObj          : this.visibilityFormAjax,
-                    translation         : self.translation
+                if (response.after.description) {
+                    self.afterPartFilled = true;
+                } else {
+                    self.afterPartFilled = false;
+                }
+
+                var arrayOfAssigneeId = modelJSON.assignedTo.map(function (item) {
+                    return item._id;
                 });
-                this.visibilityForm.on('visibilityFormEdit', function (ajaxObj) {
-                    self.visibilityFormAjax = ajaxObj;
-                    self.savedVisibilityModel = ajaxObj.model;
-                });
-            } else {
-                this.visibilityForm = new VisibilityForm({
-                    id         : id,
-                    branchName : branchesForVisibility.join(', '),
+
+                var permittedToEditAfterPart = (
+                    arrayOfAssigneeId.includes(App.currentUser._id)
+                    && [CONSTANTS.OBJECTIVE_STATUSES.IN_PROGRESS, CONSTANTS.OBJECTIVE_STATUSES.RE_OPENED].includes(modelJSON.status._id)
+                    && modelJSON.objectiveType === 'individual'
+                    && App.currentUser.workAccess
+                );
+
+                self.visibilityFormPreview = new VisibilityForm({
                     translation: self.translation,
-                    description: modelJSON.description
+                    visibilityFormData: response,
+                    branches: branchesForVisibility,
+                    location: modelJSON.location,
+                    withoutBranches: true,
+                    beforeDescription: modelJSON.description.currentLanguage,
+                    permittedToEditAfterPart: permittedToEditAfterPart
                 });
-            }
+                self.visibilityFormPreview.on('visibility-form-updated', function (vfData) {
+                    if (vfData.after.description) {
+                        self.afterPartFilled = true;
+                    } else {
+                        self.afterPartFilled = false;
+                    }
+                });
+            });
         },
 
         duplicateInStoreTask: function () {

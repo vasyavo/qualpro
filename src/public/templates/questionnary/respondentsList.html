@@ -1,5 +1,5 @@
 <% optionIndex = answer.optionIndex && answer.optionIndex.length ? answer.optionIndex : [answer.optionIndex] %>
-<div class="questionsList flexRowStretch noShrink borderBottom">
+<div id="respondent-answer-container-<%- answer._id %>" class="questionsList flexRowStretch noShrink borderBottom">
     <div class="questionsUser">
         <img src="preview/<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
     </div>
@@ -12,7 +12,11 @@
     </div>
     <div class="questionsStatusBlock questionnaireMultiEllipsis noShrink">
         <div class="questionsStatus <%= question.type._id === 'fullAnswer' ? 'answer' : question.type._id === 'singleChoice' ? 'question' : ''%>">
-            <span class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
+            <span id="answer-area-<%- answer._id %>" class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
         </div>
+    </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer" data-personnel-id="<%- answer.personnelId %>">Edit</button>
+        <button class="delete-answer" data-id="<%- answer._id %>"><%- translation.delete %></button>
     </div>
 </div>

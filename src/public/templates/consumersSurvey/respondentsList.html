@@ -1,5 +1,5 @@
 <% optionIndex = answer.optionIndex && answer.optionIndex.length ? answer.optionIndex : [answer.optionIndex] %>
-<div class="questionsList flexRowStretch noShrink borderBottom">
+<div id="respondent-answer-container-<%- answer._id %>" class="questionsList flexRowStretch noShrink borderBottom">
     <div class="questionsDescription flexGrow">
         <div class="fontBold"><%= answer.customer.name %></div>
         <div class="fontGray fontSmall"><%- answer.customer.nationality.name[App.currentUser.currentLanguage] %></div>
@@ -10,5 +10,9 @@
         <div class="questionsStatus <%= question.type._id === 'fullAnswer' ? 'answer' : question.type._id === 'singleChoice' ? 'question' : ''%>">
             <span class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
         </div>
+    </div>
+    <div class="<%= allowEdit ? '' : 'hidden' %>">
+        <button class="edit-answer" data-customer-name="<%- answer.customer.name %>">Edit</button>
+        <button class="delete-answer" data-id="<%- answer._id %>"><%- translation.delete %></button>
     </div>
 </div>

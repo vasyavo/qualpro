@@ -5,7 +5,7 @@ define([
     'views/baseDialog',
     'text!templates/file/preView.html',
     'text!templates/marketingCampaign/marketingCampaignItem/commentDialog.html',
-    'text!templates/objectives/comments/comment.html',
+    'text!templates/marketingCampaign/marketingCampaignItem/comment.html',
     'text!templates/objectives/comments/newRow.html',
     'collections/comment/collection',
     'models/comment',
@@ -15,11 +15,13 @@ define([
     'constants/contentType',
     'constants/errorMessages',
     'views/objectives/fileDialogView',
-    'views/fileDialog/fileDialog'
-
+    'views/fileDialog/fileDialog',
+    'views/marketingCampaign/comments/edit',
+    'constants/infoMessages'
 ], function (Backbone, $, _, BaseDialog, FilePreviewTemplate, CommentViewTemplate, CommentTemplate,
              NewCommentTemplate, CommentCollection, CommentModel, FileModel, CONSTANTS,
-             FileCollection, CONTENT_TYPES, ERROR_MESSAGES, FileDialogView, FileDialogPreviewView) {
+             FileCollection, CONTENT_TYPES, ERROR_MESSAGES, FileDialogView, FileDialogPreviewView,
+             EditCommentView, INFO_MESSAGES) {
 
     var CommentView = BaseDialog.extend({
         contentType        : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
@@ -33,7 +35,10 @@ define([
             'click #viewComments'    : 'showComments',
             'click #sendComment'     : 'sendComment',
             'click #attachFiles'     : 'showAttachDialog',
-            'click #downloadFile'    : 'stopPropagation'
+            'click #downloadFile'    : 'stopPropagation',
+            'click .edit-comment' : 'editComment',
+            'click .delete-comment' : 'deleteComment',
+            'click .showDescription' : 'toggleCommentBody',
         },
 
         initialize: function (options) {
@@ -65,8 +70,58 @@ define([
             this.collection.on('reset', function () {
                 self.collection.changeUrl(false);
                 self.render();
+                self.commentsCount = self.collection.length;
             });
             _.bindAll(this, 'render');
+        },
+
+        toggleCommentBody: function (event) {
+            var target = $(event.target);
+            var commentId = target.attr('data-id');
+
+            this.$el.find('.comment-body-wrapper-' + commentId).toggleClass('showAllDescription');
+        },
+
+        deleteComment: function (event) {
+            if (confirm(INFO_MESSAGES.confirmDeleteComment[App.currentUser.currentLanguage])) {
+                var that = this;
+                var target = $(event.target);
+                var commentId = target.attr('data-id');
+                var model = new CommentModel();
+
+                model.delete(commentId);
+
+                model.on('comment-deleted', function () {
+                    that.commentsCount--;
+
+                    that.$el.find('#comment-container-' + commentId).remove();
+                    that.trigger('comment-deleted');
+                });
+            }
+        },
+
+        editComment: function (event) {
+            var that = this;
+            var target = $(event.target);
+            var commentId = target.attr('data-id');
+            var commentBody = target.attr('data-body');
+
+            this.editCommentView = new EditCommentView({
+                translation: this.translation,
+                initialValue: commentBody,
+            });
+            this.editCommentView.on('edit-comment', function (newCommentBody) {
+                var model = new CommentModel();
+
+                model.editBody(commentId, newCommentBody);
+
+                model.on('comment-edited', function () {
+                    that.$el.find('#comment-body-' + commentId).html(newCommentBody);
+                    target.attr('data-body', newCommentBody);
+
+                    that.editCommentView.$el.dialog('close').dialog('destroy').remove();
+                });
+            });
         },
 
         showFilePreviewDialog: _.debounce(function (e) {
@@ -273,6 +328,8 @@ define([
                         context.showFilesInComment(options);
                     }
                     context.newFileCollection = new FileCollection();
+
+                    context.commentsCount++;
                 }
             });
 
@@ -293,8 +350,7 @@ define([
                 }
             });
             this.files = new FileCollection(commentFiles);
-
-
+debugger;
             $formString.html(this.commentViewTemplate({
                 collection : jsonCollection,
                 translation: this.translation

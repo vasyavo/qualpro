@@ -381,7 +381,7 @@ const OutletHandler = function () {
                 from: 'outlets',
                 key: 'outlet',
                 isArray: false,
-                addProjection: ['createdBy', 'editedBy', 'imageSrc', 'archived', 'topArchived', 'retailSegments', 'subRegions'],
+                addProjection: ['createdBy', 'editedBy', 'imageSrc', 'archived', 'topArchived', 'retailSegments', 'subRegions', 'imageSrc'],
             }));
 
             pipeLine.push({
@@ -781,6 +781,7 @@ const OutletHandler = function () {
                                 editedBy: 1,
                                 topArchived: 1,
                                 translated: 1,
+                                imageSrc: 1,
                             },
                         },
                         {
@@ -812,6 +813,7 @@ const OutletHandler = function () {
                                 editedBy: 1,
                                 topArchived: 1,
                                 translated: 1,
+                                imageSrc: 1,
                             },
                         },
                         {
@@ -852,6 +854,7 @@ const OutletHandler = function () {
                                 editedBy: 1,
                                 topArchived: 1,
                                 translated: 1,
+                                imageSrc: 1,
                             },
                         },
                         {
@@ -886,6 +889,7 @@ const OutletHandler = function () {
                                 editedBy: 1,
                                 topArchived: 1,
                                 translated: 1,
+                                imageSrc: 1,
                             },
                         },
                         {
@@ -926,6 +930,7 @@ const OutletHandler = function () {
                                 editedBy: 1,
                                 topArchived: 1,
                                 translated: 1,
+                                imageSrc: 1,
                             },
                         },
                         {
@@ -959,6 +964,7 @@ const OutletHandler = function () {
                                 editedBy: 1,
                                 topArchived: 1,
                                 translated: 1,
+                                imageSrc: 1,
                             },
                         },
                         {
@@ -992,6 +998,7 @@ const OutletHandler = function () {
                                 editedBy: '$data.editedBy',
                                 topArchived: '$data.topArchived',
                                 translated: '$data.translated',
+                                imageSrc: '$data.imageSrc',
                                 total: 1,
                             },
                         },

@@ -43,6 +43,7 @@ define([
         saveBtn            : 'حفظ',
         duplicatePromotion : 'تكرار إنشاء الترويج',
         editPromotion      : 'تعديل بيانات',
+        editPromotionItem : '', // todo ar
         // preview
         okBtn              : 'موافق',
         preViewTitle       : 'عرض بيانات الترويج',
@@ -68,6 +69,7 @@ define([
             en: 'إضافة الترجمة العربية',
             ar: 'إضافة الترجمة الانجليزية'
         },
+        options  : 'الخيارات',
 
         dialogTitle: 'ملفات الترويج',
         attachBtn  : 'ارفاق',

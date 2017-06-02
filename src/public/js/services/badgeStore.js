@@ -6,17 +6,24 @@ define(function(require) {
     var state = {};
 
     PubNub.client.addListener({
-        message: function(data) {
-            var nextState = data.message.badgesState;
+        message: function (data) {
+            var channel = data.channel;
+            var message = data.message;
 
-            Object.keys(nextState).forEach(function(prop) {
-                if (nextState[prop] !== state[prop]) {
-                    var count = nextState[prop];
+            if (channel.length === 24) {
+                var nextState = message.badgesState;
 
-                    state[prop] = count;
-                    App.setMenuCount(prop, count);
-                }
-            });
+                Object.keys(nextState).forEach(function (prop) {
+                    if (nextState[prop] !== state[prop]) {
+                        var count = nextState[prop];
+
+                        state[prop] = count;
+                        App.setMenuCount(prop, count);
+                    }
+                });
+            } else if (channel === App.currentDeviceChannel) {
+                App.EventBus.trigger('import-finished', message);
+            }
         },
     });
 

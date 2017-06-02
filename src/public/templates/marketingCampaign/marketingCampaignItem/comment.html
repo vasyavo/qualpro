@@ -1,0 +1,35 @@
+<% collection.forEach(function(comment){ %>
+<div id="comment-container-<%- comment._id %>" class="commentWrap" data-id="<%- comment._id %>">
+    <div class="userBlock">
+        <div class="flexRowStart">
+            <img src="preview/<%- comment.createdBy.user.imageSrc %>" alt="image" class="userImgBig imgCircle"/>
+            <div class="userDescription">
+                <div class="fontSmall"><%- comment.createdBy.user.firstName.currentLanguage +
+                    comment.createdBy.user.lastName.currentLanguage %>
+                </div>
+                <div class="fontMicro"><%- comment.createdBy.user.accessRole.name.currentLanguage %></div>
+            </div>
+        </div>
+    </div>
+    <div class="commentDescription flexGrow">
+        <div id="commentBody" class="commentEllipsis fontSmall comment-body-wrapper-<%- comment._id %>">
+            <p class="fontSmall" id="comment-body-<%- comment._id %>"><%- comment.body %></p>
+            <icon id="showAllDescription" class="showDescription" data-id="<%- comment._id %>"></icon>
+        </div>
+        <div id="showFilesBlock" class="showFilesBlock"></div>
+        <% if (comment.attachments && comment.attachments.length && !notShowAttach) { %>
+        <div class="commentBottom">
+            <span class="attachment"></span>
+            <span class="commentCount"><%- comment.attachments.length %></span>
+        </div>
+        <% } %>
+    </div>
+    <div class="timeBlock">
+        <span class="dateTime fontSmall"><%- comment.createdBy.diffDate || comment.createdBy.date %></span>
+        <span>
+            <button class="edit-comment" data-id="<%- comment._id %>" data-body="<%- comment.body %>"><%- translation.edit %></button>
+            <button class="delete-comment" data-id="<%- comment._id %>"><%- translation.delete %></button>
+        </span>
+    </div>
+</div>
+<% }) %>

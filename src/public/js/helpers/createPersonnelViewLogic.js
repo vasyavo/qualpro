@@ -418,8 +418,10 @@ define([
 
                 data.forEach(function (id) {
                     var model = context.collection.get(id);
-                    text = text + model.get('name').en + ', ';
-                    ids.push(id);
+                    if (model) {
+                        text = text + model.get('name').en + ', ';
+                        ids.push(id);
+                    }
                 });
 
                 text = text ? text.slice(0, -2) : text;

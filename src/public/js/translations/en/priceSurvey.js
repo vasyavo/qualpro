@@ -10,6 +10,7 @@ define([
             mid: 'mid',
             min: 'min',
             avg: 'avg',
+            median: 'med',
 
             // header
             total   : 'Total',
@@ -28,6 +29,9 @@ define([
             branch   : 'Branch',
             value    : 'Value',
             employee : 'Employee',
+            options  : 'Options',
+
+            saveBtn  : 'Save',
 
             // topBar
             all: 'Price Survey'
