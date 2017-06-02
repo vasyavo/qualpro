@@ -63,6 +63,14 @@ module.exports = (req, res, next) => {
             }
         });
 
+        pipeline.push({
+            $match: {
+                $or: timeFilter.map(timePeriod => ({
+                    $and: [{ 'createdBy.date': { $gt: new Date(timePeriod.from) } }, { 'createdBy.date': { $lt: new Date(timePeriod.to) } }],
+                })),
+            },
+        });
+
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY], queryFilter, personnel);
