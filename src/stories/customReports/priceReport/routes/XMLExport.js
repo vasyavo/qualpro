@@ -193,8 +193,8 @@ module.exports = (req, res, next) => {
 
                         return `
                             <tr>
+                                <td>${price}</td>
                                 <td>${itemDate}</td>
-                                <td>${item.date}</td>
                             </tr>
                         `;
                     })}
