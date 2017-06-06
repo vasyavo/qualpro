@@ -21,9 +21,6 @@ module.exports = (pipeline, personnel, filter) => {
                     {
                         [location]: { $eq: null },
                     },
-                    {
-                        'createdBy.user': { $eq: personnel._id },
-                    },
                 ],
             });
         }
