@@ -379,8 +379,6 @@ module.exports = (req, res, next) => {
                             '$retailSegment.name.en',
                             ' -> ',
                             '$outlet.name.en',
-                            ' -> ',
-                            '$branch.name.en',
                         ],
                     },
                 },
@@ -388,28 +386,25 @@ module.exports = (req, res, next) => {
             {
                 $sort: {
                     location: 1,
-                },
-            },
-            {
-                $addFields: {
-                    location: null,
-                    publisher: {
-                        $concat: [
-                            '$createdBy.user.name.en',
-                            ' -> ',
-                            '$createdBy.user.position.name.en',
-                        ],
-                    },
+                    'branch.name.en': 1,
                 },
             },
             {
                 $sort: {
-                    publisher: 1,
+                    'createdBy.user.name.en': 1,
+                    'createdBy.user.position.name.en': 1,
                 },
             },
             {
-                $addFields: {
-                    publisher: null,
+                $project: {
+                    _id: 1,
+                    location: 1,
+                    branch: 1,
+                    description: 1,
+                    additionalComment: 1,
+                    attachments: 1,
+                    createdBy: 1,
+                    total: 1,
                 },
             },
         ]);
@@ -429,14 +424,10 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: '$records._id',
+                location: '$records.location',
+                branch: '$records.branch',
                 description: '$records.description',
                 additionalComment: '$records.additionalComment',
-                country: '$records.country',
-                region: '$records.region',
-                subRegion: '$records.subRegion',
-                retailSegment: '$records.retailSegment',
-                outlet: '$records.outlet',
-                branch: '$records.branch',
                 attachments: '$records.attachments',
                 createdBy: '$records.createdBy',
                 total: 1,

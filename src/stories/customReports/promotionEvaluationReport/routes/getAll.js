@@ -211,6 +211,8 @@ module.exports = (req, res, next) => {
                                 en: '$$branch.name.en',
                                 ar: '$$branch.name.ar',
                             },
+                            outlet: '$$branch.outlet',
+                            retailSegment: '$$branch.retailSegment',
                             subRegion: '$$branch.subRegion',
                         },
                     },
@@ -341,14 +343,86 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'outlets',
+                    localField: 'branch.outlet',
+                    foreignField: '_id',
+                    as: 'outlet',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        retailSegment: '$branch.retailSegment',
+                        subRegion: '$branch.subRegion',
+                    },
+                    outlet: {
+                        $let: {
+                            vars: {
+                                outlet: { $arrayElemAt: ['$outlet', 0] },
+                            },
+                            in: {
+                                _id: '$$outlet._id',
+                                name: {
+                                    en: '$$outlet.name.en',
+                                    ar: '$$outlet.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'retailSegments',
+                    localField: 'branch.retailSegment',
+                    foreignField: '_id',
+                    as: 'retailSegment',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        subRegion: '$branch.subRegion',
+                    },
+                    retailSegment: {
+                        $let: {
+                            vars: {
+                                retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            },
+                            in: {
+                                _id: '$$retailSegment._id',
+                                name: {
+                                    en: '$$retailSegment.name.en',
+                                    ar: '$$retailSegment.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        ]);
+
         pipeline.push({
             $addFields: {
-                country: {
-                    _id: '$country._id',
-                    name: '$country.name',
-                },
                 location: {
-                    $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
+                    $concat: [
+                        '$country.name.en',
+                        ' -> ',
+                        '$region.name.en',
+                        ' -> ',
+                        '$subRegion.name.en',
+                        ' -> ',
+                        '$retailSegment.name.en',
+                        ' -> ',
+                        '$outlet.name.en',
+                    ],
                 },
             },
         });
@@ -356,37 +430,50 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
+                'branch.name.en': 1,
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                location: 1,
+                branch: 1,
+                promotionType: 1,
+                ppt: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                createdBy: 1,
+                promotion: 1,
             },
         });
 
         pipeline.push({
             $group: {
                 _id: null,
-                setPromotions: { $push: '$$ROOT' },
+                records: { $push: '$$ROOT' },
                 total: { $sum: 1 },
             },
         });
 
         pipeline.push({
             $unwind: {
-                path: '$setPromotions',
+                path: '$records',
                 preserveNullAndEmptyArrays: true,
             },
         });
 
         pipeline.push({
             $project: {
-                _id: '$setPromotions._id',
-                country: '$setPromotions.country',
-                region: '$setPromotions.region',
-                subRegion: '$setPromotions.subRegion',
-                branch: '$setPromotions.branch',
-                promotionType: '$setPromotions.promotionType',
-                ppt: '$setPromotions.ppt',
-                dateStart: '$setPromotions.dateStart',
-                dateEnd: '$setPromotions.dateEnd',
-                createdBy: '$setPromotions.createdBy',
-                promotion: '$setPromotions.promotion',
+                _id: '$records._id',
+                location: '$records.location',
+                branch: '$records.branch',
+                promotionType: '$records.promotionType',
+                ppt: '$records.ppt',
+                dateStart: '$records.dateStart',
+                dateEnd: '$records.dateEnd',
+                createdBy: '$records.createdBy',
+                promotion: '$records.promotion',
                 total: 1,
             },
         });
@@ -420,9 +507,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: '$promotion._id',
-                country: 1,
-                region: 1,
-                subRegion: 1,
+                location: 1,
                 branch: 1,
                 promotionType: 1,
                 promotionComment: { $arrayElemAt: ['$promotionComment', 0] },
