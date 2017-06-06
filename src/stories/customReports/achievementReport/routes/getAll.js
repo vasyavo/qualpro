@@ -155,6 +155,35 @@ module.exports = (req, res, next) => {
         pipeline.push(...[
             {
                 $lookup: {
+                    from: 'positions',
+                    localField: 'createdBy.user.position',
+                    foreignField: '_id',
+                    as: 'createdBy.user.position',
+                },
+            },
+            {
+                $addFields: {
+                    'createdBy.user.position': {
+                        $let: {
+                            vars: {
+                                position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                            },
+                            in: {
+                                _id: '$$position._id',
+                                name: {
+                                    en: '$$position.name.en',
+                                    ar: '$$position.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        ]);
+
+        pipeline.push(...[
+            {
+                $lookup: {
                     from: 'branches',
                     localField: 'branch',
                     foreignField: '_id',
@@ -174,7 +203,72 @@ module.exports = (req, res, next) => {
                                     en: '$$branch.name.en',
                                     ar: '$$branch.name.ar',
                                 },
+                                outlet: '$$branch.outlet',
+                                retailSegment: '$$branch.retailSegment',
                                 subRegion: '$$branch.subRegion',
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'outlets',
+                    localField: 'branch.outlet',
+                    foreignField: '_id',
+                    as: 'outlet',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        retailSegment: '$branch.retailSegment',
+                        subRegion: '$branch.subRegion',
+                    },
+                    outlet: {
+                        $let: {
+                            vars: {
+                                outlet: { $arrayElemAt: ['$outlet', 0] },
+                            },
+                            in: {
+                                _id: '$$outlet._id',
+                                name: {
+                                    en: '$$outlet.name.en',
+                                    ar: '$$outlet.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'retailSegments',
+                    localField: 'branch.retailSegment',
+                    foreignField: '_id',
+                    as: 'retailSegment',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        subRegion: '$branch.subRegion',
+                    },
+                    retailSegment: {
+                        $let: {
+                            vars: {
+                                retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            },
+                            in: {
+                                _id: '$$retailSegment._id',
+                                name: {
+                                    en: '$$retailSegment.name.en',
+                                    ar: '$$retailSegment.name.ar',
+                                },
                             },
                         },
                     },
@@ -274,12 +368,20 @@ module.exports = (req, res, next) => {
             },
             {
                 $addFields: {
-                    country: {
-                        _id: '$country._id',
-                        name: '$country.name',
-                    },
                     location: {
-                        $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
+                        $concat: [
+                            '$country.name.en',
+                            ' -> ',
+                            '$region.name.en',
+                            ' -> ',
+                            '$subRegion.name.en',
+                            ' -> ',
+                            '$retailSegment.name.en',
+                            ' -> ',
+                            '$outlet.name.en',
+                            ' -> ',
+                            '$branch.name.en',
+                        ],
                     },
                 },
             },
@@ -288,38 +390,55 @@ module.exports = (req, res, next) => {
                     location: 1,
                 },
             },
+            {
+                $addFields: {
+                    location: null,
+                    publisher: {
+                        $concat: [
+                            '$createdBy.user.name.en',
+                            ' -> ',
+                            '$createdBy.user.position.name.en',
+                        ],
+                    },
+                },
+            },
+            {
+                $sort: {
+                    publisher: 1,
+                },
+            },
+            {
+                $addFields: {
+                    publisher: null,
+                },
+            },
         ]);
 
         pipeline.push({
             $group: {
                 _id: null,
                 total: { $sum: 1 },
-                setAchievementForm: { $push: '$$ROOT' },
+                records: { $push: '$$ROOT' },
             },
         });
 
         pipeline.push({
-            $unwind: '$setAchievementForm',
+            $unwind: '$records',
         });
 
         pipeline.push({
             $project: {
-                _id: '$setAchievementForm._id',
-                description: '$setAchievementForm.description',
-                additionalComment: '$setAchievementForm.additionalComment',
-                startDate: '$setAchievementForm.startDate',
-                endDate: '$setAchievementForm.endDate',
-                personnel: '$setAchievementForm.personnel',
-                country: '$setAchievementForm.country',
-                region: '$setAchievementForm.region',
-                subRegion: '$setAchievementForm.subRegion',
-                retailSegment: '$setAchievementForm.retailSegment',
-                outlet: '$setAchievementForm.outlet',
-                branch: '$setAchievementForm.branch',
-                attachments: '$setAchievementForm.attachments',
-                archived: '$setAchievementForm.archived',
-                createdBy: '$setAchievementForm.createdBy',
-                editedBy: '$setAchievementForm.editedBy',
+                _id: '$records._id',
+                description: '$records.description',
+                additionalComment: '$records.additionalComment',
+                country: '$records.country',
+                region: '$records.region',
+                subRegion: '$records.subRegion',
+                retailSegment: '$records.retailSegment',
+                outlet: '$records.outlet',
+                branch: '$records.branch',
+                attachments: '$records.attachments',
+                createdBy: '$records.createdBy',
                 total: 1,
             },
         });
@@ -342,29 +461,13 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                description: 1,
-                additionalComment: 1,
-                startDate: 1,
-                endDate: 1,
-                personnel: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
+            $addFields: {
                 attachments: {
                     _id: 1,
                     originalName: 1,
                     contentType: 1,
                     preview: 1,
                 },
-                archived: 1,
-                createdBy: 1,
-                editedBy: 1,
-                total: 1,
             },
         });
 
