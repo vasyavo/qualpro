@@ -606,7 +606,7 @@ const QuestionnaryHandler = function () {
                 queryObject.status = {
                     $nin: ['draft', 'expired'],
                 };
-            } else {
+            } else if (accessRoleLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
                 $generalMatch.$and.push({
                     $or: [
                         {
