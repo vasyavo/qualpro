@@ -758,6 +758,20 @@ const QuestionnaryHandler = function () {
                             ],
                         });
                     }
+
+                    pipeline.push({
+                        $match: {
+                            $or: [
+                                {
+                                    personnels: personnel._id,
+                                },
+                                {
+                                    personnels: [],
+                                },
+                            ],
+                        },
+                    });
+
                     // remove for onLeave functionality
                    /* $generalMatch.$and.push({
                         $or: [
