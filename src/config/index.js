@@ -116,5 +116,11 @@ config.externalUiUrls = {
     customReports: process.env.CUSTOM_REPORTS_UI_URL || 'http://localhost:4000',
 };
 
+
+config.currencyLayer = {
+    api: process.env.CURRENCYLAYER_API,
+    host: process.env.CURRENCYLAYER_HOST,
+};
+
 // import this file at begin of server.js
 module.exports = config;
