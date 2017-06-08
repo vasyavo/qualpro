@@ -106,22 +106,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
-            $generalMatch.$and.push({
-                'items.brand': {
-                    $in: queryFilter[CONTENT_TYPES.BRAND],
-                },
-            });
-        }
-
-        if (queryFilter.size && queryFilter.size.length) {
-            $generalMatch.$and.push({
-                'items.size': {
-                    $in: queryFilter.size,
-                },
-            });
-        }
-
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
@@ -169,6 +153,26 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $unwind: '$items',
         });
+
+        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
+            pipeline.push({
+                $match: {
+                    'items.brand': {
+                        $in: queryFilter[CONTENT_TYPES.BRAND],
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.size && queryFilter.size.length) {
+            pipeline.push({
+                $match: {
+                    'items.size': {
+                        $in: queryFilter.size,
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $group: {
