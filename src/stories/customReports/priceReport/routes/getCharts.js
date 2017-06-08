@@ -6,6 +6,7 @@ const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const currency = require('./../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -115,9 +116,16 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $addFields: {
+                'payload.ppt': { $divide: ['$payload.ppt', 1000] },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: '$date',
                 ppt: { $avg: '$payload.ppt' },
+                country: { $first: '$payload.country' },
                 itemId: { $first: '$itemId' },
             },
         });
@@ -154,6 +162,9 @@ module.exports = (req, res, next) => {
                 data: {
                     $push: '$ppt',
                 },
+                country: {
+                    $first: '$country',
+                },
                 labels: {
                     $push: {
                         $dateToString: { format: '%Y-%m-%d', date: '$_id' },
@@ -167,6 +178,7 @@ module.exports = (req, res, next) => {
                 lineChart: {
                     dataSets: [
                         {
+                            country: '$country',
                             label: '$label',
                             data: '$data',
                         },
@@ -214,6 +226,16 @@ module.exports = (req, res, next) => {
         response.lineChart.labels = response.lineChart.labels.map(item => {
             return moment(new Date(item)).format('MMMM, YYYY');
         });
+
+        if (response.lineChart.dataSets.length) {
+            response.lineChart.dataSets[0].data = response.lineChart.dataSets[0].data.map(item => {
+                const currentCountry = currency.defaultData.find((country) => {
+                    return country._id.toString() === response.lineChart.dataSets[0].country.toString();
+                });
+
+                return parseFloat(item / currentCountry.currencyInUsd).toFixed(2);
+            });
+        }
 
         res.status(200).send(response);
     });

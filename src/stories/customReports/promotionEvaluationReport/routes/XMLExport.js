@@ -11,6 +11,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -119,6 +120,12 @@ module.exports = (req, res, next) => {
                     },
                     date: 1,
                 },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                ppt: { $divide: ['$ppt', 100] },
             },
         });
 
@@ -434,6 +441,10 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const currentCountry = currency.defaultData.find((country) => {
+                            return country._id.toString() === item.country._id.toString();
+                        });
+                        const itemPrice = parseFloat(item.ppt / currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
@@ -441,7 +452,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.subRegion.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${striptags(_.unescape(item.promotionType[currentLanguage]))}</td>
-                                <td>${item.ppt}</td>
+                                <td>${itemPrice}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>
                                 <td>${item.itemDateStart}</td>
