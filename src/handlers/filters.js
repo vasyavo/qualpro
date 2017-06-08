@@ -2789,7 +2789,7 @@ const Filters = function() {
                 publisher: result.publisher || [],
                 position: result.position && _.flatten(result.position) || [],
                 personnel: result.personnel && _.flatten(result.personnel) || [],
-                status: mapFiltersValues(result.status, CONSTANTS.PROMOTION_UI_STATUSES),
+                status: mapFiltersValues(result.status, CONSTANTS.CONTRACTS_UI_STATUSES),
             };
 
             res.status(200).send(result);
