@@ -34,7 +34,7 @@ define([
                     }
                 });
 
-                if (valid) {
+                if (valid && item.selectedForPersonnel) {
                     answers.push(item);
                 }
             });
