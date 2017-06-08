@@ -84,8 +84,7 @@ define([
             return CONTENT_TYPES.INSTORETASKS;
         },
         modelParse: function (model) {
-            let location = [];
-
+            var location = [];
             var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
 
             var countryString = this.modelMapper('country', model, currentLanguage);

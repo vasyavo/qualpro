@@ -41,6 +41,41 @@ module.exports = function (req, res, next) {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'domains',
+            key: 'country',
+            isArray: true,
+            addProjection: ['_id', 'name'],
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'outlets',
+            key: 'outlet',
+            isArray: true,
+            addProjection: ['_id', 'name'],
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'domains',
+            key: 'region',
+            isArray: true,
+            addProjection: ['_id', 'name'],
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'domains',
+            key: 'subRegion',
+            isArray: true,
+            addProjection: ['_id', 'name'],
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'retailSegments',
+            key: 'retailSegment',
+            isArray: true,
+            addProjection: ['_id', 'name'],
+        }));
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'personnels',
             key: 'assignedTo',
             addProjection: ['position', 'accessRole', 'firstName', 'lastName', 'imageSrc'],
