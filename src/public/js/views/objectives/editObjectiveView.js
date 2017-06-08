@@ -1,6 +1,7 @@
 define([
     'backbone',
     'Underscore',
+    'lodash',
     'jQuery',
     'text!templates/objectives/edit.html',
     'text!templates/objectives/form/form.html',
@@ -26,7 +27,7 @@ define([
     'helpers/objectivesStatusHelper',
     'constants/errorMessages',
     'constants/aclRoleIndexes'
-], function (Backbone, _, $, EditTemplate, FormTemplate, FileTemplate, BaseView, FileDialogView, Model,
+], function (Backbone, _, lodash, $, EditTemplate, FormTemplate, FileTemplate, BaseView, FileDialogView, Model,
              populate, LinkFormView, FilterCollection, FileCollection, FileModel, PersonnelListForSelectionView, TreeView,
              implementShowHideArabicInputIn, CONSTANTS, dataService, moment, VisibilityFromEditView,
              FileDialogPreviewView, async, CONTENT_TYPES, objectivesStatusHelper, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
@@ -254,6 +255,7 @@ define([
                             ]);
                         }
                         var resultFileObjects = [];
+                        var applyToAll = false;
 
                         if (response.before.files.length) {
                             resultFileObjects = response.before.files.map(function (fileObj) {
@@ -267,8 +269,14 @@ define([
                                 };
                             });
                         } else if (response.branches.length) {
+                            var arraysWithFileId = [];
+
                             response.branches.forEach(function (item) {
+                                var arrayOfFileId = [];
+
                                 item.before.files.forEach(function (fileObject) {
+                                    arrayOfFileId.push(fileObject._id);
+
                                     resultFileObjects.push({
                                         uploaded: true,
                                         fileName: fileObject.originalName,
@@ -278,13 +286,31 @@ define([
                                         _id: fileObject._id
                                     });
                                 });
+
+                                arraysWithFileId.push(arrayOfFileId);
                             });
+
+                            if (arraysWithFileId.length > 1) {
+                                var lengthOfArrays = [];
+                                arraysWithFileId.forEach(function (array) {
+                                    lengthOfArrays.push(array.length);
+                                });
+                                lengthOfArrays = lodash.uniq(lengthOfArrays);
+
+                                if (lengthOfArrays.length === 1) {
+                                    var compareArrays = lodash.intersection.apply(null, arraysWithFileId);
+
+                                    if (compareArrays.length === lengthOfArrays[0]) {
+                                        applyToAll = true;
+                                    }
+                                }
+                            }
                         }
 
                         if (resultFileObjects.length) {
                             self.visibilityFormData = {
-                                files: resultFileObjects,
-                                applyToAll: false,
+                                files: applyToAll ? [resultFileObjects[0]] : resultFileObjects,
+                                applyToAll: applyToAll,
                             }
                         }
 
