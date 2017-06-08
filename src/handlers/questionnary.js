@@ -617,6 +617,17 @@ const QuestionnaryHandler = function () {
                         },
                     ],
                 });
+            } else {
+                $generalMatch.$and.push({
+                    $or: [
+                        {
+                            'createdBy.user': personnel._id,
+                            status: { $in: ['draft'] },
+                        }, {
+                            status: { $nin: ['draft'] },
+                        },
+                    ],
+                });
             }
 
             $generalMatch.$and.push(queryObject);
