@@ -11,6 +11,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -438,6 +439,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 location: 1,
+                country: '$country._id',
                 branch: 1,
                 promotionType: 1,
                 ppt: 1,
@@ -445,6 +447,12 @@ module.exports = (req, res, next) => {
                 dateEnd: 1,
                 createdBy: 1,
                 promotion: 1,
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                ppt: { $divide: ['$ppt', 100] },
             },
         });
 
@@ -468,6 +476,7 @@ module.exports = (req, res, next) => {
                 _id: '$records._id',
                 location: '$records.location',
                 branch: '$records.branch',
+                country: '$records.country',
                 promotionType: '$records.promotionType',
                 ppt: '$records.ppt',
                 dateStart: '$records.dateStart',
@@ -512,6 +521,7 @@ module.exports = (req, res, next) => {
                 promotionType: 1,
                 promotionComment: { $arrayElemAt: ['$promotionComment', 0] },
                 ppt: 1,
+                country: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 createdBy: {
@@ -586,6 +596,10 @@ module.exports = (req, res, next) => {
             result[0] : { data: [], total: 0 };
 
         response.data.forEach(item => {
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country.toString();
+            });
+            item.ppt = parseFloat(item.ppt / currentCountry.currencyInUsd).toFixed(2);
             item.promotionType = {
                 en: striptags(_.unescape(item.promotionType.en)),
                 ar: striptags(_.unescape(item.promotionType.ar)),

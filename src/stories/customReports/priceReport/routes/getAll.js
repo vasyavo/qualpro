@@ -7,6 +7,7 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -124,8 +125,15 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $addFields: {
+                'payload.ppt': { $divide: ['$payload.ppt', 1000] },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: '$date',
+                country: { $first: '$payload.country' },
                 ppt: { $avg: '$payload.ppt' },
             },
         });
@@ -147,6 +155,7 @@ module.exports = (req, res, next) => {
                 _id: 0,
                 date: '$setPrice._id',
                 price: '$setPrice.ppt',
+                country: '$setPrice.country',
                 total: 1,
             },
         });
@@ -191,7 +200,10 @@ module.exports = (req, res, next) => {
 
         response.data.forEach((item) => {
             delete item.total;
-
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country.toString();
+            });
+            item.price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
             item.date = moment(item.date).format('MMMM, YYYY');
         });
 
