@@ -296,17 +296,19 @@ var Category = function () {
 
             PlanogramModel.update({ product: { $in: ids } }, { editedBy: editedBy }, {
                 multi: true,
+            }, () => {
+                CategoryModel.update({ _id: { $in: ids } }, body, {
+                    multi: true,
+                }, (err, result) => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    res.status(200).send(result);
+                });
             });
 
-            CategoryModel.update({ _id: { $in: ids } }, body, {
-                multi: true,
-            }, (err, result) => {
-                if (err) {
-                    return next(err);
-                }
 
-                res.status(200).send(result);
-            });
         }
 
         access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, (err, allowed) => {
