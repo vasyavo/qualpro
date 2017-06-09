@@ -43,6 +43,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.BRAND, CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
+
         currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
@@ -437,7 +438,7 @@ module.exports = (req, res, next) => {
 
         ShelfShareModel.aggregate(pipeline)
             .allowDiskUse(true)
-            .exec(callback);6
+            .exec(callback);
     };
 
     async.waterfall([
@@ -492,8 +493,6 @@ module.exports = (req, res, next) => {
             </table>
         `;
         /* eslint-enable */
-
-        // res.status(200).send(verstka);
 
         conversion(verstka, (err, stream) => {
             if (err) {
