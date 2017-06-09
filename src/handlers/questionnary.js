@@ -759,18 +759,20 @@ const QuestionnaryHandler = function () {
                         });
                     }
 
-                    pipeline.push({
-                        $match: {
-                            $or: [
-                                {
-                                    personnels: personnel._id,
-                                },
-                                {
-                                    personnels: [],
-                                },
-                            ],
-                        },
-                    });
+                    if (accessRoleLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+                        pipeline.push({
+                            $match: {
+                                $or: [
+                                    {
+                                        personnels: personnel._id,
+                                    },
+                                    {
+                                        personnels: [],
+                                    },
+                                ],
+                            },
+                        });
+                    }
 
                     // remove for onLeave functionality
                    /* $generalMatch.$and.push({
