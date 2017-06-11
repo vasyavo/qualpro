@@ -8,6 +8,7 @@ const shelfShareReport = require('./shelfShareReport/router');
 const newProductLaunchReport = require('./newProductLaunchReport/router');
 const competitorPromoReport = require('./competitorPromoReport/router');
 const priceSurveyReport = require('./priceSurveyReport/router');
+const inStoreTaskReport = require('./inStoreTaskReport/router');
 
 const router = express.Router();
 const checkAuth = access.checkAuth;
@@ -21,5 +22,6 @@ router.use('/achievementReport', achievementReport);
 router.use('/priceReport', priceReport);
 router.use('/competitorPromoReport', competitorPromoReport);
 router.use('/priceSurveyReport', priceSurveyReport);
+router.use('/inStoreTaskReport', inStoreTaskReport);
 
 module.exports = router;
