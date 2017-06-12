@@ -10,6 +10,7 @@ const competitorPromoReport = require('./competitorPromoReport/router');
 const priceSurveyReport = require('./priceSurveyReport/router');
 const inStoreTaskReport = require('./inStoreTaskReport/router');
 const objectiveReport = require('./objectiveReport/router');
+const distributionListReport = require('./distributionListReport/router');
 
 const router = express.Router();
 const checkAuth = access.checkAuth;
@@ -25,5 +26,6 @@ router.use('/competitorPromoReport', competitorPromoReport);
 router.use('/priceSurveyReport', priceSurveyReport);
 router.use('/inStoreTaskReport', inStoreTaskReport);
 router.use('/objectiveReport', objectiveReport);
+router.use('/distributionListReport', distributionListReport);
 
 module.exports = router;
