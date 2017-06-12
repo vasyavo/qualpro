@@ -35,6 +35,8 @@ module.exports = (pipeline) => {
                             en: '$$branch.name.en',
                             ar: '$$branch.name.ar',
                         },
+                        outlet: '$$branch.outlet',
+                        retailSegment: '$$branch.retailSegment',
                         subRegion: '$$branch.subRegion',
                     },
                 },
@@ -128,15 +130,81 @@ module.exports = (pipeline) => {
         },
     });
 
+    pipeline.push(...[
+        {
+            $lookup: {
+                from: 'outlets',
+                localField: 'domain.outlet',
+                foreignField: '_id',
+                as: 'outlet',
+            },
+        },
+        {
+            $addFields: {
+                branch: {
+                    _id: '$domain._id',
+                    name: '$domain.name',
+                    retailSegment: '$domain.retailSegment',
+                    subRegion: '$domain.subRegion',
+                },
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                        },
+                        in: {
+                            _id: '$$outlet._id',
+                            name: {
+                                en: '$$outlet.name.en',
+                                ar: '$$outlet.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        {
+            $lookup: {
+                from: 'retailSegments',
+                localField: 'domain.retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        },
+        {
+            $addFields: {
+                branch: {
+                    _id: '$branch._id',
+                    name: '$branch.name',
+                    subRegion: '$branch.subRegion',
+                },
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                        },
+                        in: {
+                            _id: '$$retailSegment._id',
+                            name: {
+                                en: '$$retailSegment.name.en',
+                                ar: '$$retailSegment.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    ]);
+
     pipeline.push({
         $addFields: {
             location: {
                 _id: '$domain._id', // <-- important fix magical duplication
                 en: {
-                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' -> ', '$domain.name.en'],
+                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$retailSegment.name.en', ' / ', '$outlet.name.en', ' -> ', '$domain.name.en'],
                 },
                 ar: {
-                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' -> ', '$domain.name.ar'],
+                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$outlet.name.ar', ' -> ', '$domain.name.ar'],
                 },
             },
         },
