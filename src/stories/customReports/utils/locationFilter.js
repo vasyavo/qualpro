@@ -21,6 +21,9 @@ module.exports = (pipeline, personnel, filter) => {
                     {
                         [location]: { $eq: null },
                     },
+                    {
+                        [location]: { $eq: [] },
+                    },
                 ],
             });
         }
