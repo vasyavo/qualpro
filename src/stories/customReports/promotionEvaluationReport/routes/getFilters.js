@@ -7,11 +7,9 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
-const striptags = require('striptags');
-const HtmlEntities = require('html-entities').AllHtmlEntities;
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
-const htmlEntities = new HtmlEntities();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
@@ -634,10 +632,10 @@ module.exports = (req, res, next) => {
 
         const response = result[0];
 
-        response.promotionTypes.forEach(item => ({
-            en: striptags(htmlEntities.decode(item.en)),
-            ar: item.ar,
-        }));
+        response.promotionTypes.forEach(item => {
+            item.en = sanitizeHtml(item.en);
+            item.ar = sanitizeHtml(item.ar);
+        });
 
         response.analyzeBy = [
             {
