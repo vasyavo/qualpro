@@ -2,29 +2,109 @@ const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType'
 
 module.exports = (pipeline, queryFilter) => {
     pipeline.push({
-        $unwind: '$branch',
+        $match: {
+            'promotionType.en': queryFilter['promotionType.en'][0], // ID like matching
+        },
     });
 
     pipeline.push({
-        $group: {
-            _id: '$branch',
-            promotion: { $first: '$_id' },
-            count: { $sum: 1 },
+        $lookup: {
+            from: CONTENT_TYPES.PROMOTIONSITEMS,
+            localField: '_id',
+            foreignField: 'promotion',
+            as: 'promotion',
         },
+    });
+
+    pipeline.push({
+        $unwind: '$promotion',
     });
 
     if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
         pipeline.push({
             $match: {
-                _id: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
             },
         });
     }
 
+    pipeline.push(...[
+        {
+            $project: {
+                branch: '$promotion.branch',
+                promotion: {
+                    openingStock: {
+                        $let: {
+                            vars: { openingStock: { $arrayElemAt: ['$promotion.opening', 0] } },
+                            in: { $cond: { if: { $eq: ['$$openingStock', null] }, then: 0, else: '$$openingStock' } },
+                        },
+                    },
+                    sellIn: {
+                        $let: {
+                            vars: { sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] } },
+                            in: { $cond: { if: { $eq: ['$$sellIn', null] }, then: 0, else: '$$sellIn' } },
+                        },
+                    },
+                    closingStock: {
+                        $let: {
+                            vars: { closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] } },
+                            in: { $cond: { if: { $eq: ['$$closingStock', null] }, then: 0, else: '$$closingStock' } },
+                        },
+                    },
+                    sellOut: {
+                        $let: {
+                            vars: { sellOut: { $arrayElemAt: ['$promotion.sellOut', 0] } },
+                            in: { $cond: { if: { $eq: ['$$sellOut', null] }, then: 0, else: '$$sellOut' } },
+                        },
+                    },
+                    filledAt: '$promotion.createdBy.date',
+                },
+            },
+        },
+        {
+            $sort: {
+                branch: 1,
+                'promotion.filledAt': 1,
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    branch: '$branch',
+                },
+                promotion: {
+                    $push: '$promotion',
+                },
+                openingStock: {
+                    $first: '$promotion.openingStock',
+                },
+                closingStock: {
+                    $last: '$promotion.closingStock',
+                },
+                sellIn: {
+                    $sum: '$promotion.sellIn',
+                },
+                sellOut: {
+                    $sum: '$promotion.sellOut',
+                },
+            },
+        },
+        {
+            $project: {
+                _id: false,
+                branch: '$_id.branch',
+                openingStock: 1,
+                closingStock: 1,
+                sellIn: 1,
+                sellOut: 1,
+            },
+        },
+    ]);
+
     pipeline.push({
         $lookup: {
             from: 'branches',
-            localField: '_id',
+            localField: 'branch',
             foreignField: '_id',
             as: 'branch',
         },
@@ -33,7 +113,7 @@ module.exports = (pipeline, queryFilter) => {
     pipeline.push({
         $project: {
             _id: 1,
-            count: 1,
+            promotion: 1,
             domain: {
                 $let: {
                     vars: {
@@ -51,6 +131,10 @@ module.exports = (pipeline, queryFilter) => {
                     },
                 },
             },
+            openingStock: 1,
+            closingStock: 1,
+            sellIn: 1,
+            sellOut: 1,
         },
     });
 
@@ -248,10 +332,13 @@ module.exports = (pipeline, queryFilter) => {
         $group: {
             _id: null,
             data: {
-                $addToSet: {
+                $push: {
                     _id: '$domain._id',
                     name: '$domain.name',
-                    count: '$count',
+                    openingStock: '$openingStock',
+                    sellIn: '$sellIn',
+                    closingStock: '$closingStock',
+                    sellOut: '$sellOut',
                     country: '$country',
                     region: '$region',
                     subRegion: '$subRegion',

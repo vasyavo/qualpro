@@ -7,8 +7,11 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
+const striptags = require('striptags');
+const HtmlEntities = require('html-entities').AllHtmlEntities;
 
 const ajv = new Ajv();
+const htmlEntities = new HtmlEntities();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
@@ -63,7 +66,7 @@ module.exports = (req, res, next) => {
 
         locationFiler(pipeline, personnel, queryFilter);
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status'], queryFilter, personnel);
+        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status', 'promotionType.en'], queryFilter, personnel);
 
         if (queryFilter.publisher && queryFilter.publisher.length) {
             $generalMatch.$and.push({
@@ -169,6 +172,7 @@ module.exports = (req, res, next) => {
                 publishers: { $addToSet: '$createdBy.user._id' },
                 positions: { $addToSet: '$createdBy.user.position' },
                 personnels: { $addToSet: '$promotion.createdBy.user' },
+                promotionTypes: { $addToSet: '$promotionType' },
             },
         });
 
@@ -347,6 +351,15 @@ module.exports = (req, res, next) => {
                 personnels: {
                     $filter: {
                         input: '$personnels',
+                        as: 'item',
+                        cond: {
+                            $ne: ['$$item', null],
+                        },
+                    },
+                },
+                promotionTypes: {
+                    $filter: {
+                        input: '$promotionTypes',
                         as: 'item',
                         cond: {
                             $ne: ['$$item', null],
@@ -621,6 +634,11 @@ module.exports = (req, res, next) => {
 
         const response = result[0];
 
+        response.promotionTypes.forEach(item => ({
+            en: striptags(htmlEntities.decode(item.en)),
+            ar: item.ar,
+        }));
+
         response.analyzeBy = [
             {
                 name: {
@@ -677,6 +695,13 @@ module.exports = (req, res, next) => {
                     ar: '',
                 },
                 value: 'personnel',
+            },
+            {
+                name: {
+                    en: 'Promotion Description',
+                    ar: '',
+                },
+                value: 'promotionType',
             },
         ];
 
