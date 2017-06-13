@@ -1614,6 +1614,10 @@ allowedParams[CONTENT_TYPES.QUESTIONNARIES] = {
     10: {
         create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
         update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
+    },
+    11: {
+        create: ['title', 'dueDate', 'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'questionnaryId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
     }
 };
 
@@ -1659,6 +1663,10 @@ allowedParams[CONTENT_TYPES.CONSUMER_SURVEY] = {
         update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text']
     },
     10 : {
+        create: ['title', 'dueDate', 'startDate',  'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
+        update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
+    },
+    11 : {
         create: ['title', 'dueDate', 'startDate',  'send', 'questions', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'position', 'personnel', 'location'],
         update: ['personnelId', 'consumerSurveyId', 'questionId', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'optionIndex', 'text', 'answers', 'customer']
     }
