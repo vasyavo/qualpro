@@ -129,6 +129,7 @@ module.exports = (req, res, next) => {
                 category: 1,
                 publisher: { $arrayElemAt: ['$createdBy.user._id', 0] },
                 publisherPosition: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                promotionType: 1,
             },
         });
 
