@@ -12,6 +12,7 @@ const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 const currency = require('../../utils/currency');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -532,7 +533,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment.name[currentLanguage]}</td>
                                 <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
-                                <td>${striptags(_.unescape(item.promotionType[currentLanguage]))}</td>
+                                <td>${sanitizeHtml(item.promotionType[currentLanguage])}</td>
                                 <td>${itemPrice}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>

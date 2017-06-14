@@ -1,6 +1,6 @@
 const DomainModel = require('../../../types/domain/model');
-const request = require('./request');
-const API_KEY = require('../../../config').currencyLayer;
+const currencyApi = require('currency-api').api;
+const logger = require('../../../utils/logger');
 
 const defaultData = [];
 
@@ -9,16 +9,16 @@ const getCurrency = () => {
         return item.currency;
     }))];
     for (const currency of listOfCurrencies) {
-        const url = `${API_KEY.host}?access_key=${API_KEY.api}&currencies=${currency}`;
-        request({
-            method: 'GET',
-            url,
+        currencyApi.getExchangeRate({
+            currency,
         }, (err, response) => {
+            if (err) {
+                logger.error(err);
+            }
             if (response) {
-                response = JSON.parse(response);
                 defaultData.map((country) => {
                     if (country.currency === currency) {
-                        country.currencyInUsd = response.quotes[`USD${currency}`];
+                        country.currencyInUsd = response;
                     }
                     return country;
                 });

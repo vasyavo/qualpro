@@ -12,6 +12,7 @@ const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 const currency = require('../../utils/currency');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -601,8 +602,8 @@ module.exports = (req, res, next) => {
             });
             item.ppt = parseFloat(item.ppt / currentCountry.currencyInUsd).toFixed(2);
             item.promotionType = {
-                en: striptags(_.unescape(item.promotionType.en)),
-                ar: striptags(_.unescape(item.promotionType.ar)),
+                en: sanitizeHtml(item.promotionType.en),
+                ar: sanitizeHtml(item.promotionType.ar),
             };
         });
 
