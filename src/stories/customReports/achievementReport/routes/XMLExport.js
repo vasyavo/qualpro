@@ -175,6 +175,8 @@ module.exports = (req, res, next) => {
                                     en: '$$branch.name.en',
                                     ar: '$$branch.name.ar',
                                 },
+                                outlet: '$$branch.outlet',
+                                retailSegment: '$$branch.retailSegment',
                                 subRegion: '$$branch.subRegion',
                             },
                         },
@@ -272,7 +274,76 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+            }]
+        );
+
+        pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'outlets',
+                    localField: 'branch.outlet',
+                    foreignField: '_id',
+                    as: 'outlet',
+                },
             },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        retailSegment: '$branch.retailSegment',
+                        subRegion: '$branch.subRegion',
+                    },
+                    outlet: {
+                        $let: {
+                            vars: {
+                                outlet: { $arrayElemAt: ['$outlet', 0] },
+                            },
+                            in: {
+                                _id: '$$outlet._id',
+                                name: {
+                                    en: '$$outlet.name.en',
+                                    ar: '$$outlet.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'retailSegments',
+                    localField: 'branch.retailSegment',
+                    foreignField: '_id',
+                    as: 'retailSegment',
+                },
+            },
+            {
+                $addFields: {
+                    branch: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        subRegion: '$branch.subRegion',
+                    },
+                    retailSegment: {
+                        $let: {
+                            vars: {
+                                retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            },
+                            in: {
+                                _id: '$$retailSegment._id',
+                                name: {
+                                    en: '$$retailSegment.name.en',
+                                    ar: '$$retailSegment.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        ]);
+
+        pipeline.push(...[
             {
                 $addFields: {
                     country: {
@@ -280,7 +351,7 @@ module.exports = (req, res, next) => {
                         name: '$country.name',
                     },
                     location: {
-                        $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$branch.name.en'],
+                        $concat: ['$country.name.en', ' -> ', '$region.name.en', ' -> ', '$subRegion.name.en', ' -> ', '$retailSegment.name.en', ' -> ', '$outlet.name.en', ' -> ', '$branch.name.en'],
                     },
                 },
             },
@@ -299,6 +370,9 @@ module.exports = (req, res, next) => {
                 country: 1,
                 region: 1,
                 subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
                 createdBy: 1,
             },
         });
@@ -328,6 +402,9 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
+                        <th>Branch</th>
                         <th>Employee name</th>
                         <th>Description</th>
                         <th>Comment</th>
@@ -340,6 +417,9 @@ module.exports = (req, res, next) => {
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
                                 <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${emojiStrip(item.description[currentLanguage])}</td>
                                 <td>${emojiStrip(item.additionalComment[currentLanguage])}</td>

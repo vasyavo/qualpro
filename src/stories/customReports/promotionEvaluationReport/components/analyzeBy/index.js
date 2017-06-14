@@ -7,6 +7,7 @@ const analyzeByMethods = {
     publisher: require('./analyzeByPublisher'),
     position: require('./analyzeByPosition'),
     personnel: require('./analyzeByPersonnel'),
+    promotionType: require('./analyzeByDetails'),
 };
 
 module.exports = (pipeline, analyzeBy, queryFilter) => {

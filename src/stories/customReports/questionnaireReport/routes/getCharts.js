@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const async = require('async');
+const _ = require('lodash');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const PromotionModel = require('./../../../../types/promotion/model');
-const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
-const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
+const QuestionnaryModel = require('./../../../../types/questionnaries/model');
+const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
+const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const applyAnalyzeBy = require('./../components/analyzeBy/index');
 const moment = require('moment');
 
@@ -34,14 +35,13 @@ module.exports = (req, res, next) => {
 
     const queryRun = (personnel, callback) => {
         const query = req.query;
-        const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const analyzeByParam = query.analyzeBy;
+        const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.CATEGORY, 'displayType',
-            'status', 'publisher', CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
         ];
         const pipeline = [];
 
@@ -59,15 +59,67 @@ module.exports = (req, res, next) => {
         }
 
         filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0] && filterName !== 'status') {
+            if (queryFilter[filterName] && queryFilter[filterName][0]) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
             }
         });
 
-        const $timeMatch = {};
+        pipeline.push({
+            $match: {
+                countAnswered: { $gt: 0 },
+            },
+        });
 
+        locationFiler(pipeline, personnel, queryFilter);
+
+        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
+
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+            $generalMatch.$and.push({
+                'createdBy.user': {
+                    $in: _.union(queryFilter[CONTENT_TYPES.PERSONNEL], personnel._id),
+                },
+            });
+        }
+
+        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
+            $generalMatch.$and.push({
+                personnels: {
+                    $in: _.union(queryFilter.assignedTo, personnel._id),
+                },
+            });
+        }
+
+        if (queryFilter.status && queryFilter.status.length) {
+            $generalMatch.$and.push({
+                status: {
+                    $in: _.union(queryFilter.status, personnel._id),
+                },
+            });
+        }
+
+        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+            $generalMatch.$and.push({
+                $or: [
+                    {
+                        'title.en': { $in: queryFilter.questionnaireTitle },
+                    },
+                    {
+                        'title.ar': { $in: queryFilter.questionnaireTitle },
+                    },
+                ],
+            });
+        }
+
+        if ($generalMatch.$and.length) {
+            pipeline.push({
+                $match: $generalMatch,
+            });
+        }
+
+        const $timeMatch = {};
         $timeMatch.$or = [];
 
         if (timeFilter) {
@@ -92,24 +144,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        locationFiler(pipeline, personnel, queryFilter);
-
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status'], queryFilter, personnel);
-
-        if (queryFilter.publisher && queryFilter.publisher.length) {
-            $generalMatch.$and.push({
-                'createdBy.user': {
-                    $in: queryFilter.publisher,
-                },
-            });
-        }
-
-        if ($generalMatch.$and.length) {
-            pipeline.push({
-                $match: $generalMatch,
-            });
-        }
-
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -120,48 +154,48 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                branch: 1,
-                category: 1,
-                publisher: { $arrayElemAt: ['$createdBy.user._id', 0] },
-                publisherPosition: { $arrayElemAt: ['$createdBy.user.position', 0] },
-                promotionType: 1,
+            $addFields: {
+                createdBy: {
+                    date: '$createdBy.date',
+                    user: {
+                        $let: {
+                            vars: {
+                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                            },
+                            in: {
+                                _id: '$$user._id',
+                                name: {
+                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                },
+                                position: '$$user.position',
+                            },
+                        },
+                    },
+                },
             },
         });
 
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    publisherPosition: {
+                    'createdBy.user.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
             });
         }
 
-        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter);
+        applyAnalyzeBy(pipeline, analyzeByParam);
 
-        pipeline.push({
-            $project: {
-                barChart: {
-                    data: '$data',
-                    labels: '$labels',
-                },
-            },
-        });
-
-        PromotionModel.aggregate(pipeline)
+        QuestionnaryModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
@@ -176,9 +210,9 @@ module.exports = (req, res, next) => {
         if (response) {
             response = {
                 barChart: {
-                    labels: response.barChart.labels,
+                    labels: response.labels,
                     datasets: [{
-                        data: response.barChart.data,
+                        data: response.data,
                     }],
                 },
             };
