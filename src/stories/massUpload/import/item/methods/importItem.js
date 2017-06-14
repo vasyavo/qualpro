@@ -5,6 +5,7 @@ const CategoryModel = require('../../../../../types/category/model');
 const VariantModel = require('../../../../../types/variant/model');
 const DomainModel = require('../../../../../types/domain/model');
 const ItemModel = require('../../../../../types/item/model');
+const ItemHistoryModel = require('../../../../../types/itemHistory/model');
 const logger = require('../../../../../utils/logger');
 
 const intNumberRegExp = /[0-9]+/;
@@ -230,11 +231,28 @@ function* createOrUpdate(payload) {
         setDefaultsOnInsert: true
     };
 
+    let itemModel;
+
     try {
-        yield ItemModel.update(query, modify, opt);
+        itemModel = yield ItemModel.findOneAndUpdate(query, modify, opt);
     } catch (ex) {
         throw ex;
     }
+
+    const body = {
+        headers: {
+            itemId: itemModel._id,
+            contentType: 'item',
+            actionType: 'itemChanged',
+            user: itemModel.createdBy.user,
+            date: new Date(),
+        },
+        payload: itemModel,
+    };
+
+    const itemHistoryModel = new ItemHistoryModel(body);
+
+    itemHistoryModel.save();
 }
 
 module.exports = function* importer(data) {
