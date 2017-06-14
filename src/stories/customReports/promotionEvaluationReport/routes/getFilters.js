@@ -632,9 +632,14 @@ module.exports = (req, res, next) => {
 
         const response = result[0];
 
-        response.promotionTypes.forEach(item => {
-            item.en = sanitizeHtml(item.en);
-            item.ar = sanitizeHtml(item.ar);
+        response.promotionTypes = response.promotionTypes.map(item => {
+            return {
+                _id: item.en, // like ID
+                name: {
+                    en: sanitizeHtml(item.en),
+                    ar: sanitizeHtml(item.ar),
+                },
+            };
         });
 
         response.analyzeBy = [
@@ -696,7 +701,7 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Promotion Description',
+                    en: 'Promotion Type',
                     ar: '',
                 },
                 value: 'promotionType',
