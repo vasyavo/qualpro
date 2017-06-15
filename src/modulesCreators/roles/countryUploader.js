@@ -238,7 +238,7 @@ module.exports = [
             archive: false,
             edit: false,
             write: false,
-            read: false
+            read: true
         }
     }, {
         module: ACL_MODULES.AL_ALALI_MARKETING,
