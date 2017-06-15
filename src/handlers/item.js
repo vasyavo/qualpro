@@ -1049,7 +1049,7 @@ const Item = function () {
                     res.status(200).send(model);
                 });
 
-                logToHistory(body, userId, model._id);
+                logToHistory(model, userId, model._id);
             });
         }
 
