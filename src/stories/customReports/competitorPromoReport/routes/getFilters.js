@@ -483,6 +483,65 @@ module.exports = (req, res, next) => {
             personnels: [],
         };
 
+        response.analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'Sub Region',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Brand',
+                    ar: '',
+                },
+                value: 'brand',
+            },
+            {
+                name: {
+                    en: 'Product',
+                    ar: '',
+                },
+                value: 'category',
+            },
+            {
+                name: {
+                    en: 'Employee',
+                    ar: '',
+                },
+                value: 'employee',
+            },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
+            },
+        ];
+
         res.status(200).send(response);
     });
 };

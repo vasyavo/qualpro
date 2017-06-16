@@ -459,6 +459,51 @@ module.exports = (req, res, next) => {
             assignedToPersonnels: [],
         };
 
+        response.analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'Sub Region',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Originator',
+                    ar: '',
+                },
+                value: 'originator',
+            },
+            {
+                name: {
+                    en: 'Assignee',
+                    ar: '',
+                },
+                value: 'assignee',
+            },
+        ];
+
         res.status(200).send(response);
     });
 };
