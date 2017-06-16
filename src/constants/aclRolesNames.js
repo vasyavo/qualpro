@@ -11,4 +11,5 @@ module.exports = {
     COUNTRY_UPLOADER: 9,
     TRADE_MARKETER: 10,
     VIRTUAL: 11,
+    PROMOTER: 12
 };

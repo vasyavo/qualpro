@@ -41,8 +41,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.BRAND,
-            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.VARIANT, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
         ];
         const pipeline = [];
 
@@ -81,7 +80,7 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
             $generalMatch.$and.push({
-                'brand._id': {
+                'brand.name': {
                     $in: queryFilter[CONTENT_TYPES.BRAND],
                 },
             });
@@ -89,7 +88,7 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
             $generalMatch.$and.push({
-                'variant._id': {
+                'variant.name': {
                     $in: queryFilter[CONTENT_TYPES.VARIANT],
                 },
             });
@@ -126,6 +125,44 @@ module.exports = (req, res, next) => {
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
+            });
+        }
+
+        if (queryFilter.shelfLife) {
+            queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
+
+            pipeline.push({
+                $match: {
+                    $and: [
+                        {
+                            shelfLifeStart: { $exists: true },
+                        },
+                        {
+                            shelfLifeEnd: { $exists: true },
+                        },
+                    ],
+                },
+            });
+
+            pipeline.push({
+                $addFields: {
+                    shelfLifePeriod: {
+                        $trunc: {
+                            $divide: [
+                                {
+                                    $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
+                                },
+                                86400000,
+                            ],
+                        },
+                    },
+                },
+            });
+
+            pipeline.push({
+                $match: {
+                    shelfLifePeriod: queryFilter.shelfLife,
+                },
             });
         }
 
@@ -172,42 +209,80 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $group: {
-                _id: null,
-                total: { $sum: 1 },
-                setProducts: { $push: '$$ROOT' },
+            $project: {
+                _id: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                createdBy: 1,
+                brand: 1,
+                category: 1,
+                variant: 1,
+                packing: 1,
+                displayType: 1,
+                price: 1,
+                origin: 1,
+                shelfLifeStart: 1,
+                shelfLifeEnd: 1,
+                distributor: 1,
+                attachments: 1,
             },
         });
 
         pipeline.push({
-            $unwind: '$setProducts',
+            $lookup: {
+                from: 'domains',
+                localField: 'country',
+                foreignField: '_id',
+                as: 'country',
+            },
         });
 
         pipeline.push({
-            $skip: skip,
+            $lookup: {
+                from: 'domains',
+                localField: 'region',
+                foreignField: '_id',
+                as: 'region',
+            },
         });
 
         pipeline.push({
-            $limit: limit,
+            $lookup: {
+                from: 'domains',
+                localField: 'subRegion',
+                foreignField: '_id',
+                as: 'subRegion',
+            },
         });
 
         pipeline.push({
-            $project: {
-                total: 1,
-                _id: '$setProducts._id',
-                createdBy: '$setProducts.createdBy',
-                location: '$setProducts.location',
-                brand: '$setProducts.brand',
-                category: '$setProducts.category',
-                variant: '$setProducts.variant',
-                packing: '$setProducts.packing',
-                displayType: '$setProducts.displayType',
-                price: '$setProducts.price',
-                origin: '$setProducts.origin',
-                shelfLifeStart: '$setProducts.shelfLifeStart',
-                shelfLifeEnd: '$setProducts.shelfLifeEnd',
-                distributor: '$setProducts.distributor',
-                attachments: '$setProducts.attachments',
+            $lookup: {
+                from: 'retailSegments',
+                localField: 'retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: 'outlet',
+                foreignField: '_id',
+                as: 'outlet',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: 'branch',
+                foreignField: '_id',
+                as: 'branch',
             },
         });
 
@@ -251,8 +326,64 @@ module.exports = (req, res, next) => {
             $project: {
                 total: 1,
                 _id: 1,
+                location: {
+                    $concat: [
+                        {
+                            $let: {
+                                vars: {
+                                    country: { $arrayElemAt: ['$country', 0] },
+                                },
+                                in: '$$country.name.en',
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $let: {
+                                vars: {
+                                    region: { $arrayElemAt: ['$region', 0] },
+                                },
+                                in: '$$region.name.en',
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $let: {
+                                vars: {
+                                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                                },
+                                in: '$$subRegion.name.en',
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $let: {
+                                vars: {
+                                    retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                                },
+                                in: '$$retailSegment.name.en',
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $let: {
+                                vars: {
+                                    outlet: { $arrayElemAt: ['$outlet', 0] },
+                                },
+                                in: '$$outlet.name.en',
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $let: {
+                                vars: {
+                                    branch: { $arrayElemAt: ['$branch', 0], },
+                                },
+                                in: '$$branch.name.en',
+                            },
+                        },
+                    ],
+                },
                 createdBy: 1,
-                location: 1,
                 brand: 1,
                 category: {
                     $let: {
@@ -268,14 +399,8 @@ module.exports = (req, res, next) => {
                 variant: 1,
                 packing: 1,
                 displayType: {
-                    $map: {
-                        input: '$displayType',
-                        as: 'displayType',
-                        in: {
-                            _id: '$$displayType._id',
-                            name: '$$displayType.name',
-                        },
-                    },
+                    _id: 1,
+                    name: 1,
                 },
                 price: 1,
                 origin: {
@@ -293,6 +418,52 @@ module.exports = (req, res, next) => {
                 shelfLifeEnd: 1,
                 distributor: 1,
                 attachments: 1,
+            },
+        });
+
+        pipeline.push({
+            $sort: {
+                location: 1,
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                total: { $sum: 1 },
+                setProducts: { $push: '$$ROOT' },
+            },
+        });
+
+        pipeline.push({
+            $unwind: '$setProducts',
+        });
+
+        pipeline.push({
+            $skip: skip,
+        });
+
+        pipeline.push({
+            $limit: limit,
+        });
+
+        pipeline.push({
+            $project: {
+                total: 1,
+                _id: '$setProducts._id',
+                location: '$setProducts.location',
+                createdBy: '$setProducts.createdBy',
+                brand: '$setProducts.brand',
+                category: '$setProducts.category',
+                variant: '$setProducts.variant',
+                packing: '$setProducts.packing',
+                displayType: '$setProducts.displayType',
+                price: '$setProducts.price',
+                origin: '$setProducts.origin',
+                shelfLifeStart: '$setProducts.shelfLifeStart',
+                shelfLifeEnd: '$setProducts.shelfLifeEnd',
+                distributor: '$setProducts.distributor',
+                attachments: '$setProducts.attachments',
             },
         });
 
