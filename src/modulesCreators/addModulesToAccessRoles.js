@@ -13,6 +13,7 @@ const cashVan = require('./roles/cashVan');
 const masterUpload = require('./roles/masterUploader');
 const countryUpload = require('./roles/countryUploader');
 const tradeMarketer = require('./roles/tradeMarketer');
+const promoter = require('./roles/promoter');
 
 // sequence is important
 const accessRolesData = [
@@ -26,7 +27,8 @@ const accessRolesData = [
     cashVan,
     masterUpload,
     countryUpload,
-    tradeMarketer
+    tradeMarketer,
+    promoter
 ];
 
 const accessRoles = [];
@@ -52,7 +54,8 @@ const levels = [
     'Cash van',
     'Master uploader',
     'Country uploader',
-    'Trade marketer'
+    'Trade marketer',
+    'Promoter',
 ];
 
 const generate = (callback) => {
