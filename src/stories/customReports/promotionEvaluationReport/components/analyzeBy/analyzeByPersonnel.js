@@ -25,6 +25,12 @@ module.exports = (pipeline) => {
                 personnel: '$personnel',
                 promotion: '$_id',
             },
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$_id.personnel',
             count: { $sum: 1 },
         },
     });
@@ -32,7 +38,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'personnels',
-            localField: '_id.personnel',
+            localField: '_id',
             foreignField: '_id',
             as: 'personnel',
         },
@@ -40,7 +46,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
-            _id: '$_id.personnel',
+            _id: 1,
             count: 1,
             domain: {
                 $let: {
@@ -70,6 +76,62 @@ module.exports = (pipeline) => {
                 },
             },
             labels: { $addToSet: '$domain.name' },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$data',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'data.name.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                labels: '$labels',
+            },
+            data: { $push: '$data' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            labels: '$_id.labels',
+            data: 1,
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$labels',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'labels.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                data: '$data',
+            },
+            labels: { $push: '$labels' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            data: '$_id.data',
+            labels: 1,
         },
     });
 };
