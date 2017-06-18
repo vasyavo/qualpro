@@ -430,6 +430,7 @@ module.exports = function (req, res, next) {
 
         const adminFromCMS = req.query.filter && req.query.filter.tabName === 'all';
         const adminFromMobile = req.isMobile && [
+            ACL_CONSTANTS.MASTER_ADMIN,
             ACL_CONSTANTS.COUNTRY_ADMIN,
             ACL_CONSTANTS.AREA_MANAGER,
             ACL_CONSTANTS.AREA_IN_CHARGE,

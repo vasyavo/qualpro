@@ -60,7 +60,8 @@ module.exports = function (req, res, next) {
                     date: new Date(),
                 };
 
-                attachments = attachments.objectID();
+                attachments = attachments && attachments[0] ? attachments.objectID() : [];
+
                 updateObject.attachments = attachments.concat(filesIds);
 
                 ObjectiveModel.findOne({ _id: inStoreTaskId }, (err, inStoreTaskModel) => {

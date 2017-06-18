@@ -203,6 +203,7 @@ module.exports = (req, res, next) => {
 
         (allowed, personnel, cb) => {
             const isAdmin = [
+                ACL_CONSTANTS.MASTER_ADMIN,
                 ACL_CONSTANTS.COUNTRY_ADMIN,
                 ACL_CONSTANTS.AREA_MANAGER,
                 ACL_CONSTANTS.AREA_IN_CHARGE,
