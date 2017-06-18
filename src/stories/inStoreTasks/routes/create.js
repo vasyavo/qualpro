@@ -79,7 +79,7 @@ module.exports = (req, res, next) => {
                 const inStoreTasks = {
                     title: body.title,
                     description: body.description,
-                    objectiveType: body.objectiveType,
+                    objectiveType: 'individual',
                     priority: body.priority,
                     status,
                     assignedTo: body.assignedTo,
