@@ -195,10 +195,10 @@ function* createOrUpdate(payload) {
     const modify = {
         $set: {
             barCode   : barcode,
-            ppt       : pptNum,
-            pptPerCase: pptPerCaseNum,
-            rspMin    : rspMinNum,
-            rspMax    : rspMaxNum,
+            ppt       : Math.round(pptNum * 1000),
+            pptPerCase: Math.round(pptPerCaseNum * 1000),
+            rspMin    : Math.round(rspMinNum * 1000),
+            rspMax    : Math.round(rspMaxNum * 1000),
             packing   : packing,
             origin    : originId,
             category  : categoryId,
