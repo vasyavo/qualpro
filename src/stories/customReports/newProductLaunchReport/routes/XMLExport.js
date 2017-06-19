@@ -1,12 +1,11 @@
+const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
-const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
@@ -33,19 +32,20 @@ module.exports = (req, res, next) => {
         },
     };
 
+    let currentLanguage;
+
     const queryRun = (personnel, callback) => {
         const query = req.query;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
         ];
         const pipeline = [];
+
+        currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -318,16 +318,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'files',
-                localField: 'attachments',
+                from: 'positions',
+                localField: 'createdBy.user.position',
                 foreignField: '_id',
-                as: 'attachments',
+                as: 'position',
             },
         });
 
         pipeline.push({
             $project: {
-                total: 1,
                 _id: 1,
                 location: {
                     $concat: [
@@ -386,6 +385,62 @@ module.exports = (req, res, next) => {
                         },
                     ],
                 },
+                country: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
+                        in: '$$country.name',
+                    },
+                },
+                region: {
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$region', 0] },
+                        },
+                        in: '$$region.name',
+                    },
+                },
+                subRegion: {
+                    $let: {
+                        vars: {
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                        },
+                        in: '$$subRegion.name',
+                    },
+                },
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                        },
+                        in: '$$retailSegment.name',
+                    },
+                },
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                        },
+                        in: '$$outlet.name',
+                    },
+                },
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: '$$branch.name',
+                    },
+                },
+                position: {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$position', 0] },
+                        },
+                        in: '$$position.name',
+                    },
+                },
                 createdBy: 1,
                 brand: 1,
                 category: {
@@ -393,17 +448,20 @@ module.exports = (req, res, next) => {
                         vars: {
                             category: { $arrayElemAt: ['$category', 0] },
                         },
-                        in: {
-                            _id: '$$category._id',
-                            name: '$$category.name',
-                        },
+                        in: '$$category.name',
                     },
                 },
                 variant: 1,
                 packing: 1,
                 displayType: {
-                    _id: 1,
-                    name: 1,
+                    $reduce: {
+                        input: '$displayType',
+                        initialValue: { en: [], ar: [] },
+                        in: {
+                            en: { $concatArrays: ['$$value.en', ['$$this.name.en']] },
+                            ar: { $concatArrays: ['$$value.ar', ['$$this.name.ar']] },
+                        },
+                    },
                 },
                 price: 1,
                 origin: {
@@ -411,70 +469,18 @@ module.exports = (req, res, next) => {
                         vars: {
                             origin: { $arrayElemAt: ['$origin', 0] },
                         },
-                        in: {
-                            _id: '$$origin._id',
-                            name: '$$origin.name',
-                        },
+                        in: '$$origin.name',
                     },
                 },
                 shelfLifeStart: 1,
                 shelfLifeEnd: 1,
                 distributor: 1,
-                attachments: 1,
             },
         });
 
         pipeline.push({
             $sort: {
                 location: 1,
-            },
-        });
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                total: { $sum: 1 },
-                setProducts: { $push: '$$ROOT' },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$setProducts',
-        });
-
-        pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
-        });
-
-        pipeline.push({
-            $project: {
-                total: 1,
-                _id: '$setProducts._id',
-                location: '$setProducts.location',
-                createdBy: '$setProducts.createdBy',
-                brand: '$setProducts.brand',
-                category: '$setProducts.category',
-                variant: '$setProducts.variant',
-                packing: '$setProducts.packing',
-                displayType: '$setProducts.displayType',
-                price: '$setProducts.price',
-                origin: '$setProducts.origin',
-                shelfLifeStart: '$setProducts.shelfLifeStart',
-                shelfLifeEnd: '$setProducts.shelfLifeEnd',
-                distributor: '$setProducts.distributor',
-                attachments: '$setProducts.attachments',
-            },
-        });
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                total: { $first: '$total' },
-                data: { $push: '$$ROOT' },
             },
         });
 
@@ -495,9 +501,79 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result.length ?
-            result[0] : { data: [], total: 0 };
+        /* eslint-disable */
+        const verstka = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
+                        <th>Branch</th>
+                        <th>Publisher</th>
+                        <th>Brand</th>
+                        <th>Product</th>
+                        <th>Variant</th>
+                        <th>Packing</th>
+                        <th>Display Type</th>
+                        <th>Price</th>
+                        <th>Origin</th>
+                        <th>Shelf Life Start</th>
+                        <th>Shelf Life End</th>
+                        <th>Distributor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.map(item => {
+                        return `
+                            <tr>
+                                <td>${item.country[currentLanguage]}</td>
+                                <td>${item.region[currentLanguage]}</td>
+                                <td>${item.subRegion[currentLanguage]}</td>
+                                <td>${item.retailSegment[currentLanguage]}</td>
+                                <td>${item.outlet[currentLanguage]}</td>
+                                <td>${item.branch[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position[currentLanguage]}</td>
+                                <td>${item.brand.name}</td>
+                                <td>${item.category ? item.category[currentLanguage] : ''}</td>
+                                <td>${item.variant.name}</td>
+                                <td>${item.packing}</td>
+                                <td>${item.displayType[currentLanguage].join(', ')}</td>
+                                <td>${item.price}</td>
+                                <td>${item.origin ? item.origin[currentLanguage] : ''}</td>
+                                <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>
+                                <td>${item.distributor[currentLanguage]}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+        /* eslint-enable */
 
-        res.status(200).send(response);
+        conversion(verstka, (err, stream) => {
+            if (err) {
+                return next(err);
+            }
+
+            const bufs = [];
+
+            stream.on('data', (data) => {
+                bufs.push(data);
+            });
+
+            stream.on('end', () => {
+                const buf = Buffer.concat(bufs);
+
+                res.set({
+                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Disposition': `attachment; filename="newProductLaunchReportExport_${new Date()}.xls"`,
+                    'Content-Length': buf.length,
+                }).status(200).send(buf);
+            });
+        });
     });
 };

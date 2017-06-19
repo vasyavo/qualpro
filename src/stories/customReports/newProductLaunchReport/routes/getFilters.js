@@ -16,20 +16,22 @@ module.exports = (req, res, next) => {
     const timeFilterSchema = {
         type: 'object',
         properties: {
-            from: {
-                type: 'string',
-            },
-            to: {
-                type: 'string',
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
             },
         },
-        required: [
-            'from',
-            'to',
-        ],
     };
 
-    const queryRun = (personnel, callback) => { // TODO add shelfLife filter
+    const queryRun = (personnel, callback) => {
         const query = req.query;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
@@ -76,7 +78,7 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
             $generalMatch.$and.push({
-                'brand._id': {
+                'brand.name': {
                     $in: queryFilter[CONTENT_TYPES.BRAND],
                 },
             });
@@ -84,7 +86,7 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
             $generalMatch.$and.push({
-                'variant._id': {
+                'variant.name': {
                     $in: queryFilter[CONTENT_TYPES.VARIANT],
                 },
             });
@@ -107,20 +109,59 @@ module.exports = (req, res, next) => {
             });
         }
 
+        const $timeMatch = {};
+        $timeMatch.$or = [];
+
         if (timeFilter) {
-            $generalMatch.$and = [
-                {
-                    'createdBy.date': { $gt: moment(timeFilter.from, 'MM/DD/YYYY')._d },
-                },
-                {
-                    'createdBy.date': { $lt: moment(timeFilter.to, 'MM/DD/YYYY')._d },
-                },
-            ];
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
+                    $and: [
+                        {
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
         }
 
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
+            });
+        }
+
+        pipeline.push({
+            $addFields: {
+                shelfLifePeriod: {
+                    $trunc: {
+                        $divide: [
+                            {
+                                $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
+                            },
+                            86400000,
+                        ],
+                    },
+                },
+            },
+        });
+
+        if (queryFilter.shelfLife) {
+            queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
+
+            pipeline.push({
+                $match: {
+                    shelfLifePeriod: queryFilter.shelfLife,
+                },
             });
         }
 
@@ -177,12 +218,13 @@ module.exports = (req, res, next) => {
                 branches: { $addToSet: '$branch' },
                 positions: { $addToSet: '$createdBy.user.position' },
                 personnels: { $addToSet: '$createdBy.user' },
-                brands: { $addToSet: '$brand' },
+                brands: { $addToSet: '$brand.name' },
                 categories: { $addToSet: '$category' },
-                variants: { $addToSet: '$variant' },
+                variants: { $addToSet: '$variant.name' },
                 packings: { $addToSet: '$packing' },
                 distributors: { $addToSet: '$distributor' },
                 displayTypes: { $push: '$displayType' },
+                shelfLifePeriods: { $addToSet: '$shelfLifePeriod' },
             },
         });
 
@@ -266,6 +308,7 @@ module.exports = (req, res, next) => {
                 variants: 1,
                 packings: 1,
                 distributors: 1,
+                shelfLifePeriods: 1,
                 displayTypes: {
                     $reduce: {
                         input: '$displayTypes',
@@ -358,7 +401,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-
         pipeline.push({
             $lookup: {
                 from: 'displayTypes',
@@ -407,6 +449,7 @@ module.exports = (req, res, next) => {
                 variants: 1,
                 packings: 1,
                 distributors: 1,
+                shelfLifePeriods: 1,
                 displayTypes: {
                     _id: 1,
                     name: 1,
@@ -431,6 +474,69 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result[0]);
+        const response = result && result[0] ? result[0] : {
+            countries: [],
+            regions: [],
+            subRegions: [],
+            retailSegments: [],
+            outlets: [],
+            branches: [],
+            positions: [],
+            personnels: [],
+            brands: [],
+            categories: [],
+            variants: [],
+            packings: [],
+            distributors: [],
+            shelfLifePeriods: [],
+            displayTypes: [],
+        };
+
+        response.analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'Sub Region',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
+            },
+            {
+                name: {
+                    en: 'Employee',
+                    ar: '',
+                },
+                value: 'employee',
+            },
+        ];
+
+        res.status(200).send(response);
     });
 };
