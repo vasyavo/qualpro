@@ -134,7 +134,7 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: '$date',
                 country: { $first: '$payload.country' },
-                ppt: { $avg: '$payload.ppt' },
+                ppt: { $last: '$payload.ppt' },
             },
         });
 
