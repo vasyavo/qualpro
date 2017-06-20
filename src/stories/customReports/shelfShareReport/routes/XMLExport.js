@@ -290,84 +290,6 @@ module.exports = (req, res, next) => {
             $limit: 3,
         });
 
-        pipeline.push({
-            $group: {
-                _id: null,
-                data: { $push: '$$ROOT' },
-                brands: { $push: '$brands._id' },
-                brandNames: { $push: '$brands.name' },
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                brandNames: {
-                    $reduce: {
-                        input: '$brandNames',
-                        initialValue: [],
-                        in: {
-                            $cond: {
-                                if: {
-                                    $ne: ['$$this', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$this', '$$value'],
-                                },
-                                else: '$$value',
-                            },
-                        },
-                    },
-                },
-                brands: {
-                    $map: {
-                        input: {
-                            $reduce: {
-                                input: '$brands',
-                                initialValue: [],
-                                in: {
-                                    $cond: {
-                                        if: {
-                                            $ne: ['$$this', []],
-                                        },
-                                        then: {
-                                            $setUnion: ['$$this', '$$value'],
-                                        },
-                                        else: '$$value',
-                                    },
-                                },
-                            },
-                        },
-                        as: 'brand',
-                        in: {
-                            $map: {
-                                input: '$data',
-                                as: 'data',
-                                in: {
-                                    _id: '$$brand',
-                                    productName: '$$data.name',
-                                    productId: '$$data._id',
-                                    stats: {
-                                        $arrayElemAt: [
-                                            {
-                                                $filter: {
-                                                    input: '$$data.brands',
-                                                    as: 'brandData',
-                                                    cond: {
-                                                        $eq: ['$$brandData._id', '$$brand'],
-                                                    },
-                                                },
-                                            },
-                                            0,
-                                        ],
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
         ShelfShareModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -403,44 +325,45 @@ module.exports = (req, res, next) => {
         //     item.totalMaxPercent = parseFloat(item.totalMaxPercent).toFixed(2);
         // });
 
-        result = result[0] || [];
-
         /* eslint-disable */
         const verstka = `
             <table>
                 <thead>
                     <tr>
                         <th>Product</th>
-                        ${
-                            result.brandNames.map((brandName) => {
-                                return `<th colspan="3">${brandName[currentLanguage]}</th>`;
-                            }).join('')
-                        }
+                        <th>Branch</th>
+                        <th>Min (M / %)</th>
+                        <th>Max (M / %)</th>
+                        <th>Avg (M / %)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${result.brands[0].map((category) => {
-                         return `
-                            <tr>
-                                <td>${category.productName[currentLanguage]}</td>
-                                ${result.brands.map((categories) => {
-                                    const brand = categories.filter((item => item.productId.toString() === category.productId.toString()))[0];
-
+                    ${result.map((product) => {
+                        return `
+                                ${product.brands.map((brand) => {
                                     return `
-                                        <td>${brand.stats ? brand.stats.minLength + ' / ' + brand.stats.minPercent : ''}</td>
-                                        <td>${brand.stats ? brand.stats.avgPercent + ' / ' + brand.stats.avgPercent : ''}</td>
-                                        <td>${brand.stats ? brand.stats.maxLength + ' / ' + brand.stats.maxLength : ''}</td>
-                                    `;    
+                                        <tr>
+                                            <td>${product.name[currentLanguage]}</td>
+                                            <td>${brand.name[currentLanguage]}</td>
+                                            <td>${parseFloat(brand.minLength).toFixed(2) + ' / ' + parseFloat(brand.minPercent).toFixed(2)}</td>
+                                            <td>${parseFloat(brand.maxLength).toFixed(2) + ' / ' + parseFloat(brand.maxPercent).toFixed(2)}</td>
+                                            <td>${parseFloat(brand.avgLength).toFixed(2) + ' / ' + parseFloat(brand.avgPercent).toFixed(2)}</td>
+                                        </tr>
+                                    `;
                                 })}
-                            </tr>
-                         `;
-                     }).join('')}
+                                <tr>
+                                    <td></td>
+                                    <td>TOTAL</td>
+                                    <td>${parseFloat(product.totalMinLength).toFixed(2) + ' / ' + parseFloat(product.totalMinPercent).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalMaxLength).toFixed(2) + ' / ' + parseFloat(product.totalMaxPercent).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalAvgLength).toFixed(2) + ' / ' + parseFloat(product.totalAvgPercent).toFixed(2)}</td>
+                                </tr>
+                        `;    
+                    }).join('')}
                 </tbody>
             </table>
         `;
         /* eslint-enable */
-
-        // res.status(200).send(verstka);
 
         conversion(verstka, (err, stream) => {
             if (err) {
