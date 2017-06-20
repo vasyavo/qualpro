@@ -224,7 +224,7 @@ module.exports = (req, res, next) => {
                 brand: 1,
                 category: 1,
                 variant: 1,
-                packing: 1,
+                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 displayType: 1,
                 price: 1,
                 origin: 1,
