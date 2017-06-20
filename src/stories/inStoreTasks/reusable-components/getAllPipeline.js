@@ -69,16 +69,14 @@ module.exports = (options) => {
         }
     }
 
-    if (!isMobile) {
-        pipeLine.push({
-            $match: {
-                $or: [
-                    { archived: false },
-                    { archived: { $exists: false } },
-                ],
-            },
-        });
-    }
+    pipeLine.push({
+        $match: {
+            $or: [
+                { archived: false },
+                { archived: { $exists: false } },
+            ],
+        },
+    });
 
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
         from: 'personnels',
