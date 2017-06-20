@@ -476,7 +476,7 @@ var Promotions = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.REPORTING, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -606,7 +606,7 @@ var Promotions = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, function (err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.REPORTING, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -786,7 +786,7 @@ var Promotions = function () {
         async.waterfall([
 
             (cb) => {
-                access.getEditAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, cb);
+                access.getEditAccess(req, ACL_MODULES.REPORTING, cb);
             },
 
             (allowed, personnel, cb) => {
@@ -830,7 +830,7 @@ var Promotions = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.AL_ALALI_PROMO_EVALUATION, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.REPORTING, function (err, allowed) {
             if (err) {
                 return next(err);
             }
