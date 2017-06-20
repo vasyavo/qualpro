@@ -40,16 +40,14 @@ module.exports = (options) => {
         $match: queryObject,
     });
 
-    if (!isMobile) {
-        pipeline.push({
-            $match: {
-                $or: [
-                    { archived: false },
-                    { archived: { $exists: false } },
-                ],
-            },
-        });
-    }
+    pipeline.push({
+        $match: {
+            $or: [
+                { archived: false },
+                { archived: { $exists: false } },
+            ],
+        },
+    });
 
     const $locationMatch = {
         $and: [],

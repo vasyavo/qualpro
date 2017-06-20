@@ -75,16 +75,14 @@ module.exports = (options) => {
         });
     }
 
-    if (!isMobile) {
-        pipeline.push({
-            $match: {
-                $or: [
-                    { archived: false },
-                    { archived: { $exists: false } },
-                ],
-            },
-        });
-    }
+    pipeline.push({
+        $match: {
+            $or: [
+                { archived: false },
+                { archived: { $exists: false } },
+            ],
+        },
+    });
 
     if (isMobile) {
         pipeline.push({
