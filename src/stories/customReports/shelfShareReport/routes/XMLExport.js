@@ -31,6 +31,7 @@ module.exports = (req, res, next) => {
             },
         },
     };
+
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
@@ -131,17 +132,18 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                branch: 1,
                 category: 1,
-                shelfShare: '$brands',
+                brands: 1,
                 createdBy: {
                     user: {
                         $let: {
-                            vars: { user: { $arrayElemAt: ['$createdBy.user', 0] } },
-                            in: { _id: '$$user._id', position: '$$user.position' },
+                            vars: {
+                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                            },
+                            in: {
+                                _id: '$$user._id',
+                                position: '$$user.position',
+                            },
                         },
                     },
                     date: 1,
@@ -160,13 +162,13 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $unwind: '$shelfShare',
+            $unwind: '$brands',
         });
 
         if (queryFilter.brand && queryFilter.brand.length) {
             pipeline.push({
                 $match: {
-                    'shelfShare.brand': {
+                    'brands.brand': {
                         $in: queryFilter.brand,
                     },
                 },
@@ -176,263 +178,193 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: {
-                    country: '$country',
-                    region: '$region',
-                    subRegion: '$subRegion',
-                    branch: '$branch',
                     category: '$category',
-                    brand: '$shelfShare.brand',
+                    brand: '$brands.brand',
                 },
-                shelfShares: {
-                    $push: {
-                        percent: '$shelfShare.percent',
-                        length: '$shelfShare.length',
-                    },
-                },
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                _id: false,
-                group: '$_id',
-                shelfShares: 1,
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'group.country',
-                foreignField: '_id',
-                as: 'group.country',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                group: {
-                    country: {
-                        $let: {
-                            vars: {
-                                country: { $arrayElemAt: ['$group.country', 0] },
-                            },
-                            in: {
-                                _id: '$$country._id',
-                                name: '$$country.name',
-                            },
-                        },
-                    },
-                    region: 1,
-                    subRegion: 1,
-                    branch: 1,
-                    category: 1,
-                    brand: 1,
-                },
-                shelfShares: 1,
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'group.region',
-                foreignField: '_id',
-                as: 'group.region',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                group: {
-                    country: 1,
-                    region: {
-                        $let: {
-                            vars: {
-                                region: { $arrayElemAt: ['$group.region', 0] },
-                            },
-                            in: {
-                                _id: '$$region._id',
-                                name: '$$region.name',
-                            },
-                        },
-                    },
-                    subRegion: 1,
-                    branch: 1,
-                    category: 1,
-                    brand: 1,
-                },
-                shelfShares: 1,
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'group.subRegion',
-                foreignField: '_id',
-                as: 'group.subRegion',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                group: {
-                    country: 1,
-                    region: 1,
-                    subRegion: {
-                        $let: {
-                            vars: {
-                                subRegion: { $arrayElemAt: ['$group.subRegion', 0] },
-                            },
-                            in: {
-                                _id: '$$subRegion._id',
-                                name: '$$subRegion.name',
-                            },
-                        },
-                    },
-                    branch: 1,
-                    category: 1,
-                    brand: 1,
-                },
-                shelfShares: 1,
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'group.branch',
-                foreignField: '_id',
-                as: 'group.branch',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                group: {
-                    country: 1,
-                    region: 1,
-                    subRegion: 1,
-                    branch: {
-                        $let: {
-                            vars: {
-                                branch: { $arrayElemAt: ['$group.branch', 0] },
-                            },
-                            in: {
-                                _id: '$$branch._id',
-                                name: '$$branch.name',
-                            },
-                        },
-                    },
-                    category: 1,
-                    brand: 1,
-                },
-                shelfShares: 1,
-                total: 1,
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                country: '$group.country',
-                region: '$group.region',
-                subRegion: '$group.subRegion',
-                branch: '$group.branch',
-                category: '$group.category',
-                brand: '$group.brand',
-                location: {
-                    $concat: ['$group.country.name.en', ' -> ', '$group.region.name.en', ' -> ', '$group.subRegion.name.en', ' -> ', '$group.branch.name.en'],
-                },
-                shelfShares: 1,
-                total: 1,
-            },
-        });
-
-        pipeline.push({
-            $sort: {
-                location: 1,
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                branch: 1,
-                category: 1,
-                brand: 1,
-                location: 1,
-                maxLength: { $max: '$shelfShares.length' },
-                minLength: { $min: '$shelfShares.length' },
-                avgLength: { $avg: '$shelfShares.length' },
-                maxPercent: { $max: '$shelfShares.percent' },
-                minPercent: { $min: '$shelfShares.percent' },
-                avgPercent: { $avg: '$shelfShares.percent' },
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'categories',
-                localField: 'category',
-                foreignField: '_id',
-                as: 'category',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                category: {
-                    $let: {
-                        vars: {
-                            category: { $arrayElemAt: ['$category', 0] },
-                        },
-                        in: {
-                            _id: '$$category._id',
-                            name: '$$category.name',
-                        },
-                    },
-                },
+                maxLength: { $max: '$brands.length' },
+                minLength: { $min: '$brands.length' },
+                avgLength: { $avg: '$brands.length' },
+                maxPercent: { $max: '$brands.percent' },
+                minPercent: { $min: '$brands.percent' },
+                avgPercent: { $avg: '$brands.percent' },
             },
         });
 
         pipeline.push({
             $lookup: {
                 from: 'brands',
-                localField: 'brand',
+                localField: '_id.brand',
                 foreignField: '_id',
                 as: 'brand',
             },
         });
+
         pipeline.push({
-            $addFields: {
-                brand: {
+            $project: {
+                _id: 1,
+                maxLength: 1,
+                minLength: 1,
+                avgLength: 1,
+                maxPercent: 1,
+                minPercent: 1,
+                avgPercent: 1,
+                name: {
                     $let: {
                         vars: {
                             brand: { $arrayElemAt: ['$brand', 0] },
                         },
-                        in: {
-                            _id: '$$brand._id',
-                            name: '$$brand.name',
-                        },
+                        in: '$$brand.name',
                     },
                 },
             },
         });
 
         pipeline.push({
-            $addFields: {
-                label: {
-                    $concat: ['$category.name.en', ' -> ', '$brand.name.en'],
+            $group: {
+                _id: '$_id.category',
+                brands: {
+                    $push: {
+                        _id: '$_id.brand',
+                        name: '$name',
+                        maxLength: '$maxLength',
+                        minLength: '$minLength',
+                        avgLength: '$avgLength',
+                        maxPercent: '$maxPercent',
+                        minPercent: '$minPercent',
+                        avgPercent: '$avgPercent',
+                    },
+                },
+                totalMinLength: { $min: '$minLength' },
+                totalMaxLength: { $max: '$maxLength' },
+                totalAvgLength: { $avg: '$avgLength' },
+                totalMinPercent: { $min: '$minPercent' },
+                totalMaxPercent: { $max: '$maxPercent' },
+                totalAvgPercent: { $avg: '$avgPercent' },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                brands: 1,
+                totalMinLength: 1,
+                totalMaxLength: 1,
+                totalAvgLength: 1,
+                totalMinPercent: 1,
+                totalMaxPercent: 1,
+                totalAvgPercent: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                brands: 1,
+                totalMinLength: 1,
+                totalMaxLength: 1,
+                totalAvgLength: 1,
+                totalMinPercent: 1,
+                totalMaxPercent: 1,
+                totalAvgPercent: 1,
+                name: {
+                    $let: {
+                        vars: {
+                            category: { $arrayElemAt: ['$category', 0] },
+                        },
+                        in: '$$category.name',
+                    },
                 },
             },
         });
 
         pipeline.push({
-            $sort: {
-                label: 1,
+            $limit: 3,
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                data: { $push: '$$ROOT' },
+                brands: { $push: '$brands._id' },
+                brandNames: { $push: '$brands.name' },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                brandNames: {
+                    $reduce: {
+                        input: '$brandNames',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $ne: ['$$this', []],
+                                },
+                                then: {
+                                    $setUnion: ['$$this', '$$value'],
+                                },
+                                else: '$$value',
+                            },
+                        },
+                    },
+                },
+                brands: {
+                    $map: {
+                        input: {
+                            $reduce: {
+                                input: '$brands',
+                                initialValue: [],
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $ne: ['$$this', []],
+                                        },
+                                        then: {
+                                            $setUnion: ['$$this', '$$value'],
+                                        },
+                                        else: '$$value',
+                                    },
+                                },
+                            },
+                        },
+                        as: 'brand',
+                        in: {
+                            $map: {
+                                input: '$data',
+                                as: 'data',
+                                in: {
+                                    _id: '$$brand',
+                                    productName: '$$data.name',
+                                    productId: '$$data._id',
+                                    stats: {
+                                        $arrayElemAt: [
+                                            {
+                                                $filter: {
+                                                    input: '$$data.brands',
+                                                    as: 'brandData',
+                                                    cond: {
+                                                        $eq: ['$$brandData._id', '$$brand'],
+                                                    },
+                                                },
+                                            },
+                                            0,
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -453,46 +385,62 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
+        // result.forEach(item => {
+        //     item.brands.forEach(brand => {
+        //         brand.minLength = parseFloat(brand.minLength).toFixed(2);
+        //         brand.minPercent = parseFloat(brand.minPercent).toFixed(2);
+        //         brand.avgLength = parseFloat(brand.avgLength).toFixed(2);
+        //         brand.avgPercent = parseFloat(brand.avgPercent).toFixed(2);
+        //         brand.maxLength = parseFloat(brand.maxLength).toFixed(2);
+        //         brand.maxPercent = parseFloat(brand.maxPercent).toFixed(2);
+        //     });
+        //
+        //     item.totalMinLength = parseFloat(item.totalMinLength).toFixed(2);
+        //     item.totalMinPercent = parseFloat(item.totalMinPercent).toFixed(2);
+        //     item.totalAvgLength = parseFloat(item.totalAvgLength).toFixed(2);
+        //     item.totalAvgPercent = parseFloat(item.totalAvgPercent).toFixed(2);
+        //     item.totalMaxLength = parseFloat(item.totalMaxLength).toFixed(2);
+        //     item.totalMaxPercent = parseFloat(item.totalMaxPercent).toFixed(2);
+        // });
+
+        result = result[0] || [];
+
         /* eslint-disable */
         const verstka = `
             <table>
                 <thead>
                     <tr>
-                        <th>Country</th>
-                        <th>Region</th>
-                        <th>Sub Region</th>
-                        <th>Branch</th>
                         <th>Product</th>
-                        <th>Min Length</th>
-                        <th>Min Percent</th>
-                        <th>Avg Length</th>
-                        <th>Avg Percent</th>
-                        <th>Max Length</th>
-                        <th>Max Percent</th>
+                        ${
+                            result.brandNames.map((brandName) => {
+                                return `<th colspan="3">${brandName[currentLanguage]}</th>`;
+                            }).join('')
+                        }
                     </tr>
                 </thead>
                 <tbody>
-                    ${result.map(item => {
-            return `
+                    ${result.brands[0].map((category) => {
+                         return `
                             <tr>
-                                <td>${item.country.name[currentLanguage]}</td>
-                                <td>${item.region.name[currentLanguage]}</td>
-                                <td>${item.subRegion.name[currentLanguage]}</td>
-                                <td>${item.branch.name[currentLanguage]}</td>
-                                <td>${item.category.name[currentLanguage]}</td>
-                                <td>${parseFloat(item.minLength).toFixed(2)}</td>
-                                <td>${parseFloat(item.minPercent).toFixed(2)}</td>
-                                <td>${parseFloat(item.avgLength).toFixed(2)}</td>
-                                <td>${parseFloat(item.avgPercent).toFixed(2)}</td>
-                                <td>${parseFloat(item.maxLength).toFixed(2)}</td>
-                                <td>${parseFloat(item.maxPercent).toFixed(2)}</td>
+                                <td>${category.productName[currentLanguage]}</td>
+                                ${result.brands.map((categories) => {
+                                    const brand = categories.filter((item => item.productId.toString() === category.productId.toString()))[0];
+
+                                    return `
+                                        <td>${brand.stats ? brand.stats.minLength + ' / ' + brand.stats.minPercent : ''}</td>
+                                        <td>${brand.stats ? brand.stats.avgPercent + ' / ' + brand.stats.avgPercent : ''}</td>
+                                        <td>${brand.stats ? brand.stats.maxLength + ' / ' + brand.stats.maxLength : ''}</td>
+                                    `;    
+                                })}
                             </tr>
-                        `;
-        }).join('')}
+                         `;
+                     }).join('')}
                 </tbody>
             </table>
         `;
         /* eslint-enable */
+
+        // res.status(200).send(verstka);
 
         conversion(verstka, (err, stream) => {
             if (err) {
