@@ -6,8 +6,8 @@ const conversion = require('html-to-xlsx')({
     /* directory where are stored temporary html and pdf files, use something like npm package reaper to clean this up */
     tmpDir: 'os/tmpdir',
     /* optional port range where to start phantomjs server */
-    portLeftBoundary: 3004,
-    portRightBoundary: 3007,
+    portLeftBoundary: 3000,
+    portRightBoundary: 4000,
     /* optional hostname where to start phantomjs server */
     host: '127.0.0.1',
 });
