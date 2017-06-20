@@ -404,7 +404,50 @@ module.exports = (req, res, next) => {
             $addFields: {
                 regions: {
                     $map: {
-                        input: '$regions',
+                        input: {
+                            $let: {
+                                vars: {
+                                    setCountry: queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length ? queryFilter[CONTENT_TYPES.COUNTRY] : {
+                                        $map: {
+                                            input: '$countries',
+                                            as: 'item',
+                                            in: '$$item._id',
+                                        },
+                                    },
+                                    setRegion: queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length ? queryFilter[CONTENT_TYPES.REGION] : personnel[CONTENT_TYPES.REGION],
+                                },
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $gt: [{
+                                                $size: '$$setRegion',
+                                            }, 0],
+                                        },
+                                        then: {
+                                            $filter: {
+                                                input: '$regions',
+                                                as: 'item',
+                                                cond: {
+                                                    $and: [
+                                                        { $setIsSubset: [['$$item.parent'], '$$setCountry'] },
+                                                        { $setIsSubset: [['$$item._id'], '$$setRegion'] },
+                                                    ],
+                                                },
+                                            },
+                                        },
+                                        else: {
+                                            $filter: {
+                                                input: '$regions',
+                                                as: 'item',
+                                                cond: {
+                                                    $setIsSubset: [['$$item.parent'], '$$setCountry'],
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                         as: 'region',
                         in: {
                             _id: '$$region._id',
@@ -428,7 +471,52 @@ module.exports = (req, res, next) => {
             $addFields: {
                 subRegions: {
                     $map: {
-                        input: '$subRegions',
+                        input: {
+                            $let: {
+                                vars: {
+                                    setRegion: queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length ? queryFilter[CONTENT_TYPES.REGION] : {
+                                        $map: {
+                                            input: '$regions',
+                                            as: 'item',
+                                            in: '$$item._id',
+                                        },
+                                    },
+                                    setSubRegion: queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length ?
+                                        queryFilter[CONTENT_TYPES.SUBREGION] :
+                                        personnel[CONTENT_TYPES.SUBREGION],
+                                },
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $gt: [{
+                                                $size: '$$setSubRegion',
+                                            }, 0],
+                                        },
+                                        then: {
+                                            $filter: {
+                                                input: '$subRegions',
+                                                as: 'item',
+                                                cond: {
+                                                    $and: [
+                                                        { $setIsSubset: [['$$item.parent'], '$$setRegion'] },
+                                                        { $setIsSubset: [['$$item._id'], '$$setSubRegion'] },
+                                                    ],
+                                                },
+                                            },
+                                        },
+                                        else: {
+                                            $filter: {
+                                                input: '$subRegions',
+                                                as: 'item',
+                                                cond: {
+                                                    $setIsSubset: [['$$item.parent'], '$$setRegion'],
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                         as: 'subRegion',
                         in: {
                             _id: '$$subRegion._id',
@@ -452,11 +540,99 @@ module.exports = (req, res, next) => {
             $addFields: {
                 branches: {
                     $map: {
-                        input: '$branches',
+                        input: {
+                            $let: {
+                                vars: {
+                                    setSubRegion: queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length ? queryFilter[CONTENT_TYPES.SUBREGION] : {
+                                        $map: {
+                                            input: '$subRegions',
+                                            as: 'item',
+                                            in: '$$item._id',
+                                        },
+                                    },
+                                    setBranches: queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length ?
+                                        queryFilter[CONTENT_TYPES.BRANCH] :
+                                        personnel[CONTENT_TYPES.BRANCH],
+                                },
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $gt: [{
+                                                $size: '$$setBranches',
+                                            }, 0],
+                                        },
+                                        then: {
+                                            $filter: {
+                                                input: '$branches',
+                                                as: 'item',
+                                                cond: {
+                                                    $and: [
+                                                        { $setIsSubset: [['$$item.subRegion'], '$$setSubRegion'] },
+                                                        { $setIsSubset: [['$$item._id'], '$$setBranches'] },
+                                                    ],
+                                                },
+                                            },
+                                        },
+                                        else: {
+                                            $filter: {
+                                                input: '$branches',
+                                                as: 'item',
+                                                cond: {
+                                                    $setIsSubset: [['$$item.subRegion'], '$$setSubRegion'],
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                         as: 'branch',
                         in: {
                             _id: '$$branch._id',
                             name: '$$branch.name',
+                            retailSegment: '$$branch.retailSegment',
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                retailSegments: {
+                    $let: {
+                        vars: {
+                            setRetailSegments: queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length ? queryFilter[CONTENT_TYPES.RETAILSEGMENT] : [],
+                        },
+                        in: {
+                            $cond: {
+                                if: {
+                                    $gt: [{
+                                        $size: '$$setRetailSegments',
+                                    }, 0],
+                                },
+                                then: {
+                                    $filter: {
+                                        input: '$retailSegments',
+                                        as: 'item',
+                                        cond: {
+                                            $and: [
+                                                { $setIsSubset: [['$$item'], '$branches.retailSegment'] },
+                                                { $setIsSubset: [['$$item'], '$$setRetailSegments'] },
+                                            ],
+                                        },
+                                    },
+                                },
+                                else: {
+                                    $filter: {
+                                        input: '$retailSegments',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item'], '$branches.retailSegment'],
+                                        },
+                                    },
+                                },
+                            },
                         },
                     },
                 },
