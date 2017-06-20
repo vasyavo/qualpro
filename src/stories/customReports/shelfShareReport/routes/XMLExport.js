@@ -286,10 +286,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        pipeline.push({
-            $limit: 3,
-        });
-
         ShelfShareModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -306,24 +302,6 @@ module.exports = (req, res, next) => {
         if (err) {
             return next(err);
         }
-
-        // result.forEach(item => {
-        //     item.brands.forEach(brand => {
-        //         brand.minLength = parseFloat(brand.minLength).toFixed(2);
-        //         brand.minPercent = parseFloat(brand.minPercent).toFixed(2);
-        //         brand.avgLength = parseFloat(brand.avgLength).toFixed(2);
-        //         brand.avgPercent = parseFloat(brand.avgPercent).toFixed(2);
-        //         brand.maxLength = parseFloat(brand.maxLength).toFixed(2);
-        //         brand.maxPercent = parseFloat(brand.maxPercent).toFixed(2);
-        //     });
-        //
-        //     item.totalMinLength = parseFloat(item.totalMinLength).toFixed(2);
-        //     item.totalMinPercent = parseFloat(item.totalMinPercent).toFixed(2);
-        //     item.totalAvgLength = parseFloat(item.totalAvgLength).toFixed(2);
-        //     item.totalAvgPercent = parseFloat(item.totalAvgPercent).toFixed(2);
-        //     item.totalMaxLength = parseFloat(item.totalMaxLength).toFixed(2);
-        //     item.totalMaxPercent = parseFloat(item.totalMaxPercent).toFixed(2);
-        // });
 
         /* eslint-disable */
         const verstka = `
