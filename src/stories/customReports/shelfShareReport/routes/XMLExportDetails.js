@@ -510,7 +510,7 @@ module.exports = (req, res, next) => {
 
                 res.set({
                     'Content-Type': 'application/vnd.ms-excel',
-                    'Content-Disposition': `attachment; filename="shelfSharesReportExport_${new Date()}.xls"`,
+                    'Content-Disposition': `attachment; filename="shelfSharesDetailsReportExport_${new Date()}.xls"`,
                     'Content-Length': buf.length,
                 }).status(200).send(buf);
             });
