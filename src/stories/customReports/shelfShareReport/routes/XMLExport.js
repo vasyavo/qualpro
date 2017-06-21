@@ -133,6 +133,8 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 category: 1,
+                retailSegment: 1,
+                outlet: 1,
                 brands: 1,
                 createdBy: {
                     user: {
@@ -180,6 +182,9 @@ module.exports = (req, res, next) => {
                 _id: {
                     category: '$category',
                     brand: '$brands.brand',
+                    retailSegment: '$retailSegment',
+                    outlet: '$outlet',
+
                 },
                 maxLength: { $max: '$brands.length' },
                 minLength: { $min: '$brands.length' },
@@ -221,7 +226,11 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
-                _id: '$_id.category',
+                _id: {
+                    category: '$_id.category',
+                    retailSegment: '$_id.retailSegment',
+                    outlet: '$_id.outlet',
+                },
                 brands: {
                     $push: {
                         _id: '$_id.brand',
@@ -259,9 +268,27 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'categories',
-                localField: '_id',
+                localField: '_id.category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'retailSegments',
+                localField: '_id.retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: '_id.outlet',
+                foreignField: '_id',
+                as: 'outlet',
             },
         });
 
@@ -275,6 +302,28 @@ module.exports = (req, res, next) => {
                 totalMinPercent: 1,
                 totalMaxPercent: 1,
                 totalAvgPercent: 1,
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                        },
+                        in: {
+                            _id: '$$retailSegment._id',
+                            name: '$$retailSegment.name',
+                        },
+                    },
+                },
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                        },
+                        in: {
+                            _id: '$$outlet._id',
+                            name: '$$outlet.name',
+                        },
+                    },
+                },
                 name: {
                     $let: {
                         vars: {
@@ -308,6 +357,8 @@ module.exports = (req, res, next) => {
             <table>
                 <thead>
                     <tr>
+                        <th>Retail Segment</th>
+                        <th>Outlet</th>
                         <th>Product</th>
                         <th>Branch</th>
                         <th>Min (M / %)</th>
@@ -321,6 +372,8 @@ module.exports = (req, res, next) => {
                                 ${product.brands.map((brand) => {
                                     return `
                                         <tr>
+                                            <td>${product.retailSegment.name[currentLanguage]}</td>
+                                            <td>${product.outlet.name[currentLanguage]}</td>
                                             <td>${product.name[currentLanguage]}</td>
                                             <td>${brand.name[currentLanguage]}</td>
                                             <td>${parseFloat(brand.minLength).toFixed(2) + ' / ' + parseFloat(brand.minPercent).toFixed(2)}</td>
