@@ -456,7 +456,7 @@ module.exports = (req, res, next) => {
                         <th>Outlet</th>
                         <th>Branch</th>
                         <th>Product</th>
-                        <th>Branch</th>
+                        <th>Brand</th>
                         <th>Min (M / %)</th>
                         <th>Max (M / %)</th>
                         <th>Avg (M / %)</th>
