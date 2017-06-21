@@ -1,3 +1,4 @@
+const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
 const async = require('async');
 const _ = require('lodash');
@@ -7,7 +8,6 @@ const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const QuestionnaryModel = require('./../../../../types/questionnaries/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
 
@@ -32,13 +32,11 @@ module.exports = (req, res, next) => {
             },
         },
     };
+    let currentLanguage;
 
     const queryRun = (personnel, callback) => {
         const query = req.query;
         const timeFilter = query.timeFilter;
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
@@ -46,6 +44,8 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
         ];
         const pipeline = [];
+
+        currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -280,39 +280,19 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $group: {
-                _id: null,
-                total: { $sum: 1 },
-                records: { $push: '$$ROOT' },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$records',
-        });
-
-        pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
-        });
-
-        pipeline.push({
             $project: {
                 total: 1,
-                _id: '$records._id',
-                title: '$records.title',
-                country: '$records.answer.country',
-                region: '$records.answer.region',
-                subRegion: '$records.answer.subRegion',
-                retailSegment: '$records.answer.retailSegment',
-                outlet: '$records.answer.outlet',
-                branch: '$records.answer.branch',
-                personnel: '$records.answer.personnel',
-                question: '$records.answer.question',
-                answer: { $arrayElemAt: ['$records.answer.answerText', 0] },
+                _id: 1,
+                title: 1,
+                country: '$answer.country',
+                region: '$answer.region',
+                subRegion: '$answer.subRegion',
+                retailSegment: '$answer.retailSegment',
+                outlet: '$answer.outlet',
+                branch: '$answer.branch',
+                personnel: '$answer.personnel',
+                question: '$answer.question',
+                answer: { $arrayElemAt: ['$answer.answerText', 0] },
             },
         });
 
@@ -495,16 +475,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        pipeline.push({
-            $group: {
-                _id: null,
-                total: { $first: '$total' },
-                data: {
-                    $push: '$$ROOT',
-                },
-            },
-        });
-
         QuestionnaryModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -522,9 +492,69 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result.length ?
-            result[0] : { data: [], total: 0 };
+        const anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
-        res.status(200).send(response);
+        /* eslint-disable */
+        const verstka = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
+                        <th>Retail Segment</th>
+                        <th>Outlet</th>
+                        <th>Branch</th>
+                        <th>Title</th>
+                        <th>Question</th>
+                        <th>Answer</th>
+                        <th>Position</th>
+                        <th>Personnel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.map(item => {
+                        return `
+                            <tr>
+                                <td>${item.country.name[currentLanguage] }</td>
+                                <td>${item.region.name[currentLanguage] }</td>
+                                <td>${item.subRegion.name[currentLanguage] }</td>
+                                <td>${item.retailSegment.name[currentLanguage] }</td>
+                                <td>${item.outlet.name[currentLanguage] }</td>
+                                <td>${item.branch.name[currentLanguage] }</td>
+                                <td>${item.title[currentLanguage] }</td>
+                                <td>${item.question[currentLanguage] || item.question[anotherLanguage] }</td>
+                                <td>${item.answer[currentLanguage] || item.answer[anotherLanguage] }</td>
+                                <td>${item.position.name[currentLanguage] }</td>
+                                <td>${item.personnel.name[currentLanguage] }</td>
+                            </tr>
+                        `;
+                     }).join('')}
+                </tbody>
+            </table>
+        `;
+        /* eslint-enable */
+
+        conversion(verstka, (err, stream) => {
+            if (err) {
+                return next(err);
+            }
+
+            const bufs = [];
+
+            stream.on('data', (data) => {
+                bufs.push(data);
+            });
+
+            stream.on('end', () => {
+                const buf = Buffer.concat(bufs);
+
+                res.set({
+                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Disposition': `attachment; filename="questionnaireDetailsReportExport_${new Date()}.xls"`,
+                    'Content-Length': buf.length,
+                }).status(200).send(buf);
+            });
+        });
     });
 };
