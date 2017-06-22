@@ -174,10 +174,40 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'questionnaryAnswer',
+                localField: '_id',
+                foreignField: 'questionnaryId',
+                as: 'answers',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: {
+                    $map: {
+                        input: '$answers',
+                        as: 'item',
+                        in: '$$item.personnelId',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'answeredPersonnels',
+                foreignField: '_id',
+                as: 'answeredPersonnels',
+            },
+        });
+
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
+                    'answeredPersonnels.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
@@ -194,7 +224,7 @@ module.exports = (req, res, next) => {
                 outlets: { $push: '$outlet' },
                 branches: { $push: '$branch' },
                 publishers: { $addToSet: '$createdBy.user' },
-                positions: { $addToSet: '$createdBy.user.position' },
+                positions: { $push: '$answeredPersonnels.position' },
                 assignedTo: { $push: '$personnels' },
                 statuses: { $addToSet: '$status' },
                 questionnaireTitles: { $push: '$title' },
@@ -203,6 +233,32 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
+                answeredPersonnels: null,
+                answers: null,
+                positions: {
+                    $reduce: {
+                        input: '$positions',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $and: [
+                                        {
+                                            $ne: ['$$this', []],
+                                        },
+                                        {
+                                            $ne: ['$$this', null],
+                                        },
+                                    ],
+                                },
+                                then: {
+                                    $setUnion: ['$$value', '$$this'],
+                                },
+                                else: '$$value',
+                            },
+                        },
+                    },
+                },
                 countries: {
                     $reduce: {
                         input: '$countries',
@@ -348,7 +404,6 @@ module.exports = (req, res, next) => {
                     },
                 },
                 publishers: 1,
-                positions: 1,
                 assignedTo: {
                     $reduce: {
                         input: '$assignedTo',

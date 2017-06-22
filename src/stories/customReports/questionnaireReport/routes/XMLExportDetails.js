@@ -178,16 +178,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
-
         pipeline.push({
             $lookup: {
                 from: 'questionnaryAnswer',
@@ -280,6 +270,45 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'answer.personnel',
+                foreignField: '_id',
+                as: 'personnel',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                personnel: {
+                    $let: {
+                        vars: {
+                            personnel: { $arrayElemAt: ['$personnel', 0] },
+                        },
+                        in: {
+                            _id: '$$personnel._id',
+                            name: {
+                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
+                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
+                            },
+                            position: '$$personnel.position',
+                        },
+                    },
+                },
+            },
+        });
+
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $match: {
+                    'personnel.position': {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
+            });
+        }
+
+        pipeline.push({
             $project: {
                 total: 1,
                 _id: 1,
@@ -290,7 +319,7 @@ module.exports = (req, res, next) => {
                 retailSegment: '$answer.retailSegment',
                 outlet: '$answer.outlet',
                 branch: '$answer.branch',
-                personnel: '$answer.personnel',
+                personnel: '$personnel',
                 question: '$answer.question',
                 answer: { $arrayElemAt: ['$answer.answerText', 0] },
             },
@@ -348,15 +377,6 @@ module.exports = (req, res, next) => {
                 localField: 'branch',
                 foreignField: '_id',
                 as: 'branch',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'personnel',
-                foreignField: '_id',
-                as: 'personnel',
             },
         });
 
@@ -430,21 +450,7 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                personnel: {
-                    $let: {
-                        vars: {
-                            personnel: { $arrayElemAt: ['$personnel', 0] },
-                        },
-                        in: {
-                            _id: '$$personnel._id',
-                            name: {
-                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
-                            },
-                            position: '$$personnel.position',
-                        },
-                    },
-                },
+                personnel: 1,
                 question: 1,
                 answer: 1,
             },

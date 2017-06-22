@@ -178,15 +178,52 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'questionnaryAnswer',
+                localField: '_id',
+                foreignField: 'questionnaryId',
+                as: 'answers',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: {
+                    $map: {
+                        input: '$answers',
+                        as: 'item',
+                        in: '$$item.personnelId',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'answeredPersonnels',
+                foreignField: '_id',
+                as: 'answeredPersonnels',
+            },
+        });
+
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
+                    'answeredPersonnels.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: null,
+                answers: null,
+            },
+        });
 
         pipeline.push({
             $group: {
