@@ -1,7 +1,5 @@
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
-const striptags = require('striptags');
-const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -232,6 +230,16 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': {
+                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                    },
                 },
             });
         }
@@ -471,10 +479,10 @@ module.exports = (req, res, next) => {
                 displayType: { $arrayElemAt: ['$displayType', 0] },
                 itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
                 itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
-                opening: '$promotion.opening',
-                sellIn: '$promotion.sellIn',
-                closingStock: '$promotion.closingStock',
-                sellOut: '$promotion.sellOut',
+                opening: { $arrayElemAt: ['$promotion.opening', 0] },
+                sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] },
+                closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] },
+                sellOut: { $arrayElemAt: ['$promotion.sellOut', 0] },
             },
         });
 

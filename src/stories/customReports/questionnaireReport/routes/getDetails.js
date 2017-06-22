@@ -312,7 +312,7 @@ module.exports = (req, res, next) => {
                 branch: '$records.answer.branch',
                 personnel: '$records.answer.personnel',
                 question: '$records.answer.question',
-                answer: '$records.answer.answerText',
+                answer: { $arrayElemAt: ['$records.answer.answerText', 0] },
             },
         });
 
@@ -384,69 +384,30 @@ module.exports = (req, res, next) => {
             $project: {
                 total: 1,
                 title: 1,
-                country: {
+                location: {
                     $let: {
                         vars: {
                             country: { $arrayElemAt: ['$country', 0] },
-                        },
-                        in: {
-                            _id: '$$country._id',
-                            name: '$$country.name',
-                        },
-                    },
-                },
-                region: {
-                    $let: {
-                        vars: {
                             region: { $arrayElemAt: ['$region', 0] },
-                        },
-                        in: {
-                            _id: '$$region._id',
-                            name: '$$region.name',
-                        },
-                    },
-                },
-                subRegion: {
-                    $let: {
-                        vars: {
                             subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                        },
-                        in: {
-                            _id: '$$subRegion._id',
-                            name: '$$subRegion.name',
-                        },
-                    },
-                },
-                retailSegment: {
-                    $let: {
-                        vars: {
                             retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                        },
-                        in: {
-                            _id: '$$retailSegment._id',
-                            name: '$$retailSegment.name',
-                        },
-                    },
-                },
-                outlet: {
-                    $let: {
-                        vars: {
                             outlet: { $arrayElemAt: ['$outlet', 0] },
-                        },
-                        in: {
-                            _id: '$$outlet._id',
-                            name: '$$outlet.name',
-                        },
-                    },
-                },
-                branch: {
-                    $let: {
-                        vars: {
                             branch: { $arrayElemAt: ['$branch', 0] },
                         },
                         in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
+                            $concat: [
+                                '$$country.name.en',
+                                ' -> ',
+                                '$$region.name.en',
+                                ' -> ',
+                                '$$subRegion.name.en',
+                                ' -> ',
+                                '$$retailSegment.name.en',
+                                ' -> ',
+                                '$$outlet.name.en',
+                                ' -> ',
+                                '$$branch.name.en',
+                            ],
                         },
                     },
                 },
@@ -465,8 +426,14 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                question: '$records.answer.question',
-                answer: '$records.answer.answerText',
+                question: 1,
+                answer: 1,
+            },
+        });
+
+        pipeline.push({
+            $sort: {
+                location: 1,
             },
         });
 
@@ -490,6 +457,42 @@ module.exports = (req, res, next) => {
                             _id: '$$position._id',
                             name: '$$position.name',
                         },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: {
+                    questionnaireId: '$_id',
+                    location: '$location',
+                    personnel: '$personnel._id',
+                },
+                total: { $first: '$total' },
+                title: { $first: '$title' },
+                personnel: { $first: '$personnel' },
+                position: { $first: '$position' },
+                items: {
+                    $push: {
+                        question: '$question',
+                        answer: '$answer',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: '$_id.questionnaireId',
+                total: { $first: '$total' },
+                title: { $first: '$title' },
+                respondents: {
+                    $push: {
+                        personnel: '$personnel',
+                        position: '$position',
+                        location: '$_id.location',
+                        items: '$items',
                     },
                 },
             },

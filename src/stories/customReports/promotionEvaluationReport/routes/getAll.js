@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const striptags = require('striptags');
-const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -226,6 +224,16 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': {
+                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                    },
                 },
             });
         }

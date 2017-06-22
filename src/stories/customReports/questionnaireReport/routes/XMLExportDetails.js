@@ -1,11 +1,12 @@
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
 const async = require('async');
+const _ = require('lodash');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
-const CompetitorPromotionModel = require('./../../../../types/competitorPromotion/model');
+const QuestionnaryModel = require('./../../../../types/questionnaries/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
@@ -31,7 +32,6 @@ module.exports = (req, res, next) => {
             },
         },
     };
-
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
@@ -41,8 +41,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.BRAND, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-            CONTENT_TYPES.ORIGIN, CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
         ];
         const pipeline = [];
 
@@ -69,18 +68,50 @@ module.exports = (req, res, next) => {
             }
         });
 
+        pipeline.push({
+            $match: {
+                countAnswered: { $gt: 0 },
+            },
+        });
+
         locationFiler(pipeline, personnel, queryFilter);
 
-        const $generalMatch = generalFiler([
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND,
-            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, CONTENT_TYPES.ORIGIN,
-        ], queryFilter, personnel);
+        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
                 'createdBy.user': {
-                    $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                    $in: _.union(queryFilter[CONTENT_TYPES.PERSONNEL], personnel._id),
                 },
+            });
+        }
+
+        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
+            $generalMatch.$and.push({
+                personnels: {
+                    $in: _.union(queryFilter.assignedTo, personnel._id),
+                },
+            });
+        }
+
+        if (queryFilter.status && queryFilter.status.length) {
+            $generalMatch.$and.push({
+                status: {
+                    $in: _.union(queryFilter.status, personnel._id),
+                },
+            });
+        }
+
+        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+            $generalMatch.$and.push({
+                $or: [
+                    {
+                        'title.en': { $in: queryFilter.questionnaireTitle },
+                    },
+                    {
+                        'title.ar': { $in: queryFilter.questionnaireTitle },
+                    },
+                ],
             });
         }
 
@@ -126,8 +157,8 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 createdBy: {
+                    date: '$createdBy.date',
                     user: {
                         $let: {
                             vars: {
@@ -143,7 +174,6 @@ module.exports = (req, res, next) => {
                             },
                         },
                     },
-                    date: '$createdBy.date',
                 },
             },
         });
@@ -160,30 +190,112 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'categories',
-                localField: 'category',
-                foreignField: '_id',
-                as: 'category',
+                from: 'questionnaryAnswer',
+                localField: '_id',
+                foreignField: 'questionnaryId',
+                as: 'answers',
             },
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'origins',
-                localField: 'origin',
-                foreignField: '_id',
-                as: 'origin',
+            $project: {
+                _id: 1,
+                title: 1,
+                answer: {
+                    $map: {
+                        input: '$answers',
+                        as: 'answer',
+                        in: {
+                            country: '$$answer.country',
+                            region: '$$answer.region',
+                            subRegion: '$$answer.subRegion',
+                            retailSegment: '$$answer.retailSegment',
+                            outlet: '$$answer.outlet',
+                            branch: '$$answer.branch',
+                            personnel: '$$answer.personnelId',
+                            question: {
+                                $let: {
+                                    vars: {
+                                        questionObject: {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: '$questions',
+                                                        as: 'question',
+                                                        cond: {
+                                                            $eq: ['$$question._id', '$$answer.questionId'],
+                                                        },
+                                                    },
+                                                },
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: '$$questionObject.title',
+                                },
+                            },
+                            answerText: {
+                                $cond: {
+                                    if: { $gt: ['$$answer.text', ''] },
+                                    then: ['$$answer.text'],
+                                    else: {
+                                        $map: {
+                                            input: '$$answer.optionIndex',
+                                            as: 'answerIndex',
+                                            in: {
+                                                $let: {
+                                                    vars: {
+                                                        questionObject: {
+                                                            $arrayElemAt: [
+                                                                {
+                                                                    $filter: {
+                                                                        input: '$questions',
+                                                                        as: 'question',
+                                                                        cond: {
+                                                                            $eq: ['$$question._id', '$$answer.questionId'],
+                                                                        },
+                                                                    },
+                                                                },
+                                                                0,
+                                                            ],
+                                                        },
+                                                    },
+                                                    in: {
+                                                        $arrayElemAt: ['$$questionObject.options', '$$answerIndex'],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'displayTypes',
-                localField: 'displayType',
-                foreignField: '_id',
-                as: 'displayType',
+            $unwind: '$answer',
+        });
+
+        pipeline.push({
+            $project: {
+                total: 1,
+                _id: 1,
+                title: 1,
+                country: '$answer.country',
+                region: '$answer.region',
+                subRegion: '$answer.subRegion',
+                retailSegment: '$answer.retailSegment',
+                outlet: '$answer.outlet',
+                branch: '$answer.branch',
+                personnel: '$answer.personnel',
+                question: '$answer.question',
+                answer: { $arrayElemAt: ['$answer.answerText', 0] },
             },
         });
+
 
         pipeline.push({
             $lookup: {
@@ -241,22 +353,17 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'positions',
-                localField: 'createdBy.user.position',
+                from: 'personnels',
+                localField: 'personnel',
                 foreignField: '_id',
-                as: 'createdBy.user.position',
+                as: 'personnel',
             },
         });
 
         pipeline.push({
             $project: {
-                _id: 1,
-                description: 1,
-                packing: 1,
-                expiry: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                price: 1,
+                total: 1,
+                title: 1,
                 country: {
                     $let: {
                         vars: {
@@ -323,111 +430,59 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                category: {
+                personnel: {
                     $let: {
                         vars: {
-                            category: { $arrayElemAt: ['$category', 0] },
+                            personnel: { $arrayElemAt: ['$personnel', 0] },
                         },
                         in: {
-                            _id: '$$category._id',
-                            name: '$$category.name',
-                        },
-                    },
-                },
-                origin: {
-                    $let: {
-                        vars: {
-                            origin: { $arrayElemAt: ['$origin', 0] },
-                        },
-                        in: {
-                            _id: '$$origin._id',
-                            name: '$$origin.name',
-                        },
-                    },
-                },
-                displayType: {
-                    $reduce: {
-                        input: '$displayType',
-                        initialValue: { en: '', ar: '' },
-                        in: {
-                            en: {
-                                $concat: ['$$this.name.en', ' ', '$$value.en'],
+                            _id: '$$personnel._id',
+                            name: {
+                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
+                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
                             },
-                            ar: {
-                                $concat: ['$$this.name.en', ' ', '$$value.en'],
-                            },
+                            position: '$$personnel.position',
                         },
                     },
                 },
-                createdBy: {
-                    user: {
-                        _id: 1,
-                        name: 1,
-                        position: {
-                            $let: {
-                                vars: {
-                                    position: { $arrayElemAt: ['$createdBy.user.position', 0] },
-                                },
-                                in: {
-                                    _id: '$$position._id',
-                                    name: '$$position.name',
-                                },
-                            },
-                        },
-                    },
-                    date: 1,
-                },
+                question: 1,
+                answer: 1,
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                description: 1,
-                packing: 1,
-                expiry: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                price: 1,
-                category: 1,
-                origin: 1,
-                displayType: 1,
-                createdBy: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                location: {
-                    $concat: [
-                        '$country.name.en',
-                        ' -> ',
-                        '$region.name.en',
-                        ' -> ',
-                        '$subRegion.name.en',
-                        ' -> ',
-                        '$retailSegment.name.en',
-                        ' -> ',
-                        '$outlet.name.en',
-                        ' -> ',
-                        '$branch.name.en',
-                    ],
-                },
+            $lookup: {
+                from: 'positions',
+                localField: 'personnel.position',
+                foreignField: '_id',
+                as: 'position',
             },
         });
 
         pipeline.push({
-            $sort: {
-                location: 1,
+            $addFields: {
+                position: {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: '$$position.name',
+                        },
+                    },
+                },
             },
         });
 
-        CompetitorPromotionModel.aggregate(pipeline)
+        QuestionnaryModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
@@ -437,6 +492,8 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
+        const anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+
         /* eslint-disable */
         const verstka = `
             <table>
@@ -445,36 +502,34 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
-                        <th>Product</th>
-                        <th>Promotion (description)</th>
-                        <th>Weight + metric type</th>
-                        <th>Expiry date</th>
-                        <th>Start date</th>
-                        <th>End date</th>
-                        <th>Origin</th>
-                        <th>RSP</th>
-                        <th>Display or branding type</th>
+                        <th>Retail Segment</th>
+                        <th>Outlet</th>
+                        <th>Branch</th>
+                        <th>Title</th>
+                        <th>Question</th>
+                        <th>Answer</th>
+                        <th>Position</th>
+                        <th>Personnel</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
-            return `
+                        return `
                             <tr>
-                                <td>${item.country.name[currentLanguage]}</td>
-                                <td>${item.region.name[currentLanguage]}</td>
-                                <td>${item.subRegion.name[currentLanguage]}</td>
-                                <td>${item.category.name[currentLanguage]}</td>
-                                <td>${item.description[currentLanguage]}</td>
-                                <td>${item.packing}</td>
-                                <td>${moment(item.expiry).format('MMMM, YYYY')}</td>
-                                <td>${moment(item.dateStart).format('MMMM, YYYY')}</td>
-                                <td>${moment(item.dateEnd).format('MMMM, YYYY')}</td>
-                                <td>${item.origin.name ? item.origin.name[currentLanguage] : null}</td>
-                                <td>${item.price}</td>
-                                <td>${item.displayType[currentLanguage]}</td>
+                                <td>${item.country.name[currentLanguage] }</td>
+                                <td>${item.region.name[currentLanguage] }</td>
+                                <td>${item.subRegion.name[currentLanguage] }</td>
+                                <td>${item.retailSegment.name[currentLanguage] }</td>
+                                <td>${item.outlet.name[currentLanguage] }</td>
+                                <td>${item.branch.name[currentLanguage] }</td>
+                                <td>${item.title[currentLanguage] }</td>
+                                <td>${item.question[currentLanguage] || item.question[anotherLanguage] }</td>
+                                <td>${item.answer[currentLanguage] || item.answer[anotherLanguage] }</td>
+                                <td>${item.position.name[currentLanguage] }</td>
+                                <td>${item.personnel.name[currentLanguage] }</td>
                             </tr>
                         `;
-        }).join('')}
+                     }).join('')}
                 </tbody>
             </table>
         `;
@@ -496,7 +551,7 @@ module.exports = (req, res, next) => {
 
                 res.set({
                     'Content-Type': 'application/vnd.ms-excel',
-                    'Content-Disposition': `attachment; filename="competitorPromoReportExport_${new Date()}.xls"`,
+                    'Content-Disposition': `attachment; filename="questionnaireDetailsReportExport_${new Date()}.xls"`,
                     'Content-Length': buf.length,
                 }).status(200).send(buf);
             });
