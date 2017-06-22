@@ -522,6 +522,20 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
+                    en: 'Brand',
+                    ar: '',
+                },
+                value: 'brand',
+            },
+            {
+                name: {
+                    en: 'Product',
+                    ar: '',
+                },
+                value: 'category',
+            },
+            {
+                name: {
                     en: 'Position',
                     ar: '',
                 },
