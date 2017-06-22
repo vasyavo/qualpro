@@ -126,6 +126,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
+                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 createdBy: {
                     user: {
                         $let: {
