@@ -9,6 +9,7 @@ const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const currency = require('../../utils/currency');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -399,6 +400,17 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                country: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
+                    },
+                },
                 variant: 1,
                 packing: 1,
                 displayType: {
@@ -457,6 +469,7 @@ module.exports = (req, res, next) => {
                 location: '$setProducts.location',
                 createdBy: '$setProducts.createdBy',
                 brand: '$setProducts.brand',
+                country: '$setProducts.country',
                 category: '$setProducts.category',
                 variant: '$setProducts.variant',
                 packing: '$setProducts.packing',
@@ -497,6 +510,13 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            item.price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
+        });
 
         res.status(200).send(response);
     });
