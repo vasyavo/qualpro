@@ -41,7 +41,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo', 'questionnaire',
         ];
         const pipeline = [];
 
@@ -100,16 +100,9 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+        if (queryFilter.questionnaire && queryFilter.questionnaire.length) {
             $generalMatch.$and.push({
-                $or: [
-                    {
-                        'title.en': { $in: queryFilter.questionnaireTitle },
-                    },
-                    {
-                        'title.ar': { $in: queryFilter.questionnaireTitle },
-                    },
-                ],
+                _id: { $in: queryFilter.questionnaire },
             });
         }
 

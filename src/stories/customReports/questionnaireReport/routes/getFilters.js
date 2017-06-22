@@ -39,7 +39,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo', 'questionnaire',
         ];
         const pipeline = [];
 
@@ -98,16 +98,9 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+        if (queryFilter.questionnaire && queryFilter.questionnaire.length) {
             $generalMatch.$and.push({
-                $or: [
-                    {
-                        'title.en': { $in: queryFilter.questionnaireTitle },
-                    },
-                    {
-                        'title.ar': { $in: queryFilter.questionnaireTitle },
-                    },
-                ],
+                _id: { $in: queryFilter.questionnaire },
             });
         }
 
@@ -227,7 +220,12 @@ module.exports = (req, res, next) => {
                 positions: { $push: '$answeredPersonnels.position' },
                 assignedTo: { $push: '$personnels' },
                 statuses: { $addToSet: '$status' },
-                questionnaireTitles: { $push: '$title' },
+                questionnaires: {
+                    $push: {
+                        _id: '$_id',
+                        name: '$title',
+                    },
+                },
             },
         });
 
@@ -429,7 +427,7 @@ module.exports = (req, res, next) => {
                     },
                 },
                 statuses: 1,
-                questionnaireTitles: 1,
+                questionnaires: 1,
             },
         });
 
@@ -550,7 +548,7 @@ module.exports = (req, res, next) => {
                     },
                 },
                 statuses: 1,
-                questionnaireTitles: 1,
+                questionnaires: 1,
             },
         });
 
@@ -582,7 +580,7 @@ module.exports = (req, res, next) => {
             positions: [],
             assignedTo: [],
             statuses: [],
-            questionnaireTitles: [],
+            questionnaires: [],
         };
 
         response.analyzeBy = [
