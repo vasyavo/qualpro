@@ -12,7 +12,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$_id' },
+            labels: { $push: { en: '$_id' } },
         },
     });
 };
