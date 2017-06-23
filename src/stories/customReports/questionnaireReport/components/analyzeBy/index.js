@@ -8,9 +8,9 @@ const analyzeByMethods = {
     position: require('./analyzeByPosition'),
 };
 
-module.exports = (pipeline, analyzeBy) => {
+module.exports = (pipeline, analyzeBy, queryFilter) => {
     if (analyzeByMethods[analyzeBy]) {
-        return analyzeByMethods[analyzeBy](pipeline);
+        return analyzeByMethods[analyzeBy](pipeline, queryFilter);
     }
 
     return analyzeByMethods.publisher(pipeline);

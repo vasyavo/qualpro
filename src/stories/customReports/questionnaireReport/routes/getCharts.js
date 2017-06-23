@@ -216,7 +216,7 @@ module.exports = (req, res, next) => {
             },
         });
 
-        applyAnalyzeBy(pipeline, analyzeByParam);
+        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter);
 
         QuestionnaryModel.aggregate(pipeline)
             .allowDiskUse(true)
