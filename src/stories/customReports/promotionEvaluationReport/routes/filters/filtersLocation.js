@@ -17,7 +17,6 @@ module.exports = (queryFilter, personnel) => {
     const regionFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.REGION);
     const subRegionFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.SUBREGION);
     const retailSegmentFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.RETAILSEGMENT);
-    const branchFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.BRANCH);
     const pipeline = [];
 
     pipeline.push({
