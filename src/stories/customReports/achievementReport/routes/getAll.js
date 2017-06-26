@@ -454,10 +454,16 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $addFields: {
                 attachments: {
-                    _id: 1,
-                    originalName: 1,
-                    contentType: 1,
-                    preview: 1,
+                    $map: {
+                        input: '$attachments',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            originalName: '$$item.originalName',
+                            contentType: '$$item.contentType',
+                            preview: '$$item.preview',
+                        },
+                    },
                 },
             },
         });
