@@ -234,7 +234,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 0,
-                dataSets: [
+                datasets: [
                     {
                         data: '$data',
                     },
