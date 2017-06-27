@@ -552,6 +552,7 @@ module.exports = (req, res, next) => {
                         <th>Retail Segment</th>
                         <th>Outlet</th>
                         <th>Branch</th>
+                        <th>Brandдщсф</th>
                         <th>Product</th>
                         <th>Min Length</th>
                         <th>Min Percent</th>
@@ -571,6 +572,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment.name[currentLanguage]}</td>
                                 <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${parseFloat(item.minLength).toFixed(2)}</td>
                                 <td>${parseFloat(item.minPercent).toFixed(2)}</td>

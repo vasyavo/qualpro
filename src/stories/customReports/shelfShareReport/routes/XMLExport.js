@@ -148,6 +148,8 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$user._id',
+                                lastName: '$$user.lastName',
+                                firstName: '$$user.firstName',
                                 position: '$$user.position',
                             },
                         },
@@ -192,6 +194,7 @@ module.exports = (req, res, next) => {
                     retailSegment: '$retailSegment',
                     outlet: '$outlet',
                     branch: '$branch',
+                    createdBy: '$createdBy',
 
                 },
                 maxLength: { $max: '$brands.length' },
@@ -215,6 +218,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
+                createdBy: 1,
                 maxLength: 1,
                 minLength: 1,
                 avgLength: 1,
@@ -247,6 +251,7 @@ module.exports = (req, res, next) => {
                     $push: {
                         _id: '$_id.brand',
                         name: '$name',
+                        createdBy: '$_id.createdBy',
                         maxLength: '$maxLength',
                         minLength: '$minLength',
                         avgLength: '$avgLength',
@@ -449,6 +454,7 @@ module.exports = (req, res, next) => {
             <table>
                 <thead>
                     <tr>
+                        <th>Employee</th>
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
@@ -468,6 +474,7 @@ module.exports = (req, res, next) => {
                                 ${product.brands.map((brand) => {
                                     return `
                                         <tr>
+                                            <td>${brand.createdBy.user.firstName[currentLanguage]} ${brand.createdBy.user.lastName[currentLanguage]}</td>
                                             <td>${product.country.name[currentLanguage]}</td>
                                             <td>${product.region.name[currentLanguage]}</td>
                                             <td>${product.subRegion.name[currentLanguage]}</td>
