@@ -10,7 +10,8 @@ module.exports = function () {
     var checkAuth = access.checkAuth;
 
     router.use(checkAuth);
-    
+
+    router.get('/:id', handler.getFileById);
     router.get('/:bucket/:id', handler.getById);
 
     router.post('/', multipartMiddleware, handler.uploadFileHandler);

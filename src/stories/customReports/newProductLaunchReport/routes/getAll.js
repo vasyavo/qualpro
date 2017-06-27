@@ -10,6 +10,7 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const currency = require('../../utils/currency');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -216,6 +217,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 country: 1,
+                additionalComment: 1,
                 region: 1,
                 subRegion: 1,
                 retailSegment: 1,
@@ -330,6 +332,7 @@ module.exports = (req, res, next) => {
             $project: {
                 total: 1,
                 _id: 1,
+                additionalComment: 1,
                 location: {
                     $concat: [
                         {
@@ -467,6 +470,7 @@ module.exports = (req, res, next) => {
                 total: 1,
                 _id: '$setProducts._id',
                 location: '$setProducts.location',
+                additionalComment: '$setProducts.additionalComment',
                 createdBy: '$setProducts.createdBy',
                 brand: '$setProducts.brand',
                 country: '$setProducts.country',
@@ -516,6 +520,14 @@ module.exports = (req, res, next) => {
                 return country._id.toString() === item.country._id.toString();
             });
             item.price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
+            item.additionalComment = {
+                en: sanitizeHtml(item.additionalComment.en),
+                ar: sanitizeHtml(item.additionalComment.ar),
+            };
+            item.distributor = {
+                en: sanitizeHtml(item.distributor.en),
+                ar: sanitizeHtml(item.distributor.ar),
+            };
         });
 
         res.status(200).send(response);

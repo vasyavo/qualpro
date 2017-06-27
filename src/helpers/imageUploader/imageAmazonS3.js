@@ -198,6 +198,20 @@ var imageUploader = function (awsConfig) {
         return url;
     };*/
 
+    function getFile (fileName, bucket) {
+        return new Promise((resolve, reject) => {
+            const s3Params = {
+                Bucket: awsConfig.bucketName,
+                Key: `files/${fileName}`,
+            };
+            s3.getObject(s3Params, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result);
+            });
+        });
+    }
     function duplicateImage(url, imageName, folderName, callback) {
 
         var imageData = {};
@@ -241,7 +255,8 @@ var imageUploader = function (awsConfig) {
         duplicateImage: duplicateImage,
         removeImage: removeImage,
         getImageUrl: getImageUrl,
-        uploadFromBase64 : uploadFromBase64
+        uploadFromBase64 : uploadFromBase64,
+        getFile
     };
 };
 
