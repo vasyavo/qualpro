@@ -26,7 +26,8 @@ var imageUploader = function (config) {
         uploadImage     : imageUploadImpl.uploadImage,
         duplicateImage  : imageUploadImpl.duplicateImage,
         removeImage     : imageUploadImpl.removeImage,
-        getImageUrl     : imageUploadImpl.getImageUrl
+        getImageUrl     : imageUploadImpl.getImageUrl,
+        getFile         : imageUploadImpl.getFile,
     };
 };
 
