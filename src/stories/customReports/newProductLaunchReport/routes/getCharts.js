@@ -161,7 +161,7 @@ module.exports = (req, res, next) => {
 
             pipeline.push({
                 $match: {
-                    shelfLifePeriod: queryFilter.shelfLife,
+                    shelfLifePeriod: { $gte: queryFilter.shelfLife },
                 },
             });
         }
