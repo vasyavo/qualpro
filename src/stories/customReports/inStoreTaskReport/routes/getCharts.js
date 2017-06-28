@@ -181,9 +181,7 @@ module.exports = (req, res, next) => {
             response = {
                 barChart: {
                     labels: response.labels,
-                    datasets: [{
-                        data: response.data,
-                    }],
+                    datasets: response.datasets,
                 },
             };
         } else {
