@@ -9,6 +9,11 @@ module.exports = (pipeline) => {
                 country: '$country',
                 category: '$category',
             },
+            region: { $addToSet: '$region' },
+            subRegion: { $addToSet: '$subRegion' },
+            retailSegment: { $addToSet: '$retailSegment' },
+            outlet: { $addToSet: '$outlet' },
+            branch: { $addToSet: '$branch' },
             count: { $sum: 1 },
         },
     });
@@ -19,6 +24,51 @@ module.exports = (pipeline) => {
             localField: '_id.country',
             foreignField: '_id',
             as: 'country',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'region',
+            foreignField: '_id',
+            as: 'region',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'subRegion',
+            foreignField: '_id',
+            as: 'subRegion',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'retailSegments',
+            localField: 'retailSegment',
+            foreignField: '_id',
+            as: 'retailSegment',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'outlets',
+            localField: 'outlet',
+            foreignField: '_id',
+            as: 'outlet',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'branches',
+            localField: 'branch',
+            foreignField: '_id',
+            as: 'branch',
         },
     });
 
@@ -46,6 +96,26 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            region: {
+                _id: 1,
+                name: 1,
+            },
+            subRegion: {
+                _id: 1,
+                name: 1,
+            },
+            retailSegment: {
+                _id: 1,
+                name: 1,
+            },
+            outlet: {
+                _id: 1,
+                name: 1,
+            },
+            branch: {
+                _id: 1,
+                name: 1,
+            },
             category: {
                 $let: {
                     vars: {
@@ -69,6 +139,11 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
+            region: 1,
+            subRegion: 1,
+            retailSegment: 1,
+            outlet: 1,
+            branch: 1,
             category: 1,
             dataSets: [
                 {
@@ -84,6 +159,11 @@ module.exports = (pipeline) => {
             _id: null,
             charts: {
                 $push: {
+                    region: '$region',
+                    subRegion: '$subRegion',
+                    retailSegment: '$retailSegment',
+                    outlet: '$outlet',
+                    branch: '$branch',
                     category: '$category',
                     dataSets: '$dataSets',
                     labels: '$labels',
