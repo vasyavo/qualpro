@@ -5,7 +5,10 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $group: {
-            _id: '$branch',
+            _id: {
+                branch: '$branch',
+                status: '$status',
+            },
             count: { $sum: 1 },
         },
     });
@@ -13,7 +16,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'branches',
-            localField: '_id',
+            localField: '_id.branch',
             foreignField: '_id',
             as: 'branch',
         },
@@ -47,9 +50,28 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            '_id.status': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$branch._id',
+            branch: { $first: '$branch' },
+            data: {
+                $push: {
+                    count: '$count',
+                    status: '$_id.status',
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
-            data: { $push: '$count' },
+            datasets: { $push: { data: '$data' } },
             labels: { $push: '$branch' },
         },
     });

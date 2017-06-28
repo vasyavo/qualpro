@@ -5,7 +5,10 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $group: {
-            _id: '$region',
+            _id: {
+                region: '$region',
+                status: '$status',
+            },
             count: { $sum: 1 },
         },
     });
@@ -13,7 +16,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'domains',
-            localField: '_id',
+            localField: '_id.region',
             foreignField: '_id',
             as: 'region',
         },
@@ -47,9 +50,28 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            '_id.status': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$region._id',
+            region: { $first: '$region' },
+            data: {
+                $push: {
+                    count: '$count',
+                    status: '$_id.status',
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
-            data: { $push: '$count' },
+            datasets: { $push: { data: '$data' } },
             labels: { $push: '$region' },
         },
     });
