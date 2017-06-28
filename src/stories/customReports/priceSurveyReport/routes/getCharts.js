@@ -175,9 +175,20 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $group: {
+                _id: {
+                    country: '$country',
+                    category: '$category',
+                    brand: '$items.brand',
+                },
+                price: { $avg: '$items.price' },
+            },
+        });
+
+        pipeline.push({
             $lookup: {
                 from: 'brands',
-                localField: 'items.brand',
+                localField: '_id.brand',
                 foreignField: '_id',
                 as: 'brand',
             },
@@ -185,8 +196,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                country: 1,
-                category: 1,
                 brand: {
                     $let: {
                         vars: {
@@ -198,15 +207,15 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                price: '$items.price',
+                price: '$price',
             },
         });
 
         pipeline.push({
             $group: {
                 _id: {
-                    country: '$country',
-                    category: '$category',
+                    country: '$_id.country',
+                    category: '$_id.category',
                 },
                 data: { $push: '$price' },
                 labels: { $push: '$brand' },
@@ -296,6 +305,10 @@ module.exports = (req, res, next) => {
                 charts: [],
             };
         }
+
+        response.charts.forEach((chart) => {
+            chart.datasets[0].data = chart.datasets[0].data.map(price => price.toFixed(2));
+        });
 
         res.status(200).send(response);
     });
