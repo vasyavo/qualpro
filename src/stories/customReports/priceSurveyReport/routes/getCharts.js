@@ -178,47 +178,14 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: {
                     country: '$country',
+                    region: '$region',
+                    subRegion: '$subRegion',
+                    branch: '$branch',
                     category: '$category',
                     brand: '$items.brand',
+                    size: '$items.size',
                 },
                 price: { $avg: '$items.price' },
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'brands',
-                localField: '_id.brand',
-                foreignField: '_id',
-                as: 'brand',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                brand: {
-                    $let: {
-                        vars: {
-                            brand: { $arrayElemAt: ['$brand', 0] },
-                        },
-                        in: {
-                            _id: '$$brand._id',
-                            name: '$$brand.name',
-                        },
-                    },
-                },
-                price: '$price',
-            },
-        });
-
-        pipeline.push({
-            $group: {
-                _id: {
-                    country: '$_id.country',
-                    category: '$_id.category',
-                },
-                data: { $push: '$price' },
-                labels: { $push: '$brand' },
             },
         });
 
@@ -233,6 +200,42 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'domains',
+                localField: '_id.region',
+                foreignField: '_id',
+                as: 'region',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: '_id.subRegion',
+                foreignField: '_id',
+                as: 'subRegion',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: '_id.branch',
+                foreignField: '_id',
+                as: 'branch',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: '_id.brand',
+                foreignField: '_id',
+                as: 'brand',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'categories',
                 localField: '_id.category',
                 foreignField: '_id',
@@ -242,13 +245,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                _id: 0,
-                datasets: [
-                    {
-                        data: '$data',
-                    },
-                ],
-                labels: 1,
                 category: {
                     $let: {
                         vars: {
@@ -271,6 +267,70 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                brand: {
+                    $let: {
+                        vars: {
+                            brand: { $arrayElemAt: ['$brand', 0] },
+                        },
+                        in: {
+                            _id: '$$brand._id',
+                            name: {
+                                en: {
+                                    $concat: [
+                                        {
+                                            $let: {
+                                                vars: {
+                                                    region: { $arrayElemAt: ['$region', 0] },
+                                                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                                                    branch: { $arrayElemAt: ['$branch', 0] },
+                                                },
+                                                in: {
+                                                    $concat: [
+                                                        '$$region.name.en',
+                                                        ' / ',
+                                                        '$$subRegion.name.en',
+                                                        ' / ',
+                                                        '$$branch.name.en',
+                                                    ],
+                                                },
+                                            },
+                                        },
+                                        ' / ',
+                                        '$$brand.name.en',
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                },
+                price: '$price',
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: {
+                    country: '$_id.country',
+                    category: '$_id.category',
+                },
+                country: { $first: '$country' },
+                category: { $first: '$category' },
+                data: { $push: '$price' },
+                labels: { $push: '$brand' },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 0,
+                datasets: [
+                    {
+                        data: '$data',
+                    },
+                ],
+                labels: 1,
+                category: 1,
+                country: 1,
             },
         });
 
