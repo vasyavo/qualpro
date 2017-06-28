@@ -345,7 +345,6 @@ module.exports = (req, res, next) => {
         });
 
 
-
         pipeline.push({
             $lookup: {
                 from: 'outlets',
@@ -552,7 +551,7 @@ module.exports = (req, res, next) => {
                         <th>Retail Segment</th>
                         <th>Outlet</th>
                         <th>Branch</th>
-                        <th>Brandдщсф</th>
+                        <th>Brand</th>
                         <th>Product</th>
                         <th>Min Length</th>
                         <th>Min Percent</th>
