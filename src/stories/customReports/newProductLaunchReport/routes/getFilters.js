@@ -8,6 +8,7 @@ const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -490,6 +491,13 @@ module.exports = (req, res, next) => {
             shelfLifePeriods: [],
             displayTypes: [],
         };
+
+        response.distributors = response.distributors.map(item => {
+            return {
+                en: sanitizeHtml(item.en),
+                ar: sanitizeHtml(item.ar),
+            };
+        });
 
         response.analyzeBy = [
             {
