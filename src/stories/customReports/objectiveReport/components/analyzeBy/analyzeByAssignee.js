@@ -5,7 +5,10 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $group: {
-            _id: '$assignedTo',
+            _id: {
+                assignedTo: '$assignedTo',
+                status: '$status',
+            },
             count: { $sum: 1 },
         },
     });
@@ -13,7 +16,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'personnels',
-            localField: '_id',
+            localField: '_id.assignedTo',
             foreignField: '_id',
             as: 'assignee',
         },
@@ -40,9 +43,28 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            '_id.status': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$assignee._id',
+            assignee: { $first: '$assignee' },
+            data: {
+                $push: {
+                    count: '$count',
+                    status: '$_id.status',
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
-            data: { $push: '$count' },
+            datasets: { $push: { data: '$data' } },
             labels: { $push: '$assignee' },
         },
     });
