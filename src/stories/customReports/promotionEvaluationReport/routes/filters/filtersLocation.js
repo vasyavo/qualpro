@@ -20,315 +20,59 @@ module.exports = (queryFilter, personnel) => {
     const pipeline = [];
 
     pipeline.push({
+        $project: {
+            _id: 1,
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: CONTENT_TYPES.PROMOTIONSITEMS,
+            localField: '_id',
+            foreignField: 'promotion',
+            as: 'promotion',
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$promotion',
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
-            countries: { $addToSet: '$country' },
-            regions: { $push: '$region' },
-            subRegions: { $push: '$subRegion' },
-            retailSegments: { $push: '$retailSegment' },
-            branches: { $push: '$branch' },
+            branches: { $addToSet: '$promotion.branch' },
         },
     });
-
-    pipeline.push({
-        $project: {
-            countries: 1,
-            regions: {
-                $reduce: {
-                    input: '$regions',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            subRegions: {
-                $reduce: {
-                    input: '$subRegions',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            retailSegments: {
-                $reduce: {
-                    input: '$retailSegments',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            branches: {
-                $reduce: {
-                    input: '$branches',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'countries',
-            foreignField: '_id',
-            as: 'countries',
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            countries: {
-                _id: 1,
-                name: 1,
-            },
-            countriesIds: '$countries._id',
-            regions: 1,
-            subRegions: 1,
-            retailSegments: 1,
-            branches: 1,
-        },
-    });
-
-    if (countryFilter) {
-        pipeline.push({
-            $addFields: {
-                countriesIds: {
-                    $setIntersection: [countryFilter, '$countriesIds'],
-                },
-            },
-        });
-    }
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'countriesIds',
-            foreignField: 'parent',
-            as: 'childRegions',
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            childRegions: null,
-            countriesIds: null,
-            regions: {
-                $let: {
-                    vars: {
-                        setRegion: { $setIntersection: ['$regions', '$childRegions._id'] },
-                    },
-                    in: {
-                        $map: {
-                            input: {
-                                $filter: {
-                                    input: '$childRegions',
-                                    as: 'region',
-                                    cond: {
-                                        $setIsSubset: [['$$region._id'], '$$setRegion'],
-                                    },
-                                },
-                            },
-                            as: 'region',
-                            in: {
-                                _id: '$$region._id',
-                                name: '$$region.name',
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            regionsIds: '$regions._id',
-        },
-    });
-
-    if (regionFilter) {
-        pipeline.push({
-            $addFields: {
-                regionsIds: {
-                    $setIntersection: [regionFilter, '$regionsIds'],
-                },
-            },
-        });
-    }
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'regionsIds',
-            foreignField: 'parent',
-            as: 'childSubRegions',
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            childSubRegions: null,
-            regionsIds: null,
-            subRegions: {
-                $let: {
-                    vars: {
-                        setSubRegion: { $setIntersection: ['$subRegions', '$childSubRegions._id'] },
-                    },
-                    in: {
-                        $map: {
-                            input: {
-                                $filter: {
-                                    input: '$childSubRegions',
-                                    as: 'subRegion',
-                                    cond: {
-                                        $setIsSubset: [['$$subRegion._id'], '$$setSubRegion'],
-                                    },
-                                },
-                            },
-                            as: 'subRegion',
-                            in: {
-                                _id: '$$subRegion._id',
-                                name: '$$subRegion.name',
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            subRegionsIds: '$subRegions._id',
-        },
-    });
-
-    if (subRegionFilter) {
-        pipeline.push({
-            $addFields: {
-                subRegionsIds: {
-                    $setIntersection: [subRegionFilter, '$subRegionsIds'],
-                },
-            },
-        });
-    }
 
     pipeline.push({
         $lookup: {
             from: 'branches',
-            localField: 'subRegionsIds',
-            foreignField: 'subRegion',
-            as: 'childBranches',
+            localField: 'branches',
+            foreignField: '_id',
+            as: 'branches',
         },
     });
 
     pipeline.push({
-        $addFields: {
-            childBranches: null,
-            retailSegments: {
-                $setIntersection: ['$childBranches.retailSegment', '$retailSegments'],
-            },
-            subRegionsIds: null,
+        $project: {
             branches: {
-                $let: {
-                    vars: {
-                        setBranches: { $setIntersection: ['$branches', '$childBranches._id'] },
-                    },
-                    in: {
-                        $map: {
-                            input: {
-                                $filter: {
-                                    input: '$childBranches',
-                                    as: 'branch',
-                                    cond: retailSegmentFilter ? {
-                                        $and: [
-                                            {
-                                                $setIsSubset: [['$$branch._id'], '$$setBranches'],
-                                            },
-                                            {
-                                                $setIsSubset: [['$$branch.retailSegment'], retailSegmentFilter],
-                                            },
-                                        ],
-                                    } : {
-                                        $setIsSubset: [['$$branch._id'], '$$setBranches'],
-                                    },
-                                },
-                            },
-                            as: 'branch',
-                            in: {
-                                _id: '$$branch._id',
-                                name: '$$branch.name',
-                            },
-                        },
-                    },
-                },
+                _id: 1,
+                name: 1,
+                subRegion: 1,
+                retailSegment: 1,
             },
+            subRegions: '$branches.subRegion',
+            retailSegments: '$branches.retailSegment',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'subRegions',
+            foreignField: '_id',
+            as: 'subRegions',
         },
     });
 
@@ -343,17 +87,276 @@ module.exports = (queryFilter, personnel) => {
 
     pipeline.push({
         $project: {
-            countries: 1,
-            regions: 1,
-            subRegions: 1,
+            branches: 1,
+            subRegions: {
+                _id: 1,
+                name: 1,
+                parent: 1,
+            },
             retailSegments: {
                 _id: 1,
                 name: 1,
             },
-            branches: 1,
-        }
+            regions: '$subRegions.parent',
+        },
     });
 
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'regions',
+            foreignField: '_id',
+            as: 'regions',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            branches: 1,
+            subRegions: 1,
+            retailSegments: 1,
+            regions: {
+                _id: 1,
+                name: 1,
+                parent: 1,
+            },
+            countries: '$regions.parent',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'countries',
+            foreignField: '_id',
+            as: 'countries',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            branches: 1,
+            retailSegments: 1,
+            subRegions: 1,
+            regions: 1,
+            countriesIds: '$countries._id',
+            countries: {
+                _id: 1,
+                name: 1,
+            },
+        },
+    });
+
+    if (countryFilter) {
+        pipeline.push({
+            $addFields: {
+                countriesIds: {
+                    $setIntersection: [countryFilter, '$countriesIds'],
+                },
+            },
+        });
+    }
+
+    pipeline.push({
+        $addFields: {
+            countriesIds: null,
+            regions: {
+                $reduce: {
+                    input: '$regions',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: { $setIsSubset: [['$$this.parent'], '$countriesIds'] },
+                            then: {
+                                $setUnion: [
+                                    [
+                                        {
+                                            _id: '$$this._id',
+                                            name: '$$this.name',
+                                        },
+                                    ],
+                                    '$$value',
+                                ],
+                            },
+                            else: '$$value',
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (regionFilter) {
+        pipeline.push({
+            $addFields: {
+                regionsIds: {
+                    $setIntersection: [regionFilter, '$regions._id'],
+                },
+            },
+        });
+    } else {
+        pipeline.push({
+            $addFields: {
+                regionsIds: '$regions._id',
+            },
+        });
+    }
+
+    pipeline.push({
+        $addFields: {
+            regionsIds: null,
+            subRegions: {
+                $reduce: {
+                    input: '$subRegions',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: { $setIsSubset: [['$$this.parent'], '$regionsIds'] },
+                            then: {
+                                $setUnion: [
+                                    [
+                                        {
+                                            _id: '$$this._id',
+                                            name: '$$this.name',
+                                        },
+                                    ],
+                                    '$$value',
+                                ],
+                            },
+                            else: '$$value',
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (subRegionFilter) {
+        pipeline.push({
+            $addFields: {
+                subRegionsIds: {
+                    $setIntersection: [subRegionFilter, '$subRegions._id'],
+                },
+            },
+        });
+    } else {
+        pipeline.push({
+            $addFields: {
+                subRegionsIds: '$subRegions._id',
+            },
+        });
+    }
+
+    pipeline.push({
+        $addFields: {
+            retailSegments: {
+                $reduce: {
+                    input: {
+                        $reduce: {
+                            input: '$branches',
+                            initialValue: [],
+                            in: {
+                                $cond: {
+                                    if: { $setIsSubset: [['$$this.subRegion'], '$subRegionsIds'] },
+                                    then: { $setUnion: [['$$this.retailSegment'], '$$value'] },
+                                    else: '$$value',
+                                },
+                            },
+                        },
+                    },
+                    initialValue: [],
+                    in: {
+                        $setUnion: [
+                            '$$value',
+                            [
+                                {
+                                    $let: {
+                                        vars: {
+                                            retailSegment: {
+                                                $arrayElemAt: [
+                                                    {
+                                                        $filter: {
+                                                            input: '$retailSegments',
+                                                            as: 'retailSegment',
+                                                            cond: {
+                                                                $eq: ['$$retailSegment._id', '$$this'],
+                                                            },
+                                                        },
+                                                    },
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        in: {
+                                            _id: '$$retailSegment._id',
+                                            name: '$$retailSegment.name',
+                                        },
+                                    },
+                                },
+                            ],
+                        ],
+                    },
+                },
+            },
+        },
+    });
+
+    if (retailSegmentFilter) {
+        pipeline.push({
+            $addFields: {
+                retailSegmentsIds: {
+                    $setIntersection: [retailSegmentFilter, '$retailSegments._id'],
+                },
+            },
+        });
+    } else {
+        pipeline.push({
+            $addFields: {
+                retailSegmentsIds: '$retailSegments._id',
+            },
+        });
+    }
+
+    pipeline.push({
+        $addFields: {
+            subRegionsIds: null,
+            retailSegmentsIds: null,
+            branches: {
+                $reduce: {
+                    input: '$branches',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $and: [
+                                    {
+                                        $setIsSubset: [['$$this.subRegion'], '$subRegionsIds'],
+                                    },
+                                    {
+                                        $setIsSubset: [['$$this.retailSegment'], '$retailSegmentsIds'],
+                                    },
+                                ],
+                            },
+                            then: {
+                                $setUnion: [
+                                    [
+                                        {
+                                            _id: '$$this._id',
+                                            name: '$$this.name',
+                                            subRegion: '$$this.subRegion',
+                                            retailSegment: '$$this.retailSegment',
+                                        },
+                                    ],
+                                    '$$value',
+                                ],
+                            },
+                            else: '$$value',
+                        },
+                    },
+                },
+            },
+        },
+    });
 
     return pipeline;
 };
