@@ -145,7 +145,7 @@ module.exports = (pipeline) => {
             outlet: 1,
             branch: 1,
             category: 1,
-            dataSets: [
+            datasets: [
                 {
                     data: ['$count'],
                 },
@@ -165,7 +165,7 @@ module.exports = (pipeline) => {
                     outlet: '$outlet',
                     branch: '$branch',
                     category: '$category',
-                    dataSets: '$dataSets',
+                    datasets: '$datasets',
                     labels: '$labels',
                 },
             },
