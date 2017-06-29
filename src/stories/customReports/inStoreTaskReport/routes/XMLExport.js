@@ -44,6 +44,12 @@ module.exports = (req, res, next) => {
         ];
         const pipeline = [];
 
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
+
         currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {

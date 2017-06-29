@@ -46,6 +46,12 @@ module.exports = (req, res, next) => {
         ];
         const pipeline = [];
 
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
+
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
             const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
