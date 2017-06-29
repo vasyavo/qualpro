@@ -78,7 +78,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
-            datasets: ['$data'],
+            datasets: [{ data: '$data' }],
             labels: 1,
         },
     });
