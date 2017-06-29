@@ -519,7 +519,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country._id.toString();
             });
-            item.price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
+            item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
             item.additionalComment = {
                 en: sanitizeHtml(item.additionalComment.en),
                 ar: sanitizeHtml(item.additionalComment.ar),

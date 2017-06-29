@@ -487,7 +487,7 @@ module.exports = (req, res, next) => {
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
-                        const price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
+                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
             return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>

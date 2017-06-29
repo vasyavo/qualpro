@@ -456,6 +456,7 @@ module.exports = (req, res, next) => {
                 description: 1,
                 promotion: 1,
                 brand: 1,
+                location: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
