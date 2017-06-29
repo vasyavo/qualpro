@@ -240,6 +240,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'comments',
+                localField: 'setTasks.comments',
+                foreignField: '_id',
+                as: 'comments',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'positions',
                 localField: 'setTasks.createdBy.user.position',
                 foreignField: '_id',
@@ -258,12 +267,18 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
+                _id: '$setTasks._id',
                 title: '$setTasks.title',
                 createdBy: '$setTasks.createdBy',
                 priority: '$setTasks.priority',
                 status: '$setTasks.status',
                 form: '$setTasks.form',
+                description: '$setTasks.description',
+                objectiveType: '$setTasks.objectiveType',
+                dateStart: '$setTasks.dateStart',
+                dateEnd: '$setTasks.dateEnd',
                 total: 1,
+                comments: 1,
                 country: {
                     _id: 1,
                     name: 1,
@@ -299,6 +314,23 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                attachments: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $ne: ['$$this.attachments', []],
+                                },
+                                then: {
+                                    $setUnion: ['$$this.attachments', '$$value'],
+                                },
+                                else: '$$value',
+                            },
+                        },
+                    },
+                },
                 assignedTo: {
                     $map: {
                         input: '$assignedTo',
@@ -312,6 +344,75 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                title: 1,
+                createdBy: 1,
+                priority: 1,
+                status: 1,
+                form: 1,
+                description: 1,
+                objectiveType: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                total: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                position: 1,
+                attachments: 1,
+                assignedTo: 1,
+                comments: {
+                    $map: {
+                        input: '$comments',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            body: '$$item.body',
+                            attachments: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$attachments',
+                                            as: 'attachment',
+                                            cond: {
+                                                $ne: [
+                                                    {
+                                                        $setIntersection: [['$attachment._id'], '$item.attachments'],
+                                                    },
+                                                    [],
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'attachment',
+                                    in: {
+                                        _id: '$$attachment._id',
+                                        originalName: '$$attachment.originalName',
+                                        contentType: '$$attachment.contentType',
+                                        preview: '$$attachment.preview',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'attachments',
+                foreignField: '_id',
+                as: 'attachments',
             },
         });
 
