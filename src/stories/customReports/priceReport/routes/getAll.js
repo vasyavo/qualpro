@@ -203,7 +203,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
-            item.price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
+            item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
             item.date = moment(item.date).format('MMMM, YYYY');
         });
 

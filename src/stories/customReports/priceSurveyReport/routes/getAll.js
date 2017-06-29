@@ -441,9 +441,9 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country._id.toString();
             });
-            item.min = parseFloat(item.min / currentCountry.currencyInUsd).toFixed(2);
-            item.avg = parseFloat(item.avg / currentCountry.currencyInUsd).toFixed(2);
-            item.max = parseFloat(item.min / currentCountry.currencyInUsd).toFixed(2);
+            item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
+            item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
+            item.max = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
         });
 
         res.status(200).send(response);

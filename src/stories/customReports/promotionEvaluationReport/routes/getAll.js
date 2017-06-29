@@ -608,7 +608,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
-            item.ppt = parseFloat(item.ppt / currentCountry.currencyInUsd).toFixed(2);
+            item.ppt = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
             item.promotionType = {
                 en: sanitizeHtml(item.promotionType.en),
                 ar: sanitizeHtml(item.promotionType.ar),

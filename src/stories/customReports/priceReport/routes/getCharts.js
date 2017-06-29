@@ -233,7 +233,7 @@ module.exports = (req, res, next) => {
                     return country._id.toString() === response.lineChart.dataSets[0].country.toString();
                 });
 
-                return parseFloat(item / currentCountry.currencyInUsd).toFixed(2);
+                return parseFloat(item * currentCountry.currencyInUsd).toFixed(2);
             });
         }
 
