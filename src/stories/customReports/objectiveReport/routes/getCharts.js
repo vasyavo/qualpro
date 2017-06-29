@@ -187,7 +187,17 @@ module.exports = (req, res, next) => {
             response = {
                 barChart: {
                     labels: response.labels,
-                    datasets: response.datasets,
+                    datasets: response.datasets.map(dataset => {
+                        return dataset.data.map(items => {
+                            const thisItem = {};
+
+                            items.forEach(item => {
+                                thisItem[item.status] = item.count;
+                            });
+
+                            return thisItem;
+                        });
+                    }),
                 },
             };
         } else {
