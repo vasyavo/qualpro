@@ -182,6 +182,7 @@ module.exports = (req, res, next) => {
                     branch: '$branch',
                     brand: '$items.brand',
                     size: '$items.size',
+                    variant: '$variant',
                     category: '$category',
                 },
                 min: { $min: '$items.price' },
@@ -220,6 +221,7 @@ module.exports = (req, res, next) => {
                 branch: '$setData._id.branch',
                 brand: '$setData._id.brand',
                 size: '$setData._id.size',
+                variant: '$setData._id.variant',
                 category: '$setData._id.category',
                 min: '$setData.min',
                 max: '$setData.max',
@@ -265,6 +267,15 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
             },
         });
 
@@ -343,6 +354,17 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$category._id',
                             name: '$$category.name',
+                        },
+                    },
+                },
+                variant: {
+                    $let: {
+                        vars: {
+                            variant: { $arrayElemAt: ['$variant', 0] },
+                        },
+                        in: {
+                            _id: '$$variant._id',
+                            name: '$$variant.name',
                         },
                     },
                 },

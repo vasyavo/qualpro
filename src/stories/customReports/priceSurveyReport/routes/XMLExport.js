@@ -184,6 +184,7 @@ module.exports = (req, res, next) => {
                     brand: '$items.brand',
                     size: '$items.size',
                     category: '$category',
+                    variant: '$variant',
                 },
                 min: { $min: '$items.price' },
                 max: { $max: '$items.price' },
@@ -202,6 +203,7 @@ module.exports = (req, res, next) => {
                 brand: '$_id.brand',
                 size: '$_id.size',
                 category: '$_id.category',
+                variant: '$_id.variant',
                 min: 1,
                 max: 1,
                 avg: 1,
@@ -245,6 +247,15 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
             },
         });
 
@@ -325,6 +336,17 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                variant: {
+                    $let: {
+                        vars: {
+                            variant: { $arrayElemAt: ['$variant', 0] },
+                        },
+                        in: {
+                            _id: '$$variant._id',
+                            name: '$$variant.name',
+                        },
+                    },
+                },
                 location: {
                     $let: {
                         vars: {
@@ -390,6 +412,7 @@ module.exports = (req, res, next) => {
                     <tr>
                         <th>Location</th>
                         <th>Category</th>
+                        <th>Variant</th>
                         <th>Branch</th>
                         <th>Brand</th>
                         <th>Size</th>
@@ -410,6 +433,7 @@ module.exports = (req, res, next) => {
                             <tr>
                                 <td>${item.location}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
+                                <td>${item.variant.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.size}</td>
