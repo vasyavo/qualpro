@@ -174,6 +174,8 @@ module.exports = (req, res, next) => {
                 _id: '$setPromotion._id',
                 category: '$setPromotion.category',
                 description: '$setPromotion.description',
+                promotion: '$setPromotion.promotion',
+                brand: '$setPromotion.brand',
                 packing: '$setPromotion.packing',
                 expiry: '$setPromotion.expiry',
                 dateStart: '$setPromotion.dateStart',
@@ -207,6 +209,15 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
             },
         });
 
@@ -294,8 +305,8 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'comments',
-                localField: 'comments',
-                foreignField: '_id',
+                localField: '_id',
+                foreignField: 'taskId',
                 as: 'comments',
             },
         });
@@ -304,6 +315,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 description: 1,
+                promotion: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
@@ -319,6 +331,17 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$category._id',
                             name: '$$category.name',
+                        },
+                    },
+                },
+                brand: {
+                    $let: {
+                        vars: {
+                            brand: { $arrayElemAt: ['$brand', 0] },
+                        },
+                        in: {
+                            _id: '$$brand._id',
+                            name: '$$brand.name',
                         },
                     },
                 },
@@ -431,6 +454,8 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 description: 1,
+                promotion: 1,
+                brand: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
