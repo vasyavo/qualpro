@@ -9,6 +9,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -183,6 +184,7 @@ module.exports = (req, res, next) => {
                     brand: '$items.brand',
                     size: '$items.size',
                     category: '$category',
+                    variant: '$variant',
                 },
                 min: { $min: '$items.price' },
                 max: { $max: '$items.price' },
@@ -201,6 +203,7 @@ module.exports = (req, res, next) => {
                 brand: '$_id.brand',
                 size: '$_id.size',
                 category: '$_id.category',
+                variant: '$_id.variant',
                 min: 1,
                 max: 1,
                 avg: 1,
@@ -249,6 +252,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'domains',
                 localField: 'country',
                 foreignField: '_id',
@@ -290,6 +302,11 @@ module.exports = (req, res, next) => {
                 max: 1,
                 avg: 1,
                 size: '$size',
+                country: { $arrayElemAt: ['$country', 0] },
+                region: { $arrayElemAt: ['$region', 0] },
+                subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                outlet: { $arrayElemAt: ['$outlet', 0] },
                 branch: {
                     $let: {
                         vars: {
@@ -320,6 +337,17 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$category._id',
                             name: '$$category.name',
+                        },
+                    },
+                },
+                variant: {
+                    $let: {
+                        vars: {
+                            variant: { $arrayElemAt: ['$variant', 0] },
+                        },
+                        in: {
+                            _id: '$$variant._id',
+                            name: '$$variant.name',
                         },
                     },
                 },
@@ -380,14 +408,18 @@ module.exports = (req, res, next) => {
         if (err) {
             return next(err);
         }
-
         /* eslint-disable */
         const verstka = `
             <table>
                 <thead>
                     <tr>
-                        <th>Location</th>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
                         <th>Category</th>
+                        <th>Variant</th>
                         <th>Branch</th>
                         <th>Brand</th>
                         <th>Size</th>
@@ -398,16 +430,27 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const currentCountry = currency.defaultData.find((country) => {
+                            return country._id.toString() === item.country._id.toString();
+                        });
+                        const minPrice = parseFloat(item.min / currentCountry.currencyInUsd).toFixed(2);
+                        const avgPrice = parseFloat(item.avg / currentCountry.currencyInUsd).toFixed(2);
+                        const maxPrice = parseFloat(item.max / currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
-                                <td>${item.location}</td>
+                                <td>${item.country.name[currentLanguage]}</td>
+                                <td>${item.region.name[currentLanguage]}</td>
+                                <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
+                                <td>${item.variant.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.size}</td>
-                                <td>${item.avg}</td>
-                                <td>${item.max}</td>
-                                <td>${item.min}</td>
+                                <td>${avgPrice}</td>
+                                <td>${maxPrice}</td>
+                                <td>${minPrice}</td>
                             </tr>
                         `;
                     }).join('')}
