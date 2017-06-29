@@ -9,6 +9,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -311,6 +312,7 @@ module.exports = (req, res, next) => {
                 avg: 1,
                 total: 1,
                 size: '$size',
+                country: { $arrayElemAt: ['$country', 0] },
                 branch: {
                     $let: {
                         vars: {
@@ -412,6 +414,15 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach((item) => {
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            item.min = parseFloat(item.min / currentCountry.currencyInUsd).toFixed(2);
+            item.avg = parseFloat(item.avg / currentCountry.currencyInUsd).toFixed(2);
+            item.max = parseFloat(item.min / currentCountry.currencyInUsd).toFixed(2);
+        });
 
         res.status(200).send(response);
     });
