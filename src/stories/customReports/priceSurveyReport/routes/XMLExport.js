@@ -303,6 +303,10 @@ module.exports = (req, res, next) => {
                 avg: 1,
                 size: '$size',
                 country: { $arrayElemAt: ['$country', 0] },
+                region: { $arrayElemAt: ['$region', 0] },
+                subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                outlet: { $arrayElemAt: ['$outlet', 0] },
                 branch: {
                     $let: {
                         vars: {
@@ -404,13 +408,16 @@ module.exports = (req, res, next) => {
         if (err) {
             return next(err);
         }
-
         /* eslint-disable */
         const verstka = `
             <table>
                 <thead>
                     <tr>
-                        <th>Location</th>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
                         <th>Category</th>
                         <th>Variant</th>
                         <th>Branch</th>
@@ -431,7 +438,11 @@ module.exports = (req, res, next) => {
                         const maxPrice = parseFloat(item.max / currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
-                                <td>${item.location}</td>
+                                <td>${item.country.name[currentLanguage]}</td>
+                                <td>${item.region.name[currentLanguage]}</td>
+                                <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${item.variant.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
