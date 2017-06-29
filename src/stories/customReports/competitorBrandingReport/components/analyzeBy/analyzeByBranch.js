@@ -214,7 +214,7 @@ module.exports = (pipeline) => {
                 },
             },
             category: 1,
-            dataSets: [
+            datasets: [
                 {
                     data: '$data',
                 },
@@ -279,7 +279,7 @@ module.exports = (pipeline) => {
             },
             country: 1,
             category: 1,
-            dataSets: 1,
+            datasets: 1,
             labels: 1,
         },
     });
@@ -295,7 +295,7 @@ module.exports = (pipeline) => {
                     subRegion: '$subRegion',
                     retailSegment: '$retailSegment',
                     outlet: '$outlet',
-                    dataSets: '$dataSets',
+                    datasets: '$datasets',
                     labels: '$labels',
                 },
             },
