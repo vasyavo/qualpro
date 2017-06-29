@@ -71,8 +71,15 @@ module.exports = (pipeline) => {
     pipeline.push({
         $group: {
             _id: null,
-            datasets: { $push: { data: '$data' } },
+            data: { $push: '$data' },
             labels: { $push: '$country' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            datasets: ['$data'],
+            labels: 1,
         },
     });
 };
