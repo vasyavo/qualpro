@@ -279,6 +279,33 @@ module.exports = (req, res, next) => {
                 dateEnd: '$setTasks.dateEnd',
                 total: 1,
                 comments: 1,
+                location: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                            region: { $arrayElemAt: ['$region', 0] },
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            $concat: [
+                                '$$country.name.en',
+                                ' -> ',
+                                '$$region.name.en',
+                                ' -> ',
+                                '$$subRegion.name.en',
+                                ' -> ',
+                                '$$retailSegment.name.en',
+                                ' -> ',
+                                '$$outlet.name.en',
+                                ' -> ',
+                                '$$branch.name.en',
+                            ],
+                        },
+                    },
+                },
                 country: {
                     _id: 1,
                     name: 1,
@@ -362,6 +389,7 @@ module.exports = (req, res, next) => {
                 dateStart: 1,
                 dateEnd: 1,
                 total: 1,
+                location: 1,
                 country: 1,
                 region: 1,
                 subRegion: 1,
