@@ -139,6 +139,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
+            country: 1,
             region: 1,
             subRegion: 1,
             retailSegment: 1,
@@ -159,6 +160,7 @@ module.exports = (pipeline) => {
             _id: null,
             charts: {
                 $push: {
+                    country: '$country',
                     region: '$region',
                     subRegion: '$subRegion',
                     retailSegment: '$retailSegment',
