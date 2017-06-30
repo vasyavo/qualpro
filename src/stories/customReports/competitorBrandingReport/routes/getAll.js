@@ -258,6 +258,23 @@ module.exports = (req, res, next) => {
                 foreignField: '_id',
                 as: 'createdBy.user.position',
             },
+        }, {
+            $addFields: {
+                'createdBy.user.position': {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: {
+                                en: '$$position.name.en',
+                                ar: '$$position.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         pipeline.push({
