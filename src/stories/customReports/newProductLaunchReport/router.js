@@ -7,9 +7,9 @@ const XMLExport = require('./routes/XMLExport');
 
 const router = express.Router();
 
-router.get('/', getAll);
-router.get('/filters', getFilters);
-router.get('/charts', getCharts);
-router.get('/export', XMLExport);
+router.post('/', getAll);
+router.post('/filters', getFilters);
+router.post('/charts', getCharts);
+router.post('/export', XMLExport);
 
 module.exports = router;
