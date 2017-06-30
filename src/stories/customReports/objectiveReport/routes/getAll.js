@@ -341,7 +341,6 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-
                 attachments: {
                     $reduce: {
                         input: '$comments',
@@ -359,7 +358,6 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-
                 assignedTo: {
                     $map: {
                         input: '$assignedTo',
@@ -373,6 +371,15 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'attachments',
+                foreignField: '_id',
+                as: 'attachments',
             },
         });
 
@@ -397,39 +404,14 @@ module.exports = (req, res, next) => {
                 outlet: 1,
                 branch: 1,
                 position: 1,
-                attachments: 1,
                 assignedTo: 1,
-                comments: 1,
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'files',
-                localField: 'comments.attachments',
-                foreignField: '_id',
-                as: 'comments.attachment',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'files',
-                localField: 'attachments',
-                foreignField: '_id',
-                as: 'attachments',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
                 comments: {
                     $map: {
                         input: '$comments',
-                        as: 'item',
+                        as: 'comment',
                         in: {
-                            _id: '$$item._id',
-                            body: '$$item.body',
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
                             attachments: {
                                 $map: {
                                     input: {
@@ -437,7 +419,7 @@ module.exports = (req, res, next) => {
                                             input: '$attachments',
                                             as: 'attachment',
                                             cond: {
-                                                $setIsSubset: [['$$attachment._id'], '$$item.attachments'],
+                                                $setIsSubset: [['$$attachment._id'], '$$comment.attachments'],
                                             },
                                         },
                                     },
