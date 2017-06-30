@@ -9,6 +9,7 @@ const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -35,7 +36,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
@@ -390,7 +391,10 @@ module.exports = (req, res, next) => {
                         vars: {
                             country: { $arrayElemAt: ['$country', 0] },
                         },
-                        in: '$$country.name',
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
                     },
                 },
                 region: {
@@ -527,6 +531,10 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const currentCountry = currency.defaultData.find((country) => {
+                            return country._id.toString() === item.country._id.toString();
+                        });
+                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
                                 <td>${item.country[currentLanguage]}</td>
@@ -541,7 +549,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.variant.name}</td>
                                 <td>${item.packing}</td>
                                 <td>${item.displayType[currentLanguage].join(', ')}</td>
-                                <td>${item.price}</td>
+                                <td>${price}</td>
                                 <td>${item.origin ? item.origin[currentLanguage] : ''}</td>
                                 <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>

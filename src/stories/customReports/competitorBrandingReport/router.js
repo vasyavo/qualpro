@@ -6,8 +6,8 @@ const getCharts = require('./routes/getCharts');
 
 const router = express.Router();
 
-router.get('/', getAll);
-router.get('/filters', getFilters);
-router.get('/charts', getCharts);
+router.post('/', getAll);
+router.post('/filters', getFilters);
+router.post('/charts', getCharts);
 
 module.exports = router;

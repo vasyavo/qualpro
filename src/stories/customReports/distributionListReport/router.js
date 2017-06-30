@@ -6,7 +6,7 @@ const getFilters = require('./routes/getFilters');
 
 const router = express.Router();
 
-router.get('/', getAll);
-router.get('/filters', getFilters);
+router.post('/', getAll);
+router.post('/filters', getFilters);
 
 module.exports = router;

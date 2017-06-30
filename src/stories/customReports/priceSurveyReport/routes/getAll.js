@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
@@ -443,7 +443,7 @@ module.exports = (req, res, next) => {
             });
             item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
             item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
-            item.max = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
+            item.max = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
         });
 
         res.status(200).send(response);

@@ -33,7 +33,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const analyzeByParam = query.analyzeBy;
         const queryFilter = query.filter || {};
@@ -45,7 +45,7 @@ module.exports = (req, res, next) => {
         const pipeline = [];
 
         if (timeFilter) {
-            const timeFilterValidate = ajv.compile(timeFilterSchema);
+            const timeFilterValidate = ajv.compile({ timeFrames: timeFilter });
             const timeFilterValid = timeFilterValidate(timeFilter);
 
             if (!timeFilterValid) {
