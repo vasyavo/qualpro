@@ -491,12 +491,7 @@ module.exports = (req, res, next) => {
                                             input: '$attachments',
                                             as: 'attachment',
                                             cond: {
-                                                $ne: [
-                                                    {
-                                                        $setIntersection: [['$attachment._id'], '$item.attachments'],
-                                                    },
-                                                    [],
-                                                ],
+                                                $setIsSubset: [['$$attachment._id'], '$$item.attachments'],
                                             },
                                         },
                                     },
