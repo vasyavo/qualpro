@@ -113,6 +113,27 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $addFields: {
+                category: {
+                    $let: {
+                        vars: {
+                            allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
+                        },
+                        in: {
+                            $filter: {
+                                input: { $ifNull: ['$category', []] },
+                                as: 'category',
+                                cond: {
+                                    $setIsSubset: [['$$category'], '$$allowedCategory'],
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $lookup: {
                 from: 'personnels',
                 localField: 'createdBy.user',
