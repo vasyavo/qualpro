@@ -40,8 +40,8 @@ module.exports = (pipeline) => {
                     in: {
                         _id: '$$region._id',
                         name: {
-                            en: { $concat: ['$$region.name.en', ' ', '$$region.name.en'] },
-                            ar: { $concat: ['$$region.name.ar', ' ', '$$region.name.ar'] },
+                            en: '$$region.name.en',
+                            ar: '$$region.name.ar',
                         },
                     },
                 },
