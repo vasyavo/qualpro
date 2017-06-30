@@ -492,12 +492,14 @@ module.exports = (req, res, next) => {
             displayTypes: [],
         };
 
-        response.distributors = response.distributors.map(item => {
-            return {
-                en: sanitizeHtml(item.en),
-                ar: sanitizeHtml(item.ar),
-            };
-        });
+        response.distributors = response.distributors
+            .map(item => {
+                return {
+                    en: sanitizeHtml(item.en),
+                    ar: sanitizeHtml(item.ar),
+                };
+            })
+            .filter(item => item.en); // todo: item should appear if it filled in current language
 
         response.analyzeBy = [
             {
