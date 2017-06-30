@@ -422,6 +422,41 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $addFields: {
+                comments: {
+                    $map: {
+                        input: '$comments',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            body: '$$item.body',
+                            attachments: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$attachments',
+                                            as: 'attachment',
+                                            cond: {
+                                                $setIsSubset: [['$$attachment._id'], '$$item.attachments'],
+                                            },
+                                        },
+                                    },
+                                    as: 'attachment',
+                                    in: {
+                                        _id: '$$attachment._id',
+                                        originalName: '$$attachment.originalName',
+                                        contentType: '$$attachment.contentType',
+                                        preview: '$$attachment.preview',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 total: { $first: '$total' },
