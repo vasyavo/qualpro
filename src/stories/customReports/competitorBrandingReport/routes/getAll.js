@@ -252,8 +252,18 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'createdBy.user.position',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
+                branch: 1,
                 location: {
                     $let: {
                         vars: {
@@ -362,6 +372,17 @@ module.exports = (req, res, next) => {
                                 then: '$$value',
                                 else: { $concat: ['$$value', ', ', '$$this.name.en'] },
                             },
+                        },
+                    },
+                },
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
                         },
                     },
                 },
