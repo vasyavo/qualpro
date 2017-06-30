@@ -2,24 +2,33 @@ const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType'
 
 module.exports = (pipeline, queryFilter) => {
     pipeline.push({
-        $unwind: '$branch',
+        $lookup: {
+            from: CONTENT_TYPES.PROMOTIONSITEMS,
+            localField: '_id',
+            foreignField: 'promotion',
+            as: 'promotion',
+        },
     });
 
     pipeline.push({
-        $group: {
-            _id: '$branch',
-            promotion: { $first: '$_id' },
-            count: { $sum: 1 },
-        },
+        $unwind: '$promotion',
     });
 
     if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
         pipeline.push({
             $match: {
-                _id: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
             },
         });
     }
+
+    pipeline.push({
+        $group: {
+            _id: '$promotion.branch',
+            promotion: { $first: '$_id' },
+            count: { $sum: 1 },
+        },
+    });
 
     pipeline.push({
         $lookup: {
@@ -58,6 +67,14 @@ module.exports = (pipeline, queryFilter) => {
         pipeline.push({
             $match: {
                 'domain.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+            },
+        });
+    }
+
+    if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+        pipeline.push({
+            $match: {
+                'domain.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
             },
         });
     }

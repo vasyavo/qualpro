@@ -74,18 +74,29 @@ module.exports = (queryFilter, timeFilter, personnel) => {
         $unwind: '$promotion',
     });
 
+    const $timeMatch = {};
+
+    $timeMatch.$or = [];
+
     if (timeFilter) {
-        pipeline.push({
-            $match: {
+        timeFilter.map((frame) => {
+            $generalMatch.$or.push({
                 $and: [
                     {
-                        'promotion.createdBy.date': { $gt: new Date(timeFilter.from) },
+                        'promotion.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
                     },
                     {
-                        'promotion.createdBy.date': { $lt: new Date(timeFilter.to) },
+                        'promotion.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
                     },
                 ],
-            },
+            });
+            return frame;
+        });
+    }
+
+    if ($timeMatch.$or.length) {
+        pipeline.push({
+            $match: $timeMatch,
         });
     }
 
@@ -95,6 +106,131 @@ module.exports = (queryFilter, timeFilter, personnel) => {
                 'promotion.createdBy.user': {
                     $in: queryFilter[CONTENT_TYPES.PERSONNEL],
                 },
+            },
+        });
+    }
+
+    if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+        pipeline.push({
+            $match: {
+                'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+            },
+        });
+    }
+
+    pipeline.push({
+        $lookup: {
+            from: 'branches',
+            localField: 'promotion.branch',
+            foreignField: '_id',
+            as: 'promotion.branch',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            promotion: {
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$promotion.branch', 0] },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            subRegion: '$$branch.subRegion',
+                            retailSegment: '$$branch.retailSegment',
+                        },
+                    },
+                },
+                createdBy: '$promotion.createdBy',
+            },
+        },
+    });
+
+    if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+        pipeline.push({
+            $match: {
+                'promotion.branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+            },
+        });
+    }
+
+    if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+        pipeline.push({
+            $match: {
+                'promotion.branch.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
+            },
+        });
+    }
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'promotion.branch.subRegion',
+            foreignField: '_id',
+            as: 'promotion.branch.subRegion',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            promotion: {
+                subRegion: {
+                    $let: {
+                        vars: {
+                            subRegion: { $arrayElemAt: ['$promotion.branch.subRegion', 0] },
+                        },
+                        in: {
+                            _id: '$$subRegion._id',
+                            parent: '$$subRegion.parent',
+                        },
+                    },
+                },
+                createdBy: '$promotion.createdBy',
+            },
+        },
+    });
+
+    if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+        pipeline.push({
+            $match: {
+                'promotion.subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+            },
+        });
+    }
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'promotion.subRegion.parent',
+            foreignField: '_id',
+            as: 'promotion.subRegion.parent',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            promotion: {
+                region: {
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$promotion.subRegion.parent', 0] },
+                        },
+                        in: {
+                            _id: '$$region._id',
+                            parent: '$$region.parent',
+                        },
+                    },
+                },
+                createdBy: '$promotion.createdBy',
+            },
+        },
+    });
+
+    if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+        pipeline.push({
+            $match: {
+                'promotion.region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
             },
         });
     }
