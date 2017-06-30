@@ -460,12 +460,6 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $addFields: {
-                ppt: { $divide: ['$ppt', 100] },
-            },
-        });
-
-        pipeline.push({
             $group: {
                 _id: null,
                 records: { $push: '$$ROOT' },
