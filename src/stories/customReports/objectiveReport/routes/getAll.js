@@ -399,41 +399,16 @@ module.exports = (req, res, next) => {
                 position: 1,
                 attachments: 1,
                 assignedTo: 1,
-                comments: {
-                    $map: {
-                        input: '$comments',
-                        as: 'item',
-                        in: {
-                            _id: '$$item._id',
-                            body: '$$item.body',
-                            attachments: {
-                                $map: {
-                                    input: {
-                                        $filter: {
-                                            input: '$attachments',
-                                            as: 'attachment',
-                                            cond: {
-                                                $ne: [
-                                                    {
-                                                        $setIntersection: [['$attachment._id'], '$item.attachments'],
-                                                    },
-                                                    [],
-                                                ],
-                                            },
-                                        },
-                                    },
-                                    as: 'attachment',
-                                    in: {
-                                        _id: '$$attachment._id',
-                                        originalName: '$$attachment.originalName',
-                                        contentType: '$$attachment.contentType',
-                                        preview: '$$attachment.preview',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+                comments: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'comments.attachments',
+                foreignField: '_id',
+                as: 'comments.attachment',
             },
         });
 
