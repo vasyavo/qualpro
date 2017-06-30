@@ -184,6 +184,32 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'createdBy.user.position',
+            },
+        }, {
+            $addFields: {
+                'createdBy.user.position': {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: {
+                                en: '$$position.name.en',
+                                ar: '$$position.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: {
                     category: '$category',
@@ -455,6 +481,7 @@ module.exports = (req, res, next) => {
                 <thead>
                     <tr>
                         <th>Employee</th>
+                        <th>Position</th>
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
@@ -475,6 +502,7 @@ module.exports = (req, res, next) => {
                                     return `
                                         <tr>
                                             <td>${brand.createdBy.user.firstName[currentLanguage]} ${brand.createdBy.user.lastName[currentLanguage]}</td>
+                                            <td>${brand.createdBy.user.position.name[currentLanguage]}</td>
                                             <td>${product.country.name[currentLanguage]}</td>
                                             <td>${product.region.name[currentLanguage]}</td>
                                             <td>${product.subRegion.name[currentLanguage]}</td>
