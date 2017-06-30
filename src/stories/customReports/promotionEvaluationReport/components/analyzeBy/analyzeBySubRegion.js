@@ -2,24 +2,78 @@ const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType'
 
 module.exports = (pipeline, queryFilter) => {
     pipeline.push({
-        $unwind: '$subRegion',
+        $lookup: {
+            from: CONTENT_TYPES.PROMOTIONSITEMS,
+            localField: '_id',
+            foreignField: 'promotion',
+            as: 'promotion',
+        },
     });
 
     pipeline.push({
-        $group: {
-            _id: '$subRegion',
-            promotion: { $first: '$_id' },
-            count: { $sum: 1 },
+        $unwind: '$promotion',
+    });
+
+    if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+        pipeline.push({
+            $match: {
+                'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+            },
+        });
+    }
+
+    pipeline.push({
+        $lookup: {
+            from: 'branches',
+            localField: 'promotion.branch',
+            foreignField: '_id',
+            as: 'promotion.branch',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            promotion: {
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$promotion.branch', 0] },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            subRegion: '$$branch.subRegion',
+                            retailSegment: '$$branch.retailSegment',
+                        },
+                    },
+                },
+                createdBy: '$promotion.createdBy',
+            },
         },
     });
 
     if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
         pipeline.push({
             $match: {
-                _id: { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                'promotion.branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
             },
         });
     }
+
+    if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+        pipeline.push({
+            $match: {
+                'promotion.branch.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
+            },
+        });
+    }
+
+    pipeline.push({
+        $group: {
+            _id: '$promotion.branch.subRegion',
+            promotion: { $first: '$_id' },
+            count: { $sum: 1 },
+        },
+    });
 
     pipeline.push({
         $lookup: {

@@ -146,6 +146,14 @@ module.exports = (pipeline, queryFilter) => {
         });
     }
 
+    if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+        pipeline.push({
+            $match: {
+                'domain.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
+            },
+        });
+    }
+
     pipeline.push({
         $lookup: {
             from: 'domains',

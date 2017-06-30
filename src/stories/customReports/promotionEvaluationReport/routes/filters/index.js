@@ -16,17 +16,19 @@ module.exports = (req, res, next) => {
     const timeFilterSchema = {
         type: 'object',
         properties: {
-            from: {
-                type: 'string',
-            },
-            to: {
-                type: 'string',
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
             },
         },
-        required: [
-            'from',
-            'to',
-        ],
     };
 
     const queryRun = (personnel, callback) => {
@@ -42,7 +44,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate(timeFilter);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
