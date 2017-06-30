@@ -12,7 +12,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,

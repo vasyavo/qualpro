@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
