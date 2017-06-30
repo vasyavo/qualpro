@@ -44,7 +44,7 @@ module.exports = (req, res, next) => {
         const pipeline = [];
 
         if (timeFilter) {
-            const timeFilterValidate = ajv.compile(timeFilterSchema);
+            const timeFilterValidate = ajv.compile({ timeFrames: timeFilter });
             const timeFilterValid = timeFilterValidate(timeFilter);
 
             if (!timeFilterValid) {
