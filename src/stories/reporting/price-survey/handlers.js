@@ -1,6 +1,7 @@
 const async = require('async');
 const _ = require('lodash');
 const logger = require('../../../utils/logger');
+const getMedian = require('../../../utils/getMedian');
 const ActivityLog = require('./../../push-notifications/activityLog');
 const access = require('../../../helpers/access')();
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
@@ -1029,23 +1030,9 @@ const getAll = (req, res, next) => {
             response.data.map(function (priceSurvey) {
                 return priceSurvey.brands.map(function (brand) {
                     return brand.variants.map(function (variant) {
-                        variant.arrayOfPrice = variant.arrayOfPrice.sort(function(a, b) { return a - b; });
-                        const half = Math.floor(variant.arrayOfPrice.length / 2);
-
-                        if (variant.arrayOfPrice.length % 2) {
-                            variant.totalMedPrice = variant.arrayOfPrice[half];
-                        } else {
-                            variant.totalMedPrice = (variant.arrayOfPrice[half - 1] + variant.arrayOfPrice[half]) / 2.0;
-                        }
+                        variant.totalMedPrice = getMedian(variant.arrayOfPrice);
                         variant.branches = variant.branches.map(function (branch) {
-                            branch.price = branch.price.sort(function(a, b) { return a - b; });
-                            const half = Math.floor(branch.price.length / 2);
-
-                            if (branch.price.length % 2) {
-                                branch.medPrice = branch.price[half];
-                            } else {
-                                branch.medPrice = (branch.price[half - 1] + branch.price[half]) / 2.0;
-                            }
+                            branch.medPrice = getMedian(branch.price);
                             return branch;
                         });
                         return variant;

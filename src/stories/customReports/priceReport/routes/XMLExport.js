@@ -47,7 +47,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.ITEM,
         ],
     };
-
+    let currentLanguage;
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
@@ -108,6 +108,8 @@ module.exports = (req, res, next) => {
             delete $generalMatch.$or;
         }
 
+        currentLanguage = personnel.currentLanguage || 'en';
+
         pipeline.push({
             $match: $generalMatch,
         });
@@ -131,7 +133,37 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: '$date',
                 country: { $first: '$payload.country' },
+                category: { $first: '$payload.category' },
+                variant: { $first: '$payload.variant' },
+                packing: { $first: '$payload.packing' },
                 ppt: { $avg: '$payload.ppt' },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: 'country',
+                foreignField: '_id',
+                as: 'country',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
             },
         });
 
@@ -139,7 +171,10 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 0,
                 date: '$_id',
-                country: '$country',
+                country: { $arrayElemAt: ['$country', 0] },
+                category: { $arrayElemAt: ['$category', 0] },
+                variant: { $arrayElemAt: ['$variant', 0] },
+                packing: '$packing',
                 price: '$ppt',
             },
         });
@@ -192,6 +227,10 @@ module.exports = (req, res, next) => {
             <table>
                 <thead>
                     <tr>
+                        <th>Country</th>
+                        <th>Product</th>
+                        <th>Variant</th>
+                        <th>Size</th>
                         <th>Price</th>
                         <th>Date</th>
                     </tr>
@@ -200,12 +239,16 @@ module.exports = (req, res, next) => {
                     ${result.map(item => {
                         const itemDate = moment(item.date).format('MMMM, YYYY');
                         const currentCountry = currency.defaultData.find((country) => {
-                            return country._id.toString() === item.country.toString();
+                            return country._id.toString() === item.country._id.toString();
                         });
                         const itemPrice = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
 
                         return `
                             <tr>
+                                <td>${item.country.name[currentLanguage]}</td>
+                                <td>${item.category.name[currentLanguage]}</td>
+                                <td>${item.variant.name[currentLanguage]}</td>
+                                <td>${item.packing}</td>
                                 <td>${itemPrice}</td>
                                 <td>${itemDate}</td>
                             </tr>

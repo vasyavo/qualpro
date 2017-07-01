@@ -7,6 +7,7 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
+const getMedian = require('./../../../../utils/getMedian');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 const currency = require('../../utils/currency');
@@ -188,6 +189,7 @@ module.exports = (req, res, next) => {
                 min: { $min: '$items.price' },
                 max: { $max: '$items.price' },
                 avg: { $avg: '$items.price' },
+                arrayOfPrice: { $push: '$items.price' },
                 country: { $first: '$country' },
                 region: { $first: '$region' },
                 subRegion: { $first: '$subRegion' },
@@ -226,6 +228,7 @@ module.exports = (req, res, next) => {
                 min: '$setData.min',
                 max: '$setData.max',
                 avg: '$setData.avg',
+                arrayOfPrice: '$setData.arrayOfPrice',
                 country: '$setData.country',
                 region: '$setData.region',
                 subRegion: '$setData.subRegion',
@@ -321,6 +324,7 @@ module.exports = (req, res, next) => {
                 min: 1,
                 max: 1,
                 avg: 1,
+                arrayOfPrice: 1,
                 total: 1,
                 size: '$size',
                 country: { $arrayElemAt: ['$country', 0] },
@@ -441,9 +445,11 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country._id.toString();
             });
+            item.med = getMedian(item.arrayOfPrice);
             item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
             item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
             item.max = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
+            item.med = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
         });
 
         res.status(200).send(response);
