@@ -53,6 +53,12 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            'category.name.en': 1,
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: '$category',
             count: { $sum: 1 },
