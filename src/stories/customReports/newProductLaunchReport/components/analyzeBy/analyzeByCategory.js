@@ -3,8 +3,12 @@ module.exports = (pipeline) => {
         $project: {
             category: 1,
             customCategory: {
-                en: '$category_name.en',
-                ar: '$category_name.ar',
+                en: {
+                    $toUpper: '$category_name.en',
+                },
+                ar: {
+                    $toUpper: '$category_name.ar',
+                },
             },
         },
     });
