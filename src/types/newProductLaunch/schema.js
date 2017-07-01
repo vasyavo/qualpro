@@ -19,6 +19,9 @@ const schema = new Schema({
         ref: CONTENT_TYPES.CATEGORY,
         default: null,
     },
+    /*
+    * todo: if prop "category_name" means custom category (product) filled then prop "category" will be undefined.
+    * */
     category_name: {
         en: {
             type: String,

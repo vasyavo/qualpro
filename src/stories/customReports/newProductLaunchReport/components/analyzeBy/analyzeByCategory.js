@@ -1,15 +1,18 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $group: {
-            _id: '$category',
-            count: { $sum: 1 },
+        $project: {
+            category: 1,
+            customCategory: {
+                en: '$category_name.en',
+                ar: '$category_name.ar',
+            },
         },
     });
 
     pipeline.push({
         $lookup: {
             from: 'categories',
-            localField: '_id',
+            localField: 'category',
             foreignField: '_id',
             as: 'category',
         },
@@ -17,22 +20,38 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
-            _id: 1,
-            count: 1,
-            domain: {
-                $let: {
-                    vars: {
-                        category: { $arrayElemAt: ['$category', 0] },
+            category: {
+                $cond: {
+                    if: {
+                        $gt: [{
+                            $size: '$category',
+                        }, 0],
                     },
-                    in: {
-                        _id: '$$category._id',
-                        name: {
-                            en: '$$category.name.en',
-                            ar: '$$category.name.ar',
+                    then: {
+                        $let: {
+                            vars: {
+                                category: { $arrayElemAt: ['$category', 0] },
+                            },
+                            in: {
+                                name: {
+                                    en: '$$category.name.en',
+                                    ar: '$$category.name.ar',
+                                },
+                            },
                         },
+                    },
+                    else: {
+                        name: '$customCategory',
                     },
                 },
             },
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$category',
+            count: { $sum: 1 },
         },
     });
 
@@ -42,7 +61,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$domain.name' },
+            labels: { $push: '$_id.name' },
         },
     });
 };
