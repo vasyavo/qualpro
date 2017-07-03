@@ -135,6 +135,7 @@ module.exports = (req, res, next) => {
                 country: { $first: '$payload.country' },
                 category: { $first: '$payload.category' },
                 variant: { $first: '$payload.variant' },
+                name: { $first: '$payload.name' },
                 packing: { $first: '$payload.packing' },
                 ppt: { $avg: '$payload.ppt' },
             },
@@ -170,6 +171,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 0,
+                name: 1,
                 date: '$_id',
                 country: { $arrayElemAt: ['$country', 0] },
                 category: { $arrayElemAt: ['$category', 0] },
@@ -248,7 +250,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${item.variant.name[currentLanguage]}</td>
-                                <td>${item.packing}</td>
+                                <td>${item.name[currentLanguage]}</td>
                                 <td>${itemPrice}</td>
                                 <td>${itemDate}</td>
                             </tr>
