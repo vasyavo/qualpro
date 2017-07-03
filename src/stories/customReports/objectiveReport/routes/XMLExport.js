@@ -9,6 +9,7 @@ const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const emojiStrip = require('emoji-strip');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -241,6 +242,7 @@ module.exports = (req, res, next) => {
                 title: '$title',
                 createdBy: '$createdBy',
                 priority: '$priority',
+                description: '$description',
                 status: '$status',
                 objectiveType: '$objectiveType',
                 form: '$form',
@@ -374,6 +376,7 @@ module.exports = (req, res, next) => {
                         <th>Objective Type</th>
                         <th>Assigned To</th>
                         <th>Assigned By</th>
+                        <th>Description</th>
                         <th>Form Type</th>
                         <th>Status</th>
                         <th>Priority</th>
@@ -393,6 +396,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.objectiveType}</td>
                                 <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
                                 <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${emojiStrip(item.description[currentLanguage])}</td>
                                 <td>${item.form ? item.form.contentType : ''}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>
