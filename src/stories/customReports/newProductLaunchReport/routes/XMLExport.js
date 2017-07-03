@@ -517,6 +517,7 @@ module.exports = (req, res, next) => {
                         <th>Customer</th>
                         <th>Branch</th>
                         <th>Publisher</th>
+                        <th>Position</th>
                         <th>Brand</th>
                         <th>Product</th>
                         <th>Variant</th>
@@ -543,7 +544,8 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment[currentLanguage]}</td>
                                 <td>${item.outlet[currentLanguage]}</td>
                                 <td>${item.branch[currentLanguage]}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position[currentLanguage]}</td>
                                 <td>${item.brand.name}</td>
                                 <td>${item.category ? item.category[currentLanguage] : ''}</td>
                                 <td>${item.variant.name}</td>
