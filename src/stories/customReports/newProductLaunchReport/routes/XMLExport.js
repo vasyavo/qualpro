@@ -537,7 +537,7 @@ module.exports = (req, res, next) => {
                         const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
-                                <td>${item.country[currentLanguage]}</td>
+                                <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region[currentLanguage]}</td>
                                 <td>${item.subRegion[currentLanguage]}</td>
                                 <td>${item.retailSegment[currentLanguage]}</td>
