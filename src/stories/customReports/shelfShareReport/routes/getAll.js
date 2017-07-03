@@ -233,12 +233,9 @@ module.exports = (req, res, next) => {
                         avgPercent: '$avgPercent',
                     },
                 },
-                totalMinLength: { $min: '$minLength' },
-                totalMaxLength: { $max: '$maxLength' },
-                totalAvgLength: { $avg: '$avgLength' },
-                totalMinPercent: { $min: '$minPercent' },
-                totalMaxPercent: { $max: '$maxPercent' },
-                totalAvgPercent: { $avg: '$avgPercent' },
+                totalMinLength: { $sum: '$minLength' },
+                totalMaxLength: { $sum: '$maxLength' },
+                totalAvgLength: { $sum: '$avgLength' },
             },
         });
 
@@ -264,9 +261,6 @@ module.exports = (req, res, next) => {
                 totalMinLength: '$setShelfShare.totalMinLength',
                 totalMaxLength: '$setShelfShare.totalMaxLength',
                 totalAvgLength: '$setShelfShare.totalAvgLength',
-                totalMinPercent: '$setShelfShare.totalMinPercent',
-                totalMaxPercent: '$setShelfShare.totalMaxPercent',
-                totalAvgPercent: '$setShelfShare.totalAvgPercent',
                 total: 1,
             },
         });
@@ -295,9 +289,6 @@ module.exports = (req, res, next) => {
                 totalMinLength: 1,
                 totalMaxLength: 1,
                 totalAvgLength: 1,
-                totalMinPercent: 1,
-                totalMaxPercent: 1,
-                totalAvgPercent: 1,
                 total: 1,
                 name: {
                     $let: {
@@ -349,11 +340,8 @@ module.exports = (req, res, next) => {
             });
 
             item.totalMinLength = parseFloat(item.totalMinLength).toFixed(2);
-            item.totalMinPercent = parseFloat(item.totalMinPercent).toFixed(2);
             item.totalAvgLength = parseFloat(item.totalAvgLength).toFixed(2);
-            item.totalAvgPercent = parseFloat(item.totalAvgPercent).toFixed(2);
             item.totalMaxLength = parseFloat(item.totalMaxLength).toFixed(2);
-            item.totalMaxPercent = parseFloat(item.totalMaxPercent).toFixed(2);
         });
 
         res.status(200).send(response);
