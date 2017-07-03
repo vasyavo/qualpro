@@ -122,12 +122,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        pipeline.push({
-            $addFields: {
-                ppt: { $divide: ['$ppt', 100] },
-            },
-        });
-
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {

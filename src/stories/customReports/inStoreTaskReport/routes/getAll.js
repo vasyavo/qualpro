@@ -375,6 +375,15 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'attachments',
+                foreignField: '_id',
+                as: 'attachments',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
                 title: 1,
@@ -400,10 +409,10 @@ module.exports = (req, res, next) => {
                 comments: {
                     $map: {
                         input: '$comments',
-                        as: 'item',
+                        as: 'comment',
                         in: {
-                            _id: '$$item._id',
-                            body: '$$item.body',
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
                             attachments: {
                                 $map: {
                                     input: {
@@ -411,12 +420,7 @@ module.exports = (req, res, next) => {
                                             input: '$attachments',
                                             as: 'attachment',
                                             cond: {
-                                                $ne: [
-                                                    {
-                                                        $setIntersection: [['$attachment._id'], '$item.attachments'],
-                                                    },
-                                                    [],
-                                                ],
+                                                $setIsSubset: [['$$attachment._id'], '$$comment.attachments'],
                                             },
                                         },
                                     },
@@ -432,15 +436,6 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'files',
-                localField: 'attachments',
-                foreignField: '_id',
-                as: 'attachments',
             },
         });
 
