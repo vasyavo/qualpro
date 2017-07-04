@@ -286,12 +286,9 @@ module.exports = (req, res, next) => {
                         avgPercent: '$avgPercent',
                     },
                 },
-                totalMinLength: { $min: '$minLength' },
-                totalMaxLength: { $max: '$maxLength' },
-                totalAvgLength: { $avg: '$avgLength' },
-                totalMinPercent: { $min: '$minPercent' },
-                totalMaxPercent: { $max: '$maxPercent' },
-                totalAvgPercent: { $avg: '$avgPercent' },
+                totalMinLength: { $sum: '$minLength' },
+                totalMaxLength: { $sum: '$maxLength' },
+                totalAvgLength: { $sum: '$avgLength' },
             },
         });
 
@@ -302,9 +299,6 @@ module.exports = (req, res, next) => {
                 totalMinLength: 1,
                 totalMaxLength: 1,
                 totalAvgLength: 1,
-                totalMinPercent: 1,
-                totalMaxPercent: 1,
-                totalAvgPercent: 1,
             },
         });
 
@@ -378,9 +372,6 @@ module.exports = (req, res, next) => {
                 totalMinLength: 1,
                 totalMaxLength: 1,
                 totalAvgLength: 1,
-                totalMinPercent: 1,
-                totalMaxPercent: 1,
-                totalAvgPercent: 1,
                 country: {
                     $let: {
                         vars: {
@@ -520,9 +511,9 @@ module.exports = (req, res, next) => {
                                 <tr>
                                     <td></td>
                                     <td>TOTAL</td>
-                                    <td>${parseFloat(product.totalMinLength).toFixed(2) + ' / ' + parseFloat(product.totalMinPercent).toFixed(2)}</td>
-                                    <td>${parseFloat(product.totalMaxLength).toFixed(2) + ' / ' + parseFloat(product.totalMaxPercent).toFixed(2)}</td>
-                                    <td>${parseFloat(product.totalAvgLength).toFixed(2) + ' / ' + parseFloat(product.totalAvgPercent).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalMinLength).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalMaxLength).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalAvgLength).toFixed(2)}</td>
                                 </tr>
                         `;    
                     }).join('')}
