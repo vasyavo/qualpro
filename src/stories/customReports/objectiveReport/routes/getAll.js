@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
@@ -42,7 +43,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'assignedToPersonnel',
         ];
         const pipeline = [];
 
@@ -119,6 +120,16 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+        if (queryFilter.assignedToPersonnel && queryFilter.assignedToPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    assignedTo: {
+                        $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
             });
         }
 
