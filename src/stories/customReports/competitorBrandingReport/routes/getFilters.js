@@ -67,8 +67,7 @@ module.exports = (req, res, next) => {
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND,
-            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND, CONTENT_TYPES.DISPLAY_TYPE,
         ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -147,6 +146,16 @@ module.exports = (req, res, next) => {
                 $match: {
                     'createdBy.user.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            pipeline.push({
+                $match: {
+                    category: {
+                        $in: queryFilter[CONTENT_TYPES.CATEGORY],
                     },
                 },
             });
