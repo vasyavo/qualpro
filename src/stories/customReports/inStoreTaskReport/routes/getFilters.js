@@ -48,6 +48,12 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
+
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
             const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
