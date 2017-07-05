@@ -77,6 +77,7 @@ module.exports = (pipeline) => {
                         country: { $arrayElemAt: ['$country', 0] },
                     },
                     in: {
+                        _id: '$$country._id',
                         name: {
                             en: '$$country.name.en',
                             ar: '$$country.name.ar',
@@ -90,6 +91,7 @@ module.exports = (pipeline) => {
                         region: { $arrayElemAt: ['$region', 0] },
                     },
                     in: {
+                        _id: '$$region._id',
                         name: {
                             en: '$$region.name.en',
                             ar: '$$region.name.ar',
@@ -103,6 +105,7 @@ module.exports = (pipeline) => {
                         subRegion: { $arrayElemAt: ['$subRegion', 0] },
                     },
                     in: {
+                        _id: '$$subRegion._id',
                         name: {
                             en: '$$subRegion.name.en',
                             ar: '$$subRegion.name.ar',
@@ -116,6 +119,7 @@ module.exports = (pipeline) => {
                         retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
                     },
                     in: {
+                        _id: '$$retailSegment._id',
                         name: {
                             en: '$$retailSegment.name.en',
                             ar: '$$retailSegment.name.ar',
@@ -129,6 +133,7 @@ module.exports = (pipeline) => {
                         outlet: { $arrayElemAt: ['$outlet', 0] },
                     },
                     in: {
+                        _id: '$$outlet._id',
                         name: {
                             en: '$$outlet.name.en',
                             ar: '$$outlet.name.ar',
@@ -142,6 +147,7 @@ module.exports = (pipeline) => {
                         branch: { $arrayElemAt: ['$branch', 0] },
                     },
                     in: {
+                        _id: '$$branch._id',
                         name: {
                             en: '$$branch.name.en',
                             ar: '$$branch.name.ar',

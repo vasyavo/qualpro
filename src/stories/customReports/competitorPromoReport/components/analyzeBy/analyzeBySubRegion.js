@@ -47,6 +47,7 @@ module.exports = (pipeline) => {
                         country: { $arrayElemAt: ['$country', 0] },
                     },
                     in: {
+                        _id: '$$country._id',
                         name: {
                             en: '$$country.name.en',
                             ar: '$$country.name.ar',
@@ -60,6 +61,7 @@ module.exports = (pipeline) => {
                         region: { $arrayElemAt: ['$region', 0] },
                     },
                     in: {
+                        _id: '$$region._id',
                         name: {
                             en: '$$region.name.en',
                             ar: '$$region.name.ar',
@@ -73,6 +75,7 @@ module.exports = (pipeline) => {
                         subRegion: { $arrayElemAt: ['$subRegion', 0] },
                     },
                     in: {
+                        _id: '$$subRegion._id',
                         name: {
                             en: '$$subRegion.name.en',
                             ar: '$$subRegion.name.ar',
