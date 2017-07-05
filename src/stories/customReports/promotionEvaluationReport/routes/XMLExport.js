@@ -113,6 +113,10 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$user._id',
+                                name: {
+                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                },
                                 position: '$$user.position',
                             },
                         },
@@ -131,6 +135,15 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'position',
+            },
+        });
 
         pipeline.push({
             $lookup: {
@@ -467,7 +480,21 @@ module.exports = (req, res, next) => {
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 createdBy: {
-                    user: 1,
+                    user: {
+                        _id: 1,
+                        name: 1,
+                        position: {
+                            $let: {
+                                vars: {
+                                    position: { $arrayElemAt: ['$position', 0] },
+                                },
+                                in: {
+                                    _id: '$$position._id',
+                                    name: '$$position.name',
+                                },
+                            },
+                        },
+                    },
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
                 displayType: { $arrayElemAt: ['$displayType', 0] },
@@ -508,6 +535,8 @@ module.exports = (req, res, next) => {
                         <th>Trade channel</th>
                         <th>Customer</th>
                         <th>Branch</th>
+                        <th>Employee</th>
+                        <th>Position</th>
                         <th>Promotion description</th>
                         <th>PPT, AED or $</th>
                         <th>Promotion Start</th>
@@ -534,6 +563,9 @@ module.exports = (req, res, next) => {
                                 <td>${item.subRegion.name[currentLanguage]}</td>
                                 <td>${item.retailSegment.name[currentLanguage]}</td>
                                 <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.promotionType[currentLanguage])}</td>
                                 <td>${itemPrice}</td>
