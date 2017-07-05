@@ -389,7 +389,7 @@ module.exports = (req, res, next) => {
                 objectiveType: 1,
                 createdByPersonnels: 1,
                 positions: {
-                    _id: 1,
+                    _ids: 1,
                     name: 1,
                 },
                 countries: {
@@ -464,6 +464,36 @@ module.exports = (req, res, next) => {
             branches: [],
             assignedToPersonnels: [],
         };
+
+        const objectiveTypes = [{
+            _id: 'weekly',
+            name: {
+                en: 'Weekly Company Objective',
+                ar: '',
+            },
+        }, {
+            _id: 'individual',
+            name: {
+                en: 'Individual Objective',
+                ar: '',
+            },
+        }, {
+            _id: 'monthly',
+            name: {
+                en: 'Monthly Company Objective',
+                ar: '',
+            },
+        }, {
+            _id: 'country',
+            name: {
+                en: 'Country Objective',
+                ar: '',
+            },
+        }];
+
+        response.objectiveType = objectiveTypes.filter((item) => {
+            return response.objectiveType.indexOf(item._id) > -1;
+        });
 
         response.analyzeBy = [
             {
