@@ -420,6 +420,9 @@ module.exports = (req, res, next) => {
                 country: 1,
                 region: 1,
                 subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
                 location: {
                     $concat: [
                         '$country.name.en',
@@ -469,7 +472,11 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
+                        <th>Branch</th>
                         <th>Employee</th>
+                        <th>Position</th>
                         <th>Brand</th>
                         <th>Product</th>
                         <th>Promotion (description)</th>
@@ -493,14 +500,18 @@ module.exports = (req, res, next) => {
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
                                 <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
                                 <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${item.promotion}</td>
                                 <td>${item.packing}</td>
-                                <td>${moment(item.expiry).format('MMMM, YYYY')}</td>
-                                <td>${moment(item.dateStart).format('MMMM, YYYY')}</td>
-                                <td>${moment(item.dateEnd).format('MMMM, YYYY')}</td>
+                                <td>${moment(item.expiry).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${item.origin.name ? item.origin.name[currentLanguage] : null}</td>
                                 <td>${price}</td>
                                 <td>${item.displayType[currentLanguage]}</td>
