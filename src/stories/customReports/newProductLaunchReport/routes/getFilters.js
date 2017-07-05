@@ -494,6 +494,7 @@ module.exports = (req, res, next) => {
 
         response.distributors = response.distributors
             .map(item => {
+                item.en = item.en.trim();
                 return {
                     en: sanitizeHtml(item.en),
                     ar: sanitizeHtml(item.ar),
