@@ -9,6 +9,7 @@ const QuestionnaryModel = require('./../../../../types/questionnaries/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -528,6 +529,17 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(dataItem => {
+            dataItem.respondents.forEach(respondent => {
+                respondent.items.forEach(item => {
+                    item.answer = {
+                        en: sanitizeHtml(item.answer.en),
+                        ar: sanitizeHtml(item.answer.ar),
+                    };
+                });
+            });
+        });
 
         res.status(200).send(response);
     });
