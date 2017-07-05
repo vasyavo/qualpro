@@ -51,6 +51,12 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
+
         currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
