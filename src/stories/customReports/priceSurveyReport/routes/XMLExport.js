@@ -7,6 +7,7 @@ const PriceSurveyModel = require('./../../../../types/priceSurvey/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
+const getMedian = require('./../../../../utils/getMedian');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 const currency = require('../../utils/currency');
@@ -189,6 +190,7 @@ module.exports = (req, res, next) => {
                 min: { $min: '$items.price' },
                 max: { $max: '$items.price' },
                 avg: { $avg: '$items.price' },
+                arrayOfPrice: { $push: '$items.price' },
                 country: { $first: '$country' },
                 region: { $first: '$region' },
                 subRegion: { $first: '$subRegion' },
@@ -204,6 +206,7 @@ module.exports = (req, res, next) => {
                 size: '$_id.size',
                 category: '$_id.category',
                 variant: '$_id.variant',
+                arrayOfPrice: 1,
                 min: 1,
                 max: 1,
                 avg: 1,
@@ -302,6 +305,7 @@ module.exports = (req, res, next) => {
                 max: 1,
                 avg: 1,
                 size: '$size',
+                arrayOfPrice: 1,
                 country: { $arrayElemAt: ['$country', 0] },
                 region: { $arrayElemAt: ['$region', 0] },
                 subRegion: { $arrayElemAt: ['$subRegion', 0] },
@@ -426,6 +430,7 @@ module.exports = (req, res, next) => {
                         <th>Avg</th>
                         <th>Max</th>
                         <th>Min</th>
+                        <th>Med</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -433,6 +438,8 @@ module.exports = (req, res, next) => {
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
+                        item.med = getMedian(item.arrayOfPrice);
+                        const medPrice = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
                         const minPrice = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
                         const avgPrice = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
                         const maxPrice = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
@@ -451,6 +458,7 @@ module.exports = (req, res, next) => {
                                 <td>${avgPrice}</td>
                                 <td>${maxPrice}</td>
                                 <td>${minPrice}</td>
+                                <td>${medPrice}</td>
                             </tr>
                         `;
                     }).join('')}
