@@ -88,13 +88,14 @@ define([
 
                 model.on('competitor-promotion-edited', function (response) {
                     var view = that.$el;
+                    var currentLanguage = App.currentUser.currentLanguage;
 
                     response.dateStart = moment.utc(response.dateStart).format('DD.MM.YYYY');
                     response.dateEnd = moment.utc(response.dateEnd).format('DD.MM.YYYY');
                     response.expiry = moment.utc(response.expiry).format('DD.MM.YYYY');
 
                     that.model.set(response, {
-                        merge: true
+                        merge: true,
                     });
 
                     view.find('#promotion').html(data.promotion);
@@ -114,10 +115,21 @@ define([
                     }
 
                     var displayTypeString = response.displayType.map(function (item) {
-                        return item.name[App.currentUser.currentLanguage];
+                        return item.name[currentLanguage];
                     }).join(', ');
-
                     view.find('#display-type').html(displayTypeString);
+
+                    var categoryString = response.category.map(function (item) {
+                        return item.name[currentLanguage];
+                    }).join(', ');
+                    view.find('#category').html(categoryString);
+
+                    var originString = response.origin.map(function (item) {
+                        return item.name[currentLanguage];
+                    }).join(', ');
+                    view.find('#origin').html(originString);
+
+                    view.find('#brand').html(response.brand.name[currentLanguage]);
 
                     that.editView.$el.dialog('close').dialog('destroy').remove();
 
@@ -414,6 +426,11 @@ define([
 
         render: function () {
             var jsonModel = this.model.toJSON();
+
+            if (!jsonModel.parsed) {
+                jsonModel = this.model.parse(jsonModel);
+            }
+
             var formString;
             var self = this;
             var currentConfig;
@@ -437,9 +454,10 @@ define([
             && App.currentUser.workAccess);
 
             formString = this.$el.html(this.template({
-                model      : jsonModel,
+                model: jsonModel,
                 translation: self.translation,
                 permittedToEdit: currentUserPermittedToEdit,
+                currentLanguage: App.currentUser.currentLanguage,
             }));
 
             this.$el = formString.dialog({

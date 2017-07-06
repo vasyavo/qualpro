@@ -298,7 +298,13 @@ var CompetitorBranding = function() {
                 user: userId,
                 date: Date.now()
             };
-            CompetitorPromotionModel.findByIdAndUpdate(id, body, { new: true }).populate('displayType').exec(callback);
+            CompetitorPromotionModel
+                .findByIdAndUpdate(id, body, { new: true })
+                .populate('displayType')
+                .populate('category')
+                .populate('origin')
+                .populate('brand')
+                .exec(callback);
         };
 
         async.waterfall([

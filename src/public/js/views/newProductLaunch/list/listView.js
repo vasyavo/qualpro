@@ -47,6 +47,7 @@ define(function(require) {
             this.preView.on('update-list-view', function () {
                 that.collection.getPage(that.collection.currentPage, {
                     filter: that.filter,
+                    reset: true,
                 });
             });
         },

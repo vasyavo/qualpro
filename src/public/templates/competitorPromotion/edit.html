@@ -9,7 +9,7 @@
                     <div class="table">
                         <div class="row">
                             <div class="cell alignTop">
-                                <span><%= translation.rsp %></span>
+                                <span><%- translation.rsp %></span>
                             </div>
                             <div class="cell mandatory">
                                 <input type="text"
@@ -23,7 +23,7 @@
                         </div>
                         <div class="row">
                             <div class="cell alignTop">
-                                <span><%= translation.weight %></span>
+                                <span><%- translation.weight %></span>
                             </div>
                             <div class="cell mandatory">
                                 <input type="text"
@@ -33,6 +33,30 @@
                                        required
                                        maxlength="32"
                                        placeholder="Input opening stock"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.category %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="categoryDd" href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.brand %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="brandDd" href="javascript:;"></a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+                                <span><%- translation.origin %></span>
+                            </div>
+                            <div class="cell mandatory">
+                                <a id="originDd" href="javascript:;"></a>
                             </div>
                         </div>
                         <div class="row">
