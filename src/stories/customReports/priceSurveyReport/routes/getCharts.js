@@ -8,6 +8,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -522,7 +523,10 @@ module.exports = (req, res, next) => {
         }
 
         response.charts.forEach((chart) => {
-            chart.datasets[0].data = chart.datasets[0].data.map(price => price.toFixed(2));
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === chart.country._id.toString();
+            });
+            chart.datasets[0].data = chart.datasets[0].data.map(price => parseFloat(price * currentCountry.currencyInUsd).toFixed(2));
         });
 
         res.status(200).send(response);
