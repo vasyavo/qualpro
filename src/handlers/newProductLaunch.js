@@ -277,9 +277,19 @@ var NewProductLaunch = function() {
         const queryRun = (body, callback) => {
             body.editedBy = {
                 user: userId,
-                date: Date.now()
+                date: Date.now(),
             };
-            NewProductLaunchModel.findByIdAndUpdate(id, body, { new: true }).populate('origin').populate('displayType').exec(callback)
+            body.brand = {
+                _id: body.brand,
+            };
+            NewProductLaunchModel
+                .findByIdAndUpdate(id, body, { new: true })
+                .populate('displayType')
+                .populate('category')
+                .populate('origin')
+                .populate('brand._id')
+                .lean()
+                .exec(callback);
         };
 
         async.waterfall([
@@ -289,6 +299,12 @@ var NewProductLaunch = function() {
 
             (body, cb) => {
                 queryRun(body, cb);
+            },
+
+            (body, cb) => {
+                body.brand = body.brand._id;
+
+                cb(null, body);
             },
 
         ], (err, body) => {
