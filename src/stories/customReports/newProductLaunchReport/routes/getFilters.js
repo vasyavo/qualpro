@@ -502,6 +502,13 @@ module.exports = (req, res, next) => {
             })
             .filter(item => item.en); // todo: item should appear if it filled in current language
 
+        response.variants = response.variants.map(item => {
+            return {
+                _id: item, // like ID
+                name: sanitizeHtml(item),
+            };
+        });
+
         response.analyzeBy = [
             {
                 name: {
