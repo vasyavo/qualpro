@@ -79,6 +79,7 @@ define([
             });
 
             this.editView.on('edit-competitor-branding-item', function (data, competitorBrandingId) {
+                var currentLanguage = App.currentUser.currentLanguage;
                 var model = new CompetitorBrandingModel();
 
                 model.edit(competitorBrandingId, data);
@@ -99,11 +100,17 @@ define([
                     }
 
                     var displayTypeString = response.displayType.map(function (item) {
-                        return item.name[App.currentUser.currentLanguage];
+                        return item.name[currentLanguage];
                     }).join(', ');
-
                     view.find('#display-type').html(displayTypeString);
-                    view.find('#description').html(data.description[App.currentUser.currentLanguage]);
+
+                    var categoryString = response.category.map(function (item) {
+                        return item.name[currentLanguage];
+                    }).join(', ');
+                    view.find('#category').html(categoryString);
+
+                    view.find('#description').html(data.description[currentLanguage]);
+                    view.find('#brand').html(response.brand.name[currentLanguage]);
 
                     that.trigger('update-list-view');
 
@@ -403,6 +410,11 @@ define([
 
         render: function () {
             var jsonModel = this.model.toJSON();
+
+            if (!jsonModel.parsed) {
+                jsonModel = this.model.parse(jsonModel);
+            }
+
             var formString;
             var self = this;
             var currentConfig;

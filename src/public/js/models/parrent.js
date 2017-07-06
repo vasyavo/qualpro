@@ -124,6 +124,8 @@ function (Backbone, custom, Cookies, FilesCollection) {
                 this.modelParse(model);
             }
 
+            model.parsed = true;
+
             return model;
         }
     });

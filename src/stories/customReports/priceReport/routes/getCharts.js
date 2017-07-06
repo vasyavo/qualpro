@@ -156,6 +156,12 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $sort: {
+                _id: 1,
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 label: { $first: '$item.name' },

@@ -28,7 +28,7 @@
                 </div>
                 <div class="fontSmall fontGray textContainer">
                     <div <%= model.variant.name.currentLanguage ? '' : 'class="newBrand"' %>><%= translation.variant + ': ' + (model.variant.name.currentLanguage || model.variant.name) %></div>
-                    <div <%= model.brand.name.currentLanguage ? '' : 'class="newBrand"' %>><%= translation.brand + ': ' + (model.brand.name.currentLanguage || model.brand.name) %></div>
+                    <div <%= (model.brand.name && model.brand.name.currentLanguage) ? '' : 'class="newBrand"' %>><%= translation.brand + ': ' + ((model.brand.name && model.brand.name.currentLanguage) || model.brand.name) %></div>
                     <div><%= translation.packaging + ': ' + model.packing %> <%- model.packingType %></div>
                 </div>
             </div>
