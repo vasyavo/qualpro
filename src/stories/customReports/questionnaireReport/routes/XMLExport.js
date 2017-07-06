@@ -355,15 +355,15 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
-                        <th>Retail Segment</th>
-                        <th>Outlet</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
                         <th>Branch</th>
                         <th>Assigned By</th>
+                        <th>Position</th>
                         <th>Assigned To</th>
                         <th>Title</th>
                         <th>Status</th>
                         <th>Count Answered</th>
-                        <th>Count Branches</th>
                         <th>Count All</th>
                         <th>Due Date</th>
                     </tr>
@@ -378,12 +378,12 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment && item.retailSegment.length ? item.retailSegment.join(', ') : ''}</td>
                                 <td>${item.outlet && item.outlet.length ? item.outlet.join(', ') : ''}</td>
                                 <td>${item.branch && item.branch.length ? item.branch.join(', ') : ''}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position.name[currentLanguage]}</td>
                                 <td>${item.assignedTo && item.assignedTo.length ? item.assignedTo.join(', ') : ''}</td>
                                 <td>${item.title[currentLanguage]}</td>
                                 <td>${item.status}</td>
                                 <td>${item.countAnswered}</td>
-                                <td>${item.countBranches}</td>
                                 <td>${item.countAll}</td>
                                 <td>${moment(item.dueDate).format('DD MMMM, YYYY')}</td>
                             </tr>

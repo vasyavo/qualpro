@@ -227,6 +227,7 @@ module.exports = (req, res, next) => {
                 variant: 1,
                 packing: 1,
                 displayType: 1,
+                additionalComment: 1,
                 price: 1,
                 origin: 1,
                 shelfLifeStart: 1,
@@ -329,6 +330,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
+                additionalComment: 1,
                 location: {
                     $concat: [
                         {
@@ -528,6 +530,7 @@ module.exports = (req, res, next) => {
                         <th>Shelf Life Start</th>
                         <th>Shelf Life End</th>
                         <th>Distributor</th>
+                        <th>Comment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -556,6 +559,7 @@ module.exports = (req, res, next) => {
                                 <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${item.distributor[currentLanguage]}</td>
+                                <td>${item.additionalComment[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}
