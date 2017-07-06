@@ -389,28 +389,101 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $group: {
-                _id: {
-                    variant: '$items.variant',
-                    branch: '$items.branches.branch',
+            $lookup: {
+                from: 'branches',
+                localField: 'items.branches.branch',
+                foreignField: '_id',
+                as: 'branch',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                            retailSegment: '$$branch.retailSegment',
+                            outlet: '$$branch.outlet',
+                            subRegion: '$$branch.subRegion',
+                        },
+                    },
                 },
-                indicator: { $last: '$items.branches.indicator' },
-                category: { $first: '$items.category' },
-                objective: { $first: '$objective' },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'retailSegments',
+                localField: 'branch.retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                        },
+                        in: {
+                            _id: '$$retailSegment._id',
+                            name: '$$retailSegment.name',
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: 'branch.outlet',
+                foreignField: '_id',
+                as: 'outlet',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                        },
+                        in: {
+                            _id: '$$outlet._id',
+                            name: '$$outlet.name',
+                        },
+                    },
+                },
             },
         });
 
         pipeline.push({
             $group: {
-                _id: '$_id.variant',
+                _id: {
+                    _id: '$_id',
+                    variant: '$items.variant',
+                    category: '$items.category',
+                },
                 items: {
                     $push: {
-                        branch: '$_id.branch',
-                        indicator: '$indicator',
+                        branch: '$branch',
+                        indicator: '$items.branches.indicator',
+                        retailSegment: '$retailSegment',
+                        outlet: '$outlet',
+                        timestamp: '$editedBy.date',
                     },
                 },
-                category: { $first: '$category' },
                 objective: { $first: '$objective' },
+                subRegion: { $addToSet: '$branch.subRegion' },
             },
         });
 
@@ -436,8 +509,118 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'domains',
+                localField: 'setItems.subRegion',
+                foreignField: '_id',
+                as: 'subRegion',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: '$setItems._id',
+                total: 1,
+                items: '$setItems.items',
+                objective: '$setItems.objective',
+                region: '$subRegion.parent',
+                subRegion: {
+                    $reduce: {
+                        input: '$subRegion',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $setIsSubset: [['$$this.name.en'], '$$value'],
+                                },
+                                then: '$$value',
+                                else: {
+                                    $setUnion: ['$$value', ['$$this.name.en']],
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: 'region',
+                foreignField: '_id',
+                as: 'region',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                total: 1,
+                items: 1,
+                objective: 1,
+                subRegion: 1,
+                country: '$region.parent',
+                region: {
+                    $reduce: {
+                        input: '$region',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $setIsSubset: [['$$this.name.en'], '$$value'],
+                                },
+                                then: '$$value',
+                                else: {
+                                    $setUnion: ['$$value', ['$$this.name.en']],
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: 'country',
+                foreignField: '_id',
+                as: 'country',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                total: 1,
+                items: 1,
+                objective: 1,
+                subRegion: 1,
+                region: 1,
+                country: {
+                    $reduce: {
+                        input: '$country',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $setIsSubset: [['$$this.name.en'], '$$value'],
+                                },
+                                then: '$$value',
+                                else: {
+                                    $setUnion: ['$$value', ['$$this.name.en']],
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'variants',
-                localField: 'setItems._id',
+                localField: '_id.variant',
                 foreignField: '_id',
                 as: 'variant',
             },
@@ -446,7 +629,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'categories',
-                localField: 'setItems.category',
+                localField: '_id.category',
                 foreignField: '_id',
                 as: 'category',
             },
@@ -454,11 +637,61 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                _id: '$setItems._id',
+                _id: 0,
+                items: 1,
+                objective: 1,
+                location: {
+                    $concat: [
+                        {
+                            $reduce: {
+                                input: '$country',
+                                initialValue: {
+                                    $arrayElemAt: ['$country', 0],
+                                },
+                                in: {
+                                    $cond: {
+                                        if: { $eq: ['$$this', '$$value'] },
+                                        then: '$$value',
+                                        else: { $concat: ['$$value', ', ', '$$this'] },
+                                    },
+                                },
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $reduce: {
+                                input: '$region',
+                                initialValue: {
+                                    $arrayElemAt: ['$region', 0],
+                                },
+                                in: {
+                                    $cond: {
+                                        if: { $eq: ['$$this', '$$value'] },
+                                        then: '$$value',
+                                        else: { $concat: ['$$value', ', ', '$$this'] },
+                                    },
+                                },
+                            },
+                        },
+                        ' -> ',
+                        {
+                            $reduce: {
+                                input: '$subRegion',
+                                initialValue: {
+                                    $arrayElemAt: ['$subRegion', 0],
+                                },
+                                in: {
+                                    $cond: {
+                                        if: { $eq: ['$$this', '$$value'] },
+                                        then: '$$value',
+                                        else: { $concat: ['$$value', ', ', '$$this'] },
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
                 total: 1,
-                objective: '$setItems.objective',
-                items: '$setItems.items',
-                branches: '$setItems.items.branch',
                 category: {
                     $let: {
                         vars: {
@@ -485,57 +718,6 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'branches',
-                foreignField: '_id',
-                as: 'branches',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                total: 1,
-                objective: 1,
-                category: 1,
-                variant: 1,
-                items: {
-                    $map: {
-                        input: '$items',
-                        as: 'item',
-                        in: {
-                            indicator: '$$item.indicator',
-                            branch: {
-                                $let: {
-                                    vars: {
-                                        branchModel: {
-                                            $arrayElemAt: [
-                                                {
-                                                    $filter: {
-                                                        input: '$branches',
-                                                        as: 'branch',
-                                                        cond: {
-                                                            $eq: ['$$branch._id', '$$item.branch'],
-                                                        },
-                                                    },
-                                                },
-                                                0,
-                                            ],
-                                        },
-                                    },
-                                    in: {
-                                        _id: '$$branchModel._id',
-                                        name: '$$branchModel.name',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
-        pipeline.push({
             $group: {
                 _id: null,
                 total: { $first: '$total' },
@@ -543,28 +725,6 @@ module.exports = (req, res, next) => {
                     $push: '$$ROOT',
                 },
                 branches: { $push: '$items.branch' },
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                branches: {
-                    $reduce: {
-                        input: '$branches',
-                        initialValue: [],
-                        in: {
-                            $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
-                            },
-                        },
-                    },
-                },
             },
         });
 
