@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, 'assignedToPersonnel',
+            CONTENT_TYPES.POSITION, 'assignedToPersonnel', 'createdByPersonnel',
         ];
         const pipeline = [];
 
@@ -134,6 +134,16 @@ module.exports = (req, res, next) => {
                 $match: {
                     assignedTo: {
                         $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
                     },
                 },
             });

@@ -40,7 +40,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'createdByPersonnel',
         ];
         const pipeline = [];
 
@@ -117,6 +117,16 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
+                    },
+                },
             });
         }
 
