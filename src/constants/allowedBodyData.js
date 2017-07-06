@@ -1166,11 +1166,11 @@ allowedParams[CONTENT_TYPES.COMPETITORBRANDING] = {
     },
     1: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'category', 'brand', 'dateStart', 'dateEnd', 'description']
     },
     2: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'category', 'brand', 'dateStart', 'dateEnd', 'description']
     },
     3: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
@@ -1194,11 +1194,11 @@ allowedParams[CONTENT_TYPES.COMPETITORBRANDING] = {
     },
     8: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'category', 'brand', 'dateStart', 'dateEnd', 'description']
     },
     9: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'category', 'brand', 'dateStart', 'dateEnd', 'description']
     },
     10: {
         create: ['description', 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'displayType', 'dateStart', 'dateEnd'],

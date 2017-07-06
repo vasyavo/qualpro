@@ -50,6 +50,7 @@ define(function(require) {
             this.preView.on('update-list-view', function () {
                 self.collection.getPage(self.collection.currentPage, {
                     filter: self.filter,
+                    reset: true,
                 });
             });
         },

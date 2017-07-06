@@ -131,7 +131,7 @@ define(function (require) {
                                 valid = false;
                             }
 
-                            if (!data.category) {
+                            if (!data.category.length) {
                                 App.renderErrors([
                                     ERROR_MESSAGES.categoryRequired[currentLanguage]
                                 ]);
@@ -145,7 +145,7 @@ define(function (require) {
                                 valid = false;
                             }
 
-                            if (!data.origin) {
+                            if (!data.origin.length) {
                                 App.renderErrors([
                                     ERROR_MESSAGES.originRequired[currentLanguage]
                                 ]);
