@@ -563,6 +563,7 @@ module.exports = (req, res, next) => {
                 items: {
                     $push: {
                         branch: '$branch',
+                        publisher: '$createdBy.user',
                         indicator: '$items.branches.indicator',
                         retailSegment: '$retailSegment',
                         outlet: '$outlet',
@@ -670,7 +671,6 @@ module.exports = (req, res, next) => {
                 data: {
                     $push: '$$ROOT',
                 },
-                branches: { $push: '$items.branch' },
             },
         });
 
