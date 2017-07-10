@@ -1,11 +1,11 @@
-define([
-    'backbone',
-    'Underscore',
-    'jQuery',
-    'collections/parrent',
-    'models/item',
-    'constants/contentType'
-], function (Backbone, _, $, Parrent, Model, CONTENT_TYPES) {
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var Model = require('models/item');
+    var CONTENT_TYPES = require('constants/contentType');
+
     var Collection = Parrent.extend({
         model      : Model,
         url        : CONTENT_TYPES.ITEM,

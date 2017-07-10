@@ -1,26 +1,24 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'lodash',
-    'moment',
-    'views/main/main',
-    'views/login/login',
-    'views/createSuperAdmin/createSuperAdmin',
-    'views/forgotPassword/forgotPassword',
-    'dataService',
-    'custom',
-    'constants/contentType',
-    'js-cookie',
-    'views/documents/list',
-    'views/documents/topBar',
-    'views/importExport/Overview',
-    'views/importExport/TopBar',
-    'models/importExport',
-    'constants/aclRoleIndexes',
-    'services/pubnub',
-], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView, forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView, ImportExportModel, ACL_ROLES, PubNubClient) {
+define(function(require) {
+    var Backbone = require('backbone');
+    var $ = require('jQuery');
+    var _ = require('Underscore');
+    var lodash = require('lodash');
+    var moment = require('moment');
+    var mainView = require('views/main/main');
+    var LoginView = require('views/login/login');
+    var CreateSuperAdminView = require('views/createSuperAdmin/createSuperAdmin');
+    var forgotPassView = require('views/forgotPassword/forgotPassword');
+    var dataService = require('dataService');
+    var custom = require('custom');
+    var CONSTANTS = require('constants/contentType');
+    var Cookies = require('js-cookie');
+    var DocumentsListView = require('views/documents/list');
+    var DocumentsTopBarView = require('documents/topBar');
+    var ImportExportOverview = require('views/importExport/Overview');
+    var ImportExportTopBarView = require('views/importExport/TopBar');
+    var ImportExportModel = require('models/importExport');
+    var ACL_ROLES = require('constants/aclRoleIndexes');
+    var PubNubClient = require('services/pubnub');
 
     var appRouter = Backbone.Router.extend({
 

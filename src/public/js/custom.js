@@ -1,14 +1,13 @@
-define([
-    'backbone',
-    'jQuery',
-    'async',
-    'dataService',
-    'moment',
-    'constants/contentType',
-    'constants/errorMessages',
-    'constants/aclRoleIndexes',
-    'services/pubnub'
-], function (Backbone, $, async, dataService, moment, CONSTANTS, ERROR_MESSAGES, ACL_ROLE_INDEXES, PubNubClient) {
+define(function(require) {
+    var Backbone = require('backbone');
+    var $ = require('jQuery');
+    var async = require('async');
+    var dataService = require('dataService');
+    var moment = require('moment');
+    var CONSTANTS = require('constants/contentType');
+    var ERROR_MESSAGES = require('constants/errorMessages');
+    var ACL_ROLE_INDEXES = require('constants/aclRoleIndexes');
+    var PubNubClient = require('services/pubnub');
 
     var runApplication = function (success) {
         var url;

@@ -1,8 +1,8 @@
-define(function (require) {
-
+define(function(require) {
     var $ = require('jquery');
     var _ = require('underscore');
     var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
     var Model = require('models/documents');
     var CONTENT_TYPES = require('constants/contentType');
 

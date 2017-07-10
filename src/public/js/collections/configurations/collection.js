@@ -1,36 +1,35 @@
-define([
-        'collections/parrent',
-        'models/configuration',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            viewType   : null,
-            contentType: null,
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/configuration');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            url: function () {
-                return `/retailSegment/forConfigs?arrayOfId=${this.retailSegmentId}`;
-            },
+    var Collection = Parent.extend({
+        model      : Model,
+        viewType   : null,
+        contentType: null,
 
-            initialize: function () {
+        url: function () {
+            return `/retailSegment/forConfigs?arrayOfId=${this.retailSegmentId}`;
+        },
 
-            },
+        initialize: function () {
 
-            fetchFromRetailSegmentId: function (retailSegmentId) {
-                this.retailSegmentId = retailSegmentId;
-                this.fetch({reset: true});
-            },
+        },
 
-            parse: function (response) {
-                return response.configurations.map((item) => {
-                    return {
-                        _id : item._id,
-                        name: item.configuration
-                    }
-                });
-            }
-        });
+        fetchFromRetailSegmentId: function (retailSegmentId) {
+            this.retailSegmentId = retailSegmentId;
+            this.fetch({reset: true});
+        },
 
-        return Collection;
+        parse: function (response) {
+            return response.configurations.map((item) => {
+                return {
+                    _id : item._id,
+                    name: item.configuration
+                }
+            });
+        }
     });
+
+    return Collection;
+});

@@ -1,10 +1,9 @@
-﻿define([
-    'underscore',
-    'jQuery',
-    'dataService',
-    'constants/otherConstants',
-    'constants/errorMessages'
-], function (_, $, dataService, CONSTANTS, ERROR_MESSAGES) {
+﻿define(function(require) {
+    var _ = require('underscore');
+    var $ = require('jQuery');
+    var dataService = require('dataService');
+    var CONSTANTS = require('constants/otherConstants');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var canvasSize = CONSTANTS.CANVAS_SIZE;
 
     var canvasDrawing = function (options, context) {

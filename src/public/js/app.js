@@ -1,269 +1,267 @@
-// Filename: app.js
-define([
-    'underscore',
-    'jQuery',
-    'router',
-    'communication',
-    'custom',
-    'ckeditor-core',
-    'socket.io',
-    'scrollBar',
-    'rater',
-    'jquery-rater',
-    'tree',
-    'ckeditor-jquery',
-    'jquery-masked-field'
-], function (_, $, Router, Communication, Custom, CKEDITOR, io) {
-    var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+var _ = require('underscore');
+var $ = require('jQuery');
+var Router = require('router');
+var Communication = require('communication');
+var Custom = require('custom');
+var CKEDITOR = require('ckeditor-core');
+var io = require('socket.io');
 
-    _.templateHelpers = {
-        isPreview: function(value) {
-            return _.isString(value) && value.length === 24 ?
-                'preview/' + value : value;
+require('scrollBar');
+require('rater');
+require('jquery-rater');
+require('tree');
+require('ckeditor-jquery');
+require('jquery-masked-field');
+
+var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+_.templateHelpers = {
+    isPreview: function(value) {
+        return _.isString(value) && value.length === 24 ?
+            'preview/' + value : value;
+    }
+};
+
+var initialize = function () {
+    var appRouter = new Router();
+
+    $('html').click(function (e) {
+        if (!$(e.target).hasClass('filterElement')) {
+            $('.dropDownContent').removeClass('showActionDropDown');
+            $('.filterBar .dropDownContent').hide();
         }
-    };
+    });
 
-    var initialize = function () {
-        var appRouter = new Router();
-
-        $('html').click(function (e) {
-            if (!$(e.target).hasClass('filterElement')) {
-                $('.dropDownContent').removeClass('showActionDropDown');
-                $('.filterBar .dropDownContent').hide();
-            }
-        });
-
-        if (!Array.prototype.last) {
-            Array.prototype.last = function () {
-                return this[this.length - 1];
-            };
-        }
-
-        appRouter.checkLogin = Communication.checkLogin;
-        Communication.checkLogin(Custom.runApplication);
-    };
-    var applyDefaults = function () {
-        CKEDITOR.config.customConfig = '../../helpers/ckeditor/config.js';
-
-        $.fn.fadeFn = function (options) {
-            var visibleState = options.visibleState;
-            var count = options.count;
-            var addClassTransparent = !!options.transparent && !!visibleState;
-            var $curEl = this;
-            var curDuration = visibleState ? 0 : 500;
-            var currentFunction = visibleState ? 'fadeIn' : 'fadeOut';
-            setTimeout(function () {
-                $($curEl)[currentFunction](curDuration);
-                $($curEl).toggleClass('transparent', addClassTransparent);
-            }, count || 0);
+    if (!Array.prototype.last) {
+        Array.prototype.last = function () {
+            return this[this.length - 1];
         };
+    }
 
-        //add startsWith function to strings
-        if (typeof String.prototype.startsWith !== 'function') {
-            String.prototype.startsWith = function (str) {
-                if (str === 'All') {
-                    return true;
-                }
+    appRouter.checkLogin = Communication.checkLogin;
+    Communication.checkLogin(Custom.runApplication);
+};
+var applyDefaults = function () {
+    CKEDITOR.config.customConfig = '../../helpers/ckeditor/config.js';
 
-                if (str === '0-9') {
-                    return !isNaN(parseInt(this[0]));
-                }
+    $.fn.fadeFn = function (options) {
+        var visibleState = options.visibleState;
+        var count = options.count;
+        var addClassTransparent = !!options.transparent && !!visibleState;
+        var $curEl = this;
+        var curDuration = visibleState ? 0 : 500;
+        var currentFunction = visibleState ? 'fadeIn' : 'fadeOut';
+        setTimeout(function () {
+            $($curEl)[currentFunction](curDuration);
+            $($curEl).toggleClass('transparent', addClassTransparent);
+        }, count || 0);
+    };
 
-                return this.indexOf(str) === 0;
-            };
-        }
+    //add startsWith function to strings
+    if (typeof String.prototype.startsWith !== 'function') {
+        String.prototype.startsWith = function (str) {
+            if (str === 'All') {
+                return true;
+            }
 
-        $.extend($.mCustomScrollbar.defaults, {
-            scrollButtons: {
-                enable      : true,
-                scrollAmount: 10
+            if (str === '0-9') {
+                return !isNaN(parseInt(this[0]));
+            }
+
+            return this.indexOf(str) === 0;
+        };
+    }
+
+    $.extend($.mCustomScrollbar.defaults, {
+        scrollButtons: {
+            enable      : true,
+            scrollAmount: 10
+        },
+
+        theme: 'qualPro'
+    });
+
+    // star rating plugin default options
+    $.extend($.fn.rate.settings, {
+        readonly            : true,
+        symbols             : {
+            qualProStar: {
+                base    : '\u2605',
+                hover   : '\u2605',
+                selected: '\u2605'
             },
+            qualProCube: {
+                base    : '\u25A1',
+                hover   : '\u25A0',
+                selected: '\u25A0'
+            }
+        },
+        selected_symbol_type: 'qualProStar'
+    });
 
-            theme: 'qualPro'
-        });
+    $.fn.rateProgress = function (complete) {
+        complete = complete || 0;
 
-        // star rating plugin default options
-        $.extend($.fn.rate.settings, {
+        $(this).rate({
             readonly            : true,
-            symbols             : {
-                qualProStar: {
-                    base    : '\u2605',
-                    hover   : '\u2605',
-                    selected: '\u2605'
-                },
-                qualProCube: {
-                    base    : '\u25A1',
-                    hover   : '\u25A0',
-                    selected: '\u25A0'
-                }
-            },
-            selected_symbol_type: 'qualProStar'
+            selected_symbol_type: 'qualProCube',
+            max_value           : 10,
+            initial_value       : complete / 10
+        });
+    };
+
+    // rating to name jquery function
+    $.fn.rateName = function (params) {
+        var defaults = {
+            rateList: [
+                {_id: 1, name: 'New'},
+                {_id: 2, name: 'Below Standard'},
+                {_id: 3, name: 'Standard'},
+                {_id: 4, name: 'Superior'},
+                {_id: 5, name: 'Exceptional'}
+            ]
+        };
+        var options = $.extend({}, defaults, params);
+        var optionsRateList = options.rateList;
+        var rateList = {};
+
+        for (var i = optionsRateList.length - 1;
+             i > 0;
+             i--) {
+            rateList[optionsRateList[i]._id] = optionsRateList[i].name;
+        }
+
+        this.each(function () {
+            var rate = +$(this).attr('data-rate-value');
+            rate = Math.round(rate);
+            if (!isNaN(parseFloat(rate)) && isFinite(rate) && rate >= 1 && rate <= 5) {
+                $(this).html(rateList[rate]);
+            } else {
+                $(this).html('Not rated');
+            }
         });
 
-        $.fn.rateProgress = function (complete) {
-            complete = complete || 0;
+        return this;
+    };
 
-            $(this).rate({
-                readonly            : true,
-                selected_symbol_type: 'qualProCube',
-                max_value           : 10,
-                initial_value       : complete / 10
-            });
-        };
+    $.extend($.fn.barrating.defaults, {
+        theme             : 'css-stars',
+        showSelectedRating: false
+    });
 
-        // rating to name jquery function
-        $.fn.rateName = function (params) {
-            var defaults = {
-                rateList: [
-                    {_id: 1, name: 'New'},
-                    {_id: 2, name: 'Below Standard'},
-                    {_id: 3, name: 'Standard'},
-                    {_id: 4, name: 'Superior'},
-                    {_id: 5, name: 'Exceptional'}
-                ]
-            };
-            var options = $.extend({}, defaults, params);
-            var optionsRateList = options.rateList;
-            var rateList = {};
+    $.extend($.ui.dialog.prototype.options, {
+        closeOnEscape: true,
+        modal        : true,
+        resizable    : false,
+        draggable    : true,
+        autoOpen     : true,
+        width        : 'auto',
+        height       : 'auto',
+        appendTo     : '#dialogHandler',
+        showCancelBtn: true,
+        buttons      : {},
+        create       : function () {
+            var options = $(this).dialog('option');
+            var buttons = options.buttons;
+            var currentUser = App.currentUser;
+            var currentLanguage = currentUser && currentUser.currentLanguage || 'en';
+            var cancelText = (currentLanguage === 'en') ? 'Cancel' : 'إلغاء';
+            var cancelFunction;
 
-            for (var i = optionsRateList.length - 1;
-                 i > 0;
-                 i--) {
-                rateList[optionsRateList[i]._id] = optionsRateList[i].name;
+            $(this).dialog('option', 'dialogClass', 'allDialogsClass ' + (options.dialogClass || ''));
+
+            if (buttons && buttons.cancel) {
+                cancelText = buttons.cancel.text;
+                cancelFunction = buttons.cancel.click;
+
+                delete buttons.cancel;
             }
 
-            this.each(function () {
-                var rate = +$(this).attr('data-rate-value');
-                rate = Math.round(rate);
-                if (!isNaN(parseFloat(rate)) && isFinite(rate) && rate >= 1 && rate <= 5) {
-                    $(this).html(rateList[rate]);
-                } else {
-                    $(this).html('Not rated');
-                }
-            });
+            $('body').css({overflow: 'hidden'});
 
-            return this;
-        };
+            if (buttons.save) {
+                buttons.save.class = 'btn acceptBtn';
+            }
 
-        $.extend($.fn.barrating.defaults, {
-            theme             : 'css-stars',
-            showSelectedRating: false
-        });
-
-        $.extend($.ui.dialog.prototype.options, {
-            closeOnEscape: true,
-            modal        : true,
-            resizable    : false,
-            draggable    : true,
-            autoOpen     : true,
-            width        : 'auto',
-            height       : 'auto',
-            appendTo     : '#dialogHandler',
-            showCancelBtn: true,
-            buttons      : {},
-            create       : function () {
-                var options = $(this).dialog('option');
-                var buttons = options.buttons;
-                var currentUser = App.currentUser;
-                var currentLanguage = currentUser && currentUser.currentLanguage || 'en';
-                var cancelText = (currentLanguage === 'en') ? 'Cancel' : 'إلغاء';
-                var cancelFunction;
-
-                $(this).dialog('option', 'dialogClass', 'allDialogsClass ' + (options.dialogClass || ''));
-
-                if (buttons && buttons.cancel) {
-                    cancelText = buttons.cancel.text;
-                    cancelFunction = buttons.cancel.click;
-
-                    delete buttons.cancel;
-                }
-
-                $('body').css({overflow: 'hidden'});
-
-                if (buttons.save) {
-                    buttons.save.class = 'btn acceptBtn';
-                }
-
-                if (options.showCancelBtn) {
-                    $.extend(buttons, {
-                        cancel: {
-                            text : cancelText || 'Cancel',
-                            class: 'btn cancelBtn',
-                            click: function () {
-                                if (cancelFunction && typeof cancelFunction === 'function') {
-                                    cancelFunction();
-                                }
-                                $(this).dialog('close').dialog('destroy').remove();
+            if (options.showCancelBtn) {
+                $.extend(buttons, {
+                    cancel: {
+                        text : cancelText || 'Cancel',
+                        class: 'btn cancelBtn',
+                        click: function () {
+                            if (cancelFunction && typeof cancelFunction === 'function') {
+                                cancelFunction();
                             }
+                            $(this).dialog('close').dialog('destroy').remove();
                         }
-                    });
+                    }
+                });
 
-                    $(this).dialog('option', 'buttons', buttons);
-                }
-            },
-
-            close: function () {
-                $('body').css({overflow: 'inherit'});
+                $(this).dialog('option', 'buttons', buttons);
             }
-        });
+        },
 
-        $.datepicker.regional.ar = {
-            closeText  : 'إغلاق',
-            prevText   : '&#x3C;السابق',
-            nextText   : 'التالي&#x3E;',
-            currentText: 'اليوم',
+        close: function () {
+            $('body').css({overflow: 'inherit'});
+        }
+    });
 
-            monthNames: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+    $.datepicker.regional.ar = {
+        closeText  : 'إغلاق',
+        prevText   : '&#x3C;السابق',
+        nextText   : 'التالي&#x3E;',
+        currentText: 'اليوم',
 
-            monthNamesShort   : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-            dayNames          : ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
-            dayNamesShort     : ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
-            dayNamesMin       : ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
-            weekHeader        : 'أسبوع',
-            dateFormat        : 'dd.mm.yy',
-            firstDay          : 0,
-            isRTL             : true,
-            showMonthAfterYear: false,
-            yearSuffix        : ''
-        };
+        monthNames: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
 
-        $.datepicker.regional.en = {
-            closeText  : 'Done',
-            prevText   : 'Prev',
-            nextText   : 'Next',
-            currentText: 'Today',
-
-            monthNames: ['January', 'February', 'March', 'April',
-                'May', 'June', 'July', 'August',
-                'September', 'October', 'November', 'December'],
-
-            monthNamesShort   : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            dayNames          : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-            dayNamesShort     : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            dayNamesMin       : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-            weekHeader        : 'Wk',
-            dateFormat        : 'dd.mm.yy',
-            firstDay          : 1,
-            isRTL             : false,
-            showMonthAfterYear: false,
-            yearSuffix        : ''
-        };
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-Token': CSRF_TOKEN
-            }
-        });
-
-       /* $.ajaxPrefilter(function(req){
-            req.headers.clientdate = new Date;
-        });*/
-
+        monthNamesShort   : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+        dayNames          : ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+        dayNamesShort     : ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
+        dayNamesMin       : ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
+        weekHeader        : 'أسبوع',
+        dateFormat        : 'dd.mm.yy',
+        firstDay          : 0,
+        isRTL             : true,
+        showMonthAfterYear: false,
+        yearSuffix        : ''
     };
 
-    return {
-        initialize   : initialize,
-        applyDefaults: applyDefaults
+    $.datepicker.regional.en = {
+        closeText  : 'Done',
+        prevText   : 'Prev',
+        nextText   : 'Next',
+        currentText: 'Today',
+
+        monthNames: ['January', 'February', 'March', 'April',
+            'May', 'June', 'July', 'August',
+            'September', 'October', 'November', 'December'],
+
+        monthNamesShort   : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        dayNames          : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        dayNamesShort     : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        dayNamesMin       : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+        weekHeader        : 'Wk',
+        dateFormat        : 'dd.mm.yy',
+        firstDay          : 1,
+        isRTL             : false,
+        showMonthAfterYear: false,
+        yearSuffix        : ''
     };
-});
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-Token': CSRF_TOKEN
+        }
+    });
+
+   /* $.ajaxPrefilter(function(req){
+        req.headers.clientdate = new Date;
+    });*/
+
+};
+
+module.exports = {
+    initialize   : initialize,
+    applyDefaults: applyDefaults
+};

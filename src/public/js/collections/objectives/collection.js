@@ -1,153 +1,151 @@
-define([
-        'backbone',
-        'jQuery',
-        'Underscore',
-        'collections/parrent',
-        'models/objectives',
-        'constants/otherConstants',
-        'async',
-        'custom',
-        'constants/contentType'
-    ],
-    function (Backbone, $, _, Parent, Model, OTHER_CONSTANTS, async, custom, CONTENT_TYPES) {
-        var Collection = Parent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.OBJECTIVES,
-            viewType   : null,
-            contentType: null,
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var Model = require('models/objectives');
+    var CONTENT_TYPES = require('constants/contentType');
+    var custom = require('custom');
+    var async = require('async');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.OBJECTIVES,
+        viewType   : null,
+        contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                if (options.url) {
-                    this.url = options.url;
+            options = options || {};
+            page = options.page;
+            options.reset = true;
 
-                    delete options.url;
-                }
+            if (options.url) {
+                this.url = options.url;
 
-                if ($.isEmptyObject(options.filter)) {
-                    this.filterInitialize(options);
-                }
+                delete options.url;
+            }
 
-                this.getPage(page, options);
-            },
+            if ($.isEmptyObject(options.filter)) {
+                this.filterInitialize(options);
+            }
 
-            composeFlowTree: function (taskLevel, callback) {
-                var result = this.toJSON();
-                var ids = {};
-                var level = {};
-                var levels;
-                var index;
-                var parentNew;
+            this.getPage(page, options);
+        },
 
-                levels = _.pluck(result, '_id');
+        composeFlowTree: function (taskLevel, callback) {
+            var result = this.toJSON();
+            var ids = {};
+            var level = {};
+            var levels;
+            var index;
+            var parentNew;
 
-                if (result.length) {
-                    for (var i = 4; i > 0; i--) {
-                        index = levels.indexOf(i);
+            levels = _.pluck(result, '_id');
 
-                        if (index !== -1) {
-                            level[i] = result[index].subTasks;
-                        } else {
-                            level[i] = [];
-                        }
+            if (result.length) {
+                for (var i = 4; i > 0; i--) {
+                    index = levels.indexOf(i);
+
+                    if (index !== -1) {
+                        level[i] = result[index].subTasks;
+                    } else {
+                        level[i] = [];
                     }
                 }
+            }
 
-                ids[1] = _.map(_.pluck(level[1], '_id'), function (id) {
-                    return id.toString()
-                });
-                ids[2] = _.map(_.pluck(level[2], '_id'), function (id) {
-                    return id.toString()
-                });
-                ids[3] = _.map(_.pluck(level[3], '_id'), function (id) {
-                    return id.toString()
-                });
+            ids[1] = _.map(_.pluck(level[1], '_id'), function (id) {
+                return id.toString()
+            });
+            ids[2] = _.map(_.pluck(level[2], '_id'), function (id) {
+                return id.toString()
+            });
+            ids[3] = _.map(_.pluck(level[3], '_id'), function (id) {
+                return id.toString()
+            });
 
-                function getParallelTask(curLevel) {
-                    return function (parallelCb) {
-                        var idIndex;
-                        var model;
+            function getParallelTask(curLevel) {
+                return function (parallelCb) {
+                    var idIndex;
+                    var model;
 
-                        if (!level[curLevel].length) {
-                            return parallelCb(null);
-                        }
+                    if (!level[curLevel].length) {
+                        return parallelCb(null);
+                    }
 
-                        for (var i = level[curLevel].length - 1; i >= 0; i--) {
-                            model = level[curLevel][i];
-                            model.dateStart = custom.dateFormater('DD.MM.YYYY', model.dateStart);
-                            model.dateEnd = custom.dateFormater('DD.MM.YYYY', model.dateEnd);
+                    for (var i = level[curLevel].length - 1; i >= 0; i--) {
+                        model = level[curLevel][i];
+                        model.dateStart = custom.dateFormater('DD.MM.YYYY', model.dateStart);
+                        model.dateEnd = custom.dateFormater('DD.MM.YYYY', model.dateEnd);
 
-                            _.map(OTHER_CONSTANTS.OBJECTIVESTATUSES_FOR_UI, function (status) {
-                                if (status._id === model.status) {
-                                    model.status = status;
-                                }
-                            });
+                        _.map(OTHER_CONSTANTS.OBJECTIVESTATUSES_FOR_UI, function (status) {
+                            if (status._id === model.status) {
+                                model.status = status;
+                            }
+                        });
 
-                            if (curLevel !== 1) {
-                                parentNew = model.parentNew || '';
-                                idIndex = ids[curLevel - 1].indexOf(parentNew.toString());
+                        if (curLevel !== 1) {
+                            parentNew = model.parentNew || '';
+                            idIndex = ids[curLevel - 1].indexOf(parentNew.toString());
 
-                                if (idIndex !== -1) {
-                                    level[curLevel - 1][idIndex].child.push(model);
-                                }
+                            if (idIndex !== -1) {
+                                level[curLevel - 1][idIndex].child.push(model);
                             }
                         }
-
-                        parallelCb(null);
-                    };
-                }
-
-                function getParallelTasksArray() {
-                    var parallelTasks = [];
-
-                    for (var i = 4; i >= 1; i--) {
-                        parallelTasks.push(getParallelTask(i));
                     }
 
-                    return parallelTasks;
-                }
-
-                async.parallel(getParallelTasksArray(), function (err) {
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    callback(null, level[taskLevel]);
-                });
-            },
-
-            filterInitialize: function (options) {
-                var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-
-                var id = App.currentUser._id;
-                var filterId = {
-                    type  : 'ObjectId',
-                    values: [id]
+                    parallelCb(null);
                 };
-
-                var filter = {
-                    '$or'   : {
-                        type  : 'collection',
-                        values: [
-                            {'assignedTo': filterId},
-                            {'createdBy.user': filterId}
-                        ]
-                    },
-                    'status': {
-                        type   : 'string',
-                        values : [OBJECTIVE_STATUSES.CLOSED],
-                        options: {$nin: true}
-                    }
-                };
-
-                options.filter = filter;
             }
-        });
 
-        return Collection;
+            function getParallelTasksArray() {
+                var parallelTasks = [];
+
+                for (var i = 4; i >= 1; i--) {
+                    parallelTasks.push(getParallelTask(i));
+                }
+
+                return parallelTasks;
+            }
+
+            async.parallel(getParallelTasksArray(), function (err) {
+                if (err) {
+                    return callback(err);
+                }
+
+                callback(null, level[taskLevel]);
+            });
+        },
+
+        filterInitialize: function (options) {
+            var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+
+            var id = App.currentUser._id;
+            var filterId = {
+                type  : 'ObjectId',
+                values: [id]
+            };
+
+            var filter = {
+                '$or'   : {
+                    type  : 'collection',
+                    values: [
+                        {'assignedTo': filterId},
+                        {'createdBy.user': filterId}
+                    ]
+                },
+                'status': {
+                    type   : 'string',
+                    values : [OBJECTIVE_STATUSES.CLOSED],
+                    options: {$nin: true}
+                }
+            };
+
+            options.filter = filter;
+        }
     });
+
+    return Collection;
+});

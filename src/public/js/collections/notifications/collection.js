@@ -1,27 +1,26 @@
-define([
-        'backbone',
-        'jQuery',
-        'Underscore',
-        'collections/parrent',
-        'models/notifications',
-        'constants/contentType'
-    ],
-    function (Backbone, $, _, Parent, Model, CONTENT_TYPES) {
-        var Collection = Parent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.NOTIFICATIONS,
-            viewType   : null,
-            contentType: null,
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var Model = require('models/notifications');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.NOTIFICATIONS,
+        viewType   : null,
+        contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                this.getPage(page, options);
-            }
-        });
-        return Collection;
+            options = options || {};
+            page = options.page;
+            options.reset = true;
+
+            this.getPage(page, options);
+        }
     });
+    return Collection;
+});

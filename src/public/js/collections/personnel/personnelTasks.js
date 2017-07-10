@@ -1,97 +1,93 @@
-define([
-        'backbone',
-        'jQuery',
-        'Underscore',
-        'collections/parrent',
-        'models/objectives',
-        'models/inStoreTasks',
-        'constants/otherConstants',
-        'async',
-        'custom',
-        'constants/contentType'
-    ],
-    function (Backbone, $, _,
-              Parent, ObjectivesModel, InStoreModel,
-              OTHER_CONSTANTS, async, custom, CONTENT_TYPES) {
-        'use strict';
-        var models;
-        var Collection;
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var ObjectivesModel = require('models/objectives');
+    var InStoreModel = require('models/inStoreTasks');
+    var CONTENT_TYPES = require('constants/contentType');
+    var OTHER_CONSTANTS = require('constants/otherConstants');
+    var custom = require('custom');
+    var async = require('async');
 
-        function buildModelsObject() {
-            var resObject = {};
+    var models;
+    var Collection;
 
-            resObject[CONTENT_TYPES.OBJECTIVES] = ObjectivesModel;
-            resObject[CONTENT_TYPES.INSTORETASKS] = InStoreModel;
+    function buildModelsObject() {
+        var resObject = {};
 
-            return resObject;
-        }
+        resObject[CONTENT_TYPES.OBJECTIVES] = ObjectivesModel;
+        resObject[CONTENT_TYPES.INSTORETASKS] = InStoreModel;
 
-        models = buildModelsObject();
+        return resObject;
+    }
 
-        Collection = Parent.extend({
-            url        : 'personnel/personnelTasks',
-            viewType   : null,
-            contentType: null,
+    models = buildModelsObject();
 
-            modelId: function (attributes) {
-                return attributes._id;
-            },
+    Collection = Parent.extend({
+        url        : 'personnel/personnelTasks',
+        viewType   : null,
+        contentType: null,
 
-            model: function (attributes, options) {
-                options.parse = true;
+        modelId: function (attributes) {
+            return attributes._id;
+        },
 
-                return new models[attributes.context || 'objectives'](attributes, options);
-            },
+        model: function (attributes, options) {
+            options.parse = true;
 
-            initialize: function (options) {
-                var page;
+            return new models[attributes.context || 'objectives'](attributes, options);
+        },
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                if (options.url) {
-                    this.url = options.url;
+            options = options || {};
+            page = options.page;
+            options.reset = true;
 
-                    delete options.url;
-                }
+            if (options.url) {
+                this.url = options.url;
 
-                if ($.isEmptyObject(options.filter)) {
-                    this.filterInitialize(options);
-                }
-
-                this.getPage(page, options);
-            },
-
-            filterInitialize: function (options) {
-                var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-
-                var id = App.currentUser._id;
-                var filterId = {
-                    type  : 'ObjectId',
-                    values: [id]
-                };
-
-                var filter = {
-                    $or: {
-                        type  : 'collection',
-                        values: [
-                            {assignedTo: filterId},
-                            {'createdBy.user': filterId}
-                        ]
-                    },
-
-                    status: {
-                        type   : 'string',
-                        values : [OBJECTIVE_STATUSES.CLOSED],
-                        options: {$nin: true}
-                    }
-                };
-
-                options.filter = filter;
+                delete options.url;
             }
-        });
 
-        return Collection;
+            if ($.isEmptyObject(options.filter)) {
+                this.filterInitialize(options);
+            }
+
+            this.getPage(page, options);
+        },
+
+        filterInitialize: function (options) {
+            var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+
+            var id = App.currentUser._id;
+            var filterId = {
+                type  : 'ObjectId',
+                values: [id]
+            };
+
+            var filter = {
+                $or: {
+                    type  : 'collection',
+                    values: [
+                        {assignedTo: filterId},
+                        {'createdBy.user': filterId}
+                    ]
+                },
+
+                status: {
+                    type   : 'string',
+                    values : [OBJECTIVE_STATUSES.CLOSED],
+                    options: {$nin: true}
+                }
+            };
+
+            options.filter = filter;
+        }
     });
+
+    return Collection;
+});
 

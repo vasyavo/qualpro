@@ -1,34 +1,33 @@
-define([
-        'collections/parrent',
-        'models/personnel',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.PERSONNEL,
-            viewType   : null,
-            contentType: null,
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/personnel');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.PERSONNEL,
+        viewType   : null,
+        contentType: null,
 
-                options = options || {};
-                page = options.page;
+        initialize: function (options) {
+            var page;
 
-                if (!options.hasOwnProperty('reset')) {
-                    options.reset = true;
-                }
+            options = options || {};
+            page = options.page;
 
-                if (!options.hasOwnProperty('fetch')) {
-                    options.fetch = true;
-                }
+            if (!options.hasOwnProperty('reset')) {
+                options.reset = true;
+            }
 
-                if (options.fetch) {
-                    this.getPage(page, options);
-                }
-            },
-        });
+            if (!options.hasOwnProperty('fetch')) {
+                options.fetch = true;
+            }
 
-        return Collection;
+            if (options.fetch) {
+                this.getPage(page, options);
+            }
+        },
     });
+
+    return Collection;
+});

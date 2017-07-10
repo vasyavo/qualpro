@@ -1,5 +1,6 @@
-// Filename: communication.js
-define(function () {
+define(function(require) {
+    var $ = require('jQuery');
+
     var checkLogin = function (callback) {
         var url = "/authenticated";
         $.ajax({

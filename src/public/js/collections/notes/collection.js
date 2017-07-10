@@ -1,27 +1,27 @@
-define([
-        'collections/parrent',
-        'models/notes',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        'use strict';
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var Model = require('models/notes');
+    var CONTENT_TYPES = require('constants/contentType');
 
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.NOTES,
-            viewType   : null,
-            contentType: null,
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.NOTES,
+        viewType   : null,
+        contentType: null,
 
-            initialize: function (options) {
-                var page;
+        initialize: function (options) {
+            var page;
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+            options = options || {};
+            page = options.page;
+            options.reset = true;
 
-                this.getPage(page, options);
-            }
-        });
-
-        return Collection;
+            this.getPage(page, options);
+        }
     });
+
+    return Collection;
+});

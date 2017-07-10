@@ -106,10 +106,12 @@
     "sinon": "1.17.6",
     "sinon-chai": "2.8.0",
     "supertest": "2.0.1",
-    "supertest-session": "1.0.0"
+    "supertest-session": "1.0.0",
+    "webpack": "^3.1.0"
   },
   "scripts": {
     "start": "node src/server.js",
+    "start:builder": "webpack --config webpack.config.js",
     "test": "cross-env NODE_ENV=test mocha --require co-mocha src/server.spec.js",
     "dev": "cross-env NODE_ENV=development DEBUG_DEV=true node src/server.js",
     "debug": "cross-env NODE_ENV=development DEBUG_DEV=true node-debug --save-live-edit src/server.js",

@@ -1,13 +1,13 @@
 // TODO: Remove itemsPrices collection (after renaming of itemsPrises to items in whole project), because it is a duplicate of item collection
-define([
-    'backbone',
-    'Underscore',
-    'jQuery',
-    'collections/parrent',
-    'models/itemsPrices',
-    'constants/contentType'
-], function (Backbone, _, $, Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var Model = require('models/itemsPrices');
+    var CONTENT_TYPES = require('constants/contentType');
+
+    var Collection = Parent.extend({
         model      : Model,
         url        : CONTENT_TYPES.ITEM,
         viewType   : null,

@@ -1,10 +1,8 @@
-define([
-    'backbone',
-    'socketio',
-    'models/personnel',
-    'constants/errorMessages'
-], function (Backbone, io, PersonnelModel, ERROR_MESSAGES) {
-    'use strict';
+define(function(require) {
+    var Backbone = require('Backbone');
+    var io = require('socketio');
+    var PersonnelModel = require('models/personnel');
+    var ERROR_MESSAGES = require('constants/errorMessages');
     var socket = io.connect({
         upgrade: false,
         transports: ['websocket'],

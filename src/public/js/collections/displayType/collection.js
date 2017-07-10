@@ -1,28 +1,27 @@
-define([
-        'underscore',
-        'collections/parrent',
-        'models/displayType',
-        'constants/contentType'
-    ],
-    function (_, Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.DISPLAYTYPE,
-            viewType   : null,
-            contentType: CONTENT_TYPES.DISPLAYTYPE,
-            sortOrder  : 1,
+define(function(require) {
+    var _ = require('underscore');
+    var Parent = require('collections/parrent');
+    var Model = require('models/displayType');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.DISPLAYTYPE,
+        viewType   : null,
+        contentType: CONTENT_TYPES.DISPLAYTYPE,
+        sortOrder  : 1,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                this.getPage(page, options);
-            },
+            options = options || {};
+            page = options.page;
+            options.reset = true;
 
-            comparator: '_id'
-        });
-        return Collection;
+            this.getPage(page, options);
+        },
+
+        comparator: '_id'
     });
+    return Collection;
+});

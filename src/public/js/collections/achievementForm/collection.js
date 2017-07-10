@@ -1,8 +1,8 @@
-define([
-    'collections/parrent',
-    'models/achievementForm',
-    'constants/contentType'
-], function (Parent, Model, CONTENT_TYPES) {
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/achievementForm');
+    var CONTENT_TYPES = require('constants/contentType');
+
     var Collection = Parent.extend({
         model      : Model,
         url        : CONTENT_TYPES.ACHIEVEMENTFORM,

@@ -1,9 +1,9 @@
-define([
-    'collections/parrent',
-    'models/comment',
-    'constants/contentType'
-], function (Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/comment');
+    var CONTENT_TYPES = require('constants/contentType');
+
+    var Collection = Parent.extend({
         model      : Model,
         url        : CONTENT_TYPES.COMMENT,
         viewType   : null,

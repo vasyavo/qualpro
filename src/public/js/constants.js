@@ -1,7 +1,4 @@
-/**
- * Created by Roman on 23.04.2015.
- */
-define([], function () {
+define(function () {
     return {
         CANVAS_SIZE: 135,
 

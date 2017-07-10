@@ -1,8 +1,8 @@
-define([
-    'collections/parrent',
-    'models/question'
-], function (Parrent, Model) {
-    var Collection = Parrent.extend({
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/question');
+
+    var Collection = Parent.extend({
         model      : Model,
         url        : '/question/',
         viewType   : null,

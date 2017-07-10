@@ -1,10 +1,9 @@
-define([
-    'collections/parrent',
-    'models/activityList',
-    'constants/contentType'
-],
-function (Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/activityList');
+    var CONTENT_TYPES = require('constants/contentType');
+
+    var Collection = Parent.extend({
         model      : Model,
         url        : CONTENT_TYPES.ACTIVITYLIST,
         viewType   : null,

@@ -1,10 +1,9 @@
-define([
-    'underscore',
-    'collections/parrent',
-    'models/category',
-    'constants/contentType'
-], function (_, Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/category');
+    var CONTENT_TYPES = require('constants/contentType');
+
+    var Collection = Parent.extend({
         model      : Model,
         url        : CONTENT_TYPES.CATEGORY,
         viewType   : null,

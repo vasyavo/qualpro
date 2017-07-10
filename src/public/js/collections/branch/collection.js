@@ -1,27 +1,27 @@
-define([
-        'collections/parrent',
-        'models/branch',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.BRANCH,
-            viewType   : null,
-            contentType: CONTENT_TYPES.BRANCH,
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/branch');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.BRANCH,
+        viewType   : null,
+        contentType: CONTENT_TYPES.BRANCH,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                this.subRegion = options.subRegion;
-                this.retailSegment = options.retailSegment;
-                this.outlet = options.outlet;
-                this.getPage(page, options);
-            }
-        });
-        return Collection;
+            options = options || {};
+            page = options.page;
+            options.reset = true;
+
+            this.subRegion = options.subRegion;
+            this.retailSegment = options.retailSegment;
+            this.outlet = options.outlet;
+            this.getPage(page, options);
+        }
     });
+
+    return Collection;
+});

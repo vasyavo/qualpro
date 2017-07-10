@@ -1,24 +1,23 @@
-define([
-        'collections/parrent',
-        'models/brand',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.BRAND,
-            viewType   : null,
-            contentType: CONTENT_TYPES.BRAND,
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/brand');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.BRAND,
+        viewType   : null,
+        contentType: CONTENT_TYPES.BRAND,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                this.getPage(page, options);
-            }
-        });
-        return Collection;
+            options = options || {};
+            page = options.page;
+            options.reset = true;
+
+            this.getPage(page, options);
+        }
     });
+    return Collection;
+});

@@ -1,9 +1,12 @@
-define([
-    'collections/parrent',
-    'models/marketingCampaignItem',
-    'constants/contentType'
-], function (Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
+define(function(require) {
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Parent = require('collections/parrent');
+    var Model = require('models/marketingCampaignItem');
+    var CONTENT_TYPES = require('constants/contentType');
+
+    var Collection = Parent.extend({
         model      : Model,
         url        : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
         viewType   : null,

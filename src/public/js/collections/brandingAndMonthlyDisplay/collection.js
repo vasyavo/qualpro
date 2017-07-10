@@ -1,25 +1,24 @@
-define([
-        'collections/parrent',
-        'models/brandingAndMonthlyDisplay',
-        'constants/contentType'
-    ],
-    function (Parent, Model, CONTENT_TYPES) {
-        var Collection = Parent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
-            viewType   : null,
-            contentType: null,
+define(function(require) {
+    var Parent = require('collections/parrent');
+    var Model = require('models/brandingAndMonthlyDisplay');
+    var CONTENT_TYPES = require('constants/contentType');
 
-            initialize: function (options) {
-                var page;
+    var Collection = Parent.extend({
+        model      : Model,
+        url        : CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
+        viewType   : null,
+        contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        initialize: function (options) {
+            var page;
 
-                this.getPage(page, options);
-            }
-        });
+            options = options || {};
+            page = options.page;
+            options.reset = true;
 
-        return Collection;
+            this.getPage(page, options);
+        }
     });
+
+    return Collection;
+});
