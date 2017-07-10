@@ -1,4 +1,5 @@
 define(function(require) {
+
     var Backbone = require('Backbone');
     var io = require('socketio');
     var PersonnelModel = require('models/personnel');

@@ -1,32 +1,27 @@
-define(
-    [
-        'underscore',
-        'constants/otherConstants'
-    ],
-function (_, otherConstants) {
-    var STATUSES = otherConstants.OBJECTIVE_STATUSES;
+var _ = require('Underscore');
+var otherConstants = require('constants/otherConstants');
 
-    var checkStatus = function (status, createdByUser, currentStatus) {
-        var coveredIds = App.currentUser.covered ? Object.keys(App.currentUser.covered) : [];
-        var currentUser = createdByUser._id === App.currentUser._id || coveredIds.indexOf(createdByUser._id) !== -1;
+var STATUSES = otherConstants.OBJECTIVE_STATUSES;
 
-        if (status._id === STATUSES.CLOSED && currentStatus !== STATUSES.CLOSED && !currentUser) {
-            return false;
-        }
+var checkStatus = function (status, createdByUser, currentStatus) {
+    var coveredIds = App.currentUser.covered ? Object.keys(App.currentUser.covered) : [];
+    var currentUser = createdByUser._id === App.currentUser._id || coveredIds.indexOf(createdByUser._id) !== -1;
 
-        return status;
-    };
+    if (status._id === STATUSES.CLOSED && currentStatus !== STATUSES.CLOSED && !currentUser) {
+        return false;
+    }
 
-    return function (objectiveModel) {
-        var currentStatus = objectiveModel.status._id;
-        var allowedStatuses = otherConstants.OBJECTIVE_STATUSES_FLOW[currentStatus];
-        var createdByUser = objectiveModel.createdBy && objectiveModel.createdBy.user ? objectiveModel.createdBy.user : '';
+    return status;
+};
 
-        allowedStatuses = _.map(allowedStatuses, function (status) {
-            return checkStatus(status, createdByUser, currentStatus);
-        });
+module.exports = function (objectiveModel) {
+    var currentStatus = objectiveModel.status._id;
+    var allowedStatuses = otherConstants.OBJECTIVE_STATUSES_FLOW[currentStatus];
+    var createdByUser = objectiveModel.createdBy && objectiveModel.createdBy.user ? objectiveModel.createdBy.user : '';
 
-        return _.compact(allowedStatuses);
+    allowedStatuses = _.map(allowedStatuses, function (status) {
+        return checkStatus(status, createdByUser, currentStatus);
+    });
 
-    };
-});
+    return _.compact(allowedStatuses);
+};

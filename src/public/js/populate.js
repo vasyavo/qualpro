@@ -1,4 +1,5 @@
 define(function(require) {
+
     var Backbone = require('backbone');
     var $ = require('jQuery');
     var _ = require('Underscore');
