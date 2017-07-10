@@ -70,129 +70,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({
                 $match: {
-                    branches: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'branches',
-                foreignField: '_id',
-                as: 'branches',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                subRegions: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.subRegion',
-                    },
-                },
-                retailSegments: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.retailSegment',
-                    },
-                },
-                outlets: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.outlet',
-                    },
-                },
-                branches: null,
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
-            pipeline.push({
-                $match: {
-                    subRegions: { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
-            pipeline.push({
-                $match: {
-                    retailSegments: { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
-            pipeline.push({
-                $match: {
-                    outlets: { $in: queryFilter[CONTENT_TYPES.OUTLET] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'subRegions',
-                foreignField: '_id',
-                as: 'subRegions',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                subRegions: null,
-                retailSegments: null,
-                outlets: null,
-                regions: {
-                    $map: {
-                        input: '$subRegions',
-                        as: 'item',
-                        in: '$$item.parent',
-                    },
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
-            pipeline.push({
-                $match: {
-                    regions: { $in: queryFilter[CONTENT_TYPES.REGION] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'regions',
-                foreignField: '_id',
-                as: 'regions',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                regions: null,
-                countries: {
-                    $map: {
-                        input: '$regions',
-                        as: 'item',
-                        in: '$$item.parent',
-                    },
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
-            pipeline.push({
-                $match: {
-                    countries: { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                    branches: {$in: queryFilter[CONTENT_TYPES.BRANCH]},
                 },
             });
         }
@@ -417,6 +295,30 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+            pipeline.push({
+                $match: {
+                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
+            pipeline.push({
+                $match: {
+                    'branch.outlet': { $in: queryFilter[CONTENT_TYPES.OUTLET] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'retailSegments',
@@ -468,136 +370,127 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $group: {
-                _id: {
-                    _id: '$_id',
-                    variant: '$items.variant',
-                    category: '$items.category',
-                },
-                items: {
-                    $push: {
-                        branch: '$branch',
-                        indicator: '$items.branches.indicator',
-                        retailSegment: '$retailSegment',
-                        outlet: '$outlet',
-                        timestamp: '$editedBy.date',
-                    },
-                },
-                subRegion: { $addToSet: '$branch.subRegion' },
-            },
-        });
-
-        pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'subRegion',
+                localField: 'branch.subRegion',
                 foreignField: '_id',
                 as: 'subRegion',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                total: 1,
-                items: 1,
-                region: '$subRegion.parent',
+            $addFields: {
                 subRegion: {
-                    $reduce: {
-                        input: '$subRegion',
-                        initialValue: [],
+                    $let: {
+                        vars: {
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                        },
                         in: {
-                            $cond: {
-                                if: {
-                                    $setIsSubset: [['$$this.name.en'], '$$value'],
-                                },
-                                then: '$$value',
-                                else: {
-                                    $setUnion: ['$$value', ['$$this.name.en']],
-                                },
-                            },
+                            name: '$$subRegion.name',
+                            parent: '$$subRegion.parent',
                         },
                     },
                 },
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $match: {
+                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'region',
+                localField: 'subRegion.parent',
                 foreignField: '_id',
                 as: 'region',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                total: 1,
-                items: 1,
-                subRegion: 1,
-                country: '$region.parent',
+            $addFields: {
                 region: {
-                    $reduce: {
-                        input: '$region',
-                        initialValue: [],
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$region', 0] },
+                        },
                         in: {
-                            $cond: {
-                                if: {
-                                    $setIsSubset: [['$$this.name.en'], '$$value'],
-                                },
-                                then: '$$value',
-                                else: {
-                                    $setUnion: ['$$value', ['$$this.name.en']],
-                                },
-                            },
+                            name: '$$region.name',
+                            parent: '$$region.parent',
                         },
                     },
                 },
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $match: {
+                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'country',
+                localField: 'region.parent',
                 foreignField: '_id',
                 as: 'country',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                total: 1,
-                items: 1,
-                subRegion: 1,
-                region: 1,
-                country: {
-                    $reduce: {
-                        input: '$country',
-                        initialValue: [],
-                        in: {
-                            $cond: {
-                                if: {
-                                    $setIsSubset: [['$$this.name.en'], '$$value'],
+            $addFields: {
+                location: {
+                    $concat: [
+                        '$subRegion.name.en',
+                        ' -> ',
+                        '$region.name.en',
+                        ' -> ',
+                        {
+                            $let: {
+                                vars: {
+                                    country: { $arrayElemAt: ['$country', 0] },
                                 },
-                                then: '$$value',
-                                else: {
-                                    $setUnion: ['$$value', ['$$this.name.en']],
-                                },
+                                in: '$$country.name.en',
                             },
                         },
-                    },
+                    ],
                 },
+            },
+        });
+
+        pipeline.push({
+            $sort: {
+                'editedBy.date': 1,
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                variant: '$items.variant',
+                category: '$items.category',
+                item: '$items.item',
+                publisher: '$createdBy.user',
+                indicator: '$items.branches.indicator',
+                timestamp: '$editedBy.date',
+                location: 1,
+                branch: 1,
+                retailSegment: 1,
+                outlet: 1,
+                objective: 1,
             },
         });
 
         pipeline.push({
             $lookup: {
                 from: 'variants',
-                localField: '_id.variant',
+                localField: 'variant',
                 foreignField: '_id',
                 as: 'variant',
             },
@@ -606,68 +499,31 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'categories',
-                localField: '_id.category',
+                localField: 'category',
                 foreignField: '_id',
                 as: 'category',
             },
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'items',
+                localField: 'item',
+                foreignField: '_id',
+                as: 'item',
+            },
+        });
+
+        pipeline.push({
             $project: {
-                _id: 0,
-                items: 1,
-                location: {
-                    $concat: [
-                        {
-                            $reduce: {
-                                input: '$country',
-                                initialValue: {
-                                    $arrayElemAt: ['$country', 0],
-                                },
-                                in: {
-                                    $cond: {
-                                        if: { $eq: ['$$this', '$$value'] },
-                                        then: '$$value',
-                                        else: { $concat: ['$$value', ', ', '$$this'] },
-                                    },
-                                },
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $reduce: {
-                                input: '$region',
-                                initialValue: {
-                                    $arrayElemAt: ['$region', 0],
-                                },
-                                in: {
-                                    $cond: {
-                                        if: { $eq: ['$$this', '$$value'] },
-                                        then: '$$value',
-                                        else: { $concat: ['$$value', ', ', '$$this'] },
-                                    },
-                                },
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $reduce: {
-                                input: '$subRegion',
-                                initialValue: {
-                                    $arrayElemAt: ['$subRegion', 0],
-                                },
-                                in: {
-                                    $cond: {
-                                        if: { $eq: ['$$this', '$$value'] },
-                                        then: '$$value',
-                                        else: { $concat: ['$$value', ', ', '$$this'] },
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                total: 1,
+                location: 1,
+                publisher: 1,
+                indicator: 1,
+                timestamp: 1,
+                branch: 1,
+                retailSegment: 1,
+                outlet: 1,
+                objective: 1,
                 category: {
                     $let: {
                         vars: {
@@ -690,16 +546,17 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$items',
-        });
-
-        pipeline.push({
-            $sort: {
-                'items.timestamp': 1,
+                item: {
+                    $let: {
+                        vars: {
+                            item: { $arrayElemAt: ['$item', 0] },
+                        },
+                        in: {
+                            _id: '$$item._id',
+                            name: '$$item.name',
+                        },
+                    },
+                },
             },
         });
 
@@ -728,11 +585,13 @@ module.exports = (req, res, next) => {
                         <th>Location</th>
                         <th>Category</th>
                         <th>Variant</th>
+                        <th>Item</th>
                         <th>Trade Channel</th>
                         <th>Outlet</th>
                         <th>Branch</th>
                         <th>Indicator</th>
                         <th>Timestamp</th>
+                        <th>Publisher</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -742,11 +601,13 @@ module.exports = (req, res, next) => {
                                 <td>${item.location}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${item.variant.name[currentLanguage]}</td>
-                                <td>${item.items.retailSegment.name[currentLanguage]}</td>
-                                <td>${item.items.outlet.name[currentLanguage]}</td>
-                                <td>${item.items.branch.name[currentLanguage]}</td>
-                                <td>${item.items.indicator}</td>
-                                <td>${moment(item.items.timestamp).format('DD MMMM, YYYY')}</td>
+                                <td>${item.item.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.indicator}</td>
+                                <td>${moment(item.timestamp).format('DD MMMM, YYYY')}</td>
+                                <td>${item.publisher.name[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}

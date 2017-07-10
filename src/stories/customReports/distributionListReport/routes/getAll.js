@@ -69,129 +69,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({
                 $match: {
-                    branches: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'branches',
-                foreignField: '_id',
-                as: 'branches',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                subRegions: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.subRegion',
-                    },
-                },
-                retailSegments: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.retailSegment',
-                    },
-                },
-                outlets: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.outlet',
-                    },
-                },
-                branches: null,
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
-            pipeline.push({
-                $match: {
-                    subRegions: { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
-            pipeline.push({
-                $match: {
-                    retailSegments: { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
-            pipeline.push({
-                $match: {
-                    outlets: { $in: queryFilter[CONTENT_TYPES.OUTLET] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'subRegions',
-                foreignField: '_id',
-                as: 'subRegions',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                subRegions: null,
-                retailSegments: null,
-                outlets: null,
-                regions: {
-                    $map: {
-                        input: '$subRegions',
-                        as: 'item',
-                        in: '$$item.parent',
-                    },
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
-            pipeline.push({
-                $match: {
-                    regions: { $in: queryFilter[CONTENT_TYPES.REGION] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'regions',
-                foreignField: '_id',
-                as: 'regions',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                regions: null,
-                countries: {
-                    $map: {
-                        input: '$regions',
-                        as: 'item',
-                        in: '$$item.parent',
-                    },
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
-            pipeline.push({
-                $match: {
-                    countries: { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                    branches: {$in: queryFilter[CONTENT_TYPES.BRANCH]},
                 },
             });
         }
@@ -416,6 +294,30 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+            pipeline.push({
+                $match: {
+                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
+            pipeline.push({
+                $match: {
+                    'branch.outlet': { $in: queryFilter[CONTENT_TYPES.OUTLET] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'retailSegments',
@@ -491,6 +393,14 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $match: {
+                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'domains',
@@ -515,6 +425,14 @@ module.exports = (req, res, next) => {
                 },
             },
         });
+
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $match: {
+                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
