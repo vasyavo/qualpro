@@ -135,14 +135,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                objective: {
-                    $let: {
-                        vars: {
-                            objective: { $arrayElemAt: ['$objective', 0] },
-                        },
-                        in: '$$objective._id',
-                    },
-                },
                 executors: {
                     $let: {
                         vars: {
