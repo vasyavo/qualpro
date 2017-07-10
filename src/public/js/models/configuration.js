@@ -1,16 +1,10 @@
-define([
-        'models/parrent',
-        'validation',
-        'constants/contentType'
-    ],
-    function (parent, validation, CONTENT_TYPES) {
-        var Model = parent.extend({
-            defaults: {},
+var parent = require('./parrent');
+var CONTENT_TYPES = require('../constants/contentType');
 
-            urlRoot: function () {
-                return CONTENT_TYPES.RETAILSEGMENT;
-            }
-        });
+module.exports = parent.extend({
+    defaults: {},
 
-        return Model;
-    });
+    urlRoot: function () {
+        return CONTENT_TYPES.RETAILSEGMENT;
+    }
+});

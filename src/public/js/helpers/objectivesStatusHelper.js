@@ -1,5 +1,5 @@
 var _ = require('Underscore');
-var otherConstants = require('constants/otherConstants');
+var otherConstants = require('../constants/otherConstants');
 
 var STATUSES = otherConstants.OBJECTIVE_STATUSES;
 

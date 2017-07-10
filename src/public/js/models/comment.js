@@ -1,91 +1,87 @@
-define([
-    'models/parrent',
-    'validation',
-    'constants/contentType',
-    'moment',
-    'locales',
-    'constants/errorMessages',
-    'dataService',
-], function (parent, validation, CONTENT_TYPES, moment, locales, ERROR_MESSAGES, dataService) {
-    var Model = parent.extend({
-        defaults      : {},
-        attachmentsKey: 'attachments',
+var moment = require('moment');
+var locales = require('moment/min/locales');
+var parent = require('./parrent');
+var validation = require('../validation');
+var dataService = require('../dataService');
+var CONTENT_TYPES = require('../constants/contentType');
+var ERROR_MESSAGES = require('../constants/errorMessages');
 
-        fieldsToTranslate: [
-            'commentText'
-        ],
+module.exports = parent.extend({
+    defaults      : {},
+    attachmentsKey: 'attachments',
 
-        multilanguageFields: [
-            'createdBy.user.firstName',
-            'createdBy.user.lastName',
-            'createdBy.user.accessRole.name'
-        ],
+    fieldsToTranslate: [
+        'commentText'
+    ],
 
-        validate: function (attrs, cb) {
-            var errors = [];
+    multilanguageFields: [
+        'createdBy.user.firstName',
+        'createdBy.user.lastName',
+        'createdBy.user.accessRole.name'
+    ],
 
-            if (this.translatedFields.commentText) {
-                validation.checkDescriptionField(errors, true, attrs.commentText, this.translatedFields.commentText);
-            }
+    validate: function (attrs, cb) {
+        var errors = [];
 
-            if (errors.length > 0) {
-                return cb(errors);
-            }
-            return cb();
-        },
+        if (this.translatedFields.commentText) {
+            validation.checkDescriptionField(errors, true, attrs.commentText, this.translatedFields.commentText);
+        }
 
-        urlRoot: function () {
-            return CONTENT_TYPES.COMMENT;
-        },
+        if (errors.length > 0) {
+            return cb(errors);
+        }
+        return cb();
+    },
 
-        modelParse: function (model) {
-            var userName;
-            if (model.createdBy && model.createdBy.diffDate) {
-                moment.locale(App.currentUser.currentLanguage, locales);
-                model.createdBy.diffDate = moment.duration(model.createdBy.diffDate * -1).humanize(true);
-            }
-            if (model.attachments.length) {
-                userName = model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage;
-                model.attachments.forEach(function (attachment) {
-                    attachment.userName = userName;
-                });
-            }
+    urlRoot: function () {
+        return CONTENT_TYPES.COMMENT;
+    },
 
-            return model;
-        },
-
-        editBody: function (commentId, newCommentBody) {
-            var that = this;
-
-            dataService.putData('/comment/' + commentId, {
-                commentText: newCommentBody,
-            }, function (err) {
-                if (err) {
-                    return App.renderErrors([
-                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
-                        'Edit comment',
-                    ]);
-                }
-
-                that.trigger('comment-edited');
+    modelParse: function (model) {
+        var userName;
+        if (model.createdBy && model.createdBy.diffDate) {
+            moment.locale(App.currentUser.currentLanguage, locales);
+            model.createdBy.diffDate = moment.duration(model.createdBy.diffDate * -1).humanize(true);
+        }
+        if (model.attachments.length) {
+            userName = model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage;
+            model.attachments.forEach(function (attachment) {
+                attachment.userName = userName;
             });
-        },
+        }
 
-        delete: function (commentId) {
-            var that = this;
+        return model;
+    },
 
-            dataService.deleteData('/comment/' + commentId, {}, function (err) {
-                if (err) {
-                    return App.renderErrors([
-                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
-                        'Delete comment',
-                    ]);
-                }
+    editBody: function (commentId, newCommentBody) {
+        var that = this;
 
-                that.trigger('comment-deleted');
-            });
-        },
-    });
+        dataService.putData('/comment/' + commentId, {
+            commentText: newCommentBody,
+        }, function (err) {
+            if (err) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                    'Edit comment',
+                ]);
+            }
 
-    return Model;
+            that.trigger('comment-edited');
+        });
+    },
+
+    delete: function (commentId) {
+        var that = this;
+
+        dataService.deleteData('/comment/' + commentId, {}, function (err) {
+            if (err) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                    'Delete comment',
+                ]);
+            }
+
+            that.trigger('comment-deleted');
+        });
+    },
 });
