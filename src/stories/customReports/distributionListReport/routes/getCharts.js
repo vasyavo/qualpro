@@ -39,7 +39,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.VARIANT, CONTENT_TYPES.ITEM,
-            CONTENT_TYPES.POSITION, 'executorPosition', CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.POSITION, 'executorPosition', 'executor', CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
 
@@ -68,6 +68,16 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     branches: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                    },
                 },
             });
         }
@@ -144,11 +154,11 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+        if (queryFilter.executor && queryFilter.executor.length) {
             pipeline.push({
                 $match: {
                     executors: {
-                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                        $in: queryFilter.executor,
                     },
                 },
             });
