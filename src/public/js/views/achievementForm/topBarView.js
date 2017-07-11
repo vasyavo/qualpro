@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var topBarTemplate = require('../../../templates/achievementForm/topBarTemplate.html');
 var pagination = require('../../../templates/pagination/pagination.html');
 var baseTopBar = require('../../views/baseTopBar');
