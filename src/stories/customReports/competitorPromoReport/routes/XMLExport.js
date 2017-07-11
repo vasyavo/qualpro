@@ -494,6 +494,8 @@ module.exports = (req, res, next) => {
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
+                        const dateStart = item.dateStart ? moment(item.dateStart).format('DD MMMM, YYYY') : 'N/A';
+                        const dateEnd = item.dateEnd ? moment(item.dateEnd).format('DD MMMM, YYYY') : 'N/A';
                         const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
             return `
                             <tr>
@@ -510,8 +512,8 @@ module.exports = (req, res, next) => {
                                 <td>${item.promotion}</td>
                                 <td>${item.packing}</td>
                                 <td>${moment(item.expiry).format('DD MMMM, YYYY')}</td>
-                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
-                                <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
+                                <td>${dateStart}</td>
+                                <td>${dateEnd}</td>
                                 <td>${item.origin.name ? item.origin.name[currentLanguage] : null}</td>
                                 <td>${price}</td>
                                 <td>${item.displayType[currentLanguage]}</td>
