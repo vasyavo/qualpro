@@ -1,4 +1,3 @@
-var Backbone = require('backbone');
 var _ = require('underscore');
 var $ = require('jQuery');
 var moment = require('moment');
@@ -9,7 +8,7 @@ var NewCommentTemplate = require('../../../../templates/objectives/comments/newR
 var FileCollection = require('../../../collections/file/collection');
 var FileModel = require('../../../models/file');
 var CommentModel = require('../../../models/comment');
-var BaseView = require('../../../baseDialog');
+var BaseView = require('../../../views/baseDialog');
 var CommentCollection = require('../../../collections/comment/collection');
 var populate = require('../../../populate');
 var CONSTANTS = require('../../../constants/otherConstants');
