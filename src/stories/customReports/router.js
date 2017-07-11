@@ -13,6 +13,7 @@ const objectiveReport = require('./objectiveReport/router');
 const distributionListReport = require('./distributionListReport/router');
 const questionnaireReport = require('./questionnaireReport/router');
 const competitorBrandingReport = require('./competitorBrandingReport/router');
+const consumerSurveyReport = require('./consumerSurveyReport/router');
 
 const router = express.Router();
 const checkAuth = access.checkAuth;
@@ -31,5 +32,6 @@ router.use('/objectiveReport', objectiveReport);
 router.use('/distributionListReport', distributionListReport);
 router.use('/questionnaireReport', questionnaireReport);
 router.use('/competitorBrandingReport', competitorBrandingReport);
+router.use('/consumerSurveyReport', consumerSurveyReport);
 
 module.exports = router;
