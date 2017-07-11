@@ -1,4 +1,4 @@
-define({
+module.exports = {
     // default
     importErrorsPreviewTitle: 'Import Errors',
     dragOrClickTitle: 'Click here',
@@ -14,4 +14,4 @@ define({
     exportPersonnelTitle: 'Export Personnel',
     exportItemsPricesTitle: 'Export Items&Prices',
     exportCompetitorListTitle: 'Export Competitor list',
-});
+};

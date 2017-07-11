@@ -1,40 +1,37 @@
-define([
-        'Underscore',
-        'translations/en/pagination',
-        'translations/en/filters'
-    ],
-    function (_, paginationTranslation, filtersTranslation) {
-        var priceSurveyTranslation = {
-            // body
-            max: 'max',
-            mid: 'mid',
-            min: 'min',
-            avg: 'avg',
-            median: 'med',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-            // header
-            total   : 'Total',
-            brand   : 'Brand',
-            variants: 'Variants',
-            size    : 'Size',
-            origin  : 'Origin',
-            gms     : '(GMS.)',
+var priceSurveyTranslation = {
+    // body
+    max: 'max',
+    mid: 'mid',
+    min: 'min',
+    avg: 'avg',
+    median: 'med',
 
-            // list
-            product : 'Product',
-            category: 'category',
+    // header
+    total   : 'Total',
+    brand   : 'Brand',
+    variants: 'Variants',
+    size    : 'Size',
+    origin  : 'Origin',
+    gms     : '(GMS.)',
 
-            // preview
-            timeStamp: 'Time Stamp',
-            branch   : 'Branch',
-            value    : 'Value',
-            employee : 'Employee',
-            options  : 'Options',
+    // list
+    product : 'Product',
+    category: 'category',
 
-            saveBtn  : 'Save',
+    // preview
+    timeStamp: 'Time Stamp',
+    branch   : 'Branch',
+    value    : 'Value',
+    employee : 'Employee',
+    options  : 'Options',
+    saveBtn  : 'Save',
 
-            // topBar
-            all: 'Price Survey'
-        };
-        return _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);
-    });
+    // topBar
+    all: 'Price Survey'
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);

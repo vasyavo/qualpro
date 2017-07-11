@@ -1,34 +1,31 @@
-define([
-        'Underscore',
-        'translations/en/pagination',
-        'translations/en/filters'
-    ],
-    function (_, paginationTranslation, filtersTranslation) {
-        var shelfSharesTranslation = {
-            // body
-            max: 'max',
-            mid: 'mid',
-            min: 'min',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-            // header
-            total: 'Total 100%',
-            brand: 'Brand',
+var shelfSharesTranslation = {
+    // body
+    max: 'max',
+    mid: 'mid',
+    min: 'min',
 
-            // list
-            product: 'Product',
+    // header
+    total: 'Total 100%',
+    brand: 'Brand',
 
-            // preview
-            timeStamp: 'Time Stamp',
-            branch   : 'Branch',
-            value    : 'Value',
-            employee : 'Employee',
-            options  : 'Options',
+    // list
+    product: 'Product',
 
-            saveBtn  : 'Save',
+    // preview
+    timeStamp: 'Time Stamp',
+    branch   : 'Branch',
+    value    : 'Value',
+    employee : 'Employee',
+    options  : 'Options',
 
-            // top Bar
-            all: 'Shelf shares'
+    saveBtn  : 'Save',
 
-        };
-        return _.extend({}, paginationTranslation, filtersTranslation, shelfSharesTranslation);
-    });
+    // top Bar
+    all: 'Shelf shares'
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, shelfSharesTranslation);
