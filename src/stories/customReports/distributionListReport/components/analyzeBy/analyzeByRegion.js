@@ -71,11 +71,20 @@ module.exports = (pipeline) => {
             data: { $push: '$count' },
             labels: {
                 $push: {
-                    $concat: [
-                        '$country.name.en',
-                        ' / ',
-                        '$region.name.en',
-                    ],
+                    en: {
+                        $concat: [
+                            '$country.name.en',
+                            ' / ',
+                            '$region.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            '$country.name.ar',
+                            ' / ',
+                            '$region.name.ar',
+                        ],
+                    },
                 },
             },
         },
