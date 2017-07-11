@@ -250,6 +250,8 @@ module.exports = (req, res, next) => {
                 priority: '$priority',
                 description: '$description',
                 status: '$status',
+                dateStart: '$dateStart',
+                dateEnd: '$dateEnd',
                 objectiveType: '$objectiveType',
                 form: '$form',
                 country: {
@@ -386,6 +388,9 @@ module.exports = (req, res, next) => {
                         <th>Form Type</th>
                         <th>Status</th>
                         <th>Priority</th>
+                        <th>Creation date</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -406,6 +411,9 @@ module.exports = (req, res, next) => {
                                 <td>${item.form ? item.form.contentType : ''}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>
+                                <td>${moment(item.createdBy.date).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
                             </tr>
                         `;
         }).join('')}
