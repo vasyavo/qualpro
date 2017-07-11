@@ -1,12 +1,6 @@
-define([
-        'views/domain/list'
-    ],
+var ListView = require('../../../views/domain/list');
 
-    function (ListView) {
-        var View = ListView.extend({
-            contentType: 'branch',
-            childContent: null
-        });
-
-        return View;
-    });
+module.exports = ListView.extend({
+    contentType: 'branch',
+    childContent: null
+});
