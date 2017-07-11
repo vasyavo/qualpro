@@ -204,7 +204,7 @@ const Filters = function() {
 
         // ToDo: add filtering by time
 
-        const beforeFilter = _.pick(filter, 'priority', 'objectiveType', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
+        const beforeFilter = _.pick(filter, '_id', 'priority', 'objectiveType', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
         const pipeLine = [];
         let personnelFilter;
 
@@ -1094,7 +1094,7 @@ const Filters = function() {
 
         const aggregationHelper = new AggregationHelper($defProjection, filter);
 
-        const beforeFilter = _.pick(filter, 'priority', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
+        const beforeFilter = _.pick(filter, '_id', 'priority', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
         const afterFilter = _.pick(filter, 'position');
         let aggregation;
         let pipeLine = [];
