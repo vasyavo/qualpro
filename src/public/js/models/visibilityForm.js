@@ -1,22 +1,16 @@
-define([
-        'models/parrent',
-        'validation'
-    ],
-    function (parent, validation) {
-        var Model = parent.extend({
-            defaults: {},
+var parent = require('./parrent');
 
-            validate: function (attrs) {
-                var errors = [];
-                if (errors.length > 0) {
-                    return errors;
-                }
-            },
+module.exports = parent.extend({
+    defaults: {},
 
-            urlRoot: function () {
-                return '/form/visibility';
-            }
-        });
+    validate: function (attrs) {
+        var errors = [];
+        if (errors.length > 0) {
+            return errors;
+        }
+    },
 
-        return Model;
-    });
+    urlRoot: function () {
+        return '/form/visibility';
+    }
+});

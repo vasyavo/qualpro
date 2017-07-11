@@ -1,20 +1,15 @@
-define([
-        'models/parrent',
-        'validation',
-        'constants/contentType'
+var parent = require('./parrent');
+var CONTENT_TYPES = require('../constants/contentType');
+
+module.exports = parent.extend({
+    idAttribute: '_id',
+
+    multilanguageFields: [
+        'category.name',
+        'brands.name'
     ],
-    function (parent, validation, CONTENT_TYPES) {
-        var Model = parent.extend({
-            idAttribute: '_id',
 
-            multilanguageFields: [
-                'category.name',
-                'brands.name'
-            ],
-
-            urlRoot: function () {
-                return CONTENT_TYPES.SHELFSHARES;
-            }
-        });
-        return Model;
-    });
+    urlRoot: function () {
+        return CONTENT_TYPES.SHELFSHARES;
+    }
+});

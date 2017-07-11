@@ -1,74 +1,69 @@
-define([
-    'models/parrent',
-    'validation',
-    'constants/otherConstants',
-    'constants/errorMessages',
-    'dataService',
-], function (parent, validation, CONSTANTS, ERROR_MESSAGES, dataService) {
-    var Model = parent.extend({
+var parent = require('./parrent');
+var dataService = require('../dataService');
+var CONSTANTS = require('../constants/otherConstants');
+var ERROR_MESSAGES = require('../constants/errorMessages');
 
-        defaults: {
-            selected            : true,
-            selectedForPersonnel: true
-        },
+module.exports = parent.extend({
 
-        urlRoot: function () {
-            return '/questionnary/answer';
-        },
+    defaults: {
+        selected            : true,
+        selectedForPersonnel: true
+    },
 
-        modelParse: function (model) {
-            var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
+    urlRoot: function () {
+        return '/questionnary/answer';
+    },
 
-            if (model.optionIndex && model.optionIndex.length) {
-                model.optionIndex.forEach(function (option, iterator) {
-                    model.optionIndex[iterator] = ++option;
-                });
-            }
+    modelParse: function (model) {
+        var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
 
-            if (model.text) {
-                model.text.currentLanguage = model.text[currentLanguage];
-            }
-
-            _.map(CONSTANTS.QUESTION_TYPE, function (type) {
-                if (model.type === type._id) {
-                    model.type = type;
-                    model.type.name.currentLanguage = model.type.name[currentLanguage];
-                }
-            });
-
-            return model;
-        },
-
-        edit: function (answerId, data) {
-            var that = this;
-
-            dataService.putData('/questionnary/answer/' + answerId, data, function (err) {
-                if (err) {
-                    return App.renderErrors([
-                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
-                        'Edit answer of question',
-                    ]);
-                }
-
-                that.trigger('answer-edited');
-            });
-        },
-
-        delete: function (answerId) {
-            var that = this;
-
-            dataService.deleteData('/questionnary/answer/' + answerId, {}, function (err) {
-                if (err) {
-                    return App.renderErrors([
-                        ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
-                        'Delete answer of question',
-                    ]);
-                }
-
-                that.trigger('answer-deleted');
+        if (model.optionIndex && model.optionIndex.length) {
+            model.optionIndex.forEach(function (option, iterator) {
+                model.optionIndex[iterator] = ++option;
             });
         }
-    });
 
-    return Model;
+        if (model.text) {
+            model.text.currentLanguage = model.text[currentLanguage];
+        }
+
+        _.map(CONSTANTS.QUESTION_TYPE, function (type) {
+            if (model.type === type._id) {
+                model.type = type;
+                model.type.name.currentLanguage = model.type.name[currentLanguage];
+            }
+        });
+
+        return model;
+    },
+
+    edit: function (answerId, data) {
+        var that = this;
+
+        dataService.putData('/questionnary/answer/' + answerId, data, function (err) {
+            if (err) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                    'Edit answer of question',
+                ]);
+            }
+
+            that.trigger('answer-edited');
+        });
+    },
+
+    delete: function (answerId) {
+        var that = this;
+
+        dataService.deleteData('/questionnary/answer/' + answerId, {}, function (err) {
+            if (err) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage],
+                    'Delete answer of question',
+                ]);
+            }
+
+            that.trigger('answer-deleted');
+        });
+    }
 });

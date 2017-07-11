@@ -1,30 +1,26 @@
-define([
-        'models/parrent'
-    ],
-    function (parent) {
-        var Model = parent.extend({
-            defaults   : {},
-            idAttribute: '_id',
+var parent = require('./parrent');
 
-            initialize: function () {
-                this.fetchAndReset();
+module.exports = parent.extend({
+    defaults   : {},
+    idAttribute: '_id',
+
+    initialize: function () {
+        this.fetchAndReset();
+    },
+
+    urlRoot: function () {
+        return '/modules';
+    },
+
+    fetchAndReset: function () {
+        var self = this;
+
+        this.fetch({
+            success: function (model) {
+                self.trigger('reset');
             },
-
-            urlRoot: function () {
-                return '/modules';
-            },
-
-            fetchAndReset: function () {
-                var self = this;
-
-                this.fetch({
-                    success: function (model) {
-                        self.trigger('reset');
-                    },
-                    error  : function () {
-                    }
-                });
+            error  : function () {
             }
         });
-        return Model;
-    });
+    }
+});

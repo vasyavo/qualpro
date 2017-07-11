@@ -1,33 +1,28 @@
-define([
-    'models/parrent',
-    'validation',
-    'constants/contentType'
-], function (parent, validation, CONTENT_TYPES) {
-    var Model = parent.extend({
-        defaults: {},
+var parent = require('./parrent');
+var CONTENT_TYPES = require('../constants/contentType');
 
-        multilanguageFields: [
-            'categoryName',
-            'variants.variantName',
-            'variants.items.name',
-            'variants.items.origin.name',
-            'variant.items.origin.name',
-            'origin.name',
-            'name'
-        ],
+module.exports = parent.extend({
+    defaults: {},
 
-        validate: function (attrs) {
-            var errors = [];
+    multilanguageFields: [
+        'categoryName',
+        'variants.variantName',
+        'variants.items.name',
+        'variants.items.origin.name',
+        'variant.items.origin.name',
+        'origin.name',
+        'name'
+    ],
 
-            if (errors.length > 0) {
-                return errors;
-            }
-        },
+    validate: function (attrs) {
+        var errors = [];
 
-        urlRoot: function () {
-            return CONTENT_TYPES.ITEM;
+        if (errors.length > 0) {
+            return errors;
         }
-    });
+    },
 
-    return Model;
+    urlRoot: function () {
+        return CONTENT_TYPES.ITEM;
+    }
 });
