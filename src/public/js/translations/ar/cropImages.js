@@ -1,10 +1,8 @@
-define([
-    'Underscore',
-    'translations/ar/filters'
-], function (_, filtersTranslation) {
-    return _.extend({}, {
-        title    : ' تحديد جزء من الصورة',
-        cancelBtn: 'إلغاء',
-        cropBtn  : 'تحديد'
-    }, filtersTranslation);
-});
+var _ = require('underscore');
+var filtersTranslation = require('./filters');
+
+module.exports = _.extend({}, {
+    title    : ' تحديد جزء من الصورة',
+    cancelBtn: 'إلغاء',
+    cropBtn  : 'تحديد'
+}, filtersTranslation);

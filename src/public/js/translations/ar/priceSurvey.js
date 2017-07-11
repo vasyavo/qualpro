@@ -1,41 +1,37 @@
-define([
-        'Underscore',
-        'translations/ar/pagination',
-        'translations/ar/filters'
-    ],
-    function (_, paginationTranslation, filtersTranslation) {
-        var priceSurveyTranslation = {
-            // body
-            max: 'الاقصى',
-            mid: ' منتصف',
-            min: 'الأدنى',
-            avg: ' متوسط ',
-            median: '', // todo
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-            // header
-            total   : 'المجموع الكلى',
-            brand   : 'المنافس',
-            variants: 'المنوع',
-            size    : 'الحجم',
-            origin  : 'بلد المنشأ',
-            gms     : '(كلغ.)',
+var priceSurveyTranslation = {
+    // body
+    max: 'الاقصى',
+    mid: ' منتصف',
+    min: 'الأدنى',
+    avg: ' متوسط ',
+    median: '', // todo
 
-            // list
-            product : 'المننج',
-            category: 'الفئة',
+    // header
+    total   : 'المجموع الكلى',
+    brand   : 'المنافس',
+    variants: 'المنوع',
+    size    : 'الحجم',
+    origin  : 'بلد المنشأ',
+    gms     : '(كلغ.)',
 
-            // preview
-            timeStamp: 'وقت الدخول',
-            branch   : 'الفرع',
-            value    : 'القيمة',
-            employee : 'الموظف',
-            options  : 'الخيارات',
+    // list
+    product : 'المننج',
+    category: 'الفئة',
 
-            saveBtn       : 'حفظ',
+    // preview
+    timeStamp: 'وقت الدخول',
+    branch   : 'الفرع',
+    value    : 'القيمة',
+    employee : 'الموظف',
+    options  : 'الخيارات',
+    saveBtn       : 'حفظ',
 
-            // topBar
+    // topBar
+    all: ' الدراسة الاستقصائية للأسعار'
+};
 
-            all: ' الدراسة الاستقصائية للأسعار'
-        };
-        return _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);
-    });
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);

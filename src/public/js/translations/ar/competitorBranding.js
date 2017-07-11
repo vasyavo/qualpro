@@ -1,47 +1,45 @@
-define([
-    'Underscore',
-    'translations/ar/pagination',
-    'translations/ar/filters'
-], function (_, paginationTranslation, filtersTranslation) {
-    var translation = {
-        // list view
-        brand      : 'المنافس',
-        category   : 'الفئة',
-        displayType: 'نوع العرض',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-        startDate: 'تاريخ البدء',
-        endDate  : 'تاريخ الانتهاء',
-        location : 'الموقع',
+var translation = {
+    // list view
+    brand      : 'المنافس',
+    category   : 'الفئة',
+    displayType: 'نوع العرض',
 
-        // preview
-        titlePreview : 'عرض بيانات النشاط التسويقي',
-        country      : 'الدولة',
-        region       : 'المنطقة',
-        subRegion    : 'المنطقة الفرعية',
-        retailSegment: 'الفئة التجارية',
-        outlet       : 'العميل',
-        branch       : 'الفرع',
-        description  : 'الوصف',
-        attachments  : 'الملفات المرفقة',
-        files        : 'الملفات',
-        attachBtn    : 'ارفاق',
-        sendBtn      : 'ارسال',
-        noTranslation: ' لا يوجد ترجمة ',
-        skipped      : 'تخطي',
-        commentText  : 'التعليق',
-        edit         : 'تعديل بيانات',
-        delete: '', // todo
-        saveBtn : '', // todo ar
+    startDate: 'تاريخ البدء',
+    endDate  : 'تاريخ الانتهاء',
+    location : 'الموقع',
 
-        // edit
-        competitorBrandingEditTitle: '', // todo ar
+    // preview
+    titlePreview : 'عرض بيانات النشاط التسويقي',
+    country      : 'الدولة',
+    region       : 'المنطقة',
+    subRegion    : 'المنطقة الفرعية',
+    retailSegment: 'الفئة التجارية',
+    outlet       : 'العميل',
+    branch       : 'الفرع',
+    description  : 'الوصف',
+    attachments  : 'الملفات المرفقة',
+    files        : 'الملفات',
+    attachBtn    : 'ارفاق',
+    sendBtn      : 'ارسال',
+    noTranslation: ' لا يوجد ترجمة ',
+    skipped      : 'تخطي',
+    commentText  : 'التعليق',
+    edit         : 'تعديل بيانات',
+    delete: '', // todo
+    saveBtn : '', // todo ar
 
-        // topBar
-        all        : ' العلامات التجارية وتقارير العرض للمنافسين',
-        okBtn      : 'موافق',
-        dialogTitle: ' التعليقات والمرفقات',
-        goToBtn : '' //todo
+    // edit
+    competitorBrandingEditTitle: '', // todo ar
 
-    };
-    return _.extend({}, paginationTranslation, filtersTranslation, translation);
-});
+    // topBar
+    all        : ' العلامات التجارية وتقارير العرض للمنافسين',
+    okBtn      : 'موافق',
+    dialogTitle: ' التعليقات والمرفقات',
+    goToBtn : '' //todo
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation);

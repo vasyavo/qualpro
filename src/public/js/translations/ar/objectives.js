@@ -1,113 +1,110 @@
-define([
-    'Underscore',
-    'translations/ar/pagination',
-    'translations/ar/cropImages',
-    'translations/ar/personnel',
-    'translations/ar/filters',
-    'translations/ar/visibilityForm'
-], function (_, paginationTranslation, cropImagesTranslation, personnelTranslation, filtersTranslation,
-             visibilityForm) {
-    var translation = {
-        crop             : cropImagesTranslation,
-        assignToPersonnel: personnelTranslation,
-        // top bar
-        objectives       : 'الأهداف',
-        allObjectives    : 'جميع الأهداف ',
-        assignedToMe     : ' مخصصة لي',
-        createdByMe      : ' تم إنشاؤه من قبلي',
-        myCoverObjectives: ' الأهداف المغطاة',
-        closed           : 'المغلقة',
-        myCCObjectives   : '', //todo translation
-        newObjective     : 'هدف جديد',
-        // list
-        priority         : 'الأولوية',
-        endDate          : 'تاريخ الانتهاء',
-        progress         : 'التقدم',
-        location         : 'الموقع',
-        coveringFor      : 'ينوب عن',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
+var cropImagesTranslation = require('./cropImages');
+var personnelTranslation = require('./personnel');
+var visibilityForm = require('./visibilityForm');
 
-        // create
-        titleCreate    : 'انشاء هدف جديد',
-        title          : 'عنوان النص',
-        type           : 'النوع',
-        assignTo       : 'تعيين الى',
-        status         : 'الحالة',
-        draft          : 'مسودة',
-        startDate      : 'تاريخ البدء',
-        description    : 'الوصف',
-        attachments    : 'المرفقات',
-        action         : 'اتخاذ اجراء',
-        attachFiles    : 'ارفاق ملفات',
-        linkForm       : 'ربط نموذج',
-        unlinkForm     : 'إلغاء ربط النموذج',
-        files          : 'الملفات',
-        commentText    : 'نص التعليق',
-        reAssign       : ' إعادة تعيين',
-        selectPersonnel: 'اختر الموظف',
+var translation = {
+    crop             : cropImagesTranslation,
+    assignToPersonnel: personnelTranslation,
+    // top bar
+    objectives       : 'الأهداف',
+    allObjectives    : 'جميع الأهداف ',
+    assignedToMe     : ' مخصصة لي',
+    createdByMe      : ' تم إنشاؤه من قبلي',
+    myCoverObjectives: ' الأهداف المغطاة',
+    closed           : 'المغلقة',
+    myCCObjectives   : '', //todo translation
+    newObjective     : 'هدف جديد',
+    // list
+    priority         : 'الأولوية',
+    endDate          : 'تاريخ الانتهاء',
+    progress         : 'التقدم',
+    location         : 'الموقع',
+    coveringFor      : 'ينوب عن',
 
-        // edit
-        titleEdit     : 'تعديل بيانات الهدف',
-        titleDuplicate: 'تكرار انشاءالهدف',
+    // create
+    titleCreate    : 'انشاء هدف جديد',
+    title          : 'عنوان النص',
+    type           : 'النوع',
+    assignTo       : 'تعيين الى',
+    status         : 'الحالة',
+    draft          : 'مسودة',
+    startDate      : 'تاريخ البدء',
+    description    : 'الوصف',
+    attachments    : 'المرفقات',
+    action         : 'اتخاذ اجراء',
+    attachFiles    : 'ارفاق ملفات',
+    linkForm       : 'ربط نموذج',
+    unlinkForm     : 'إلغاء ربط النموذج',
+    files          : 'الملفات',
+    commentText    : 'نص التعليق',
+    reAssign       : ' إعادة تعيين',
+    selectPersonnel: 'اختر الموظف',
 
-        // distribution
-        titleDistribution: 'نموذج التوزيع',
-        product          : 'المنتج',
-        variant          : "النوع",
-        item             : 'السلعة',
-        packing          : 'التغليف',
+    // edit
+    titleEdit     : 'تعديل بيانات الهدف',
+    titleDuplicate: 'تكرار انشاءالهدف',
 
-        // link form template
-        formType: ' نوع النموذج',
+    // distribution
+    titleDistribution: 'نموذج التوزيع',
+    product          : 'المنتج',
+    variant          : "النوع",
+    item             : 'السلعة',
+    packing          : 'التغليف',
 
-        // preview
-        titleObjective       : 'عرض الهدف',
-        main                 : 'الرئيسى',
-        objectivesTree       : ' هيكل الأهداف',
-        okBtn                : 'موافق',
-        viewSubObjective     : 'عرض الهدف الفرعى',
-        titleSubObjectiveView: 'هدف فرعى',
-        creationDate         : 'تاريخ الإنشاء',
+    // link form template
+    formType: ' نوع النموذج',
 
-        // subObjectives
-        titleAssign     : 'تعيين الهدف',
-        titleCreateSub  : 'انشاء هدف فرعى',
-        companyObjective: 'هدف  الشركة',
-        dontShow        : " عدم إظهار هدف الشركة في الأهداف الفرعية ",
+    // preview
+    titleObjective       : 'عرض الهدف',
+    main                 : 'الرئيسى',
+    objectivesTree       : ' هيكل الأهداف',
+    okBtn                : 'موافق',
+    viewSubObjective     : 'عرض الهدف الفرعى',
+    titleSubObjectiveView: 'هدف فرعى',
+    creationDate         : 'تاريخ الإنشاء',
 
-        // updatePreview
-        assignBy: ' تعيين بواسطة',
-        attach  : 'ارفاق',
-        send    : 'ارسال',
+    // subObjectives
+    titleAssign     : 'تعيين الهدف',
+    titleCreateSub  : 'انشاء هدف فرعى',
+    companyObjective: 'هدف  الشركة',
+    dontShow        : " عدم إظهار هدف الشركة في الأهداف الفرعية ",
 
-        // assignBtn
-        areaMan  : 'مدير المنطقة الفرعية',
-        salesMan : 'موظف المبيعات, المروج, موظف الشاحنة الصغيرة',
-        duplicate: 'تكرار',
-        edit     : 'تعديل بيانات',
-        assign   : 'تعيين',
+    // updatePreview
+    assignBy: ' تعيين بواسطة',
+    attach  : 'ارفاق',
+    send    : 'ارسال',
 
-        // subObjective
-        titleSubObjective : 'اهداف فرعية',
-        createSubObjective: 'انشاء هدف فرعى',
+    // assignBtn
+    areaMan  : 'مدير المنطقة الفرعية',
+    salesMan : 'موظف المبيعات, المروج, موظف الشاحنة الصغيرة',
+    duplicate: 'تكرار',
+    edit     : 'تعديل بيانات',
+    assign   : 'تعيين',
 
-        // form
-        forms: 'النماذج',
-        form : 'النموذج',
+    // subObjective
+    titleSubObjective : 'اهداف فرعية',
+    createSubObjective: 'انشاء هدف فرعى',
 
-        // effort
-        effort        : 'الجهود',
-        employee      : 'الموظف',
-        saveBtn       : 'حفظ',
-        sendBtn       : 'ارسال',
-        goToBtn       : 'الذهاب الى',
-        addTranslation: {
-            en: 'إضافة الترجمة العربية',
-            ar: 'إضافة الترجمة الانجليزية'
-        },
+    // form
+    forms: 'النماذج',
+    form : 'النموذج',
 
-        dialogTitle: 'ملفات الاهداف',
-        countOfAttachedFiles: '' // todo
-    };
+    // effort
+    effort        : 'الجهود',
+    employee      : 'الموظف',
+    saveBtn       : 'حفظ',
+    sendBtn       : 'ارسال',
+    goToBtn       : 'الذهاب الى',
+    addTranslation: {
+        en: 'إضافة الترجمة العربية',
+        ar: 'إضافة الترجمة الانجليزية'
+    },
 
-    return _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);
-});
+    dialogTitle: 'ملفات الاهداف',
+    countOfAttachedFiles: '' // todo
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);
