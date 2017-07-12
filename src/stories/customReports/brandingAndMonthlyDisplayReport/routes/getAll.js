@@ -45,6 +45,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
+        const currentLanguage = personnel.currentLanguage || 'en';
         const pipeline = [];
 
         // fixme: data structure should be like in Competitor Branding
@@ -324,8 +325,6 @@ module.exports = (req, res, next) => {
                                     '$$retailSegment.name.en',
                                     ' -> ',
                                     '$$outlet.name.en',
-                                    ' -> ',
-                                    '$$branch.name.en',
                                 ],
                             },
                             ar: {
@@ -339,8 +338,6 @@ module.exports = (req, res, next) => {
                                     '$$retailSegment.name.ar',
                                     ' -> ',
                                     '$$outlet.name.ar',
-                                    ' -> ',
-                                    '$$branch.name.ar',
                                 ],
                             },
                         },
@@ -360,6 +357,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
+                'branch.name': 1,
             },
         });
 
@@ -396,8 +394,8 @@ module.exports = (req, res, next) => {
                 total: 1,
                 location: 1,
                 attachments: 1,
-                dateStart: 1,
-                dateEnd: 1,
+                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
+                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 description: 1,
                 createdBy: 1,
                 category: {
@@ -406,16 +404,22 @@ module.exports = (req, res, next) => {
                         initialValue: {
                             $let: {
                                 vars: {
-                                    category: { $arrayElemAt: ['$category', 0] },
+                                    category: {
+                                        $arrayElemAt: ['$category', 0],
+                                    },
                                 },
-                                in: '$$category.name.en',
+                                in: `$$category.name.${currentLanguage}`,
                             },
                         },
                         in: {
                             $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
+                                if: {
+                                    $eq: [`$$this.name.${currentLanguage}`, '$$value'],
+                                },
                                 then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                                else: {
+                                    $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
+                                },
                             },
                         },
                     },
@@ -437,16 +441,22 @@ module.exports = (req, res, next) => {
                         initialValue: {
                             $let: {
                                 vars: {
-                                    displayType: { $arrayElemAt: ['$displayType', 0] },
+                                    displayType: {
+                                        $arrayElemAt: ['$displayType', 0],
+                                    },
                                 },
-                                in: '$$displayType.name.en',
+                                in: `$$displayType.name.${currentLanguage}`,
                             },
                         },
                         in: {
                             $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
+                                if: {
+                                    $eq: [`$$this.name.${currentLanguage}`, '$$value'],
+                                },
                                 then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                                else: {
+                                    $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
+                                },
                             },
                         },
                     },

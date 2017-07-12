@@ -14,7 +14,7 @@ const distributionListReport = require('./distributionListReport/router');
 const questionnaireReport = require('./questionnaireReport/router');
 const competitorBrandingReport = require('./competitorBrandingReport/router');
 const consumerSurveyReport = require('./consumerSurveyReport/router');
-const brandingAndMonthlyDisplayReport = require('./competitorBrandingReport/router');
+const brandingAndMonthlyDisplayReport = require('./brandingAndMonthlyDisplayReport/router');
 
 const router = express.Router();
 const checkAuth = access.checkAuth;
