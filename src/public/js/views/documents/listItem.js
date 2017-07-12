@@ -1,103 +1,99 @@
-define(function (require) {
+var Backbone = require('backbone');
+var Marionette = require('marionette');
+var _ = require('underscore');
+var documentPreview = require('../../views/documents/preview');
+var EditDocumentView = require('../../views/documents/edit');
+var FileTemplate = require('../../../templates/documents/list-item.html');
+var FolderTemplate = require('../../../templates/documents/list-item-folder.html');
 
-    var Backbone = require('backbone');
-    var Marionette = require('marionette');
-    var _ = require('underscore');
-    var documentPreview = require('views/documents/preview');
-    var EditDocumentView = require('views/documents/edit');
-    var FileTemplate = require('text!templates/documents/list-item.html');
-    var FolderTemplate = require('text!templates/documents/list-item-folder.html');
+module.exports = Marionette.View.extend({
 
-    return Marionette.View.extend({
+    initialize : function (options) {
+        this.translation = options.translation;
+        this.type = this.model.get('type') || 'file';
+    },
 
-        initialize : function (options) {
-            this.translation = options.translation;
-            this.type = this.model.get('type') || 'file';
-        },
+    template : function (ops) {
+        var template;
 
-        template : function (ops) {
-            var template;
+        if (ops.type === 'file') {
+            template = _.template(FileTemplate)(ops);
+        } else {
+            template = _.template(FolderTemplate)(ops);
+        }
 
-            if (ops.type === 'file') {
-                template = _.template(FileTemplate)(ops);
+        return template;
+    },
+
+    ui : {
+        thumbnail : '.documentBody',
+        checkbox : '#checkbox',
+        edit : '#edit'
+    },
+
+    events: {
+        'mouseup @ui.thumbnail': _.debounce(function(event) {
+            if (this.doucleckicked) {
+                this.doucleckicked = false;
             } else {
-                template = _.template(FolderTemplate)(ops);
+                this.onSingleClick.call(this, event);
             }
-
-            return template;
+        }, 300),
+        'dblclick @ui.thumbnail': function(event) {
+            this.doucleckicked = true;
+            this.onDoubleClick.call(this, event);
         },
+        'click @ui.edit' : 'showEditView'
+    },
 
-        ui : {
-            thumbnail : '.documentBody',
-            checkbox : '#checkbox',
-            edit : '#edit'
-        },
+    onSingleClick: function() {
+        var checkbox = this.ui.checkbox;
+        var newCheckedState = !checkbox.prop('checked');
 
-        events: {
-            'mouseup @ui.thumbnail': _.debounce(function(event) {
-                if (this.doucleckicked) {
-                    this.doucleckicked = false;
-                } else {
-                    this.onSingleClick.call(this, event);
-                }
-            }, 300),
-            'dblclick @ui.thumbnail': function(event) {
-                this.doucleckicked = true;
-                this.onDoubleClick.call(this, event);
-            },
-            'click @ui.edit' : 'showEditView'
-        },
+        checkbox.prop('checked', newCheckedState);
 
-        onSingleClick: function() {
-            var checkbox = this.ui.checkbox;
-            var newCheckedState = !checkbox.prop('checked');
+        this.trigger('checked', {
+            _id : this.model.get('_id'),
+            state : newCheckedState
+        });
+    },
 
-            checkbox.prop('checked', newCheckedState);
-
-            this.trigger('checked', {
-                _id : this.model.get('_id'),
-                state : newCheckedState
-            });
-        },
-
-        onDoubleClick : function () {
-            if (this.type === 'file') {
-                new documentPreview({
-                    model : this.model,
-                    translation : this.translation
-                });
-            } else {
-                Backbone.history.navigate('qualPro/documents/' + this.model.get('_id'), true);
-            }
-        },
-
-        showEditView : function () {
-            var that = this;
-
-            this.editView = new EditDocumentView({
+    onDoubleClick : function () {
+        if (this.type === 'file') {
+            new documentPreview({
                 model : this.model,
                 translation : this.translation
             });
-
-            this.editView.on('file:saved', function (savedData) {
-                that.model.set('title', savedData.title);
-                that.model.collection.trigger('sync');
-            });
-        },
-
-        modelEvents : {
-            'item:check' : 'checkItem',
-            'item:uncheck' : 'uncheckItem'
-        },
-
-        checkItem : function () {
-            this.ui.checkbox.prop('checked', true);
-        },
-
-        uncheckItem : function () {
-            this.ui.checkbox.prop('checked', false);
+        } else {
+            Backbone.history.navigate('qualPro/documents/' + this.model.get('_id'), true);
         }
+    },
 
-    });
+    showEditView : function () {
+        var that = this;
+
+        this.editView = new EditDocumentView({
+            model : this.model,
+            translation : this.translation
+        });
+
+        this.editView.on('file:saved', function (savedData) {
+            that.model.set('title', savedData.title);
+            that.model.collection.trigger('sync');
+        });
+    },
+
+    modelEvents : {
+        'item:check' : 'checkItem',
+        'item:uncheck' : 'uncheckItem'
+    },
+
+    checkItem : function () {
+        this.ui.checkbox.prop('checked', true);
+    },
+
+    uncheckItem : function () {
+        this.ui.checkbox.prop('checked', false);
+    }
 
 });
