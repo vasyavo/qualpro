@@ -62,7 +62,6 @@ module.exports = (req, res, next) => {
                 dateStart: 1,
                 dateEnd: 1,
                 description: 1,
-                attachments: 1,
                 createdBy: {
                     user: '$createdBy',
                     date: '$createdAt',
@@ -240,8 +239,88 @@ module.exports = (req, res, next) => {
                 foreignField: '_id',
                 as: 'createdBy.user.position',
             },
-        }, {
+        });
+
+        pipeline.push({
             $addFields: {
+                country: {
+                    $let: {
+                        vars: {
+                            country: {
+                                $arrayElemAt: ['$country', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
+                    },
+                },
+                region: {
+                    $let: {
+                        vars: {
+                            region: {
+                                $arrayElemAt: ['$region', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$region._id',
+                            name: '$$region.name',
+                        },
+                    },
+                },
+                subRegion: {
+                    $let: {
+                        vars: {
+                            subRegion: {
+                                $arrayElemAt: ['$subRegion', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$subRegion._id',
+                            name: '$$subRegion.name',
+                        },
+                    },
+                },
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: {
+                                $arrayElemAt: ['$retailSegment', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$retailSegment._id',
+                            name: '$$retailSegment.name',
+                        },
+                    },
+                },
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: {
+                                $arrayElemAt: ['$outlet', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$outlet._id',
+                            name: '$$outlet.name',
+                        },
+                    },
+                },
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: {
+                                $arrayElemAt: ['$branch', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                        },
+                    },
+                },
                 'createdBy.user.position': {
                     $let: {
                         vars: {
@@ -260,56 +339,35 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                branch: 1,
+            $addFields: {
                 location: {
-                    $let: {
-                        vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                            region: { $arrayElemAt: ['$region', 0] },
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
-                            branch: { $arrayElemAt: ['$branch', 0] },
-                        },
-                        in: {
-                            en: {
-                                $concat: [
-                                    '$$country.name.en',
-                                    ' -> ',
-                                    '$$region.name.en',
-                                    ' -> ',
-                                    '$$subRegion.name.en',
-                                    ' -> ',
-                                    '$$retailSegment.name.en',
-                                    ' -> ',
-                                    '$$outlet.name.en',
-                                ],
-                            },
-                            ar: {
-                                $concat: [
-                                    '$$country.name.ar',
-                                    ' -> ',
-                                    '$$region.name.ar',
-                                    ' -> ',
-                                    '$$subRegion.name.ar',
-                                    ' -> ',
-                                    '$$retailSegment.name.ar',
-                                    ' -> ',
-                                    '$$outlet.name.ar',
-                                ],
-                            },
-                        },
+                    en: {
+                        $concat: [
+                            '$$country.name.en',
+                            ' -> ',
+                            '$$region.name.en',
+                            ' -> ',
+                            '$$subRegion.name.en',
+                            ' -> ',
+                            '$$retailSegment.name.en',
+                            ' -> ',
+                            '$$outlet.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            '$$country.name.ar',
+                            ' -> ',
+                            '$$region.name.ar',
+                            ' -> ',
+                            '$$subRegion.name.ar',
+                            ' -> ',
+                            '$$retailSegment.name.ar',
+                            ' -> ',
+                            '$$outlet.name.ar',
+                        ],
                     },
                 },
-                category: 1,
-                displayType: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                description: 1,
-                createdBy: 1,
-                attachments: 1,
             },
         });
 
@@ -339,15 +397,6 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'files',
-                localField: 'attachments',
-                foreignField: '_id',
-                as: 'attachments',
-            },
-        });
-
-        pipeline.push({
             $project: {
                 _id: 1,
                 country: 1,
@@ -355,19 +404,7 @@ module.exports = (req, res, next) => {
                 subRegion: 1,
                 retailSegment: 1,
                 outlet: 1,
-                branch: {
-                    $let: {
-                        vars: {
-                            branch: {
-                                $arrayElemAt: ['$branch', 0],
-                            },
-                        },
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
-                        },
-                    },
-                },
+                branch: 1,
                 category: {
                     $reduce: {
                         input: '$category',
@@ -423,7 +460,6 @@ module.exports = (req, res, next) => {
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 description: 1,
-                attachments: 1,
                 createdBy: 1,
             },
         });
