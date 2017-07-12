@@ -30,6 +30,16 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'domains',
+            localField: 'region',
+            foreignField: '_id',
+            as: 'region',
+        },
+    });
+
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
             localField: '_id.subRegion',
             foreignField: '_id',
             as: 'subRegion',
@@ -48,11 +58,6 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             _id: 1,
-            count: 1,
-            region: 1,
-            retailSegment: 1,
-            outlet: 1,
-            branch: 1,
             country: {
                 $let: {
                     vars: {
@@ -61,6 +66,17 @@ module.exports = (pipeline) => {
                     in: {
                         _id: '$$country._id',
                         name: '$$country.name',
+                    },
+                },
+            },
+            region: {
+                $let: {
+                    vars: {
+                        region: { $arrayElemAt: ['$region', 0] },
+                    },
+                    in: {
+                        _id: '$$region._id',
+                        name: '$$region.name',
                     },
                 },
             },
@@ -75,6 +91,9 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            branch: 1,
+            retailSegment: 1,
+            outlet: 1,
             category: {
                 $let: {
                     vars: {
@@ -86,14 +105,28 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            count: 1,
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            location: {
+                en: {
+                    $concat: ['$region.name.en', ' / ', '$subRegion.name.en'],
+                },
+                ar: {
+                    $concat: ['$region.name.ar', ' / ', '$subRegion.name.ar'],
+                },
+            },
         },
     });
 
     pipeline.push({
         $sort: {
-            'country._id': 1,
-            'category._id': 1,
-            'subRegion._id': 1,
+            'country.name': 1,
+            location: 1,
+            'category.name': 1,
         },
     });
 
@@ -110,125 +143,13 @@ module.exports = (pipeline) => {
             branch: { $push: '$branch' },
             category: { $first: '$category' },
             data: { $push: '$count' },
-            labels: { $push: '$subRegion.name' },
+            labels: { $push: '$location' },
         },
     });
 
     pipeline.push({
-        $project: {
-            country: 1,
-            region: {
-                $reduce: {
-                    input: '$region',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            retailSegment: {
-                $reduce: {
-                    input: '$retailSegment',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            outlet: {
-                $reduce: {
-                    input: '$outlet',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            branch: {
-                $reduce: {
-                    input: '$branch',
-                    initialValue: [],
-                    in: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    {
-                                        $ne: ['$$this', []],
-                                    },
-                                    {
-                                        $ne: ['$$this', null],
-                                    },
-                                ],
-                            },
-                            then: {
-                                $setUnion: ['$$value', '$$this'],
-                            },
-                            else: '$$value',
-                        },
-                    },
-                },
-            },
-            category: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
-            labels: '$labels',
-        },
-    });
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'region',
-            foreignField: '_id',
-            as: 'region',
+        $addFields: {
+            datasets: [{ data: '$data' }],
         },
     });
 
@@ -261,7 +182,9 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
-            region: {
+            country: 1,
+            region: 1,
+            branch: {
                 _id: 1,
                 name: 1,
             },
@@ -273,11 +196,6 @@ module.exports = (pipeline) => {
                 _id: 1,
                 name: 1,
             },
-            branch: {
-                _id: 1,
-                name: 1,
-            },
-            country: 1,
             category: 1,
             datasets: 1,
             labels: 1,
