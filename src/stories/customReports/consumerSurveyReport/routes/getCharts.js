@@ -5,6 +5,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const ConsumersSurveyAnswersModel = require('./../../../../types/consumersSurveyAnswers/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const applyAnalyzeBy = require('./../components/analyzeBy/index');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -32,6 +33,7 @@ module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const timeFilter = query.timeFilter;
+        const analyzeByParam = query.analyzeBy;
         const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
@@ -356,15 +358,17 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                status: {
+                consumer: {
                     $let: {
                         vars: {
                             consumer: { $arrayElemAt: ['$consumer', 0] },
                         },
-                        in: '$$consumer.status',
+                        in: {
+                            createdBy: '$$consumer.createdBy',
+                            status: '$$consumer.status',
+                        },
                     },
                 },
-                consumer: null,
                 customer: {
                     gender: '$customer.gender',
                     nationality: {
@@ -377,7 +381,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $match: {
-                status: {
+                'consumer.status': {
                     $ne: 'draft',
                 },
             },
@@ -386,10 +390,12 @@ module.exports = (req, res, next) => {
         if (queryFilter.status && queryFilter.status.length) {
             pipeline.push({
                 $match: {
-                    status: { $in: queryFilter.status },
+                    'consumer.status': { $in: queryFilter.status },
                 },
             });
         }
+
+        applyAnalyzeBy(pipeline, analyzeByParam);
 
         ConsumersSurveyAnswersModel.aggregate(pipeline)
             .allowDiskUse(true)
@@ -408,6 +414,8 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result);
+        const response = result[0];
+
+        res.status(200).send(response);
     });
 };
