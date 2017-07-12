@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var topBarTemplate = require('../../../templates/competitorPromotion/topBarTemplate.html');
+var topBarTemplate = require('../../../templates/inStoreTasks/topBarTemplate.html');
 var pagination = require('../../../templates/pagination/pagination.html');
 var baseTopBar = require('../../views/baseTopBar');
 var CONTENT_TYPES = require('../../constants/contentType');

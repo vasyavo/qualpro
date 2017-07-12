@@ -1,34 +1,30 @@
-define([
-    'Underscore',
-    'text!templates/itemsPrices/topBarTemplate.html',
-    'text!templates/pagination/pagination.html',
-    'views/baseTopBar',
-    'views/itemsPrices/itemsToOutletView',
-    'views/selectLocation/selectLocationView'
-], function (_, topBarTemplate, pagination, baseTopBar, ItemsToOutletView, SelectLocationView) {
-    var TopBarView = baseTopBar.extend({
-        contentType       : 'itemsPrices',
-        template          : _.template(topBarTemplate),
-        paginationTemplate: _.template(pagination),
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/itemsPrices/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var ItemsToOutletView = require('../../views/itemsPrices/itemsToOutletView');
+var SelectLocationView = require('../../views/selectLocation/selectLocationView');
 
-        events: {
-            'click #linkBtn': 'showItemsToOutletDialog'
-        },
+module.exports = baseTopBar.extend({
+    contentType       : 'itemsPrices',
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 
-        showItemsToOutletDialog: _.debounce(function (e) {
-            var self = this;
-            var selectLocationView = new SelectLocationView({
-                translation: this.translation
+    events: {
+        'click #linkBtn': 'showItemsToOutletDialog'
+    },
+
+    showItemsToOutletDialog: _.debounce(function (e) {
+        var self = this;
+        var selectLocationView = new SelectLocationView({
+            translation: this.translation
+        });
+
+        selectLocationView.on('locationSelected', function (location) {
+            new ItemsToOutletView({
+                filter     : location,
+                translation: self.translation
             });
-
-            selectLocationView.on('locationSelected', function (location) {
-                new ItemsToOutletView({
-                    filter     : location,
-                    translation: self.translation
-                });
-            });
-        }, 1000, true)
-    });
-
-    return TopBarView;
+        });
+    }, 1000, true)
 });
