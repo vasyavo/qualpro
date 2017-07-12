@@ -410,19 +410,7 @@ module.exports = (req, res, next) => {
                 subRegion: 1,
                 retailSegment: 1,
                 outlet: 1,
-                branch: {
-                    $let: {
-                        vars: {
-                            branch: {
-                                $arrayElemAt: ['$branch', 0],
-                            },
-                        },
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
-                        },
-                    },
-                },
+                branch: 1,
                 category: {
                     $reduce: {
                         input: '$category',
