@@ -502,7 +502,7 @@ module.exports = (req, res, next) => {
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
@@ -573,7 +573,7 @@ module.exports = (req, res, next) => {
 
                 res.set({
                     'Content-Type': 'application/vnd.ms-excel',
-                    'Content-Disposition': `attachment; filename="brandingAndMonthlyDisplayReportExport_${new Date()}.xls"`,
+                    'Content-Disposition': `attachment; filename="competitorBrandingReportExport_${new Date()}.xls"`,
                     'Content-Length': buf.length,
                 }).status(200).send(buf);
             });
