@@ -4,8 +4,8 @@ const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const ConsumersSurveyAnswersModel = require('./../../../../types/consumersSurveyAnswers/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const applyAnalyzeBy = require('./../components/analyzeBy/index');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -33,10 +33,8 @@ module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const timeFilter = query.timeFilter;
+        const analyzeByParam = query.analyzeBy;
         const queryFilter = query.filter || {};
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
@@ -366,12 +364,8 @@ module.exports = (req, res, next) => {
                             consumer: { $arrayElemAt: ['$consumer', 0] },
                         },
                         in: {
+                            createdBy: '$$consumer.createdBy',
                             status: '$$consumer.status',
-                            title: '$$consumer.title',
-                            createdBy: '$$consumer.createdBy.user',
-                            countAnswered: '$$consumer.countAnswered',
-                            startDate: '$$consumer.startDate',
-                            dueDate: '$$consumer.dueDate',
                         },
                     },
                 },
@@ -401,102 +395,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'region.parent',
-                foreignField: '_id',
-                as: 'country',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                location: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    country: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$country.name.en',
-                            },
-                        },
-                        ' -> ',
-                        '$region.name.en',
-                        ' -> ',
-                        '$subRegion.name.en',
-                        ' -> ',
-                        '$retailSegment.name.en',
-                        ' -> ',
-                        '$outlet.name.en',
-                        ' -> ',
-                        '$branch.name.en',
-                    ],
-                },
-            },
-        });
-
-        pipeline.push({
-            $sort: {
-                location: 1,
-            },
-        });
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                setItems: { $push: '$$ROOT' },
-                total: { $sum: 1 },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$setItems',
-        });
-
-        pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'setItems.consumer.createdBy',
-                foreignField: '_id',
-                as: 'publisher',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                location: '$setItems.location',
-                status: '$setItems.consumer.status',
-                title: '$setItems.consumer.title',
-                publisherName: {
-                    $let: {
-                        vars: {
-                            publisher: { $arrayElemAt: ['$publisher', 0] },
-                        },
-                        in: {
-                            en: {
-                                $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'],
-                            },
-                            ar: {
-                                $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'],
-                            },
-                        },
-                    },
-                },
-                countAnswered: '$setItems.consumer.countAnswered',
-                startDate: { $dateToString: { format: '%m/%d/%Y', date: '$setItems.consumer.startDate' } },
-                dueDate: { $dateToString: { format: '%m/%d/%Y', date: '$setItems.consumer.dueDate' } },
-            },
-        });
+        applyAnalyzeBy(pipeline, analyzeByParam);
 
         ConsumersSurveyAnswersModel.aggregate(pipeline)
             .allowDiskUse(true)
@@ -515,6 +414,8 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        res.status(200).send(result);
+        const response = result[0];
+
+        res.status(200).send(response);
     });
 };
