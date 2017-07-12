@@ -310,7 +310,6 @@ module.exports = (req, res, next) => {
                 description: 1,
                 createdBy: 1,
                 attachments: 1,
-                total: 1,
             },
         });
 
@@ -351,13 +350,24 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                total: 1,
-                location: 1,
-                attachments: 1,
-                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
-                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
-                description: 1,
-                createdBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: {
+                                $arrayElemAt: ['$branch', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                        },
+                    },
+                },
                 category: {
                     $reduce: {
                         input: '$category',
@@ -381,19 +391,6 @@ module.exports = (req, res, next) => {
                                     $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
                                 },
                             },
-                        },
-                    },
-                },
-                branch: {
-                    $let: {
-                        vars: {
-                            branch: {
-                                $arrayElemAt: ['$branch', 0],
-                            },
-                        },
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
                         },
                     },
                 },
@@ -423,6 +420,11 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
+                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
+                description: 1,
+                attachments: 1,
+                createdBy: 1,
             },
         });
 

@@ -40,7 +40,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.BRAND, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
 
@@ -72,7 +72,7 @@ module.exports = (req, res, next) => {
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
         ], queryFilter, personnel);
 
@@ -288,7 +288,6 @@ module.exports = (req, res, next) => {
                 description: 1,
                 createdBy: 1,
                 attachments: 1,
-                total: 1,
             },
         });
 
@@ -305,6 +304,15 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
             },
         });
 
@@ -329,13 +337,24 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                total: 1,
-                location: 1,
-                attachments: 1,
-                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
-                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
-                description: 1,
-                createdBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: {
+                                $arrayElemAt: ['$branch', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                        },
+                    },
+                },
                 category: {
                     $reduce: {
                         input: '$category',
@@ -362,16 +381,16 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                branch: {
+                brand: {
                     $let: {
                         vars: {
-                            branch: {
-                                $arrayElemAt: ['$branch', 0],
+                            brand: {
+                                $arrayElemAt: ['$brand', 0],
                             },
                         },
                         in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
+                            _id: '$$brand._id',
+                            name: '$$brand.name',
                         },
                     },
                 },
@@ -401,6 +420,11 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
+                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
+                description: 1,
+                attachments: 1,
+                createdBy: 1,
             },
         });
 
@@ -443,7 +467,7 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
-                        return `
+            return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
@@ -460,7 +484,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.dateEnd}</td>
                             </tr>
                         `;
-                    }).join('')}
+        }).join('')}
                 </tbody>
             </table>
         `;
