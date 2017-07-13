@@ -416,7 +416,14 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (!response) {
+        if (response) {
+            response = {
+                barChart: {
+                    labels: response.labels,
+                    datasets: response.datasets,
+                },
+            };
+        } else {
             response = {
                 barChart: {
                     labels: [],
