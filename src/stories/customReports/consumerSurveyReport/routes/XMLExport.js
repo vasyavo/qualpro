@@ -6,7 +6,6 @@ const AccessManager = require('./../../../../helpers/access')();
 const ConsumersSurveyAnswersModel = require('./../../../../types/consumersSurveyAnswers/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const sanitizeHtml = require('./../../utils/sanitizeHtml');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -39,7 +38,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'title',
         ];
         const pipeline = [];
 
@@ -70,6 +69,14 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     branch: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                },
+            });
+        }
+
+        if (queryFilter.title && queryFilter.title.length) {
+            pipeline.push({
+                $match: {
+                    questionnaryId: { $in: queryFilter.title },
                 },
             });
         }
@@ -367,14 +374,20 @@ module.exports = (req, res, next) => {
                             consumer: { $arrayElemAt: ['$consumer', 0] },
                         },
                         in: {
-                            title: '$$consumer.title',
-                            questions: '$$consumer.questions',
                             status: '$$consumer.status',
-                            createdBy: '$$consumer.createdBy',
+                            title: '$$consumer.title',
+                            createdBy: '$$consumer.createdBy.user',
                             countAnswered: '$$consumer.countAnswered',
                             startDate: '$$consumer.startDate',
                             dueDate: '$$consumer.dueDate',
                         },
+                    },
+                },
+                customer: {
+                    gender: '$customer.gender',
+                    nationality: {
+                        _id: '$customer.nationality.name.en',
+                        name: '$customer.nationality.name',
                     },
                 },
             },
@@ -397,125 +410,111 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $project: {
-                title: '$consumer.title',
-                author: '$consumer.createdBy.user',
-                status: '$consumer.status',
-                numberOfRespondents: '$consumer.countAnswered',
-                startDate: { $dateToString: { format: '%m/%d/%Y', date: '$consumer.startDate' } },
-                dueDate: { $dateToString: { format: '%m/%d/%Y', date: '$consumer.dueDate' } },
-                name: '$customer.name',
-                nationality: '$customer.nationality.name',
-                gender: '$customer.gender',
-                question: {
-                    $let: {
-                        vars: {
-                            question: {
-                                $arrayElemAt: [
-                                    {
-                                        $filter: {
-                                            input: '$consumer.questions',
-                                            as: 'question',
-                                            cond: {
-                                                $eq: ['$$question._id', '$questionId'],
-                                            },
-                                        },
-                                    },
-                                    0,
-                                ],
-                            },
-                        },
-                        in: {
-                            text: '$$question.title',
-                            answer: {
-                                $cond: {
-                                    if: { $eq: ['$type', 'fullAnswer'] },
-                                    then: ['$text'],
-                                    else: {
-                                        $map: {
-                                            input: '$optionIndex',
-                                            as: 'index',
-                                            in: {
-                                                $arrayElemAt: ['$$question.options', { $subtract: ['$$index', 1] }],
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                country: '$region.parent',
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-            },
-        });
-
-        pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'country',
+                localField: 'region.parent',
                 foreignField: '_id',
                 as: 'country',
             },
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'author',
-                foreignField: '_id',
-                as: 'author',
-            },
-        });
-
-        pipeline.push({
             $addFields: {
-                author: {
-                    $let: {
-                        vars: {
-                            author: { $arrayElemAt: ['$author', 0] },
-                        },
-                        in: {
-                            en: {
-                                $concat: ['$$author.firstName.en', ' ', '$$author.lastName.en'],
-                            },
-                            ar: {
-                                $concat: ['$$author.firstName.ar', ' ', '$$author.lastName.ar'],
+                location: {
+                    $concat: [
+                        {
+                            $let: {
+                                vars: {
+                                    country: { $arrayElemAt: ['$country', 0] },
+                                },
+                                in: '$$country.name.en',
                             },
                         },
-                    },
-                },
-                country: {
-                    $let: {
-                        vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                        },
-                        in: {
-                            _id: '$$country._id',
-                            name: '$$country.name',
-                        },
-                    },
+                        ' -> ',
+                        '$region.name.en',
+                        ' -> ',
+                        '$subRegion.name.en',
+                        ' -> ',
+                        '$retailSegment.name.en',
+                        ' -> ',
+                        '$outlet.name.en',
+                        ' -> ',
+                        '$branch.name.en',
+                    ],
                 },
             },
         });
 
         pipeline.push({
             $sort: {
-                'country.name.en': 1,
-                'region.name.en': 1,
-                'subRegion.name.en': 1,
-                'retailSegment.name.en': 1,
-                'outlet.name.en': 1,
-                'branch.name.en': 1,
-                'title.en': 1,
-                'nationality.en': 1,
-                gender: 1,
-                'name.en': 1,
-                'question.text.en': 1,
+                location: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'consumer.createdBy',
+                foreignField: '_id',
+                as: 'publisher',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                total: 1,
+                location: 1,
+                status: '$consumer.status',
+                title: '$consumer.title',
+                publisher: {
+                    $let: {
+                        vars: {
+                            publisher: { $arrayElemAt: ['$publisher', 0] },
+                        },
+                        in: {
+                            name: {
+                                en: {
+                                    $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'],
+                                },
+                                ar: {
+                                    $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'],
+                                },
+                            },
+                            position: '$$publisher.position',
+                        },
+                    },
+                },
+                countAnswered: '$consumer.countAnswered',
+                startDate: { $dateToString: { format: '%m/%d/%Y', date: '$consumer.startDate' } },
+                dueDate: { $dateToString: { format: '%m/%d/%Y', date: '$consumer.dueDate' } },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'publisher.position',
+                foreignField: '_id',
+                as: 'publisher.position',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                publisher: {
+                    name: '$publisher.name',
+                    position: {
+                        $let: {
+                            vars: {
+                                position: { $arrayElemAt: ['$publisher.position', 0] },
+                            },
+                            in: {
+                                _id: '$$position._id',
+                                name: '$$position.name',
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -543,49 +542,29 @@ module.exports = (req, res, next) => {
             <table>
                 <thead>
                     <tr>
-                        <th>Country</th>
-                        <th>Region</th>
-                        <th>Sub Region</th>
-                        <th>Trade channel</th>
-                        <th>Outlet</th>
-                        <th>Branch</th>
-                        <th>Author</th>
+                        <th>Location</th>
+                        <th>Publisher</th>
+                        <th>Title</th>
                         <th>Status</th>
-                        <th>Number of respondents</th>
+                        <th>Answers number</th>
                         <th>Start date</th>
-                        <th>End date</th>
-                        <th>Consumer survey name</th>
-                        <th>Customer name</th>
-                        <th>Nationality</th>
-                        <th>Gender</th>
-                        <th>Question</th>
-                        <th>Answer</th>
+                        <th>Due date</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.country.name[currentLanguage] || item.country.name[anotherLanguage] }</td>
-                                <td>${item.region.name[currentLanguage] || item.region.name[anotherLanguage] }</td>
-                                <td>${item.subRegion.name[currentLanguage] || item.subRegion.name[anotherLanguage] }</td>
-                                <td>${item.retailSegment.name[currentLanguage] || item.retailSegment.name[anotherLanguage] }</td>
-                                <td>${item.outlet.name[currentLanguage] || item.outlet.name[anotherLanguage] }</td>
-                                <td>${item.branch.name[currentLanguage] || item.branch.name[anotherLanguage] }</td>
-                                <td>${item.author[currentLanguage] || item.author[anotherLanguage] }</td>
+                                <td>${item.location}</td>
+                                <td>${`${item.publisher.name[currentLanguage] || item.publisher.name[anotherLanguage]}, ${item.publisher.position.name[currentLanguage] || item.publisher.position.name[anotherLanguage]}`}</td>
+                                <td>${item.title[currentLanguage] || item.title[anotherLanguage]}</td>
                                 <td>${item.status}</td>
-                                <td>${item.numberOfRespondents}</td>
+                                <td>${item.countAnswered}</td>
                                 <td>${item.startDate}</td>
                                 <td>${item.dueDate}</td>
-                                <td>${item.title[currentLanguage] || item.title[anotherLanguage]}</td>
-                                <td>${item.name}</td>
-                                <td>${item.nationality[currentLanguage] || item.nationality[anotherLanguage]}</td>
-                                <td>${item.gender}</td>
-                                <td>${sanitizeHtml(item.question.text[currentLanguage] || item.question.text[anotherLanguage])}</td>
-                                <td>${sanitizeHtml(item.question.answer.map((item) => item[currentLanguage] || item[anotherLanguage]).join('; '))}</td>
                             </tr>
                                 `;
-                        }).join('')}
+                    }).join('')}
                 </tbody>
             </table>
         `;
@@ -607,7 +586,7 @@ module.exports = (req, res, next) => {
 
                 res.set({
                     'Content-Type': 'application/vnd.ms-excel',
-                    'Content-Disposition': `attachment; filename="consumerSurveyDetailsReportExport_${new Date()}.xls"`,
+                    'Content-Disposition': `attachment; filename="consumerSurveyReportExport_${new Date()}.xls"`,
                     'Content-Length': buf.length,
                 }).status(200).send(buf);
             });
