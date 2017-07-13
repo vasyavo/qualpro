@@ -201,11 +201,12 @@ module.exports = (req, res, next) => {
                         return {
                             data: dataset.data.map(items => {
                                 const thisItem = {};
-
+                                let total = 0;
                                 items.forEach(item => {
+                                    total += item.count;
                                     thisItem[item.status] = item.count;
                                 });
-
+                                thisItem.total = total;
                                 return thisItem;
                             }),
                         };
