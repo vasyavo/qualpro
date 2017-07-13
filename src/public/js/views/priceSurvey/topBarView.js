@@ -1,57 +1,52 @@
-define(
-    [
-        'text!templates/priceSurvey/topBarTemplate.html',
-        'text!templates/pagination/pagination.html',
-        'views/baseTopBar',
-        'constants/contentType'
-    ],
-    function (topBarTemplate, pagination, baseTopBar, contentType) {
-        var TopBarView = baseTopBar.extend({
-            contentType       : contentType.PRICESURVEY,
-            template          : _.template(topBarTemplate),
-            paginationTemplate: _.template(pagination),
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/newProductLaunch/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var contentType = require('../../constants/contentType');
 
-            render: function () {
-                var paginationContainer;
-                var $thisEl = this.$el;
-                var $createBtn;
-                var $archiveBtn;
-                var $unArchiveBtn;
+module.exports = baseTopBar.extend({
+    contentType       : contentType.PRICESURVEY,
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 
-                $('title').text(this.contentType);
+    render: function () {
+        var paginationContainer;
+        var $thisEl = this.$el;
+        var $createBtn;
+        var $archiveBtn;
+        var $unArchiveBtn;
 
-                $thisEl.html(this.template({
-                    viewType     : this.viewType,
-                    contentType  : this.contentType,
-                    translation  : this.translation,
-                    currentUserId: this.sendPassForCurrentUser
-                }));
+        $('title').text(this.contentType);
 
-                $thisEl.find('#' + this.tabName).addClass('viewBarTabActive');
+        $thisEl.html(this.template({
+            viewType     : this.viewType,
+            contentType  : this.contentType,
+            translation  : this.translation,
+            currentUserId: this.sendPassForCurrentUser
+        }));
 
-                this.$actionButton = $thisEl.find('.actionBtn');
-                this.$editButton = $thisEl.find('#editBtn');
+        $thisEl.find('#' + this.tabName).addClass('viewBarTabActive');
 
-                paginationContainer = $thisEl.find('#paginationHolder');
-                paginationContainer.html(this.paginationTemplate({translation: this.translation}));
+        this.$actionButton = $thisEl.find('.actionBtn');
+        this.$editButton = $thisEl.find('#editBtn');
 
-                $createBtn = $thisEl.find('#createBtn');
-                $archiveBtn = $thisEl.find('#archiveBtn');
-                $unArchiveBtn = $thisEl.find('#unArchiveBtn');
+        paginationContainer = $thisEl.find('#paginationHolder');
+        paginationContainer.html(this.paginationTemplate({translation: this.translation}));
 
-                if (this.tabName === 'archived') {
-                    $archiveBtn.hide();
-                    $unArchiveBtn.show();
-                    $createBtn.hide();
-                } else {
-                    $createBtn.show();
-                    $archiveBtn.show();
-                    $unArchiveBtn.hide();
-                }
+        $createBtn = $thisEl.find('#createBtn');
+        $archiveBtn = $thisEl.find('#archiveBtn');
+        $unArchiveBtn = $thisEl.find('#unArchiveBtn');
 
-                return this;
-            }
-        });
+        if (this.tabName === 'archived') {
+            $archiveBtn.hide();
+            $unArchiveBtn.show();
+            $createBtn.hide();
+        } else {
+            $createBtn.show();
+            $archiveBtn.show();
+            $unArchiveBtn.hide();
+        }
 
-        return TopBarView;
-    });
+        return this;
+    }
+});
