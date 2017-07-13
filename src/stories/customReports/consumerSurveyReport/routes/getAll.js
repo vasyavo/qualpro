@@ -533,7 +533,7 @@ module.exports = (req, res, next) => {
         }
 
         const response = result.length ?
-            result : { data: [], total: 0 };
+            result[0] : { data: [], total: 0 };
 
         res.status(200).send(response);
     });
