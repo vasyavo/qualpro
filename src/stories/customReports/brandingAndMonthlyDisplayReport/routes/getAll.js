@@ -4,7 +4,7 @@ const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
-const CompetitorBrandingModel = require('./../../../../types/competitorBranding/model');
+const BrandingAndMonthlyDisplayModel = require('./../../../../types/brandingAndMonthlyDisplay/model');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
@@ -42,10 +42,33 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.BRAND, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
+        const currentLanguage = personnel.currentLanguage || 'en';
         const pipeline = [];
+
+        // fixme: data structure should be like in Competitor Branding
+        pipeline.push({
+            $project: {
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                category: '$categories',
+                displayType: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                description: 1,
+                attachments: 1,
+                createdBy: {
+                    user: '$createdBy',
+                    date: '$createdAt',
+                },
+            },
+        });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -71,7 +94,7 @@ module.exports = (req, res, next) => {
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND,
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
         ], queryFilter, personnel);
 
@@ -186,7 +209,6 @@ module.exports = (req, res, next) => {
                 outlet: '$setBranding.outlet',
                 branch: '$setBranding.branch',
                 category: '$setBranding.category',
-                brand: '$setBranding.brand',
                 displayType: '$setBranding.displayType',
                 dateStart: '$setBranding.dateStart',
                 dateEnd: '$setBranding.dateEnd',
@@ -322,7 +344,6 @@ module.exports = (req, res, next) => {
                     },
                 },
                 category: 1,
-                brand: 1,
                 displayType: 1,
                 dateStart: 1,
                 dateEnd: 1,
@@ -346,15 +367,6 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'brands',
-                localField: 'brand',
-                foreignField: '_id',
-                as: 'brand',
             },
         });
 
@@ -392,16 +404,22 @@ module.exports = (req, res, next) => {
                         initialValue: {
                             $let: {
                                 vars: {
-                                    category: { $arrayElemAt: ['$category', 0] },
+                                    category: {
+                                        $arrayElemAt: ['$category', 0],
+                                    },
                                 },
-                                in: '$$category.name.en',
+                                in: `$$category.name.${currentLanguage}`,
                             },
                         },
                         in: {
                             $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
+                                if: {
+                                    $eq: [`$$this.name.${currentLanguage}`, '$$value'],
+                                },
                                 then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                                else: {
+                                    $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
+                                },
                             },
                         },
                     },
@@ -417,33 +435,28 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                brand: {
-                    $let: {
-                        vars: {
-                            brand: { $arrayElemAt: ['$brand', 0] },
-                        },
-                        in: {
-                            _id: '$$brand._id',
-                            name: '$$brand.name',
-                        },
-                    },
-                },
                 displayType: {
                     $reduce: {
                         input: '$displayType',
                         initialValue: {
                             $let: {
                                 vars: {
-                                    displayType: { $arrayElemAt: ['$displayType', 0] },
+                                    displayType: {
+                                        $arrayElemAt: ['$displayType', 0],
+                                    },
                                 },
-                                in: '$$displayType.name.en',
+                                in: `$$displayType.name.${currentLanguage}`,
                             },
                         },
                         in: {
                             $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
+                                if: {
+                                    $eq: [`$$this.name.${currentLanguage}`, '$$value'],
+                                },
                                 then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                                else: {
+                                    $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
+                                },
                             },
                         },
                     },
@@ -461,14 +474,14 @@ module.exports = (req, res, next) => {
             },
         });
 
-        CompetitorBrandingModel.aggregate(pipeline)
+        BrandingAndMonthlyDisplayModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);

@@ -6,6 +6,7 @@ const ConsumersSurveyAnswersModel = require('./../../../../types/consumersSurvey
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -36,7 +37,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'title',
         ];
         const pipeline = [];
 
@@ -65,6 +66,14 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     branch: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                },
+            });
+        }
+
+        if (queryFilter.title && queryFilter.title.length) {
+            pipeline.push({
+                $match: {
+                    questionnaryId: { $in: queryFilter.title },
                 },
             });
         }
@@ -365,6 +374,14 @@ module.exports = (req, res, next) => {
                     },
                 },
                 consumer: null,
+                title: {
+                    $let: {
+                        vars: {
+                            consumer: { $arrayElemAt: ['$consumer', 0] },
+                        },
+                        in: '$$consumer.title',
+                    },
+                },
                 customer: {
                     gender: '$customer.gender',
                     nationality: {
@@ -395,6 +412,12 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: null,
                 countries: { $addToSet: '$region.parent' },
+                titles: {
+                    $addToSet: {
+                        _id: '$questionnaryId',
+                        name: '$title',
+                    },
+                },
                 regions: { $addToSet: '$region' },
                 subRegions: { $addToSet: '$subRegion' },
                 retailSegments: { $addToSet: '$retailSegment' },
@@ -428,6 +451,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
+                titles: 1,
                 countries: {
                     _id: 1,
                     name: 1,
@@ -479,6 +503,7 @@ module.exports = (req, res, next) => {
 
         const response = result && result[0] ? result[0] : {
             countries: [],
+            titles: [],
             regions: [],
             subRegions: [],
             branches: [],
@@ -529,6 +554,16 @@ module.exports = (req, res, next) => {
             return response.statuses.indexOf(item._id) > -1;
         });
 
+        response.titles = response.titles.map(item => {
+            return {
+                _id: item._id,
+                name: {
+                    en: sanitizeHtml(item.name.en),
+                    ar: sanitizeHtml(item.name.ar),
+                },
+            };
+        });
+
         response.genders = genders.filter((item) => {
             return response.genders.indexOf(item._id) > -1;
         });
@@ -575,13 +610,6 @@ module.exports = (req, res, next) => {
                     ar: '',
                 },
                 value: 'publisher',
-            },
-            {
-                name: {
-                    en: 'Consumer survey',
-                    ar: '',
-                },
-                value: 'consumerSurvey',
             },
         ];
 

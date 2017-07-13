@@ -4,11 +4,11 @@ const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
-const ObjectiveModel = require('./../../../../types/objective/model');
+const BrandingAndMonthlyDisplayModel = require('./../../../../types/brandingAndMonthlyDisplay/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const applyAnalyzeBy = require('./../components/analyzeBy/index');
 const moment = require('moment');
+const applyAnalyzeBy = require('./../components/analyzeBy/index');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -40,13 +40,30 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, 'createdByPersonnel',
+            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
 
+        // fixme: data structure should be like in Competitor Branding
         pipeline.push({
-            $match: {
-                archived: false,
+            $project: {
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                category: '$categories',
+                displayType: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                description: 1,
+                attachments: 1,
+                createdBy: {
+                    user: '$createdBy',
+                    date: '$createdAt',
+                },
             },
         });
 
@@ -71,20 +88,17 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                context: CONTENT_TYPES.OBJECTIVES,
-            },
-        });
-
         locationFiler(pipeline, personnel, queryFilter);
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, 'status', 'priority', 'objectiveType'], queryFilter, personnel);
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
+        ], queryFilter, personnel);
 
-        if (queryFilter.formType && queryFilter.formType.length) {
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
-                'form.contentType': {
-                    $in: queryFilter.formType,
+                'createdBy.user': {
+                    $in: queryFilter[CONTENT_TYPES.PERSONNEL],
                 },
             });
         }
@@ -120,15 +134,26 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user': {
-                        $in: queryFilter.createdByPersonnel,
+        pipeline.push({
+            $addFields: {
+                category: {
+                    $let: {
+                        vars: {
+                            allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
+                        },
+                        in: {
+                            $filter: {
+                                input: { $ifNull: ['$category', []] },
+                                as: 'category',
+                                cond: {
+                                    $setIsSubset: [['$$category'], '$$allowedCategory'],
+                                },
+                            },
+                        },
                     },
                 },
-            });
-        }
+            },
+        });
 
         pipeline.push({
             $lookup: {
@@ -174,14 +199,14 @@ module.exports = (req, res, next) => {
 
         applyAnalyzeBy(pipeline, analyzeByParam);
 
-        ObjectiveModel.aggregate(pipeline)
+        BrandingAndMonthlyDisplayModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
@@ -193,32 +218,9 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (response) {
+        if (!response || !response.charts) {
             response = {
-                barChart: {
-                    labels: response.labels,
-                    datasets: response.datasets.map(dataset => {
-                        return {
-                            data: dataset.data.map(items => {
-                                const thisItem = {};
-                                let total = 0;
-                                items.forEach(item => {
-                                    total += item.count;
-                                    thisItem[item.status] = item.count;
-                                });
-                                thisItem.total = total;
-                                return thisItem;
-                            }),
-                        };
-                    }),
-                },
-            };
-        } else {
-            response = {
-                barChart: {
-                    labels: [],
-                    datasets: [],
-                },
+                charts: [],
             };
         }
 

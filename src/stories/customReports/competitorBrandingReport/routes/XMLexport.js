@@ -1,13 +1,13 @@
+const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
-const generalFiler = require('./../../utils/generalFilter');
 const CompetitorBrandingModel = require('./../../../../types/competitorBranding/model');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const locationFiler = require('./../../utils/locationFilter');
+const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -31,21 +31,40 @@ module.exports = (req, res, next) => {
             },
         },
     };
+    let currentLanguage;
 
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
-        const page = query.page || 1;
-        const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
-        const skip = (page - 1) * limit;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.BRAND, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
+
+        currentLanguage = personnel.currentLanguage || 'en';
+
         const pipeline = [];
+
+        pipeline.push({
+            $project: {
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                category: 1,
+                brand: 1,
+                displayType: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                description: 1,
+                createdBy: 1,
+            },
+        });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -157,47 +176,6 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $group: {
-                _id: null,
-                total: { $sum: 1 },
-                setBranding: { $push: '$$ROOT' },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$setBranding',
-        });
-
-        pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
-        });
-
-        pipeline.push({
-            $project: {
-                _id: '$setBranding._id',
-                country: '$setBranding.country',
-                region: '$setBranding.region',
-                subRegion: '$setBranding.subRegion',
-                retailSegment: '$setBranding.retailSegment',
-                outlet: '$setBranding.outlet',
-                branch: '$setBranding.branch',
-                category: '$setBranding.category',
-                brand: '$setBranding.brand',
-                displayType: '$setBranding.displayType',
-                dateStart: '$setBranding.dateStart',
-                dateEnd: '$setBranding.dateEnd',
-                description: '$setBranding.description',
-                createdBy: '$setBranding.createdBy',
-                attachments: '$setBranding.attachments',
-                total: 1,
-            },
-        });
-
-        pipeline.push({
             $lookup: {
                 from: 'domains',
                 localField: 'country',
@@ -258,8 +236,88 @@ module.exports = (req, res, next) => {
                 foreignField: '_id',
                 as: 'createdBy.user.position',
             },
-        }, {
+        });
+
+        pipeline.push({
             $addFields: {
+                country: {
+                    $let: {
+                        vars: {
+                            country: {
+                                $arrayElemAt: ['$country', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
+                    },
+                },
+                region: {
+                    $let: {
+                        vars: {
+                            region: {
+                                $arrayElemAt: ['$region', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$region._id',
+                            name: '$$region.name',
+                        },
+                    },
+                },
+                subRegion: {
+                    $let: {
+                        vars: {
+                            subRegion: {
+                                $arrayElemAt: ['$subRegion', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$subRegion._id',
+                            name: '$$subRegion.name',
+                        },
+                    },
+                },
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: {
+                                $arrayElemAt: ['$retailSegment', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$retailSegment._id',
+                            name: '$$retailSegment.name',
+                        },
+                    },
+                },
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: {
+                                $arrayElemAt: ['$outlet', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$outlet._id',
+                            name: '$$outlet.name',
+                        },
+                    },
+                },
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: {
+                                $arrayElemAt: ['$branch', 0],
+                            },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                        },
+                    },
+                },
                 'createdBy.user.position': {
                     $let: {
                         vars: {
@@ -278,58 +336,35 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                branch: 1,
+            $addFields: {
                 location: {
-                    $let: {
-                        vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                            region: { $arrayElemAt: ['$region', 0] },
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
-                            branch: { $arrayElemAt: ['$branch', 0] },
-                        },
-                        in: {
-                            en: {
-                                $concat: [
-                                    '$$country.name.en',
-                                    ' -> ',
-                                    '$$region.name.en',
-                                    ' -> ',
-                                    '$$subRegion.name.en',
-                                    ' -> ',
-                                    '$$retailSegment.name.en',
-                                    ' -> ',
-                                    '$$outlet.name.en',
-                                ],
-                            },
-                            ar: {
-                                $concat: [
-                                    '$$country.name.ar',
-                                    ' -> ',
-                                    '$$region.name.ar',
-                                    ' -> ',
-                                    '$$subRegion.name.ar',
-                                    ' -> ',
-                                    '$$retailSegment.name.ar',
-                                    ' -> ',
-                                    '$$outlet.name.ar',
-                                ],
-                            },
-                        },
+                    en: {
+                        $concat: [
+                            '$country.name.en',
+                            ' -> ',
+                            '$region.name.en',
+                            ' -> ',
+                            '$subRegion.name.en',
+                            ' -> ',
+                            '$retailSegment.name.en',
+                            ' -> ',
+                            '$outlet.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            '$country.name.ar',
+                            ' -> ',
+                            '$region.name.ar',
+                            ' -> ',
+                            '$subRegion.name.ar',
+                            ' -> ',
+                            '$retailSegment.name.ar',
+                            ' -> ',
+                            '$outlet.name.ar',
+                        ],
                     },
                 },
-                category: 1,
-                brand: 1,
-                displayType: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                description: 1,
-                createdBy: 1,
-                attachments: 1,
-                total: 1,
             },
         });
 
@@ -368,59 +403,46 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'files',
-                localField: 'attachments',
-                foreignField: '_id',
-                as: 'attachments',
-            },
-        });
-
-        pipeline.push({
             $project: {
                 _id: 1,
-                total: 1,
-                location: 1,
-                attachments: 1,
-                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
-                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
-                description: 1,
-                createdBy: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
                 category: {
                     $reduce: {
                         input: '$category',
                         initialValue: {
                             $let: {
                                 vars: {
-                                    category: { $arrayElemAt: ['$category', 0] },
+                                    category: {
+                                        $arrayElemAt: ['$category', 0],
+                                    },
                                 },
-                                in: '$$category.name.en',
+                                in: `$$category.name.${currentLanguage}`,
                             },
                         },
                         in: {
                             $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
+                                if: {
+                                    $eq: [`$$this.name.${currentLanguage}`, '$$value'],
+                                },
                                 then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                                else: {
+                                    $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
+                                },
                             },
-                        },
-                    },
-                },
-                branch: {
-                    $let: {
-                        vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
-                        },
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
                         },
                     },
                 },
                 brand: {
                     $let: {
                         vars: {
-                            brand: { $arrayElemAt: ['$brand', 0] },
+                            brand: {
+                                $arrayElemAt: ['$brand', 0],
+                            },
                         },
                         in: {
                             _id: '$$brand._id',
@@ -434,30 +456,30 @@ module.exports = (req, res, next) => {
                         initialValue: {
                             $let: {
                                 vars: {
-                                    displayType: { $arrayElemAt: ['$displayType', 0] },
+                                    displayType: {
+                                        $arrayElemAt: ['$displayType', 0],
+                                    },
                                 },
-                                in: '$$displayType.name.en',
+                                in: `$$displayType.name.${currentLanguage}`,
                             },
                         },
                         in: {
                             $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
+                                if: {
+                                    $eq: [`$$this.name.${currentLanguage}`, '$$value'],
+                                },
                                 then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                                else: {
+                                    $concat: ['$$value', ', ', `$$this.name.${currentLanguage}`],
+                                },
                             },
                         },
                     },
                 },
-            },
-        });
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                total: { $first: '$total' },
-                data: {
-                    $push: '$$ROOT',
-                },
+                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
+                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
+                description: 1,
+                createdBy: 1,
             },
         });
 
@@ -468,7 +490,7 @@ module.exports = (req, res, next) => {
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.COMPETITOR_PROMOTION_ACTIVITY, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.COMPETITOR_BRANDING_DISPLAY_REPORT, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
@@ -478,9 +500,71 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result.length ?
-            result[0] : { data: [], total: 0 };
+        /* eslint-disable */
+        const verstka = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
+                        <th>Branch</th>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Product</th>
+                        <th>Brand</th>
+                        <th>Display Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.map(item => {
+            return `
+                            <tr>
+                                <td>${item.country.name[currentLanguage]}</td>
+                                <td>${item.region.name[currentLanguage]}</td>
+                                <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
+                                <td>${item.category}</td>
+                                <td>${item.brand.name[currentLanguage]}</td>
+                                <td>${item.displayType}</td>
+                                <td>${item.dateStart}</td>
+                                <td>${item.dateEnd}</td>
+                            </tr>
+                        `;
+        }).join('')}
+                </tbody>
+            </table>
+        `;
+        /* eslint-enable */
 
-        res.status(200).send(response);
+        conversion(verstka, (err, stream) => {
+            if (err) {
+                return next(err);
+            }
+
+            const bufs = [];
+
+            stream.on('data', (data) => {
+                bufs.push(data);
+            });
+
+            stream.on('end', () => {
+                const buf = Buffer.concat(bufs);
+
+                res.set({
+                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Disposition': `attachment; filename="competitorBrandingReportExport_${new Date()}.xls"`,
+                    'Content-Length': buf.length,
+                }).status(200).send(buf);
+            });
+        });
     });
 };

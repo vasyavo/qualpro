@@ -453,7 +453,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
-                'branch.name.en': 1,
+                'branch.name': 1,
             },
         });
 
@@ -566,7 +566,6 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
-                                <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.promotionType[currentLanguage])}</td>
                                 <td>${itemPrice}</td>
                                 <td>${item.dateStart}</td>
