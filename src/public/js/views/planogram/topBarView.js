@@ -1,60 +1,55 @@
-define([
-        'underscore',
-        'text!templates/planogram/topBarTemplate.html',
-        'text!templates/pagination/pagination.html',
-        'views/baseTopBar',
-        'views/planogram/manageView',
-        'constants/contentType',
-        'constants/errorMessages',
-        'dataService',
-        'views/planogram/manageProductsInformation'
-    ],
-    function (_, topBarTemplate, pagination, baseTopBar, manageView, CONTENT_TYPES, ERROR_MESSAGES, dataService, ManageProductsInformationView) {
-        var TopBarView = baseTopBar.extend({
-            contentType       : CONTENT_TYPES.PLANOGRAM,
-            template          : _.template(topBarTemplate),
-            paginationTemplate: _.template(pagination),
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/planogram/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var manageView = require('../../views/planogram/manageView');
+var CONTENT_TYPES = require('../../constants/contentType');
+var ERROR_MESSAGES = require('../../constants/errorMessages');
+var dataService = require('../../dataService');
+var ManageProductsInformationView = require('../../views/planogram/manageProductsInformation');
 
-            events: {
-                'click #manageBtn': 'showManageDialog',
-                'click #manage-block': 'toggleManageBlock',
-                'click #namage-products': 'showManageProductsView'
-            },
+module.exports = baseTopBar.extend({
+    contentType       : CONTENT_TYPES.PLANOGRAM,
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 
-            toggleManageBlock: function () {
-                this.$el.find('#manage-dropdown').toggleClass('showActionsDropDown');
-            },
+    events: {
+        'click #manageBtn': 'showManageDialog',
+        'click #manage-block': 'toggleManageBlock',
+        'click #namage-products': 'showManageProductsView'
+    },
 
-            showManageProductsView: function () {
-                var that = this;
+    toggleManageBlock: function () {
+        this.$el.find('#manage-dropdown').toggleClass('showActionsDropDown');
+    },
 
-                dataService.getData('/category', {}, function (err, response) {
-                    if (err) {
-                        return App.renderErrors([
-                            ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage]
-                        ]);
-                    }
+    showManageProductsView: function () {
+        var that = this;
 
-                    that.manageProductInfoView = new ManageProductsInformationView({
-                        translation: that.translation,
-                        categories: response
-                    });
-                    that.manageProductInfoView.on('update-list-view', function () {
-                        that.trigger('update-list-view');
-                    });
-                });
+        dataService.getData('/category', {}, function (err, response) {
+            if (err) {
+                return App.renderErrors([
+                    ERROR_MESSAGES.somethingWentWrong[App.currentUser.currentLanguage]
+                ]);
+            }
 
-                this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
-            },
-
-            showManageDialog: _.debounce(function () {
-                new manageView({
-                    translation: this.translation
-                });
-
-                this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
-            }, 1000, true)
+            that.manageProductInfoView = new ManageProductsInformationView({
+                translation: that.translation,
+                categories: response
+            });
+            that.manageProductInfoView.on('update-list-view', function () {
+                that.trigger('update-list-view');
+            });
         });
 
-        return TopBarView;
-    });
+        this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
+    },
+
+    showManageDialog: _.debounce(function () {
+        new manageView({
+            translation: this.translation
+        });
+
+        this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
+    }, 1000, true)
+});
