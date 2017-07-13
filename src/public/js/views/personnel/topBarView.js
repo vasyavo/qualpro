@@ -1,44 +1,36 @@
-'use strict';
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/personnel/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
 
-define([
-    'backbone',
-    'Underscore',
-    'jQuery',
-    'text!templates/personnel/topBarTemplate.html',
-    'text!templates/pagination/pagination.html',
-    'views/baseTopBar'
-], function (Backbone, _, $, topBarTemplate, pagination, baseTopBar, dataService, VisibilityForm) {
-    var TopBarView = baseTopBar.extend({
-        contentType       : 'personnel',
-        template          : _.template(topBarTemplate),
-        paginationTemplate: _.template(pagination),
+module.exports = baseTopBar.extend({
+    contentType       : 'personnel',
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 
-        events: {
-            'click #sendEmail'           : 'sendPass',
-            'click #sendSMS'             : 'sendPass',
-            'click #supervisorBtn'       : 'addSupervisor',
-            'click #actionHolder:not(ul)': 'showHideActionDd'
+    events: {
+        'click #sendEmail'           : 'sendPass',
+        'click #sendSMS'             : 'sendPass',
+        'click #supervisorBtn'       : 'addSupervisor',
+        'click #actionHolder:not(ul)': 'showHideActionDd'
 
-        },
+    },
 
-        showHideActionDd: function (e) {
-            e.stopPropagation();
+    showHideActionDd: function (e) {
+        e.stopPropagation();
 
-            this.trigger('checkAvailableSendPass');
+        this.trigger('checkAvailableSendPass');
 
-            this.showHideActionDropdown(e);
-        },
+        this.showHideActionDropdown(e);
+    },
 
-        sendPass: function (e) {
-            var type = $(e.target).attr('data-type');
+    sendPass: function (e) {
+        var type = $(e.target).attr('data-type');
 
-            this.trigger('sendPass', type);
-        },
+        this.trigger('sendPass', type);
+    },
 
-        addSupervisor: function () {
-            this.trigger('addSupervisor');
-        }
-    });
-
-    return TopBarView;
+    addSupervisor: function () {
+        this.trigger('addSupervisor');
+    }
 });
