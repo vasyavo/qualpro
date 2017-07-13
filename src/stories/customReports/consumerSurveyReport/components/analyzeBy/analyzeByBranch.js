@@ -39,11 +39,16 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
-        $sort: {
-            'country.name.en': 1,
-            'region.name.en': 1,
-            'subRegion.name.en': 1,
-            'branch.name.en': 1,
+        $addFields: {
+            location: {
+                _id: '$branch._id', // <-- important fix magical duplication
+                en: {
+                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$retailSegment.name.en', ' / ', '$outlet.name.en', ' -> ', '$branch.name.en'],
+                },
+                ar: {
+                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$outlet.name.ar', ' -> ', '$branch.name.ar'],
+                },
+            },
         },
     });
 
@@ -51,34 +56,78 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$count',
-            },
-            labels: {
-                $push: {
-                    en: {
-                        $concat: [
-                            '$country.name.en',
-                            ' / ',
-                            '$region.name.en',
-                            ' / ',
-                            '$subRegion.name.en',
-                            ' / ',
-                            '$branch.name.en',
-                        ],
-                    },
-                    ar: {
-                        $concat: [
-                            '$country.name.ar',
-                            ' / ',
-                            '$region.name.ar',
-                            ' / ',
-                            '$subRegion.name.ar',
-                            ' / ',
-                            '$branch.name.ar',
-                        ],
+                data: {
+                    $addToSet: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        count: '$count',
+                        country: '$country',
+                        region: '$region',
+                        subRegion: '$subRegion',
+                        location: '$location',
                     },
                 },
+                labels: {
+                    $addToSet: '$location',
+                },
             },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$data',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'data.location.en': 1,
+            'data.count': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                labels: '$labels',
+            },
+            data: { $push: '$data' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            labels: '$_id.labels',
+            data: 1,
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$labels',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'labels.en': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                data: '$data',
+            },
+            labels: { $push: '$labels' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            data: '$_id.data',
+            labels: 1,
         },
     });
 
