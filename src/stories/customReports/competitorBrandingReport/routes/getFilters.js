@@ -438,17 +438,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Employee',
+                    en: 'Publisher',
                     ar: '',
                 },
-                value: 'employee',
+                value: 'publisher',
             },
             {
                 name: {
-                    en: 'Position',
+                    en: 'Publisher Position',
                     ar: '',
                 },
-                value: 'position',
+                value: 'publisherPosition',
             },
         ];
 

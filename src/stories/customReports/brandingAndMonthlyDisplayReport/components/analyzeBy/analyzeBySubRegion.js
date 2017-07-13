@@ -112,11 +112,14 @@ module.exports = (pipeline) => {
     pipeline.push({
         $addFields: {
             location: {
-                en: {
-                    $concat: ['$region.name.en', ' / ', '$subRegion.name.en'],
-                },
-                ar: {
-                    $concat: ['$region.name.ar', ' / ', '$subRegion.name.ar'],
+                _id: '$subRegion._id',
+                name: {
+                    en: {
+                        $concat: ['$region.name.en', ' / ', '$subRegion.name.en'],
+                    },
+                    ar: {
+                        $concat: ['$region.name.ar', ' / ', '$subRegion.name.ar'],
+                    },
                 },
             },
         },
@@ -125,7 +128,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $sort: {
             'country.name': 1,
-            location: 1,
+            'location.name': 1,
             'category.name': 1,
         },
     });

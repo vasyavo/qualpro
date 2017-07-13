@@ -132,8 +132,8 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'country._id': 1,
-            'category._id': 1,
+            'country.name': 1,
+            'category.name': 1,
         },
     });
 
@@ -146,12 +146,8 @@ module.exports = (pipeline) => {
             outlet: 1,
             branch: 1,
             category: 1,
-            datasets: [
-                {
-                    data: ['$count'],
-                },
-            ],
-            labels: ['$country.name'],
+            datasets: [{ data: ['$count'] }],
+            labels: ['$country'],
         },
     });
 
