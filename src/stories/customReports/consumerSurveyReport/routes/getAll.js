@@ -482,6 +482,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
+                total: 1,
                 location: '$setItems.location',
                 status: '$setItems.consumer.status',
                 title: '$setItems.consumer.title',
@@ -506,6 +507,14 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $group: {
+                _id: null,
+                total: { $first: '$total' },
+                data: { $push: '$$ROOT' },
+            },
+        });
+
         ConsumersSurveyAnswersModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -524,7 +533,7 @@ module.exports = (req, res, next) => {
         }
 
         const response = result.length ?
-            result[0] : { data: [], total: 0 };
+            result : { data: [], total: 0 };
 
         res.status(200).send(response);
     });
