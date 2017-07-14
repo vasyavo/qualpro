@@ -1,52 +1,48 @@
-define([
-        'underscore',
-        'collections/parrent',
-        'models/variant',
-        'constants/contentType'
-    ],
-    function (_, Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : "/variant",
-            viewType   : null,
-            contentType: CONTENT_TYPES.VARIANT,
-            sortOrder  : 1,
+var Parent = require('../parrent');
+var Model = require('../../models/variant');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : "/variant",
+    viewType   : null,
+    contentType: CONTENT_TYPES.VARIANT,
+    sortOrder  : 1,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            },
-            comparator: function (modelA, modelB) {
-                var nameA = getName(modelA);
-                var nameB = getName(modelB);
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-                function getName(model) {
-                    var employeeAttr = model.get('name');
+        this.getPage(page, options);
+    },
 
-                    if (employeeAttr) {
-                        return model.get('name').currentLanguage;
-                    }
+    comparator: function (modelA, modelB) {
+        var nameA = getName(modelA);
+        var nameB = getName(modelB);
 
-                    return false;
-                }
+        function getName(model) {
+            var employeeAttr = model.get('name');
 
-                if (nameA && nameB) {
-                    if (nameA > nameB) {
-                        return this.sortOrder;
-                    }
-
-                    if (nameA < nameB) {
-                        return this.sortOrder * (-1);
-                    }
-
-                    return 0;
-                }
+            if (employeeAttr) {
+                return model.get('name').currentLanguage;
             }
-        });
-        return Collection;
-    });
+
+            return false;
+        }
+
+        if (nameA && nameB) {
+            if (nameA > nameB) {
+                return this.sortOrder;
+            }
+
+            if (nameA < nameB) {
+                return this.sortOrder * (-1);
+            }
+
+            return 0;
+        }
+    }
+});

@@ -1,23 +1,20 @@
-define(function(require) {
-    var Parent = require('collections/parrent');
-    var Model = require('models/competitorItem');
-    var CONTENT_TYPES = require('constants/contentType');
+var Parent = require('../parrent');
+var Model = require('../../models/competitorItem');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-    var Collection = Parrent.extend({
-        model      : Model,
-        url        : CONTENT_TYPES.COMPETITORITEM,
-        viewType   : null,
-        contentType: CONTENT_TYPES.COMPETITORITEM,
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.COMPETITORITEM,
+    viewType   : null,
+    contentType: CONTENT_TYPES.COMPETITORITEM,
 
-        initialize: function (options) {
-            var page;
+    initialize: function (options) {
+        var page;
 
-            options = options || {};
-            page = options.page;
-            options.reset = true;
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-            this.getPage(page, options);
-        }
-    });
-    return Collection;
+        this.getPage(page, options);
+    }
 });

@@ -1,29 +1,24 @@
-define([
-        'collections/parrent',
-        'models/personnel'
-    ],
-    function (Parrent, Model) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            viewType   : null,
-            contentType: null,
+var Parrent = require('../parrent');
+var Model = require('../../models/personnel');
 
-            url: function () {
-                return '/' + this.contentType + '/personnelFroSelection';
-            },
+module.exports = Parrent.extend({
+    model      : Model,
+    viewType   : null,
+    contentType: null,
 
-            initialize: function (options) {
-                var page;
+    url: function () {
+        return '/' + this.contentType + '/personnelFroSelection';
+    },
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.contentType = options.contentType;
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-                this.getPage(page, options);
-            }
-        });
+        this.contentType = options.contentType;
 
-        return Collection;
-    });
+        this.getPage(page, options);
+    }
+});
