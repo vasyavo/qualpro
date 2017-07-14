@@ -691,7 +691,7 @@ module.exports = (req, res, next) => {
                     en: 'Product',
                     ar: '',
                 },
-                value: 'category',
+                value: 'product',
             },
             {
                 name: {
@@ -702,17 +702,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Employee',
+                    en: 'Assignee',
                     ar: '',
                 },
-                value: 'employee',
+                value: 'assignee',
             },
             {
                 name: {
-                    en: 'Position',
+                    en: 'Assignee Position',
                     ar: '',
                 },
-                value: 'position',
+                value: 'assigneePosition',
             },
         ];
 

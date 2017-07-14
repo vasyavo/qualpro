@@ -62,9 +62,25 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $addFields: {
+            location: {
+                _id: '$branch._id',
+                name: {
+                    en: {
+                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$branch.name.en'],
+                    },
+                    ar: {
+                        $concat: ['$country.name.en', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$branch.name.ar'],
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $sort: {
-            'branch._id': 1,
-            'category._id': 1,
+            'location.name': 1,
+            'category.name': 1,
         },
     });
 
@@ -73,32 +89,7 @@ module.exports = (pipeline) => {
             _id: '$category._id',
             category: { $first: '$category' },
             data: { $push: '$count' },
-            labels: {
-                $push: {
-                    en: {
-                        $concat: [
-                            '$country.name.en',
-                            ' / ',
-                            '$region.name.en',
-                            ' / ',
-                            '$subRegion.name.en',
-                            ' / ',
-                            '$branch.name.en',
-                        ],
-                    },
-                    ar: {
-                        $concat: [
-                            '$country.name.ar',
-                            ' / ',
-                            '$region.name.ar',
-                            ' / ',
-                            '$subRegion.name.ar',
-                            ' / ',
-                            '$branch.name.ar',
-                        ],
-                    },
-                },
-            },
+            labels: { $push: '$location' },
         },
     });
 
@@ -106,11 +97,7 @@ module.exports = (pipeline) => {
         $project: {
             category: 1,
             labels: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
+            datasets: [{ data: '$data' }],
         },
     });
 

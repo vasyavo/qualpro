@@ -1,15 +1,9 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $unwind: '$executors',
-    });
-
-    pipeline.push({
         $group: {
             _id: {
-                executor: '$executors',
                 category: '$items.category',
             },
-            executor: { $first: '$executors' },
             count: { $sum: 1 },
         },
     });
@@ -26,7 +20,6 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             count: 1,
-            executor: 1,
             category: {
                 $let: {
                     vars: {
@@ -43,8 +36,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'executor._id': 1,
-            'category._id': 1,
+            'category.name': 1,
         },
     });
 
@@ -53,7 +45,7 @@ module.exports = (pipeline) => {
             _id: '$category._id',
             category: { $first: '$category' },
             data: { $push: '$count' },
-            labels: { $push: '$executor.name' },
+            labels: { $push: '$category' },
         },
     });
 
@@ -61,11 +53,7 @@ module.exports = (pipeline) => {
         $project: {
             category: 1,
             labels: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
+            datasets: [{ data: '$data' }],
         },
     });
 

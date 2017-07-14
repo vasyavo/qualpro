@@ -57,8 +57,8 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'variant._id': 1,
-            'category._id': 1,
+            'variant.name': 1,
+            'category.name': 1,
         },
     });
 
@@ -67,7 +67,7 @@ module.exports = (pipeline) => {
             _id: '$category._id',
             category: { $first: '$category' },
             data: { $push: '$count' },
-            labels: { $push: '$variant.name' },
+            labels: { $push: '$variant' },
         },
     });
 
@@ -75,11 +75,7 @@ module.exports = (pipeline) => {
         $project: {
             category: 1,
             labels: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
+            datasets: [{ data: '$data' }],
         },
     });
 
