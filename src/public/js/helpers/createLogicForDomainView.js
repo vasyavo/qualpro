@@ -3,6 +3,7 @@ var contentTypes = require('../helpers/contentTypesHelper');
 var BreadcrumbsNavigator = require('../helpers/breadcrumbsNavigator');
 var BreadcrumbsView = require('../views/breadcrumb/breadcrumbs');
 var CONTENT_TYPES = require('../constants/contentType');
+var App = require('../appState');
 
 var types = [
     CONTENT_TYPES.COUNTRY,

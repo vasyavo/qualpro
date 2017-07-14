@@ -11,6 +11,7 @@ var dataService = require('../dataService');
 var custom = require('../custom');
 var ERROR_MESSAGES = require('../constants/errorMessages');
 var ACL_ROLE_INDEXES = require('../constants/aclRoleIndexes');
+var App = require('../appState');
 
 var types = [
     CONTENT_TYPES.COUNTRY,

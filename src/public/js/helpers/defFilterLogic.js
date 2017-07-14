@@ -1,6 +1,7 @@
 var CONTENT_TYPES = require('../constants/contentType');
 var OTHER_CONSTANTS = require('../constants/otherConstants');
 var ACL_INDEXES = require('../constants/aclRoleIndexes');
+var App = require('../appState');
 
 module.exports = function (currentUserId) {
     var self = this;
