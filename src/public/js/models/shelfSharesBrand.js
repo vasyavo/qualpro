@@ -2,6 +2,7 @@ var parent = require('./parrent');
 var dataService = require('../dataService');
 var CONTENT_TYPES = require('../constants/contentType');
 var ERROR_MESSAGES = require('../constants/errorMessages');
+var App = require('../appState');
 
 module.exports = parent.extend({
     idAttribute: '_id',

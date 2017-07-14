@@ -8,6 +8,7 @@ var FileModel = require('./file');
 var CONTENT_TYPES = require('../constants/contentType');
 var otherConstants = require('../constants/otherConstants');
 var ERROR_MESSAGES = require('../constants/errorMessages');
+var App = require('../appState');
 
 module.exports = parent.extend({
 

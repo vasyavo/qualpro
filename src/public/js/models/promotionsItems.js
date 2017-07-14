@@ -5,6 +5,7 @@ var dataService = require('../dataService');
 var CONSTANTS = require('../constants/otherConstants');
 var CONTENT_TYPES = require('../constants/contentType');
 var ERROR_MESSAGES = require('../constants/errorMessages');
+var App = require('../appState');
 
 module.exports = parent.extend({
     defaults      : {},

@@ -1,5 +1,6 @@
 var parent = require('./parrent');
 var validation = require('../validation');
+var App = require('../appState');
 
 module.exports = parent.extend({
 

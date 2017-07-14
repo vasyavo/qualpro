@@ -3,6 +3,7 @@ var validation = require('../validation');
 var dataService = require('../dataService');
 var CONSTANTS = require('../constants/otherConstants');
 var ERROR_MESSAGES = require('../constants/errorMessages');
+var App = require('../appState');
 
 module.exports = parent.extend({
 

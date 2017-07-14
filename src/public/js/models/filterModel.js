@@ -1,4 +1,5 @@
 var parrent = require('./parrent');
+var App = require('../appState');
 
 module.exports = parrent.extend({
     idAttribute: "_id",

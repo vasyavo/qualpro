@@ -5,6 +5,7 @@ var validation = require('../validation');
 var custom = require('../custom');
 var CONSTANTS = require('../constants/otherConstants');
 var CONTENT_TYPES = require('../constants/contentType');
+var App = require('../appState');
 
 module.exports = parent.extend({
     defaults      : {},

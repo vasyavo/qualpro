@@ -2,6 +2,7 @@ var parent = require('./parrent');
 var validation = require('../validation');
 var CONTENT_TYPES = require('../constants/contentType');
 var CONSTANTS = require('../constants/otherConstants');
+var App = require('../appState');
 
 module.exports = parent.extend({
     defaults      : {},

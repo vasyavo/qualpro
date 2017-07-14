@@ -2,6 +2,7 @@ var Backbone = require('backbone');
 var Cookies = require('js-cookie');
 var custom = require('../custom');
 var FilesCollection = require('../collections/file/collection');
+var App = require('../appState');
 
 module.exports = Backbone.Model.extend({
     idAttribute: '_id',

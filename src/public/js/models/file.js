@@ -2,6 +2,7 @@ var Backbone = require('backbone');
 var dataService = require('../dataService');
 var otherConstants = require('../constants/otherConstants');
 var ERROR_MESSAGES = require('../constants/errorMessages');
+var App = require('../appState');
 
 module.exports = Backbone.Model.extend({
     idAttribute: '_id',
