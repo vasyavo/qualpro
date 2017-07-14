@@ -1,5 +1,6 @@
 var $ = require('jQuery');
 var PubNub = require('./pubnub');
+var App = require('../appState');
 
 var state = {};
 

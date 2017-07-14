@@ -1,4 +1,5 @@
 var PubNub = require('https://cdn.pubnub.com/sdk/javascript/pubnub.4.4.0.min.js');
+var App = require('../appState');
 
 var client = new PubNub({
     subscribeKey: PUBNUB_SUBSCRIBE_KEY,
