@@ -1,12 +1,6 @@
-define([
-        'views/domain/list'
-    ],
+var ListView = require('../../../views/domain/list');
 
-    function (ListView) {
-        var View = ListView.extend({
-            contentType: 'subRegion',
-            childContent: 'retailSegment'
-        });
-
-        return View;
-    });
+module.exports = ListView.extend({
+    contentType: 'subRegion',
+    childContent: 'retailSegment'
+});
