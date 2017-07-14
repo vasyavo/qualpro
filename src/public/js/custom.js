@@ -8,6 +8,7 @@ var ERROR_MESSAGES = require('./constants/errorMessages');
 var ACL_ROLE_INDEXES = require('./constants/aclRoleIndexes');
 var PubNubClient = require('./services/pubnub');
 var App = require('./appState');
+var PersonnelModel = require('./models/personnel');
 
 var runApplication = function (success) {
     var url;
@@ -45,41 +46,39 @@ var runApplication = function (success) {
         }
     }
 
-    require(['models/personnel'], (PersonnelModel) => {
-        if (!App.currentUser) {
-            const currentUser = new PersonnelModel();
-            currentUser.url = '/personnel/currentUser';
-            currentUser.fetch({
-                success: function (currentUser) {
-                    var currentUser = currentUser.toJSON();
-                    var userId = currentUser._id;
+    if (!App.currentUser) {
+        var currentUser = new PersonnelModel();
+        currentUser.url = '/personnel/currentUser';
+        currentUser.fetch({
+            success: function (currentUserModel) {
+                var currentUser = currentUserModel.toJSON();
+                var userId = currentUser._id;
 
-                    App.currentUser = currentUser;
-                    $.datepicker.setDefaults($.datepicker.regional[currentUser.currentLanguage]);
-                    moment.locale(currentUser.currentLanguage);
-                    loadUrl(success);
-                    App.socket.emit('save_socket_connection', { uId: userId });
+                App.currentUser = currentUser;
+                $.datepicker.setDefaults($.datepicker.regional[currentUser.currentLanguage]);
+                moment.locale(currentUser.currentLanguage);
+                loadUrl(success);
+                App.socket.emit('save_socket_connection', { uId: userId });
 
-                    PubNubClient.subscribe({
-                        userId: userId
-                    });
-                },
+                PubNubClient.subscribe({
+                    userId: userId
+                });
+            },
 
-                error: function (err) {
-                    const status = err.status;
-                    switch (status) {
-                        case 401 :
-                            getCurrentUserFails();
-                            break;
-                        default : break;
-                    }
+            error: function (err) {
+                const status = err.status;
+                switch (status) {
+                    case 401 :
+                        getCurrentUserFails();
+                        break;
+                    default : break;
                 }
-            });
-        } else {
-            loadUrl(success);
-            App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
-        }
-    });
+            }
+        });
+    } else {
+        loadUrl(success);
+        App.socket.emit('save_socket_connection', {uId: App.currentUser._id});
+    }
 };
 
 var getCurrentTab = function (contentType) {
