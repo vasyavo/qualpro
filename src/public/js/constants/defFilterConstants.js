@@ -1,5 +1,6 @@
 var CONTENT_TYPES = require('./contentType');
 var OTHER_CONSTANTS = require('../constants/otherConstants');
+var App = require('../appState');
 
 var defFilters = {};
 
