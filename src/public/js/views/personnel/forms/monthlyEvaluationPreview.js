@@ -6,6 +6,7 @@ var BaseDialog = require('../../../views/baseDialog');
 var EditView = require('../../../views/personnel/forms/monthlyEvaluationEdit');
 var CONSTANTS = require('../../../constants/otherConstants');
 var custom = require('../../../custom');
+var App = require('../../../appState');
 
 module.exports = BaseDialog.extend({
     contentType  : 'monthly',

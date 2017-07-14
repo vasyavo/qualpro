@@ -9,6 +9,7 @@ var ERROR_MESSAGES = require('../../constants/errorMessages');
 var FullSizeFileOverview = require('../../views/fileDialog/fileDialog');
 var Template = require('../../../templates/planogram/manage-products-information.html');
 var FileThumbnailTemplate = require('../../../templates/planogram/file-thumbnail.html');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
 

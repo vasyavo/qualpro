@@ -12,6 +12,7 @@ var FileCollection = require('../../collections/file/collection');
 var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var CommentFiewDialog = require('../../views/marketingCampaign/comments/comment');
+var App = require('../../appState');
 
 module.exports = BaseDialog.extend({
     contentType       : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,

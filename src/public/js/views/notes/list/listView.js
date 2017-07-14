@@ -8,6 +8,7 @@ var PreView = require('../../../views/notes/preView/preView');
 var paginator = require('../../../views/paginator');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.NOTES,

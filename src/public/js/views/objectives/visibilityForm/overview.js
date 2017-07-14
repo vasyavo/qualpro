@@ -10,6 +10,7 @@ var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var FileThumbnailTemplate = require('../../../../templates/objectives/visibilityForm/file-thumbnail.html');
 var NewFileThumbnailTemplate = require('../../../../templates/objectives/visibilityForm/new-file-thumbnail.html');
 var Template = require('../../../../templates/objectives/visibilityForm/preview.html');
+var App = require('../../../appState');
 
 require('lightSlider');
 

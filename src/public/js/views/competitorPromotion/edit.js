@@ -7,6 +7,7 @@ var BrandCollection = require('../../collections/brand/collection');
 var OriginCollection = require('../../collections/origin/collection');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var Template = require('../../../templates/competitorPromotion/edit.html');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
 

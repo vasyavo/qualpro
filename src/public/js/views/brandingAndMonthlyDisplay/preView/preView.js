@@ -22,6 +22,7 @@ var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var EditView = require('../../../views/brandingAndMonthlyDisplay/edit');
 var BrandingAndMonthlyDislpayModel = require('../../../models/brandingAndMonthlyDisplay');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,

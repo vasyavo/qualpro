@@ -12,6 +12,7 @@ var ERROR_MESSAGES = require('../../constants/errorMessages');
 var dataService = require('../../dataService');
 var ACL_ROLE_INDEXES = require('../../constants/aclRoleIndexes');
 var PubNubClient = require('../../services/pubnub');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     tagName            : 'ul',

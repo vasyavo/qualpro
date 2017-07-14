@@ -10,6 +10,7 @@ var filterValuesCollection = require('../../collections/filter/filterCollection'
 var CONSTANTS = require('../../constants/contentType');
 var FILTERSCONSTANTS = require('../../constants/filters');
 var dataService = require('../../dataService');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     contentType            : 'filter',

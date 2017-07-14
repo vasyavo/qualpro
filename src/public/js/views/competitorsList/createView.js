@@ -8,6 +8,7 @@ var NestedContentView = require('../../views/nestedContent/view');
 var BaseView = require('../../views/baseDialog');
 var DropDownView = require('../../views/filter/dropDownView');
 var CountryCollection = require('../../collections/country/collection');
+var App = require('../../appState');
 
 var types = {
     category: {

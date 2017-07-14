@@ -16,6 +16,7 @@ var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var ACL_ROLES = require('../../../constants/aclRoleIndexes');
 var EditAnswerView = require('../../../views/questionnary/editAnswer');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.QUESTIONNARIES,

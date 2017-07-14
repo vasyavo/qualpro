@@ -10,6 +10,7 @@ var Model = require('../../../models/achievementForm');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var EditView = require('../../../views/achievementForm/edit');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: 'achievementForm',

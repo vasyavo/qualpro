@@ -1,13 +1,13 @@
 var _ = require('underscore');
 var $ = require('jQuery');
-var template = require('text!templates/contractsSecondary/list/list.html');
-var createView = require('views/contractsSecondary/createView');
-var newRow = require('text!templates/contractsSecondary/list/newRow.html');
-var EditView = require('views/contractsSecondary/editView');
-var PreView = require('views/contractsSecondary/preView/preView');
-var paginator = require('views/paginator');
-var CONTENT_TYPES = require('constants/contentType');
-var BadgeStore = require('services/badgeStore');
+var template = require('../../../../templates/contractsSecondary/list/list.html');
+var createView = require('../../../views/contractsSecondary/createView');
+var newRow = require('../../../../templates/contractsSecondary/list/newRow.html');
+var EditView = require('../../../views/contractsSecondary/editView');
+var PreView = require('../../../views/contractsSecondary/preView/preView');
+var paginator = require('../../../views/paginator');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BadgeStore = require('../../../services/badgeStore');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.CONTRACTSSECONDARY,

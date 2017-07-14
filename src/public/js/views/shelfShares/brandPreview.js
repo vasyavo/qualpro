@@ -10,6 +10,7 @@ var EditShelfSharesValueView = require('../../views/shelfShares/editValue');
 var ShelfSharesBrandModel = require('../../models/shelfSharesBrand');
 var INFO_MESSAGES = require('../../constants/infoMessages');
 var ACL_ROLES = require('../../constants/aclRoleIndexes');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.SHELFSHARES,

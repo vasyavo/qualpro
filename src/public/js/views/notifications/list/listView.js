@@ -9,6 +9,7 @@ var newRow = require('../../../../templates/notifications/list/newRow.html');
 var dataService = require('../../../dataService');
 var Model = require('../../../models/notifications');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.NOTIFICATIONS,

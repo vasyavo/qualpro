@@ -4,6 +4,7 @@ var template = require('../../../templates/filter/treeTemplate.html');
 var baseDialog = require('../../views/baseDialog');
 var dataService = require('../../dataService');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = baseDialog.extend({
     contentType  : 'Tree',

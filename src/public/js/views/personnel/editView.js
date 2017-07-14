@@ -8,6 +8,7 @@ var common = require('../../common');
 var implementShowHideArabicInputIn = require('../../helpers/implementShowHideArabicInputIn');
 var createPersonnelViewLogic = require('../../helpers/createPersonnelViewLogic');
 var ListForSelection = require('../../views/personnel/listForSelection');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType   : 'personnel',

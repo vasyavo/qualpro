@@ -26,6 +26,7 @@ var validation = require('../../validation');
 var FileDialogPreviewView = require('../../views/fileDialog/fileDialog');
 var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     el                   : '#contentHolder',

@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var paginator = require('../views/paginator');
+var App = require('../appState');
 
 module.exports = paginator.extend({
 

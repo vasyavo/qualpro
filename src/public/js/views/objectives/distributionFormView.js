@@ -6,6 +6,7 @@ var baseDialog = require('../../views/baseDialog');
 var Collection = require('../../collections/distribution/collection');
 var CONSTANTS = require('../../constants/otherConstants');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = baseDialog.extend({
     contentType       : 'Tree',

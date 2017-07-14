@@ -25,6 +25,7 @@ var dataService = require('../../dataService');
 var validation = require('../../validation');
 var DisplayTypeCollection = require('../../collections/displayType/collection');
 var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.CONTRACTSSECONDARY,

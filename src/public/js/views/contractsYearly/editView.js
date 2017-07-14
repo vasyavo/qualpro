@@ -21,6 +21,7 @@ var DropDownView = require('../../views/filter/dropDownView');
 var CONSTANTS = require('../../constants/otherConstants');
 var dataService = require('../../dataService');
 var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.CONTRACTSYEARLY,

@@ -18,6 +18,7 @@ var CONTENT_TYPES = require('../../../constants/contentType');
 var FileDialogView = require('../../../views/objectives/fileDialogView');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.CONTACT_US,

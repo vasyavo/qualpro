@@ -6,6 +6,7 @@ var createBiYearlyWorkflow = require('../../../helpers/createBiYearlyWorkflow');
 var BaseDialog = require('../../../views/baseDialog');
 var BiYearlyRatingModel = require('../../../models/biYearlyRating');
 var BiYearlyEvaluationEditView = require('../../../views/personnel/forms/biYearlyEvaluationEdit');
+var App = require('../../../appState');
 
 module.exports = BaseDialog.extend({
 

@@ -5,6 +5,7 @@ var CONSTANTS = require('../../constants/otherConstants');
 var FileModel = require('../../models/file');
 var DocumentModel = require('../../models/documents');
 var Template = require('../../../templates/documents/create-file.html');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
 

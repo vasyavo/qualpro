@@ -19,6 +19,7 @@ var CONSTANTS = require('../../constants/otherConstants');
 var VisibilityEditView = require('../../views/objectives/visibilityForm/editView');
 var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType          : CONTENT_TYPES.INSTORETASKS,

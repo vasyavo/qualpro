@@ -3,6 +3,7 @@ var _ = require('underscore');
 var Backbone = require('backbone');
 var Cookies = require('js-cookie');
 var template = require('../../../templates/menu/left.html');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     el      : '#leftMenuHolder',

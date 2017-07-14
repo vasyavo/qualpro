@@ -4,6 +4,7 @@ var listTemplate = require('../../../../templates/personnel/list/list.html');
 var REGEXP = require('../../../constants/validation');
 var STATUSES = require('../../../constants/personnelStatuses');
 var CONTENT_TYPES = require('../../../constants/contentType');
+var App = require('../../../appState');
 
 module.exports = Backbone.View.extend({
     template: _.template(listTemplate),

@@ -1,13 +1,13 @@
 var _ = require('underscore');
 var $ = require('jQuery');
 var moment = require('moment');
-var paginator = require('views/paginator');
-var CreateView = require('views/consumersSurvey/createView');
-var PreView = require('views/consumersSurvey/preView/preView');
-var template = require('text!templates/consumersSurvey/list/list.html');
-var NewRowTemplate = require('text!templates/consumersSurvey/list/newRow.html');
-var CONTENT_TYPES = require('constants/contentType');
-var BadgeStore = require('services/badgeStore');
+var paginator = require('../../../views/paginator');
+var CreateView = require('../../../views/consumersSurvey/createView');
+var PreView = require('../../../views/consumersSurvey/preView/preView');
+var template = require('../../../../templates/consumersSurvey/list/list.html');
+var NewRowTemplate = require('../../../../templates/consumersSurvey/list/newRow.html');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BadgeStore = require('../../../services/badgeStore');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.CONSUMER_SURVEY,

@@ -16,6 +16,7 @@ var FileDialogView = require('../../../views/objectives/fileDialogView');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var EditCommentView = require('../../../views/marketingCampaign/comments/edit');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
+var App = require('../../../appState');
 
 module.exports = BaseDialog.extend({
     contentType        : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,

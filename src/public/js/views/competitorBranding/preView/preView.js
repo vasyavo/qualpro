@@ -22,6 +22,7 @@ var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var EditView = require('../../../views/competitorBranding/edit');
 var CompetitorBrandingModel = require('../../../models/competitorBranding');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.COMPETITORBRANDING,

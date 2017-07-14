@@ -9,6 +9,7 @@ var OriginCollection = require('../../collections/origin/collection');
 var dataService = require('../../dataService');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
 var defaultTypes = {
     category: {

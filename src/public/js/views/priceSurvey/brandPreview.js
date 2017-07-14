@@ -10,6 +10,7 @@ var EditPriceSurveyValueView = require('../../views/priceSurvey/editPriceSurveyV
 var PriceSurveyBrandModel = require('../../models/priceSurveyBrand');
 var INFO_MESSAGES = require('../../constants/infoMessages');
 var ACL_ROLES = require('../../constants/aclRoleIndexes');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.PRICESURVEY,

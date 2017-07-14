@@ -4,6 +4,7 @@ var moment = require('moment');
 var FilterView = require('../../views/filter/filterView');
 var valuesTemplate = require('../../../templates/filter/filterTemplate.html');
 var filterCollection = require('../../collections/filter/filterCollection');
+var App = require('../../appState');
 
 module.exports = FilterView.extend({
     template: _.template(valuesTemplate),

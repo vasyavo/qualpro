@@ -1,8 +1,9 @@
 var $ = require('jQuery');
 var _ = require('underscore');
-var FileDialogTemplate = require('text!templates/fileDialog/fileDialog.html');
-var BaseView = require('views/baseDialog');
-var ERROR_MESSAGES = require('constants/errorMessages');
+var FileDialogTemplate = require('../../../templates/fileDialog/fileDialog.html');
+var BaseView = require('../../views/baseDialog');
+var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: 'fileDialog',

@@ -12,6 +12,7 @@ var FilterCollection = require('../../../collections/filter/filterCollection');
 var BiYearlyPreview = require('../../../views/personnel/forms/biYearlyEvaluationPreview');
 var MonthlyPreview = require('../../../views/personnel/forms/monthlyEvaluationPreview');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     template          : _.template(template),

@@ -2,6 +2,7 @@ var _ = require('underscore');
 var Backbone = require('backbone');
 var MESSAGES = require('../constants/popUpMessages');
 var template = require('../../templates/main/popUp.html');
+var App = require('../appState');
 
 module.exports = Backbone.View.extend({
     contentType: 'PopUp',

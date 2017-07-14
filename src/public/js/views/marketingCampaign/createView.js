@@ -24,6 +24,7 @@ var CONSTANTS = require('../../constants/otherConstants');
 var dataService = require('../../dataService');
 var DisplayTypeCollection = require('../../collections/displayType/collection');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType          : CONTENT_TYPES.MARKETING_CAMPAIGN,

@@ -9,6 +9,7 @@ var FILTERS_CONSTANTS = require('../constants/filters');
 var dataService = require('../dataService');
 var CONTENT_TYPES = require('../constants/contentType');
 var custom = require('../custom');
+var App = require('../appState');
 
 module.exports = Backbone.View.extend({
     filterBarTemplate: _.template(filterBarTemplate),

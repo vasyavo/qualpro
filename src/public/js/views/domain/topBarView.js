@@ -5,6 +5,7 @@ var pagination = require('../../../templates/pagination/pagination.html');
 var baseTopBar = require('../../views/baseTopBar');
 var contentTypes = require('../../helpers/contentTypesHelper');
 var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
 var types = [
     CONTENT_TYPES.COUNTRY,

@@ -12,6 +12,7 @@ var retailSegmentCollection = require('../../collections/retailSegment/collectio
 var dataService = require('../../dataService');
 var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.PLANOGRAM,

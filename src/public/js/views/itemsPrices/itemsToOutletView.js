@@ -8,6 +8,7 @@ var ItemsPricesCollection = require('../../collections/item/collection');
 var linkItemsToOutlets = require('../../helpers/linkItemsToOutlet');
 var dataService = require('../../dataService');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseDialog.extend({
     contentType   : 'itemsToOutlet',

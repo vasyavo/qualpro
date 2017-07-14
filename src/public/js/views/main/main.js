@@ -2,14 +2,15 @@ var $ = require('jQuery');
 var _ = require('underscore');
 var Backbone = require('backbone');
 var moment = require('moment');
-var MainTemplate = require('text!templates/main/main.html');
-var LeftMenuView = require('views/menu/left');
-var MenuItemsCollection = require('models/module');
-var TopMenuView = require('views/menu/topMenu');
-var dataService = require('dataService');
-var custom = require('custom');
-var PersonnelModel = require('models/personnel');
-var ERROR_MESSAGES = require('constants/errorMessages');
+var MainTemplate = require('../../../templates/main/main.html');
+var LeftMenuView = require('../../views/menu/left');
+var MenuItemsCollection = require('../../models/module');
+var TopMenuView = require('../../views/menu/topMenu');
+var dataService = require('../../dataService');
+var custom = require('../../custom');
+var PersonnelModel = require('../../models/personnel');
+var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     el      : '#wrapper',

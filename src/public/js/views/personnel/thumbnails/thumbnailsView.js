@@ -11,6 +11,7 @@ var STATUSES = require('../../../constants/personnelStatuses');
 var PersonnelListForSelectionView = require('../../../views/personnel/listForSelection');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = thumbnails.extend({
     contentType: 'personnel',

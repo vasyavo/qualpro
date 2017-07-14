@@ -10,6 +10,7 @@ var personnelModel = require('../../../models/personnel');
 var REGEXP = require('../../../constants/validation');
 var dataService = require('../../../dataService');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: 'activityList',

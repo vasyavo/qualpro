@@ -5,6 +5,7 @@ var Cookies = require('js-cookie');
 var contentTypes = require('../../helpers/contentTypesHelper');
 var breadcrumbsTemplate = require('../../../templates/breadcrumbs/breadcrumb.html');
 var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
 var types = [
     CONTENT_TYPES.COUNTRY,

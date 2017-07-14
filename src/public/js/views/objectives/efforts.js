@@ -5,6 +5,7 @@ var Template = require('../../../templates/objectives/efforts/efforts.html');
 var Model = require('../../models/personnel');
 var BaseView = require('../../views/baseDialog');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: 'Efforts',

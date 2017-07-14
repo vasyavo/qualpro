@@ -1,11 +1,12 @@
 var _ = require('underscore');
 var $ = require('jQuery');
 var moment = require('moment');
-var template = require('text!templates/contactUs/list/list.html');
-var PreView = require('views/contactUs/preView/preView');
-var paginator = require('views/paginator');
-var CONTENT_TYPES = require('constants/contentType');
-var BadgeStore = require('services/badgeStore');
+var template = require('../../../../templates/contactUs/list/list.html');
+var PreView = require('../../../views/contactUs/preView/preView');
+var paginator = require('../../../views/paginator');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.CONTACT_US,

@@ -6,6 +6,7 @@ var HeaderTemplate = require('../../../templates/objectives/fileDialogView/heade
 var ThumbnailTemplate = require('../../../templates/objectives/fileDialogView/thumbnail.html');
 var BaseView = require('../../views/baseDialog');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     template         : _.template(FileDialogViewTemplate),

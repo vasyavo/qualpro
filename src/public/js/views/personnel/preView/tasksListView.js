@@ -15,6 +15,7 @@ var baseTopBar = require('../../../views/baseTopBar');
 var ObjectivesCollection = require('../../../collections/personnel/personnelTasks');
 var CONSTANTS = require('../../../constants/otherConstants');
 var CONTENT_TYPES = require('../../../constants/contentType');
+var App = require('../../../appState');
 
 var dateFormat = function (date) {
     return moment(date).format('DD.MM.YYYY');

@@ -11,6 +11,7 @@ var LEVEL_CONFIG = require('../../../constants/contentType');
 var EditView = require('../../../views/newProductLaunch/edit');
 var NewProductLaunchModel = require('../../../models/newProductLaunch');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,

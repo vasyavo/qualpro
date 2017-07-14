@@ -6,6 +6,7 @@ var dropDownTemplate = require('../../../templates/filter/dropDown.html');
 var dropDownContentTemplate = require('../../../templates/filter/dropDownContent.html');
 var filterCollection = require('../../collections/filter/filterCollection');
 var FILTERSCONSTANTS = require('../../constants/filters');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     template       : _.template(dropDownTemplate),

@@ -24,6 +24,7 @@ var implementShowHideArabicInputIn = require('../../helpers/implementShowHideAra
 var CONSTANTS = require('../../constants/otherConstants');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var dataService = require('../../dataService');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTIFICATIONS,

@@ -1,10 +1,10 @@
 var $ = require('jQuery');
 var _ = require('underscore');
-var paginator = require('views/paginator');
-var ViewTemplate = require('text!templates/objectives/viewSubObjectives.html');
-var NewRow = require('text!templates/objectives/list/newRow.html');
-var PreViewSub = require('views/objectives/preView/preView');
-var CONTENT_TYPES = require('constants/contentType');
+var paginator = require('../../views/paginator');
+var ViewTemplate = require('../../../templates/objectives/viewSubObjectives.html');
+var NewRow = require('../../../templates/objectives/list/newRow.html');
+var PreViewSub = require('../../views/objectives/preView/preView');
+var CONTENT_TYPES = require('../../constants/contentType');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.OBJECTIVES,

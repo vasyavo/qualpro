@@ -22,6 +22,7 @@ var EditView = require('../../../views/competitorPromotion/edit');
 var CompetitorPromotionModel = require('../../../models/competitorPromotion');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var ACL_ROLES = require('../../../constants/aclRoleIndexes');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.COMPETITORPROMOTION,

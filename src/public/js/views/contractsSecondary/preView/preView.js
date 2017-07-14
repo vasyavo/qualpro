@@ -1,18 +1,19 @@
 var $ = require('jQuery');
 var _ = require('underscore');
-var PreviewTemplate = require('text!templates/contractsSecondary/preView/preView.html');
-var FileTemplate = require('text!templates/file/preView.html');
-var FileCollection = require('collections/file/collection');
-var Model = require('models/contractsSecondary');
-var DocumentsModel = require('models/documents');
-var BaseView = require('views/baseDialog');
-var populate = require('populate');
-var CONSTANTS = require('constants/otherConstants');
-var LEVEL_CONFIG = require('constants/levelConfig');
-var implementShowHideArabicInputIn = require('helpers/implementShowHideArabicInputIn');
-var dataService = require('dataService');
-var CONTENT_TYPES = require('constants/contentType');
-var PreView = require('views/documents/preview');
+var PreviewTemplate = require('../../../../templates/contractsSecondary/preView/preView.html');
+var FileTemplate = require('../../../../templates/file/preView.html');
+var FileCollection = require('../../../collections/file/collection');
+var Model = require('../../../models/contractsSecondary');
+var DocumentsModel = require('../../../models/documents');
+var BaseView = require('../../../views/baseDialog');
+var populate = require('../../../populate');
+var CONSTANTS = require('../../../constants/otherConstants');
+var LEVEL_CONFIG = require('../../../constants/levelConfig');
+var implementShowHideArabicInputIn = require('../../../helpers/implementShowHideArabicInputIn');
+var dataService = require('../../../dataService');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var PreView = require('../../../views/documents/preview');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.CONTRACTSSECONDARY,

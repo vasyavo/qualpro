@@ -13,6 +13,7 @@ var dataService = require('../../../dataService');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var brandingAndDisplayItemsView = require('../../../views/marketingCampaign/marketingCampaignItem');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.MARKETING_CAMPAIGN,

@@ -10,6 +10,7 @@ var personnelCollection = require('../../collections/personnelForSelection/colle
 var Collection = require('../../collections/personnel/collection');
 var personnelModel = require('../../models/personnel');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = paginator.extend({
     contentType        : 'personnel',

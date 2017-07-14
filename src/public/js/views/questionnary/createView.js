@@ -18,6 +18,7 @@ var populate = require('../../populate');
 var BaseView = require('../../views/baseDialog');
 var custom = require('../../custom');
 var implementShowHideArabicInputIn = require('../../helpers/implementShowHideArabicInputIn');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: 'createQuestionnary',

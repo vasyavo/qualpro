@@ -22,6 +22,7 @@ var VisibilityFormEditView = require('../../views/objectives/visibilityForm/edit
 var CONSTANTS = require('../../constants/otherConstants');
 var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.OBJECTIVES,

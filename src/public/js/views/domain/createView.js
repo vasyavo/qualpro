@@ -10,6 +10,7 @@ var common = require('../../common');
 var populate = require('../../populate');
 var implementShowHideArabicInputIn = require('../../helpers/implementShowHideArabicInputIn');
 var dataService = require('../../dataService');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     template            : _.template(CreateTemplate),

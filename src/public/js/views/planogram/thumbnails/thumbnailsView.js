@@ -9,6 +9,7 @@ var createView = require('../../../views/planogram/createView');
 var PreView = require('../../../views/planogram/preView/preView');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = thumbnails.extend({
     contentType: CONTENT_TYPES.PLANOGRAM,

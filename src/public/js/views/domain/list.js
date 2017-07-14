@@ -8,6 +8,7 @@ var EditView = require('../../views/domain/editView');
 var newRow = require('../../../templates/domain/newRow.html');
 var createLogicForDomainView = require('../../helpers/createLogicForDomainView');
 var BadgeStore = require('../../services/badgeStore');
+var App = require('../../appState');
 
 module.exports = paginator.extend({
     el         : '#contentHolder',

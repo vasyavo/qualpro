@@ -8,6 +8,7 @@ var RetailSegmentCollection = require('../../collections/retailSegment/collectio
 var OutletCollection = require('../../collections/outlet/collection');
 var dataService = require('../../dataService');
 var validation = require('../../validation');
+var App = require('../../appState');
 
 module.exports = Dialog.extend({
     template  : _.template(template),

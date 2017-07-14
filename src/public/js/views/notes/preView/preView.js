@@ -8,6 +8,7 @@ var CONTENT_TYPES = require('../../../constants/contentType');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var FileCollection = require('../../../collections/file/collection');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTES,

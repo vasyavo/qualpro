@@ -7,6 +7,7 @@ var EditView = require('../../../views/domain/editView');
 var PreView = require('../../../views/domain/preView/preView');
 var newThumbnail = require('../../../../templates/domain/newThumbnail.html');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = thumbnails.extend({
     el         : '#contentHolder',

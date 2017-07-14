@@ -12,6 +12,7 @@ var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var dataService = require('../../../dataService');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var PreView = require('../../../views/documents/preview');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.CONTRACTSYEARLY,

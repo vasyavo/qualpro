@@ -8,6 +8,7 @@ var custom = require('../../custom');
 var CONSTANTS = require('../../constants/validation');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var PubNubClient = require('../../services/pubnub');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     el      : '#wrapper',

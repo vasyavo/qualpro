@@ -6,6 +6,7 @@ var paginator = require('../../../views/paginator');
 var FileModel = require('../../../models/file');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,

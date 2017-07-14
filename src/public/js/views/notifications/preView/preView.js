@@ -7,6 +7,7 @@ var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var PreviewTemplate = require('../../../../templates/notifications/preview.html');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var CONSTANTS = require('../../../constants/otherConstants');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTIFICATIONS,

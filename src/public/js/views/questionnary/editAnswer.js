@@ -8,6 +8,7 @@ var FullAnswerTemplate = require('../../../templates/questionnary/editAnswer/ful
 var MultiSelectAnswerTemplate = require('../../../templates/questionnary/editAnswer/multi-select-answer.html');
 var SingleSelectAnswerTemplate = require('../../../templates/questionnary/editAnswer/single-select-answer.html');
 var NpsAnswerTemplate = require('../../../templates/questionnary/editAnswer/nps-answer.html');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
 

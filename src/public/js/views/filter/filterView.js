@@ -7,6 +7,7 @@ var filterElements = require('../../../templates/filter/filterElements.html');
 var filtersEmptySearchResultTemplate = require('../../../templates/filter/filters-empty-search-result.html');
 var FilterCollection = require('../../collections/filter/filterCollection');
 var TimeView = require('../../views/filter/timeView');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     elementsTemplate  : _.template(filterElements),

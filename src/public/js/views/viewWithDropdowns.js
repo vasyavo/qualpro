@@ -1,6 +1,6 @@
-var $ = reqyuire('jQuery');
-var Backbone = reqyuire('backbone');
-var populate = reqyuire('populate');
+var $ = require('jQuery');
+var Backbone = require('backbone');
+var populate = require('../populate');
 
 module.exports = Backbone.View.extend({
 

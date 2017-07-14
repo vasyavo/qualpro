@@ -4,6 +4,7 @@ var forgotTemplate = require('../../../templates/forgotPassword/forgotPassword.h
 var custom = require('../../custom');
 var CONSTANTS = require('../../constants/validation');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     el            : '#wrapper',

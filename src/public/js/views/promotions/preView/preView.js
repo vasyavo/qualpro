@@ -19,6 +19,7 @@ var NewCommentTemplate = require('../../../../templates/objectives/comments/newR
 var CommentModel = require('../../../models/comment');
 var CommentCollection = require('../../../collections/comment/collection');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
+var App = require('../../../appState');
 
 module.exports = BaseView.extend({
     contentType          : CONTENT_TYPES.PROMOTIONS,

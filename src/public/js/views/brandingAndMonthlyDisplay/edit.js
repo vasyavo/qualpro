@@ -6,6 +6,7 @@ var DisplayTypeCollection = require('../../collections/displayType/collection');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var arabicInput = require('../../helpers/implementShowHideArabicInputIn');
 var Template = require('../../../templates/brandingAndMonthlyDisplay/edit.html');
+var App = require('../../appState');
 
 return Backbone.View.extend({
 

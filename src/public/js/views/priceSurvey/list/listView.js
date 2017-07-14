@@ -10,6 +10,7 @@ var BranchDataTemplate = require('../../../../templates/priceSurvey/list/branchD
 var CONTENT_TYPES = require('../../../constants/contentType');
 var dataService = require('../../../dataService');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     el         : '#contentHolder',

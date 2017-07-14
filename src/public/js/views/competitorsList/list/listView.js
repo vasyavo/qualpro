@@ -1,16 +1,17 @@
 var _ = require('underscore');
 var $ = require('jQuery');
 var async = require('async');
-var headerTemplate = require('text!templates/competitorsList/list/header.html');
-var newRowTemplate = require('text!templates/competitorsList/list/newRow.html');
-var createView = require('views/competitorsList/createView');
-var ListItemsView = require('views/competitorsList/list/listItemsView');
-var paginator = require('views/paginator');
-var REGEXP = require('constants/validation');
-var STATUSES = require('constants/personnelStatuses');
-var dataService = require('dataService');
-var ERROR_MESSAGES = require('constants/errorMessages');
-var BadgeStore = require('services/badgeStore');
+var headerTemplate = require('../../../../templates/competitorsList/list/header.html');
+var newRowTemplate = require('../../../../templates/competitorsList/list/newRow.html');
+var createView = require('../../../views/competitorsList/createView');
+var ListItemsView = require('../../../views/competitorsList/list/listItemsView');
+var paginator = require('../../../views/paginator');
+var REGEXP = require('../../../constants/validation');
+var STATUSES = require('../../../constants/personnelStatuses');
+var dataService = require('../../../dataService');
+var ERROR_MESSAGES = require('../../../constants/errorMessages');
+var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType   : 'competitorsList',

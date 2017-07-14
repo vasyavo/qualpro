@@ -9,6 +9,7 @@ var FileCollection = require('../../collections/file/collection');
 var FileModel = require('../../models/file');
 var CONTENT_TYPES = require('../../constants/contentType');
 var CONSTANTS = require('../../constants/otherConstants');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTES,

@@ -4,6 +4,7 @@ var Backbone = require('backbone');
 var dataService = require('../../dataService');
 var createSuperAdminTemplate = require('../../../templates/createSuperAdmin/createSuperAdmin.html');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     el      : '#wrapper',

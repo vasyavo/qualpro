@@ -22,6 +22,7 @@ var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var FileDialogPreviewView = require('../../views/fileDialog/fileDialog');
 var objectivesStatusHelper = require('../../helpers/objectivesStatusHelper');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType          : CONTENT_TYPES.INSTORETASKS,

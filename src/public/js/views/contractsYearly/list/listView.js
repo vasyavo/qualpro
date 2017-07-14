@@ -1,15 +1,15 @@
 var _ = require('underscore');
 var $ = require('jQuery');
-var template = require('text!templates/contractsYearly/list/list.html');
-var createView = require('views/contractsYearly/createView');
-var newRow = require('text!templates/contractsYearly/list/newRow.html');
-var EditView = require('views/contractsYearly/editView');
-var PreView = require('views/contractsYearly/preView/preView');
-var paginator = require('views/paginator');
-var FileDialogPreviewView = require('views/fileDialog/fileDialog');
-var FileCollection = require('collections/file/collection');
-var CONTENT_TYPES = require('constants/contentType');
-var BadgeStore = require('services/badgeStore');
+var template = require('../../../../templates/contractsYearly/list/list.html');
+var createView = require('../../../views/contractsYearly/createView');
+var newRow = require('../../../../templates/contractsYearly/list/newRow.html');
+var EditView = require('../../../views/contractsYearly/editView');
+var PreView = require('../../../views/contractsYearly/preView/preView');
+var paginator = require('../../../views/paginator');
+var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
+var FileCollection = require('../../../collections/file/collection');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BadgeStore = require('../../../services/badgeStore');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.CONTRACTSYEARLY,

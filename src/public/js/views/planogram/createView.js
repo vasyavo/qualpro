@@ -15,6 +15,7 @@ var filterCollection = require('../../collections/filter/filterCollection');
 var dataService = require('../../dataService');
 var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONSTANTS.PLANOGRAM,

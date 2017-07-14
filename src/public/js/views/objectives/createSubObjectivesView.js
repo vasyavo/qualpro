@@ -21,6 +21,7 @@ var dataService = require('../../dataService');
 var CONTENT_TYPES = require('../../constants/contentType');
 var Model = require('../../models/objectives');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.OBJECTIVES,

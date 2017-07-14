@@ -11,6 +11,7 @@ var BaseView = require('../../views/baseDialog');
 var dataService = require('../../dataService');
 var common = require('../../common');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType   : 'brandList',

@@ -8,6 +8,7 @@ var newThumbnail = require('../../../templates/domain/newThumbnail.html');
 var createLogicForDomainView = require('../../helpers/createLogicForDomainView');
 var CONTENT_TYPES = require('../../constants/contentType');
 var BadgeStore = require('../../services/badgeStore');
+var App = require('../../appState');
 
 var types = [
     CONTENT_TYPES.COUNTRY,

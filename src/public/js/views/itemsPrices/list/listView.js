@@ -11,6 +11,7 @@ var STATUSES = require('../../../constants/personnelStatuses');
 var dataService = require('../../../dataService');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: 'itemsPrices',

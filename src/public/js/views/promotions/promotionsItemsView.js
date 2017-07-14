@@ -15,6 +15,7 @@ var ERROR_MESSAGES = require('../../constants/errorMessages');
 var EditPromotionItemView = require('../../views/promotions/editPromotionItem');
 var PromotionItemModel = require('../../models/promotionsItems');
 var INFO_MESSAGES = require('../../constants/infoMessages');
+var App = require('../../appState');
 
 module.exports = BaseDialog.extend({
     contentType        : CONTENT_TYPES.PROMOTIONSITEMS,

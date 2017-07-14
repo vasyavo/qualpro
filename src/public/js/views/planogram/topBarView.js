@@ -7,6 +7,7 @@ var CONTENT_TYPES = require('../../constants/contentType');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var dataService = require('../../dataService');
 var ManageProductsInformationView = require('../../views/planogram/manageProductsInformation');
+var App = require('../../appState');
 
 module.exports = baseTopBar.extend({
     contentType       : CONTENT_TYPES.PLANOGRAM,

@@ -8,6 +8,7 @@ var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var Template = require('../../../../templates/objectives/visibilityForm/edit.html');
 var FileThumbnailTemplate = require('../../../../templates/objectives/visibilityForm/file-thumbnail.html');
 var NewFileThumbnailTemplate = require('../../../../templates/objectives/visibilityForm/new-file-thumbnail.html');
+var App = require('../../../appState');
 
 module.exports = Backbone.View.extend({
 

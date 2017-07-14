@@ -10,6 +10,7 @@ var FileModel = require('../../models/file');
 var FileDialogPreviewView = require('../../views/fileDialog/fileDialog');
 var CONTENT_TYPES = require('../../constants/contentType');
 var CONSTANTS = require('../../constants/otherConstants');
+var App = require('../../appState');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTES,
