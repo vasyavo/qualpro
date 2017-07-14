@@ -1,3 +1,5 @@
+var App = require('./appState');
+
 // Removed cyrillic chars
 var phoneRegExp = /^[0-9\+]?([0-9-\s()])+[0-9()]$/;
 var intNumberRegExp = /[0-9]+/;

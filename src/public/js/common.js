@@ -4,6 +4,7 @@ var dataService = require('./dataService');
 var CONSTANTS = require('./constants/otherConstants');
 var ERROR_MESSAGES = require('./constants/errorMessages');
 var canvasSize = CONSTANTS.CANVAS_SIZE;
+var App = require('./appState');
 
 var canvasDrawing = function (options, context) {
     var canvas = (options.canvas) ? options.canvas : context.$('.avatar canvas')[0];

@@ -2,6 +2,8 @@ var Backbone = require('Backbone');
 var io = require('socketio');
 var PersonnelModel = require('./models/personnel');
 var ERROR_MESSAGES = require('./constants/errorMessages');
+var App = require('./appState');
+
 var socket = io.connect({
     upgrade: false,
     transports: ['websocket'],

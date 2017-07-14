@@ -3,6 +3,7 @@ var Parent = require('../parrent');
 var Model = require('../../models/taskFlow');
 var CONTENT_TYPES = require('../../constants/contentType');
 var OTHER_CONSTANTS = require('../../constants/otherConstants');
+var App = require('../../appState');
 
 module.exports = Parent.extend({
     model      : Model,

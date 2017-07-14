@@ -2,6 +2,7 @@ var $ = require('jquery');
 var Backbone = require('backbone');
 var Model = require('../../models/documents');
 var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
 module.exports = Backbone.Collection.extend({
 

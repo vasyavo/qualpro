@@ -18,6 +18,9 @@ var ImportExportTopBarView = require('./views/importExport/TopBar');
 var ImportExportModel = require('./models/importExport');
 var ACL_ROLES = require('./constants/aclRoleIndexes');
 var PubNubClient = require('./services/pubnub');
+var App = require('./appState');
+var DocumentCollection = require('./collections/documents/collection');
+var DefFilters = require('./helpers/defFilterLogic');
 
 module.exports = Backbone.Router.extend({
 
@@ -106,41 +109,40 @@ module.exports = Backbone.Router.extend({
             }
 
             var currentLanguage = App.currentUser.currentLanguage;
-            require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {
-                var rootPath = CONSTANTS.DOCUMENTS + '/folder';
-                var documentsCollection = new collection();
+            var translation = require('./translations/' + currentLanguage + '/documents');
+            var rootPath = CONSTANTS.DOCUMENTS + '/folder';
+            var documentsCollection = new DocumentCollection();
 
-                delete documentsCollection.state.search;
+            delete documentsCollection.state.search;
 
-                if (folder) {
-                    documentsCollection.url = rootPath + '/' + folder;
-                    documentsCollection.folder = folder;
-                } else {
-                    documentsCollection.url = rootPath;
-                    documentsCollection.folder = null;
-                }
+            if (folder) {
+                documentsCollection.url = rootPath + '/' + folder;
+                documentsCollection.folder = folder;
+            } else {
+                documentsCollection.url = rootPath;
+                documentsCollection.folder = null;
+            }
 
-                if (filter) {
-                    filter = JSON.parse(filter);
-                    documentsCollection.url = documentsCollection.url + '?' + $.param(filter);
-                }
+            if (filter) {
+                filter = JSON.parse(filter);
+                documentsCollection.url = documentsCollection.url + '?' + $.param(filter);
+            }
 
-                var documentsTopBarView = new DocumentsTopBarView({
-                    translation : translation,
-                    collection : documentsCollection,
-                    archived : lodash.get(filter, 'archived')
-                });
-                $('#topBarHolder').html(documentsTopBarView.render().$el);
-
-                var documentsListView = new DocumentsListView({
-                    collection : documentsCollection,
-                    translation : translation
-                });
-
-                $('#contentHolder').html(documentsListView.render().$el);
-
-                documentsCollection.getFirstPage();
+            var documentsTopBarView = new DocumentsTopBarView({
+                translation : translation,
+                collection : documentsCollection,
+                archived : lodash.get(filter, 'archived')
             });
+            $('#topBarHolder').html(documentsTopBarView.render().$el);
+
+            var documentsListView = new DocumentsListView({
+                collection : documentsCollection,
+                translation : translation
+            });
+
+            $('#contentHolder').html(documentsListView.render().$el);
+
+            documentsCollection.getFirstPage();
         });
     },
 
@@ -175,21 +177,20 @@ module.exports = Backbone.Router.extend({
                 $loader.addClass('smallLogo').removeClass('ellipseAnimated');
             }
 
-            require(['translations/' + App.currentUser.currentLanguage + '/importExport'], function (translation) {
-                var importExportModel = new ImportExportModel();
+            var translation = require('./translations/' + App.currentUser.currentLanguage + '/importExport');
+            var importExportModel = new ImportExportModel();
 
-                var importExportTopBar = new ImportExportTopBarView({
-                    model: importExportModel,
-                    translation: translation,
-                });
-                $('#topBarHolder').html(importExportTopBar.render().$el);
-
-                var importExportOverview = new ImportExportOverview({
-                    model: importExportModel,
-                    translation: translation,
-                });
-                $('#contentHolder').html(importExportOverview.render().$el);
+            var importExportTopBar = new ImportExportTopBarView({
+                model: importExportModel,
+                translation: translation,
             });
+            $('#topBarHolder').html(importExportTopBar.render().$el);
+
+            var importExportOverview = new ImportExportOverview({
+                model: importExportModel,
+                translation: translation,
+            });
+            $('#contentHolder').html(importExportOverview.render().$el);
         });
     },
 
@@ -233,23 +234,15 @@ module.exports = Backbone.Router.extend({
     },
 
     goToDomains: function (domainType, tabName, viewType, parentId, subRegionId, retailSegmentId, outletId, page, countPerPage, filter) {
+        var self = this;
+
         App.$preLoader.fadeFn({
             visibleState: true
         });
-        var self = this;
+
         this.checkLogin(function (success) {
-            var currentUser;
-            var breadcrumb;
-            var domainFilter;
-            var defaultFilters;
-            var collectionUrl;
-            var startTime;
-            var topBarViewUrl;
-            var contentViewUrl;
-            var defCurFilter;
-            var translationUrl;
             var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-            var $loader = $('#alaliLogo');
+
             if (!success) {
                 return self.redirectTo();
             }
@@ -258,12 +251,12 @@ module.exports = Backbone.Router.extend({
                 self.main(domainType);
             }
 
-            contentViewUrl = 'views/domain/' + viewType;
-            topBarViewUrl = 'views/domain/topBarView';
-            startTime = new Date();
-            collectionUrl = 'collections/' + domainType + '/collection';
-            translationUrl = 'translations/' + currentLanguage + '/' + domainType;
-            breadcrumb = {
+            var contentViewUrl = 'views/domain/' + viewType;
+            var topBarViewUrl = 'views/domain/topBarView';
+            var startTime = new Date();
+            var collectionUrl = 'collections/' + domainType + '/collection';
+            var translationUrl = 'translations/' + currentLanguage + '/' + domainType;
+            var breadcrumb = {
                 type: domainType,
                 ids : {
                     parent       : parentId,
@@ -276,6 +269,8 @@ module.exports = Backbone.Router.extend({
             self.mainView.topMenu.currentCT = domainType;
 
             function loadContent() {
+                var $loader = $('#alaliLogo');
+
                 if (!$loader.hasClass('smallLogo')) {
                     $loader
                         .addClass('animated');
@@ -295,61 +290,52 @@ module.exports = Backbone.Router.extend({
             loadContent();
 
             function getContentDomain() {
+                var ContentView = require(contentViewUrl);
+                var TopBar = require(topBarViewUrl);
+                var Collection = require(collectionUrl);
+                var translation = require(translationUrl);
+                var defaultFilters = new DefFilters(App.currentUser._id);
+                var defCurFilter = defaultFilters.getDefFilter(domainType, tabName);
+                filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
+                var domainFilter = composeDomainFilter(domainType, parentId, subRegionId, retailSegmentId, outletId);
+                filter = _.extend(filter, domainFilter);
 
-                require([
-                    contentViewUrl,
-                    topBarViewUrl,
-                    collectionUrl,
-                    'helpers/defFilterLogic',
-                    translationUrl
-                ], function (ContentView, TopBar, Collection, DefFilters, translation) {
-                    var contentViewOpts;
-                    var collectionOpts;
-                    var topBarOpts;
-
-                    defaultFilters = new DefFilters(App.currentUser._id);
-                    defCurFilter = defaultFilters.getDefFilter(domainType, tabName);
-                    filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
-                    domainFilter = composeDomainFilter(domainType, parentId, subRegionId, retailSegmentId, outletId);
-                    filter = _.extend(filter, domainFilter);
-
-                    contentViewOpts = {
-                        Constructor: ContentView,
-                        options    : {
-                            startTime  : startTime,
-                            filter     : filter,
-                            breadcrumb : breadcrumb,
-                            tabName    : tabName,
-                            defFilter  : defCurFilter,
-                            contentType: domainType,
-                            translation: translation
-                        }
-                    };
-                    collectionOpts = {
-                        Constructor: Collection,
-                        options    : {
-                            viewType     : viewType,
-                            filter       : filter,
-                            newCollection: true
-                        }
-                    };
-                    topBarOpts = {
-                        Constructor: TopBar,
-                        options    : {
-                            viewType   : viewType,
-                            filter     : filter,
-                            contentType: domainType,
-                            tabName    : tabName,
-                            translation: translation
-                        }
-                    };
-
-                    if (self.mainView === null) {
-                        self.main(domainType);
+                var contentViewOpts = {
+                    Constructor: ContentView,
+                    options    : {
+                        startTime  : startTime,
+                        filter     : filter,
+                        breadcrumb : breadcrumb,
+                        tabName    : tabName,
+                        defFilter  : defCurFilter,
+                        contentType: domainType,
+                        translation: translation
                     }
+                };
+                var collectionOpts = {
+                    Constructor: Collection,
+                    options    : {
+                        viewType     : viewType,
+                        filter       : filter,
+                        newCollection: true
+                    }
+                };
+                var topBarOpts = {
+                    Constructor: TopBar,
+                    options    : {
+                        viewType   : viewType,
+                        filter     : filter,
+                        contentType: domainType,
+                        tabName    : tabName,
+                        translation: translation
+                    }
+                };
 
-                    self.createViews(contentViewOpts, topBarOpts, collectionOpts, self.mainView.topMenu);
-                });
+                if (self.mainView === null) {
+                    self.main(domainType);
+                }
+
+                self.createViews(contentViewOpts, topBarOpts, collectionOpts, self.mainView.topMenu);
             }
         });
     },
@@ -371,64 +357,54 @@ module.exports = Backbone.Router.extend({
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
         var translationUrl = 'translations/' + currentLanguage + '/' + contentType;
 
-        var defaultFilters;
-        var defCurFilter;
-
         if (context.mainView === null) {
             context.main(contentType);
         }
 
         function loadContent() {
-            require([contentViewUrl,
-                topBarViewUrl,
-                collectionUrl,
-                'helpers/defFilterLogic',
-                translationUrl
-            ], function (ContentView, TopBarView, ContentCollection, DefFilters, translation) {
-                var contentViewOpts;
-                var collectionOpts;
-                var topBarOpts;
+            var ContentView = require(contentViewUrl);
+            var TopBarView = require(topBarViewUrl);
+            var ContentCollection = require(collectionUrl);
+            var translation = require(translationUrl);
+            var defaultFilters = new DefFilters(App.currentUser._id);
+            var defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
+            filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
 
-                defaultFilters = new DefFilters(App.currentUser._id);
-                defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
-                filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
+            var contentViewOpts = {
+                Constructor: ContentView,
+                options    : {
+                    el         : '#contentHolder',
+                    startTime  : startTime,
+                    filter     : filter,
+                    tabName    : tabName,
+                    defFilter  : defCurFilter,
+                    contentType: contentType,
+                    translation: translation
+                }
+            };
+            var collectionOpts = {
+                Constructor: ContentCollection,
+                options    : {
+                    viewType     : viewType,
+                    page         : page,
+                    count        : countPerPage,
+                    filter       : filter,
+                    contentType  : contentType,
+                    newCollection: true
+                }
+            };
+            var topBarOpts = {
+                Constructor: TopBarView,
+                options    : {
+                    viewType   : viewType,
+                    filter     : filter,
+                    contentType: contentType,
+                    tabName    : tabName,
+                    translation: translation
+                }
+            };
 
-                contentViewOpts = {
-                    Constructor: ContentView,
-                    options    : {
-                        el         : '#contentHolder',
-                        startTime  : startTime,
-                        filter     : filter,
-                        tabName    : tabName,
-                        defFilter  : defCurFilter,
-                        contentType: contentType,
-                        translation: translation
-                    }
-                };
-                collectionOpts = {
-                    Constructor: ContentCollection,
-                    options    : {
-                        viewType     : viewType,
-                        page         : page,
-                        count        : countPerPage,
-                        filter       : filter,
-                        contentType  : contentType,
-                        newCollection: true
-                    }
-                };
-                topBarOpts = {
-                    Constructor: TopBarView,
-                    options    : {
-                        viewType   : viewType,
-                        filter     : filter,
-                        contentType: contentType,
-                        tabName    : tabName,
-                        translation: translation
-                    }
-                };
-
-                self.createViews(contentViewOpts, topBarOpts, collectionOpts, context.mainView.topMenu);
-            });
+            self.createViews(contentViewOpts, topBarOpts, collectionOpts, context.mainView.topMenu);
         }
 
         loadContent();

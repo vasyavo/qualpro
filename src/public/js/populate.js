@@ -7,6 +7,7 @@ var selectTemplate = require('../templates/main/selectTemplate.html');
 var CONTENT_TYPES = require('./constants/contentType');
 var DropDownView = require('./views/filter/dropDownView');
 var FilterCollection = require('./collections/filter/filterCollection');
+var App = require('./appState');
 
 var types = [
     CONTENT_TYPES.COUNTRY,

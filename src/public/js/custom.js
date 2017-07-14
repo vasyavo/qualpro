@@ -7,6 +7,7 @@ var CONSTANTS = require('./constants/contentType');
 var ERROR_MESSAGES = require('./constants/errorMessages');
 var ACL_ROLE_INDEXES = require('./constants/aclRoleIndexes');
 var PubNubClient = require('./services/pubnub');
+var App = require('./appState');
 
 var runApplication = function (success) {
     var url;

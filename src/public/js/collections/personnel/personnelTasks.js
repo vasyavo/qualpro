@@ -5,6 +5,7 @@ var InStoreModel = require('../../models/inStoreTasks');
 var CONTENT_TYPES = require('../../constants/contentType');
 var OTHER_CONSTANTS = require('../../constants/otherConstants');
 var custom = require('../../custom');
+var App = require('../../appState');
 
 function buildModelsObject() {
     var resObject = {};
