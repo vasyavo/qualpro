@@ -300,8 +300,8 @@ var createPersonnelViewLogic = function (context) {
             var view = self.view;
             var $currentDomainA = this['$' + domainType];
             var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
-            var translationsUrl = 'translations/' + currentLanguage + '/' + domainType;
-            var url = 'collections/' + domainType + '/collection';
+            var translationsUrl = '../translations/' + currentLanguage + '/' + domainType;
+            var url = '../collections/' + domainType + '/collection';
             var dataId = $currentDomainA.attr('data-id');
             var currentDomains = dataId !== '' ? dataId.split(',') : [];
             var collection;
@@ -327,59 +327,60 @@ var createPersonnelViewLogic = function (context) {
                 parentId = $prevDomainA.attr('data-id');
             }
 
-            require([url, translationsUrl], function (Collection, translation) {
-                var subRegionsId;
-                var creationOptions = {
-                    viewType     : 'thumbnails',
-                    newCollection: true,
-                    count        : -1
-                };
+            var Collection = require(url);
+            var translation = require(translationsUrl);
 
-                if (parentId && domainType !== 'branch') {
-                    creationOptions.filter = {
-                        parent: {
-                            values: parentId.split(','),
-                            type  : 'ObjectId'
-                        }
-                    };
-                } else if (parentId) {
-                    subRegionsId = self.$subRegion.attr('data-id').split(',');
-                    creationOptions.filter = {
-                        subRegion: {
-                            values: subRegionsId,
-                            type  : 'ObjectId'
-                        }
-                    };
-                }
+            var subRegionsId;
+            var creationOptions = {
+                viewType     : 'thumbnails',
+                newCollection: true,
+                count        : -1
+            };
 
-                if (self.personnelAccessRoleLevel === 2 ||
-                    self.personnelAccessRoleLevel === 3 ||
-                    self.personnelAccessRoleLevel === 4 ||
-                    self.personnelAccessRoleLevel === 9) {
-                    creationOptions.accessRoleLevel = self.personnelAccessRoleLevel;
-                }
-
-                view.collection = new Collection(creationOptions);
-
-                view.collection.on('reset', function () {
-                    var selectView;
-
-                    if (view.collection.length === 0) {
-                        return App.render({
-                            type   : 'error',
-                            message: translation.domainName + ERROR_MESSAGES.noData[currentLanguage]
-                        });
+            if (parentId && domainType !== 'branch') {
+                creationOptions.filter = {
+                    parent: {
+                        values: parentId.split(','),
+                        type  : 'ObjectId'
                     }
+                };
+            } else if (parentId) {
+                subRegionsId = self.$subRegion.attr('data-id').split(',');
+                creationOptions.filter = {
+                    subRegion: {
+                        values: subRegionsId,
+                        type  : 'ObjectId'
+                    }
+                };
+            }
 
-                    selectView = new DomainThumbnailsView({
-                        selected   : currentDomains,
-                        contentType: domainType,
-                        collection : view.collection,
-                        multiselect: multiSelect
+            if (self.personnelAccessRoleLevel === 2 ||
+                self.personnelAccessRoleLevel === 3 ||
+                self.personnelAccessRoleLevel === 4 ||
+                self.personnelAccessRoleLevel === 9) {
+                creationOptions.accessRoleLevel = self.personnelAccessRoleLevel;
+            }
+
+            view.collection = new Collection(creationOptions);
+
+            view.collection.on('reset', function () {
+                var selectView;
+
+                if (view.collection.length === 0) {
+                    return App.render({
+                        type   : 'error',
+                        message: translation.domainName + ERROR_MESSAGES.noData[currentLanguage]
                     });
-                    selectView.on('elementsSelected', function (data) {
-                        self.onDomainSelected(data, domainType, self);
-                    });
+                }
+
+                selectView = new DomainThumbnailsView({
+                    selected   : currentDomains,
+                    contentType: domainType,
+                    collection : view.collection,
+                    multiselect: multiSelect
+                });
+                selectView.on('elementsSelected', function (data) {
+                    self.onDomainSelected(data, domainType, self);
                 });
             });
         },
