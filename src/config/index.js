@@ -106,6 +106,14 @@ config.pubnub = {
     subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY,
 };
 
+config.phantom = {
+    numberOfWorkers: process.env.PHANTOM_WORKERS,
+    timeout: process.env.PHANTOM_TIMEOUT,
+    portLeftBoundary: process.env.PHANTOM_PORT_LEFT,
+    portRightBoundary: process.env.PHANTOM_PORT_RIGHT,
+    host: process.env.PHANTOM_HOST,
+};
+
 config.session = {
     age: process.env.SESSION_AGE || 24 * 60 * 60 * 1000,
     maxAge: process.env.SESSION_MAX_AGE || 365 * 24 * 60 * 60 * 1000,

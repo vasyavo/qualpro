@@ -114,6 +114,13 @@ Ask credentials in your administrator.
  - `PUBNUB_PUBLISH_KEY`
  - `PUBNUB_SUBSCRIBE_KEY`
 
+##### PhantomJS
+ - `PHANTOM_WORKERS`
+ - `PHANTOM_TIMEOUT`
+ - `PHANTOM_PORT_LEFT`
+ - `PHANTOM_PORT_RIGHT`
+ - `PHANTOM_HOST`
+
 ##### Datastore:
  - `REDIS_URL` or `REDISGREEN_URL` Redis url
 
