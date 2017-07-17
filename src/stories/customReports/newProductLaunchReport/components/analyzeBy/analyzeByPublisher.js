@@ -1,17 +1,17 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$createdBy.user.position',
+            _id: '$createdBy.user._id',
             count: { $sum: 1 },
         },
     });
 
     pipeline.push({
         $lookup: {
-            from: 'positions',
+            from: 'personnels',
             localField: '_id',
             foreignField: '_id',
-            as: 'position',
+            as: 'personnel',
         },
     });
 
@@ -19,20 +19,26 @@ module.exports = (pipeline) => {
         $project: {
             _id: 1,
             count: 1,
-            position: {
+            personnel: {
                 $let: {
                     vars: {
-                        position: { $arrayElemAt: ['$position', 0] },
+                        personnel: { $arrayElemAt: ['$personnel', 0] },
                     },
                     in: {
-                        _id: '$$position._id',
+                        _id: '$$personnel._id',
                         name: {
-                            en: '$$position.name.en',
-                            ar: '$$position.name.ar',
+                            en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
+                            ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
                         },
                     },
                 },
             },
+        },
+    });
+
+    pipeline.push({
+        $sort: {
+            'personnel.name': 1,
         },
     });
 
@@ -42,7 +48,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$position.name' },
+            labels: { $push: '$personnel' },
         },
     });
 };

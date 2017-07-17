@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
+const ObjectId = require('bson-objectid');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -11,7 +10,6 @@ const moment = require('moment');
 const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
-const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
@@ -36,16 +34,10 @@ module.exports = (req, res, next) => {
         const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
-        const filters = [
-            CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-        ];
-        const pipeline = [];
 
         if (timeFilter) {
-            const timeFilterValidate = ajv.compile({ timeFrames: timeFilter });
-            const timeFilterValid = timeFilterValidate(timeFilter);
+            const timeFilterValidate = ajv.compile(timeFilterSchema);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -56,17 +48,43 @@ module.exports = (req, res, next) => {
             }
         }
 
-        filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0]) {
+        // map set String ID to set ObjectID
+        [
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL,
+        ].forEach(filterName => {
+            if (queryFilter[filterName] && queryFilter[filterName].length) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        const pipeline = [];
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, 'packing'], queryFilter, personnel);
+        const $locationMatch = generalFiler([
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+        ], queryFilter);
+
+        if ($locationMatch.$and.length) {
+            pipeline.push({ $match: $locationMatch });
+        }
+
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.DISPLAY_TYPE,
+            'packing',
+        ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
@@ -76,12 +94,63 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
-            $generalMatch.$and.push({
-                'brand.name': {
-                    $in: queryFilter[CONTENT_TYPES.BRAND],
-                },
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.CATEGORY].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ category: { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({
+                    $or: [
+                        { 'category_name.en': { $in: setString } },
+                        { 'category_name.ar': { $in: setString } },
+                    ],
+                });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.BRAND].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
+            });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'brand._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'brand.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
@@ -109,24 +178,16 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -208,6 +269,120 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $addFields: {
+                category: 1,
+                customCategory: {
+                    en: '$category_name.en',
+                    ar: '$category_name.ar',
+                },
+                brand: '$brand._id',
+                customBrand: {
+                    en: '$brand.name',
+                    ar: '$brand.name',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                category: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$category',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    category: { $arrayElemAt: ['$category', 0] },
+                                },
+                                in: {
+                                    _id: '$$category._id',
+                                    name: {
+                                        en: {
+                                            $toUpper: '$$category.name.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$$category.name.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customCategory.en', // tip: the same as ar
+                            name: {
+                                en: {
+                                    $toUpper: '$customCategory.en',
+                                },
+                                ar: {
+                                    $toUpper: '$customCategory.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+                brand: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$brand',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    brand: { $arrayElemAt: ['$brand', 0] },
+                                },
+                                in: {
+                                    _id: '$$brand._id',
+                                    name: {
+                                        en: {
+                                            $toUpper: '$$brand.name.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$$brand.name.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customBrand.en', // tip: same as ar
+                            name: {
+                                en: {
+                                    $toUpper: '$customBrand.en',
+                                },
+                                ar: {
+                                    $toUpper: '$customBrand.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 countries: { $addToSet: '$country' },
@@ -218,8 +393,8 @@ module.exports = (req, res, next) => {
                 branches: { $addToSet: '$branch' },
                 positions: { $addToSet: '$createdBy.user.position' },
                 personnels: { $addToSet: '$createdBy.user' },
-                brands: { $addToSet: '$brand.name' },
                 categories: { $addToSet: '$category' },
+                brands: { $addToSet: '$brand' },
                 variants: { $addToSet: '$variant.name' },
                 packings: { $addToSet: '$packing' },
                 distributors: { $addToSet: '$distributor' },
@@ -295,14 +470,18 @@ module.exports = (req, res, next) => {
                     },
                 },
                 personnels: 1,
-                brands: 1,
                 categories: {
                     $filter: {
                         input: '$categories',
-                        as: 'item',
-                        cond: {
-                            $ne: ['$$item', null],
-                        },
+                        as: 'category',
+                        cond: { $ne: ['$$category._id', null] },
+                    },
+                },
+                brands: {
+                    $filter: {
+                        input: '$brands',
+                        as: 'brand',
+                        cond: { $ne: ['$$brand._id', null] },
                     },
                 },
                 variants: 1,
@@ -394,15 +573,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'categories',
-                localField: 'categories',
-                foreignField: '_id',
-                as: 'categories',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
                 from: 'displayTypes',
                 localField: 'displayTypes',
                 foreignField: '_id',
@@ -441,7 +611,10 @@ module.exports = (req, res, next) => {
                     name: 1,
                 },
                 personnels: 1,
-                brands: 1,
+                brands: {
+                    _id: 1,
+                    name: 1,
+                },
                 categories: {
                     _id: 1,
                     name: 1,
@@ -550,21 +723,21 @@ module.exports = (req, res, next) => {
                     en: 'Product',
                     ar: '',
                 },
-                value: 'category',
+                value: 'product',
             },
             {
                 name: {
-                    en: 'Position',
+                    en: 'Publisher Position',
                     ar: '',
                 },
-                value: 'position',
+                value: 'publisherPosition',
             },
             {
                 name: {
-                    en: 'Employee',
+                    en: 'Publisher',
                     ar: '',
                 },
-                value: 'employee',
+                value: 'publisher',
             },
         ];
 

@@ -162,11 +162,13 @@ module.exports = (pipeline) => {
         $addFields: {
             location: {
                 _id: '$domain._id', // <-- important fix magical duplication
-                en: {
-                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$retailSegment.name.en', ' / ', '$outlet.name.en', ' -> ', '$domain.name.en'],
-                },
-                ar: {
-                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$outlet.name.ar', ' -> ', '$domain.name.ar'],
+                name: {
+                    en: {
+                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$retailSegment.name.en', ' / ', '$outlet.name.en', ' -> ', '$domain.name.en'],
+                    },
+                    ar: {
+                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$outlet.name.ar', ' -> ', '$domain.name.ar'],
+                    },
                 },
             },
         },
@@ -199,7 +201,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'data.location.en': 1,
+            'data.location.name': 1,
             'data.count': 1,
         },
     });
@@ -228,7 +230,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'labels.en': 1,
+            'labels.name': 1,
         },
     });
 
