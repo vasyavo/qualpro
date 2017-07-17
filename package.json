@@ -109,7 +109,7 @@
     "supertest-session": "1.0.0"
   },
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node src/server.js --max-old-space-size=${WEB_MEMORY}",
     "test": "cross-env NODE_ENV=test mocha --require co-mocha src/server.spec.js",
     "dev": "cross-env NODE_ENV=development DEBUG_DEV=true node src/server.js",
     "debug": "cross-env NODE_ENV=development DEBUG_DEV=true node-debug --save-live-edit src/server.js",
