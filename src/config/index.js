@@ -109,8 +109,8 @@ config.pubnub = {
 config.phantom = {
     numberOfWorkers: process.env.PHANTOM_WORKERS,
     timeout: process.env.PHANTOM_TIMEOUT,
-    portLeftBoundary: process.env.PHANTOM_PORT_LEFT,
-    portRightBoundary: process.env.PHANTOM_PORT_RIGHT,
+    portLeftBoundary: parseInt(process.env.PHANTOM_PORT_LEFT, 10),
+    portRightBoundary: parseInt(process.env.PHANTOM_PORT_RIGHT, 10),
     host: process.env.PHANTOM_HOST,
 };
 
