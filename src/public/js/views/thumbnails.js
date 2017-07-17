@@ -27,26 +27,26 @@ module.exports = paginator.extend({
         var contentType = this.contentType;
         var viewType = this.viewType;
         var parentId = this.parentId;
-        var modelUrl = 'models/' + contentType;
+        var modelUrl = '../models/' + contentType;
         var self = this;
         var CreateView = this.CreateView;
 
-        require([modelUrl], function (Model) {
-            var createView = new CreateView({
-                Model      : Model,
-                contentType: contentType,
-                viewType   : viewType,
-                parentId   : parentId,
-                translation: self.translation
-            });
+        var Model = require(modelUrl);
 
-            createView.on('itemSaved', function () {
-                self.collection.getPage(1);
-            });
+        var createView = new CreateView({
+            Model      : Model,
+            contentType: contentType,
+            viewType   : viewType,
+            parentId   : parentId,
+            translation: self.translation
+        });
 
-            createView.on('modelSaved', function (model) {
-                self.addReplaceRow(model);
-            });
+        createView.on('itemSaved', function () {
+            self.collection.getPage(1);
+        });
+
+        createView.on('modelSaved', function (model) {
+            self.addReplaceRow(model);
         });
     },
 

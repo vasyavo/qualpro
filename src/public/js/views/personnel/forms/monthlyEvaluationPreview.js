@@ -53,20 +53,22 @@ module.exports = BaseDialog.extend({
         e.stopPropagation();
 
         if (object && (missingPreviews.indexOf(object.context) === -1)) {
-            translationUrl = 'translations/' + App.currentUser.currentLanguage + '/' + object.context;
-            targetModelUrl = 'models/' + object.context;
-            preViewUrl = 'views/' + object.context + '/preView/preView';
+            translationUrl = '../../../translations/' + App.currentUser.currentLanguage + '/' + object.context;
+            targetModelUrl = '../../../models/' + object.context;
+            preViewUrl = '../../../views/' + object.context + '/preView/preView';
 
-            require([translationUrl, targetModelUrl, preViewUrl], function (translation, TargetModel, PreView) {
-                var itemModel = new TargetModel({_id: modelId});
-                itemModel.on('sync', function (prettyModel) {
-                    self.preView = new PreView({
-                        model      : prettyModel,
-                        translation: translation
-                    });
+            var translation = require(translationUrl);
+            var TargetModel = require(targetModelUrl);
+            var PreView = require(preViewUrl);
+
+            var itemModel = new TargetModel({_id: modelId});
+            itemModel.on('sync', function (prettyModel) {
+                self.preView = new PreView({
+                    model      : prettyModel,
+                    translation: translation
                 });
-                itemModel.fetch();
             });
+            itemModel.fetch();
         }
     },
 

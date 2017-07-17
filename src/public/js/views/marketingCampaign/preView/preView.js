@@ -169,21 +169,17 @@ module.exports = BaseView.extend({
 
         if ([1, 2, 3, 4, 8, 9, 10].indexOf(level) !== -1 && App.currentUser.workAccess) {
             currentConfig.forEach(function (config) {
-                require([
-                        config.template
-                    ],
-                    function (template) {
-                        var container = self.$el.find(config.selector);
+                var template = require('../../../../' + config.template);
+                var container = self.$el.find(config.selector);
 
-                        template = _.template(template);
+                template = _.template(template);
 
-                        if (!container.find('#' + config.elementId).length) {
-                            container[config.insertType](template({
-                                elementId  : config.elementId,
-                                translation: self.translation
-                            }));
-                        }
-                    });
+                if (!container.find('#' + config.elementId).length) {
+                    container[config.insertType](template({
+                        elementId  : config.elementId,
+                        translation: self.translation
+                    }));
+                }
             });
         }
 

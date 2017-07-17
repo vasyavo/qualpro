@@ -810,30 +810,7 @@ module.exports = BaseView.extend({
 
                     if (App.currentUser.workAccess) {
                         if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
-                            require([
-                                    config.template
-                                ],
-                                function (template) {
-                                    var container = self.$el.find(config.selector);
-
-                                    template = _.template(template);
-
-                                    if (!container.find('#' + config.elementId).length) {
-                                        container[config.insertType](template({
-                                            elementId  : config.elementId,
-                                            translation: self.translation
-                                        }));
-                                    }
-                                });
-                        }
-                    }
-                });
-            } else {
-                configForActivityList.forEach(function (config) {
-                    require([
-                            config.template
-                        ],
-                        function (template) {
+                            var template = require('../../../../' + config.template);
                             var container = self.$el.find(config.selector);
 
                             template = _.template(template);
@@ -844,7 +821,22 @@ module.exports = BaseView.extend({
                                     translation: self.translation
                                 }));
                             }
-                        });
+                        }
+                    }
+                });
+            } else {
+                configForActivityList.forEach(function (config) {
+                    var template = require('../../../../' + config.template);
+                    var container = self.$el.find(config.selector);
+
+                    template = _.template(template);
+
+                    if (!container.find('#' + config.elementId).length) {
+                        container[config.insertType](template({
+                            elementId  : config.elementId,
+                            translation: self.translation
+                        }));
+                    }
                 });
             }
         }

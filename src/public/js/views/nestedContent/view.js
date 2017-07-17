@@ -69,13 +69,13 @@ module.exports = BaseView.extend({
 
             self.tablesArray[index] = key;
 
-            templates[templateIndex] = 'text!' + type.templateDir + '/header.html';
-            templates[templateIndex + 1] = 'text!' + type.templateDir + '/list.html';
-            templates[templateIndex + 2] = 'text!' + type.templateDir + '/newRow.html';
+            templates[templateIndex] = '../../../' + type.templateDir + '/header.html';
+            templates[templateIndex + 1] = '../../../' + type.templateDir + '/list.html';
+            templates[templateIndex + 2] = '../../../' + type.templateDir + '/newRow.html';
         });
 
         models = this.tablesArray.map(function (item) {
-            return 'models/' + item;
+            return '../../models/' + item;
         });
 
         collections = this.tablesArray.map(function (item) {
@@ -118,61 +118,94 @@ module.exports = BaseView.extend({
     loadTemplates: function (templates, cb) {
         var self = this;
         var keys = Object.keys(this.types);
+        var templateFiles = {};
+        var constNames = [
+            'categoryHeaderTemplate',
+            'categoryListTemplate',
+            'categoryRowTemplate',
+            'variantHeaderTemplate',
+            'variantListTemplate',
+            'variantRowTemplate',
+            'itemHeaderTemplate',
+            'itemListTemplate',
+            'itemRowTemplate',
+        ];
 
-        require(templates, function (categoryHeaderTemplate, categoryListTemplate, categoryRowTemplate,
-                                     variantHeaderTemplate, variantListTemplate, variantRowTemplate,
-                                     itemHeaderTemplate, itemListTemplate, itemRowTemplate) {
-            self.templates = {};
-            self.templates[keys[0]] = {
-                header: _.template(categoryHeaderTemplate),
-                list  : _.template(categoryListTemplate),
-                row   : _.template(categoryRowTemplate)
-            };
-            self.templates[keys[1]] = {
-                header: _.template(variantHeaderTemplate),
-                list  : _.template(variantListTemplate),
-                row   : _.template(variantRowTemplate)
-            };
-            self.templates[keys[2]] = {
-                header: _.template(itemHeaderTemplate),
-                list  : _.template(itemListTemplate),
-                row   : _.template(itemRowTemplate)
-            };
+        templates.forEach(function (path, index) {
+            var constName = constNames[index];
 
-            cb(null);
+            templateFiles[constName] = require(path);
         });
+
+        self.templates = {};
+        self.templates[keys[0]] = {
+            header: _.template(templateFiles.categoryHeaderTemplate),
+            list  : _.template(templateFiles.categoryListTemplate),
+            row   : _.template(templateFiles.categoryRowTemplate)
+        };
+        self.templates[keys[1]] = {
+            header: _.template(templateFiles.variantHeaderTemplate),
+            list  : _.template(templateFiles.variantListTemplate),
+            row   : _.template(templateFiles.variantRowTemplate)
+        };
+        self.templates[keys[2]] = {
+            header: _.template(templateFiles.itemHeaderTemplate),
+            list  : _.template(templateFiles.itemListTemplate),
+            row   : _.template(templateFiles.itemRowTemplate)
+        };
+
+        cb(null);
     },
 
     loadModels: function (models, cb) {
         var self = this;
+        var modelFiles = {};
+        var constNames = [
+            'FirstModel',
+            'NestedModel',
+            'LastNestedModel',
+        ];
 
-        require(models, function (FirstModel, NestedModel, LastNestedModel) {
-            var newModels = {};
+        models.forEach(function (path, index) {
+            var constName = constNames[index];
 
-            newModels[self.tablesArray[0]] = FirstModel;
-            newModels[self.tablesArray[1]] = NestedModel;
-            newModels[self.tablesArray[2]] = LastNestedModel;
-
-            self.models = newModels;
-
-            cb(null);
+            modelFiles[constName] = require(path);
         });
+
+        var newModels = {};
+        newModels[self.tablesArray[0]] = modelFiles.FirstModel;
+        newModels[self.tablesArray[1]] = modelFiles.NestedModel;
+        newModels[self.tablesArray[2]] = modelFiles.LastNestedModel;
+
+        self.models = newModels;
+
+        cb(null);
     },
 
     loadCollections: function (collections, cb) {
         var self = this;
+        var collectionFiles = {};
+        var constNames = [
+            'FirstCollection',
+            'NestedCollection',
+            'LastNestedCollection',
+        ];
 
-        require(collections, function (FirstCollection, NestedCollection, LastNestedCollection) {
-            var collections = {};
+        collections.forEach(function (path, index) {
+            var constName = constNames[index];
 
-            collections[self.tablesArray[0]] = FirstCollection;
-            collections[self.tablesArray[1]] = NestedCollection;
-            collections[self.tablesArray[2]] = LastNestedCollection;
-
-            self.collections = collections;
-
-            cb(null);
+            collectionFiles[constName] = require(path);
         });
+
+        var collections = {};
+
+        collections[self.tablesArray[0]] = collectionFiles.FirstCollection;
+        collections[self.tablesArray[1]] = collectionFiles.NestedCollection;
+        collections[self.tablesArray[2]] = collectionFiles.LastNestedCollection;
+
+        self.collections = collections;
+
+        cb(null);
     },
 
     showHideButtons: function ($contentHolder, options) {

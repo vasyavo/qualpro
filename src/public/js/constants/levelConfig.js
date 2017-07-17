@@ -9,7 +9,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -17,7 +17,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -25,7 +25,7 @@ var objectivesConfig = {
                 selector       : '#subObjective',
                 insertType     : 'append',
                 elementId      : 'viewSubObjective',
-                template       : 'text!templates/objectives/preview/viewSubObjectives.html',
+                template       : 'templates/objectives/preview/viewSubObjectives.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -37,7 +37,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'edit',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -45,7 +45,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -53,7 +53,7 @@ var objectivesConfig = {
                 selector       : '#subObjective',
                 insertType     : 'append',
                 elementId      : 'createSubObjective',
-                template       : 'text!templates/objectives/preview/subObjective.html',
+                template       : 'templates/objectives/preview/subObjective.html',
                 forAll         : false,
                 forAllWithoutMy: true
             },
@@ -61,7 +61,7 @@ var objectivesConfig = {
                 selector       : '#subObjective',
                 insertType     : 'append',
                 elementId      : 'viewSubObjective',
-                template       : 'text!templates/objectives/preview/viewSubObjectives.html',
+                template       : 'templates/objectives/preview/viewSubObjectives.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -73,7 +73,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'edit',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -81,7 +81,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'assign',
-                template       : 'text!templates/objectives/preview/assignBtn.html',
+                template       : 'templates/objectives/preview/assignBtn.html',
                 forAll         : false,
                 forAllWithoutMy: true
             },
@@ -89,7 +89,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -97,7 +97,7 @@ var objectivesConfig = {
                 selector       : '#subObjective',
                 insertType     : 'append',
                 elementId      : 'viewSubObjective',
-                template       : 'text!templates/objectives/preview/viewSubObjectives.html',
+                template       : 'templates/objectives/preview/viewSubObjectives.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -109,7 +109,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'edit',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -117,7 +117,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'assign',
-                template       : 'text!templates/objectives/preview/assignBtn.html',
+                template       : 'templates/objectives/preview/assignBtn.html',
                 forAll         : false,
                 forAllWithoutMy: true
             },
@@ -125,7 +125,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : false,
                 forAllWithoutMy: false
             },
@@ -133,7 +133,7 @@ var objectivesConfig = {
                 selector       : '#subObjective',
                 insertType     : 'append',
                 elementId      : 'viewSubObjective',
-                template       : 'text!templates/objectives/preview/viewSubObjectives.html',
+                template       : 'templates/objectives/preview/viewSubObjectives.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -148,7 +148,7 @@ var objectivesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -162,7 +162,7 @@ var inStoreDefaultConfig = {
             selector       : '#topButtons',
             elementId      : 'duplicate',
             insertType     : 'append',
-            template       : 'text!templates/objectives/preview/duplicateButton.html',
+            template       : 'templates/objectives/preview/duplicateButton.html',
             forAll         : false,
             forAllWithoutMy: false
         },
@@ -170,7 +170,7 @@ var inStoreDefaultConfig = {
             selector       : '#topButtons',
             elementId      : 'edit',
             insertType     : 'append',
-            template       : 'text!templates/objectives/preview/editButton.html',
+            template       : 'templates/objectives/preview/editButton.html',
             forAll         : false,
             forAllWithoutMy: false
         },
@@ -178,7 +178,7 @@ var inStoreDefaultConfig = {
             selector       : '#topButtons',
             insertType     : 'append',
             elementId      : 'assign',
-            template       : 'text!templates/objectives/preview/assignBtn.html',
+            template       : 'templates/objectives/preview/assignBtn.html',
             forAll         : false,
             forAllWithoutMy: true
         }
@@ -200,7 +200,7 @@ var inStoreTasksConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -215,7 +215,7 @@ var documentsConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -230,7 +230,7 @@ var notesConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -245,7 +245,7 @@ var contractsSecondaryConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -253,7 +253,7 @@ var contractsSecondaryConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -265,7 +265,7 @@ var contractsSecondaryConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -280,7 +280,7 @@ var contractsYearlyConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -288,7 +288,7 @@ var contractsYearlyConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -300,7 +300,7 @@ var contractsYearlyConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -315,7 +315,7 @@ var questionaryConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -330,7 +330,7 @@ var consumersSurveyConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -345,7 +345,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -353,7 +353,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -361,7 +361,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -373,7 +373,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -381,7 +381,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -389,7 +389,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -401,7 +401,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -413,7 +413,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -425,7 +425,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -437,7 +437,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -449,7 +449,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -461,7 +461,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -469,7 +469,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -477,7 +477,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -489,7 +489,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -497,7 +497,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -505,7 +505,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -517,7 +517,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -530,7 +530,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'brandingAndDisplayItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -538,7 +538,7 @@ var brandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -553,7 +553,7 @@ var promotionsConfig = {
                 selector       : '#topButtons',
                 elementId      : 'promotionsItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -561,7 +561,7 @@ var promotionsConfig = {
                 selector       : '#topButtons',
                 elementId      : 'duplicate',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/duplicateButton.html',
+                template       : 'templates/objectives/preview/duplicateButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -569,7 +569,7 @@ var promotionsConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -581,7 +581,7 @@ var promotionsConfig = {
                 selector       : '#topButtons',
                 elementId      : 'promotionsItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -593,7 +593,7 @@ var promotionsConfig = {
                 selector       : '#topButtons',
                 elementId      : 'promotionsItems',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/tableBtn.html',
+                template       : 'templates/objectives/preview/tableBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -601,7 +601,7 @@ var promotionsConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -616,7 +616,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -624,7 +624,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -636,7 +636,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -644,7 +644,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -656,7 +656,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -664,7 +664,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -676,7 +676,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -684,7 +684,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -696,7 +696,7 @@ var competitorPromotionActivities = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -711,7 +711,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -719,7 +719,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -731,7 +731,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -739,7 +739,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -751,7 +751,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -759,7 +759,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -771,7 +771,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -779,7 +779,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -791,7 +791,7 @@ var competitorBrandingAndDisplayConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -806,7 +806,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -814,7 +814,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -826,7 +826,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -834,7 +834,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -846,7 +846,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -854,7 +854,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -866,7 +866,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -874,7 +874,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -886,7 +886,7 @@ var achievementFormConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -901,7 +901,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -909,7 +909,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -921,7 +921,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -929,7 +929,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -941,7 +941,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -949,7 +949,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -961,7 +961,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -969,7 +969,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -981,7 +981,7 @@ var newProductLunchConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -996,7 +996,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -1004,7 +1004,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -1016,7 +1016,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -1024,7 +1024,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -1036,7 +1036,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -1044,7 +1044,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -1056,7 +1056,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'edit',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/editButton.html',
+                template       : 'templates/objectives/preview/editButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             },
@@ -1064,7 +1064,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 elementId      : 'delete',
                 insertType     : 'append',
-                template       : 'text!templates/objectives/preview/deleteButton.html',
+                template       : 'templates/objectives/preview/deleteButton.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -1076,7 +1076,7 @@ var brandingAndMonthlyDisplayConfig = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }
@@ -1091,7 +1091,7 @@ var defaultActivityListGoToButton = {
                 selector       : '#topButtons',
                 insertType     : 'append',
                 elementId      : 'goToBtn',
-                template       : 'text!templates/objectives/preview/goToBtn.html',
+                template       : 'templates/objectives/preview/goToBtn.html',
                 forAll         : true,
                 forAllWithoutMy: false
             }

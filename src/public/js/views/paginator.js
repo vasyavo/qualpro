@@ -657,41 +657,41 @@ module.exports = Backbone.View.extend({
         var viewType = this.viewType;
         var parentId = this.parentId;
         var translation = this.translation;
-        var modelUrl = 'models/' + contentType;
+        var modelUrl = '../models/' + contentType;
         var self = this;
         var CreateView = this.CreateView;
 
         options = options || {};
 
-        require([modelUrl], function (Model) {
-            var createView;
-            var creationOptions = {
-                Model      : Model,
-                contentType: contentType,
-                viewType   : viewType,
-                parentId   : parentId,
-                translation: translation
-            };
+        var Model = require(modelUrl);
 
-            if (options.model) {
-                creationOptions.model = options.model;
+        var createView;
+        var creationOptions = {
+            Model      : Model,
+            contentType: contentType,
+            viewType   : viewType,
+            parentId   : parentId,
+            translation: translation
+        };
+
+        if (options.model) {
+            creationOptions.model = options.model;
+        }
+
+        if (options.edit) {
+            creationOptions.edit = true;
+        }
+
+        createView = new CreateView(creationOptions);
+
+        createView.on('itemSaved', function () {
+            self.collection.getPage(1, {filter: self.filter});
+        });
+
+        createView.on('modelSaved', function (model) {
+            if (self.tabName === 'all' || self.tabName === 'createdByMe') {
+                self.addReplaceRow(model);
             }
-
-            if (options.edit) {
-                creationOptions.edit = true;
-            }
-
-            createView = new CreateView(creationOptions);
-
-            createView.on('itemSaved', function () {
-                self.collection.getPage(1, {filter: self.filter});
-            });
-
-            createView.on('modelSaved', function (model) {
-                if (self.tabName === 'all' || self.tabName === 'createdByMe') {
-                    self.addReplaceRow(model);
-                }
-            });
         });
     },
 

@@ -196,22 +196,17 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                require([
-                        config.template
-                    ],
-                    function (template) {
-                        var container = self.$el.find(config.selector);
+                var template = require('../../../../' + config.template);
+                var container = self.$el.find(config.selector);
 
-                        template = _.template(template);
+                template = _.template(template);
 
-                        if (!container.find('#' + config.elementId).length) {
-                            container[config.insertType](template({
-                                elementId  : config.elementId,
-                                translation: self.translation
-                            }));
-                        }
-                    });
-
+                if (!container.find('#' + config.elementId).length) {
+                    container[config.insertType](template({
+                        elementId  : config.elementId,
+                        translation: self.translation
+                    }));
+                }
             });
         } else {
             this.$el.find('.objectivesTopBtnBlockSmall').hide();

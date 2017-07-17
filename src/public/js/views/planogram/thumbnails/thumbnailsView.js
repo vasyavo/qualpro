@@ -71,19 +71,19 @@ module.exports = thumbnails.extend({
         var model = this.collection.get(id);
         var self = this;
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = 'translations/' + currentLanguage + '/' + CONSTANTS.PLANOGRAM;
+        var translationUrl = '../../../translations/' + currentLanguage + '/' + CONSTANTS.PLANOGRAM;
 
-        require([translationUrl], function (translation) {
-            self.translation = translation;
+        var translation = require(translationUrl);
 
-            self.PreView = new PreView({
-                model      : model,
-                translation: translation
-            });
-            self.PreView.on('modelSaved', function (model) {
-                self.addReplaceRow(model);
-            }, self);
+        self.translation = translation;
+
+        self.PreView = new PreView({
+            model      : model,
+            translation: translation
         });
+        self.PreView.on('modelSaved', function (model) {
+            self.addReplaceRow(model);
+        }, self);
     }
 
 });

@@ -80,6 +80,10 @@ module.exports = paginator.extend({
         var toTime;
         var timeDate;
         var activityList = id !== App.currentUser._id;
+        var itemModel;
+        var TargetModel;
+        var PreView;
+        var translation;
 
         e.stopPropagation();
 
@@ -88,61 +92,55 @@ module.exports = paginator.extend({
                 href = promotionItems ? 'promotions' : 'marketingCampaign';
             }
             href = href ? href : moduleObject.href;
-            translationUrl = 'translations/' + self.currentLanguage + '/' + href;
+            translationUrl = '../../../translations/' + self.currentLanguage + '/' + href;
             if (href === 'inStoreTasks') {
-                targetModelUrl = 'models/taskFlow';
+                targetModelUrl = '../../../models/taskFlow';
             } else {
-                targetModelUrl = 'models/' + href;
+                targetModelUrl = '../../../models/' + href;
             }
-            preViewUrl = 'views/' + href + '/preView/preView';
+            preViewUrl = '../../../views/' + href + '/preView/preView';
 
-            require([
-                    targetModelUrl,
-                    preViewUrl,
-                    translationUrl
-                ],
-                function (TargetModel, PreView, translation) {
-                    var itemModel = new TargetModel({
-                        _id : id
-                    });
-                    itemModel.on('sync', function (prettyModel) {
-                        self.preView = new PreView({
-                            model       : prettyModel,
-                            translation : translation,
-                            activityList: activityList
-                        });
-                        self.preView.on('disableEvent', this.archiveItems, this);
-                        self.preView.on('openEditView', this.editItem, this);
-                        itemModel.off('sync');
-                    });
-                    itemModel.fetch();
+            TargetModel = require(targetModelUrl);
+            PreView = require(preViewUrl);
+            translation = require(translationUrl);
+
+            itemModel = new TargetModel({
+                _id : id
+            });
+            itemModel.on('sync', function (prettyModel) {
+                self.preView = new PreView({
+                    model       : prettyModel,
+                    translation : translation,
+                    activityList: activityList
                 });
+                self.preView.on('disableEvent', this.archiveItems, this);
+                self.preView.on('openEditView', this.editItem, this);
+                itemModel.off('sync');
+            });
+            itemModel.fetch();
         } else if (['region', 'subRegion', 'country', 'retailSegment', 'outlet', 'branch'].indexOf(modelJSON.itemDetails) !== -1) {
             contentType = modelJSON.itemDetails;
             url = model.get('itemType');
-            translationUrl = 'translations/' + self.currentLanguage + '/' + contentType;
-            targetModelUrl = 'models/' + contentType;
-            preViewUrl = 'views/' + url + '/preView/preView';
+            translationUrl = '../../../translations/' + self.currentLanguage + '/' + contentType;
+            targetModelUrl = '../../../models/' + contentType;
+            preViewUrl = '../../../views/' + url + '/preView/preView';
 
-            require([
-                    targetModelUrl,
-                    preViewUrl,
-                    translationUrl
-                ],
-                function (TargetModel, PreView, translation) {
-                    var itemModel = new TargetModel({_id: id});
-                    itemModel.on('sync', function (prettyModel) {
-                        self.preView = new PreView({
-                            model      : prettyModel,
-                            translation: translation,
-                            contentType: contentType
+            TargetModel = require(targetModelUrl);
+            PreView = require(preViewUrl);
+            translation = require(translationUrl);
 
-                        });
-                        self.preView.on('disableEvent', this.archiveItems, this);
-                        self.preView.on('openEditView', this.editItem, this);
-                    });
-                    itemModel.fetch();
+            itemModel = new TargetModel({_id: id});
+            itemModel.on('sync', function (prettyModel) {
+                self.preView = new PreView({
+                    model      : prettyModel,
+                    translation: translation,
+                    contentType: contentType
+
                 });
+                self.preView.on('disableEvent', this.archiveItems, this);
+                self.preView.on('openEditView', this.editItem, this);
+            });
+            itemModel.fetch();
         } else if (['priceSurvey', 'shelfShares'].indexOf(modelType) !== -1) {
             timeDate = modelJSON.createdBy.date;
             fromTime = timeDate ? moment(timeDate, 'DD.MM.YYYY, h:mm:ss').set('hour', 0).set('minute', 1).toISOString() : null;
@@ -278,15 +276,14 @@ module.exports = paginator.extend({
         e.stopPropagation();
 
         personModel.on('sync', function (model) {
-            var translationUrl = 'translations/' + self.currentLanguage + '/personnel';
-            require([translationUrl], function (translation) {
-                self.personPreView = new personPreView({
-                    model      : model,
-                    translation: translation
-                });
-                self.personPreView.on('disableEvent', this.archiveItems, this);
-                self.personPreView.on('openEditView', this.editItem, this);
+            var translation = require('../../../translations/' + self.currentLanguage + '/personnel');
+
+            self.personPreView = new personPreView({
+                model      : model,
+                translation: translation
             });
+            self.personPreView.on('disableEvent', this.archiveItems, this);
+            self.personPreView.on('openEditView', this.editItem, this);
         });
         personModel.fetch();
     },

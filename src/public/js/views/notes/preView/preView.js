@@ -76,21 +76,17 @@ module.exports = BaseView.extend({
         if (this.activityList && App.currentUser.workAccess) {
             currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
 
-            require([
-                    currentConfig.template
-                ],
-                function (template) {
-                    var container = self.$el.find(currentConfig.selector);
+            var template = require('../../../../' + currentConfig.template);
+            var container = self.$el.find(currentConfig.selector);
 
-                    template = _.template(template);
+            template = _.template(template);
 
-                    if (!container.find('#' + currentConfig.elementId).length) {
-                        container[currentConfig.insertType](template({
-                            elementId  : currentConfig.elementId,
-                            translation: self.translation
-                        }));
-                    }
-                });
+            if (!container.find('#' + currentConfig.elementId).length) {
+                container[currentConfig.insertType](template({
+                    elementId  : currentConfig.elementId,
+                    translation: self.translation
+                }));
+            }
         }
 
         this.delegateEvents(this.events);

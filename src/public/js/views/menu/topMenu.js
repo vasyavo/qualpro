@@ -84,17 +84,17 @@ module.exports = Backbone.View.extend({
         var self = this;
         var currentUser = new PersonnelModel(App.currentUser);
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = 'translations/' + currentLanguage + '/personnel';
+        var translationUrl = '../../translations/' + currentLanguage + '/personnel';
 
-        require([translationUrl], function (translation) {
-            self.translation = translation;
-            self.preView = new personnelPreView({
-                model      : currentUser,
-                fromTopMenu: true,
-                translation: translation
-            });
-            self.preView.on('openEditView', self.openEditView, self);
+        var translation = require(translationUrl);
+
+        self.translation = translation;
+        self.preView = new personnelPreView({
+            model      : currentUser,
+            fromTopMenu: true,
+            translation: translation
         });
+        self.preView.on('openEditView', self.openEditView, self);
     },
 
     openEditView: function (model) {
@@ -138,11 +138,10 @@ module.exports = Backbone.View.extend({
         var currentUser = new PersonnelModel(App.currentUser);
         var currentLanguage = currentUser.get('currentLanguage') || Cookies.get('currentLanguage');
         var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-
         var translationUrl;
 
         if (this.currentCT) {
-            translationUrl = 'translations/' + anotherLanguage + '/' + this.currentCT;
+            translationUrl = '../../translations/' + anotherLanguage + '/' + this.currentCT;
         }
 
         App.currentUser.currentLanguage = anotherLanguage;
@@ -176,13 +175,13 @@ module.exports = Backbone.View.extend({
         _.bindAll(this, 'saveCurrentUser');
 
         if (translationUrl) {
-            require([translationUrl], function (translation) {
-                currentUser.setFieldsNames(translation);
+            var translation = require(translationUrl);
 
-                self.saveCurrentUser();
+            currentUser.setFieldsNames(translation);
 
-                self.trigger('translationLoaded', translation);
-            });
+            self.saveCurrentUser();
+
+            self.trigger('translationLoaded', translation);
         } else {
             this.saveCurrentUser();
         }

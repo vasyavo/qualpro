@@ -29,7 +29,7 @@ module.exports = paginator.extend({
         var collectionOptions;
 
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = 'translations/' + currentLanguage + '/personnel';
+        var translationUrl = '../../translations/' + currentLanguage + '/personnel';
 
         this.personnelToOnLeave = options.personnelToOnLeave ? options.personnelToOnLeave.toJSON() : {};
 
@@ -90,27 +90,26 @@ module.exports = paginator.extend({
 
         this.collection = new personnelCollection(collectionOptions);
 
-        require([translationUrl], function (translation) {
-            self.translation = translation;
+        var translation = require(translationUrl);
 
-            options.translation = translation;
+        self.translation = translation;
 
-            self.makeRender(options);
+        options.translation = translation;
 
-            self.collection.bind('reset', _.bind(self.render, self));
+        self.makeRender(options);
 
-            self.on('coverSaved', function () {
-                self.filterView.removeAll();
-                self.$el.dialog('close').dialog('destroy').remove();
-            }, self);
+        self.collection.bind('reset', _.bind(self.render, self));
 
-            self.bind('filter', self.showFilteredPage, self);
+        self.on('coverSaved', function () {
+            self.filterView.removeAll();
+            self.$el.dialog('close').dialog('destroy').remove();
+        }, self);
 
-            _.bindAll(self, 'saveItem');
+        self.bind('filter', self.showFilteredPage, self);
 
-            self.collection.bind('showMore', self.showMoreContent, self);
-        });
+        _.bindAll(self, 'saveItem');
 
+        self.collection.bind('showMore', self.showMoreContent, self);
     },
 
     showFilteredPage: function () {
