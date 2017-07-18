@@ -29,11 +29,14 @@ module.exports = (req, res, next) => {
             },
         },
     };
+    let currentLanguage;
 
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
+
+        currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -66,7 +69,27 @@ module.exports = (req, res, next) => {
             }
         });
 
-        const pipeline = [];
+        const pipeline = [{
+            $project: {
+                createdBy: 1,
+                shelfLifeStart: 1,
+                shelfLifeEnd: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                category: 1,
+                category_name: 1,
+                brand: 1,
+                variant: 1,
+                packing: 1,
+                packingType: 1,
+                displayType: 1,
+                distributor: 1,
+            },
+        }];
 
         const $locationMatch = generalFiler([
             CONTENT_TYPES.COUNTRY,
@@ -154,11 +177,30 @@ module.exports = (req, res, next) => {
         }
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
-            $generalMatch.$and.push({
-                'variant.name': {
-                    $in: queryFilter[CONTENT_TYPES.VARIANT],
-                },
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.VARIANT].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'variant._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'variant.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter.distributor && queryFilter.distributor.length) {
@@ -270,10 +312,16 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                category: 1,
+                category: '$category',
                 customCategory: {
                     en: '$category_name.en',
                     ar: '$category_name.ar',
+                },
+                variant: '$variant._id',
+                competitorVariant: '$variant._id',
+                customVariant: {
+                    en: '$variant.name',
+                    ar: '$variant.name',
                 },
                 brand: '$brand._id',
                 customBrand: {
@@ -289,6 +337,24 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'competitorVariants',
+                localField: 'competitorVariant',
+                foreignField: '_id',
+                as: 'competitorVariant',
             },
         });
 
@@ -341,6 +407,71 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                variant: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$variant',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    variant: { $arrayElemAt: ['$variant', 0] },
+                                },
+                                in: {
+                                    _id: '$$variant._id',
+                                    name: {
+                                        en: {
+                                            $toUpper: '$$variant.name.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$$variant.name.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            $cond: {
+                                if: {
+                                    $gt: [{
+                                        $size: '$competitorVariant',
+                                    }, 0],
+                                },
+                                then: {
+                                    $let: {
+                                        vars: {
+                                            competitorVariant: { $arrayElemAt: ['$competitorVariant', 0] },
+                                        },
+                                        in: {
+                                            _id: '$$competitorVariant._id',
+                                            name: {
+                                                en: {
+                                                    $toUpper: '$$competitorVariant.name.en',
+                                                },
+                                                ar: {
+                                                    $toUpper: '$$competitorVariant.name.ar',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                                else: {
+                                    _id: '$customVariant.en', // tip: the same as ar
+                                    name: {
+                                        en: {
+                                            $toUpper: '$customVariant.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$customVariant.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
                 brand: {
                     $cond: {
                         if: {
@@ -383,6 +514,28 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $project: {
+                createdBy: 1,
+                shelfLifeStart: 1,
+                shelfLifeEnd: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                category: 1,
+                brand: 1,
+                variant: 1,
+                packing: 1,
+                packingType: 1,
+                displayType: 1,
+                distributor: 1,
+                shelfLifePeriod: 1,
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 countries: { $addToSet: '$country' },
@@ -395,14 +548,13 @@ module.exports = (req, res, next) => {
                 personnels: { $addToSet: '$createdBy.user' },
                 categories: { $addToSet: '$category' },
                 brands: { $addToSet: '$brand' },
-                variants: { $addToSet: '$variant.name' },
+                variants: { $addToSet: '$variant' },
                 packings: { $addToSet: '$packing' },
                 distributors: { $addToSet: '$distributor' },
                 displayTypes: { $push: '$displayType' },
                 shelfLifePeriods: { $addToSet: '$shelfLifePeriod' },
             },
         });
-
 
         pipeline.push({
             $project: {
@@ -484,9 +636,27 @@ module.exports = (req, res, next) => {
                         cond: { $ne: ['$$brand._id', null] },
                     },
                 },
-                variants: 1,
+                variants: {
+                    $filter: {
+                        input: '$variants',
+                        as: 'variant',
+                        cond: { $ne: ['$$variant._id', null] },
+                    },
+                },
                 packings: 1,
-                distributors: 1,
+                distributors: {
+                    $map: {
+                        input: '$distributors',
+                        as: 'item',
+                        in: {
+                            // id doesn't required for distributors as they're absolutely custom
+                            name: {
+                                en: '$$item.en',
+                                ar: '$$item.ar',
+                            },
+                        },
+                    },
+                },
                 shelfLifePeriods: 1,
                 displayTypes: {
                     $reduce: {
@@ -619,9 +789,15 @@ module.exports = (req, res, next) => {
                     _id: 1,
                     name: 1,
                 },
-                variants: 1,
+                variants: {
+                    _id: 1,
+                    name: 1,
+                },
                 packings: 1,
-                distributors: 1,
+                distributors: {
+                    _id: 1,
+                    name: 1,
+                },
                 shelfLifePeriods: 1,
                 displayTypes: {
                     _id: 1,
@@ -665,21 +841,27 @@ module.exports = (req, res, next) => {
             displayTypes: [],
         };
 
-        response.distributors = response.distributors
-            .map(item => {
-                item.en = item.en.trim();
-                return {
-                    en: sanitizeHtml(item.en),
-                    ar: sanitizeHtml(item.ar),
-                };
-            })
-            .filter(item => item.en); // todo: item should appear if it filled in current language
+        // sanitize and filter custom values
+        [
+            'categories',
+            'variants',
+            'brands',
+            'distributors',
+        ].forEach(field => {
+            response[field] = response[field]
+                .map(item => {
+                    const newItem = {
+                        name: {
+                            en: sanitizeHtml(item.name.en.trim()),
+                            ar: sanitizeHtml(item.name.ar.trim()),
+                        },
+                    };
 
-        response.variants = response.variants.map(item => {
-            return {
-                _id: item, // like ID
-                name: sanitizeHtml(item),
-            };
+                    if (item._id) newItem._id = item._id;
+
+                    return newItem;
+                })
+                .filter(item => item.name[currentLanguage]);
         });
 
         response.analyzeBy = [

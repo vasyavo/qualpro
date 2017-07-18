@@ -155,11 +155,30 @@ module.exports = (req, res, next) => {
         }
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
-            $generalMatch.$and.push({
-                'variant.name': {
-                    $in: queryFilter[CONTENT_TYPES.VARIANT],
-                },
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.VARIANT].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'variant._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'variant.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter.distributor && queryFilter.distributor.length) {
