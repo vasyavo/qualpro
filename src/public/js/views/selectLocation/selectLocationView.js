@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var Dialog = require('../../views/baseDialog');
 var dropDownView = require('../../views/filter/dropDownView');

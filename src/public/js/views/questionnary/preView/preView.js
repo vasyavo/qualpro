@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var d3 = require('d3');
 var PreViewTemplate = require('../../../../templates/questionnary/preview.html');

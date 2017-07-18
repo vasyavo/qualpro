@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var BaseDialog = require('../../views/baseDialog');
 var template = require('../../../templates/promotions/promotionsItems/header.html');

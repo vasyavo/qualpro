@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 
 module.exports = function (view) {
     var $curEl = view.$el;

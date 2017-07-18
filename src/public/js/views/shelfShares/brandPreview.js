@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var PreviewTemplate = require('../../../templates/shelfShares/preview.html');
 var PreviewBodyTemplate = require('../../../templates/shelfShares/previewBody.html');

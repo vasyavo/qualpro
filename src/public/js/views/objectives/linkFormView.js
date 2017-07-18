@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var FileDialogViewTemplate = require('../../../templates/objectives/linkFormTemplate.html');
 var BaseView = require('../../views/baseDialog');

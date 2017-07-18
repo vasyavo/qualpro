@@ -1,69 +1,10 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var Backbone = require('backbone');
 var MiniGrid = require('minigrid');
 var app = require('./app');
-
-require.config({
-    paths: {
-        async                : './libs/async/lib/async',
-        'js-cookie'          : './libs/js-cookie/src/js.cookie',
-        jQuery               : './libs/jquery/dist/jquery.min',
-        imageCrop            : './libs/Jcrop/js/jquery.Jcrop.min',
-        jqueryui             : './libs/jquery-ui/jquery-ui.min',
-        Underscore           : './libs/underscore/underscore-min',
-        backbone : './libs/backbone/backbone-min',
-        'backbone.radio' : './libs/backbone.radio/build/backbone.radio',
-        templates            : '../templates',
-        text                 : './libs/requirejs-text/text',
-        helpers              : 'helpers',
-        constants            : 'constants',
-        d3                   : './libs/d3/d3.min',
-        moment               : './libs/moment/moment',
-        locales              : './libs/moment/min/locales',
-        scrollBar            : './libs/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min',
-        rater                : './libs/rater/rater',
-        tree                 : './libs/fancytree/dist/jquery.fancytree-all.min',
-        'jquery-rater'       : './libs/jquery-bar-rating/dist/jquery.barrating.min',
-        'ckeditor-core'      : './libs/ckeditor/ckeditor',
-        'ckeditor-jquery'    : './libs/ckeditor/adapters/jquery',
-        'jquery-masked-field': './libs/jquery.inputmask/dist/jquery.inputmask.bundle',
-        sprintf              : './libs/sprintf/dist/sprintf.min',
-        minigrid             : './libs/minigrid/dist/minigrid.min',
-        socketio             : '/socket.io/socket.io.js',
-        lodash               : './libs/lodash/lodash',
-        marionette : './libs/backbone.marionette/lib/backbone.marionette',
-        dropzone: './libs/dropzone/dist/dropzone-amd-module',
-        shortId : './libs/js-shortid/dist/js-shortid',
-        lightSlider: './libs/lightslider/dist/js/lightslider'
-    },
-    shim : {
-        jqueryui : ['jQuery'],
-        imageCrop: ['jQuery'],
-        backbone : ['Underscore', 'jQuery'],
-        app      : ['backbone', 'jqueryui', 'imageCrop'],
-        d3       : {
-            exports: 'd3'
-        },
-
-        scrollBar : ['jQuery'],
-        rater     : ['jQuery'],
-        Underscore: {
-            exports: '_'
-        },
-
-        jQuery: {
-            exports: '$'
-        },
-
-        'ckeditor-core': {
-            exports: 'CKEDITOR'
-        },
-
-        'ckeditor-jquery'    : ['jQuery', 'ckeditor-core'],
-        'jquery-masked-field': ['jQuery']
-    }
-});
+var PopUpView = require('./views/popUp');
+var App = require('./appState');
 
 var Store = function () {
     this.save = function (name, data) {
@@ -110,9 +51,7 @@ App.render = function (data) {
 };
 
 App.showPopUp = function (options) {
-    require(['views/popUp'], function (PopUpView) {
-        new PopUpView(options);
-    });
+    new PopUpView(options);
 };
 
 App.renderErrors = function (errors) {

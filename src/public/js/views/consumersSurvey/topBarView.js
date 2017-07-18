@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var topBarTemplate = require('../../../templates/consumersSurvey/topBarTemplate.html');
 var pagination = require('../../../templates/pagination/pagination.html');
 var baseTopBar = require('../../views/baseTopBar');

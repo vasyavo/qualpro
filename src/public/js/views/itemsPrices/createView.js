@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var async = require('async');
 var CreateTemplate = require('../../../templates/itemsPrices/create/main.html');

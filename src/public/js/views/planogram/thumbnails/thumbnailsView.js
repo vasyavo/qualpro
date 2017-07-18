@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var CONSTANTS = require('../../../constants/contentType');
 var thumbnailsTemplate = require('../../../../templates/planogram/thumbnails/thumbnails.html');
 var NewThumbnail = require('../../../../templates/planogram/thumbnails/newThumbnail.html');

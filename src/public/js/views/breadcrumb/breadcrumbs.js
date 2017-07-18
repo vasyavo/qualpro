@@ -1,6 +1,6 @@
 var Backbone = require('backbone');
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var Cookies = require('js-cookie');
 var contentTypes = require('../../helpers/contentTypesHelper');
 var breadcrumbsTemplate = require('../../../templates/breadcrumbs/breadcrumb.html');

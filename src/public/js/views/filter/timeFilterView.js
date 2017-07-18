@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var moment = require('moment');
 var FilterView = require('../../views/filter/filterView');

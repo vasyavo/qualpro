@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var Backbone = require('backbone');
-var $ = require('jQuery');
+var $ = require('jquery');
 var moment = require('moment');
 var Cookies = require('js-cookie');
 var template = require('../../../templates/menu/topMenu.html');

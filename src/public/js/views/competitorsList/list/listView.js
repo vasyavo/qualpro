@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var async = require('async');
 var headerTemplate = require('../../../../templates/competitorsList/list/header.html');
 var newRowTemplate = require('../../../../templates/competitorsList/list/newRow.html');

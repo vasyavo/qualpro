@@ -1,6 +1,6 @@
 var async = require('async');
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var headerTemplate = require('../../../../templates/itemsPrices/list/header.html');
 var createView = require('../../../views/itemsPrices/createView');
 var ListItemsView = require('../../../views/itemsPrices/list/listItemsView');

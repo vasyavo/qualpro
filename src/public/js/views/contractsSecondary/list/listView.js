@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var template = require('../../../../templates/contractsSecondary/list/list.html');
 var createView = require('../../../views/contractsSecondary/createView');
 var newRow = require('../../../../templates/contractsSecondary/list/newRow.html');

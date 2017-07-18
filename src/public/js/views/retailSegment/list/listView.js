@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var paginator = require('../../../views/paginator');
 var ListItemsView = require('../../../views/retailSegment/list/listItemsView');
 var PreView = require('../../../views/domain/preView/preView');

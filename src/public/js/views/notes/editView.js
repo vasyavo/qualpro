@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var FileTemplate = require('../../../templates/file/preView.html');
 var EditTemplate = require('../../../templates/notes/edit.html');

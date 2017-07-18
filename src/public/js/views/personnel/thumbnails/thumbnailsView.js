@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var thumbnailsTemplate = require('../../../../templates/personnel/thumbnails/thumbnails.html');
 var thumbnails = require('../../../views/thumbnails');
 var PreView = require('../../../views/personnel/preView/preView');

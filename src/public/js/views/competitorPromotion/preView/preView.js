@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/competitorPromotion/preview.html');
 var FileTemplate = require('../../../../templates/file/preView.html');

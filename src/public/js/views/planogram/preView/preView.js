@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var CONSTANTS = require('../../../constants/contentType');
 var template = require('../../../../templates/planogram/preView/preView.html');

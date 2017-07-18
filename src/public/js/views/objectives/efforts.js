@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var common = require('../../common');
 var Template = require('../../../templates/objectives/efforts/efforts.html');

@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var template = require('../../../../templates/newProductLaunch/list/list.html');
 var PreView = require('../../../views/newProductLaunch/preView/preView');
 var paginator = require('../../../views/paginator');

@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('Underscore');
 var moment = require('moment');
 var Cookies = require('js-cookie');

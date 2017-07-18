@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BaseView = require('../../../views/baseDialog');

@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var Parent = require('../parrent');
 var Model = require('../../models/taskFlow');
 var CONTENT_TYPES = require('../../constants/contentType');

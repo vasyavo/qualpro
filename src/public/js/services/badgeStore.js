@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var PubNub = require('./pubnub');
 var App = require('../appState');
 

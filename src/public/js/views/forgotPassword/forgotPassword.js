@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var Backbone = require('backbone');
 var forgotTemplate = require('../../../templates/forgotPassword/forgotPassword.html');
 var custom = require('../../custom');

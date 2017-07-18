@@ -1,10 +1,10 @@
 var _ = require('underscore');
-var $ = require('jQuery');
-var Router = require('router');
-var Communication = require('communication');
-var Custom = require('custom');
+var $ = require('jquery');
+var io = require('socket.io-client');
 var CKEDITOR = require('ckeditor-core');
-var io = require('socket.io');
+//var Router = require('./router');
+var Communication = require('./communication');
+var Custom = require('./custom');
 
 require('scrollBar');
 require('rater');
@@ -12,6 +12,9 @@ require('jquery-rater');
 require('tree');
 require('ckeditor-jquery');
 require('jquery-masked-field');
+
+//require styles for webpack build
+require('../styles');
 
 var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 

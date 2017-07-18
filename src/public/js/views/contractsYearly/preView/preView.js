@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var PreviewTemplate = require('../../../../templates/contractsYearly/preView/preView.html');
 var FileTemplate = require('../../../../templates/file/preView.html');

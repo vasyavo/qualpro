@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var Backbone = require('backbone');
 var populate = require('../populate');
 

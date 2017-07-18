@@ -1,5 +1,5 @@
 var moment = require('moment');
-var locales = require('moment/min/locales');
+var locales = require('locales');
 var parent = require('./parrent');
 var validation = require('../validation');
 var dataService = require('../dataService');

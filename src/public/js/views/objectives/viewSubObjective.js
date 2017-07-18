@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var paginator = require('../../views/paginator');
 var ViewTemplate = require('../../../templates/objectives/viewSubObjectives.html');

@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var template = require('../../../templates/filter/treeTemplate.html');
 var baseDialog = require('../../views/baseDialog');

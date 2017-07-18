@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var moment = require('moment');
 var template = require('../../../templates/personnel/edit.html');

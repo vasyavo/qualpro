@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var mainTemplate = require('../../../templates/itemsPrices/itemsToOutlet/main.html');
 var headerTemplate = require('../../../templates/itemsPrices/itemsToOutlet/header.html');

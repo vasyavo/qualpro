@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var moment = require('moment');
-var locales = require('moment/min/locales');
+var locales = require('locales');
 var parent = require('./parrent');
 var CONTENT_TYPES = require('../constants/contentType');
 var CONSTANTS = require('../constants/otherConstants');

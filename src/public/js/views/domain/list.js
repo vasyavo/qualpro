@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var headerTemplate = require('../../../templates/domain/listHeader.html');
 var ListItemsView = require('../../views/domain/listItemsView');
 var paginator = require('../../views/paginator');

@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('underscore');
 var async = require('async');
 var ManageTemplate = require('../../../templates/planogram/manage.html');
