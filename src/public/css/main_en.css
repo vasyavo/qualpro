@@ -11528,6 +11528,9 @@ label[for=searchInputnoCT]::after {
     margin-bottom: 10px;
     margin-left: 5px;
 }
+.add-attachment img {
+  width: 100%;
+}
 .apply-to-all {
     padding: 0 20px;
 }
