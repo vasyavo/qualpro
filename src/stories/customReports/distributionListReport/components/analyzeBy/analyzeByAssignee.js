@@ -1,24 +1,16 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $unwind: '$executorPositions',
+        $unwind: '$executors',
     });
 
     pipeline.push({
         $group: {
             _id: {
-                executorPosition: '$executorPositions',
+                executor: '$executors',
                 category: '$items.category',
             },
+            executor: { $first: '$executors' },
             count: { $sum: 1 },
-        },
-    });
-
-    pipeline.push({
-        $lookup: {
-            from: 'positions',
-            localField: '_id.executorPosition',
-            foreignField: '_id',
-            as: 'executorPosition',
         },
     });
 
@@ -34,17 +26,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             count: 1,
-            executorPosition: {
-                $let: {
-                    vars: {
-                        executorPosition: { $arrayElemAt: ['$executorPosition', 0] },
-                    },
-                    in: {
-                        _id: '$$executorPosition._id',
-                        name: '$$executorPosition.name',
-                    },
-                },
-            },
+            executor: 1,
             category: {
                 $let: {
                     vars: {
@@ -61,8 +43,8 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'executorPosition._id': 1,
-            'category._id': 1,
+            'executor.name': 1,
+            'category.name': 1,
         },
     });
 
@@ -71,7 +53,7 @@ module.exports = (pipeline) => {
             _id: '$category._id',
             category: { $first: '$category' },
             data: { $push: '$count' },
-            labels: { $push: '$executorPosition.name' },
+            labels: { $push: '$executor' },
         },
     });
 
@@ -79,11 +61,7 @@ module.exports = (pipeline) => {
         $project: {
             category: 1,
             labels: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
+            datasets: [{ data: '$data' }],
         },
     });
 

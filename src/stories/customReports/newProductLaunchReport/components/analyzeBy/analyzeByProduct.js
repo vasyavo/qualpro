@@ -1,60 +1,60 @@
 module.exports = (pipeline) => {
-    // todo: ostorozhno, zdes' bydyt mytki tak kak eto custom brands...
+    // todo: ostorozhno, zdes' bydyt mytki tak kak eto custom products...
 
     pipeline.push({
         $project: {
-            brand: '$brand._id',
-            customBrand: {
-                en: '$brand.name',
-                ar: '$brand.name',
+            category: 1,
+            customCategory: {
+                en: '$category_name.en',
+                ar: '$category_name.ar',
             },
         },
     });
 
     pipeline.push({
         $lookup: {
-            from: 'brands',
-            localField: 'brand',
+            from: 'categories',
+            localField: 'category',
             foreignField: '_id',
-            as: 'brand',
+            as: 'category',
         },
     });
 
     pipeline.push({
         $project: {
-            brand: {
+            category: {
                 $cond: {
                     if: {
                         $gt: [{
-                            $size: '$brand',
+                            $size: '$category',
                         }, 0],
                     },
                     then: {
                         $let: {
                             vars: {
-                                brand: { $arrayElemAt: ['$brand', 0] },
+                                category: { $arrayElemAt: ['$category', 0] },
                             },
                             in: {
-                                _id: '$$brand._id',
+                                _id: '$$category._id',
                                 name: {
                                     en: {
-                                        $toUpper: '$$brand.name.en',
+                                        $toUpper: '$$category.name.en',
                                     },
                                     ar: {
-                                        $toUpper: '$$brand.name.ar',
+                                        $toUpper: '$$category.name.ar',
                                     },
                                 },
                             },
                         },
                     },
                     else: {
-                        _id: '$customBrand.en', // tip: same as ar
+                        _id: '$customCategory.en', // tip: the same as ar
                         name: {
                             en: {
-                                $toUpper: '$customBrand.en',
+                                $toUpper: '$customCategory.en',
                             },
                             ar: {
-                                $toUpper: '$customBrand.ar',
+                                $toUpper: '$customCategory.ar',
                             },
                         },
                     },
@@ -65,16 +65,16 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $group: {
-            _id: '$brand.name.en',
+            _id: '$category.name.en',
             count: { $sum: 1 },
-            ar: { $first: '$brand.name.ar' },
-            variants: { $addToSet: '$brand._id' },
+            ar: { $first: '$category.name.ar' },
+            variants: { $addToSet: '$category._id' },
         },
     });
 
     pipeline.push({
         $project: {
-            brand: {
+            category: {
                 _id: '$variants',  // tip: should be an array id
                 name: {
                     en: '$_id',
@@ -87,7 +87,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'brand.name': 1,
+            'category.name': 1,
         },
     });
 
@@ -98,7 +98,7 @@ module.exports = (pipeline) => {
                     $gt: [{
                         $size: {
                             $filter: {
-                                input: '$brand._id',
+                                input: '$category._id',
                                 as: 'id',
                                 cond: { $ne: ['$$id', null] },
                             },
@@ -115,7 +115,7 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: { $push: '$count' },
-            labels: { $push: '$brand' },
+            labels: { $push: '$category' },
         },
     });
 };

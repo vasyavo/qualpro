@@ -1,11 +1,9 @@
-const locationFiler = require('./../../../utils/locationFilter');
+const moment = require('moment');
 const generalFiler = require('./../../../utils/generalFilter');
 const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
 
 module.exports = (queryFilter, timeFilter, personnel) => {
     const pipeline = [];
-
-    locationFiler(pipeline, personnel, queryFilter);
 
     const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status', 'promotionType.en'], queryFilter, personnel);
 

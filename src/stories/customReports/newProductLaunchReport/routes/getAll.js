@@ -1,9 +1,7 @@
-const mongoose = require('mongoose');
+const ObjectId = require('bson-objectid');
 const async = require('async');
 const Ajv = require('ajv');
-const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONSTANTS = require('./../../../../constants/mainConstants');
@@ -14,7 +12,6 @@ const sanitizeHtml = require('../../utils/sanitizeHtml');
 const moment = require('moment');
 
 const ajv = new Ajv();
-const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
@@ -42,12 +39,6 @@ module.exports = (req, res, next) => {
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
-        const filters = [
-            CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-        ];
-        const pipeline = [];
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -62,17 +53,43 @@ module.exports = (req, res, next) => {
             }
         }
 
-        filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0]) {
+        // map set String ID to set ObjectID
+        [
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL,
+        ].forEach(filterName => {
+            if (queryFilter[filterName] && queryFilter[filterName].length) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        const pipeline = [];
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, 'packing'], queryFilter, personnel);
+        const $locationMatch = generalFiler([
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+        ], queryFilter);
+
+        if ($locationMatch.$and.length) {
+            pipeline.push({ $match: $locationMatch });
+        }
+
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.DISPLAY_TYPE,
+            'packing',
+        ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
@@ -82,20 +99,90 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
-            $generalMatch.$and.push({
-                'brand.name': {
-                    $in: queryFilter[CONTENT_TYPES.BRAND],
-                },
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.CATEGORY].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ category: { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({
+                    $or: [
+                        { 'category_name.en': { $in: setString } },
+                        { 'category_name.ar': { $in: setString } },
+                    ],
+                });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.BRAND].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
+            });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'brand._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'brand.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
-            $generalMatch.$and.push({
-                'variant.name': {
-                    $in: queryFilter[CONTENT_TYPES.VARIANT],
-                },
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.VARIANT].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'variant._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'variant.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter.distributor && queryFilter.distributor.length) {
@@ -115,24 +202,16 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -146,23 +225,23 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.shelfLife) {
-            queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
-
-            pipeline.push({
-                $addFields: {
-                    shelfLifePeriod: {
-                        $trunc: {
-                            $divide: [
-                                {
-                                    $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
-                                },
-                                86400000,
-                            ],
-                        },
+        pipeline.push({
+            $addFields: {
+                shelfLifePeriod: {
+                    $trunc: {
+                        $divide: [
+                            {
+                                $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
+                            },
+                            86400000,
+                        ],
                     },
                 },
-            });
+            },
+        });
+
+        if (queryFilter.shelfLife) {
+            queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
 
             pipeline.push({
                 $match: {
@@ -334,61 +413,48 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 additionalComment: 1,
                 location: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    country: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$country.name.en',
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                            region: { $arrayElemAt: ['$region', 0] },
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            en: {
+                                $concat: [
+                                    '$$country.name.en',
+                                    ' -> ',
+                                    '$$region.name.en',
+                                    ' -> ',
+                                    '$$subRegion.name.en',
+                                    ' -> ',
+                                    '$$retailSegment.name.en',
+                                    ' -> ',
+                                    '$$outlet.name.en',
+                                    ' -> ',
+                                    '$$branch.name.en',
+                                ],
+                            },
+                            ar: {
+                                $concat: [
+                                    '$$country.name.ar',
+                                    ' -> ',
+                                    '$$region.name.ar',
+                                    ' -> ',
+                                    '$$subRegion.name.ar',
+                                    ' -> ',
+                                    '$$retailSegment.name.ar',
+                                    ' -> ',
+                                    '$$outlet.name.ar',
+                                    ' -> ',
+                                    '$$branch.name.ar',
+                                ],
                             },
                         },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    region: { $arrayElemAt: ['$region', 0] },
-                                },
-                                in: '$$region.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                                },
-                                in: '$$subRegion.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                                },
-                                in: '$$retailSegment.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    outlet: { $arrayElemAt: ['$outlet', 0] },
-                                },
-                                in: '$$outlet.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    branch: { $arrayElemAt: ['$branch', 0] },
-                                },
-                                in: '$$branch.name.en',
-                            },
-                        },
-                    ],
+                    },
                 },
                 createdBy: 1,
                 brand: 1,

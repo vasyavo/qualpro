@@ -3,10 +3,10 @@ const analyzeByMethods = {
     region: require('./analyzeByRegion'),
     subRegion: require('./analyzeBySubRegion'),
     branch: require('./analyzeByBranch'),
-    position: require('./analyzeByPosition'),
-    employee: require('./analyzeByEmployee'),
-    category: require('./analyzeByCategory'),
+    product: require('./analyzeByProduct'),
     variant: require('./analyzeByVariant'),
+    assigneePosition: require('./analyzeByAssigneePosition'),
+    assignee: require('./analyzeByAssignee'),
 };
 
 module.exports = (pipeline, analyzeBy) => {
