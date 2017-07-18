@@ -1,5 +1,5 @@
 var Backbone = require('backbone');
-var $ = require('jQuery');
+var $ = require('jquery');
 var async = require('async');
 var moment = require('moment');
 var dataService = require('./dataService');

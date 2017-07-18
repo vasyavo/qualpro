@@ -1,4 +1,4 @@
-var PubNub = require('https://cdn.pubnub.com/sdk/javascript/pubnub.4.4.0.min.js');
+var PubNub = require('pubnub');
 var App = require('../appState');
 
 var client = new PubNub({

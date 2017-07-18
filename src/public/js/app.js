@@ -2,7 +2,7 @@ var _ = require('underscore');
 var $ = require('jquery');
 var io = require('socket.io-client');
 var CKEDITOR = require('ckeditor-core');
-//var Router = require('./router');
+var Router = require('./router');
 var Communication = require('./communication');
 var Custom = require('./custom');
 
