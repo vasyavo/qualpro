@@ -287,7 +287,38 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $addFields: {
+            $project: {
+                _id: 1,
+                name: 1,
+                position: 1,
+                target: 1,
+                achiev: 1,
+                percentage: 1,
+                avgRating: 1,
+                country: {
+                    _id: 1,
+                    name: 1,
+                },
+                region: {
+                    _id: 1,
+                    name: 1,
+                },
+                subRegion: {
+                    _id: 1,
+                    name: 1,
+                },
+                retailSegment: {
+                    _id: 1,
+                    name: 1,
+                },
+                outlet: {
+                    _id: 1,
+                    name: 1,
+                },
+                branch: {
+                    _id: 1,
+                    name: 1,
+                },
                 location: {
                     en: {
                         $concat: [
@@ -557,6 +588,12 @@ module.exports = (req, res, next) => {
             $project: {
                 total: 1,
                 _id: '$setItems._id',
+                country: '$setItems.country',
+                region: '$setItems.region',
+                subRegion: '$setItems.subRegion',
+                retailSegment: '$setItems.retailSegment',
+                outlet: '$setItems.outlet',
+                branch: '$setItems.branch',
                 location: '$setItems.location',
                 name: '$setItems.name',
                 position: '$setItems.position',
