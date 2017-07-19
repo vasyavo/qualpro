@@ -182,7 +182,7 @@ module.exports = BaseView.extend({
 
         const attachmentsIdFromServer = _.pluck(this.model.get('attachments'), '_id');
         const attachmentsIdLocal = _.pluck(this.files, '_id');
-        let filesChanged = false;
+        var filesChanged = false;
 
         if (!_.isEqual(attachmentsIdFromServer, attachmentsIdLocal)) {
             filesChanged = true;
@@ -192,7 +192,7 @@ module.exports = BaseView.extend({
             return cb();
         }
 
-        attachmentsIdFromServer.map((fileId) => {
+        attachmentsIdFromServer.map(function(fileId) {
             this.files.remove(fileId);
         });
 

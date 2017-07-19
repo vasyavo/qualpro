@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var Backbone = require('Backbone');
+var Backbone = require('backbone');
 var template = require('../../../../templates/personnel/form/biYearlyEvaluationFormTemplate.html');
 var createBiYearlyWorkflow = require('../../../helpers/createBiYearlyWorkflow');
 var BaseDialog = require('../../../views/baseDialog');

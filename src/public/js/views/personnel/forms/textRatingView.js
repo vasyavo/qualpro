@@ -2,42 +2,33 @@ var _ = require('underscore');
 var Backbone = require('backbone');
 var template = require('../../../../templates/personnel/form/ratingTextTemplate.html');
 
-define([
-        'backbone',
-        'text!templates/personnel/form/ratingTextTemplate.html'
-    ],
-    function (Backbone, template) {
+module.exports = Backbone.View.extend({
+    template : _.template(template),
+    completed: true,
 
-        var View = Backbone.View.extend({
-            template : _.template(template),
-            completed: true,
+    events: {
+        'change textarea': 'textChanged'
+    },
 
-            events: {
-                'change textarea': 'textChanged'
-            },
+    initialize: function (options) {
 
-            initialize: function (options) {
+        this.translation = options.translation;
+        this.rating = options.rating;
+        this.preview = options.preview;
+    },
 
-                this.translation = options.translation;
-                this.rating = options.rating;
-                this.preview = options.preview;
-            },
+    textChanged: function (e) {
+        var $target = $(e.target);
+        var text = $target.val();
 
-            textChanged: function (e) {
-                var $target = $(e.target);
-                var text = $target.val();
+        this.trigger('textAreaChanged', {text: text});
+    },
 
-                this.trigger('textAreaChanged', {text: text});
-            },
-
-            render: function () {
-                this.$el.html(this.template({
-                    rating     : this.rating,
-                    preview    : this.preview,
-                    translation: this.translation
-                }));
-            }
-        });
-
-        return View;
-    });
+    render: function () {
+        this.$el.html(this.template({
+            rating     : this.rating,
+            preview    : this.preview,
+            translation: this.translation
+        }));
+    }
+});

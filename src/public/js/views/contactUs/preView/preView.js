@@ -61,9 +61,9 @@ module.exports = BaseView.extend({
     setStatusResolved : function () {
         var self = this;
         if (self.model.get('status') === 'new') {
-            dataService.putData(`${CONTENT_TYPES.CONTACT_US}/${self.model.get('_id')}`, {
+            dataService.putData(CONTENT_TYPES.CONTACT_US + '/' + self.model.get('_id'), {
                 status : 'resolved'
-            }, (err) => {
+            }, function(err) {
                 if (err) {
                     return App.renderErrors([
                         ERROR_MESSAGES.statusNotChanged[App.currentUser.currentLanguage]
@@ -78,7 +78,7 @@ module.exports = BaseView.extend({
     },
 
     updateCommentsCountOnListView : function () {
-        let comments = this.model.get('comments');
+        var comments = this.model.get('comments');
 
         comments = comments ? comments : [];
 
@@ -362,7 +362,7 @@ module.exports = BaseView.extend({
 
     render: function () {
         const self = this;
-        dataService.getData(`contactUs/${self.model.get('_id')}`, {}, function (err, modelData) {
+        dataService.getData('contactUs/' + self.model.get('_id'), {}, function (err, modelData) {
             if (err) {
                 return App.renderErrors([
                     ERROR_MESSAGES.readError[App.currentUser.currentLanguage]
@@ -376,7 +376,7 @@ module.exports = BaseView.extend({
                 self.previewFiles = new FileCollection(jsonModel.attachments, true);
             }
 
-            jsonModel.creator.name = `${jsonModel.creator.firstName[App.currentUser.currentLanguage]} ${jsonModel.creator.lastName[App.currentUser.currentLanguage]}`;
+            jsonModel.creator.name = jsonModel.creator.firstName[App.currentUser.currentLanguage] + ' ' + jsonModel.creator.lastName[App.currentUser.currentLanguage];
             jsonModel.createdAt = moment(jsonModel.createdAt).format('DD.MM.YYYY');
 
             formString = self.$el.html(self.template({
@@ -391,7 +391,7 @@ module.exports = BaseView.extend({
                 buttons      : {
                     resolve : {
                         text : self.translation.resolveBtn,
-                        class : `btn ${jsonModel.status === 'resolved' ? 'hidden' : ''}`,
+                        class : 'btn ' + jsonModel.status === 'resolved' ? 'hidden' : '',
                         click : function() {
                             self.undelegateEvents();
 

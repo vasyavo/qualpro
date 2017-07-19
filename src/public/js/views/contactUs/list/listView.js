@@ -60,8 +60,8 @@ module.exports = paginator.extend({
     },
 
     prepareDataToDisplay : function (data) {
-        _.each(data, (model) => {
-            model.createdBy.user.name = `${model.createdBy.user.firstName[App.currentUser.currentLanguage]} ${model.createdBy.user.lastName[App.currentUser.currentLanguage]}`;
+        _.each(data, function(model) {
+            model.createdBy.user.name = model.createdBy.user.firstName[App.currentUser.currentLanguage] + ' ' + model.createdBy.user.lastName[App.currentUser.currentLanguage];
 
            if (model.country && model.country.name ){
                model.country.name.currentLanguage = model.country.name[App.currentUser.currentLanguage];

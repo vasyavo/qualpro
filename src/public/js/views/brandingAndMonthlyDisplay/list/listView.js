@@ -64,16 +64,16 @@ module.exports = paginator.extend({
     prepareDataToDisplay : function (data) {
         const currentLanguage = App.currentUser.currentLanguage;
         const fileModel = new FileModel();
-        return data.map((model) => {
+        return data.map(function(model) {
             const categories = [];
-            model.categories.map((category) => {
+            model.categories.map(function(category) {
                 categories.push(category.name[currentLanguage]);
             });
             model.categoryString = categories.join(', ');
 
             model.branchString = model.branch.name[currentLanguage];
 
-            model.createdBy.userName = `${model.createdBy.firstName[currentLanguage]} ${model.createdBy.lastName[currentLanguage]}`;
+            model.createdBy.userName = model.createdBy.firstName[currentLanguage] + ' ' + model.createdBy.lastName[currentLanguage];
             model.createdBy.positionString = model.createdBy.position.name[currentLanguage];
             model.createdBy.accessRoleString = model.createdBy.accessRole.name[currentLanguage];
 

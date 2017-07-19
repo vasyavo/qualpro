@@ -29,6 +29,21 @@ var CONTENT_TYPES = require('../../../constants/contentType');
 var objectivesStatusHelper = require('../../../helpers/objectivesStatusHelper');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
+var CONTROLS_CONFIG = levelConfig[CONTENT_TYPES.INSTORETASKS];
+
+var viewControls = Object.keys(CONTROLS_CONFIG).map(function (key) {
+    var object = CONTROLS_CONFIG[key];
+
+    object.preview.map(function(item) {
+        var relativePath = '../../../../' + item.template;
+
+        item.template = require(relativePath);
+
+        return item;
+    });
+
+    return object;
+});
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.INSTORETASKS,
@@ -728,8 +743,8 @@ module.exports = BaseView.extend({
         var self = this;
         var jsonFlowModel = this.modelForFlow.toJSON();
         var buttons = {};
-        var configForTemplate = $.extend([], levelConfig[this.contentType][App.currentUser.accessRole.level].preview);
-        var configForActivityList = levelConfig[this.contentType].activityList.preview;
+        var configForTemplate = viewControls[App.currentUser.accessRole.level].preview;
+        var configForActivityList = viewControls.activityList.preview;
 
         jsonModel.myCC = self.tabName === 'myCC';
 
@@ -810,10 +825,8 @@ module.exports = BaseView.extend({
 
                     if (App.currentUser.workAccess) {
                         if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
-                            var template = require('../../../../' + config.template);
                             var container = self.$el.find(config.selector);
-
-                            template = _.template(template);
+                            var template = _.template(config.template);
 
                             if (!container.find('#' + config.elementId).length) {
                                 container[config.insertType](template({
@@ -826,10 +839,8 @@ module.exports = BaseView.extend({
                 });
             } else {
                 configForActivityList.forEach(function (config) {
-                    var template = require('../../../../' + config.template);
                     var container = self.$el.find(config.selector);
-
-                    template = _.template(template);
+                    var template = _.template(config.template);
 
                     if (!container.find('#' + config.elementId).length) {
                         container[config.insertType](template({

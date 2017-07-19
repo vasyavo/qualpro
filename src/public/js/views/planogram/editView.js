@@ -35,7 +35,7 @@ module.exports = BaseView.extend({
 
     initialize: function (options) {
         var countryId;
-        let retailSegments;
+        var retailSegments;
         var modelJSON;
 
         _.bindAll(this, 'render');
@@ -45,7 +45,7 @@ module.exports = BaseView.extend({
 
         modelJSON = this.currentModel.toJSON();
         countryId = modelJSON.country._id;
-        retailSegments = modelJSON.retailSegment.map((item) => {
+        retailSegments = modelJSON.retailSegment.map(function(item) {
             return item._id;
         });
 

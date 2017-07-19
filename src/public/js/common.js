@@ -1,5 +1,5 @@
 ﻿var _ = require('underscore');
-var $ = require('jQuery');
+var $ = require('jquery');
 var dataService = require('./dataService');
 var CONSTANTS = require('./constants/otherConstants');
 var ERROR_MESSAGES = require('./constants/errorMessages');

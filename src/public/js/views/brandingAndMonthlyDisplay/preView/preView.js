@@ -404,7 +404,7 @@ module.exports = BaseView.extend({
             currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
         }
 
-        dataService.getData(`${CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY}/${this.model.get('_id')}`, {}, (err, model) => {
+        dataService.getData(CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY + '/' + this.model.get('_id'), {}, function(err, model) {
             if (err) {
                 return App.renderErrors([ERROR_MESSAGES.readError]);
             }
@@ -412,7 +412,7 @@ module.exports = BaseView.extend({
             const currentLanguage = App.currentUser.currentLanguage;
 
             const categories = [];
-            model.categories.map((category) => {
+            model.categories.map(function(category) {
                 categories.push(category.name[currentLanguage]);
             });
             model.categoryString = categories.join(', ');
@@ -429,7 +429,7 @@ module.exports = BaseView.extend({
             model.regionString = (model.region) ? model.region.name[currentLanguage] : self.translation.missedData;
             model.subRegionString = (model.subRegion) ? model.subRegion.name[currentLanguage] : self.translation.missedData;
 
-            model.createdBy.userName = `${model.createdBy.firstName[currentLanguage]} ${model.createdBy.lastName[currentLanguage]}`;
+            model.createdBy.userName = model.createdBy.firstName[currentLanguage] + ' ' + model.createdBy.lastName[currentLanguage];
 
             var formString;
 

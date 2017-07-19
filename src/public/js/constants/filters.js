@@ -3,13 +3,13 @@ var CONSTANTS = require('./contentType');
 function getConstants(CONSTANTS) {
     var filters = {};
 
-    let brandingAndMonthlyDisplayFilter = {};
+    var brandingAndMonthlyDisplayFilter = {};
     var marketingCampaignFilter = {};
     var priceSurveyFilter = {};
     var personnelFilter = {};
     var shelfSharesFilter = {};
     var createQuestionnary = {};
-    let createConsumersSurvey = {};
+    var createConsumersSurvey = {};
     var itemsPricesFilter = {};
     var itemsLocationFilter = {};
     var planogramFilter = {};
@@ -1021,15 +1021,6 @@ function getConstants(CONSTANTS) {
         filterType : 'time'
     });
     brandingAndMonthlyDisplayFilter.time.backendKeys = [
-        // Comment according to QPCMS-2083 Reporting > Competitor branding > filtering by Fixed period should search by creation date
-        // {
-        //     key     : 'dateStart',
-        //     operator: ['$gte', '$lte']
-        // },
-        // {
-        //     key     : 'dateEnd',
-        //     operator: ['$gte', '$lte']
-        // },
         {
             key     : 'createdBy.date',
             operator: ['$gte', '$lte']

@@ -73,7 +73,7 @@ module.exports = baseDialog.extend({
         editView.on('modelSaved', function (model) {
             const jsonModel = model.toJSON();
 
-            jsonModel.retailSegmentString = jsonModel.retailSegment.map((item) => {
+            jsonModel.retailSegmentString = jsonModel.retailSegment.map(function(item) {
                 return item.name.currentLanguage;
             }).join(', ');
 
@@ -92,7 +92,7 @@ module.exports = baseDialog.extend({
 
 
 
-        modelJSON.retailSegmentString = modelJSON.retailSegment.map((item) => {
+        modelJSON.retailSegmentString = modelJSON.retailSegment.map(function(item) {
             return item.name.currentLanguage;
         }).join(', ');
 

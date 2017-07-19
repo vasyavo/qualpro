@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var Backbone = require('Backbone');
+var Backbone = require('backbone');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/objectives/preview.html');
 var FormTemplate = require('../../../../templates/objectives/form/form.html');
@@ -16,7 +16,6 @@ var EffortsDialog = require('../../../views/objectives/efforts');
 var CommentCollection = require('../../../collections/comment/collection');
 var populate = require('../../../populate');
 var CONSTANTS = require('../../../constants/otherConstants');
-var levelConfig = require('../../../constants/levelConfig');
 var implementShowHideArabicInputIn = require('../../../helpers/implementShowHideArabicInputIn');
 var objectivesStatusHelper = require('../../../helpers/objectivesStatusHelper');
 var dataService = require('../../../dataService');
@@ -31,7 +30,24 @@ var DefFilters = require('../../../helpers/defFilterLogic');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
+var SubObjectiveView = require('../../../views/objectives/viewSubObjective');
 var App = require('../../../appState');
+var LEVEL_CONFIG = require('../../../constants/levelConfig');
+var CONTROLS_CONFIG = LEVEL_CONFIG[CONTENT_TYPES.OBJECTIVES];
+
+var viewControls = Object.keys(CONTROLS_CONFIG).map(function (key) {
+    var object = CONTROLS_CONFIG[key];
+
+    object.preview.map(function(item) {
+        var relativePath = '../../../../' + item.template;
+
+        item.template = require(relativePath);
+
+        return item;
+    });
+
+    return object;
+});
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.OBJECTIVES,
@@ -158,8 +174,6 @@ module.exports = BaseView.extend({
             }
 
             newSubCollection = new ObjectiveCollection(subObjectiveCollection, {parse: true});
-
-            var SubObjectiveView = require('../../../views/objectives/viewSubObjective');
             self.subObjectiveView = new SubObjectiveView({
                 translation: self.translation,
                 collection : newSubCollection
@@ -870,8 +884,8 @@ module.exports = BaseView.extend({
         var assignToIds = _.pluck(jsonModel.assignedTo, '_id');
         var isUserAssignedToAndCover = this.tabName === 'myCover' ? _.intersection(assignToIds, coveredIds) : [];
         var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
-        var configForTemplate = $.extend([], levelConfig[this.contentType][App.currentUser.accessRole.level].preview);
-        var onfigForActivityList = levelConfig[this.contentType].activityList.preview;
+        var configForTemplate = viewControls[App.currentUser.accessRole.level].preview;
+        var onfigForActivityList = viewControls.activityList.preview;
         var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
         if (!this.dontShowDialog) {
@@ -951,10 +965,8 @@ module.exports = BaseView.extend({
 
                     if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
                         if (!(individualObjective && config.elementId === 'viewSubObjective')) {
-                            var template = require('../../../../' + config.template);
                             var container = self.$el.find(config.selector);
-
-                            template = _.template(template);
+                            var template = _.template(config.template);
 
                             if (!container.find('#' + config.elementId).length) {
                                 container[config.insertType](template({
@@ -967,10 +979,8 @@ module.exports = BaseView.extend({
                 });
             } else {
                 onfigForActivityList.forEach(function (config) {
-                    var template = require('../../../../' + config.template);
                     var container = self.$el.find(config.selector);
-
-                    template = _.template(template);
+                    var template = _.template(config.template);
 
                     if (!container.find('#' + config.elementId).length) {
                         container[config.insertType](template({

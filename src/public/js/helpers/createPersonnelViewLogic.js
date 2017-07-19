@@ -161,7 +161,7 @@ var createPersonnelViewLogic = function (context) {
 
             const emptyLocations = _.difference(types, PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel]);
 
-            emptyLocations.forEach((location) => {
+            emptyLocations.forEach(function(location) {
                 updateData[location] = [];
             });
 

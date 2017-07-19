@@ -54,7 +54,7 @@ module.exports = Backbone.View.extend({
             }
 
             if (this.showSelectAll) {
-                $(`#select-all-li-${self.contentType}`).removeClass('checkedValue');
+                $('#select-all-li-' + self.contentType).removeClass('checkedValue');
                 $('.dropDownItem.selected').removeClass('selected');
             }
 
@@ -129,7 +129,7 @@ module.exports = Backbone.View.extend({
             $('.dropDownItem.selected').removeClass('selected');
             selectAllLi.removeClass('checkedValue');
         } else {
-            var arrayOfIds = this.collection.toJSON().map((model) => {
+            var arrayOfIds = this.collection.toJSON().map(function(model) {
                 return model._id;
             });
 
@@ -341,9 +341,9 @@ module.exports = Backbone.View.extend({
             }
 
             if (this.selectedValues.length === this.collection.length) {
-                $(`#select-all-li-${this.contentType}`).addClass('checkedValue');
+                $('#select-all-li-' + this.contentType).addClass('checkedValue');
             } else {
-                $(`#select-all-li-${this.contentType}`).removeClass('checkedValue');
+                $('#select-all-li-' + this.contentType).removeClass('checkedValue');
             }
 
             this.trigger('changeItem', {

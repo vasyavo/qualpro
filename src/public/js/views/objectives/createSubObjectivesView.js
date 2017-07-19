@@ -500,13 +500,13 @@ module.exports = BaseView.extend({
             return item._id;
         });
         this.outletsForVisibility = _.map(this.outletsForVisibility, function (outlet) {
-            let result = {
+            var result = {
                 name : outlet.name.currentLanguage,
                 _id : outlet._id,
                 branches : []
             };
 
-            self.branchesForVisibility.map((branch) => {
+            self.branchesForVisibility.map(function(branch) {
                 if (outlet._id === branch.outlet) {
                     result.branches.push({
                         name : branch.name.currentLanguage,

@@ -47,7 +47,7 @@ module.exports = parent.extend({
     },
 
     modelParse: function (model) {
-        let location = [];
+        var location = [];
 
         model.countryString = model.countries ? model.countries.name[App.currentUser.currentLanguage] : '';
         location.push(model.countryString);
@@ -68,7 +68,7 @@ module.exports = parent.extend({
         location.push(model.branchString);
 
         model.categoryString = this.modelMapper('categories', model);
-        model.displayTypeString = model.displayType.map((model) => {
+        model.displayTypeString = model.displayType.map(function(model) {
             return model.name.currentLanguage;
         }).join(', ');
 

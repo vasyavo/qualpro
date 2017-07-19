@@ -274,16 +274,16 @@ module.exports = paginator.extend({
         //subscribing on online status of users
         App.socket.emit('subscribe_online_status');
 
-        App.socket.on('goOnline', (userId) => {
-            var onlineStatusTd = $(`#online-${userId.uid}`);
-            var statusTd = $(`#status-${userId.uid}`);
+        App.socket.on('goOnline', function(userId) {
+            var onlineStatusTd = $('#online-' + userId.uid);
+            var statusTd = $('#status-' + userId.uid);
             onlineStatusTd.removeClass('hidden');
             statusTd.addClass('hidden');
         });
 
-        App.socket.on('goOffline', (userId) => {
-            var onlineStatusTd = $(`#online-${userId.uid}`);
-            var statusTd = $(`#status-${userId.uid}`);
+        App.socket.on('goOffline', function(userId) {
+            var onlineStatusTd = $('#online-' + userId.uid);
+            var statusTd = $('#status-' + userId.uid);
             onlineStatusTd.addClass('hidden');
             statusTd.removeClass('hidden');
         });

@@ -88,13 +88,13 @@ module.exports = BaseView.extend({
         var branches = this.model.get('branch') || [];
         var outlets = this.model.get('outlet') || [];
         this.outletsForVisibility = _.map(outlets, function (outlet) {
-            let result = {
+            var result = {
                 name : outlet.name[self.currentLanguage],
                 _id : outlet._id,
                 branches : []
             };
 
-            branches.map((branch) => {
+            branches.map(function(branch) {
                 if (outlet._id === branch.outlet) {
                     result.branches.push({
                         name : branch.name[self.currentLanguage],
@@ -881,13 +881,13 @@ module.exports = BaseView.extend({
             return item._id;
         });
         this.outletsForVisibility = _.map(this.outletsForVisibility, function (outlet) {
-            let result = {
+            var result = {
                 name : outlet.name.currentLanguage,
                 _id : outlet._id,
                 branches : []
             };
 
-            self.branchesForVisibility.map((branch) => {
+            self.branchesForVisibility.map(function(branch) {
                 if (outlet._id === branch.outlet) {
                     result.branches.push({
                         name : branch.name.currentLanguage,

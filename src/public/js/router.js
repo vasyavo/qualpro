@@ -1,5 +1,5 @@
 var Backbone = require('backbone');
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('Underscore');
 var lodash = require('lodash');
 var moment = require('moment');
@@ -12,7 +12,7 @@ var dataService = require('./dataService');
 var custom = require('./custom');
 var CONSTANTS = require('./constants/contentType');
 var DocumentsListView = require('./views/documents/list');
-var DocumentsTopBarView = require('./documents/topBar');
+var DocumentsTopBarView = require('./views/documents/topBar');
 var ImportExportOverview = require('./views/importExport/Overview');
 var ImportExportTopBarView = require('./views/importExport/TopBar');
 var ImportExportModel = require('./models/importExport');

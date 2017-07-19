@@ -75,7 +75,7 @@ module.exports = paginator.extend({
         var $holder;
 
         jsonCollection.map(function (model) {
-            model.displayTypeString = model.displayType.map((item) => {
+            model.displayTypeString = model.displayType.map(function(item) {
                 return item.name.currentLanguage;
             }).join(', ');
 

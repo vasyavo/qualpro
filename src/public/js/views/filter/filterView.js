@@ -100,7 +100,7 @@ module.exports = Backbone.View.extend({
                 values : []
             };
 
-            jsonCollection.map((model) => {
+            jsonCollection.map(function(model) {
                 filters.names.push(model.name[App.currentUser.currentLanguage]);
                 filters.values.push(model._id);
             });
@@ -140,9 +140,9 @@ module.exports = Backbone.View.extend({
         this.selectValue(options);
 
         if (this.collection.length === this.filter[this.filterName].values.length) {
-            $(`#select-all-${this.filterName}`).children('li').addClass('checkedValue');
+            $('#select-all-' + this.filterName).children('li').addClass('checkedValue');
         } else {
-            $(`#select-all-${this.filterName}`).children('li').removeClass('checkedValue');
+            $('#select-all-' + this.filterName).children('li').removeClass('checkedValue');
         }
 
         if (this.filter[this.filterName] && !this.filter[this.filterName].values.length) {

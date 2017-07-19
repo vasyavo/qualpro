@@ -1,4 +1,4 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 var _ = require('Underscore');
 var Cookies = require('js-cookie');
 var dataService = require('./dataService');

@@ -42,7 +42,7 @@ module.exports = parent.extend({
     },
 
     modelParse: function (model) {
-        model.displayTypeString = model.displayType.map((model) => {
+        model.displayTypeString = model.displayType.map(function(model) {
             return model.name.currentLanguage;
         }).join(', ');
 

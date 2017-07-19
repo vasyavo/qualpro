@@ -435,7 +435,7 @@ module.exports = BaseView.extend({
             currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
         }
 
-        jsonModel.displayTypeString = jsonModel.displayType.map((item) => {
+        jsonModel.displayTypeString = jsonModel.displayType.map(function(item) {
             return item.name.currentLanguage;
         }).join(', ');
 

@@ -3,7 +3,7 @@
     <div class="userBlock flexColumn">
         <div class="top flexRowStart bottomLine">
             <div class="left flexColumn">
-                <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                <img src="/preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="right flexColumn">
                 <div class="userName"><%= App.currentUser.firstName.currentLanguage + ' ' + App.currentUser.lastName.currentLanguage%></div>
@@ -14,7 +14,7 @@
         <div class="middle flexColumn">
             <% model.assignedTo.forEach( function(assignedTo) { %>
             <div class="flexRowStart">
-                <img src="preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                <img src="/preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                 <div class="description fontGray">
                     <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
                     <%= assignedTo.firstName.currentLanguage + ' ' + assignedTo.lastName.currentLanguage %>

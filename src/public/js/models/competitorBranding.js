@@ -55,7 +55,7 @@ module.exports = parent.extend({
         model.outletString = model.outlet ? model.outlet.name.currentLanguage : '';
         model.branchString = model.branch ? model.branch.name.currentLanguage : '';
         model.brandString = model.brand ? model.brand.name.currentLanguage : '';
-        model.displayTypeString = model.displayType.map((model) => {
+        model.displayTypeString = model.displayType.map(function(model) {
             return model.name.currentLanguage;
         }).join(', ');
 

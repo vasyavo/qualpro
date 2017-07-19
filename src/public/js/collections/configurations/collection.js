@@ -7,7 +7,7 @@ module.exports = Parent.extend({
     contentType: null,
 
     url: function () {
-        return `/retailSegment/forConfigs?arrayOfId=${this.retailSegmentId}`;
+        return '/retailSegment/forConfigs?arrayOfId=' + this.retailSegmentId;
     },
 
     initialize: function () {
@@ -20,7 +20,7 @@ module.exports = Parent.extend({
     },
 
     parse: function (response) {
-        return response.configurations.map((item) => {
+        return response.configurations.map(function(item) {
             return {
                 _id : item._id,
                 name: item.configuration
