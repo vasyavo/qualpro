@@ -498,6 +498,7 @@ module.exports = (req, res, next) => {
                         <th>Display Type</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -516,6 +517,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.displayType}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>
+                                <td>${item.description[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}
