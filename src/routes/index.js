@@ -70,7 +70,7 @@ module.exports = function(app) {
     app.use(require('./../utils/rememberMeMiddleware'));
 
     app.get('/', csrfProtection, (req, res, next) => {
-        res.render('index.html', {
+        res.render('../public/dist/index.html', {
             csrfToken: req.csrfToken(),
             pubnubSubscribeKey: config.pubnub.subscribeKey,
             previewUrlRoot: config.previewUrlRoot,

@@ -26,6 +26,7 @@
     "currency-api": "git+https://d6e7978abd2d2f3cbea3d54216daf6b8f7bd156d:x-oauth-basic@github.com/foxtrapplimited/currency-api.git#0.4",
     "dotenv": "2.0.0",
     "emoji-strip": "1.0.1",
+    "expose-loader": "0.7.3",
     "express": "4.3.0",
     "express-request-id": "1.1.0",
     "express-session": "1.14.2",

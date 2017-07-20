@@ -69,4 +69,4 @@ restore-staging-db.sh
 /src/stories/customReports/frontend/
 
 # Frontend build
-dist
+/src/public/dist

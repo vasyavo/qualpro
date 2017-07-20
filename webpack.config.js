@@ -6,7 +6,7 @@ module.exports = {
     entry: './src/public/js/main.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'src/public/dist'),
     },
     resolve: {
         alias: {
@@ -41,20 +41,61 @@ module.exports = {
         modules : ['src', 'node_modules', 'bower_components']
     },
 
+    devtool : 'source-map',
+
     module : {
         loaders : [
-            { test: /jqueryui/, loader: 'imports-loader?jquery' },
-            { test: /imageCrop/, loader: 'imports-loader?jquery' },
-            { test: /scrollBar/, loader: 'imports-loader?jquery,jquery-mousewheel' },
-            { test: /rater/, loader: 'imports-loader?jquery' },
-            { test: /ckeditor-jquery/, loader: 'imports-loader?jquery,ckeditor-core' },
-            { test: /jquery-masked-field/, loader: 'imports-loader?jquery' },
-            { test: /backbone/, loader: 'exports-loader?backbone!imports-loader?underscore,jquery' },
-            { test: /underscore/, loader: 'exports-loader?_' },
-            { test: /d3/, loader: 'exports-loader?d3' },
-            { test: /jquery/, loader: 'exports-loader?$' },
-            { test: /ckeditor-core/, loader: 'exports-loader?CKEDITOR' },
-            { test: /ckeditor-core/, loader: 'exports-loader?CKEDITOR' },
+            {
+                test: /jquery/,
+                use: [
+                    'expose-loader?jquery',
+                ]
+            },
+            {
+                test: /underscore/,
+                use: [
+                    'expose-loader?underscore',
+                ]
+            },
+            {
+                test: /backbone/,
+                use: [
+                    'expose-loader?backbone',
+                    'imports-loader?this=>window,jquery,underscore'
+                ]
+            },
+            {
+                test: /ckeditor-core/,
+                loader: 'expose-loader?ckeditor-core'
+            },
+            {
+                test: /jqueryui/,
+                loader: 'imports-loader?this=>window,jquery'
+            },
+            {
+                test: /imageCrop/,
+                loader: 'imports-loader?this=>window,jquery'
+            },
+            {
+                test: /scrollBar/,
+                loader: 'imports-loader?this=>window,jquery,jquery-mousewheel'
+            },
+            {
+                test: /rater/,
+                loader: 'imports-loader?this=>window,jquery'
+            },
+            {
+                test: /ckeditor-jquery/,
+                loader: 'imports-loader?this=>window,jquery,ckeditor-core'
+            },
+            {
+                test: /jquery-masked-field/,
+                loader: 'imports-loader?this=>window,jquery'
+            },
+            {
+                test: /d3/,
+                loader: 'expose-loader?d3'
+            },
             {
                 test : /\.html$/,
                 loader : 'html-loader'
@@ -75,8 +116,8 @@ module.exports = {
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
         new webpack.optimize.UglifyJsPlugin({ minimize: true }),
         new HtmlWebpackPlugin({
-            template : './src/views/index.html',
+            template : './src/public/templates/index.html',
             inject : 'body'
-        })
+        }),
     ],
 };
