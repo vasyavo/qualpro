@@ -384,6 +384,7 @@ module.exports = (req, res, next) => {
                         <th>Objective Type</th>
                         <th>Assigned To</th>
                         <th>Assigned By</th>
+                        <th>Position</th>
                         <th>Description</th>
                         <th>Form Type</th>
                         <th>Status</th>
@@ -406,7 +407,8 @@ module.exports = (req, res, next) => {
                                 <td>${item.title[currentLanguage]}</td>
                                 <td>${item.objectiveType}</td>
                                 <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position.name[currentLanguage]}</td>
                                 <td>${emojiStrip(item.description[currentLanguage])}</td>
                                 <td>${item.form ? item.form.contentType : ''}</td>
                                 <td>${item.status}</td>
