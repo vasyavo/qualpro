@@ -6,6 +6,7 @@ const PersonnelModel = require('./../../../../types/personnel/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const CONSTANTS = require('./../../../../constants/mainConstants');
+const OTHER_CONSTANTS = require('./../../../../public/js/constants/otherConstants');
 const locationFiler = require('./../../utils/locationFilter');
 const moment = require('moment');
 
@@ -91,7 +92,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'monthlies',
+                from: 'biYearlies',
                 localField: '_id',
                 foreignField: 'personnel',
                 as: 'evaluations',
@@ -134,10 +135,11 @@ module.exports = (req, res, next) => {
                 position: 1,
                 evaluations: {
                     _id: 1,
-                    rating: 1,
-                    target: 1,
-                    achiev: 1,
-                    age: 1,
+                    personalSkills: 1,
+                    sellingSkills: 1,
+                    reporting: 1,
+                    planningAndOrganizationSkills: 1,
+                    overallPerformance: 1,
                     createdBy: 1,
                 },
             },
@@ -175,10 +177,15 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $addFields: {
                 publisher: '$evaluations.createdBy.user',
-                rating: '$evaluations.rating',
-                target: '$evaluations.target',
-                achiev: '$evaluations.achiev',
-                age: '$evaluations.age',
+                overallPerformance: '$evaluations.overallPerformance',
+                skillsRate: {
+                    $divide: [
+                        {
+                            $add: ['$evaluations.personalSkills.result', '$evaluations.sellingSkills.result', '$evaluations.reporting.result', '$evaluations.planningAndOrganizationSkills.result'],
+                        },
+                        4,
+                    ],
+                },
             },
         });
 
@@ -192,11 +199,21 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.rate && queryFilter.rate.length) {
+        if (queryFilter.overallPerformance && queryFilter.overallPerformance.length) {
             pipeline.push({
                 $match: {
-                    rating: {
-                        $gte: queryFilter.rate,
+                    overallPerformance: {
+                        $in: queryFilter.overallPerformance,
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.skillsRate && queryFilter.skillsRate.length) {
+            pipeline.push({
+                $match: {
+                    skillsRate: {
+                        $gte: queryFilter.skillsRate,
                     },
                 },
             });
@@ -234,10 +251,9 @@ module.exports = (req, res, next) => {
                 location: { $first: '$location' },
                 name: { $first: '$name' },
                 position: { $first: '$position' },
-                target: { $sum: '$target' },
-                achiev: { $sum: '$achiev' },
-                percentage: { $sum: '$age' },
-                avgRating: { $avg: '$rating' },
+                publisher: { $first: '$publisher' },
+                skillsRate: { $avg: '$skillsRate' },
+                overallPerformance: { $last: '$overallPerformance' },
             },
         });
 
@@ -296,6 +312,15 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'publisher',
+                foreignField: '_id',
+                as: 'publisher',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
                 name: 1,
@@ -310,10 +335,26 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                target: 1,
-                achiev: 1,
-                percentage: 1,
-                avgRating: 1,
+                publisher: {
+                    $let: {
+                        vars: {
+                            publisher: { $arrayElemAt: ['$publisher', 0] },
+                        },
+                        in: {
+                            _id: '$$publisher._id',
+                            name: {
+                                en: {
+                                    $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'],
+                                },
+                                ar: {
+                                    $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'],
+                                },
+                            },
+                        },
+                    },
+                },
+                skillsRate: 1,
+                overallPerformance: 1,
                 country: {
                     _id: 1,
                     name: 1,
@@ -616,10 +657,9 @@ module.exports = (req, res, next) => {
                 location: '$setItems.location',
                 name: '$setItems.name',
                 position: '$setItems.position',
-                target: '$setItems.target',
-                achiev: '$setItems.achiev',
-                percentage: '$setItems.percentage',
-                avgRating: '$setItems.avgRating',
+                publisher: '$setItems.publisher',
+                skillsRate: '$setItems.skillsRate',
+                overallPerformance: '$setItems.overallPerformance',
             },
         });
 
@@ -652,6 +692,10 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach((item) => {
+            item.overallPerformance = OTHER_CONSTANTS.RATING_BIYEARLY.find((rating) => rating._id === item.overallPerformance).name;
+        });
 
         res.status(200).send(response);
     });

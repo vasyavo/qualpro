@@ -1,8 +1,20 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
+            _id: '$_id',
+            rating: { $avg: '$rating' },
+            country: { $first: '$country' },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$country',
+    });
+
+    pipeline.push({
+        $group: {
             _id: '$country',
-            count: { $sum: 1 },
+            rating: { $avg: '$rating' },
         },
     });
 
@@ -17,19 +29,15 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
-            _id: 1,
-            count: 1,
+            rating: 1,
             country: {
                 $let: {
                     vars: {
-                        country: { $arrayElemAt: ['$country', 0] },
+                        domain: { $arrayElemAt: ['$country', 0] },
                     },
                     in: {
-                        _id: '$$country._id',
-                        name: {
-                            en: '$$country.name.en',
-                            ar: '$$country.name.ar',
-                        },
+                        _id: '$$domain._id',
+                        name: '$$domain.name',
                     },
                 },
             },
@@ -38,7 +46,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            count: 1,
+            'country.name': 1,
         },
     });
 
@@ -46,9 +54,16 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$count',
+                $push: '$rating',
             },
             labels: { $push: '$country' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            datasets: [{ data: '$data' }],
+            labels: 1,
         },
     });
 };

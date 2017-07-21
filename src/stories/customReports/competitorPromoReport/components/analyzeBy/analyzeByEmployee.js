@@ -2,7 +2,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $group: {
             _id: '$createdBy.user._id',
-            employeeName: { $first: '$createdBy.user.name' },
+            employee: { $first: '$createdBy.user' },
             count: { $sum: 1 },
         },
     });
@@ -19,7 +19,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$employeeName' },
+            labels: { $push: '$employee' },
         },
     });
 };
