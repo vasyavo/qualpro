@@ -25,6 +25,7 @@ module.exports = (pipeline) => {
                         position: { $arrayElemAt: ['$position', 0] },
                     },
                     in: {
+                        _id: '$$position._id',
                         name: {
                             en: '$$position.name.en',
                             ar: '$$position.name.ar',
@@ -47,7 +48,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$position.name' },
+            labels: { $push: '$position' },
         },
     });
 };

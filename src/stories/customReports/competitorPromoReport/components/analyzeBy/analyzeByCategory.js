@@ -31,6 +31,7 @@ module.exports = (pipeline) => {
                         category: { $arrayElemAt: ['$category', 0] },
                     },
                     in: {
+                        _id: '$$category._id',
                         name: {
                             en: '$$category.name.en',
                             ar: '$$category.name.ar',
@@ -53,7 +54,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$category.name' },
+            labels: { $push: '$category' },
         },
     });
 };
