@@ -184,6 +184,16 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter.publisher && queryFilter.publisher.length) {
+            pipeline.push({
+                $match: {
+                    publisher: {
+                        $in: queryFilter.publisher,
+                    },
+                },
+            });
+        }
+
         if (queryFilter.overallPerformance && queryFilter.overallPerformance.length) {
             pipeline.push({
                 $match: {
