@@ -65,11 +65,13 @@ module.exports = (pipeline) => {
     pipeline.push({
         $addFields: {
             location: {
-                en: {
-                    $concat: ['$country.name.en', ' / ', '$domain.name.en'],
-                },
-                ar: {
-                    $concat: ['$country.name.ar', ' / ', '$domain.name.ar'],
+                name: {
+                    en: {
+                        $concat: ['$country.name.en', ' / ', '$domain.name.en'],
+                    },
+                    ar: {
+                        $concat: ['$country.name.ar', ' / ', '$domain.name.ar'],
+                    },
                 },
             },
         },
@@ -99,7 +101,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'data.location.en': 1,
+            'data.location.name.en': 1,
             'data.count': 1,
         },
     });
@@ -128,7 +130,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'labels.en': 1,
+            'labels.name.en': 1,
         },
     });
 
