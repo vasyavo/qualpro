@@ -16,6 +16,7 @@ const competitorBrandingReport = require('./competitorBrandingReport/router');
 const consumerSurveyReport = require('./consumerSurveyReport/router');
 const brandingAndMonthlyDisplayReport = require('./brandingAndMonthlyDisplayReport/router');
 const employeeEvaluationReport = require('./employeeEvaluationReport/router');
+const yearlyEmployeeEvaluationReport = require('./yearlyEmployeeEvaluationReport/router');
 
 const router = express.Router();
 const checkAuth = access.checkAuth;
@@ -37,5 +38,6 @@ router.use('/competitorBrandingReport', competitorBrandingReport);
 router.use('/consumerSurveyReport', consumerSurveyReport);
 router.use('/brandingAndMonthlyDisplayReport', brandingAndMonthlyDisplayReport);
 router.use('/employeeEvaluationReport', employeeEvaluationReport);
+router.use('/yearlyEmployeeEvaluationReport', yearlyEmployeeEvaluationReport);
 
 module.exports = router;
