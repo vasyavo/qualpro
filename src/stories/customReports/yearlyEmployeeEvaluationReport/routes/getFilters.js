@@ -2,11 +2,10 @@ const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
-const generalFiler = require('./../../utils/generalFilter');
-const ObjectiveModel = require('./../../../../types/objective/model');
+const PersonnelModel = require('./../../../../types/personnel/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const locationFiler = require('./../../utils/locationFilter');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -38,21 +37,10 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'publisher',
         ];
+
         const pipeline = [];
-
-        pipeline.push({
-            $match: {
-                archived: false,
-            },
-        });
-
-        pipeline.push({
-            $match: {
-                status: { $ne: 'draft' },
-            },
-        });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -75,29 +63,86 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                context: CONTENT_TYPES.OBJECTIVES,
-            },
-        });
-
-        locationFiler(pipeline, personnel, queryFilter);
-
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, 'status', 'priority', 'objectiveType'], queryFilter, personnel);
-
-        if (queryFilter.formType && queryFilter.formType.length) {
-            $generalMatch.$and.push({
-                'form.contentType': {
-                    $in: queryFilter.formType,
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+            pipeline.push({
+                $match: {
+                    _id: {
+                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                    },
                 },
             });
         }
 
-        if ($generalMatch.$and.length) {
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
-                $match: $generalMatch,
+                $match: {
+                    position: {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
             });
         }
+
+        locationFiler(pipeline, personnel, queryFilter);
+
+        pipeline.push({
+            $lookup: {
+                from: 'biYearlies',
+                localField: '_id',
+                foreignField: 'personnel',
+                as: 'evaluations',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: 'branch',
+                foreignField: '_id',
+                as: 'branch',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                name: {
+                    en: {
+                        $concat: ['$firstName.en', ' ', '$lastName.en'],
+                    },
+                    ar: {
+                        $concat: ['$firstName.ar', ' ', '$lastName.ar'],
+                    },
+                },
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: '$branch.retailSegment',
+                outlet: '$branch.outlet',
+                branch: {
+                    _id: 1,
+                    name: 1,
+                    retailSegment: 1,
+                    outlet: 1,
+                    subRegion: 1,
+                },
+                personnel: 1,
+                position: 1,
+                evaluations: {
+                    _id: 1,
+                    personalSkills: 1,
+                    sellingSkills: 1,
+                    reporting: 1,
+                    planningAndOrganizationSkills: 1,
+                    overallPerformance: 1,
+                    createdBy: 1,
+                },
+            },
+        });
+
+        pipeline.push({
+            $unwind: '$evaluations',
+        });
 
         const $timeMatch = {};
         $timeMatch.$or = [];
@@ -107,10 +152,10 @@ module.exports = (req, res, next) => {
                 $timeMatch.$or.push({
                     $and: [
                         {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                            'evaluations.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
                         },
                         {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                            'evaluations.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
                         },
                     ],
                 });
@@ -125,42 +170,65 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
-                foreignField: '_id',
-                as: 'createdBy.user',
-            },
-        });
-
-        pipeline.push({
             $addFields: {
-                createdBy: {
-                    user: {
-                        $let: {
-                            vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
-                            },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
-                                },
-                                position: '$$user.position',
-                            },
+                publisher: '$evaluations.createdBy.user',
+                overallPerformance: '$evaluations.overallPerformance',
+                skillsRate: {
+                    $divide: [
+                        {
+                            $add: ['$evaluations.personalSkills.result', '$evaluations.sellingSkills.result', '$evaluations.reporting.result', '$evaluations.planningAndOrganizationSkills.result'],
                         },
-                    },
-                    date: '$createdBy.date',
+                        4,
+                    ],
                 },
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+        if (queryFilter.publisher && queryFilter.publisher.length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    publisher: {
+                        $in: queryFilter.publisher,
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.overallPerformance && queryFilter.overallPerformance.length) {
+            pipeline.push({
+                $match: {
+                    overallPerformance: {
+                        $in: queryFilter.overallPerformance,
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.skillsRate && queryFilter.skillsRate.length) {
+            pipeline.push({
+                $match: {
+                    skillsRate: {
+                        $gte: queryFilter.skillsRate,
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    retailSegment: {
+                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
+            pipeline.push({
+                $match: {
+                    outlet: {
+                        $in: queryFilter[CONTENT_TYPES.OUTLET],
                     },
                 },
             });
@@ -172,34 +240,38 @@ module.exports = (req, res, next) => {
                 countries: { $push: '$country' },
                 regions: { $push: '$region' },
                 subRegions: { $push: '$subRegion' },
+                branches: { $push: '$branch' },
+                positions: { $addToSet: '$position' },
                 retailSegments: { $push: '$retailSegment' },
                 outlets: { $push: '$outlet' },
-                branches: { $push: '$branch' },
-                positions: { $addToSet: '$createdBy.user.position' },
-                statuses: { $addToSet: '$status' },
-                priorities: { $addToSet: '$priority' },
-                formTypes: { $addToSet: '$form.contentType' },
-                assignedToPersonnels: { $push: '$assignedTo' },
-                createdByPersonnels: { $addToSet: '$createdBy.user' },
-                objectiveType: { $addToSet: '$objectiveType' },
+                personnels: {
+                    $addToSet: {
+                        _id: '$_id',
+                        name: '$name',
+                    },
+                },
+                publishers: { $addToSet: '$publisher' },
+                skillsRate: { $addToSet: '$skillsRate' },
+                overallPerformance: { $addToSet: '$overallPerformance' },
             },
         });
 
         pipeline.push({
             $project: {
+                publishers: 1,
+                positions: 1,
+                overallPerformance: 1,
+                skillsRate: 1,
+                personnels: 1,
                 countries: {
                     $reduce: {
                         input: '$countries',
                         initialValue: [],
                         in: {
                             $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
+                                if: { $eq: ['$$value', []] },
+                                then: '$$this',
+                                else: { $setUnion: ['$$this', '$$value'] },
                             },
                         },
                     },
@@ -210,13 +282,9 @@ module.exports = (req, res, next) => {
                         initialValue: [],
                         in: {
                             $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
+                                if: { $eq: ['$$value', []] },
+                                then: '$$this',
+                                else: { $setUnion: ['$$this', '$$value'] },
                             },
                         },
                     },
@@ -227,13 +295,9 @@ module.exports = (req, res, next) => {
                         initialValue: [],
                         in: {
                             $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
+                                if: { $eq: ['$$value', []] },
+                                then: '$$this',
+                                else: { $setUnion: ['$$this', '$$value'] },
                             },
                         },
                     },
@@ -244,13 +308,9 @@ module.exports = (req, res, next) => {
                         initialValue: [],
                         in: {
                             $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
+                                if: { $eq: ['$$value', []] },
+                                then: '$$this',
+                                else: { $setUnion: ['$$this', '$$value'] },
                             },
                         },
                     },
@@ -261,13 +321,9 @@ module.exports = (req, res, next) => {
                         initialValue: [],
                         in: {
                             $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
+                                if: { $eq: ['$$value', []] },
+                                then: '$$this',
+                                else: { $setUnion: ['$$this', '$$value'] },
                             },
                         },
                     },
@@ -278,40 +334,13 @@ module.exports = (req, res, next) => {
                         initialValue: [],
                         in: {
                             $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
+                                if: { $eq: ['$$value', []] },
+                                then: '$$this',
+                                else: { $setUnion: ['$$this', '$$value'] },
                             },
                         },
                     },
                 },
-                positions: 1,
-                statuses: 1,
-                priorities: 1,
-                formTypes: 1,
-                assignedToPersonnels: {
-                    $reduce: {
-                        input: '$assignedToPersonnels',
-                        initialValue: [],
-                        in: {
-                            $cond: {
-                                if: {
-                                    $ne: ['$$value', []],
-                                },
-                                then: {
-                                    $setUnion: ['$$value', '$$this'],
-                                },
-                                else: '$$this',
-                            },
-                        },
-                    },
-                },
-                createdByPersonnels: 1,
-                objectiveType: 1,
             },
         });
 
@@ -362,19 +391,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'branches',
-                localField: 'branches',
-                foreignField: '_id',
-                as: 'branches',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
                 from: 'personnels',
-                localField: 'assignedToPersonnels',
+                localField: 'publishers',
                 foreignField: '_id',
-                as: 'assignedToPersonnels',
+                as: 'publishers',
             },
         });
 
@@ -389,15 +409,26 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                statuses: 1,
-                priorities: 1,
-                formTypes: 1,
-                objectiveType: 1,
-                createdByPersonnels: 1,
+                publishers: {
+                    $map: {
+                        input: '$publishers',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            name: {
+                                en: { $concat: ['$$item.firstName.en', ' ', '$$item.lastName.en'] },
+                                ar: { $concat: ['$$item.firstName.ar', ' ', '$$item.lastName.ar'] },
+                            },
+                        },
+                    },
+                },
                 positions: {
-                    _ids: 1,
+                    _id: 1,
                     name: 1,
                 },
+                overallPerformance: 1,
+                skillsRate: 1,
+                personnels: 1,
                 countries: {
                     _id: 1,
                     name: 1,
@@ -422,30 +453,17 @@ module.exports = (req, res, next) => {
                     _id: 1,
                     name: 1,
                 },
-                assignedToPersonnels: {
-                    $map: {
-                        input: '$assignedToPersonnels',
-                        as: 'personnel',
-                        in: {
-                            _id: '$$personnel._id',
-                            name: {
-                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
-                            },
-                        },
-                    },
-                },
             },
         });
 
-        ObjectiveModel.aggregate(pipeline)
+        PersonnelModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };
 
     async.waterfall([
         (cb) => {
-            AccessManager.getReadAccess(req, ACL_MODULES.IN_STORE_REPORTING, cb);
+            AccessManager.getReadAccess(req, ACL_MODULES.PERSONNEL, cb);
         },
         (allowed, personnel, cb) => {
             queryRun(personnel, cb);
@@ -456,50 +474,18 @@ module.exports = (req, res, next) => {
         }
 
         const response = result && result[0] ? result[0] : {
-            statuses: [],
-            priorities: [],
-            formTypes: [],
-            createdByPersonnels: [],
+            publishers: [],
             positions: [],
-            objectiveType: [],
+            overallPerformance: [],
+            skillsRate: [],
+            personnels: [],
             countries: [],
             regions: [],
             subRegions: [],
             retailSegments: [],
             outlets: [],
             branches: [],
-            assignedToPersonnels: [],
         };
-
-        const objectiveTypes = [{
-            _id: 'weekly',
-            name: {
-                en: 'Weekly Company Objective',
-                ar: '',
-            },
-        }, {
-            _id: 'individual',
-            name: {
-                en: 'Individual Objective',
-                ar: '',
-            },
-        }, {
-            _id: 'monthly',
-            name: {
-                en: 'Monthly Company Objective',
-                ar: '',
-            },
-        }, {
-            _id: 'country',
-            name: {
-                en: 'Country Objective',
-                ar: '',
-            },
-        }];
-
-        response.objectiveType = objectiveTypes.filter((item) => {
-            return response.objectiveType.indexOf(item._id) > -1;
-        });
 
         response.analyzeBy = [
             {
@@ -532,24 +518,24 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Originator',
-                    ar: '',
-                },
-                value: 'originator',
-            },
-            {
-                name: {
-                    en: 'Assignee',
-                    ar: '',
-                },
-                value: 'assignee',
-            },
-            {
-                name: {
                     en: 'Position',
                     ar: '',
                 },
                 value: 'position',
+            },
+            {
+                name: {
+                    en: 'Employee',
+                    ar: '',
+                },
+                value: 'employee',
+            },
+            {
+                name: {
+                    en: 'Publisher',
+                    ar: '',
+                },
+                value: 'publisher',
             },
         ];
 

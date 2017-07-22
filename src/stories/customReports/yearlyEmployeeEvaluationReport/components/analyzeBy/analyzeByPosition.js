@@ -1,35 +1,30 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$brand',
-            count: { $sum: 1 },
+            _id: '$position',
+            rating: { $avg: '$rating' },
         },
     });
 
     pipeline.push({
         $lookup: {
-            from: 'brands',
+            from: 'positions',
             localField: '_id',
             foreignField: '_id',
-            as: 'brand',
+            as: 'position',
         },
     });
 
     pipeline.push({
-        $project: {
-            _id: 1,
-            count: 1,
-            brand: {
+        $addFields: {
+            position: {
                 $let: {
                     vars: {
-                        brand: { $arrayElemAt: ['$brand', 0] },
+                        position: { $arrayElemAt: ['$position', 0] },
                     },
                     in: {
-                        _id: '$$brand._id',
-                        name: {
-                            en: '$$brand.name.en',
-                            ar: '$$brand.name.ar',
-                        },
+                        _id: '$$position._id',
+                        name: '$$position.name',
                     },
                 },
             },
@@ -38,7 +33,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            count: 1,
+            'position.name': 1,
         },
     });
 
@@ -46,9 +41,16 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$count',
+                $push: '$rating',
             },
-            labels: { $push: '$brand' },
+            labels: { $push: '$position' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            datasets: [{ data: '$data' }],
+            labels: 1,
         },
     });
 };
