@@ -855,9 +855,6 @@ module.exports = (req, res, next) => {
                 retailSegment: {
                     $setUnion: ['$branch.retailSegment', []],
                 },
-                outlet: {
-                    $setUnion: ['$branch.outlet', []],
-                },
             },
         });
 
@@ -894,6 +891,14 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                outlet: {
+                    $setUnion: ['$branch.outlet', []],
+                },
+            },
+        });
 
         if (_.get(queryFilter, `${CONTENT_TYPES.OUTLET}.length`)) {
             pipeline.push({
