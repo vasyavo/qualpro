@@ -235,7 +235,14 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (!response || !response.labels || !response.datasets) {
+        if (response) {
+            response = {
+                barChart: {
+                    labels: response.labels,
+                    datasets: response.datasets,
+                },
+            };
+        } else {
             response = {
                 barChart: {
                     labels: [],

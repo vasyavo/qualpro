@@ -84,41 +84,51 @@ module.exports = (pipeline) => {
         $project: {
             rating: 1,
             location: {
-                en: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$domain.name.en',
-                            },
+                _id: {
+                    $let: {
+                        vars: {
+                            domain: { $arrayElemAt: ['$country', 0] },
                         },
-                        ' -> ',
-                        '$region.name.en',
-                        ' -> ',
-                        '$subRegion.name.en',
-                        ' -> ',
-                        '$branch.name.en',
-                    ],
+                        in: '$$domain._id',
+                    },
                 },
-                ar: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
+                name: {
+                    en: {
+                        $concat: [
+                            {
+                                $let: {
+                                    vars: {
+                                        domain: { $arrayElemAt: ['$country', 0] },
+                                    },
+                                    in: '$$domain.name.en',
                                 },
-                                in: '$$domain.name.ar',
                             },
-                        },
-                        ' -> ',
-                        '$region.name.ar',
-                        ' -> ',
-                        '$subRegion.name.ar',
-                        ' -> ',
-                        '$branch.name.ar',
-                    ],
+                            ' -> ',
+                            '$region.name.en',
+                            ' -> ',
+                            '$subRegion.name.en',
+                            ' -> ',
+                            '$branch.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            {
+                                $let: {
+                                    vars: {
+                                        domain: { $arrayElemAt: ['$country', 0] },
+                                    },
+                                    in: '$$domain.name.ar',
+                                },
+                            },
+                            ' -> ',
+                            '$region.name.ar',
+                            ' -> ',
+                            '$subRegion.name.ar',
+                            ' -> ',
+                            '$branch.name.ar',
+                        ],
+                    },
                 },
             },
         },
