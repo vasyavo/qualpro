@@ -57,33 +57,37 @@ module.exports = (pipeline) => {
         $project: {
             rating: 1,
             location: {
-                en: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
+                _id: '$region._id',
+                country: { $arrayElemAt: ['$country', 0] },
+                name: {
+                    en: {
+                        $concat: [
+                            {
+                                $let: {
+                                    vars: {
+                                        domain: { $arrayElemAt: ['$country', 0] },
+                                    },
+                                    in: '$$domain.name.en',
                                 },
-                                in: '$$domain.name.en',
                             },
-                        },
-                        ' -> ',
-                        '$region.name.en',
-                    ],
-                },
-                ar: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
+                            ' -> ',
+                            '$region.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            {
+                                $let: {
+                                    vars: {
+                                        domain: { $arrayElemAt: ['$country', 0] },
+                                    },
+                                    in: '$$domain.name.ar',
                                 },
-                                in: '$$domain.name.ar',
                             },
-                        },
-                        ' -> ',
-                        '$region.name.ar',
-                    ],
+                            ' -> ',
+                            '$region.name.ar',
+                        ],
+                    },
                 },
             },
         },
