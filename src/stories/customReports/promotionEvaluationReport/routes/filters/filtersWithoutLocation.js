@@ -78,7 +78,7 @@ module.exports = (queryFilter, timeFilter, personnel) => {
 
     if (timeFilter) {
         timeFilter.map((frame) => {
-            $generalMatch.$or.push({
+            $timeMatch.$or.push({
                 $and: [
                     {
                         'promotion.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
