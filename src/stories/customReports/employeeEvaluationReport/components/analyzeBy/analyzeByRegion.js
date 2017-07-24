@@ -58,6 +58,7 @@ module.exports = (pipeline) => {
             rating: 1,
             location: {
                 _id: '$region._id',
+                country: { $arrayElemAt: ['$country', 0] },
                 name: {
                     en: {
                         $concat: [

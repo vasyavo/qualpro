@@ -92,6 +92,7 @@ module.exports = (pipeline) => {
                         in: '$$domain._id',
                     },
                 },
+                country: { $arrayElemAt: ['$country', 0] },
                 name: {
                     en: {
                         $concat: [
