@@ -83,6 +83,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             rating: 1,
+            country: { $arrayElemAt: ['$country', 0] },
             location: {
                 _id: {
                     $let: {
@@ -92,7 +93,6 @@ module.exports = (pipeline) => {
                         in: '$$domain._id',
                     },
                 },
-                country: { $arrayElemAt: ['$country', 0] },
                 name: {
                     en: {
                         $concat: [
@@ -145,7 +145,10 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$rating',
+                $push: {
+                    count: '$rating',
+                    country: '$country',
+                },
             },
             labels: { $push: '$location' },
         },
