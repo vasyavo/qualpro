@@ -1,9 +1,5 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $unwind: '$executors',
-    });
-
-    pipeline.push({
         $group: {
             _id: {
                 executor: '$executors',
