@@ -703,9 +703,9 @@ module.exports = [
             read   : false
         },
         mobile : {
-            edit   : false,
-            write  : false,
-            read   : false
+            edit   : true,
+            write  : true,
+            read   : true,
         }
     }
 ];
