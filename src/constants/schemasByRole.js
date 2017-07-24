@@ -151,6 +151,11 @@ schemasByRole[CONTENT_TYPES.CONTACT_US][ACL_ROLES.COUNTRY_UPLOADER] = {
     read: schemas.contactUs.getAll,
     update: schemas.contactUs.update
 };
+schemasByRole[CONTENT_TYPES.CONTACT_US][ACL_ROLES.PROMOTER] = {
+    create: schemas.contactUs.create,
+    read: schemas.contactUs.getAll,
+    update: schemas.contactUs.update
+};
 
 schemasByRole[CONTENT_TYPES.CONTACT_US][ACL_ROLES.TRADE_MARKETER] = {
     create: schemas.contactUs.create,
