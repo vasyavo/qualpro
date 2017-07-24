@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const filters = [
@@ -134,6 +134,8 @@ module.exports = (req, res, next) => {
                 country: 1,
                 region: 1,
                 subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
                 branch: 1,
                 category: 1,
                 shelfShare: '$brands',
@@ -179,6 +181,8 @@ module.exports = (req, res, next) => {
                     country: '$country',
                     region: '$region',
                     subRegion: '$subRegion',
+                    retailSegment: '$retailSegment',
+                    outlet: '$outlet',
                     branch: '$branch',
                     category: '$category',
                     brand: '$shelfShare.brand',
@@ -225,6 +229,8 @@ module.exports = (req, res, next) => {
                     },
                     region: 1,
                     subRegion: 1,
+                    retailSegment: 1,
+                    outlet: 1,
                     branch: 1,
                     category: 1,
                     brand: 1,
@@ -258,6 +264,8 @@ module.exports = (req, res, next) => {
                         },
                     },
                     subRegion: 1,
+                    retailSegment: 1,
+                    outlet: 1,
                     branch: 1,
                     category: 1,
                     brand: 1,
@@ -291,6 +299,79 @@ module.exports = (req, res, next) => {
                             },
                         },
                     },
+                    retailSegment: 1,
+                    outlet: 1,
+                    branch: 1,
+                    category: 1,
+                    brand: 1,
+                },
+                shelfShares: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'retailSegments',
+                localField: 'group.retailSegment',
+                foreignField: '_id',
+                as: 'group.retailSegment',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                group: {
+                    country: 1,
+                    region: 1,
+                    subRegion: 1,
+                    retailSegment: {
+                        $let: {
+                            vars: {
+                                retailSegment: { $arrayElemAt: ['$group.retailSegment', 0] },
+                            },
+                            in: {
+                                _id: '$$retailSegment._id',
+                                name: '$$retailSegment.name',
+                            },
+                        },
+                    },
+                    outlet: 1,
+                    branch: 1,
+                    category: 1,
+                    brand: 1,
+                },
+                shelfShares: 1,
+            },
+        });
+
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: 'group.outlet',
+                foreignField: '_id',
+                as: 'group.outlet',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                group: {
+                    country: 1,
+                    region: 1,
+                    subRegion: 1,
+                    retailSegment: 1,
+                    outlet: {
+                        $let: {
+                            vars: {
+                                outlet: { $arrayElemAt: ['$group.outlet', 0] },
+                            },
+                            in: {
+                                _id: '$$outlet._id',
+                                name: '$$outlet.name',
+                            },
+                        },
+                    },
                     branch: 1,
                     category: 1,
                     brand: 1,
@@ -314,6 +395,8 @@ module.exports = (req, res, next) => {
                     country: 1,
                     region: 1,
                     subRegion: 1,
+                    retailSegment: 1,
+                    outlet: 1,
                     branch: {
                         $let: {
                             vars: {
@@ -338,6 +421,8 @@ module.exports = (req, res, next) => {
                 country: '$group.country',
                 region: '$group.region',
                 subRegion: '$group.subRegion',
+                retailSegment: '$group.retailSegment',
+                outlet: '$group.outlet',
                 branch: '$group.branch',
                 category: '$group.category',
                 brand: '$group.brand',
@@ -360,6 +445,8 @@ module.exports = (req, res, next) => {
                 country: 1,
                 region: 1,
                 subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
                 branch: 1,
                 category: 1,
                 brand: 1,
@@ -461,7 +548,10 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
+                        <th>Retail Segment</th>
+                        <th>Outlet</th>
                         <th>Branch</th>
+                        <th>Brand</th>
                         <th>Product</th>
                         <th>Min Length</th>
                         <th>Min Percent</th>
@@ -478,7 +568,10 @@ module.exports = (req, res, next) => {
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
                                 <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${parseFloat(item.minLength).toFixed(2)}</td>
                                 <td>${parseFloat(item.minPercent).toFixed(2)}</td>

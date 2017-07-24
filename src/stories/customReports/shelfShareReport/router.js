@@ -9,11 +9,11 @@ const XMLExportDetails = require('./routes/XMLExportDetails');
 
 const router = express.Router();
 
-router.get('/', getAll);
-router.get('/details', getDetails);
-router.get('/charts', getCharts);
-router.get('/filters', getFilters);
-router.get('/exportDetails', XMLExportDetails);
-router.get('/export', XMLExport);
+router.post('/', getAll);
+router.post('/details', getDetails);
+router.post('/charts', getCharts);
+router.post('/filters', getFilters);
+router.post('/exportDetails', XMLExportDetails);
+router.post('/export', XMLExport);
 
 module.exports = router;

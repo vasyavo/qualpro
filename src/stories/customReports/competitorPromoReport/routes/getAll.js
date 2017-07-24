@@ -9,6 +9,7 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -33,7 +34,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const page = query.page || 1;
@@ -125,6 +126,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
+                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 createdBy: {
                     user: {
                         $let: {
@@ -173,6 +175,8 @@ module.exports = (req, res, next) => {
                 _id: '$setPromotion._id',
                 category: '$setPromotion.category',
                 description: '$setPromotion.description',
+                promotion: '$setPromotion.promotion',
+                brand: '$setPromotion.brand',
                 packing: '$setPromotion.packing',
                 expiry: '$setPromotion.expiry',
                 dateStart: '$setPromotion.dateStart',
@@ -206,6 +210,15 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
             },
         });
 
@@ -293,8 +306,8 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'comments',
-                localField: 'comments',
-                foreignField: '_id',
+                localField: '_id',
+                foreignField: 'taskId',
                 as: 'comments',
             },
         });
@@ -303,11 +316,13 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 description: 1,
+                promotion: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
                 dateEnd: 1,
                 price: 1,
+                country: { $arrayElemAt: ['$country', 0] },
                 comments: 1,
                 total: 1,
                 category: {
@@ -318,6 +333,17 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$category._id',
                             name: '$$category.name',
+                        },
+                    },
+                },
+                brand: {
+                    $let: {
+                        vars: {
+                            brand: { $arrayElemAt: ['$brand', 0] },
+                        },
+                        in: {
+                            _id: '$$brand._id',
+                            name: '$$brand.name',
                         },
                     },
                 },
@@ -430,6 +456,10 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 description: 1,
+                promotion: 1,
+                brand: 1,
+                country: 1,
+                location: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
@@ -461,12 +491,7 @@ module.exports = (req, res, next) => {
                                             input: '$attachments',
                                             as: 'attachment',
                                             cond: {
-                                                $ne: [
-                                                    {
-                                                        $setIntersection: [['$attachment._id'], '$item.attachments'],
-                                                    },
-                                                    [],
-                                                ],
+                                                $setIsSubset: [['$$attachment._id'], '$$item.attachments'],
                                             },
                                         },
                                     },
@@ -526,6 +551,13 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach((item) => {
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
+        });
 
         res.status(200).send(response);
     });

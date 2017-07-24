@@ -1,7 +1,5 @@
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
-const striptags = require('striptags');
-const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -38,7 +36,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const filters = [
@@ -115,18 +113,16 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$user._id',
+                                name: {
+                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                },
                                 position: '$$user.position',
                             },
                         },
                     },
                     date: 1,
                 },
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                ppt: { $divide: ['$ppt', 100] },
             },
         });
 
@@ -139,6 +135,15 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'position',
+            },
+        });
 
         pipeline.push({
             $lookup: {
@@ -232,6 +237,16 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': {
+                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                    },
                 },
             });
         }
@@ -438,7 +453,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
-                'branch.name.en': 1,
+                'branch.name': 1,
             },
         });
 
@@ -465,16 +480,30 @@ module.exports = (req, res, next) => {
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 createdBy: {
-                    user: 1,
+                    user: {
+                        _id: 1,
+                        name: 1,
+                        position: {
+                            $let: {
+                                vars: {
+                                    position: { $arrayElemAt: ['$position', 0] },
+                                },
+                                in: {
+                                    _id: '$$position._id',
+                                    name: '$$position.name',
+                                },
+                            },
+                        },
+                    },
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
                 displayType: { $arrayElemAt: ['$displayType', 0] },
                 itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
                 itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
-                opening: '$promotion.opening',
-                sellIn: '$promotion.sellIn',
-                closingStock: '$promotion.closingStock',
-                sellOut: '$promotion.sellOut',
+                opening: { $arrayElemAt: ['$promotion.opening', 0] },
+                sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] },
+                closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] },
+                sellOut: { $arrayElemAt: ['$promotion.sellOut', 0] },
             },
         });
 
@@ -506,6 +535,8 @@ module.exports = (req, res, next) => {
                         <th>Trade channel</th>
                         <th>Customer</th>
                         <th>Branch</th>
+                        <th>Employee</th>
+                        <th>Position</th>
                         <th>Promotion description</th>
                         <th>PPT, AED or $</th>
                         <th>Promotion Start</th>
@@ -524,7 +555,7 @@ module.exports = (req, res, next) => {
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
-                        const itemPrice = parseFloat(item.ppt / currentCountry.currencyInUsd).toFixed(2);
+                        const itemPrice = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
@@ -533,6 +564,8 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment.name[currentLanguage]}</td>
                                 <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.promotionType[currentLanguage])}</td>
                                 <td>${itemPrice}</td>
                                 <td>${item.dateStart}</td>

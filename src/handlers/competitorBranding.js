@@ -230,7 +230,12 @@ var CompetitorBranding = function() {
                 user: userId,
                 date: Date.now()
             };
-            CompetitorBrandingModel.findByIdAndUpdate(id, body, { new: true }).populate('displayType').exec(callback)
+            CompetitorBrandingModel
+                .findByIdAndUpdate(id, body, { new: true })
+                .populate('displayType')
+                .populate('category')
+                .populate('brand')
+                .exec(callback);
         };
 
         async.waterfall([

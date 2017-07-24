@@ -1,7 +1,10 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$region',
+            _id: {
+                country: '$country',
+                region: '$region',
+            },
             count: { $sum: 1 },
         },
     });
@@ -9,9 +12,18 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'domains',
-            localField: '_id',
+            localField: '_id.region',
             foreignField: '_id',
             as: 'region',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: '_id.country',
+            foreignField: '_id',
+            as: 'country',
         },
     });
 
@@ -33,6 +45,36 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            country: {
+                $let: {
+                    vars: {
+                        country: { $arrayElemAt: ['$country', 0] },
+                    },
+                    in: {
+                        _id: '$$country._id',
+                        name: {
+                            en: '$$country.name.en',
+                            ar: '$$country.name.ar',
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            location: {
+                _id: '$domain._id',
+                name: {
+                    en: {
+                        $concat: ['$country.name.en', ' / ', '$domain.name.en'],
+                    },
+                    ar: {
+                        $concat: ['$country.name.ar', ' / ', '$domain.name.ar'],
+                    },
+                },
+            },
         },
     });
 
@@ -40,9 +82,73 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$count',
+                $addToSet: {
+                    _id: '$domain._id',
+                    name: '$domain.name',
+                    count: '$count',
+                    country: '$country',
+                    location: '$location',
+                },
             },
-            labels: { $push: '$domain.name' },
+            labels: {
+                $addToSet: '$location',
+            },
+        },
+    });
+    pipeline.push({
+        $unwind: '$data',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'data.location.name': 1,
+            'data.count': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                labels: '$labels',
+            },
+            data: { $push: '$data' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            labels: '$_id.labels',
+            data: 1,
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$labels',
+    });
+
+
+    pipeline.push({
+        $sort: {
+            'labels.name': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                data: '$data',
+            },
+            labels: { $push: '$labels' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: 0,
+            data: '$_id.data',
+            labels: 1,
         },
     });
 };

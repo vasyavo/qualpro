@@ -25,6 +25,7 @@ module.exports = (pipeline) => {
                         country: { $arrayElemAt: ['$country', 0] },
                     },
                     in: {
+                        _id: '$$country._id',
                         name: {
                             en: '$$country.name.en',
                             ar: '$$country.name.ar',
@@ -47,7 +48,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$country.name' },
+            labels: { $push: '$country' },
         },
     });
 };

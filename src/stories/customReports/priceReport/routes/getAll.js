@@ -49,7 +49,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
@@ -134,7 +134,7 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: '$date',
                 country: { $first: '$payload.country' },
-                ppt: { $avg: '$payload.ppt' },
+                ppt: { $last: '$payload.ppt' },
             },
         });
 
@@ -203,7 +203,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
-            item.price = parseFloat(item.price / currentCountry.currencyInUsd).toFixed(2);
+            item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
             item.date = moment(item.date).format('MMMM, YYYY');
         });
 

@@ -6,6 +6,8 @@ define(function (require) {
     var Populate = require('populate');
     var arabicInput = require('helpers/implementShowHideArabicInputIn');
     var DisplayTypeCollection = require('collections/displayType/collection');
+    var CategoryCollection = require('collections/category/collection');
+    var BrandCollection = require('collections/brand/collection');
     var OriginCollection = require('collections/origin/collection');
     var ERROR_MESSAGE = require('constants/errorMessages');
     var Template = require('text!templates/newProductLaunch/edit.html');
@@ -68,6 +70,8 @@ define(function (require) {
                                 packing: ui.packing.val(),
                                 price: ui.price.val(),
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
+                                category: that.$el.find('#categoryDd').attr('data-id').split(','),
+                                brand: that.$el.find('#brandDd').attr('data-id'),
                                 origin: that.$el.find('#originDd').attr('data-id'),
                                 additionalComment: {
                                     en: ui.additionalCommentEn.val(),
@@ -81,6 +85,12 @@ define(function (require) {
 
                             if (data.displayType) {
                                 data.displayType = data.displayType.filter(function (item) {
+                                    return item;
+                                });
+                            }
+
+                            if (data.category) {
+                                data.category = data.category.filter(function (item) {
                                     return item;
                                 });
                             }
@@ -99,9 +109,23 @@ define(function (require) {
                                 valid = false;
                             }
 
+                            if (!data.brand) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.brandRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
                             if (!data.displayType.length) {
                                 App.renderErrors([
                                     ERROR_MESSAGE.displayTypeRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.category.length) {
+                                App.renderErrors([
+                                    ERROR_MESSAGE.categoryRequired[currentLanguage]
                                 ]);
                                 valid = false;
                             }
@@ -175,7 +199,7 @@ define(function (require) {
             }, this);
 
             this.originCollection = new OriginCollection({
-                count: 250
+                count: 250,
             });
             this.originCollection.on('reset', function () {
                 const defaultOrigin = [model.origin];
@@ -187,6 +211,38 @@ define(function (require) {
                     displayText : 'Origin',
                     displayModel: defaultOrigin,
                     collection  : that.originCollection.toJSON(),
+                    forPosition : true,
+                });
+            }, this);
+
+            this.categoryCollection = new CategoryCollection();
+            this.categoryCollection.on('reset', function () {
+                const defaultCategories = model.category ? [model.category] : [];
+
+                Populate.inputDropDown({
+                    selector    : '#categoryDd',
+                    context     : that,
+                    contentType : 'category',
+                    displayText : 'category',
+                    displayModel: defaultCategories,
+                    collection  : that.categoryCollection.toJSON(),
+                    forPosition : true,
+                });
+            }, this);
+
+            this.brandCollection = new BrandCollection({
+                count: 250,
+            });
+            this.brandCollection.on('reset', function () {
+                const defaultBrands = [model.brand];
+
+                Populate.inputDropDown({
+                    selector    : '#brandDd',
+                    context     : that,
+                    contentType : 'brand',
+                    displayText : 'brand',
+                    displayModel: defaultBrands,
+                    collection  : that.brandCollection.toJSON(),
                     forPosition : true,
                 });
             }, this);

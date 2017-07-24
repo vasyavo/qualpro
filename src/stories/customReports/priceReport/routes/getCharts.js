@@ -48,7 +48,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const pipeline = [];
@@ -156,6 +156,12 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $sort: {
+                _id: 1,
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 label: { $first: '$item.name' },
@@ -233,7 +239,7 @@ module.exports = (req, res, next) => {
                     return country._id.toString() === response.lineChart.dataSets[0].country.toString();
                 });
 
-                return parseFloat(item / currentCountry.currencyInUsd).toFixed(2);
+                return parseFloat(item * currentCountry.currencyInUsd).toFixed(2);
             });
         }
 

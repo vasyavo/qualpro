@@ -1,9 +1,9 @@
-module.exports = (filterNames, queryFilter, personnel) => {
+module.exports = (filterNames, queryFilter) => {
     const $generalMatch = {
         $and: [],
     };
 
-    filterNames.forEach((filterName) => {
+    filterNames.forEach(filterName => {
         const filterItems = queryFilter[filterName];
 
         if (filterItems && filterItems.length) {

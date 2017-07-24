@@ -35,13 +35,13 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo', 'questionnaire',
         ];
         const pipeline = [];
 
@@ -102,16 +102,9 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+        if (queryFilter.questionnaire && queryFilter.questionnaire.length) {
             $generalMatch.$and.push({
-                $or: [
-                    {
-                        'title.en': { $in: queryFilter.questionnaireTitle },
-                    },
-                    {
-                        'title.ar': { $in: queryFilter.questionnaireTitle },
-                    },
-                ],
+                _id: { $in: queryFilter.questionnaire },
             });
         }
 
@@ -178,15 +171,52 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'questionnaryAnswer',
+                localField: '_id',
+                foreignField: 'questionnaryId',
+                as: 'answers',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: {
+                    $map: {
+                        input: '$answers',
+                        as: 'item',
+                        in: '$$item.personnelId',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'answeredPersonnels',
+                foreignField: '_id',
+                as: 'answeredPersonnels',
+            },
+        });
+
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
+                    'answeredPersonnels.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: null,
+                answers: null,
+            },
+        });
 
         pipeline.push({
             $lookup: {
@@ -325,15 +355,15 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
-                        <th>Retail Segment</th>
-                        <th>Outlet</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
                         <th>Branch</th>
                         <th>Assigned By</th>
+                        <th>Position</th>
                         <th>Assigned To</th>
                         <th>Title</th>
                         <th>Status</th>
                         <th>Count Answered</th>
-                        <th>Count Branches</th>
                         <th>Count All</th>
                         <th>Due Date</th>
                     </tr>
@@ -348,12 +378,12 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment && item.retailSegment.length ? item.retailSegment.join(', ') : ''}</td>
                                 <td>${item.outlet && item.outlet.length ? item.outlet.join(', ') : ''}</td>
                                 <td>${item.branch && item.branch.length ? item.branch.join(', ') : ''}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position.name[currentLanguage]}</td>
                                 <td>${item.assignedTo && item.assignedTo.length ? item.assignedTo.join(', ') : ''}</td>
                                 <td>${item.title[currentLanguage]}</td>
                                 <td>${item.status}</td>
                                 <td>${item.countAnswered}</td>
-                                <td>${item.countBranches}</td>
                                 <td>${item.countAll}</td>
                                 <td>${moment(item.dueDate).format('DD MMMM, YYYY')}</td>
                             </tr>

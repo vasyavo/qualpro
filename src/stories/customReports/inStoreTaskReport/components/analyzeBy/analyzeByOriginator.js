@@ -1,17 +1,46 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$createdBy.user._id',
+            _id: {
+                originator: '$createdBy.user._id',
+                status: '$status',
+            },
             personnel: { $first: '$createdBy.user' },
             count: { $sum: 1 },
         },
     });
 
     pipeline.push({
+        $sort: {
+            '_id.status': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$personnel._id',
+            personnel: { $first: '$personnel' },
+            data: {
+                $push: {
+                    count: '$count',
+                    status: '$_id.status',
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
-            data: { $push: '$count' },
+            data: { $push: '$data' },
             labels: { $push: '$personnel' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            datasets: [{ data: '$data' }],
+            labels: 1,
         },
     });
 };

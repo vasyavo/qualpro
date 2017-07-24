@@ -35,7 +35,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
@@ -154,6 +154,32 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'positions',
+                    localField: 'createdBy.user.position',
+                    foreignField: '_id',
+                    as: 'createdBy.user.position',
+                },
+            },
+            {
+                $addFields: {
+                    'createdBy.user.position': {
+                        $let: {
+                            vars: {
+                                position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                            },
+                            in: {
+                                _id: '$$position._id',
+                                name: {
+                                    en: '$$position.name.en',
+                                    ar: '$$position.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             {
                 $lookup: {
                     from: 'branches',
@@ -405,7 +431,8 @@ module.exports = (req, res, next) => {
                         <th>Trade channel</th>
                         <th>Customer</th>
                         <th>Branch</th>
-                        <th>Employee name</th>
+                        <th>Publisher</th>
+                        <th>Position</th>
                         <th>Description</th>
                         <th>Comment</th>
                     </tr>
@@ -421,6 +448,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
                                 <td>${emojiStrip(item.description[currentLanguage])}</td>
                                 <td>${emojiStrip(item.additionalComment[currentLanguage])}</td>
                             </tr>

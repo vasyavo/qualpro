@@ -5,7 +5,10 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $group: {
-            _id: '$country',
+            _id: {
+                country: '$country',
+                status: '$status',
+            },
             count: { $sum: 1 },
         },
     });
@@ -13,7 +16,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $lookup: {
             from: 'domains',
-            localField: '_id',
+            localField: '_id.country',
             foreignField: '_id',
             as: 'country',
         },
@@ -37,8 +40,8 @@ module.exports = (pipeline) => {
                     in: {
                         _id: '$$country._id',
                         name: {
-                            en: { $concat: ['$$country.name.en', ' ', '$$country.name.en'] },
-                            ar: { $concat: ['$$country.name.ar', ' ', '$$country.name.ar'] },
+                            en: '$$country.name.en',
+                            ar: '$$country.name.ar',
                         },
                     },
                 },
@@ -47,10 +50,36 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            '_id.status': 1,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$country._id',
+            country: { $first: '$country' },
+            data: {
+                $push: {
+                    count: '$count',
+                    status: '$_id.status',
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
-            data: { $push: '$count' },
+            data: { $push: '$data' },
             labels: { $push: '$country' },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            datasets: [{ data: '$data' }],
+            labels: 1,
         },
     });
 };

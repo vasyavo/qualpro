@@ -403,7 +403,19 @@
         enterCorrectValue: {
             en: 'Enter correct value',
             ar: '' // todo
-        }
+        },
+        categoryRequired: {
+            en: 'Category is required',
+            ar: '', // todo
+        },
+        brandRequired: {
+            en: 'Brand is required',
+            ar: '', // todo
+        },
+        originRequired: {
+            en: 'Origin is required',
+            ar: '', // todo
+        },
     };
 
     if (typeof window === 'object' && this === window) {

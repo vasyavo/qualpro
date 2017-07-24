@@ -33,7 +33,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const analyzeByParam = query.analyzeBy;
@@ -43,6 +43,12 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.POSITION,
         ];
         const pipeline = [];
+
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -181,9 +187,19 @@ module.exports = (req, res, next) => {
             response = {
                 barChart: {
                     labels: response.labels,
-                    datasets: [{
-                        data: response.data,
-                    }],
+                    datasets: response.datasets.map(dataset => {
+                        return {
+                            data: dataset.data.map(items => {
+                                const thisItem = {};
+
+                                items.forEach(item => {
+                                    thisItem[item.status] = item.count;
+                                });
+
+                                return thisItem;
+                            }),
+                        };
+                    }),
                 },
             };
         } else {

@@ -37,12 +37,18 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            'domain.name': 1,
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$domain.name' },
+            labels: { $push: '$domain' },
         },
     });
 };

@@ -32,7 +32,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
@@ -41,6 +41,18 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.POSITION,
         ];
         const pipeline = [];
+
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -383,7 +395,7 @@ module.exports = (req, res, next) => {
                 objectiveType: 1,
                 createdByPersonnels: 1,
                 positions: {
-                    _id: 1,
+                    _ids: 1,
                     name: 1,
                 },
                 countries: {
@@ -459,6 +471,36 @@ module.exports = (req, res, next) => {
             assignedToPersonnels: [],
         };
 
+        const objectiveTypes = [{
+            _id: 'weekly',
+            name: {
+                en: 'Weekly Company Objective',
+                ar: '',
+            },
+        }, {
+            _id: 'individual',
+            name: {
+                en: 'Individual Objective',
+                ar: '',
+            },
+        }, {
+            _id: 'monthly',
+            name: {
+                en: 'Monthly Company Objective',
+                ar: '',
+            },
+        }, {
+            _id: 'country',
+            name: {
+                en: 'Country Objective',
+                ar: '',
+            },
+        }];
+
+        response.objectiveType = objectiveTypes.filter((item) => {
+            return response.objectiveType.indexOf(item._id) > -1;
+        });
+
         response.analyzeBy = [
             {
                 name: {
@@ -501,6 +543,13 @@ module.exports = (req, res, next) => {
                     ar: '',
                 },
                 value: 'assignee',
+            },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
             },
         ];
 

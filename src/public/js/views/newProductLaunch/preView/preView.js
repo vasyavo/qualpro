@@ -73,14 +73,14 @@ define([
                     view.find('#price').html(data.price);
                     view.find('#additionalComment').html(data.additionalComment[currentLanguage]);
                     view.find('#distributor').html(data.distributor[currentLanguage]);
+                    view.find('#origin').html(response.origin.name[currentLanguage]);
+                    view.find('#brand').html(response.brand.name[currentLanguage]);
+                    view.find('#category').html(response.category.name[currentLanguage]);
 
                     var displayTypeString = response.displayType.map(function (item) {
-                        return item.name[App.currentUser.currentLanguage];
+                        return item.name[currentLanguage];
                     }).join(', ');
                     view.find('#displayType').html(displayTypeString);
-
-                    var originString = response.origin.name[currentLanguage];
-                    view.find('#origin').html(originString);
 
                     that.editView.$el.dialog('close').dialog('destroy').remove();
 
@@ -145,6 +145,11 @@ define([
 
         render: function () {
             var jsonModel = this.model.toJSON();
+
+            if (!jsonModel.parsed) {
+                jsonModel = this.model.parse(jsonModel);
+            }
+
             var formString;
             var self = this;
             var currentConfig;

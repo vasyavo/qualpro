@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo', 'questionnaire',
         ];
         const pipeline = [];
 
@@ -102,16 +102,9 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+        if (queryFilter.questionnaire && queryFilter.questionnaire.length) {
             $generalMatch.$and.push({
-                $or: [
-                    {
-                        'title.en': { $in: queryFilter.questionnaireTitle },
-                    },
-                    {
-                        'title.ar': { $in: queryFilter.questionnaireTitle },
-                    },
-                ],
+                _id: { $in: queryFilter.questionnaire },
             });
         }
 
@@ -178,15 +171,52 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'questionnaryAnswer',
+                localField: '_id',
+                foreignField: 'questionnaryId',
+                as: 'answers',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: {
+                    $map: {
+                        input: '$answers',
+                        as: 'item',
+                        in: '$$item.personnelId',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'answeredPersonnels',
+                foreignField: '_id',
+                as: 'answeredPersonnels',
+            },
+        });
+
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
+                    'answeredPersonnels.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                answeredPersonnels: null,
+                answers: null,
+            },
+        });
 
         pipeline.push({
             $group: {

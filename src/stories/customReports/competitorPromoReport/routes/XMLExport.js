@@ -9,6 +9,7 @@ const CompetitorPromotionModel = require('./../../../../types/competitorPromotio
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -35,7 +36,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
@@ -126,6 +127,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
+                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 createdBy: {
                     user: {
                         $let: {
@@ -163,6 +165,15 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
             },
         });
 
@@ -251,6 +262,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 description: 1,
+                promotion: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
@@ -333,6 +345,17 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                brand: {
+                    $let: {
+                        vars: {
+                            brand: { $arrayElemAt: ['$brand', 0] },
+                        },
+                        in: {
+                            _id: '$$brand._id',
+                            name: '$$brand.name',
+                        },
+                    },
+                },
                 origin: {
                     $let: {
                         vars: {
@@ -383,18 +406,23 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 description: 1,
+                promotion: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
                 dateEnd: 1,
                 price: 1,
                 category: 1,
+                brand: 1,
                 origin: 1,
                 displayType: 1,
                 createdBy: 1,
                 country: 1,
                 region: 1,
                 subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
                 location: {
                     $concat: [
                         '$country.name.en',
@@ -444,6 +472,12 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
+                        <th>Trade channel</th>
+                        <th>Customer</th>
+                        <th>Branch</th>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Brand</th>
                         <th>Product</th>
                         <th>Promotion (description)</th>
                         <th>Weight + metric type</th>
@@ -457,19 +491,31 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const currentCountry = currency.defaultData.find((country) => {
+                            return country._id.toString() === item.country._id.toString();
+                        });
+                        const dateStart = item.dateStart ? moment(item.dateStart).format('DD MMMM, YYYY') : 'N/A';
+                        const dateEnd = item.dateEnd ? moment(item.dateEnd).format('DD MMMM, YYYY') : 'N/A';
+                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
             return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
                                 <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
+                                <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
-                                <td>${item.description[currentLanguage]}</td>
+                                <td>${item.promotion}</td>
                                 <td>${item.packing}</td>
-                                <td>${moment(item.expiry).format('MMMM, YYYY')}</td>
-                                <td>${moment(item.dateStart).format('MMMM, YYYY')}</td>
-                                <td>${moment(item.dateEnd).format('MMMM, YYYY')}</td>
+                                <td>${moment(item.expiry).format('DD MMMM, YYYY')}</td>
+                                <td>${dateStart}</td>
+                                <td>${dateEnd}</td>
                                 <td>${item.origin.name ? item.origin.name[currentLanguage] : null}</td>
-                                <td>${item.price}</td>
+                                <td>${price}</td>
                                 <td>${item.displayType[currentLanguage]}</td>
                             </tr>
                         `;

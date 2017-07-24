@@ -9,6 +9,7 @@ const QuestionnaryModel = require('./../../../../types/questionnaries/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -34,7 +35,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
@@ -43,7 +44,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo',
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'assignedTo', 'questionnaire',
         ];
         const pipeline = [];
 
@@ -86,14 +87,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
-            $generalMatch.$and.push({
-                personnels: {
-                    $in: _.union(queryFilter.assignedTo, personnel._id),
-                },
-            });
-        }
-
         if (queryFilter.status && queryFilter.status.length) {
             $generalMatch.$and.push({
                 status: {
@@ -102,16 +95,9 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.questionnaireTitle && queryFilter.questionnaireTitle.length) {
+        if (queryFilter.questionnaire && queryFilter.questionnaire.length) {
             $generalMatch.$and.push({
-                $or: [
-                    {
-                        'title.en': { $in: queryFilter.questionnaireTitle },
-                    },
-                    {
-                        'title.ar': { $in: queryFilter.questionnaireTitle },
-                    },
-                ],
+                _id: { $in: queryFilter.questionnaire },
             });
         }
 
@@ -177,16 +163,6 @@ module.exports = (req, res, next) => {
                 },
             },
         });
-
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
 
         pipeline.push({
             $lookup: {
@@ -279,6 +255,55 @@ module.exports = (req, res, next) => {
             $unwind: '$answer',
         });
 
+        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
+            pipeline.push({
+                $match: {
+                    'answer.personnel': {
+                        $in: _.union(queryFilter.assignedTo, personnel._id),
+                    },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'answer.personnel',
+                foreignField: '_id',
+                as: 'personnel',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                personnel: {
+                    $let: {
+                        vars: {
+                            personnel: { $arrayElemAt: ['$personnel', 0] },
+                        },
+                        in: {
+                            _id: '$$personnel._id',
+                            name: {
+                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
+                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
+                            },
+                            position: '$$personnel.position',
+                        },
+                    },
+                },
+            },
+        });
+
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $match: {
+                    'personnel.position': {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $group: {
                 _id: null,
@@ -310,9 +335,9 @@ module.exports = (req, res, next) => {
                 retailSegment: '$records.answer.retailSegment',
                 outlet: '$records.answer.outlet',
                 branch: '$records.answer.branch',
-                personnel: '$records.answer.personnel',
+                personnel: '$records.personnel',
                 question: '$records.answer.question',
-                answer: '$records.answer.answerText',
+                answer: { $arrayElemAt: ['$records.answer.answerText', 0] },
             },
         });
 
@@ -372,101 +397,45 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'personnel',
-                foreignField: '_id',
-                as: 'personnel',
+            $project: {
+                total: 1,
+                title: 1,
+                location: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                            region: { $arrayElemAt: ['$region', 0] },
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            $concat: [
+                                '$$country.name.en',
+                                ' -> ',
+                                '$$region.name.en',
+                                ' -> ',
+                                '$$subRegion.name.en',
+                                ' -> ',
+                                '$$retailSegment.name.en',
+                                ' -> ',
+                                '$$outlet.name.en',
+                                ' -> ',
+                                '$$branch.name.en',
+                            ],
+                        },
+                    },
+                },
+                personnel: 1,
+                question: 1,
+                answer: 1,
             },
         });
 
         pipeline.push({
-            $project: {
-                total: 1,
-                title: 1,
-                country: {
-                    $let: {
-                        vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                        },
-                        in: {
-                            _id: '$$country._id',
-                            name: '$$country.name',
-                        },
-                    },
-                },
-                region: {
-                    $let: {
-                        vars: {
-                            region: { $arrayElemAt: ['$region', 0] },
-                        },
-                        in: {
-                            _id: '$$region._id',
-                            name: '$$region.name',
-                        },
-                    },
-                },
-                subRegion: {
-                    $let: {
-                        vars: {
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                        },
-                        in: {
-                            _id: '$$subRegion._id',
-                            name: '$$subRegion.name',
-                        },
-                    },
-                },
-                retailSegment: {
-                    $let: {
-                        vars: {
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                        },
-                        in: {
-                            _id: '$$retailSegment._id',
-                            name: '$$retailSegment.name',
-                        },
-                    },
-                },
-                outlet: {
-                    $let: {
-                        vars: {
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
-                        },
-                        in: {
-                            _id: '$$outlet._id',
-                            name: '$$outlet.name',
-                        },
-                    },
-                },
-                branch: {
-                    $let: {
-                        vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
-                        },
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
-                        },
-                    },
-                },
-                personnel: {
-                    $let: {
-                        vars: {
-                            personnel: { $arrayElemAt: ['$personnel', 0] },
-                        },
-                        in: {
-                            _id: '$$personnel._id',
-                            name: {
-                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
-                            },
-                            position: '$$personnel.position',
-                        },
-                    },
-                },
-                question: '$records.answer.question',
-                answer: '$records.answer.answerText',
+            $sort: {
+                location: 1,
             },
         });
 
@@ -490,6 +459,42 @@ module.exports = (req, res, next) => {
                             _id: '$$position._id',
                             name: '$$position.name',
                         },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: {
+                    questionnaireId: '$_id',
+                    location: '$location',
+                    personnel: '$personnel._id',
+                },
+                total: { $first: '$total' },
+                title: { $first: '$title' },
+                personnel: { $first: '$personnel' },
+                position: { $first: '$position' },
+                items: {
+                    $push: {
+                        question: '$question',
+                        answer: '$answer',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: '$_id.questionnaireId',
+                total: { $first: '$total' },
+                title: { $first: '$title' },
+                respondents: {
+                    $push: {
+                        personnel: '$personnel',
+                        position: '$position',
+                        location: '$_id.location',
+                        items: '$items',
                     },
                 },
             },
@@ -524,6 +529,17 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(dataItem => {
+            dataItem.respondents.forEach(respondent => {
+                respondent.items.forEach(item => {
+                    item.answer = {
+                        en: sanitizeHtml(item.answer.en),
+                        ar: sanitizeHtml(item.answer.ar),
+                    };
+                });
+            });
+        });
 
         res.status(200).send(response);
     });

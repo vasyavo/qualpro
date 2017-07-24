@@ -7,8 +7,10 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
+const getMedian = require('./../../../../utils/getMedian');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -33,7 +35,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
@@ -181,11 +183,13 @@ module.exports = (req, res, next) => {
                     branch: '$branch',
                     brand: '$items.brand',
                     size: '$items.size',
+                    variant: '$variant',
                     category: '$category',
                 },
                 min: { $min: '$items.price' },
                 max: { $max: '$items.price' },
                 avg: { $avg: '$items.price' },
+                arrayOfPrice: { $push: '$items.price' },
                 country: { $first: '$country' },
                 region: { $first: '$region' },
                 subRegion: { $first: '$subRegion' },
@@ -219,10 +223,12 @@ module.exports = (req, res, next) => {
                 branch: '$setData._id.branch',
                 brand: '$setData._id.brand',
                 size: '$setData._id.size',
+                variant: '$setData._id.variant',
                 category: '$setData._id.category',
                 min: '$setData.min',
                 max: '$setData.max',
                 avg: '$setData.avg',
+                arrayOfPrice: '$setData.arrayOfPrice',
                 country: '$setData.country',
                 region: '$setData.region',
                 subRegion: '$setData.subRegion',
@@ -269,6 +275,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'domains',
                 localField: 'country',
                 foreignField: '_id',
@@ -309,8 +324,10 @@ module.exports = (req, res, next) => {
                 min: 1,
                 max: 1,
                 avg: 1,
+                arrayOfPrice: 1,
                 total: 1,
                 size: '$size',
+                country: { $arrayElemAt: ['$country', 0] },
                 branch: {
                     $let: {
                         vars: {
@@ -341,6 +358,17 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$category._id',
                             name: '$$category.name',
+                        },
+                    },
+                },
+                variant: {
+                    $let: {
+                        vars: {
+                            variant: { $arrayElemAt: ['$variant', 0] },
+                        },
+                        in: {
+                            _id: '$$variant._id',
+                            name: '$$variant.name',
                         },
                     },
                 },
@@ -412,6 +440,17 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach((item) => {
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            item.med = getMedian(item.arrayOfPrice);
+            item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
+            item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
+            item.max = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
+            item.med = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
+        });
 
         res.status(200).send(response);
     });

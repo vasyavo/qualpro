@@ -9,6 +9,7 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -33,7 +34,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const page = query.page || 1;
@@ -454,10 +455,16 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $addFields: {
                 attachments: {
-                    _id: 1,
-                    originalName: 1,
-                    contentType: 1,
-                    preview: 1,
+                    $map: {
+                        input: '$attachments',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            originalName: '$$item.originalName',
+                            contentType: '$$item.contentType',
+                            preview: '$$item.preview',
+                        },
+                    },
                 },
             },
         });
@@ -491,6 +498,13 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.description = {
+                en: sanitizeHtml(item.description.en),
+                ar: sanitizeHtml(item.description.ar),
+            };
+        });
 
         res.status(200).send(response);
     });

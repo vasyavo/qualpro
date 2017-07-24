@@ -4,6 +4,9 @@ define(function (require) {
     var Backbone = require('backbone');
     var Populate = require('populate');
     var DisplayTypeCollection = require('collections/displayType/collection');
+    var CategoryCollection = require('collections/category/collection');
+    var BrandCollection = require('collections/brand/collection');
+    var OriginCollection = require('collections/origin/collection');
     var ERROR_MESSAGES = require('constants/errorMessages');
     var Template = require('text!templates/competitorPromotion/edit.html');
 
@@ -62,11 +65,26 @@ define(function (require) {
                                 dateStart: startDate ? moment.utc(startDate, 'DD.MM.YYYY').startOf('day').toDate() : '',
                                 dateEnd: endDate ? moment.utc(endDate, 'DD.MM.YYYY').endOf('day').toDate() : '',
                                 displayType: that.$el.find('#displayTypeDd').attr('data-id').split(','),
+                                category: that.$el.find('#categoryDd').attr('data-id').split(','),
+                                brand: that.$el.find('#brandDd').attr('data-id'),
+                                origin: that.$el.find('#originDd').attr('data-id').split(','),
                                 promotion: ui.description.val(),
                             };
 
                             if (data.displayType) {
                                 data.displayType = data.displayType.filter(function (item) {
+                                    return item;
+                                });
+                            }
+
+                            if (data.category) {
+                                data.category = data.category.filter(function (item) {
+                                    return item;
+                                });
+                            }
+
+                            if (data.origin) {
+                                data.origin = data.origin.filter(function (item) {
                                     return item;
                                 });
                             }
@@ -109,6 +127,27 @@ define(function (require) {
                             if (!data.promotion) {
                                 App.renderErrors([
                                     ERROR_MESSAGES.enterDescription[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.category.length) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.categoryRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.brand) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.brandRequired[currentLanguage]
+                                ]);
+                                valid = false;
+                            }
+
+                            if (!data.origin.length) {
+                                App.renderErrors([
+                                    ERROR_MESSAGES.originRequired[currentLanguage]
                                 ]);
                                 valid = false;
                             }
@@ -172,6 +211,61 @@ define(function (require) {
                     displayModel: defaultDisplayTypes,
                     collection  : that.displayTypeCollection.toJSON(),
                     multiSelect: true,
+                    forPosition : true
+                });
+            }, this);
+
+            this.categoryCollection = new CategoryCollection();
+            this.categoryCollection.on('reset', function () {
+                const defaultCategories = model.category.map(function (item) {
+                    return that.categoryCollection.findWhere({_id : item._id}).toJSON();
+                });
+
+                Populate.inputDropDown({
+                    selector    : '#categoryDd',
+                    context     : that,
+                    contentType : 'category',
+                    displayText : 'category',
+                    displayModel: defaultCategories,
+                    collection  : that.categoryCollection.toJSON(),
+                    forPosition : true
+                });
+            }, this);
+
+            this.brandCollection = new BrandCollection({
+                count: 250,
+                fetch: true,
+            });
+            this.brandCollection.on('reset', function () {
+                var brandModel = that.brandCollection.findWhere({_id : model.brand._id});
+                var defaultBrands = brandModel ? [brandModel.toJSON()] : [];
+
+                Populate.inputDropDown({
+                    selector    : '#brandDd',
+                    context     : that,
+                    contentType : 'brand',
+                    displayText : 'brand',
+                    displayModel: defaultBrands,
+                    collection  : that.brandCollection.toJSON(),
+                    forPosition : true
+                });
+            }, this);
+
+            this.originCollection = new OriginCollection({
+                count: 250,
+            });
+            this.originCollection.on('reset', function () {
+                const defaultOrigins = model.origin.map(function (item) {
+                    return that.originCollection.findWhere({_id : item._id}).toJSON();
+                });
+
+                Populate.inputDropDown({
+                    selector    : '#originDd',
+                    context     : that,
+                    contentType : 'origin',
+                    displayText : 'origin',
+                    displayModel: defaultOrigins,
+                    collection  : that.originCollection.toJSON(),
                     forPosition : true
                 });
             }, this);

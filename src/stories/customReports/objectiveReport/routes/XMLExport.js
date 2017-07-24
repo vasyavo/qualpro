@@ -9,6 +9,7 @@ const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const emojiStrip = require('emoji-strip');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -34,7 +35,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
@@ -43,6 +44,18 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.POSITION,
         ];
         const pipeline = [];
+
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         currentLanguage = personnel.currentLanguage || 'en';
 
@@ -235,7 +248,10 @@ module.exports = (req, res, next) => {
                 title: '$title',
                 createdBy: '$createdBy',
                 priority: '$priority',
+                description: '$description',
                 status: '$status',
+                dateStart: '$dateStart',
+                dateEnd: '$dateEnd',
                 objectiveType: '$objectiveType',
                 form: '$form',
                 country: {
@@ -368,9 +384,14 @@ module.exports = (req, res, next) => {
                         <th>Objective Type</th>
                         <th>Assigned To</th>
                         <th>Assigned By</th>
+                        <th>Position</th>
+                        <th>Description</th>
                         <th>Form Type</th>
                         <th>Status</th>
                         <th>Priority</th>
+                        <th>Creation date</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -386,10 +407,15 @@ module.exports = (req, res, next) => {
                                 <td>${item.title[currentLanguage]}</td>
                                 <td>${item.objectiveType}</td>
                                 <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position.name[currentLanguage]}</td>
+                                <td>${emojiStrip(item.description[currentLanguage])}</td>
                                 <td>${item.form ? item.form.contentType : ''}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>
+                                <td>${moment(item.createdBy.date).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
                             </tr>
                         `;
         }).join('')}

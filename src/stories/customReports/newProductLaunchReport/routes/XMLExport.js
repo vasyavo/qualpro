@@ -1,5 +1,5 @@
+const ObjectId = require('bson-objectid');
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
-const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -9,9 +9,9 @@ const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
-const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
@@ -31,19 +31,12 @@ module.exports = (req, res, next) => {
             },
         },
     };
-
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
-        const filters = [
-            CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-        ];
-        const pipeline = [];
 
         currentLanguage = personnel.currentLanguage || 'en';
 
@@ -60,17 +53,43 @@ module.exports = (req, res, next) => {
             }
         }
 
-        filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0]) {
+        // map set String ID to set ObjectID
+        [
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL,
+        ].forEach(filterName => {
+            if (queryFilter[filterName] && queryFilter[filterName].length) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        const pipeline = [];
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, 'packing'], queryFilter, personnel);
+        const $locationMatch = generalFiler([
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+        ], queryFilter);
+
+        if ($locationMatch.$and.length) {
+            pipeline.push({ $match: $locationMatch });
+        }
+
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.DISPLAY_TYPE,
+            'packing',
+        ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
@@ -80,20 +99,90 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
-            $generalMatch.$and.push({
-                'brand.name': {
-                    $in: queryFilter[CONTENT_TYPES.BRAND],
-                },
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.CATEGORY].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ category: { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({
+                    $or: [
+                        { 'category_name.en': { $in: setString } },
+                        { 'category_name.ar': { $in: setString } },
+                    ],
+                });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.BRAND].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
+            });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'brand._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'brand.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
-            $generalMatch.$and.push({
-                'variant.name': {
-                    $in: queryFilter[CONTENT_TYPES.VARIANT],
-                },
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.VARIANT].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'variant._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'variant.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter.distributor && queryFilter.distributor.length) {
@@ -113,24 +202,16 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -144,27 +225,27 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push({
+            $addFields: {
+                shelfLifePeriod: {
+                    $trunc: {
+                        $divide: [
+                            {
+                                $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
+                            },
+                            86400000,
+                        ],
+                    },
+                },
+            },
+        });
+
         if (queryFilter.shelfLife) {
             queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
 
             pipeline.push({
-                $addFields: {
-                    shelfLifePeriod: {
-                        $trunc: {
-                            $divide: [
-                                {
-                                    $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
-                                },
-                                86400000,
-                            ],
-                        },
-                    },
-                },
-            });
-
-            pipeline.push({
                 $match: {
-                    shelfLifePeriod: queryFilter.shelfLife,
+                    shelfLifePeriod: { $gte: queryFilter.shelfLife },
                 },
             });
         }
@@ -224,8 +305,9 @@ module.exports = (req, res, next) => {
                 brand: 1,
                 category: 1,
                 variant: 1,
-                packing: 1,
+                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 displayType: 1,
+                additionalComment: 1,
                 price: 1,
                 origin: 1,
                 shelfLifeStart: 1,
@@ -328,69 +410,16 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                location: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    country: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$country.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    region: { $arrayElemAt: ['$region', 0] },
-                                },
-                                in: '$$region.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                                },
-                                in: '$$subRegion.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                                },
-                                in: '$$retailSegment.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    outlet: { $arrayElemAt: ['$outlet', 0] },
-                                },
-                                in: '$$outlet.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    branch: { $arrayElemAt: ['$branch', 0] },
-                                },
-                                in: '$$branch.name.en',
-                            },
-                        },
-                    ],
-                },
+                additionalComment: 1,
                 country: {
                     $let: {
                         vars: {
                             country: { $arrayElemAt: ['$country', 0] },
                         },
-                        in: '$$country.name',
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
                     },
                 },
                 region: {
@@ -513,6 +542,7 @@ module.exports = (req, res, next) => {
                         <th>Customer</th>
                         <th>Branch</th>
                         <th>Publisher</th>
+                        <th>Position</th>
                         <th>Brand</th>
                         <th>Product</th>
                         <th>Variant</th>
@@ -523,29 +553,36 @@ module.exports = (req, res, next) => {
                         <th>Shelf Life Start</th>
                         <th>Shelf Life End</th>
                         <th>Distributor</th>
+                        <th>Comment</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const currentCountry = currency.defaultData.find((country) => {
+                            return country._id.toString() === item.country._id.toString();
+                        });
+                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
                         return `
                             <tr>
-                                <td>${item.country[currentLanguage]}</td>
+                                <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region[currentLanguage]}</td>
                                 <td>${item.subRegion[currentLanguage]}</td>
                                 <td>${item.retailSegment[currentLanguage]}</td>
                                 <td>${item.outlet[currentLanguage]}</td>
                                 <td>${item.branch[currentLanguage]}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position[currentLanguage]}</td>
                                 <td>${item.brand.name}</td>
                                 <td>${item.category ? item.category[currentLanguage] : ''}</td>
                                 <td>${item.variant.name}</td>
                                 <td>${item.packing}</td>
                                 <td>${item.displayType[currentLanguage].join(', ')}</td>
-                                <td>${item.price}</td>
+                                <td>${price}</td>
                                 <td>${item.origin ? item.origin[currentLanguage] : ''}</td>
                                 <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${item.distributor[currentLanguage]}</td>
+                                <td>${item.additionalComment[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}

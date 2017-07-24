@@ -33,16 +33,22 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const analyzeByParam = query.analyzeBy;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'createdByPersonnel',
         ];
         const pipeline = [];
+
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -114,6 +120,16 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -181,9 +197,20 @@ module.exports = (req, res, next) => {
             response = {
                 barChart: {
                     labels: response.labels,
-                    datasets: [{
-                        data: response.data,
-                    }],
+                    datasets: response.datasets.map(dataset => {
+                        return {
+                            data: dataset.data.map(items => {
+                                const thisItem = {};
+                                let total = 0;
+                                items.forEach(item => {
+                                    total += item.count;
+                                    thisItem[item.status] = item.count;
+                                });
+                                thisItem.total = total;
+                                return thisItem;
+                            }),
+                        };
+                    }),
                 },
             };
         } else {

@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const striptags = require('striptags');
-const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -37,7 +35,7 @@ module.exports = (req, res, next) => {
     };
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const page = query.page || 1;
@@ -74,7 +72,7 @@ module.exports = (req, res, next) => {
 
         locationFiler(pipeline, personnel, queryFilter);
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status'], queryFilter, personnel);
+        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status', 'promotionType.en'], queryFilter, personnel);
 
         if (queryFilter.publisher && queryFilter.publisher.length) {
             $generalMatch.$and.push({
@@ -115,6 +113,10 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$user._id',
+                                name: {
+                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                },
                                 position: '$$user.position',
                             },
                         },
@@ -226,6 +228,16 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': {
+                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                    },
                 },
             });
         }
@@ -452,12 +464,6 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $addFields: {
-                ppt: { $divide: ['$ppt', 100] },
-            },
-        });
-
-        pipeline.push({
             $group: {
                 _id: null,
                 records: { $push: '$$ROOT' },
@@ -600,7 +606,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
-            item.ppt = parseFloat(item.ppt / currentCountry.currencyInUsd).toFixed(2);
+            item.ppt = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
             item.promotionType = {
                 en: sanitizeHtml(item.promotionType.en),
                 ar: sanitizeHtml(item.promotionType.ar),

@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const filters = [
@@ -43,6 +43,18 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.POSITION,
         ];
         const pipeline = [];
+
+        pipeline.push({
+            $match: {
+                archived: false,
+            },
+        });
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         currentLanguage = personnel.currentLanguage || 'en';
 
@@ -366,6 +378,7 @@ module.exports = (req, res, next) => {
                         <th>Title</th>
                         <th>Assigned To</th>
                         <th>Assigned By</th>
+                        <th>Position</th>
                         <th>Form Type</th>
                         <th>Status</th>
                         <th>Priority</th>
@@ -383,7 +396,8 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : ''}</td>
                                 <td>${item.title[currentLanguage]}</td>
                                 <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position.name[currentLanguage]}</td>
                                 <td>${item.form.contentType}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>

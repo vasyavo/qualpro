@@ -124,6 +124,59 @@ module.exports = function() {
             res.status(200).send(jsonModel);
         });
     };
+    
+
+    this.getFileById = function (req, res, next) {
+        var id = req.params.id;
+        var bucket = req.params.bucket;
+        var projection = {
+            _id         : 1,
+            name        : 1,
+            originalName: 1,
+            extension   : 1,
+            contentType : 1,
+            preview     : 1
+        };
+
+        let originalName;
+
+        async.waterfall([
+            (waterfallCb) => {
+                FileModel.findById(id, projection, function (err, fileModel) {
+                    var error;
+
+                    if (err) {
+                        waterfallCb(err);
+                    }
+
+                    if (!fileModel) {
+                        error = new Error('File model not found');
+                        error.status = 404;
+                        waterfallCb(error);
+                    }
+
+                    waterfallCb(null, fileModel.toJSON());
+
+                });
+            }, (fileModel, waterfallCb) => {
+                fileUploader.getFile(fileModel.name).then(function (file) {
+                    originalName = fileModel.originalName;
+                    waterfallCb(null, file);
+                }).catch(function (err) {
+                    waterfallCb(err);
+                });
+            },
+        ], (err, result) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.setHeader('Content-Type', result.ContentType);
+            res.setHeader('Content-Length', result.ContentLength);
+            res.setHeader('Content-Disposition', `attachment;filename=${originalName}`);
+            res.status(200).send(result.Body);
+        });
+    };
 
     this.deleteFile = function (fileName, bucket, callback) {
         fileUploader.removeImage(fileName, bucket, function (err) {

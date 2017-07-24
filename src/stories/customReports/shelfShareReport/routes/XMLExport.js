@@ -35,7 +35,7 @@ module.exports = (req, res, next) => {
     let currentLanguage;
 
     const queryRun = (personnel, callback) => {
-        const query = req.query;
+        const query = req.body;
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const filters = [
@@ -133,6 +133,12 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 category: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
                 brands: 1,
                 createdBy: {
                     user: {
@@ -142,6 +148,8 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$user._id',
+                                lastName: '$$user.lastName',
+                                firstName: '$$user.firstName',
                                 position: '$$user.position',
                             },
                         },
@@ -176,10 +184,44 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'createdBy.user.position',
+            },
+        }, {
+            $addFields: {
+                'createdBy.user.position': {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: {
+                                en: '$$position.name.en',
+                                ar: '$$position.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: {
                     category: '$category',
                     brand: '$brands.brand',
+                    country: '$country',
+                    region: '$region',
+                    subRegion: '$subRegion',
+                    retailSegment: '$retailSegment',
+                    outlet: '$outlet',
+                    branch: '$branch',
+                    createdBy: '$createdBy',
+
                 },
                 maxLength: { $max: '$brands.length' },
                 minLength: { $min: '$brands.length' },
@@ -202,6 +244,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
+                createdBy: 1,
                 maxLength: 1,
                 minLength: 1,
                 avgLength: 1,
@@ -221,11 +264,20 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
-                _id: '$_id.category',
+                _id: {
+                    category: '$_id.category',
+                    country: '$_id.country',
+                    region: '$_id.region',
+                    subRegion: '$_id.subRegion',
+                    retailSegment: '$_id.retailSegment',
+                    outlet: '$_id.outlet',
+                    branch: '$_id.branch',
+                },
                 brands: {
                     $push: {
                         _id: '$_id.brand',
                         name: '$name',
+                        createdBy: '$_id.createdBy',
                         maxLength: '$maxLength',
                         minLength: '$minLength',
                         avgLength: '$avgLength',
@@ -234,12 +286,9 @@ module.exports = (req, res, next) => {
                         avgPercent: '$avgPercent',
                     },
                 },
-                totalMinLength: { $min: '$minLength' },
-                totalMaxLength: { $max: '$maxLength' },
-                totalAvgLength: { $avg: '$avgLength' },
-                totalMinPercent: { $min: '$minPercent' },
-                totalMaxPercent: { $max: '$maxPercent' },
-                totalAvgPercent: { $avg: '$avgPercent' },
+                totalMinLength: { $sum: '$minLength' },
+                totalMaxLength: { $sum: '$maxLength' },
+                totalAvgLength: { $sum: '$avgLength' },
             },
         });
 
@@ -250,18 +299,69 @@ module.exports = (req, res, next) => {
                 totalMinLength: 1,
                 totalMaxLength: 1,
                 totalAvgLength: 1,
-                totalMinPercent: 1,
-                totalMaxPercent: 1,
-                totalAvgPercent: 1,
             },
         });
 
         pipeline.push({
             $lookup: {
                 from: 'categories',
-                localField: '_id',
+                localField: '_id.category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: '_id.country',
+                foreignField: '_id',
+                as: 'country',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: '_id.region',
+                foreignField: '_id',
+                as: 'region',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: '_id.subRegion',
+                foreignField: '_id',
+                as: 'subRegion',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'retailSegments',
+                localField: '_id.retailSegment',
+                foreignField: '_id',
+                as: 'retailSegment',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'outlets',
+                localField: '_id.outlet',
+                foreignField: '_id',
+                as: 'outlet',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: '_id.branch',
+                foreignField: '_id',
+                as: 'branch',
             },
         });
 
@@ -272,9 +372,72 @@ module.exports = (req, res, next) => {
                 totalMinLength: 1,
                 totalMaxLength: 1,
                 totalAvgLength: 1,
-                totalMinPercent: 1,
-                totalMaxPercent: 1,
-                totalAvgPercent: 1,
+                country: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
+                    },
+                },
+                region: {
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$region', 0] },
+                        },
+                        in: {
+                            _id: '$$region._id',
+                            name: '$$region.name',
+                        },
+                    },
+                },
+                subRegion: {
+                    $let: {
+                        vars: {
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                        },
+                        in: {
+                            _id: '$$subRegion._id',
+                            name: '$$subRegion.name',
+                        },
+                    },
+                },
+                retailSegment: {
+                    $let: {
+                        vars: {
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                        },
+                        in: {
+                            _id: '$$retailSegment._id',
+                            name: '$$retailSegment.name',
+                        },
+                    },
+                },
+                outlet: {
+                    $let: {
+                        vars: {
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                        },
+                        in: {
+                            _id: '$$outlet._id',
+                            name: '$$outlet.name',
+                        },
+                    },
+                },
+                branch: {
+                    $let: {
+                        vars: {
+                            branch: { $arrayElemAt: ['$branch', 0] },
+                        },
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                        },
+                    },
+                },
                 name: {
                     $let: {
                         vars: {
@@ -308,8 +471,16 @@ module.exports = (req, res, next) => {
             <table>
                 <thead>
                     <tr>
-                        <th>Product</th>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
+                        <th>Retail Segment</th>
+                        <th>Outlet</th>
                         <th>Branch</th>
+                        <th>Product</th>
+                        <th>Brand</th>
                         <th>Min (M / %)</th>
                         <th>Max (M / %)</th>
                         <th>Avg (M / %)</th>
@@ -321,6 +492,14 @@ module.exports = (req, res, next) => {
                                 ${product.brands.map((brand) => {
                                     return `
                                         <tr>
+                                            <td>${brand.createdBy.user.firstName[currentLanguage]} ${brand.createdBy.user.lastName[currentLanguage]}</td>
+                                            <td>${brand.createdBy.user.position.name[currentLanguage]}</td>
+                                            <td>${product.country.name[currentLanguage]}</td>
+                                            <td>${product.region.name[currentLanguage]}</td>
+                                            <td>${product.subRegion.name[currentLanguage]}</td>
+                                            <td>${product.retailSegment.name[currentLanguage]}</td>
+                                            <td>${product.outlet.name[currentLanguage]}</td>
+                                            <td>${product.branch.name[currentLanguage]}</td>
                                             <td>${product.name[currentLanguage]}</td>
                                             <td>${brand.name[currentLanguage]}</td>
                                             <td>${parseFloat(brand.minLength).toFixed(2) + ' / ' + parseFloat(brand.minPercent).toFixed(2)}</td>
@@ -332,9 +511,9 @@ module.exports = (req, res, next) => {
                                 <tr>
                                     <td></td>
                                     <td>TOTAL</td>
-                                    <td>${parseFloat(product.totalMinLength).toFixed(2) + ' / ' + parseFloat(product.totalMinPercent).toFixed(2)}</td>
-                                    <td>${parseFloat(product.totalMaxLength).toFixed(2) + ' / ' + parseFloat(product.totalMaxPercent).toFixed(2)}</td>
-                                    <td>${parseFloat(product.totalAvgLength).toFixed(2) + ' / ' + parseFloat(product.totalAvgPercent).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalMinLength).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalMaxLength).toFixed(2)}</td>
+                                    <td>${parseFloat(product.totalAvgLength).toFixed(2)}</td>
                                 </tr>
                         `;    
                     }).join('')}

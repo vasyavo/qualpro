@@ -30,7 +30,7 @@ module.exports = (req, res, next) => {
             },
         },
     };
-    const query = req.query;
+    const query = req.body;
     const timeFilter = query.timeFilter;
 
     const queryRun = (personnel, callback) => {

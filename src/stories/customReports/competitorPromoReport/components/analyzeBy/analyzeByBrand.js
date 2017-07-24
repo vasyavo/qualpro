@@ -25,6 +25,7 @@ module.exports = (pipeline) => {
                         brand: { $arrayElemAt: ['$brand', 0] },
                     },
                     in: {
+                        _id: '$$brand._id',
                         name: {
                             en: '$$brand.name.en',
                             ar: '$$brand.name.ar',
@@ -47,7 +48,7 @@ module.exports = (pipeline) => {
             data: {
                 $push: '$count',
             },
-            labels: { $push: '$brand.name' },
+            labels: { $push: '$brand' },
         },
     });
 };
