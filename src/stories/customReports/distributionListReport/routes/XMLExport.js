@@ -527,6 +527,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
+                country: { $arrayElemAt: ['$country', 0] },
                 location: {
                     $let: {
                         vars: {
@@ -731,6 +732,5 @@ module.exports = (req, res, next) => {
                 }).status(200).send(buf);
             });
         });
-
     });
 };
