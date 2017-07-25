@@ -561,7 +561,7 @@ module.exports = (req, res, next) => {
                 item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
                 item.price = `${item.price} $`;
             } else {
-                item.price = `${item.price} ${currentCountry.currency}`;
+                item.price = `${item.price.toFixed(2)} ${currentCountry.currency}`;
             }
         });
 
