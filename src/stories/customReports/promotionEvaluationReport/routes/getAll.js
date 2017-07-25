@@ -34,10 +34,11 @@ module.exports = (req, res, next) => {
         },
     };
 
+    const query = req.body;
+    const queryFilter = query.filter || {};
+    const timeFilter = query.timeFilter;
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const queryFilter = query.filter || {};
-        const timeFilter = query.timeFilter;
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
@@ -606,7 +607,12 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
-            item.ppt = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
+            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                item.ppt = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
+                item.ppt = `${item.ppt} $`;
+            } else {
+                item.ppt = `${item.ppt.toFixed(2)} ${currentCountry.currency}`;
+            }
             item.promotionType = {
                 en: sanitizeHtml(item.promotionType.en),
                 ar: sanitizeHtml(item.promotionType.ar),

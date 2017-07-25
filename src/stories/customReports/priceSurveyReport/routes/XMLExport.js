@@ -36,10 +36,11 @@ module.exports = (req, res, next) => {
 
     let currentLanguage;
 
+    const query = req.body;
+    const queryFilter = query.filter || {};
+    const timeFilter = query.timeFilter;
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const queryFilter = query.filter || {};
-        const timeFilter = query.timeFilter;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
@@ -439,10 +440,26 @@ module.exports = (req, res, next) => {
                             return country._id.toString() === item.country._id.toString();
                         });
                         item.med = getMedian(item.arrayOfPrice);
-                        const medPrice = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
-                        const minPrice = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
-                        const avgPrice = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
-                        const maxPrice = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
+                        let medPrice = item.med.toFixed(2);
+                        let minPrice = item.min.toFixed(2);
+                        let avgPrice = item.avg.toFixed(2);
+                        let maxPrice = item.max.toFixed(2);
+                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            medPrice = parseFloat(medPrice * currentCountry.currencyInUsd).toFixed(2);
+                            minPrice = parseFloat(minPrice * currentCountry.currencyInUsd).toFixed(2);
+                            avgPrice = parseFloat(avgPrice * currentCountry.currencyInUsd).toFixed(2);
+                            maxPrice = parseFloat(maxPrice * currentCountry.currencyInUsd).toFixed(2);
+                            medPrice = `${medPrice} $`;
+                            minPrice = `${minPrice} $`;
+                            avgPrice = `${avgPrice} $`;
+                            maxPrice = `${maxPrice} $`;
+                        } else {
+                            medPrice = `${medPrice} ${currentCountry.currency}`;
+                            minPrice = `${minPrice} ${currentCountry.currency}`;
+                            avgPrice = `${avgPrice} ${currentCountry.currency}`;
+                            maxPrice = `${maxPrice} ${currentCountry.currency}`;
+                        }
+                        
                         return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
