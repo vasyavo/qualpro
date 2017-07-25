@@ -5,6 +5,8 @@ module.exports = (pipeline) => {
             region: { $first: '$region' },
             subRegion: { $first: '$subRegion' },
             branch: { $first: '$branch' },
+            retailSegment: { $first: '$retailSegment' },
+            outlet: { $first: '$outlet' },
             count: { $sum: 1 },
         },
     });
@@ -24,6 +26,8 @@ module.exports = (pipeline) => {
             region: 1,
             subRegion: 1,
             branch: 1,
+            outlet: 1,
+            retailSegment: 1,
             country: {
                 $let: {
                     vars: {
