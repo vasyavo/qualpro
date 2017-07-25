@@ -1,38 +1,22 @@
 module.exports = (pipeline) => {
     pipeline.push({
+        $project: {
+            _id: false,
+            publisher: '$createdBy.user',
+        },
+    });
+
+    pipeline.push({
         $group: {
-            _id: '$createdBy.user._id',
+            _id: '$publisher._id',
+            name: { $first: '$publisher.name' },
             count: { $sum: 1 },
         },
     });
 
     pipeline.push({
-        $lookup: {
-            from: 'personnels',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'personnel',
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 1,
-            count: 1,
-            personnel: {
-                $let: {
-                    vars: {
-                        personnel: { $arrayElemAt: ['$personnel', 0] },
-                    },
-                    in: {
-                        _id: '$$personnel._id',
-                        name: {
-                            en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                            ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
-                        },
-                    },
-                },
-            },
+        $sort: {
+            name: 1,
         },
     });
 
@@ -41,12 +25,15 @@ module.exports = (pipeline) => {
             _id: null,
             data: {
                 $push: {
-                    _id: '$personnel._id',
-                    name: '$personnel.name',
                     count: '$count',
                 },
             },
-            labels: { $push: '$personnel.name' },
+            labels: {
+                $push: {
+                    _id: '$_id',
+                    name: '$name',
+                },
+            },
         },
     });
 };

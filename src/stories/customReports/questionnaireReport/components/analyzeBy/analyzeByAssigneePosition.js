@@ -17,7 +17,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
-            _id: 1,
+            _id: false,
             count: 1,
             position: {
                 $let: {
@@ -34,12 +34,25 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            'position.name': 1,
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
-                $push: '$count',
+                $push: {
+                    count: '$count',
+                },
             },
-            labels: { $push: '$position.name' },
+            labels: {
+                $push: {
+                    _id: '$_id',
+                    name: '$name',
+                },
+            },
         },
     });
 };

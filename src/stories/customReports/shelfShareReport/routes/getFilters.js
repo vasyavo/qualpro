@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const ShelfShareModel = require('./../../../../types/shelfShare/model');
-const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
@@ -16,17 +16,19 @@ module.exports = (req, res, next) => {
     const timeFilterSchema = {
         type: 'object',
         properties: {
-            from: {
-                type: 'string',
-            },
-            to: {
-                type: 'string',
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
             },
         },
-        required: [
-            'from',
-            'to',
-        ],
     };
 
     const queryRun = (personnel, callback) => {
@@ -42,7 +44,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate(timeFilter);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -51,6 +53,23 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
+                    $and: [
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                    ],
+                };
+            }),
+        };
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
         }
 
         filters.forEach((filterName) => {
@@ -84,21 +103,6 @@ module.exports = (req, res, next) => {
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
-            });
-        }
-
-        if (timeFilter) {
-            pipeline.push({
-                $match: {
-                    $and: [
-                        {
-                            'createdBy.date': { $gt: new Date(timeFilter.from) },
-                        },
-                        {
-                            'createdBy.date': { $lt: new Date(timeFilter.to) },
-                        },
-                    ],
-                },
             });
         }
 

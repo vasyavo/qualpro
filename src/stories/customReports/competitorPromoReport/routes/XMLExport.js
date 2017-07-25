@@ -35,10 +35,11 @@ module.exports = (req, res, next) => {
 
     let currentLanguage;
 
+    const query = req.body;
+    const timeFilter = query.timeFilter;
+    const queryFilter = query.filter || {};
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const timeFilter = query.timeFilter;
-        const queryFilter = query.filter || {};
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
@@ -496,7 +497,13 @@ module.exports = (req, res, next) => {
                         });
                         const dateStart = item.dateStart ? moment(item.dateStart).format('DD MMMM, YYYY') : 'N/A';
                         const dateEnd = item.dateEnd ? moment(item.dateEnd).format('DD MMMM, YYYY') : 'N/A';
-                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
+                        let price = item.price.toFixed(2);
+                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
+                            price = `${price} $`;
+                        } else {
+                            price = `${price} ${currentCountry.currency}`;
+                        }
             return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>

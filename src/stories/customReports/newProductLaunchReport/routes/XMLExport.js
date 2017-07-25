@@ -3,7 +3,6 @@ const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -33,11 +32,10 @@ module.exports = (req, res, next) => {
     };
     let currentLanguage;
 
+    const query = req.body;
+    const timeFilter = query.timeFilter;
+    const queryFilter = query.filter || {};
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const timeFilter = query.timeFilter;
-        const queryFilter = query.filter || {};
-
         currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
@@ -558,11 +556,19 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
+    
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
-                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
-                        return `
+                        let price = item.price.toFixed(2);
+                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
+                            price = `${price} $`;
+                        } else {
+                            price = `${price} ${currentCountry.currency}`;
+                        }
+    
+            return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region[currentLanguage]}</td>

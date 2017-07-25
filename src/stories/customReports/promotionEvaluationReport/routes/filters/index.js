@@ -67,7 +67,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $facet: {
-                locationsFilter: filtersLocation(queryFilter, personnel),
+                locationsFilter: filtersLocation(queryFilter, timeFilter, personnel),
                 otherFilters: filtersWithoutLocation(queryFilter, timeFilter, personnel),
             },
         });

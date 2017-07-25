@@ -395,7 +395,7 @@ module.exports = (req, res, next) => {
                 objectiveType: 1,
                 createdByPersonnels: 1,
                 positions: {
-                    _ids: 1,
+                    _id: 1,
                     name: 1,
                 },
                 countries: {

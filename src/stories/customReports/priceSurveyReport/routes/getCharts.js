@@ -32,10 +32,11 @@ module.exports = (req, res, next) => {
         },
     };
 
+    const query = req.body;
+    const queryFilter = query.filter || {};
+    const timeFilter = query.timeFilter;
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const queryFilter = query.filter || {};
-        const timeFilter = query.timeFilter;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
@@ -526,7 +527,13 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === chart.country._id.toString();
             });
-            chart.datasets[0].data = chart.datasets[0].data.map(price => parseFloat(price * currentCountry.currencyInUsd).toFixed(2));
+            chart.datasets[0].data = chart.datasets[0].data.map(price => {
+                let itemPrice = price.toFixed(2);
+                if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                    itemPrice = parseFloat(itemPrice * currentCountry.currencyInUsd).toFixed(2);
+                }
+                return itemPrice;
+            });
         });
 
         res.status(200).send(response);

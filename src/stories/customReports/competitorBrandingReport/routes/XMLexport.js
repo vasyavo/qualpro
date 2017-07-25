@@ -510,11 +510,12 @@ module.exports = (req, res, next) => {
                         <th>Display Type</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
-            return `
+                        return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
@@ -529,9 +530,10 @@ module.exports = (req, res, next) => {
                                 <td>${item.displayType}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>
+                                <td>${item.description[currentLanguage]}</td>
                             </tr>
                         `;
-        }).join('')}
+                    }).join('')}
                 </tbody>
             </table>
         `;

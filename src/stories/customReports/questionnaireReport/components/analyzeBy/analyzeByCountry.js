@@ -1,5 +1,12 @@
 module.exports = (pipeline) => {
     pipeline.push({
+        $project: {
+            _id: false,
+            country: 1,
+        },
+    });
+
+    pipeline.push({
         $unwind: '$country',
     });
 
@@ -38,16 +45,21 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $sort: {
+            'country.name': 1,
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
                 $push: {
-                    _id: '$country._id',
-                    name: '$country.name',
+                    country: '$country',
                     count: '$count',
                 },
             },
-            labels: { $push: '$country.name' },
+            labels: { $push: '$country' },
         },
     });
 };

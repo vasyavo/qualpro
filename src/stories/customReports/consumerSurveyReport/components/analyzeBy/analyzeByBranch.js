@@ -5,6 +5,8 @@ module.exports = (pipeline) => {
             region: { $first: '$region' },
             subRegion: { $first: '$subRegion' },
             branch: { $first: '$branch' },
+            retailSegment: { $first: '$retailSegment' },
+            outlet: { $first: '$outlet' },
             count: { $sum: 1 },
         },
     });
@@ -24,6 +26,8 @@ module.exports = (pipeline) => {
             region: 1,
             subRegion: 1,
             branch: 1,
+            outlet: 1,
+            retailSegment: 1,
             country: {
                 $let: {
                     vars: {
@@ -56,20 +60,18 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                data: {
-                    $addToSet: {
-                        _id: '$branch._id',
-                        name: '$branch.name',
-                        count: '$count',
-                        country: '$country',
-                        region: '$region',
-                        subRegion: '$subRegion',
-                        location: '$location',
-                    },
+                $addToSet: {
+                    _id: '$branch._id',
+                    name: '$branch.name',
+                    count: '$count',
+                    country: '$country',
+                    region: '$region',
+                    subRegion: '$subRegion',
+                    location: '$location',
                 },
-                labels: {
-                    $addToSet: '$location',
-                },
+            },
+            labels: {
+                $addToSet: '$location',
             },
         },
     });

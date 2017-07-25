@@ -49,7 +49,12 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$count',
+                $addToSet: {
+                    _id: '$publisher._id',
+                    name: '$publisher.name',
+                    count: '$count',
+                    country: '$country',
+                },
             },
             labels: { $push: '$publisher.name' },
         },

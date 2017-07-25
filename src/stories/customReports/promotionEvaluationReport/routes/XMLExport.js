@@ -35,10 +35,11 @@ module.exports = (req, res, next) => {
     };
     let currentLanguage;
 
+    const query = req.body;
+    const queryFilter = query.filter || {};
+    const timeFilter = query.timeFilter;
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const queryFilter = query.filter || {};
-        const timeFilter = query.timeFilter;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
@@ -555,7 +556,13 @@ module.exports = (req, res, next) => {
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
-                        const itemPrice = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
+                        let itemPrice = item.ppt.toFixed(2);
+                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            itemPrice = parseFloat(itemPrice * currentCountry.currencyInUsd).toFixed(2);
+                            itemPrice = `${itemPrice} $`;
+                        } else {
+                            itemPrice = `${itemPrice} ${currentCountry.currency}`;
+                        }
                         return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>

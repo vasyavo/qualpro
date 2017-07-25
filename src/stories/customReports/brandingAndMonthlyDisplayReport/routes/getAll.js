@@ -83,6 +83,29 @@ module.exports = (req, res, next) => {
             }
         }
 
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
+                    $and: [
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                    ],
+                };
+            }),
+        };
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
+        }
+
+        pipeline.push({
+            $match: {
+                category: { $ne: [] },
+            },
+        });
+
         filters.forEach((filterName) => {
             if (queryFilter[filterName] && queryFilter[filterName][0]) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
@@ -109,31 +132,6 @@ module.exports = (req, res, next) => {
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
-            });
-        }
-
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
-                    $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
-                    ],
-                });
-                return frame;
-            });
-        }
-
-        if ($timeMatch.$or.length) {
-            pipeline.push({
-                $match: $timeMatch,
             });
         }
 

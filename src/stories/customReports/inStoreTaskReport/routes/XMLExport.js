@@ -9,6 +9,7 @@ const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const emojiStrip = require('emoji-strip');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -246,8 +247,11 @@ module.exports = (req, res, next) => {
             $project: {
                 title: '$title',
                 createdBy: '$createdBy',
-                priority: '$priority',
+                description: '$description',
                 status: '$status',
+                dateStart: '$dateStart',
+                dateEnd: '$dateEnd',
+                priority: '$priority',
                 form: '$form',
                 country: {
                     $reduce: {
@@ -372,16 +376,20 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
-                        <th>Retail Segment</th>
-                        <th>Outlet</th>
+                        <th>Trade Channel</th>
+                        <th>Customer</th>
                         <th>Branch</th>
                         <th>Title</th>
                         <th>Assigned To</th>
                         <th>Assigned By</th>
                         <th>Position</th>
+                        <th>Description</th>
                         <th>Form Type</th>
                         <th>Status</th>
                         <th>Priority</th>
+                        <th>Creation date</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -398,9 +406,13 @@ module.exports = (req, res, next) => {
                                 <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.position.name[currentLanguage]}</td>
+                                <td>${emojiStrip(item.description[currentLanguage])}</td>
                                 <td>${item.form.contentType}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>
+                                <td>${moment(item.createdBy.date).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
                             </tr>
                         `;
         }).join('')}

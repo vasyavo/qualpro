@@ -7,6 +7,7 @@ const ConsumersSurveyAnswersModel = require('./../../../../types/consumersSurvey
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -544,6 +545,7 @@ module.exports = (req, res, next) => {
                     <tr>
                         <th>Location</th>
                         <th>Publisher</th>
+                        <th>Position</th>
                         <th>Title</th>
                         <th>Status</th>
                         <th>Answers number</th>
@@ -556,8 +558,9 @@ module.exports = (req, res, next) => {
                         return `
                             <tr>
                                 <td>${item.location}</td>
-                                <td>${`${item.publisher.name[currentLanguage] || item.publisher.name[anotherLanguage]}, ${item.publisher.position.name[currentLanguage] || item.publisher.position.name[anotherLanguage]}`}</td>
-                                <td>${item.title[currentLanguage] || item.title[anotherLanguage]}</td>
+                                <td>${item.publisher.name[currentLanguage] || item.publisher.name[anotherLanguage]}}</td>
+                                <td>${item.publisher.position.name[currentLanguage] || item.publisher.position.name[anotherLanguage]}</td>
+                                <td>${sanitizeHtml(item.title[currentLanguage]) || sanitizeHtml(item.title[anotherLanguage])}</td>
                                 <td>${item.status}</td>
                                 <td>${item.countAnswered}</td>
                                 <td>${item.startDate}</td>

@@ -1,51 +1,28 @@
 module.exports = (pipeline) => {
     pipeline.push({
+        $project: {
+            _id: false,
+            assignee: 1,
+        },
+    });
+
+    pipeline.push({
         $unwind: {
-            path: '$personnels',
-            preserveNullAndEmptyArrays: true,
+            path: '$assignee',
         },
     });
 
     pipeline.push({
         $group: {
-            _id: '$personnels',
+            _id: '$assignee._id',
+            name: { $first: '$assignee.name' },
             count: { $sum: 1 },
         },
     });
 
     pipeline.push({
-        $lookup: {
-            from: 'personnels',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'personnel',
-        },
-    });
-
-    pipeline.push({
-        $match: {
-            personnel: { $ne: [] },
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 1,
-            count: 1,
-            personnel: {
-                $let: {
-                    vars: {
-                        personnel: { $arrayElemAt: ['$personnel', 0] },
-                    },
-                    in: {
-                        _id: '$$personnel._id',
-                        name: {
-                            en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                            ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
-                        },
-                    },
-                },
-            },
+        $sort: {
+            name: 1,
         },
     });
 
@@ -53,9 +30,16 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$count',
+                $push: {
+                    count: '$count',
+                },
             },
-            labels: { $push: '$personnel.name' },
+            labels: {
+                $push: {
+                    _id: '$_id',
+                    name: '$name',
+                },
+            },
         },
     });
 };
