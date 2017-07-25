@@ -81,13 +81,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
-            pipeline.push({
-                $match: {
-                    branches: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
-                },
-            });
-        }
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             pipeline.push({
@@ -185,26 +178,56 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $addFields: {
                 executors: {
-                    $map: {
-                        input: '$executors',
-                        as: 'user',
-                        in: {
-                            _id: '$$user._id',
-                            name: {
-                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                    $let: {
+                        vars: {
+                            executor: {
+                                $arrayElemAt: [
+                                    '$executors',
+                                    0,
+                                ],
                             },
+                        },
+                        in: {
+                            _id: '$$executor._id',
+                            name: {
+                                en: {
+                                    $concat: [
+                                        '$$executor.firstName.en',
+                                        ' ',
+                                        '$$executor.lastName.en',
+                                    ],
+                                },
+                                ar: {
+                                    $concat: [
+                                        '$$executor.firstName.ar',
+                                        ' ',
+                                        '$$executor.lastName.ar',
+                                    ],
+                                },
+                            },
+                            position: '$$executor.position',
                         },
                     },
                 },
                 executorPositions: {
-                    $map: {
-                        input: '$executors',
-                        as: 'item',
-                        in: '$$item.position',
+                    $let: {
+                        vars: {
+                            executor: {
+                                $arrayElemAt: [
+                                    '$executors',
+                                    0,
+                                ],
+                            },
+                        },
+                        in: '$$executor.position',
                     },
                 },
             },
+        });
+
+        // some objectives contains not existing users
+        pipeline.push({
+            $match: { 'executors._id': { $ne: null } },
         });
 
         if (queryFilter.executorPosition && queryFilter.executorPosition.length) {

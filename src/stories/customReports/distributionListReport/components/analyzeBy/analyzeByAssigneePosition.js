@@ -1,7 +1,4 @@
 module.exports = (pipeline) => {
-    pipeline.push({
-        $unwind: '$executorPositions',
-    });
 
     pipeline.push({
         $group: {

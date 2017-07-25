@@ -56,34 +56,38 @@ module.exports = (pipeline) => {
     pipeline.push({
         $project: {
             rating: 1,
+            country: { $arrayElemAt: ['$country', 0] },
             location: {
-                en: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
+                _id: '$region._id',
+                name: {
+                    en: {
+                        $concat: [
+                            {
+                                $let: {
+                                    vars: {
+                                        domain: { $arrayElemAt: ['$country', 0] },
+                                    },
+                                    in: '$$domain.name.en',
                                 },
-                                in: '$$domain.name.en',
                             },
-                        },
-                        ' -> ',
-                        '$region.name.en',
-                    ],
-                },
-                ar: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
+                            ' -> ',
+                            '$region.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            {
+                                $let: {
+                                    vars: {
+                                        domain: { $arrayElemAt: ['$country', 0] },
+                                    },
+                                    in: '$$domain.name.ar',
                                 },
-                                in: '$$domain.name.ar',
                             },
-                        },
-                        ' -> ',
-                        '$region.name.ar',
-                    ],
+                            ' -> ',
+                            '$region.name.ar',
+                        ],
+                    },
                 },
             },
         },
@@ -99,7 +103,10 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$rating',
+                $push: {
+                    count: '$rating',
+                    country: '$country',
+                },
             },
             labels: { $push: '$location' },
         },
