@@ -504,6 +504,10 @@ module.exports = (req, res, next) => {
                 en: sanitizeHtml(item.description.en),
                 ar: sanitizeHtml(item.description.ar),
             };
+            item.additionalComment = {
+                en: sanitizeHtml(item.additionalComment.en),
+                ar: sanitizeHtml(item.additionalComment.ar),
+            };
         });
 
         res.status(200).send(response);
