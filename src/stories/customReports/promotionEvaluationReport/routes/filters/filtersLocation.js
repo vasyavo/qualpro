@@ -1,3 +1,4 @@
+const moment = require('moment');
 const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
 
 const getFilter = (queryFilter, personnel, CONTENT_TYPE) => {
@@ -12,12 +13,29 @@ const getFilter = (queryFilter, personnel, CONTENT_TYPE) => {
     return null;
 };
 
-module.exports = (queryFilter, personnel) => {
+module.exports = (queryFilter, timeFilter, personnel) => {
     const countryFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.COUNTRY);
     const regionFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.REGION);
     const subRegionFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.SUBREGION);
     const retailSegmentFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.RETAILSEGMENT);
     const pipeline = [];
+
+    const $timeMatch = {
+        $or: timeFilter.map((frame) => {
+            return {
+                $and: [
+                    { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                    { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                ],
+            };
+        }),
+    };
+
+    if ($timeMatch.$or.length) {
+        pipeline.push({
+            $match: $timeMatch,
+        });
+    }
 
     pipeline.push({
         $project: {

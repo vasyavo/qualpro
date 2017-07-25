@@ -5,6 +5,23 @@ const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType'
 module.exports = (queryFilter, timeFilter, personnel) => {
     const pipeline = [];
 
+    const $timeMatch = {
+        $or: timeFilter.map((frame) => {
+            return {
+                $and: [
+                    { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                    { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                ],
+            };
+        }),
+    };
+
+    if ($timeMatch.$or.length) {
+        pipeline.push({
+            $match: $timeMatch,
+        });
+    }
+
     const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status', 'promotionType.en'], queryFilter, personnel);
 
     if (queryFilter.publisher && queryFilter.publisher.length) {
@@ -71,32 +88,6 @@ module.exports = (queryFilter, timeFilter, personnel) => {
     pipeline.push({
         $unwind: '$promotion',
     });
-
-    const $timeMatch = {};
-
-    $timeMatch.$or = [];
-
-    if (timeFilter) {
-        timeFilter.map((frame) => {
-            $timeMatch.$or.push({
-                $and: [
-                    {
-                        'promotion.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                    },
-                    {
-                        'promotion.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                    },
-                ],
-            });
-            return frame;
-        });
-    }
-
-    if ($timeMatch.$or.length) {
-        pipeline.push({
-            $match: $timeMatch,
-        });
-    }
 
     if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
         pipeline.push({

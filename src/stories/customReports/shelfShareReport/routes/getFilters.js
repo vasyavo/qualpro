@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -54,6 +55,23 @@ module.exports = (req, res, next) => {
             }
         }
 
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
+                    $and: [
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                    ],
+                };
+            }),
+        };
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
+        }
+
         filters.forEach((filterName) => {
             if (queryFilter[filterName] && queryFilter[filterName][0]) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
@@ -87,14 +105,6 @@ module.exports = (req, res, next) => {
                 $match: $generalMatch,
             });
         }
-
-        pipeline.push({
-            $match: {
-                $or: timeFilter.map(timePeriod => ({
-                    $and: [{ 'createdBy.date': { $gt: new Date(timePeriod.from) } }, { 'createdBy.date': { $lt: new Date(timePeriod.to) } }],
-                })),
-            },
-        });
 
         pipeline.push({
             $lookup: {
