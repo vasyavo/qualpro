@@ -398,8 +398,8 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
-                        <th>Retail Segment</th>
-                        <th>Outlet</th>
+                        <th>Trade Channel</th>
+                        <th>Customer</th>
                         <th>Branch</th>
                         <th>Title</th>
                         <th>Objective Type</th>
