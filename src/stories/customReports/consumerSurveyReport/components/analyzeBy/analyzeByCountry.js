@@ -42,13 +42,11 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                data: {
-                    $addToSet: {
-                        _id: '$country._id',
-                        name: '$country.name',
-                        count: '$count',
-                        country: '$country',
-                    },
+                $addToSet: {
+                    _id: '$country._id',
+                    name: '$country.name',
+                    count: '$count',
+                    country: '$country',
                 },
             },
             labels: { $push: '$country.name' },
