@@ -31,11 +31,11 @@ module.exports = (req, res, next) => {
             },
         },
     };
-
+    const query = req.body;
+    const timeFilter = query.timeFilter;
+    const queryFilter = query.filter || {};
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const timeFilter = query.timeFilter;
-        const queryFilter = query.filter || {};
+
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
@@ -585,7 +585,14 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country._id.toString();
             });
-            item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
+
+            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
+                item.price = `${item.price} $`;
+            } else {
+                item.price = `${item.price} ${currentCountry.currency}`;
+            }
+
             item.additionalComment = {
                 en: sanitizeHtml(item.additionalComment.en),
                 ar: sanitizeHtml(item.additionalComment.ar),
