@@ -9,7 +9,7 @@ const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
-const emojiStrip = require('emoji-strip');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -406,7 +406,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.position.name[currentLanguage]}</td>
-                                <td>${emojiStrip(item.description[currentLanguage])}</td>
+                                <td>${sanitizeHtml(item.description[currentLanguage])}</td>
                                 <td>${item.form.contentType}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>
