@@ -35,7 +35,6 @@ module.exports = (req, res, next) => {
     const timeFilter = query.timeFilter;
     const queryFilter = query.filter || {};
     const queryRun = (personnel, callback) => {
-
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
