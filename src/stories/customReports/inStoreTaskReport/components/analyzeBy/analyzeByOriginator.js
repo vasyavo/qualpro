@@ -26,6 +26,21 @@ module.exports = (pipeline) => {
                     status: '$_id.status',
                 },
             },
+            total: { $sum: '$count' },
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            data: {
+                $concatArrays: [
+                    '$data',
+                    [{
+                        count: '$total',
+                        status: 'total',
+                    }],
+                ],
+            },
         },
     });
 
