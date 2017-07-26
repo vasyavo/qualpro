@@ -54,10 +54,7 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: {
-                    count: '$rating',
-                    country: '$country',
-                },
+                $push: '$rating',
             },
             labels: { $push: '$country' },
         },
