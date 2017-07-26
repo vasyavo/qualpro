@@ -54,36 +54,38 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $addFields: {
+            country: {
+                $let: {
+                    vars: {
+                        country: { $arrayElemAt: ['$country', 0] },
+                    },
+                    in: {
+                        _id: '$$country._id',
+                        name: '$$country.name',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $project: {
             rating: 1,
-            country: { $arrayElemAt: ['$country', 0] },
+            country: 1,
             location: {
                 _id: '$region._id',
                 name: {
                     en: {
                         $concat: [
-                            {
-                                $let: {
-                                    vars: {
-                                        domain: { $arrayElemAt: ['$country', 0] },
-                                    },
-                                    in: '$$domain.name.en',
-                                },
-                            },
+                            '$country.name.en',
                             ' -> ',
                             '$region.name.en',
                         ],
                     },
                     ar: {
                         $concat: [
-                            {
-                                $let: {
-                                    vars: {
-                                        domain: { $arrayElemAt: ['$country', 0] },
-                                    },
-                                    in: '$$domain.name.ar',
-                                },
-                            },
+                            '$country.name.ar',
                             ' -> ',
                             '$region.name.ar',
                         ],
