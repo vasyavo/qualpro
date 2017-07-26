@@ -81,44 +81,50 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
+        $addFields: {
+            country: {
+                $let: {
+                    vars: {
+                        country: { $arrayElemAt: ['$country', 0] },
+                    },
+                    in: {
+                        _id: '$$country._id',
+                        name: '$$country.name',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $project: {
             rating: 1,
+            country: 1,
             location: {
-                en: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$domain.name.en',
-                            },
-                        },
-                        ' -> ',
-                        '$region.name.en',
-                        ' -> ',
-                        '$subRegion.name.en',
-                        ' -> ',
-                        '$branch.name.en',
-                    ],
-                },
-                ar: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    domain: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$domain.name.ar',
-                            },
-                        },
-                        ' -> ',
-                        '$region.name.ar',
-                        ' -> ',
-                        '$subRegion.name.ar',
-                        ' -> ',
-                        '$branch.name.ar',
-                    ],
+                _id: '$branch._id',
+                name: {
+                    en: {
+                        $concat: [
+                            '$country.name.en',
+                            ' -> ',
+                            '$region.name.en',
+                            ' -> ',
+                            '$subRegion.name.en',
+                            ' -> ',
+                            '$branch.name.en',
+                        ],
+                    },
+                    ar: {
+                        $concat: [
+                            '$country.name.ar',
+                            ' -> ',
+                            '$region.name.ar',
+                            ' -> ',
+                            '$subRegion.name.ar',
+                            ' -> ',
+                            '$branch.name.ar',
+                        ],
+                    },
                 },
             },
         },
@@ -134,7 +140,10 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $push: '$rating',
+                $push: {
+                    count: '$rating',
+                    country: '$country',
+                },
             },
             labels: { $push: '$location' },
         },
