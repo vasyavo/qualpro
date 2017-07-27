@@ -17,6 +17,7 @@ module.exports = (queryFilter, personnel) => {
     const regionFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.REGION);
     const subRegionFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.SUBREGION);
     const retailSegmentFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.RETAILSEGMENT);
+    const outletFilter = getFilter(queryFilter, personnel, CONTENT_TYPES.OUTLET);
     const pipeline = [];
 
     pipeline.push({
@@ -65,9 +66,11 @@ module.exports = (queryFilter, personnel) => {
                 name: 1,
                 subRegion: 1,
                 retailSegment: 1,
+                outlet: 1,
             },
             subRegions: '$branches.subRegion',
             retailSegments: '$branches.retailSegment',
+            outlets: '$branches.outlet',
         },
     });
 
@@ -90,6 +93,15 @@ module.exports = (queryFilter, personnel) => {
     });
 
     pipeline.push({
+        $lookup: {
+            from: 'outlets',
+            localField: 'outlets',
+            foreignField: '_id',
+            as: 'outlets',
+        },
+    });
+
+    pipeline.push({
         $project: {
             branches: 1,
             subRegions: {
@@ -98,6 +110,10 @@ module.exports = (queryFilter, personnel) => {
                 parent: 1,
             },
             retailSegments: {
+                _id: 1,
+                name: 1,
+            },
+            outlets: {
                 _id: 1,
                 name: 1,
             },
@@ -119,6 +135,7 @@ module.exports = (queryFilter, personnel) => {
             branches: 1,
             subRegions: 1,
             retailSegments: 1,
+            outlets: 1,
             regions: {
                 _id: 1,
                 name: 1,
@@ -141,6 +158,7 @@ module.exports = (queryFilter, personnel) => {
         $project: {
             branches: 1,
             retailSegments: 1,
+            outlets: 1,
             subRegions: 1,
             regions: 1,
             countriesIds: '$countries._id',
@@ -323,8 +341,79 @@ module.exports = (queryFilter, personnel) => {
 
     pipeline.push({
         $addFields: {
+            outlets: {
+                $reduce: {
+                    input: {
+                        $reduce: {
+                            input: '$branches',
+                            initialValue: [],
+                            in: {
+                                $cond: {
+                                    if: { $setIsSubset: [['$$this.retailSegment'], '$retailSegmentsIds'] },
+                                    then: { $setUnion: [['$$this.outlet'], '$$value'] },
+                                    else: '$$value',
+                                },
+                            },
+                        },
+                    },
+                    initialValue: [],
+                    in: {
+                        $setUnion: [
+                            '$$value',
+                            [
+                                {
+                                    $let: {
+                                        vars: {
+                                            outlet: {
+                                                $arrayElemAt: [
+                                                    {
+                                                        $filter: {
+                                                            input: '$outlets',
+                                                            as: 'outlet',
+                                                            cond: {
+                                                                $eq: ['$$outlet._id', '$$this'],
+                                                            },
+                                                        },
+                                                    },
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        in: {
+                                            _id: '$$outlet._id',
+                                            name: '$$outlet.name',
+                                        },
+                                    },
+                                },
+                            ],
+                        ],
+                    },
+                },
+            },
+        },
+    });
+
+    if (outletFilter) {
+        pipeline.push({
+            $addFields: {
+                outletsIds: {
+                    $setIntersection: [outletFilter, '$outlets._id'],
+                },
+            },
+        });
+    } else {
+        pipeline.push({
+            $addFields: {
+                outletsIds: '$outlets._id',
+            },
+        });
+    }
+
+    pipeline.push({
+        $addFields: {
             subRegionsIds: null,
             retailSegmentsIds: null,
+            outletsIds: null,
             branches: {
                 $reduce: {
                     input: '$branches',
@@ -337,7 +426,7 @@ module.exports = (queryFilter, personnel) => {
                                         $setIsSubset: [['$$this.subRegion'], '$subRegionsIds'],
                                     },
                                     {
-                                        $setIsSubset: [['$$this.retailSegment'], '$retailSegmentsIds'],
+                                        $setIsSubset: [['$$this.outlet'], '$outletsIds'],
                                     },
                                 ],
                             },
@@ -349,6 +438,7 @@ module.exports = (queryFilter, personnel) => {
                                             name: '$$this.name',
                                             subRegion: '$$this.subRegion',
                                             retailSegment: '$$this.retailSegment',
+                                            outlet: '$$this.outlet',
                                         },
                                     ],
                                     '$$value',

@@ -55,6 +55,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.REGION,
             CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.DISPLAY_TYPE,
             CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.POSITION,

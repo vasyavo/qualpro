@@ -36,7 +36,7 @@ module.exports = (req, res, next) => {
         const timeFilter = query.timeFilter;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, 'displayType',
             'status', 'publisher', CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
@@ -96,13 +96,14 @@ module.exports = (req, res, next) => {
                 regions: response.locationsFilter[0].regions,
                 subRegions: response.locationsFilter[0].subRegions,
                 retailSegments: response.locationsFilter[0].retailSegments,
+                outlets: response.locationsFilter[0].outlets,
                 branches: response.locationsFilter[0].branches,
                 displayTypes: response.otherFilters[0].displayTypes,
                 categories: response.otherFilters[0].categories,
                 statuses: response.otherFilters[0].statuses,
                 publishers: response.otherFilters[0].publishers,
                 positions: response.otherFilters[0].positions,
-                personnels: response.otherFilters[0].personnels
+                personnels: response.otherFilters[0].personnels,
             };
         } else {
             response = {

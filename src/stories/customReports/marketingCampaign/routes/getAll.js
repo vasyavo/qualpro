@@ -101,6 +101,8 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 status: 1,
                 description: 1,
+                category: 1,
+                displayType: 1,
                 attachments: 1,
                 dateStart: 1,
                 dateEnd: 1,
@@ -125,6 +127,43 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'displayTypes',
+                localField: 'displayType',
+                foreignField: '_id',
+                as: 'displayType',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                category: {
+                    $let: {
+                        vars: {
+                            category: { $arrayElemAt: ['$category', 0] },
+                        },
+                        in: {
+                            _id: '$$category._id',
+                            name: {
+                                en: '$$category.name.en',
+                                ar: '$$category.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
@@ -134,6 +173,35 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'positions',
+                    localField: 'createdBy.user.position',
+                    foreignField: '_id',
+                    as: 'createdBy.user.position',
+                },
+            },
+            {
+                $addFields: {
+                    'createdBy.user.position': {
+                        $let: {
+                            vars: {
+                                position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                            },
+                            in: {
+                                _id: '$$position._id',
+                                name: {
+                                    en: '$$position.name.en',
+                                    ar: '$$position.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        ]);
 
         pipeline.push({
             $lookup: {
@@ -455,6 +523,11 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 status: 1,
                 attachments: 1,
+                displayType: {
+                    _id: 1,
+                    name: 1,
+                },
+                category: 1,
                 description: 1,
                 dateStart: 1,
                 dateEnd: 1,
@@ -485,6 +558,8 @@ module.exports = (req, res, next) => {
                 branch: '$records.branch',
                 country: '$records.country',
                 status: '$records.status',
+                displayType: '$records.displayType',
+                category: '$records.category',
                 attachments: '$records.attachments',
                 description: '$records.description',
                 dateStart: '$records.dateStart',
@@ -515,6 +590,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: '$marketingCampaign._id',
+                employee: '$marketingCampaign.createdBy.user',
                 location: 1,
                 branch: 1,
                 status: 1,
@@ -539,6 +615,8 @@ module.exports = (req, res, next) => {
                     },
                 },
                 attachments: 1,
+                category: 1,
+                displayType: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 createdBy: {
@@ -546,6 +624,34 @@ module.exports = (req, res, next) => {
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
                 total: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'employee',
+                foreignField: '_id',
+                as: 'employee',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                employee: {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$employee', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            name: {
+                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -587,11 +693,14 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
+                employee: 1,
                 location: 1,
                 branch: 1,
                 status: 1,
                 description: 1,
                 country: 1,
+                category: 1,
+                displayType: 1,
                 attachments: 1,
                 dateStart: 1,
                 dateEnd: 1,
