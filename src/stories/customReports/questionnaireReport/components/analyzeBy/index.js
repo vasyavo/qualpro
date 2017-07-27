@@ -5,7 +5,7 @@ const analyzeByMethods = {
     branch: require('./analyzeByBranch'),
     publisher: require('./analyzeByPublisher'),
     assignee: require('./analyzeByAssignee'),
-    position: require('./analyzeByAssigneePosition'),
+    assigneePosition: require('./analyzeByAssigneePosition'),
 };
 
 module.exports = (pipeline, analyzeBy, queryFilter) => {

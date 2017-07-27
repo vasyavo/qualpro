@@ -1,7 +1,22 @@
 module.exports = (pipeline) => {
     pipeline.push({
+        $project: {
+            _id: false,
+            positions: {
+                $setUnion: ['$assignee.position', []],
+            },
+        },
+    });
+
+    pipeline.push({
+        $unwind: {
+            path: '$positions',
+        },
+    });
+
+    pipeline.push({
         $group: {
-            _id: '$createdBy.user.position',
+            _id: '$positions',
             count: { $sum: 1 },
         },
     });
@@ -49,8 +64,8 @@ module.exports = (pipeline) => {
             },
             labels: {
                 $push: {
-                    _id: '$_id',
-                    name: '$name',
+                    _id: '$position._id',
+                    name: '$position.name',
                 },
             },
         },

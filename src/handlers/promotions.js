@@ -1,6 +1,7 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 const ReportUtils = require('./../stories/test-utils').ReportUtils;
+const aclRolesNames = require('./../constants/aclRolesNames');
 
 var Promotions = function () {
     var async = require('async');
@@ -60,30 +61,50 @@ var Promotions = function () {
         var forSync = options.forSync;
         var pipeLine = [];
 
-        // fix do not show draft to other users
         if (isMobile) {
             if (forSync) {
                 queryObject.status = {
-                    $ne: 'draft'
+                    $ne: 'draft',
                 };
             } else {
                 queryObject.status = {
-                    $nin: ['draft', 'expired']
+                    $nin: ['draft', 'expired'],
                 };
             }
         } else {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            'createdBy.user': personnel._id,
-                            status: {$in: ['draft', 'expired']}
-                        }, {
-                            status: {$nin: ['draft', 'expired']}
-                        }
-                    ]
-                }
-            });
+            const $match = {
+                $or: [
+                    {
+                        'createdBy.user': personnel._id,
+                        status: {
+                            $in: ['draft', 'expired'],
+                        },
+                    },
+                ],
+            };
+
+            // regarding QP-1411 Reporting: Al Alali Promotion Evaluation -> Expired items doesn't displayed for MA
+            if (personnel.accessRole.level === aclRolesNames.MASTER_ADMIN) {
+                $match.$or.push({
+                    'createdBy.user': {
+                        $ne: personnel._id,
+                    },
+                    status: {
+                        $ne: 'draft',
+                    },
+                });
+            } else {
+                $match.$or.push({
+                    'createdBy.user': {
+                        $ne: personnel._id,
+                    },
+                    status: {
+                        $nin: ['draft', 'expired'],
+                    },
+                });
+            }
+
+            pipeLine.push({ $match });
         }
 
         if (Object.keys(queryObject).length) {
