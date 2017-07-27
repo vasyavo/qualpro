@@ -61,6 +61,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.DISPLAY_TYPE,
             CONTENT_TYPES.PERSONNEL,
         ].forEach(filterName => {
             if (queryFilter[filterName] && queryFilter[filterName].length) {
