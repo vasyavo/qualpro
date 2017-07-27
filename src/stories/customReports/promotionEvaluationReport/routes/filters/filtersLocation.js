@@ -37,6 +37,14 @@ module.exports = (queryFilter, timeFilter, personnel) => {
         });
     }
 
+    if (queryFilter['promotionType.en']) {
+        pipeline.push({
+            $match: {
+                'promotionType.en': { $in: queryFilter['promotionType.en'] },
+            },
+        });
+    }
+
     pipeline.push({
         $project: {
             _id: 1,
