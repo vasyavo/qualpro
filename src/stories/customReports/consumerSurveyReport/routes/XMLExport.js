@@ -420,27 +420,154 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $group: {
+                _id: '$questionnaryId',
+                consumer: { $first: '$consumer' },
+                country: {
+                    $addToSet: {
+                        $let: {
+                            vars: {
+                                country: { $arrayElemAt: ['$country', 0] },
+                            },
+                            in: '$$country.name.en',
+                        },
+                    },
+                },
+                region: {
+                    $addToSet: '$region.name.en',
+                },
+                subRegion: {
+                    $addToSet: '$subRegion.name.en',
+                },
+                retailSegment: {
+                    $addToSet: '$retailSegment.name.en',
+                },
+                outlet: {
+                    $addToSet: '$outlet.name.en',
+                },
+                branch: {
+                    $addToSet: '$branch.name.en',
+                },
+            },
+        });
+
+        pipeline.push({
             $addFields: {
                 location: {
                     $concat: [
                         {
-                            $let: {
-                                vars: {
-                                    country: { $arrayElemAt: ['$country', 0] },
+                            $reduce: {
+                                input: { $setDifference: ['$country', [{ $arrayElemAt: ['$country', 0] }]] },
+                                initialValue: {
+                                    $let: {
+                                        vars: {
+                                            country: { $arrayElemAt: ['$country', 0] },
+                                        },
+                                        in: {
+                                            $ifNull: ['$$country', 'null'],
+                                        },
+                                    },
                                 },
-                                in: '$$country.name.en',
+                                in: {
+                                    $concat: ['$$value', ', ', { $ifNull: ['$$this', 'null'] }],
+                                },
                             },
                         },
                         ' -> ',
-                        '$region.name.en',
+                        {
+                            $reduce: {
+                                input: { $setDifference: ['$region', [{ $arrayElemAt: ['$region', 0] }]] },
+                                initialValue: {
+                                    $let: {
+                                        vars: {
+                                            region: { $arrayElemAt: ['$region', 0] },
+                                        },
+                                        in: {
+                                            $ifNull: ['$$region', 'null'],
+                                        },
+                                    },
+                                },
+                                in: {
+                                    $concat: ['$$value', ', ', { $ifNull: ['$$this', 'null'] }],
+                                },
+                            },
+                        },
                         ' -> ',
-                        '$subRegion.name.en',
+                        {
+                            $reduce: {
+                                input: { $setDifference: ['$subRegion', [{ $arrayElemAt: ['$subRegion', 0] }]] },
+                                initialValue: {
+                                    $let: {
+                                        vars: {
+                                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                                        },
+                                        in: {
+                                            $ifNull: ['$$subRegion', 'null'],
+                                        },
+                                    },
+                                },
+                                in: {
+                                    $concat: ['$$value', ', ', { $ifNull: ['$$this', 'null'] }],
+                                },
+                            },
+                        },
                         ' -> ',
-                        '$retailSegment.name.en',
+                        {
+                            $reduce: {
+                                input: { $setDifference: ['$retailSegment', [{ $arrayElemAt: ['$retailSegment', 0] }]] },
+                                initialValue: {
+                                    $let: {
+                                        vars: {
+                                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                                        },
+                                        in: {
+                                            $ifNull: ['$$retailSegment', 'null'],
+                                        },
+                                    },
+                                },
+                                in: {
+                                    $concat: ['$$value', ', ', { $ifNull: ['$$this', 'null'] }],
+                                },
+                            },
+                        },
                         ' -> ',
-                        '$outlet.name.en',
+                        {
+                            $reduce: {
+                                input: { $setDifference: ['$outlet', [{ $arrayElemAt: ['$outlet', 0] }]] },
+                                initialValue: {
+                                    $let: {
+                                        vars: {
+                                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                                        },
+                                        in: {
+                                            $ifNull: ['$$outlet', 'null'],
+                                        },
+                                    },
+                                },
+                                in: {
+                                    $concat: ['$$value', ', ', { $ifNull: ['$$this', 'null'] }],
+                                },
+                            },
+                        },
                         ' -> ',
-                        '$branch.name.en',
+                        {
+                            $reduce: {
+                                input: { $setDifference: ['$branch', [{ $arrayElemAt: ['$branch', 0] }]] },
+                                initialValue: {
+                                    $let: {
+                                        vars: {
+                                            branch: { $arrayElemAt: ['$branch', 0] },
+                                        },
+                                        in: {
+                                            $ifNull: ['$$branch', 'null'],
+                                        },
+                                    },
+                                },
+                                in: {
+                                    $concat: ['$$value', ', ', { $ifNull: ['$$this', 'null'] }],
+                                },
+                            },
+                        },
                     ],
                 },
             },
