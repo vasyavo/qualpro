@@ -174,6 +174,35 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push(...[
+            {
+                $lookup: {
+                    from: 'positions',
+                    localField: 'createdBy.user.position',
+                    foreignField: '_id',
+                    as: 'createdBy.user.position',
+                },
+            },
+            {
+                $addFields: {
+                    'createdBy.user.position': {
+                        $let: {
+                            vars: {
+                                position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                            },
+                            in: {
+                                _id: '$$position._id',
+                                name: {
+                                    en: '$$position.name.en',
+                                    ar: '$$position.name.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        ]);
+
         pipeline.push({
             $lookup: {
                 from: CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
@@ -561,6 +590,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: '$marketingCampaign._id',
+                employee: '$marketingCampaign.createdBy.user',
                 location: 1,
                 branch: 1,
                 status: 1,
@@ -594,6 +624,34 @@ module.exports = (req, res, next) => {
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
                 total: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'employee',
+                foreignField: '_id',
+                as: 'employee',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                employee: {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$employee', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            name: {
+                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -635,6 +693,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
+                employee: 1,
                 location: 1,
                 branch: 1,
                 status: 1,
