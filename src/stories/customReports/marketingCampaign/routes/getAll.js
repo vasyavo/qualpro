@@ -101,6 +101,8 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 status: 1,
                 description: 1,
+                category: 1,
+                displayType: 1,
                 attachments: 1,
                 dateStart: 1,
                 dateEnd: 1,
@@ -121,6 +123,43 @@ module.exports = (req, res, next) => {
                         },
                     },
                     date: 1,
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'displayTypes',
+                localField: 'displayType',
+                foreignField: '_id',
+                as: 'displayType',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                category: {
+                    $let: {
+                        vars: {
+                            category: { $arrayElemAt: ['$category', 0] },
+                        },
+                        in: {
+                            _id: '$$category._id',
+                            name: {
+                                en: '$$category.name.en',
+                                ar: '$$category.name.ar',
+                            },
+                        },
+                    },
                 },
             },
         });
@@ -455,6 +494,11 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 status: 1,
                 attachments: 1,
+                displayType: {
+                    _id: 1,
+                    name: 1,
+                },
+                category: 1,
                 description: 1,
                 dateStart: 1,
                 dateEnd: 1,
@@ -485,6 +529,8 @@ module.exports = (req, res, next) => {
                 branch: '$records.branch',
                 country: '$records.country',
                 status: '$records.status',
+                displayType: '$records.displayType',
+                category: '$records.category',
                 attachments: '$records.attachments',
                 description: '$records.description',
                 dateStart: '$records.dateStart',
@@ -539,6 +585,8 @@ module.exports = (req, res, next) => {
                     },
                 },
                 attachments: 1,
+                category: 1,
+                displayType: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 createdBy: {
@@ -592,6 +640,8 @@ module.exports = (req, res, next) => {
                 status: 1,
                 description: 1,
                 country: 1,
+                category: 1,
+                displayType: 1,
                 attachments: 1,
                 dateStart: 1,
                 dateEnd: 1,
