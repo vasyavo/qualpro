@@ -136,58 +136,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user': {
-                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
-                    },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
-                foreignField: '_id',
-                as: 'createdBy.user',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                createdBy: {
-                    user: {
-                        $let: {
-                            vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
-                            },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
-                                },
-                                position: '$$user.position',
-                            },
-                        },
-                    },
-                    date: '$createdBy.date',
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
-
         pipeline.push({
             $lookup: {
                 from: 'branches',
@@ -377,7 +325,7 @@ module.exports = (req, res, next) => {
                         in: {
                             status: '$$consumer.status',
                             title: '$$consumer.title',
-                            createdBy: '$$consumer.createdBy.user',
+                            createdBy: '$$consumer.createdBy',
                             countAnswered: '$$consumer.countAnswered',
                             startDate: '$$consumer.startDate',
                             dueDate: '$$consumer.dueDate',
@@ -393,6 +341,58 @@ module.exports = (req, res, next) => {
                 },
             },
         });
+
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+            pipeline.push({
+                $match: {
+                    'consumer.createdBy.user': {
+                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                    },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'consumer.createdBy.user',
+                foreignField: '_id',
+                as: 'consumer.createdBy.user',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                createdBy: {
+                    user: {
+                        $let: {
+                            vars: {
+                                user: { $arrayElemAt: ['$consumer.createdBy.user', 0] },
+                            },
+                            in: {
+                                _id: '$$user._id',
+                                name: {
+                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                },
+                                position: '$$user.position',
+                            },
+                        },
+                    },
+                    date: '$consumer.createdBy.date',
+                },
+            },
+        });
+
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user.position': {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $match: {
