@@ -557,6 +557,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country._id.toString();
             });
+            item.price = Number(item.price);
             if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
                 item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
                 item.price = `${item.price} $`;
