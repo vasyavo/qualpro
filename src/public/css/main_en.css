@@ -7179,6 +7179,7 @@ ul.newSelectList .miniStylePagination {
 }
 .descriptionViewContent {
   display: block;
+  overflow: auto;
 }
 .banner_inner.bannerFullWidth .bannerBig,
 .banner_inner.bannerFullWidth .banner_textBlock {
