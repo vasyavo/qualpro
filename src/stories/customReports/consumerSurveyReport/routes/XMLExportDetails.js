@@ -114,12 +114,12 @@ module.exports = (req, res, next) => {
                 $match: {
                     $or: [
                         {
-                            'customer.nationality.en': {
+                            'customer.nationality.name.en': {
                                 $in: queryFilter.nationality,
                             },
                         },
                         {
-                            'customer.nationality.ar': {
+                            'customer.nationality.name.ar': {
                                 $in: queryFilter.nationality,
                             },
                         },
