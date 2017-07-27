@@ -128,58 +128,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user': {
-                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
-                    },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
-                foreignField: '_id',
-                as: 'createdBy.user',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                createdBy: {
-                    user: {
-                        $let: {
-                            vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
-                            },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
-                                },
-                                position: '$$user.position',
-                            },
-                        },
-                    },
-                    date: '$createdBy.date',
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
-
         pipeline.push({
             $lookup: {
                 from: 'branches',
@@ -451,7 +399,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 title: '$consumer.title',
-                author: '$consumer.createdBy.user',
+                author: '$createdBy.user',
                 status: '$consumer.status',
                 numberOfRespondents: '$consumer.countAnswered',
                 startDate: { $dateToString: { format: '%m/%d/%Y', date: '$consumer.startDate' } },
@@ -516,31 +464,7 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'author',
-                foreignField: '_id',
-                as: 'author',
-            },
-        });
-
-        pipeline.push({
             $addFields: {
-                author: {
-                    $let: {
-                        vars: {
-                            author: { $arrayElemAt: ['$author', 0] },
-                        },
-                        in: {
-                            en: {
-                                $concat: ['$$author.firstName.en', ' ', '$$author.lastName.en'],
-                            },
-                            ar: {
-                                $concat: ['$$author.firstName.ar', ' ', '$$author.lastName.ar'],
-                            },
-                        },
-                    },
-                },
                 country: {
                     $let: {
                         vars: {
@@ -624,7 +548,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.retailSegment.name[currentLanguage] || item.retailSegment.name[anotherLanguage] }</td>
                                 <td>${item.outlet.name[currentLanguage] || item.outlet.name[anotherLanguage] }</td>
                                 <td>${item.branch.name[currentLanguage] || item.branch.name[anotherLanguage] }</td>
-                                <td>${item.author[currentLanguage] || item.author[anotherLanguage] }</td>
+                                <td>${item.author.name[currentLanguage] || item.author.name[anotherLanguage] }</td>
                                 <td>${item.status}</td>
                                 <td>${item.numberOfRespondents}</td>
                                 <td>${item.startDate}</td>
