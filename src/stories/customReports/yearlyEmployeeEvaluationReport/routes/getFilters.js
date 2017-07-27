@@ -487,6 +487,44 @@ module.exports = (req, res, next) => {
             branches: [],
         };
 
+        const overallPerformance = [{
+            _id: '1',
+            name: {
+                en: 'New',
+                ar: '',
+            },
+        }, {
+            _id: '2',
+            name: {
+                en: 'Below Standard',
+                ar: '',
+            },
+        }, {
+            _id: '3',
+            name: {
+                en: 'Standard',
+                ar: '',
+            },
+        }, {
+            _id: '4',
+            name: {
+                en: 'Superior',
+                ar: '',
+            },
+        }, {
+            _id: '5',
+            name: {
+                en: 'Exceptional',
+                ar: '',
+            },
+        }];
+        response.overallPerformance = response.overallPerformance.map((item) => {
+            return `${item}`;
+        });
+        response.overallPerformance = overallPerformance.filter((item) => {
+            return response.overallPerformance.indexOf(item._id) > -1;
+        });
+
         response.analyzeBy = [
             {
                 name: {
