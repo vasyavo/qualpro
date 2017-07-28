@@ -1,7 +1,7 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$questionnaireId',
+            _id: '$questionnaryId',
             region: { $addToSet: '$region' },
         },
     });
