@@ -236,7 +236,7 @@ module.exports = (queryFilter, timeFilter, personnel) => {
     pipeline.push({
         $group: {
             _id: null,
-            categories: { $addToSet: '$category' },
+            categories: { $addToSet: { $arrayElemAt: ['$category', 0] } },
             displayTypes: { $addToSet: '$displayType' },
             statuses: { $addToSet: '$status' },
             publishers: { $addToSet: '$createdBy.user._id' },
