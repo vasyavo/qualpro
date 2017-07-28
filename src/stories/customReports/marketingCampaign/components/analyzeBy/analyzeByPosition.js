@@ -141,8 +141,37 @@ module.exports = (pipeline, queryFilter) => {
     }
 
     pipeline.push({
+        $lookup: {
+            from: 'personnels',
+            localField: 'marketingCampaign.createdBy.user',
+            foreignField: '_id',
+            as: 'marketingCampaign.createdBy.user',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            marketingCampaign: {
+                createdBy: {
+                    user: {
+                        $let: {
+                            vars: {
+                                user: { $arrayElemAt: ['$marketingCampaign.createdBy.user', 0] },
+                            },
+                            in: {
+                                _id: '$$user._id',
+                                position: '$$user.position',
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
         $group: {
-            _id: '$publisherPosition',
+            _id: '$marketingCampaign.createdBy.user.position',
             marketingCampaign: { $first: '$_id' },
             count: { $sum: 1 },
         },
