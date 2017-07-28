@@ -502,7 +502,7 @@ var Rating = function () {
             dbQuery = MonthlyModel.find(conditions)
                 .sort({
                     dataKey: -1
-                });
+                }).populate('createdBy.user', '_id firstName lastName');;
 
             if (query.recentsNum) {
                 dbQuery = dbQuery.limit(+query.recentsNum);
