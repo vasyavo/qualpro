@@ -209,11 +209,11 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.skillsRate && queryFilter.skillsRate.length) {
+        if (queryFilter.skillsRate) {
             pipeline.push({
                 $match: {
                     skillsRate: {
-                        $gte: queryFilter.skillsRate,
+                        $gte: parseInt(queryFilter.skillsRate, 10),
                     },
                 },
             });
