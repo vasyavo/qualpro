@@ -1,10 +1,48 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
+            _id: '$questionnaireId',
+            subRegion: { $addToSet: '$subRegion' },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$subRegion',
+    });
+
+    pipeline.push({
+        $group: {
             _id: '$subRegion._id',
-            region: { $first: '$region' },
             subRegion: { $first: '$subRegion' },
             count: { $sum: 1 },
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'subRegion.parent',
+            foreignField: '_id',
+            as: 'region',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            count: 1,
+            region: {
+                $let: {
+                    vars: {
+                        region: { $arrayElemAt: ['$region', 0] },
+                    },
+                    in: {
+                        _id: '$$region._id',
+                        name: '$$region.name',
+                        parent: '$$region.parent',
+                    },
+                },
+            },
+            subRegion: 1,
         },
     });
 

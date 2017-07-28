@@ -1,13 +1,136 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
+            _id: '$questionnaireId',
+            branch: { $addToSet: '$branch' },
+        },
+    });
+
+    pipeline.push({
+        $unwind: '$branch',
+    });
+
+    pipeline.push({
+        $group: {
             _id: '$branch._id',
-            region: { $first: '$region' },
-            subRegion: { $first: '$subRegion' },
             branch: { $first: '$branch' },
-            retailSegment: { $first: '$retailSegment' },
-            outlet: { $first: '$outlet' },
             count: { $sum: 1 },
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'retailSegments',
+            localField: 'branch.retailSegment',
+            foreignField: '_id',
+            as: 'retailSegment',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            count: 1,
+            branch: 1,
+            retailSegment: {
+                $let: {
+                    vars: {
+                        retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                    },
+                    in: {
+                        _id: '$$retailSegment._id',
+                        name: '$$retailSegment.name',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'outlets',
+            localField: 'branch.outlet',
+            foreignField: '_id',
+            as: 'outlet',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            count: 1,
+            branch: 1,
+            retailSegment: 1,
+            outlet: {
+                $let: {
+                    vars: {
+                        outlet: { $arrayElemAt: ['$outlet', 0] },
+                    },
+                    in: {
+                        _id: '$$outlet._id',
+                        name: '$$outlet.name',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'branch.subRegion',
+            foreignField: '_id',
+            as: 'subRegion',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            count: 1,
+            branch: 1,
+            retailSegment: 1,
+            outlet: 1,
+            subRegion: {
+                $let: {
+                    vars: {
+                        subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                    },
+                    in: {
+                        _id: '$$subRegion._id',
+                        name: '$$subRegion.name',
+                        parent: '$$subRegion.parent',
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'subRegion.parent',
+            foreignField: '_id',
+            as: 'region',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            count: 1,
+            branch: 1,
+            retailSegment: 1,
+            outlet: 1,
+            subRegion: 1,
+            region: {
+                $let: {
+                    vars: {
+                        region: { $arrayElemAt: ['$region', 0] },
+                    },
+                    in: {
+                        _id: '$$region._id',
+                        name: '$$region.name',
+                        parent: '$$region.parent',
+                    },
+                },
+            },
         },
     });
 
