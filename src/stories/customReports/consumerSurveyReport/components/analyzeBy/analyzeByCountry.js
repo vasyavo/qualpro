@@ -1,8 +1,8 @@
 module.exports = (pipeline) => {
     pipeline.push({
         $group: {
-            _id: '$questionnaireId',
-            country: { $addToSet: '$country' },
+            _id: '$questionnaryId',
+            country: { $addToSet: '$region.parent' },
         },
     });
 
@@ -12,7 +12,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $group: {
-            _id: '$country.parent',
+            _id: '$country',
             count: { $sum: 1 },
         },
     });
