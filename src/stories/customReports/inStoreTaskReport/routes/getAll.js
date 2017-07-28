@@ -505,6 +505,7 @@ module.exports = (req, res, next) => {
                                                 _id: '$$user._id',
                                                 firstName: '$$user.firstName',
                                                 lastName: '$$user.lastName',
+                                                imageSrc: '$$user.imageSrc',
                                             },
 
                                         },
