@@ -386,6 +386,18 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 assignedTo: {
                     $map: {
                         input: '$assignedTo',
@@ -399,6 +411,15 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
             },
         });
 
@@ -460,6 +481,36 @@ module.exports = (req, res, next) => {
                                         preview: '$$attachment.preview',
                                     },
                                 },
+                            },
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$comment.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                            },
+
+                                        },
+                                    },
+                                    0,
+                                ],
                             },
                         },
                     },
