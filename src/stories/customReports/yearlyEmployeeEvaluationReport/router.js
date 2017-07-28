@@ -16,6 +16,6 @@ router.post('/charts', getCharts);
 router.get('/personnelSummary/:personnelId', getPersonnelSummary);
 router.get('/personnelSkillsRate/:personnelId', getPersonnelSkillsRate);
 router.get('/personnelPerformanceRating/:personnelId', getPersonnelPerformanceRating);
-router.get('/export', XMLExport);
+router.post('/export', XMLExport);
 
 module.exports = router;
