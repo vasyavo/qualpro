@@ -184,11 +184,11 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.rate && queryFilter.rate.length) {
+        if (queryFilter.rate) {
             pipeline.push({
                 $match: {
                     rating: {
-                        $gte: queryFilter.rate,
+                        $gte: parseInt(queryFilter.rate, 10),
                     },
                 },
             });
