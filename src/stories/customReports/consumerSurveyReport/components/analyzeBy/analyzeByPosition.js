@@ -1,24 +1,8 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $lookup: {
-            from: 'personnels',
-            localField: 'consumer.createdBy.user',
-            foreignField: '_id',
-            as: 'publisher',
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            publisher: null,
-            position: {
-                $let: {
-                    vars: {
-                        publisher: { $arrayElemAt: ['$publisher', 0] },
-                    },
-                    in: '$$publisher.position',
-                },
-            },
+        $group: {
+            _id: '$questionnaireId',
+            position: { $first: '$createdBy.user.position' },
         },
     });
 
