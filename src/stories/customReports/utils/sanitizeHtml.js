@@ -10,5 +10,6 @@ const defaultOptions = {
 };
 
 module.exports = (html, options = defaultOptions) => {
-    return _.unescape(sanitizeHtml(XmlEntities.decode(Html5Entities.decode(emojiStrip(html))), options));
+    // remove magic \u001b
+    return _.unescape(sanitizeHtml(XmlEntities.decode(Html5Entities.decode(emojiStrip(html))), options)).replace('\u001b', '');
 };
