@@ -41,7 +41,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, 'displayType',
-            'status', 'publisher', CONTENT_TYPES.POSITION,
+            'status', 'publisher', CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
 

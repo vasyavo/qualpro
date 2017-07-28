@@ -14,6 +14,15 @@ module.exports = (pipeline, queryFilter) => {
         $unwind: '$marketingCampaign',
     });
 
+    if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+        pipeline.push({
+            $match: {
+                'marketingCampaign.createdBy.user': {
+                    $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                },
+            },
+        });
+    }
 
     if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
         pipeline.push({
