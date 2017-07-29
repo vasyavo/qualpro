@@ -2,6 +2,7 @@ const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const ShelfShareModel = require('./../../../../types/shelfShare/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -9,6 +10,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -32,8 +34,6 @@ module.exports = (req, res, next) => {
         },
     };
 
-    let currentLanguage;
-
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
@@ -44,8 +44,6 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.BRAND, CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
-
-        currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -75,14 +73,16 @@ module.exports = (req, res, next) => {
         if (timeFilter) {
             timeFilter.map((frame) => {
                 $timeMatch.$or.push({
-                    $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
-                    ],
+                    'createdBy.date': {
+                        $gte: moment(frame.from, 'MM/DD/YYYY')._d,
+                        $lte: moment(frame.to, 'MM/DD/YYYY').add(1, 'day')._d,
+                    },
+                });
+                $timeMatch.$or.push({
+                    'editedBy.date': {
+                        $gte: moment(frame.from, 'MM/DD/YYYY')._d,
+                        $lte: moment(frame.to, 'MM/DD/YYYY').add(1, 'day')._d,
+                    },
                 });
                 return frame;
             });
@@ -133,12 +133,6 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 category: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
                 brands: 1,
                 createdBy: {
                     user: {
@@ -148,8 +142,6 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$user._id',
-                                lastName: '$$user.lastName',
-                                firstName: '$$user.firstName',
                                 position: '$$user.position',
                             },
                         },
@@ -184,44 +176,10 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $lookup: {
-                from: 'positions',
-                localField: 'createdBy.user.position',
-                foreignField: '_id',
-                as: 'createdBy.user.position',
-            },
-        }, {
-            $addFields: {
-                'createdBy.user.position': {
-                    $let: {
-                        vars: {
-                            position: { $arrayElemAt: ['$createdBy.user.position', 0] },
-                        },
-                        in: {
-                            _id: '$$position._id',
-                            name: {
-                                en: '$$position.name.en',
-                                ar: '$$position.name.ar',
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
-        pipeline.push({
             $group: {
                 _id: {
                     category: '$category',
                     brand: '$brands.brand',
-                    country: '$country',
-                    region: '$region',
-                    subRegion: '$subRegion',
-                    retailSegment: '$retailSegment',
-                    outlet: '$outlet',
-                    branch: '$branch',
-                    createdBy: '$createdBy',
-
                 },
                 maxLength: { $max: '$brands.length' },
                 minLength: { $min: '$brands.length' },
@@ -244,7 +202,6 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                createdBy: 1,
                 maxLength: 1,
                 minLength: 1,
                 avgLength: 1,
@@ -264,20 +221,11 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
-                _id: {
-                    category: '$_id.category',
-                    country: '$_id.country',
-                    region: '$_id.region',
-                    subRegion: '$_id.subRegion',
-                    retailSegment: '$_id.retailSegment',
-                    outlet: '$_id.outlet',
-                    branch: '$_id.branch',
-                },
+                _id: '$_id.category',
                 brands: {
                     $push: {
                         _id: '$_id.brand',
                         name: '$name',
-                        createdBy: '$_id.createdBy',
                         maxLength: '$maxLength',
                         minLength: '$minLength',
                         avgLength: '$avgLength',
@@ -293,75 +241,37 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $group: {
+                _id: null,
+                setShelfShare: { $push: '$$ROOT' },
+                total: { $sum: 1 },
+            },
+        });
+
+        pipeline.push({
+            $unwind: {
+                path: '$setShelfShare',
+                preserveNullAndEmptyArrays: true,
+            },
+        });
+
+        pipeline.push({
             $project: {
-                _id: 1,
-                brands: 1,
-                totalMinLength: 1,
-                totalMaxLength: 1,
-                totalAvgLength: 1,
+                _id: '$setShelfShare._id',
+                brands: '$setShelfShare.brands',
+                totalMinLength: '$setShelfShare.totalMinLength',
+                totalMaxLength: '$setShelfShare.totalMaxLength',
+                totalAvgLength: '$setShelfShare.totalAvgLength',
+                total: 1,
             },
         });
 
         pipeline.push({
             $lookup: {
                 from: 'categories',
-                localField: '_id.category',
+                localField: '_id',
                 foreignField: '_id',
                 as: 'category',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: '_id.country',
-                foreignField: '_id',
-                as: 'country',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: '_id.region',
-                foreignField: '_id',
-                as: 'region',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: '_id.subRegion',
-                foreignField: '_id',
-                as: 'subRegion',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'retailSegments',
-                localField: '_id.retailSegment',
-                foreignField: '_id',
-                as: 'retailSegment',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'outlets',
-                localField: '_id.outlet',
-                foreignField: '_id',
-                as: 'outlet',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: '_id.branch',
-                foreignField: '_id',
-                as: 'branch',
             },
         });
 
@@ -372,72 +282,7 @@ module.exports = (req, res, next) => {
                 totalMinLength: 1,
                 totalMaxLength: 1,
                 totalAvgLength: 1,
-                country: {
-                    $let: {
-                        vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                        },
-                        in: {
-                            _id: '$$country._id',
-                            name: '$$country.name',
-                        },
-                    },
-                },
-                region: {
-                    $let: {
-                        vars: {
-                            region: { $arrayElemAt: ['$region', 0] },
-                        },
-                        in: {
-                            _id: '$$region._id',
-                            name: '$$region.name',
-                        },
-                    },
-                },
-                subRegion: {
-                    $let: {
-                        vars: {
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                        },
-                        in: {
-                            _id: '$$subRegion._id',
-                            name: '$$subRegion.name',
-                        },
-                    },
-                },
-                retailSegment: {
-                    $let: {
-                        vars: {
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                        },
-                        in: {
-                            _id: '$$retailSegment._id',
-                            name: '$$retailSegment.name',
-                        },
-                    },
-                },
-                outlet: {
-                    $let: {
-                        vars: {
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
-                        },
-                        in: {
-                            _id: '$$outlet._id',
-                            name: '$$outlet.name',
-                        },
-                    },
-                },
-                branch: {
-                    $let: {
-                        vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
-                        },
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
-                        },
-                    },
-                },
+                total: 1,
                 name: {
                     $let: {
                         vars: {
@@ -446,6 +291,14 @@ module.exports = (req, res, next) => {
                         in: '$$category.name',
                     },
                 },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                total: { $first: '$total' },
+                data: { $push: '$$ROOT' },
             },
         });
 
@@ -466,60 +319,128 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        /* eslint-disable */
+        result = result.length ?
+            result[0] : { data: [], total: 0 };
+
+        result.data.forEach(item => {
+            item.brands.forEach(brand => {
+                brand.minLength = parseFloat(brand.minLength).toFixed(2);
+                brand.minPercent = parseFloat(brand.minPercent).toFixed(2);
+                brand.avgLength = parseFloat(brand.avgLength).toFixed(2);
+                brand.avgPercent = parseFloat(brand.avgPercent).toFixed(2);
+                brand.maxLength = parseFloat(brand.maxLength).toFixed(2);
+                brand.maxPercent = parseFloat(brand.maxPercent).toFixed(2);
+            });
+
+            item.totalMinLength = parseFloat(item.totalMinLength).toFixed(2);
+            item.totalAvgLength = parseFloat(item.totalAvgLength).toFixed(2);
+            item.totalMaxLength = parseFloat(item.totalMaxLength).toFixed(2);
+        });
+
+        const setBrands = result.data.map(item => {
+            return item.brands.map(brand => brand.name);
+        });
+        let orderedBrands = _(setBrands)
+            .flatten()
+            .sortBy('en')
+            .uniqBy('en')
+            .value();
+
+        const ourBrand = orderedBrands
+            .filter(brand => brand.en === 'Al alali')
+            .slice()
+            .pop();
+
+        if (ourBrand) {
+            orderedBrands = [
+                ourBrand,
+                ...orderedBrands
+                    .filter(brand => brand.en !== 'Al alali'),
+            ];
+        }
+
+        const brandTitle = orderedBrands.map(brand => (
+            `<th colspan=3>${sanitizeHtml(brand.en)}</th>`
+        )).join('');
+
+        const chastVerstki1 = orderedBrands.map(() => `
+                <th >min</th>
+                <th >avg</th>
+                <th >max</th>
+        `).join('');
+
+        const chastVerstki2 = result.data.map(item => `
+        <tr>
+        <td rowSpan=2>${item.name.en}</td>
+        <td>m</td>
+        <td>${item.totalMinLength}</td>
+        <td>${item.totalAvgLength}</td>
+        <td>${item.totalMaxLength}</td>
+        ${orderedBrands.map(brand => {
+            const brandByItem = _.find(item.brands, { name: brand });
+
+            if (brandByItem) {
+                return `
+                    <td>${brandByItem.minLength}</td>,
+                    <td>${brandByItem.avgLength}</td>,
+                    <td>${brandByItem.maxLength}</td>,
+                `;
+            }
+
+            return `
+                <td />,
+                <td />,
+                <td />,
+            `;
+        }).join('')}
+        </tr>,
+        <tr>
+        <td>%</td>
+        <td>${item.totalMinPercent || 0}</td>
+        <td>${item.totalAvgPercent || 0}</td>
+        <td>${item.totalMaxPercent || 0}</td>
+        ${_.flatten(orderedBrands.map(brand => {
+            const brandByItem = _.find(item.brands, { name: brand });
+
+            if (brandByItem) {
+                return `
+                    <td>${brandByItem.minPercent}</td>
+            <td>${brandByItem.avgPercent}</td>
+            <td>${brandByItem.maxPercent}</td>
+            `;
+            }
+
+            return `
+            <td />
+            <td />
+            <td />
+            `;
+        })).join('')}
+        </tr>,
+        `).join('');
+
         const verstka = `
             <table>
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Position</th>
-                        <th>Country</th>
-                        <th>Region</th>
-                        <th>Sub Region</th>
-                        <th>Retail Segment</th>
-                        <th>Outlet</th>
-                        <th>Branch</th>
-                        <th>Product</th>
-                        <th>Brand</th>
-                        <th>Min (M / %)</th>
-                        <th>Max (M / %)</th>
-                        <th>Avg (M / %)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${result.map((product) => {
-                        return `
-                                ${product.brands.map((brand) => {
-                                    return `
-                                        <tr>
-                                            <td>${brand.createdBy.user.firstName[currentLanguage]} ${brand.createdBy.user.lastName[currentLanguage]}</td>
-                                            <td>${brand.createdBy.user.position.name[currentLanguage]}</td>
-                                            <td>${product.country.name[currentLanguage]}</td>
-                                            <td>${product.region.name[currentLanguage]}</td>
-                                            <td>${product.subRegion.name[currentLanguage]}</td>
-                                            <td>${product.retailSegment.name[currentLanguage]}</td>
-                                            <td>${product.outlet.name[currentLanguage]}</td>
-                                            <td>${product.branch.name[currentLanguage]}</td>
-                                            <td>${product.name[currentLanguage]}</td>
-                                            <td>${brand.name[currentLanguage]}</td>
-                                            <td>${parseFloat(brand.minLength).toFixed(2) + ' / ' + parseFloat(brand.minPercent).toFixed(2)}</td>
-                                            <td>${parseFloat(brand.maxLength).toFixed(2) + ' / ' + parseFloat(brand.maxPercent).toFixed(2)}</td>
-                                            <td>${parseFloat(brand.avgLength).toFixed(2) + ' / ' + parseFloat(brand.avgPercent).toFixed(2)}</td>
-                                        </tr>
-                                    `;
-                                })}
-                                <tr>
-                                    <td></td>
-                                    <td>TOTAL</td>
-                                    <td>${parseFloat(product.totalMinLength).toFixed(2)}</td>
-                                    <td>${parseFloat(product.totalMaxLength).toFixed(2)}</td>
-                                    <td>${parseFloat(product.totalAvgLength).toFixed(2)}</td>
-                                </tr>
-                        `;    
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
+            <thead>
+            <tr>
+            <th rowSpan=2>Product</th>
+            <th rowSpan=2>m / %</th>
+            <th colSpan=3>TOTAL</th>
+            ${brandTitle}
+        </tr>
+        <tr>
+        <th>min</th>
+        <th>avg</th>
+        <th>max</th>
+        ${chastVerstki1}
+        </tr>
+        </thead>
+        <tbody>
+        ${chastVerstki2}
+        </tbody>
+        </table>
+`;
+
         /* eslint-enable */
 
         conversion(verstka, (err, stream) => {
