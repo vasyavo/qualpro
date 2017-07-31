@@ -24,7 +24,7 @@ module.exports = (pipeline) => {
         $group: {
             _id: null,
             data: {
-                $addToSet: {
+                $push: {
                     _id: '$publisher._id',
                     name: '$publisher.name',
                     count: '$count',
