@@ -381,24 +381,24 @@ module.exports = (req, res, next) => {
 
             if (brandByItem) {
                 return `
-                    <td>${brandByItem.minLength}</td>,
-                    <td>${brandByItem.avgLength}</td>,
-                    <td>${brandByItem.maxLength}</td>,
+                    <td>${brandByItem.minLength}</td>
+                    <td>${brandByItem.avgLength}</td>
+                    <td>${brandByItem.maxLength}</td>
                 `;
             }
 
             return `
-                <td />,
-                <td />,
-                <td />,
+                <td />
+                <td />
+                <td />
             `;
         }).join('')}
-        </tr>,
+        </tr>
         <tr>
         <td>%</td>
-        <td>${item.totalMinPercent || 0}</td>
-        <td>${item.totalAvgPercent || 0}</td>
-        <td>${item.totalMaxPercent || 0}</td>
+        <td>${item.totalMinPercent || ''}</td>
+        <td>${item.totalAvgPercent || ''}</td>
+        <td>${item.totalMaxPercent || ''}</td>
         ${_.flatten(orderedBrands.map(brand => {
             const brandByItem = _.find(item.brands, { name: brand });
 
@@ -416,7 +416,7 @@ module.exports = (req, res, next) => {
             <td />
             `;
         })).join('')}
-        </tr>,
+        </tr>
         `).join('');
 
         const verstka = `
