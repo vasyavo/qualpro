@@ -355,7 +355,7 @@ module.exports = [
         cms: {
             edit: false,
             write: true,
-            read: true
+            read: false
         },
         mobile: {
             edit: false,
