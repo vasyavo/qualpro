@@ -79,14 +79,14 @@ module.exports = (pipeline) => {
                     en: {
                         $concat: [
                             '$country.name.en',
-                            ' -> ',
+                            ' / ',
                             '$region.name.en',
                         ],
                     },
                     ar: {
                         $concat: [
                             '$country.name.ar',
-                            ' -> ',
+                            ' / ',
                             '$region.name.ar',
                         ],
                     },

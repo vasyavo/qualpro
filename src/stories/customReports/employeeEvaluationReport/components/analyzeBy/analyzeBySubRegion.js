@@ -105,18 +105,18 @@ module.exports = (pipeline) => {
                     en: {
                         $concat: [
                             '$country.name.en',
-                            ' -> ',
+                            ' / ',
                             '$region.name.en',
-                            ' -> ',
+                            ' / ',
                             '$subRegion.name.en',
                         ],
                     },
                     ar: {
                         $concat: [
                             '$country.name.en',
-                            ' -> ',
+                            ' / ',
                             '$region.name.ar',
-                            ' -> ',
+                            ' / ',
                             '$subRegion.name.ar',
                         ],
                     },

@@ -103,28 +103,30 @@ module.exports = (pipeline) => {
             location: {
                 _id: '$branch._id',
                 name: {
-                    en: {
-                        $concat: [
-                            '$country.name.en',
-                            ' -> ',
-                            '$region.name.en',
-                            ' -> ',
-                            '$subRegion.name.en',
-                            ' -> ',
-                            '$branch.name.en',
-                        ],
-                    },
-                    ar: {
-                        $concat: [
-                            '$country.name.ar',
-                            ' -> ',
-                            '$region.name.ar',
-                            ' -> ',
-                            '$subRegion.name.ar',
-                            ' -> ',
-                            '$branch.name.ar',
-                        ],
-                    },
+                    en: [
+                        {
+                            $concat: [
+                                '$country.name.en',
+                                ' / ',
+                                '$region.name.en',
+                                ' / ',
+                                '$subRegion.name.en',
+                            ],
+                        },
+                        '$branch.name.en',
+                    ],
+                    ar: [
+                        {
+                            $concat: [
+                                '$country.name.ar',
+                                ' / ',
+                                '$region.name.ar',
+                                ' / ',
+                                '$subRegion.name.ar',
+                            ],
+                        },
+                        '$branch.name.ar',
+                    ],
                 },
             },
         },
