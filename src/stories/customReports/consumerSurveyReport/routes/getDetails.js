@@ -7,6 +7,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
