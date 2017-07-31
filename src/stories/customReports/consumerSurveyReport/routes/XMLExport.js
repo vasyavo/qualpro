@@ -659,8 +659,8 @@ module.exports = (req, res, next) => {
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.location}</td>
-                                <td>${item.publisher.name[currentLanguage] || item.publisher.name[anotherLanguage]}}</td>
+                                <td>${sanitizeHtml(item.location)}</td>
+                                <td>${item.publisher.name[currentLanguage] || item.publisher.name[anotherLanguage]}</td>
                                 <td>${item.publisher.position.name[currentLanguage] || item.publisher.position.name[anotherLanguage]}</td>
                                 <td>${sanitizeHtml(item.title[currentLanguage]) || sanitizeHtml(item.title[anotherLanguage])}</td>
                                 <td>${item.status}</td>
