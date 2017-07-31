@@ -531,6 +531,13 @@ module.exports = (req, res, next) => {
         const response = result.length ?
             result[0] : { data: [], total: 0 };
 
+        response.data.forEach(item => {
+            item.title = {
+                en: sanitizeHtml(item.title.en),
+                ar: sanitizeHtml(item.title.ar),
+            };
+        });
+
         res.status(200).send(response);
     });
 };
