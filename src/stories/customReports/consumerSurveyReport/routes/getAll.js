@@ -423,6 +423,7 @@ module.exports = (req, res, next) => {
             $group: {
                 _id: '$questionnaryId',
                 consumer: { $first: '$consumer' },
+                createdBy: { $first: '$createdBy' },
                 country: {
                     $addToSet: {
                         $let: {
@@ -600,35 +601,12 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'setItems.consumer.createdBy',
-                foreignField: '_id',
-                as: 'publisher',
-            },
-        });
-
-        pipeline.push({
             $project: {
                 total: 1,
                 location: '$setItems.location',
                 status: '$setItems.consumer.status',
                 title: '$setItems.consumer.title',
-                publisherName: {
-                    $let: {
-                        vars: {
-                            publisher: { $arrayElemAt: ['$publisher', 0] },
-                        },
-                        in: {
-                            en: {
-                                $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'],
-                            },
-                            ar: {
-                                $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'],
-                            },
-                        },
-                    },
-                },
+                publisherName: '$setItems.createdBy.user.name',
                 countAnswered: '$setItems.consumer.countAnswered',
                 startDate: { $dateToString: { format: '%m/%d/%Y', date: '$setItems.consumer.startDate' } },
                 dueDate: { $dateToString: { format: '%m/%d/%Y', date: '$setItems.consumer.dueDate' } },
