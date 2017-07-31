@@ -20,6 +20,33 @@ module.exports = (queryFilter, timeFilter, personnel) => {
             $match: $generalMatch,
         });
     }
+    pipeline.push({
+        $lookup: {
+            from: 'personnels',
+            localField: 'createdBy.user',
+            foreignField: '_id',
+            as: 'createdBy.user',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            createdBy: {
+                user: {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$createdBy.user', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            position: '$$user.position',
+                        },
+                    },
+                },
+                date: '$createdBy.date',
+            },
+        },
+    });
 
 
     pipeline.push({
@@ -423,7 +450,7 @@ module.exports = (queryFilter, timeFilter, personnel) => {
     pipeline.push({
         $lookup: {
             from: 'personnels',
-            localField: 'personnels',
+            localField: 'personnels._id',
             foreignField: '_id',
             as: 'personnels',
         },
