@@ -417,14 +417,14 @@ module.exports = (req, res, next) => {
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.region[currentLanguage] ? item.region[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.subRegion[currentLanguage] ? item.subRegion[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.retailSegment[currentLanguage] ? item.retailSegment[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.outlet[currentLanguage] ? item.outlet[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : ''}</td>
+                                <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.region[currentLanguage] ? item.region[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.subRegion[currentLanguage] ? item.subRegion[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.retailSegment[currentLanguage] ? item.retailSegment[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.outlet[currentLanguage] ? item.outlet[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : 'N/A'}</td>
                                 <td>${item.title[currentLanguage]}</td>
-                                <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
+                                <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : 'N/A'}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.position.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.description[currentLanguage])}</td>
