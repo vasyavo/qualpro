@@ -178,6 +178,16 @@ module.exports = (pipeline, queryFilter) => {
         },
     });
 
+    if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+        pipeline.push({
+            $match: {
+                'marketingCampaign.createdBy.user.position': {
+                    $in: queryFilter[CONTENT_TYPES.POSITION],
+                },
+            },
+        });
+    }
+
     pipeline.push({
         $group: {
             _id: '$marketingCampaign.createdBy.user.position',
