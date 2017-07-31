@@ -445,10 +445,10 @@ module.exports = (req, res, next) => {
                         let avgPrice = item.avg.toFixed(2);
                         let maxPrice = item.max.toFixed(2);
                         if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
-                            medPrice = parseFloat(medPrice * currentCountry.currencyInUsd).toFixed(2);
-                            minPrice = parseFloat(minPrice * currentCountry.currencyInUsd).toFixed(2);
-                            avgPrice = parseFloat(avgPrice * currentCountry.currencyInUsd).toFixed(2);
-                            maxPrice = parseFloat(maxPrice * currentCountry.currencyInUsd).toFixed(2);
+                            medPrice = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
+                            minPrice = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
+                            avgPrice = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
+                            maxPrice = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
                             medPrice = `${medPrice} $`;
                             minPrice = `${minPrice} $`;
                             avgPrice = `${avgPrice} $`;
