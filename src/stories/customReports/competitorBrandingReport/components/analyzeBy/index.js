@@ -5,6 +5,9 @@ const analyzeByMethods = {
     branch: require('./analyzeByBranch'),
     publisher: require('./analyzeByPublisher'),
     publisherPosition: require('./analyzeByPublisherPosition'),
+    category: require('./analyzeByCategory'),
+    brand: require('./analyzeByBrand'),
+    displayType: require('./analyzeByDisplayType'),
 };
 
 module.exports = (pipeline, analyzeBy) => {

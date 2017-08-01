@@ -474,7 +474,7 @@ module.exports = (req, res, next) => {
                                 },
                             },
                         },
-                        ' -> ',
+                        ' / ',
                         {
                             $reduce: {
                                 input: { $setDifference: ['$region', [{ $arrayElemAt: ['$region', 0] }]] },
@@ -493,7 +493,7 @@ module.exports = (req, res, next) => {
                                 },
                             },
                         },
-                        ' -> ',
+                        ' / ',
                         {
                             $reduce: {
                                 input: { $setDifference: ['$subRegion', [{ $arrayElemAt: ['$subRegion', 0] }]] },
@@ -512,7 +512,7 @@ module.exports = (req, res, next) => {
                                 },
                             },
                         },
-                        ' -> ',
+                        ' / ',
                         {
                             $reduce: {
                                 input: { $setDifference: ['$retailSegment', [{ $arrayElemAt: ['$retailSegment', 0] }]] },
@@ -531,7 +531,7 @@ module.exports = (req, res, next) => {
                                 },
                             },
                         },
-                        ' -> ',
+                        ' / ',
                         {
                             $reduce: {
                                 input: { $setDifference: ['$outlet', [{ $arrayElemAt: ['$outlet', 0] }]] },
@@ -550,7 +550,7 @@ module.exports = (req, res, next) => {
                                 },
                             },
                         },
-                        ' -> ',
+                        ' / ',
                         {
                             $reduce: {
                                 input: { $setDifference: ['$branch', [{ $arrayElemAt: ['$branch', 0] }]] },
