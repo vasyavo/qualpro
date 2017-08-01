@@ -395,6 +395,31 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'createdBy.user.position',
+                foreignField: '_id',
+                as: 'createdBy.user.position',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                publisherPosition: {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: '$$position.name',
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $match: {
                 'consumer.status': {
                     $ne: 'draft',
@@ -424,6 +449,7 @@ module.exports = (req, res, next) => {
                 _id: '$questionnaryId',
                 consumer: { $first: '$consumer' },
                 createdBy: { $first: '$createdBy' },
+                publisherPosition: { $first: '$publisherPosition' },
                 country: {
                     $addToSet: {
                         $let: {
@@ -607,6 +633,7 @@ module.exports = (req, res, next) => {
                 status: '$setItems.consumer.status',
                 title: '$setItems.consumer.title',
                 publisherName: '$setItems.createdBy.user.name',
+                publisherPosition: '$setItems.publisherPosition.name',
                 countAnswered: '$setItems.consumer.countAnswered',
                 startDate: { $dateToString: { format: '%m/%d/%Y', date: '$setItems.consumer.startDate' } },
                 dueDate: { $dateToString: { format: '%m/%d/%Y', date: '$setItems.consumer.dueDate' } },
