@@ -157,6 +157,7 @@ module.exports = (req, res, next) => {
                             in: {
                                 _id: '$$questionnaire._id',
                                 title: '$$questionnaire.title',
+                                country: '$$questionnaire.country',
                                 region: '$$questionnaire.region',
                                 subRegion: '$$questionnaire.subRegion',
                                 branch: '$$questionnaire.branch',
@@ -169,6 +170,19 @@ module.exports = (req, res, next) => {
                     country: 1,
                 },
             },
+        ]);
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
+            pipeline.push({
+                $match: {
+                    'questionnaire.country': {
+                        $in: queryFilter[CONTENT_TYPES.COUNTRY],
+                    },
+                },
+            });
+        }
+
+        pipeline.push(...[
             {
                 $project: {
                     _id: '$questionnaire._id',
