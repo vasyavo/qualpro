@@ -90,6 +90,17 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            category: {
+                $let: {
+                    vars: {
+                        category: { $arrayElemAt: ['$category', 0] },
+                    },
+                    in: {
+                        _id: '$$category._id',
+                        name: '$$category.name',
+                    },
+                },
+            },
             displayType: {
                 $let: {
                     vars: {
