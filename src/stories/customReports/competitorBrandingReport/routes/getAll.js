@@ -82,10 +82,10 @@ module.exports = (req, res, next) => {
                 },
             });
         }
-
+/*
         pipeline.push({
             $match: { category: { $ne: [] } },
-        });
+        });*/
 
         if ($generalMatch.$and.length) {
             pipeline.push({

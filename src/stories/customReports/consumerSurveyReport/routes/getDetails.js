@@ -7,6 +7,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -530,6 +531,13 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.title = {
+                en: sanitizeHtml(item.title.en),
+                ar: sanitizeHtml(item.title.ar),
+            };
+        });
 
         res.status(200).send(response);
     });

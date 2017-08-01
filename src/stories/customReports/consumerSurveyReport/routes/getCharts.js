@@ -38,7 +38,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.POSITION, 'title',
         ];
         const pipeline = [];
 
@@ -67,6 +67,14 @@ module.exports = (req, res, next) => {
             pipeline.push({
                 $match: {
                     branch: { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                },
+            });
+        }
+
+        if (queryFilter.title && queryFilter.title.length) {
+            pipeline.push({
+                $match: {
+                    questionnaryId: { $in: queryFilter.title },
                 },
             });
         }

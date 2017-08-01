@@ -501,6 +501,7 @@ module.exports = (req, res, next) => {
                 displayType: { $arrayElemAt: ['$displayType', 0] },
                 itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
                 itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
+                itemRsp: '$promotion.rsp',
                 opening: { $arrayElemAt: ['$promotion.opening', 0] },
                 sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] },
                 closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] },
@@ -540,6 +541,7 @@ module.exports = (req, res, next) => {
                         <th>Position</th>
                         <th>Promotion description</th>
                         <th>PPT, AED or $</th>
+                        <th>RSP</th>
                         <th>Promotion Start</th>
                         <th>Promotion End</th>
                         <th>Start Date</th>
@@ -563,6 +565,14 @@ module.exports = (req, res, next) => {
                         } else {
                             itemPrice = `${itemPrice} ${currentCountry.currency}`;
                         }
+    
+                        let itemRsp = item.itemRsp.toFixed(2);
+                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            itemRsp = parseFloat(itemRsp * currentCountry.currencyInUsd).toFixed(2);
+                            itemRsp = `${itemRsp} $`;
+                        } else {
+                            itemRsp = `${itemRsp} ${currentCountry.currency}`;
+                        }
                         return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
@@ -575,6 +585,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.promotionType[currentLanguage])}</td>
                                 <td>${itemPrice}</td>
+                                <td>${itemRsp}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>
                                 <td>${item.itemDateStart}</td>

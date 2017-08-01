@@ -9,6 +9,7 @@ const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -525,12 +526,12 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
-                                <td>${item.category}</td>
+                                <td>${item.category || 'N/A'}</td>
                                 <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.displayType}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>
-                                <td>${item.description[currentLanguage]}</td>
+                                <td>${sanitizeHtml(item.description[currentLanguage])}</td>
                             </tr>
                         `;
                     }).join('')}

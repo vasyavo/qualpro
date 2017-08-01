@@ -1,17 +1,39 @@
 const mongoose = require('mongoose');
 const async = require('async');
+const moment = require('moment');
+const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const generalFiler = require('./../../utils/generalFilter');
-const ItemModel = require('./../../../../types/item/model');
+const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 
+const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
+    const timeFilterSchema = {
+        type: 'object',
+        properties: {
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
+            },
+        },
+    };
+
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
+        const timeFilter = query.timeFilter;
         const filters = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.VARIANT, CONTENT_TYPES.ITEM];
         const pipeline = [];
 
@@ -23,7 +45,61 @@ module.exports = (req, res, next) => {
             }
         });
 
+        if (timeFilter) {
+            const timeFilterValidate = ajv.compile(timeFilterSchema);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+
+            if (!timeFilterValid) {
+                const err = new Error(timeFilterValidate.errors[0].message);
+
+                err.status = 400;
+
+                return next(err);
+            }
+        }
         const $generalMatch = generalFiler([CONTENT_TYPES.COUNTRY, CONTENT_TYPES.VARIANT], queryFilter, personnel);
+
+        const $timeMatch = {};
+        $timeMatch.$or = [];
+
+        if (timeFilter) {
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
+                    $and: [
+                        {
+                            'headers.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'headers.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'items',
+                localField: 'headers.itemId',
+                foreignField: '_id',
+                as: 'itemsList',
+            },
+        });
+
+        pipeline.push({
+            $unwind: '$itemsList',
+        });
+
+        pipeline.push({
+            $replaceRoot: { newRoot: '$itemsList' },
+        });
 
         if (queryFilter[CONTENT_TYPES.ITEM] && queryFilter[CONTENT_TYPES.ITEM][0]) {
             $generalMatch.$and.push({
@@ -123,7 +199,7 @@ module.exports = (req, res, next) => {
             },
         });
 
-        ItemModel.aggregate(pipeline)
+        ItemHistoryModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };

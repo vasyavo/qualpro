@@ -442,6 +442,27 @@ module.exports = (req, res, next) => {
                 },
                 value: 'publisherPosition',
             },
+            {
+                name: {
+                    en: 'Category',
+                    ar: '',
+                },
+                value: 'category',
+            },
+            {
+                name: {
+                    en: 'Brand',
+                    ar: '',
+                },
+                value: 'brand',
+            },
+            {
+                name: {
+                    en: 'Display Type',
+                    ar: '',
+                },
+                value: 'displayType',
+            },
         ];
 
         res.status(200).send(response);

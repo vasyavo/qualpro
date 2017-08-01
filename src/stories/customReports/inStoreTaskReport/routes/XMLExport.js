@@ -1,5 +1,6 @@
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
+const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -41,7 +42,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'assignedToPersonnel', 'createdByPersonnel',
         ];
         const pipeline = [];
 
@@ -126,6 +127,26 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+        if (queryFilter.assignedToPersonnel && queryFilter.assignedToPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    assignedTo: {
+                        $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
+                    },
+                },
             });
         }
 
@@ -396,14 +417,14 @@ module.exports = (req, res, next) => {
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.region[currentLanguage] ? item.region[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.subRegion[currentLanguage] ? item.subRegion[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.retailSegment[currentLanguage] ? item.retailSegment[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.outlet[currentLanguage] ? item.outlet[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : ''}</td>
+                                <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.region[currentLanguage] ? item.region[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.subRegion[currentLanguage] ? item.subRegion[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.retailSegment[currentLanguage] ? item.retailSegment[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.outlet[currentLanguage] ? item.outlet[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : 'N/A'}</td>
                                 <td>${item.title[currentLanguage]}</td>
-                                <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
+                                <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : 'N/A'}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.position.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.description[currentLanguage])}</td>
