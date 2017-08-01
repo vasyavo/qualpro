@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const generalFiler = require('./../../utils/generalFilter');
 const QuestionnaryModel = require('./../../../../types/questionnaries/model');
@@ -119,17 +120,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
-            $generalMatch.$and.push({
-                personnels: {
-                    $in: [
-                        ...queryFilter.assignedTo,
-                        personnel._id,
-                    ],
-                },
-            });
-        }
-
         if (queryFilter.status && queryFilter.status.length) {
             $generalMatch.$and.push({
                 status: {
@@ -202,6 +192,16 @@ module.exports = (req, res, next) => {
                 },
             },
         });
+
+        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
+            pipeline.push({
+                $addFields: {
+                    assignee: {
+                        $setIntersection: ['$assignee', _.union(queryFilter.assignedTo, personnel._id)],
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
