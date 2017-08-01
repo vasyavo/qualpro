@@ -1,11 +1,16 @@
+const _ = require('lodash');
 const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
 
 module.exports = (pipeline, queryFilter) => {
-    pipeline.push({
-        $match: {
-            'promotionType.en': queryFilter['promotionType.en'][0], // ID like matching
-        },
-    });
+    if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
+        pipeline.push({
+            $match: {
+                _id: {
+                    $in: queryFilter[CONTENT_TYPES.PROMOTIONS],
+                },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {
