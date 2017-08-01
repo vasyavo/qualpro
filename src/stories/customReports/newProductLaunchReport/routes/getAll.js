@@ -274,6 +274,7 @@ module.exports = (req, res, next) => {
                                     ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
                                 },
                                 position: '$$user.position',
+                                imageSrc: '$$user.imageSrc',
                             },
                         },
                     },
