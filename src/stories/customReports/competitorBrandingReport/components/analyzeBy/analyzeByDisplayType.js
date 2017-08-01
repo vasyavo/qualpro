@@ -43,6 +43,15 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $lookup: {
+            from: 'categories',
+            localField: '_id.category',
+            foreignField: '_id',
+            as: 'category',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
             from: 'displayTypes',
             localField: '_id.displayType',
             foreignField: '_id',
