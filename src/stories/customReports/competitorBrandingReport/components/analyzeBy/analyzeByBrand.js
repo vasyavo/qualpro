@@ -1,9 +1,14 @@
 module.exports = (pipeline) => {
     pipeline.push({
+        $unwind: '$category',
+    });
+
+    pipeline.push({
         $group: {
             _id: {
                 country: '$country',
                 brand: '$brand',
+                category: '$category',
             },
             region: { $addToSet: '$region' },
             subRegion: { $addToSet: '$subRegion' },
@@ -29,6 +34,15 @@ module.exports = (pipeline) => {
             localField: '_id.brand',
             foreignField: '_id',
             as: 'brand',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'categories',
+            localField: '_id.category',
+            foreignField: '_id',
+            as: 'category',
         },
     });
 
@@ -63,12 +77,24 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            category: {
+                $let: {
+                    vars: {
+                        category: { $arrayElemAt: ['$category', 0] },
+                    },
+                    in: {
+                        _id: '$$category._id',
+                        name: '$$category.name',
+                    },
+                },
+            },
         },
     });
 
     pipeline.push({
         $sort: {
             'country.name': 1,
+            'category.name': 1,
             'brand.name': 1,
         },
     });
@@ -77,6 +103,7 @@ module.exports = (pipeline) => {
         $group: {
             _id: {
                 country: '$country._id',
+                category: '$category._id',
             },
             country: { $first: '$country' },
             region: { $push: '$region' },
@@ -84,7 +111,7 @@ module.exports = (pipeline) => {
             retailSegment: { $push: '$retailSegment' },
             outlet: { $push: '$outlet' },
             branch: { $push: '$branch' },
-            brand: { $first: '$brand' },
+            category: { $first: '$category' },
             data: { $push: '$count' },
             labels: { $push: '$brand' },
         },
@@ -213,7 +240,7 @@ module.exports = (pipeline) => {
                     },
                 },
             },
-            brand: 1,
+            category: 1,
             datasets: [
                 {
                     data: '$data',
@@ -291,7 +318,7 @@ module.exports = (pipeline) => {
                 name: 1,
             },
             country: 1,
-            brand: 1,
+            category: 1,
             datasets: 1,
             labels: 1,
         },
@@ -302,7 +329,7 @@ module.exports = (pipeline) => {
             _id: null,
             charts: {
                 $push: {
-                    brand: '$brand',
+                    category: '$category',
                     country: '$country',
                     region: '$region',
                     subRegion: '$subRegion',
