@@ -107,7 +107,7 @@ module.exports = (req, res, next) => {
                 $match: $timeMatch,
             });
         }
-
+/*
         pipeline.push({
             $addFields: {
                 category: {
@@ -127,7 +127,7 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
-        });
+        });*/
 
         pipeline.push({
             $lookup: {
