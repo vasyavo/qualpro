@@ -461,7 +461,7 @@ module.exports = (req, res, next) => {
                     en: 'Display Type',
                     ar: '',
                 },
-                value: 'displayType ',
+                value: 'displayType',
             },
         ];
 
