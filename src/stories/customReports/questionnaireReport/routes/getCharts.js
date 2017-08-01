@@ -91,6 +91,12 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push({
+            $match: {
+                countAnswered: { $gt: 0 },
+            },
+        });
+
         const $generalMatch = generalFiler([
             CONTENT_TYPES.COUNTRY,
             CONTENT_TYPES.REGION,

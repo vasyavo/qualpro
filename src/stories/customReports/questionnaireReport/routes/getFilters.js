@@ -73,6 +73,7 @@ module.exports = (req, res, next) => {
                 $project: {
                     _id: 1,
                     country: 1,
+                    countAnswered: 1,
                     createdAt: '$createdBy.date',
                     status: 1,
                 },
@@ -90,6 +91,8 @@ module.exports = (req, res, next) => {
                         }),
                     }, {
                         status: { $ne: 'draft' },
+                    }, {
+                        countAnswered: { $gt: 0 },
                     }],
                 },
             },
@@ -385,18 +388,30 @@ module.exports = (req, res, next) => {
                 };
             } else {
                 $addFields.region = {
-                    $map: {
-                        input: {
-                            $filter: {
-                                input: '$region.all',
-                                as: 'region',
-                                cond: {
-                                    $eq: ['$$region.archived', false],
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: {
+                                    $ifNull: ['$region.selected', []],
                                 },
+                            }, 0],
+                        },
+                        then: '$region.selected',
+                        else: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: '$region.all',
+                                        as: 'region',
+                                        cond: {
+                                            $eq: ['$$region.archived', false],
+                                        },
+                                    },
+                                },
+                                as: 'region',
+                                in: '$$region._id',
                             },
                         },
-                        as: 'region',
-                        in: '$$region._id',
                     },
                 };
             }
@@ -564,21 +579,33 @@ module.exports = (req, res, next) => {
                 };
             } else {
                 $addFields.subRegion = {
-                    $map: {
-                        input: {
-                            $filter: {
-                                input: '$subRegion.all',
-                                as: 'subRegion',
-                                cond: {
-                                    $and: [
-                                        { $eq: ['$$subRegion.archived', false] },
-                                        { $setIsSubset: [['$$subRegion.parent'], '$region'] },
-                                    ],
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: {
+                                    $ifNull: ['$subRegion.selected', []],
                                 },
+                            }, 0],
+                        },
+                        then: '$subRegion.selected',
+                        else: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: '$subRegion.all',
+                                        as: 'subRegion',
+                                        cond: {
+                                            $and: [
+                                                { $eq: ['$$subRegion.archived', false] },
+                                                { $setIsSubset: [['$$subRegion.parent'], '$region'] },
+                                            ],
+                                        },
+                                    },
+                                },
+                                as: 'subRegion',
+                                in: '$$subRegion._id',
                             },
                         },
-                        as: 'subRegion',
-                        in: '$$subRegion._id',
                     },
                 };
             }
@@ -824,24 +851,36 @@ module.exports = (req, res, next) => {
                 };
             } else {
                 $addFields.branch = {
-                    $map: {
-                        input: {
-                            $filter: {
-                                input: '$branch.all',
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: {
+                                    $ifNull: ['$branch.selected', []],
+                                },
+                            }, 0],
+                        },
+                        then: '$branch.selected',
+                        else: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: '$branch.all',
+                                        as: 'branch',
+                                        cond: {
+                                            $and: [
+                                                { $eq: ['$$branch.archived', false] },
+                                                { $setIsSubset: [['$$branch.subRegion'], '$subRegion'] },
+                                            ],
+                                        },
+                                    },
+                                },
                                 as: 'branch',
-                                cond: {
-                                    $and: [
-                                        { $eq: ['$$branch.archived', false] },
-                                        { $setIsSubset: [['$$branch.subRegion'], '$subRegion'] },
-                                    ],
+                                in: {
+                                    _id: '$$branch._id',
+                                    retailSegment: '$$branch.retailSegment',
+                                    outlet: '$$branch.outlet',
                                 },
                             },
-                        },
-                        as: 'branch',
-                        in: {
-                            _id: '$$branch._id',
-                            retailSegment: '$$branch.retailSegment',
-                            outlet: '$$branch.outlet',
                         },
                     },
                 };
