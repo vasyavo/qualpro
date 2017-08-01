@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -42,12 +43,6 @@ module.exports = (req, res, next) => {
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
-        const filters = [
-            CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.CATEGORY, 'displayType',
-            'status', 'publisher', CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
-        ];
         const pipeline = [];
 
         if (timeFilter) {
@@ -63,8 +58,20 @@ module.exports = (req, res, next) => {
             }
         }
 
-        filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0] && filterName !== 'status') {
+        [
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.CATEGORY,
+            'displayType',
+            'publisher',
+            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.PROMOTIONS,
+        ].forEach((filterName) => {
+            if (queryFilter[filterName] && queryFilter[filterName][0]) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
@@ -73,12 +80,26 @@ module.exports = (req, res, next) => {
 
         locationFiler(pipeline, personnel, queryFilter);
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status', 'promotionType.en'], queryFilter, personnel);
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.CATEGORY,
+            'displayType',
+            'status',
+            CONTENT_TYPES.PROMOTIONS,
+        ], queryFilter);
 
         if (queryFilter.publisher && queryFilter.publisher.length) {
             $generalMatch.$and.push({
                 'createdBy.user': {
                     $in: queryFilter.publisher,
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
+            $generalMatch.$and.push({
+                _id: {
+                    $in: queryFilter[CONTENT_TYPES.PROMOTIONS],
                 },
             });
         }

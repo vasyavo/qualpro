@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -37,12 +38,6 @@ module.exports = (req, res, next) => {
         const queryFilter = query.filter || {};
         const timeFilter = query.timeFilter;
         const analyzeByParam = query.analyzeBy;
-        const filters = [
-            CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.CATEGORY, 'displayType',
-            'status', 'publisher', CONTENT_TYPES.POSITION,
-        ];
         const pipeline = [];
 
         if (timeFilter) {
@@ -58,8 +53,20 @@ module.exports = (req, res, next) => {
             }
         }
 
-        filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0] && filterName !== 'status') {
+        [
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.CATEGORY,
+            'displayType',
+            'publisher',
+            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.PROMOTIONS,
+        ].forEach((filterName) => {
+            if (queryFilter[filterName] && queryFilter[filterName][0]) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
@@ -94,7 +101,13 @@ module.exports = (req, res, next) => {
 
         locationFiler(pipeline, personnel, queryFilter);
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status', 'promotionType.en'], queryFilter, personnel);
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.CATEGORY,
+            'displayType',
+            'status',
+            CONTENT_TYPES.PROMOTIONS,
+        ], queryFilter);
 
         if (queryFilter.publisher && queryFilter.publisher.length) {
             $generalMatch.$and.push({
