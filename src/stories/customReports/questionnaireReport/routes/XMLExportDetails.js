@@ -85,15 +85,6 @@ module.exports = (req, res, next) => {
                 },
             });
         }
-
-        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
-            $generalMatch.$and.push({
-                personnels: {
-                    $in: _.union(queryFilter.assignedTo, personnel._id),
-                },
-            });
-        }
-
         if (queryFilter.status && queryFilter.status.length) {
             $generalMatch.$and.push({
                 status: {
@@ -261,6 +252,16 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $unwind: '$answer',
         });
+
+        if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
+            pipeline.push({
+                $match: {
+                    'answer.personnel': {
+                        $in: _.union(queryFilter.assignedTo, personnel._id),
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
