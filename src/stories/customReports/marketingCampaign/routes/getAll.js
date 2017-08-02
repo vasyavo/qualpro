@@ -164,16 +164,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
-
         pipeline.push(...[
             {
                 $lookup: {
@@ -571,14 +561,6 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $skip: skip,
-        });
-
-        pipeline.push({
-            $limit: limit,
-        });
-
-        pipeline.push({
             $lookup: {
                 from: 'comments',
                 localField: 'marketingCampaign.comments',
@@ -649,11 +631,22 @@ module.exports = (req, res, next) => {
                                 en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
                                 ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
                             },
+                            position: '$$user.position',
                         },
                     },
                 },
             },
         });
+
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $match: {
+                    'employee.position': {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
@@ -737,6 +730,14 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
+        });
+
+        pipeline.push({
+            $skip: skip,
+        });
+
+        pipeline.push({
+            $limit: limit,
         });
 
         pipeline.push({
