@@ -852,6 +852,7 @@ module.exports = (req, res, next) => {
             response[field] = response[field]
                 .map(item => {
                     const newItem = {
+                        _id: item.name.en,
                         name: {
                             en: sanitizeHtml(item.name.en.trim()),
                             ar: sanitizeHtml(item.name.ar.trim()),
