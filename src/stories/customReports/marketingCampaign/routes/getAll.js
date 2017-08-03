@@ -527,40 +527,6 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $group: {
-                _id: null,
-                records: { $push: '$$ROOT' },
-                total: { $sum: 1 },
-            },
-        });
-
-        pipeline.push({
-            $unwind: {
-                path: '$records',
-                preserveNullAndEmptyArrays: true,
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                _id: '$records._id',
-                location: '$records.location',
-                branch: '$records.branch',
-                country: '$records.country',
-                status: '$records.status',
-                displayType: '$records.displayType',
-                category: '$records.category',
-                attachments: '$records.attachments',
-                description: '$records.description',
-                dateStart: '$records.dateStart',
-                dateEnd: '$records.dateEnd',
-                createdBy: '$records.createdBy',
-                marketingCampaign: '$records.marketingCampaign',
-                total: 1,
-            },
-        });
-
-        pipeline.push({
             $lookup: {
                 from: 'comments',
                 localField: 'marketingCampaign.comments',
@@ -604,8 +570,7 @@ module.exports = (req, res, next) => {
                 createdBy: {
                     user: 1,
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
-                },
-                total: 1,
+                }
             },
         });
 
@@ -647,6 +612,40 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                records: { $push: '$$ROOT' },
+                total: { $sum: 1 },
+            },
+        });
+
+        pipeline.push({
+            $unwind: {
+                path: '$records',
+                preserveNullAndEmptyArrays: true,
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: '$records._id',
+                location: '$records.location',
+                branch: '$records.branch',
+                country: '$records.country',
+                status: '$records.status',
+                displayType: '$records.displayType',
+                category: '$records.category',
+                attachments: '$records.attachments',
+                description: '$records.description',
+                dateStart: '$records.dateStart',
+                dateEnd: '$records.dateEnd',
+                createdBy: '$records.createdBy',
+                marketingCampaign: '$records.marketingCampaign',
+                total: 1,
+            },
+        });
 
         pipeline.push({
             $lookup: {
