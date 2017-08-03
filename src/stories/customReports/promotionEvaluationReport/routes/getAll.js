@@ -486,6 +486,35 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'promotion.createdBy.user',
+                foreignField: '_id',
+                as: 'assignee',
+            },
+        });
+
+
+        pipeline.push({
+            $addFields: {
+                assignee: {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$assignee', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            name: {
+                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            },
+                        },
+                    }
+                },
+            },
+        });
+
+        pipeline.push({
             $group: {
                 _id: null,
                 records: { $push: '$$ROOT' },
@@ -513,6 +542,7 @@ module.exports = (req, res, next) => {
                 createdBy: '$records.createdBy',
                 promotion: '$records.promotion',
                 total: 1,
+                assignee : '$records.assignee',
             },
         });
 
@@ -564,6 +594,7 @@ module.exports = (req, res, next) => {
                 sellIn: '$promotion.sellIn',
                 closingStock: '$promotion.closingStock',
                 sellOut: '$promotion.sellOut',
+                assignee : 1,
                 total: 1,
             },
         });
@@ -577,6 +608,15 @@ module.exports = (req, res, next) => {
                 localField: 'promotionComment.attachments',
                 foreignField: '_id',
                 as: 'promotionAttachments',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'promotionComment.createdBy.user',
+                foreignField: '_id',
+                as: 'promotionComment.createdBy.user',
             },
         });
 
