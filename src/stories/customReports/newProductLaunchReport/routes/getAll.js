@@ -294,6 +294,174 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $addFields: {
+                customCategory: {
+                    en: '$category_name.en',
+                    ar: '$category_name.ar',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                category: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$category',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    category: { $arrayElemAt: ['$category', 0] },
+                                },
+                                in: {
+                                    _id: '$$category._id',
+                                    name: {
+                                        en: {
+                                            $toUpper: '$$category.name.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$$category.name.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customCategory.en', // tip: the same as ar
+                            custom: true,
+                            name: {
+                                en: {
+                                    $toUpper: '$customCategory.en',
+                                },
+                                ar: {
+                                    $toUpper: '$customCategory.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                brand: '$brand._id',
+                customBrand: {
+                    en: '$brand.name',
+                    ar: '$brand.name',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                brand: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$brand',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    brand: { $arrayElemAt: ['$brand', 0] },
+                                },
+                                in: {
+                                    _id: '$$brand._id',
+                                    name: {
+                                        $toUpper: '$$brand.name.en',
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customBrand.en', // tip: same as ar
+                            custom: true,
+                            name: {
+                                $toUpper: '$customBrand.en',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                variant: '$variant._id',
+                customVariant: {
+                    en: '$variant.name',
+                    ar: '$variant.name',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                variant: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$variant',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    variant: { $arrayElemAt: ['$variant', 0] },
+                                },
+                                in: {
+                                    _id: '$$variant._id',
+                                    name: {
+                                        $toUpper: '$$variant.name.en',
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customVariant.en', // tip: same as ar
+                            custom: true,
+                            name: {
+                                $toUpper: '$customVariant.en',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
                 country: 1,
@@ -369,15 +537,6 @@ module.exports = (req, res, next) => {
                 localField: 'branch',
                 foreignField: '_id',
                 as: 'branch',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
-                from: 'categories',
-                localField: 'category',
-                foreignField: '_id',
-                as: 'category',
             },
         });
 
@@ -459,17 +618,6 @@ module.exports = (req, res, next) => {
                 },
                 createdBy: 1,
                 brand: 1,
-                category: {
-                    $let: {
-                        vars: {
-                            category: { $arrayElemAt: ['$category', 0] },
-                        },
-                        in: {
-                            _id: '$$category._id',
-                            name: '$$category.name',
-                        },
-                    },
-                },
                 country: {
                     $let: {
                         vars: {
@@ -482,6 +630,7 @@ module.exports = (req, res, next) => {
                     },
                 },
                 variant: 1,
+                category: 1,
                 packing: 1,
                 displayType: {
                     _id: 1,

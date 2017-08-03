@@ -270,50 +270,6 @@ module.exports = (req, res, next) => {
             },
         ]);
 
-        if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
-            pipeline.push(...[
-                {
-                    $addFields: {
-                        acceptable: {
-                            $let: {
-                                vars: {
-                                    filters: {
-                                        country: queryFilter[CONTENT_TYPES.COUNTRY],
-                                    },
-                                },
-                                in: {
-                                    $cond: {
-                                        if: {
-                                            $gt: [{
-                                                $size: {
-                                                    $filter: {
-                                                        input: '$country',
-                                                        as: 'country',
-                                                        cond: {
-                                                            $and: [
-                                                                { $setIsSubset: [['$$country'], '$$filters.country'] },
-                                                            ],
-                                                        },
-                                                    },
-                                                },
-                                            }, 0],
-                                        },
-                                        then: true,
-                                        else: false,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                {
-                    $match: {
-                        acceptable: true,
-                    },
-                },
-            ]);
-        }
-
         pipeline.push({
             $lookup: {
                 from: 'domains',

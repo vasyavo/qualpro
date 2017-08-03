@@ -10,6 +10,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
 const currency = require('../../utils/currency');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -260,6 +261,15 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'comments',
+                localField: '_id',
+                foreignField: 'taskId',
+                as: 'comments',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
                 description: 1,
@@ -269,6 +279,19 @@ module.exports = (req, res, next) => {
                 dateStart: 1,
                 dateEnd: 1,
                 price: 1,
+                comments: 1,
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 country: {
                     $let: {
                         vars: {
@@ -404,6 +427,15 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
                 description: 1,
@@ -424,6 +456,45 @@ module.exports = (req, res, next) => {
                 retailSegment: 1,
                 outlet: 1,
                 branch: 1,
+                comments: {
+                    $map: {
+                        input: '$comments',
+                        as: 'item',
+                        in: {
+                            _id: '$$item._id',
+                            body: '$$item.body',
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$item.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                            },
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
                 location: {
                     $concat: [
                         '$country.name.en',
@@ -488,12 +559,16 @@ module.exports = (req, res, next) => {
                         <th>Origin</th>
                         <th>RSP</th>
                         <th>Display or branding type</th>
+                        <th>Comments</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
+                        });
+                        const comments = item.comments.map(comment => {
+                            return `${comment.createdBy.firstName[currentLanguage]} ${comment.createdBy.lastName[currentLanguage]} : ${sanitizeHtml(comment.body)}`
                         });
                         const dateStart = item.dateStart ? moment(item.dateStart).format('DD MMMM, YYYY') : 'N/A';
                         const dateEnd = item.dateEnd ? moment(item.dateEnd).format('DD MMMM, YYYY') : 'N/A';
@@ -525,6 +600,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.origin.name ? item.origin.name[currentLanguage] : null}</td>
                                 <td>${price}</td>
                                 <td>${item.displayType[currentLanguage]}</td>
+                                <td>${comments}</td>
                             </tr>
                         `;
         }).join('')}

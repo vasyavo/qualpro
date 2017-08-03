@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const moment = require('moment');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
@@ -8,7 +9,7 @@ const CompetitorBrandingModel = require('./../../../../types/competitorBranding/
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -476,6 +477,19 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.description = {
+                en: sanitizeHtml(item.description.en),
+                ar: sanitizeHtml(item.description.ar),
+            };
+        });
+
+        response.data.forEach(item => {
+            item.category = item.category ? item.category : 'N/A';
+            item.dateStart = item.dateStart ? item.dateStart : 'N/A';
+            item.dateEnd = item.dateEnd ? item.dateEnd : 'N/A';
+        });
 
         res.status(200).send(response);
     });

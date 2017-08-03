@@ -100,12 +100,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $match: {
-                category: { $ne: [] },
-            },
-        });
-
         filters.forEach((filterName) => {
             if (queryFilter[filterName] && queryFilter[filterName][0]) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
@@ -491,6 +485,10 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.category = item.category ? item.category : 'N/A';
+        });
 
         res.status(200).send(response);
     });

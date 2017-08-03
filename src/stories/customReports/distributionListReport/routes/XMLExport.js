@@ -693,12 +693,12 @@ module.exports = (req, res, next) => {
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
                                 <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
                                 <td>${item.outlet.name[currentLanguage]}</td>
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${item.variant.name[currentLanguage]}</td>
                                 <td>${item.item.name[currentLanguage]}</td>
-                                <td>${item.retailSegment.name[currentLanguage]}</td>
                                 <td>${item.indicator}</td>
                                 <td>${moment(item.timestamp).format('DD MMMM, YYYY')}</td>
                                 <td>${item.publisher.name[currentLanguage]}</td>
