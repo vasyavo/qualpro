@@ -415,7 +415,7 @@ define([
 
             if (form.contentType === 'distribution') {
                 this.distributionForm = new DistributionForm({
-                    id: id,
+                    id: modelJSON.form._id,
                     translation: this.translation
                 });
             } else {
