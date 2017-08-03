@@ -10,9 +10,29 @@ module.exports = (pipeline) => {
                 region: '$region',
                 subRegion: '$subRegion',
                 branch: '$branch',
+                retailSegment: '$retailSegment',
+                outlet: '$outlet',
                 status: '$status',
             },
             count: { $sum: 1 },
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'outlets',
+            localField: '_id.outlet',
+            foreignField: '_id',
+            as: 'outlet',
+        },
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: 'retailSegments',
+            localField: '_id.retailSegment',
+            foreignField: '_id',
+            as: 'retailSegment',
         },
     });
 
@@ -103,6 +123,44 @@ module.exports = (pipeline) => {
                     },
                 },
             },
+            retailSegment: {
+                $let: {
+                    vars: {
+                        retailSegment: {
+                            $arrayElemAt: [
+                                '$retailSegment',
+                                0,
+                            ],
+                        },
+                    },
+                    in: {
+                        _id: '$$retailSegment._id',
+                        name: {
+                            en: '$$retailSegment.name.en',
+                            ar: '$$retailSegment.name.ar',
+                        },
+                    },
+                },
+            },
+            outlet: {
+                $let: {
+                    vars: {
+                        outlet: {
+                            $arrayElemAt: [
+                                '$outlet',
+                                0,
+                            ],
+                        },
+                    },
+                    in: {
+                        _id: '$$outlet._id',
+                        name: {
+                            en: '$$outlet.name.en',
+                            ar: '$$outlet.name.ar',
+                        },
+                    },
+                },
+            },
             branch: {
                 $let: {
                     vars: {
@@ -125,12 +183,48 @@ module.exports = (pipeline) => {
             location: {
                 _id: '$branch._id',
                 name: {
-                    en: {
-                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$branch.name.en'],
-                    },
-                    ar: {
-                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.en', ' / ', '$branch.name.en'],
-                    },
+                    en: [
+                        {
+                            $concat: [
+                                '$country.name.en',
+                                ' / ',
+                                '$region.name.en',
+                                ' / ',
+                                '$subRegion.name.en',
+
+                            ],
+                        },
+                        {
+                            $concat: [
+                                '$retailSegment.name.en',
+                                ' / ',
+                                '$outlet.name.en',
+                                ' / ',
+                                '$branch.name.en',
+                            ],
+                        },
+                    ],
+                    ar: [
+                        {
+                            $concat: [
+                                '$country.name.ar',
+                                ' / ',
+                                '$region.name.ar',
+                                ' / ',
+                                '$subRegion.name.ar',
+
+                            ],
+                        },
+                        {
+                            $concat: [
+                                '$retailSegment.name.ar',
+                                ' / ',
+                                '$outlet.name.ar',
+                                ' / ',
+                                '$branch.name.ar',
+                            ],
+                        },
+                    ],
                 },
             },
         },
