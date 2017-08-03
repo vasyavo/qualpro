@@ -529,8 +529,8 @@ module.exports = (req, res, next) => {
                                 <td>${item.category || 'N/A'}</td>
                                 <td>${item.brand.name[currentLanguage]}</td>
                                 <td>${item.displayType}</td>
-                                <td>${item.dateStart}</td>
-                                <td>${item.dateEnd}</td>
+                                <td>${item.dateStart || 'N/A'}</td>
+                                <td>${item.dateEnd || 'N/A'}</td>
                                 <td>${sanitizeHtml(item.description[currentLanguage])}</td>
                             </tr>
                         `;

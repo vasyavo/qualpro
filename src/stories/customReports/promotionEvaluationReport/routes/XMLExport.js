@@ -604,7 +604,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
-                                <td>${sanitizeHtml(item.promotionType[currentLanguage])}</td>
+                                <td>${sanitizeHtml(item.promotionType[currentLanguage]).trim()}</td>
                                 <td>${itemPrice}</td>
                                 <td>${itemRsp}</td>
                                 <td>${item.dateStart}</td>
