@@ -568,12 +568,45 @@ module.exports = (req, res, next) => {
             },
         });
 
+
+
+
         pipeline.push({
             $lookup: {
                 from: 'files',
                 localField: 'promotionComment.attachments',
                 foreignField: '_id',
                 as: 'promotionAttachments',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'promotionComment.createdBy.user',
+                foreignField: '_id',
+                as: 'promotionComment.createdBy.user',
+            },
+        });
+
+
+        pipeline.push({
+            $addFields: {
+                'promotionComment.createdBy.user': {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$promotionComment.createdBy.user', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            name: {
+                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
+                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            },
+                            imageSrc : '$$user.imageSrc'
+                        },
+                    }
+                },
             },
         });
 
