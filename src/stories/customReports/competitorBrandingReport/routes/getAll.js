@@ -485,6 +485,12 @@ module.exports = (req, res, next) => {
             };
         });
 
+        response.data.forEach(item => {
+            item.category = item.category ? item.category : 'N/A';
+            item.dateStart = item.dateStart ? item.dateStart : 'N/A';
+            item.dateEnd = item.dateEnd ? item.dateEnd : 'N/A';
+        });
+
         res.status(200).send(response);
     });
 };
