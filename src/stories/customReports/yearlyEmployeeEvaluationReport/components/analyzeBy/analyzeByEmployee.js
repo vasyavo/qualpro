@@ -3,7 +3,7 @@ module.exports = (pipeline) => {
         $group: {
             _id: '$_id',
             name: { $first: '$name' },
-            rating: { $avg: '$rating' },
+            rating: { $avg: '$skillsRate' },
         },
     });
 

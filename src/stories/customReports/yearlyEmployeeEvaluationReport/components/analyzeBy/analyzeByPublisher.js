@@ -2,7 +2,7 @@ module.exports = (pipeline) => {
     pipeline.push({
         $group: {
             _id: '$publisher',
-            rating: { $avg: '$rating' },
+            rating: { $avg: '$skillsRate' },
         },
     });
 
