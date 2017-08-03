@@ -485,6 +485,10 @@ module.exports = (req, res, next) => {
             };
         });
 
+        response.data.forEach(item => {
+            item.category = item.category ? item.category : 'N/A';
+        });
+
         res.status(200).send(response);
     });
 };

@@ -513,7 +513,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
-                                <td>${item.category}</td>
+                                <td>${item.category || 'N/A'}</td>
                                 <td>${item.displayType}</td>
                                 <td>${item.dateStart}</td>
                                 <td>${item.dateEnd}</td>
