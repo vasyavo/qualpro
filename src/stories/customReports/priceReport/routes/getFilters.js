@@ -101,17 +101,37 @@ module.exports = (req, res, next) => {
             $replaceRoot: { newRoot: '$itemsList' },
         });
 
-        if (queryFilter[CONTENT_TYPES.ITEM] && queryFilter[CONTENT_TYPES.ITEM][0]) {
-            $generalMatch.$and.push({
-                _id: { $in: queryFilter[CONTENT_TYPES.ITEM] },
+        if (queryFilter[CONTENT_TYPES.COUNTRY]) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                           country: {
+                                $in: queryFilter[CONTENT_TYPES.COUNTRY],
+                            },
+                        },
+                        {
+                            country: { $eq: null },
+                        },
+                        {
+                            country: { $eq: [] },
+                        },
+                    ],
+                },
             });
         }
 
+     /*   if (queryFilter[CONTENT_TYPES.ITEM] && queryFilter[CONTENT_TYPES.ITEM][0]) {
+            $generalMatch.$and.push({
+                _id: { $in: queryFilter[CONTENT_TYPES.ITEM] },
+            });
+        }*/
+/*
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
             });
-        }
+        }*/
 
         pipeline.push({
             $lookup: {
@@ -131,37 +151,67 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY][0]) {
-            pipeline.push({
-                $match: {
-                    'variant.category': { $in: queryFilter[CONTENT_TYPES.CATEGORY] },
-                },
-            });
-        }
-
         pipeline.push({
             $group: {
                 _id: null,
                 countries: { $addToSet: '$country' },
-                variants: { $addToSet: '$variant._id' },
+                variants: { $addToSet: '$variant' },
                 categories: { $addToSet: '$variant.category' },
                 items: {
                     $push: {
-                        _id: '$_id',
-                        name: '$name',
+                        _id    : '$_id',
+                        name   : '$name',
+                        variant: '$variant._id',
+                        category : '$variant.category'
                     },
                 },
             },
         });
 
-        pipeline.push({
-            $lookup: {
-                from: 'variants',
-                localField: 'variants',
-                foreignField: '_id',
-                as: 'variants',
-            },
-        });
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            pipeline.push({
+                $addFields: {
+                    variants: {
+                        $filter: {
+                            input: '$variants',
+                            as   : 'variant',
+                            cond : {
+                                $eq: ['$$variant.category', queryFilter[CONTENT_TYPES.CATEGORY][0]],
+                            },
+                        },
+                    },
+                },
+            });
+            pipeline.push({
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as   : 'item',
+                            cond : {
+                                $eq: ['$$item.category', queryFilter[CONTENT_TYPES.CATEGORY][0]],
+                            },
+                        },
+                    }
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
+            pipeline.push({
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as   : 'item',
+                            cond : {
+                                $eq: ['$$item.variant', queryFilter[CONTENT_TYPES.VARIANT][0]],
+                            },
+                        },
+                    }
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
