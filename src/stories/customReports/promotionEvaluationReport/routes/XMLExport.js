@@ -63,6 +63,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.REGION,
             CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY,
             'displayType',
@@ -82,6 +83,7 @@ module.exports = (req, res, next) => {
 
         const $generalMatch = generalFiler([
             CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.CATEGORY,
             'displayType',
             'status',
@@ -268,6 +270,16 @@ module.exports = (req, res, next) => {
                 $match: {
                     'branch.retailSegment': {
                         $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
+            pipeline.push({
+                $match: {
+                    'branch.outlet': {
+                        $in: queryFilter[CONTENT_TYPES.OUTLET],
                     },
                 },
             });

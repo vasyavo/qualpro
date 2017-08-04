@@ -58,6 +58,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.REGION,
             CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY,
             'displayType',
@@ -103,6 +104,7 @@ module.exports = (req, res, next) => {
 
         const $generalMatch = generalFiler([
             CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.CATEGORY,
             'displayType',
             'status',
