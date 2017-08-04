@@ -24,6 +24,45 @@ module.exports = (pipeline, queryFilter) => {
         });
     }
 
+    pipeline.push({
+        $lookup: {
+            from: 'personnels',
+            localField: 'marketingCampaign.createdBy.user',
+            foreignField: '_id',
+            as: 'marketingCampaign.createdBy.user',
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            marketingCampaign: {
+                createdBy: {
+                    user: {
+                        $let: {
+                            vars: {
+                                user: { $arrayElemAt: ['$marketingCampaign.createdBy.user', 0] },
+                            },
+                            in: {
+                                _id: '$$user._id',
+                                position: '$$user.position',
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+        pipeline.push({
+            $match: {
+                'marketingCampaign.createdBy.user.position': {
+                    $in: queryFilter[CONTENT_TYPES.POSITION],
+                },
+            },
+        });
+    }
+
     if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
         pipeline.push({
             $match: {

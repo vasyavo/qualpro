@@ -228,7 +228,7 @@ module.exports = (pipeline, queryFilter) => {
 
     pipeline.push({
         $sort: {
-            'domain.name' : 1
+            'domain.name': 1,
         },
     });
 

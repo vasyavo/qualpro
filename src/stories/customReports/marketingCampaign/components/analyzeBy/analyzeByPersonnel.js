@@ -148,7 +148,6 @@ module.exports = (pipeline, queryFilter) => {
             },
         });
     }
-
     pipeline.push({
         $project: {
             _id: 1,
@@ -196,11 +195,22 @@ module.exports = (pipeline, queryFilter) => {
                             en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
                             ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
                         },
+                        position: '$$personnel.position',
                     },
                 },
             },
         },
     });
+    if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+        pipeline.push({
+            $match: {
+                'domain.position': {
+                    $in: queryFilter[CONTENT_TYPES.POSITION],
+                },
+            },
+        });
+    }
+
 
     pipeline.push({
         $group: {
