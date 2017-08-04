@@ -570,7 +570,7 @@ module.exports = (req, res, next) => {
                 createdBy: {
                     user: 1,
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
-                }
+                },
             },
         });
 
@@ -632,6 +632,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: '$records._id',
                 location: '$records.location',
+                employee: '$records.employee',
                 branch: '$records.branch',
                 country: '$records.country',
                 status: '$records.status',
@@ -643,6 +644,7 @@ module.exports = (req, res, next) => {
                 dateEnd: '$records.dateEnd',
                 createdBy: '$records.createdBy',
                 marketingCampaign: '$records.marketingCampaign',
+                marketingCampaignComment: '$records.marketingCampaignComment',
                 total: 1,
             },
         });
