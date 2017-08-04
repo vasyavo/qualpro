@@ -3,7 +3,6 @@ const async = require('async');
 const moment = require('moment');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const generalFiler = require('./../../utils/generalFilter');
 const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
@@ -57,8 +56,6 @@ module.exports = (req, res, next) => {
                 return next(err);
             }
         }
-        const $generalMatch = generalFiler([CONTENT_TYPES.COUNTRY, CONTENT_TYPES.VARIANT], queryFilter, personnel);
-
         const $timeMatch = {};
         $timeMatch.$or = [];
 
@@ -101,17 +98,49 @@ module.exports = (req, res, next) => {
             $replaceRoot: { newRoot: '$itemsList' },
         });
 
-        if (queryFilter[CONTENT_TYPES.ITEM] && queryFilter[CONTENT_TYPES.ITEM][0]) {
-            $generalMatch.$and.push({
-                _id: { $in: queryFilter[CONTENT_TYPES.ITEM] },
+        pipeline.push({
+            $group: {
+                _id: null,
+                countries: { $addToSet: '$country' },
+                items: {
+                    $push: '$$ROOT'
+                },
+            },
+        });
+
+
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as   : 'item',
+                            cond : {
+                                $setIsSubset: [['$$item.country'], queryFilter[CONTENT_TYPES.COUNTRY]],
+                            },
+                        },
+                    }
+                }
             });
         }
 
-        if ($generalMatch.$and.length) {
-            pipeline.push({
-                $match: $generalMatch,
-            });
-        }
+        pipeline.push({
+            $unwind: {
+                path: '$items',
+                preserveNullAndEmptyArrays: true,
+            }
+        });
+
+        pipeline.push({
+            $project: {
+                countries  : 1,
+                _id      : '$items._id',
+                name     : '$items.name',
+                variant  : '$items.variant',
+                category : '$items.category',
+            }
+        });
 
         pipeline.push({
             $lookup: {
@@ -125,43 +154,73 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                country: 1,
+                countries : 1,
                 name: 1,
                 variant: { $arrayElemAt: ['$variant', 0] },
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY][0]) {
-            pipeline.push({
-                $match: {
-                    'variant.category': { $in: queryFilter[CONTENT_TYPES.CATEGORY] },
-                },
-            });
-        }
-
         pipeline.push({
             $group: {
                 _id: null,
-                countries: { $addToSet: '$country' },
-                variants: { $addToSet: '$variant._id' },
+                countries: { $first: '$countries' },
+                variants: { $addToSet: '$variant' },
                 categories: { $addToSet: '$variant.category' },
                 items: {
                     $push: {
-                        _id: '$_id',
-                        name: '$name',
+                        _id    : '$_id',
+                        name   : '$name',
+                        variant: '$variant._id',
+                        category : '$variant.category'
                     },
                 },
             },
         });
 
-        pipeline.push({
-            $lookup: {
-                from: 'variants',
-                localField: 'variants',
-                foreignField: '_id',
-                as: 'variants',
-            },
-        });
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            pipeline.push({
+                $addFields: {
+                    variants: {
+                        $filter: {
+                            input: '$variants',
+                            as   : 'variant',
+                            cond : {
+                                $eq: ['$$variant.category', queryFilter[CONTENT_TYPES.CATEGORY][0]],
+                            },
+                        },
+                    },
+                },
+            });
+            pipeline.push({
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as   : 'item',
+                            cond : {
+                                $eq: ['$$item.category', queryFilter[CONTENT_TYPES.CATEGORY][0]],
+                            },
+                        },
+                    }
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
+            pipeline.push({
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as   : 'item',
+                            cond : {
+                                $eq: ['$$item.variant', queryFilter[CONTENT_TYPES.VARIANT][0]],
+                            },
+                        },
+                    }
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
