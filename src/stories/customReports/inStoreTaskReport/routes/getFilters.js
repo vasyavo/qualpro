@@ -1625,6 +1625,13 @@ module.exports = (req, res, next) => {
                 },
                 value: 'assignee',
             },
+            {
+                name: {
+                    en: 'Position',
+                    ar: '',
+                },
+                value: 'position',
+            },
         ];
 
         res.status(200).send(response);
