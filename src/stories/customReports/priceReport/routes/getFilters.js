@@ -57,8 +57,6 @@ module.exports = (req, res, next) => {
                 return next(err);
             }
         }
-        const $generalMatch = generalFiler([CONTENT_TYPES.COUNTRY, CONTENT_TYPES.VARIANT], queryFilter, personnel);
-
         const $timeMatch = {};
         $timeMatch.$or = [];
 
@@ -101,37 +99,49 @@ module.exports = (req, res, next) => {
             $replaceRoot: { newRoot: '$itemsList' },
         });
 
-        if (queryFilter[CONTENT_TYPES.COUNTRY]) {
+        pipeline.push({
+            $group: {
+                _id: null,
+                countries: { $addToSet: '$country' },
+                items: {
+                    $push: '$$ROOT'
+                },
+            },
+        });
+
+
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
             pipeline.push({
-                $match: {
-                    $or: [
-                        {
-                           country: {
-                                $in: queryFilter[CONTENT_TYPES.COUNTRY],
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as   : 'item',
+                            cond : {
+                                $setIsSubset: [['$$item.country'], queryFilter[CONTENT_TYPES.COUNTRY]],
                             },
                         },
-                        {
-                            country: { $eq: null },
-                        },
-                        {
-                            country: { $eq: [] },
-                        },
-                    ],
-                },
+                    }
+                }
             });
         }
 
-     /*   if (queryFilter[CONTENT_TYPES.ITEM] && queryFilter[CONTENT_TYPES.ITEM][0]) {
-            $generalMatch.$and.push({
-                _id: { $in: queryFilter[CONTENT_TYPES.ITEM] },
-            });
-        }*/
-/*
-        if ($generalMatch.$and.length) {
-            pipeline.push({
-                $match: $generalMatch,
-            });
-        }*/
+        pipeline.push({
+            $unwind: {
+                path: '$items',
+                preserveNullAndEmptyArrays: true,
+            }
+        });
+
+        pipeline.push({
+            $project: {
+                countries  : 1,
+                _id      : '$items._id',
+                name     : '$items.name',
+                variant  : '$items.variant',
+                category : '$items.category',
+            }
+        });
 
         pipeline.push({
             $lookup: {
@@ -145,7 +155,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                country: 1,
+                countries : 1,
                 name: 1,
                 variant: { $arrayElemAt: ['$variant', 0] },
             },
@@ -154,7 +164,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $group: {
                 _id: null,
-                countries: { $addToSet: '$country' },
+                countries: { $first: '$countries' },
                 variants: { $addToSet: '$variant' },
                 categories: { $addToSet: '$variant.category' },
                 items: {
