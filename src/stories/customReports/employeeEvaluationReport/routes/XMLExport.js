@@ -238,6 +238,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'personnels',
+                localField: 'publisher',
+                foreignField: '_id',
+                as: 'publisher',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'domains',
                 localField: 'region',
                 foreignField: '_id',
@@ -293,6 +302,18 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$position._id',
                             name: '$$position.name',
+                        },
+                    },
+                },
+                publisher: {
+                    $let: {
+                        vars: {
+                            publisher: { $arrayElemAt: ['$publisher', 0] },
+                        },
+                        in: {
+                            _id: '$$publisher._id',
+                            firstName: '$$publisher.firstName',
+                            lastName: '$$publisher.lastName',
                         },
                     },
                 },
@@ -473,6 +494,7 @@ module.exports = (req, res, next) => {
                         <th>Percentage</th>
                         <th>Rating</th>
                         <th>Date</th>
+                        <th>Evaluator</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -492,6 +514,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.percentage}</td>
                                 <td>${item.rating}</td>
                                 <td>${moment(item.month, 'MM').format('MMMM') + ' ' + item.year}</td>
+                                <td>${item.publisher.firstName[currentLanguage]} ${item.publisher.lastName[currentLanguage]}</td>
                             </tr>
                         `;
         }).join('')}

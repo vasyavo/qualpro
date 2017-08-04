@@ -67,6 +67,14 @@ module.exports = (pipeline, queryFilter) => {
         });
     }
 
+    if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
+        pipeline.push({
+            $match: {
+                'promotion.branch.outlet': { $in: queryFilter[CONTENT_TYPES.OUTLET] },
+            },
+        });
+    }
+
     pipeline.push({
         $lookup: {
             from: 'domains',
