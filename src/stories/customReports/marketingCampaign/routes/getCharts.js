@@ -129,19 +129,8 @@ module.exports = (req, res, next) => {
                 dateStart: 1,
                 dateEnd: 1,
                 publisher: { $arrayElemAt: ['$createdBy.user._id', 0] },
-                publisherPosition: { $arrayElemAt: ['$createdBy.user.position', 0] },
             },
         });
-
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    publisherPosition: {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
 
         applyAnalyzeBy(pipeline, analyzeByParam, queryFilter);
 
