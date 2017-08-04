@@ -701,6 +701,14 @@ module.exports = (req, res, next) => {
             pipeline.push({ $addFields });
         }
 
+        pipeline.push({
+            $addFields: {
+                retailSegment: {
+                    $setUnion: ['$branch.selected.retailSegment', []],
+                },
+            },
+        });
+
         if (_.get(queryFilter, `${CONTENT_TYPES.RETAILSEGMENT}.length`)) {
             pipeline.push({
                 $addFields: {
@@ -725,6 +733,7 @@ module.exports = (req, res, next) => {
                                     as: 'branch',
                                     in: {
                                         _id: '$$branch._id',
+                                        retailSegment: '$$branch.retailSegment',
                                         outlet: '$$branch.outlet',
                                     },
                                 },
@@ -734,6 +743,14 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                outlet: {
+                    $setUnion: ['$branch.selected.outlet', []],
+                },
+            },
+        });
 
         if (_.get(queryFilter, `${CONTENT_TYPES.OUTLET}.length`)) {
             pipeline.push({
@@ -758,7 +775,9 @@ module.exports = (req, res, next) => {
                                     },
                                     as: 'branch',
                                     in: {
-                                        _id: '$branch._id',
+                                        _id: '$$branch._id',
+                                        retailSegment: '$$branch.retailSegment',
+                                        outlet: '$$branch.outlet',
                                     },
                                 },
                             },
@@ -867,7 +886,17 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $addFields: {
                 retailSegment: {
-                    $setUnion: ['$branch.retailSegment', []],
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$retailSegment',
+                            }, 0],
+                        },
+                        then: '$retailSegment',
+                        else: {
+                            $setUnion: ['$branch.retailSegment', []],
+                        },
+                    },
                 },
             },
         });
@@ -896,6 +925,7 @@ module.exports = (req, res, next) => {
                                     as: 'branch',
                                     in: {
                                         _id: '$$branch._id',
+                                        retailSegment: '$$branch.retailSegment',
                                         outlet: '$$branch.outlet',
                                     },
                                 },
@@ -909,7 +939,17 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $addFields: {
                 outlet: {
-                    $setUnion: ['$branch.outlet', []],
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$outlet',
+                            }, 0],
+                        },
+                        then: '$outlet',
+                        else: {
+                            $setUnion: ['$branch.outlet', []],
+                        },
+                    },
                 },
             },
         });
@@ -938,6 +978,8 @@ module.exports = (req, res, next) => {
                                     as: 'branch',
                                     in: {
                                         _id: '$$branch._id',
+                                        retailSegment: '$$branch.retailSegment',
+                                        outlet: '$$branch.outlet',
                                     },
                                 },
                             },
@@ -946,6 +988,21 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                branch: {
+                    $map: {
+                        input: '$branch',
+                        as: 'branch',
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
+                        },
+                    },
+                },
+            },
+        });
 
         if (_.get(queryFilter, `${CONTENT_TYPES.BRANCH}.length`)) {
             pipeline.push(...[
