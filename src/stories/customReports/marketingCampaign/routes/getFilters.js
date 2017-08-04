@@ -2,12 +2,11 @@ const mongoose = require('mongoose');
 const async = require('async');
 const _ = require('lodash');
 const Ajv = require('ajv');
-const AccessManager = require('./../../../../../helpers/access')();
-const MarketingCampaignModel = require('./../../../../../types/marketingCampaign/model');
-const ACL_MODULES = require('./../../../../../constants/aclModulesNames');
+const AccessManager = require('./../../../../helpers/access')();
+const MarketingCampaignModel = require('./../../../../types/marketingCampaign/model');
+const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
-const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
-const sanitizeHtml = require('../../../utils/sanitizeHtml');
+const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -155,7 +154,7 @@ module.exports = (req, res, next) => {
                                 branch: '$$marketingCampaign.branch',
                                 status: '$$marketingCampaign.status',
                                 publisher: '$$marketingCampaign.createdBy.user',
-                                product: '$$marketingCampaign.category'
+                                product: '$$marketingCampaign.category',
                             },
                         },
                     },
@@ -203,7 +202,7 @@ module.exports = (req, res, next) => {
                     },
                     status: '$marketingCampaign.status',
                     publisher: '$marketingCampaign.publisher',
-                    product: '$marketingCampaign.product'
+                    product: '$marketingCampaign.product',
                 },
             },
             {
@@ -737,7 +736,7 @@ module.exports = (req, res, next) => {
                                     in: {
                                         _id: '$$branch._id',
                                         outlet: '$$branch.outlet',
-                                        retailSegment: '$$branch.retailSegment'
+                                        retailSegment: '$$branch.retailSegment',
                                     },
                                 },
                             },
@@ -962,8 +961,16 @@ module.exports = (req, res, next) => {
         if (_.get(queryFilter, `${CONTENT_TYPES.BRANCH}.length`)) {
             pipeline.push(...[
                 {
-                    $addFields: {
-                        acceptable: {
+                    $group: {
+                        _id: null,
+                        reports: { $push: '$$ROOT' },
+                    },
+                },
+                {
+                    $project: {
+                        _id: false,
+                        reports: 1,
+                        matchedReports: {
                             $let: {
                                 vars: {
                                     filters: {
@@ -971,33 +978,55 @@ module.exports = (req, res, next) => {
                                     },
                                 },
                                 in: {
-                                    $cond: {
-                                        if: {
+                                    $filter: {
+                                        input: '$reports',
+                                        as: 'report',
+                                        cond: {
                                             $gt: [{
                                                 $size: {
                                                     $filter: {
-                                                        input: '$branch',
+                                                        input: '$$report.branch',
                                                         as: 'branch',
                                                         cond: {
-                                                            $and: [
-                                                                { $setIsSubset: [['$$branch._id'], '$$filters.branch'] },
-                                                            ],
+                                                            $setIsSubset: [['$$report.branch._id'], '$$filters.branch'],
                                                         },
                                                     },
                                                 },
                                             }, 0],
                                         },
-                                        then: true,
-                                        else: false,
                                     },
                                 },
                             },
                         },
                     },
                 },
+                /*
+                 * tip: key thing is that if at least one report match condition then it's true condition,
+                 * else condition is incorrect and branches with one of provided trade channel or outlet aren't exists.
+                 */
                 {
-                    $match: {
-                        acceptable: true,
+                    $project: {
+                        reports: {
+                            $cond: {
+                                if: {
+                                    $gt: [{
+                                        $size: '$matchedReports',
+                                    }, 0],
+                                },
+                                then: '$matchedReports',
+                                else: '$reports',
+                            },
+                        },
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$reports',
+                    },
+                },
+                {
+                    $replaceRoot: {
+                        newRoot: '$reports',
                     },
                 },
             ]);
@@ -1017,7 +1046,7 @@ module.exports = (req, res, next) => {
                     status: 1,
                     publisher: 1,
                     assignee: 1,
-                    product: 1
+                    product: 1,
                 },
             },
             {
@@ -1043,7 +1072,7 @@ module.exports = (req, res, next) => {
                             status: '$$ROOT.status',
                             publisher: '$$ROOT.publisher',
                             assignee: '$$ROOT.assignee',
-                            product: '$$ROOT.product'
+                            product: '$$ROOT.product',
                         },
                     },
                 },
@@ -1078,7 +1107,7 @@ module.exports = (req, res, next) => {
                     status: '$items.status',
                     publisher: '$items.publisher',
                     assignee: '$items.assignee',
-                    product: '$items.product'
+                    product: '$items.product',
                 },
             });
         } else {
@@ -1096,7 +1125,7 @@ module.exports = (req, res, next) => {
                     status: '$items.status',
                     publisher: '$items.publisher',
                     assignee: '$items.assignee',
-                    product: '$items.product'
+                    product: '$items.product',
                 },
             });
         }
@@ -1150,7 +1179,7 @@ module.exports = (req, res, next) => {
                     status: '$statuses',
                     publisher: 1,
                     assignee: 1,
-                    product: 1
+                    product: 1,
                 },
             },
             {
@@ -1166,7 +1195,7 @@ module.exports = (req, res, next) => {
                     status: { $first: '$status' }, // tip: all available statuses over questionnaires
                     publisher: { $addToSet: '$publisher' },
                     assignee: { $push: '$assignee' },
-                    product: { $addToSet: '$product' }
+                    product: { $addToSet: '$product' },
                 },
             },
             {
@@ -1600,7 +1629,7 @@ module.exports = (req, res, next) => {
                     personnels: '$assignee',
                     statuses: '$status',
                     promotionTypes: '$marketingCampaign',
-                    categories: '$product'
+                    categories: '$product',
                 },
             },
         ]);
