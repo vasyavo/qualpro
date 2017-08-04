@@ -227,16 +227,22 @@ module.exports = (pipeline, queryFilter) => {
     });
 
     pipeline.push({
+        $sort: {
+            'domain.name' : 1
+        },
+    });
+
+    pipeline.push({
         $group: {
             _id: null,
             data: {
-                $addToSet: {
+                $push: {
                     _id: '$domain._id',
                     name: '$domain.name',
                     count: '$count',
                 },
             },
-            labels: { $addToSet: '$domain.name' },
+            labels: { $push: '$domain.name' },
         },
     });
 };
