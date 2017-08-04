@@ -195,7 +195,7 @@ module.exports = (pipeline, queryFilter) => {
                             en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
                             ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
                         },
-                        position :  '$$personnel.position',
+                        position: '$$personnel.position',
                     },
                 },
             },
