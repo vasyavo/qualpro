@@ -945,8 +945,16 @@ module.exports = (req, res, next) => {
         if (_.get(queryFilter, `${CONTENT_TYPES.BRANCH}.length`)) {
             pipeline.push(...[
                 {
-                    $addFields: {
-                        acceptable: {
+                    $group: {
+                        _id: null,
+                        reports: { $push: '$$ROOT' },
+                    },
+                },
+                {
+                    $project: {
+                        _id: false,
+                        reports: 1,
+                        matchedReports: {
                             $let: {
                                 vars: {
                                     filters: {
@@ -954,33 +962,55 @@ module.exports = (req, res, next) => {
                                     },
                                 },
                                 in: {
-                                    $cond: {
-                                        if: {
+                                    $filter: {
+                                        input: '$reports',
+                                        as: 'report',
+                                        cond: {
                                             $gt: [{
                                                 $size: {
                                                     $filter: {
-                                                        input: '$branch',
+                                                        input: '$$report.branch',
                                                         as: 'branch',
                                                         cond: {
-                                                            $and: [
-                                                                { $setIsSubset: [['$$branch._id'], '$$filters.branch'] },
-                                                            ],
+                                                            $setIsSubset: [['$$report.branch._id'], '$$filters.branch'],
                                                         },
                                                     },
                                                 },
                                             }, 0],
                                         },
-                                        then: true,
-                                        else: false,
                                     },
                                 },
                             },
                         },
                     },
                 },
+                /*
+                 * tip: key thing is that if at least one report match condition then it's true condition,
+                 * else condition is incorrect and branches with one of provided trade channel or outlet aren't exists.
+                 */
                 {
-                    $match: {
-                        acceptable: true,
+                    $project: {
+                        reports: {
+                            $cond: {
+                                if: {
+                                    $gt: [{
+                                        $size: '$matchedReports',
+                                    }, 0],
+                                },
+                                then: '$matchedReports',
+                                else: '$reports',
+                            },
+                        },
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$reports',
+                    },
+                },
+                {
+                    $replaceRoot: {
+                        newRoot: '$reports',
                     },
                 },
             ]);
