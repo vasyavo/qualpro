@@ -65,6 +65,12 @@ module.exports = (req, res, next) => {
 
         const pipeline = [];
 
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
+
         pipeline.push(...[
             {
                 $project: {
@@ -155,7 +161,7 @@ module.exports = (req, res, next) => {
                                 branch: '$$marketingCampaign.branch',
                                 status: '$$marketingCampaign.status',
                                 publisher: '$$marketingCampaign.createdBy.user',
-                                product: '$$marketingCampaign.category'
+                                product: '$$marketingCampaign.category',
                             },
                         },
                     },
@@ -203,7 +209,7 @@ module.exports = (req, res, next) => {
                     },
                     status: '$marketingCampaign.status',
                     publisher: '$marketingCampaign.publisher',
-                    product: '$marketingCampaign.product'
+                    product: '$marketingCampaign.product',
                 },
             },
             {
@@ -737,7 +743,7 @@ module.exports = (req, res, next) => {
                                     in: {
                                         _id: '$$branch._id',
                                         outlet: '$$branch.outlet',
-                                        retailSegment: '$$branch.retailSegment'
+                                        retailSegment: '$$branch.retailSegment',
                                     },
                                 },
                             },
@@ -1017,7 +1023,7 @@ module.exports = (req, res, next) => {
                     status: 1,
                     publisher: 1,
                     assignee: 1,
-                    product: 1
+                    product: 1,
                 },
             },
             {
@@ -1043,7 +1049,7 @@ module.exports = (req, res, next) => {
                             status: '$$ROOT.status',
                             publisher: '$$ROOT.publisher',
                             assignee: '$$ROOT.assignee',
-                            product: '$$ROOT.product'
+                            product: '$$ROOT.product',
                         },
                     },
                 },
@@ -1078,7 +1084,7 @@ module.exports = (req, res, next) => {
                     status: '$items.status',
                     publisher: '$items.publisher',
                     assignee: '$items.assignee',
-                    product: '$items.product'
+                    product: '$items.product',
                 },
             });
         } else {
@@ -1096,7 +1102,7 @@ module.exports = (req, res, next) => {
                     status: '$items.status',
                     publisher: '$items.publisher',
                     assignee: '$items.assignee',
-                    product: '$items.product'
+                    product: '$items.product',
                 },
             });
         }
@@ -1150,7 +1156,7 @@ module.exports = (req, res, next) => {
                     status: '$statuses',
                     publisher: 1,
                     assignee: 1,
-                    product: 1
+                    product: 1,
                 },
             },
             {
@@ -1166,7 +1172,7 @@ module.exports = (req, res, next) => {
                     status: { $first: '$status' }, // tip: all available statuses over questionnaires
                     publisher: { $addToSet: '$publisher' },
                     assignee: { $push: '$assignee' },
-                    product: { $addToSet: '$product' }
+                    product: { $addToSet: '$product' },
                 },
             },
             {
@@ -1600,7 +1606,7 @@ module.exports = (req, res, next) => {
                     personnels: '$assignee',
                     statuses: '$status',
                     promotionTypes: '$marketingCampaign',
-                    categories: '$product'
+                    categories: '$product',
                 },
             },
         ]);
