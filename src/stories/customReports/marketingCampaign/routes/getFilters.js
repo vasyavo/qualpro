@@ -64,6 +64,12 @@ module.exports = (req, res, next) => {
 
         const pipeline = [];
 
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
+
         pipeline.push(...[
             {
                 $project: {
