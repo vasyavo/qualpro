@@ -3,7 +3,6 @@ const async = require('async');
 const moment = require('moment');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const generalFiler = require('./../../utils/generalFilter');
 const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
