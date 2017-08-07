@@ -242,13 +242,9 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             pipeline.push({
                 $match: {
-                    $or: [{
-                        marketingCampaign: null,
-                    }, {
-                        'marketingCampaign.createdBy.user': {
-                            $in: queryFilter[CONTENT_TYPES.PERSONNEL],
-                        },
-                    }],
+                    'marketingCampaign.createdBy.user': {
+                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                    },
                 },
             });
         }
@@ -655,13 +651,9 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    $or: [{
-                        _id: null,
-                    }, {
-                        'employee.position': {
-                            $in: queryFilter[CONTENT_TYPES.POSITION],
-                        },
-                    }],
+                    'employee.position': {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
                 },
             });
         }
