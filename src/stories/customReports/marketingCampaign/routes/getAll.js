@@ -69,12 +69,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        function addNullMatchFilter (nullFilter, query) {
-           return {
-               $or : [nullFilter,  query]
-           }
-        }
-
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status'], queryFilter, personnel);
@@ -210,9 +204,9 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $unwind: {
-                path : '$marketingCampaign',
-                preserveNullAndEmptyArrays: true
-            }
+                path: '$marketingCampaign',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         const $timeMatch = {};
@@ -227,10 +221,10 @@ module.exports = (req, res, next) => {
                     }, {
                         $and: [
                             {
-                                'marketingCampaign.createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d},
+                                'marketingCampaign.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
                             },
                             {
-                                'marketingCampaign.createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d},
+                                'marketingCampaign.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
                             },
                         ],
                     }],
@@ -292,8 +286,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$branch._id',
                             name: {
-                                en: {$ifNull : ['$$branch.name.en', "N/A"]},
-                                ar: {$ifNull : ['$$branch.name.ar', "N/A"]},
+                                en: { $ifNull: ['$$branch.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$branch.name.ar', 'N/A'] },
                             },
                             outlet: '$$branch.outlet',
                             retailSegment: '$$branch.retailSegment',
@@ -372,7 +366,7 @@ module.exports = (req, res, next) => {
                         marketingCampaign: null,
                     }, {
                         'subRegion.parent': {
-                            $in: queryFilter[CONTENT_TYPES.REGION]
+                            $in: queryFilter[CONTENT_TYPES.REGION],
                         },
                     }],
                 },
