@@ -69,12 +69,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                countAnswered: { $gt: 0 },
-            },
-        });
-
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
@@ -252,7 +246,10 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$answer',
+            $unwind: {
+                path: '$answer',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
@@ -284,8 +281,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$personnel._id',
                             name: {
-                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
+                                en: { $ifNull: [{ $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] }, 'N/A Personnel'] },
+                                ar: { $ifNull: [{ $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] }, 'N/A Personnel'] },
                             },
                             position: '$$personnel.position',
                         },
@@ -411,18 +408,21 @@ module.exports = (req, res, next) => {
                             branch: { $arrayElemAt: ['$branch', 0] },
                         },
                         in: {
-                            $concat: [
-                                '$$country.name.en',
-                                ' -> ',
-                                '$$region.name.en',
-                                ' -> ',
-                                '$$subRegion.name.en',
-                                ' -> ',
-                                '$$retailSegment.name.en',
-                                ' -> ',
-                                '$$outlet.name.en',
-                                ' -> ',
-                                '$$branch.name.en',
+                            $ifNull: [{
+                                $concat: [
+                                    '$$country.name.en',
+                                    ' -> ',
+                                    '$$region.name.en',
+                                    ' -> ',
+                                    '$$subRegion.name.en',
+                                    ' -> ',
+                                    '$$retailSegment.name.en',
+                                    ' -> ',
+                                    '$$outlet.name.en',
+                                    ' -> ',
+                                    '$$branch.name.en',
+                                ],
+                            }, 'N/A Location',
                             ],
                         },
                     },
@@ -456,8 +456,8 @@ module.exports = (req, res, next) => {
                             position: { $arrayElemAt: ['$position', 0] },
                         },
                         in: {
-                            _id: '$$position._id',
-                            name: '$$position.name',
+                            _id: { $ifNull: ['$$position._id', 'N/A'] },
+                            name: { $ifNull: ['$$position.name', 'N/A Position'] },
                         },
                     },
                 },
@@ -533,10 +533,12 @@ module.exports = (req, res, next) => {
         response.data.forEach(dataItem => {
             dataItem.respondents.forEach(respondent => {
                 respondent.items.forEach(item => {
-                    item.answer = {
-                        en: sanitizeHtml(item.answer.en),
-                        ar: sanitizeHtml(item.answer.ar),
-                    };
+                    if (item.answer) {
+                        item.answer = {
+                            en: sanitizeHtml(item.answer.en),
+                            ar: sanitizeHtml(item.answer.ar),
+                        };
+                    }
                 });
             });
         });
