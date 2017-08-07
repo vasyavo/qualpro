@@ -197,16 +197,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.rate) {
-            pipeline.push({
-                $match: {
-                    rating: {
-                        $gte: parseInt(queryFilter.rate, 10),
-                    },
-                },
-            });
-        }
-
         if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
             pipeline.push({
                 $match: {
@@ -226,6 +216,137 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $group: {
+                _id: '$_id',
+                avgRating: { $avg: '$rating' },
+            },
+        });
+
+        if (queryFilter.rate) {
+            pipeline.push({
+                $match: {
+                    avgRating: {
+                        $gte: parseInt(queryFilter.rate, 10),
+                    },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'newPersonnels',
+            },
+        });
+
+        pipeline.push({
+            $unwind: '$newPersonnels',
+        });
+
+        pipeline.push({
+            $replaceRoot: { newRoot: '$newPersonnels' },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'monthlies',
+                localField: '_id',
+                foreignField: 'personnel',
+                as: 'evaluations',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'branches',
+                localField: 'branch',
+                foreignField: '_id',
+                as: 'branch',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                name: {
+                    en: {
+                        $concat: ['$firstName.en', ' ', '$lastName.en'],
+                    },
+                    ar: {
+                        $concat: ['$firstName.ar', ' ', '$lastName.ar'],
+                    },
+                },
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: '$branch.retailSegment',
+                outlet: '$branch.outlet',
+                branch: {
+                    _id: 1,
+                    name: 1,
+                    retailSegment: 1,
+                    outlet: 1,
+                    subRegion: 1,
+                },
+                personnel: 1,
+                position: 1,
+                evaluations: {
+                    _id: 1,
+                    rating: 1,
+                    target: 1,
+                    achiev: 1,
+                    year: 1,
+                    month: 1,
+                    age: 1,
+                    createdBy: 1,
+                },
+            },
+        });
+
+        pipeline.push({
+            $unwind: '$evaluations',
+        });
+
+        const $timeMatch2 = {};
+        $timeMatch2.$or = [];
+
+        if (timeFilter) {
+            timeFilter.map((frame) => {
+                $timeMatch2.$or.push({
+                    $and: [
+                        {
+                            'evaluations.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'evaluations.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch2.$or.length) {
+            pipeline.push({
+                $match: $timeMatch2,
+            });
+        }
+
+        pipeline.push({
+            $addFields: {
+                publisher: '$evaluations.createdBy.user',
+                rating: '$evaluations.rating',
+                target: '$evaluations.target',
+                achiev: '$evaluations.achiev',
+                age: '$evaluations.age',
+                year: '$evaluations.year',
+                month: '$evaluations.month',
+            },
+        });
 
         pipeline.push({
             $lookup: {
@@ -338,8 +459,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -358,8 +479,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -378,8 +499,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -398,8 +519,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -418,8 +539,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -438,8 +559,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
