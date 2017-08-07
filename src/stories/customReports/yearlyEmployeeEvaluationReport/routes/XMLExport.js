@@ -343,8 +343,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -363,8 +363,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -383,8 +383,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -403,8 +403,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -423,8 +423,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -443,8 +443,8 @@ module.exports = (req, res, next) => {
                             },
                         },
                         in: {
-                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }], },
-                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }], },
+                            en: { $concat: ['$$value.en', ', ', { $ifNull: ['$$this.name.en', 'null'] }] },
+                            ar: { $concat: ['$$value.ar', ', ', { $ifNull: ['$$this.name.ar', 'null'] }] },
                         },
                     },
                 },
@@ -499,7 +499,6 @@ module.exports = (req, res, next) => {
                         <th>Reporting</th>
                         <th>Planning And Organization Skills</th>
                         <th>Overall Performance</th>
-                        <th>Rating</th>
                         <th>Date</th>
                     </tr>
                 </thead>
@@ -520,7 +519,6 @@ module.exports = (req, res, next) => {
                                 <td>${item.reporting.toFixed(2)}</td>
                                 <td>${item.planningAndOrganizationSkills.toFixed(2)}</td>
                                 <td>${OTHER_CONSTANTS.RATING_BIYEARLY.find((rating) => rating._id === item.overallPerformance).name[currentLanguage]}</td>
-                                <td>${item.rating}</td>
                                 <td>${moment(item.month, 'MM').format('MMMM') + ' ' + item.year}</td>
                             </tr>
                         `;
