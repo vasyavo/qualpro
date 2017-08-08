@@ -7,6 +7,16 @@ module.exports = (pipeline, queryFilter) => {
         },
     });
 
+    if (queryFilter.rate) {
+        pipeline.push({
+            $match: {
+                rating: {
+                    $gte: parseInt(queryFilter.rate, 10),
+                },
+            },
+        });
+    }
+
     pipeline.push({
         $unwind: '$region',
     });
@@ -17,16 +27,6 @@ module.exports = (pipeline, queryFilter) => {
             rating: { $avg: '$rating' },
         },
     });
-
-    if (queryFilter.rate) {
-        pipeline.push({
-            $match: {
-                rating: {
-                    $gte: parseInt(queryFilter.rate, 10),
-                },
-            },
-        });
-    }
 
     pipeline.push({
         $lookup: {
