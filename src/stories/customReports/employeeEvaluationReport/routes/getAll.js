@@ -226,8 +226,15 @@ module.exports = (req, res, next) => {
                 position: { $first: '$position' },
                 target: { $sum: '$target' },
                 achiev: { $sum: '$achiev' },
-                percentage: { $sum: '$age' },
                 avgRating: { $avg: '$rating' },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                percentage: {
+                    $divide: [{ $multiply: ['$achiev', 100] }, '$target'],
+                },
             },
         });
 
@@ -652,6 +659,10 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.percentage = Math.round(item.percentage);
+        });
 
         res.status(200).send(response);
     });
