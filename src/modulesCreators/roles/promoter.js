@@ -132,7 +132,7 @@ module.exports = [
         },
         mobile: {
             archive: false,
-            edit   : false,
+            edit   : true,
             write  : false,
             read   : true
         }
