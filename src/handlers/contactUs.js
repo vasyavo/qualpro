@@ -27,7 +27,7 @@ var ContactUs = function() {
             async.waterfall([
 
                 (cb) => {
-                    if (!files && !files.length) {
+                    if (!files || !files.length) {
                         return cb(null, []);
                     }
 
