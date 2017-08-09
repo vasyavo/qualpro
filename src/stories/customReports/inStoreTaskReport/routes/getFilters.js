@@ -993,7 +993,6 @@ module.exports = (req, res, next) => {
                         as: 'branch',
                         in: {
                             _id: '$$branch._id',
-                            name: '$$branch.name',
                         },
                     },
                 },

@@ -1,4 +1,4 @@
-module.exports = (pipeline) => {
+module.exports = (pipeline, queryFilter) => {
     pipeline.push({
         $group: {
             _id: '$_id',
@@ -6,6 +6,16 @@ module.exports = (pipeline) => {
             country: { $first: '$country' },
         },
     });
+
+    if (queryFilter.rate) {
+        pipeline.push({
+            $match: {
+                rating: {
+                    $gte: parseInt(queryFilter.rate, 10),
+                },
+            },
+        });
+    }
 
     pipeline.push({
         $unwind: '$country',

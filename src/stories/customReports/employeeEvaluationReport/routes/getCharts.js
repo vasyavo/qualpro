@@ -184,16 +184,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.rate) {
-            pipeline.push({
-                $match: {
-                    rating: {
-                        $gte: parseInt(queryFilter.rate, 10),
-                    },
-                },
-            });
-        }
-
         if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
             pipeline.push({
                 $match: {
@@ -214,7 +204,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        applyAnalyzeBy(pipeline, analyzeByParam);
+        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter);
 
         PersonnelModel.aggregate(pipeline)
             .allowDiskUse(true)

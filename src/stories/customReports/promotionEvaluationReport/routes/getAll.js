@@ -121,6 +121,14 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $match: {
+                    country: { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                },
+            });
+        }
+
         pipeline.push({
             $project: {
                 _id: 1,
@@ -129,6 +137,7 @@ module.exports = (req, res, next) => {
                 comments: 1,
                 dateStart: 1,
                 dateEnd: 1,
+                parentCountry: '$country',
                 createdBy: {
                     user: {
                         $let: {
@@ -160,19 +169,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $lookup: {
-                from: CONTENT_TYPES.PROMOTIONSITEMS,
-                localField: '_id',
-                foreignField: 'promotion',
-                as: 'promotion',
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$promotion',
-        });
-
         const $timeMatch = {};
 
         $timeMatch.$or = [];
@@ -182,10 +178,10 @@ module.exports = (req, res, next) => {
                 $timeMatch.$or.push({
                     $and: [
                         {
-                            'promotion.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
                         },
                         {
-                            'promotion.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
                         },
                     ],
                 });
@@ -198,6 +194,22 @@ module.exports = (req, res, next) => {
                 $match: $timeMatch,
             });
         }
+
+        pipeline.push({
+            $lookup: {
+                from: CONTENT_TYPES.PROMOTIONSITEMS,
+                localField: '_id',
+                foreignField: 'promotion',
+                as: 'promotion',
+            },
+        });
+
+        pipeline.push({
+            $unwind: {
+                path: '$promotion',
+                preserveNullAndEmptyArrays: true,
+            },
+        });
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             pipeline.push({
@@ -236,8 +248,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$branch._id',
                             name: {
-                                en: '$$branch.name.en',
-                                ar: '$$branch.name.ar',
+                                en: { $ifNull: ['$$branch.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$branch.name.ar', 'N/A'] },
                             },
                             outlet: '$$branch.outlet',
                             retailSegment: '$$branch.retailSegment',
@@ -259,9 +271,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
             pipeline.push({
                 $match: {
-                    'branch.retailSegment': {
-                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
-                    },
+                    $or: [{
+                        'branch.retailSegment': {
+                            $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                        },
+                    }, {
+                        promotion: null,
+                    }],
                 },
             });
         }
@@ -269,9 +285,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
             pipeline.push({
                 $match: {
-                    'branch.outlet': {
-                        $in: queryFilter[CONTENT_TYPES.OUTLET],
-                    },
+                    $or: [{
+                        'branch.outlet': {
+                            $in: queryFilter[CONTENT_TYPES.OUTLET],
+                        },
+                    }, {
+                        promotion: null,
+                    }],
                 },
             });
         }
@@ -349,15 +369,6 @@ module.exports = (req, res, next) => {
                 },
             },
         });
-
-
-        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
-            pipeline.push({
-                $match: {
-                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
-                },
-            });
-        }
 
         pipeline.push({
             $lookup: {
@@ -485,8 +496,8 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $project: {
                 _id: 1,
-                location: 1,
-                country: '$country._id',
+                location: { $ifNull: ['$location', 'N/A'] },
+                country: { $ifNull: ['$country._id', '$parentCountry'] },
                 branch: 1,
                 promotionType: 1,
                 ppt: 1,
@@ -517,11 +528,11 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$user._id',
                             name: {
-                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                en: { $ifNull: [{ $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] }, 'N/A'] },
+                                ar: { $ifNull: [{ $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] }, 'N/A'] },
                             },
                         },
-                    }
+                    },
                 },
             },
         });
@@ -554,7 +565,7 @@ module.exports = (req, res, next) => {
                 createdBy: '$records.createdBy',
                 promotion: '$records.promotion',
                 total: 1,
-                assignee : '$records.assignee',
+                assignee: '$records.assignee',
             },
         });
 
@@ -590,7 +601,7 @@ module.exports = (req, res, next) => {
                 location: 1,
                 branch: 1,
                 promotionType: 1,
-                promotionComment: { $arrayElemAt: ['$promotionComment', 0] },
+                promotionComment: { $ifNull: [{ $arrayElemAt: ['$promotionComment', 0] }, 'N/A'] },
                 ppt: 1,
                 country: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
@@ -599,19 +610,17 @@ module.exports = (req, res, next) => {
                     user: 1,
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
-                displayType: 1,
-                itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
-                itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
-                opening: '$promotion.opening',
-                sellIn: '$promotion.sellIn',
-                closingStock: '$promotion.closingStock',
-                sellOut: '$promotion.sellOut',
-                assignee : 1,
+                displayType: { $cond: [{ $eq: [{ $size: '$displayType' }, 0] }, [{ name: { en: 'N/A', ar: 'N/A' } }], '$displayType'] },
+                itemDateStart: { $ifNull: [{ $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } }, 'N/A'] },
+                itemDateEnd: { $ifNull: [{ $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } }, 'N/A'] },
+                opening: { $ifNull: ['$promotion.opening', 0] },
+                sellIn: { $ifNull: ['$promotion.sellIn', 0] },
+                closingStock: { $ifNull: ['$promotion.closingStock', 0] },
+                sellOut: { $ifNull: ['$promotion.sellOut', 0] },
+                assignee: 1,
                 total: 1,
             },
         });
-
-
 
 
         pipeline.push({
@@ -655,9 +664,9 @@ module.exports = (req, res, next) => {
                                 en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
                                 ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
                             },
-                            imageSrc : '$$user.imageSrc'
+                            imageSrc: '$$user.imageSrc',
                         },
-                    }
+                    },
                 },
             },
         });
@@ -719,6 +728,8 @@ module.exports = (req, res, next) => {
             } else {
                 item.ppt = `${item.ppt.toFixed(2)} ${currentCountry.currency}`;
             }
+
+
             item.promotionType = {
                 en: sanitizeHtml(item.promotionType.en),
                 ar: sanitizeHtml(item.promotionType.ar),

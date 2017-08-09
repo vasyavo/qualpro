@@ -1,10 +1,20 @@
-module.exports = (pipeline) => {
+module.exports = (pipeline, queryFilter) => {
     pipeline.push({
         $group: {
             _id: '$publisher',
             rating: { $avg: '$rating' },
         },
     });
+
+    if (queryFilter.rate) {
+        pipeline.push({
+            $match: {
+                rating: {
+                    $gte: parseInt(queryFilter.rate, 10),
+                },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {

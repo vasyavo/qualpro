@@ -175,6 +175,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: '$setPromotion._id',
                 category: '$setPromotion.category',
+                parentAttachments: '$setPromotion.attachments',
                 description: '$setPromotion.description',
                 promotion: '$setPromotion.promotion',
                 brand: '$setPromotion.brand',
@@ -211,6 +212,16 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'parentAttachments',
+                foreignField: '_id',
+                as: 'parentAttachments',
             },
         });
 
@@ -318,6 +329,7 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 description: 1,
                 promotion: 1,
+                parentAttachments: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
@@ -492,6 +504,18 @@ module.exports = (req, res, next) => {
                 displayType: 1,
                 createdBy: 1,
                 total: 1,
+                attachments: {
+                    $map: {
+                        input: '$parentAttachments',
+                        as: 'attachment',
+                        in: {
+                            _id: '$$attachment._id',
+                            preview: '$$attachment.preview',
+                            originalName: '$$attachment.originalName',
+                            contentType: '$$attachment.contentType',
+                        },
+                    },
+                },
                 publisher: {
                     $concat: [
                         '$createdBy.user.name.en',

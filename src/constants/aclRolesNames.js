@@ -10,6 +10,6 @@ module.exports = {
     MASTER_UPLOADER: 8,
     COUNTRY_UPLOADER: 9,
     TRADE_MARKETER: 10,
-    VIRTUAL: 11,
-    PROMOTER: 12
+    PROMOTER: 11,
+    VIRTUAL: 12
 };
