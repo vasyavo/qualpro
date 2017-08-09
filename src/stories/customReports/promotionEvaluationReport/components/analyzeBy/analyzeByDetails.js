@@ -122,6 +122,7 @@ module.exports = (pipeline) => {
                 branch: 1,
                 retailSegment: 1,
                 outlet: 1,
+                items: 1,
             },
         },
         {
@@ -137,24 +138,26 @@ module.exports = (pipeline) => {
                 retailSegment: { $first: '$retailSegment' },
                 outlet: { $first: '$outlet' },
                 stocks: { $first: '$stocks' },
+                items: { $first: '$items' },
             },
         },
         {
             $project: {
-                _id: '$_id.promotion', // tip: because one promotion analyzing
+                _id: false,
                 country: 1,
                 region: 1,
                 subRegion: 1,
                 branch: 1,
                 retailSegment: 1,
                 outlet: 1,
+                reports: '$items',
             },
         },
         {
             $lookup: {
                 from: CONTENT_TYPES.PROMOTIONSITEMS,
-                localField: '_id',
-                foreignField: 'promotion',
+                localField: 'reports',
+                foreignField: '_id',
                 as: 'reports',
             },
         },

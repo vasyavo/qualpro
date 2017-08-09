@@ -57,10 +57,10 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.RETAILSEGMENT,
             CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
-            CONTENT_TYPES.PERSONNEL,
             CONTENT_TYPES.PROMOTIONS,
+            CONTENT_TYPES.POSITION,
             'publisher',
+            'employee',
             CONTENT_TYPES.CATEGORY,
             'displayType',
         ].forEach((filterName) => {
@@ -71,7 +71,17 @@ module.exports = (req, res, next) => {
             }
         });
 
-        const pipeline = [
+        const pipeline = [];
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
+            pipeline.push({
+                $match: {
+                    _id: queryFilter[CONTENT_TYPES.PROMOTIONS][0],
+                },
+            });
+        }
+
+        pipeline.push(...[
             {
                 $project: {
                     _id: 1,
@@ -103,7 +113,7 @@ module.exports = (req, res, next) => {
                     }],
                 },
             },
-        ];
+        ]);
 
         if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
             pipeline.push({
@@ -115,64 +125,213 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (_.get(queryFilter, `${CONTENT_TYPES.CATEGORY}.length`)) {
+            pipeline.push({
+                $match: {
+                    product: {
+                        $in: queryFilter[CONTENT_TYPES.CATEGORY],
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, 'displayType.length')) {
+            pipeline.push({
+                $match: {
+                    displayType: {
+                        $in: queryFilter.displayType,
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, 'status.length')) {
+            pipeline.push({
+                $match: {
+                    status: {
+                        $in: queryFilter.status,
+                    },
+                },
+            });
+        }
+
+        pipeline.push({
+            $project: {
+                _id: 1,
+                title: 1,
+                country: ['$country'],
+                region: {
+                    $cond: {
+                        if: { $gt: [{ $size: { $ifNull: ['$region', []] } }, 0] },
+                        then: { selected: '$region' },
+                        else: { all: 'region' },
+                    },
+                },
+                subRegion: {
+                    $cond: {
+                        if: { $gt: [{ $size: { $ifNull: ['$subRegion', []] } }, 0] },
+                        then: { selected: '$subRegion' },
+                        else: { all: 'subRegion' },
+                    },
+                },
+                branch: {
+                    $cond: {
+                        if: { $gt: [{ $size: { $ifNull: ['$branch', []] } }, 0] },
+                        then: { selected: '$branch' },
+                        else: { all: 'branch' },
+                    },
+                },
+                status: 1,
+                publisher: 1,
+                product: 1,
+                displayType: 1,
+            },
+        });
+
+        if (_.get(queryFilter, 'publisher.length')) {
+            pipeline.push({
+                $match: {
+                    publisher: {
+                        $in: queryFilter.publisher,
+                    },
+                },
+            });
+        }
+
         pipeline.push(...[
             {
-                $project: {
-                    _id: 1,
-                    title: 1,
-                    country: ['$country'],
-                    region: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: ['$region', []] } }, 0] },
-                            then: { selected: '$region' },
-                            else: { all: 'region' },
-                        },
-                    },
-                    subRegion: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: ['$subRegion', []] } }, 0] },
-                            then: { selected: '$subRegion' },
-                            else: { all: 'subRegion' },
-                        },
-                    },
-                    branch: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: ['$branch', []] } }, 0] },
-                            then: { selected: '$branch' },
-                            else: { all: 'branch' },
-                        },
-                    },
-                    status: 1,
-                    publisher: 1,
-                    product: 1,
-                    displayType: 1,
+                $lookup: {
+                    from: 'personnels',
+                    localField: 'publisher',
+                    foreignField: '_id',
+                    as: 'publisher',
                 },
             },
+            {
+                $addFields: {
+                    publisher: {
+                        $let: {
+                            vars: {
+                                publisher: { $arrayElemAt: ['$publisher', 0] },
+                            },
+                            in: {
+                                _id: '$$publisher._id',
+                                name: {
+                                    en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
+                                    ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
+                                },
+                                position: '$$publisher.position',
+                            },
+                        },
+                    },
+                },
+            },
+        ]);
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.POSITION}.length`)) {
+            pipeline.push({
+                $match: {
+                    'publisher.position': {
+                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                    },
+                },
+            });
+        }
+
+        pipeline.push(...[
             {
                 $lookup: {
-                    from: 'promotionsItems',
-                    localField: '_id',
-                    foreignField: 'promotion',
-                    as: 'items',
+                    from: 'positions',
+                    localField: 'publisher.position',
+                    foreignField: '_id',
+                    as: 'publisher.position',
                 },
             },
             {
-                $project: {
-                    _id: 1,
-                    title: 1,
-                    country: 1,
-                    region: 1,
-                    subRegion: 1,
-                    branch: 1,
-                    status: 1,
-                    publisher: 1,
-                    product: 1,
-                    displayType: 1,
-                    assignee: {
-                        $setUnion: ['$items.createdBy.user', []],
+                $addFields: {
+                    'publisher.position': {
+                        $let: {
+                            vars: {
+                                position: { $arrayElemAt: ['$publisher.position', 0] },
+                            },
+                            in: {
+                                _id: '$$position._id',
+                                name: '$$position.name',
+                            },
+                        },
                     },
                 },
             },
+        ]);
+
+        pipeline.push({
+            $lookup: {
+                from: 'promotionsItems',
+                localField: '_id',
+                foreignField: 'promotion',
+                as: 'items',
+            },
+        });
+
+        {
+            const mapItemsByAssignee = {
+                $map: {
+                    input: '$items',
+                    as: 'item',
+                    in: {
+                        _id: '$$item._id',
+                        publisher: '$$item.createdBy.user',
+                    },
+                },
+            };
+
+            if (_.get(queryFilter, 'employee.length')) {
+                mapItemsByAssignee.$map.input = {
+                    $let: {
+                        vars: {
+                            assignee: queryFilter.employee,
+                        },
+                        in: {
+                            $filter: {
+                                input: '$items',
+                                as: 'item',
+                                cond: {
+                                    $setIsSubset: [['$$item.createdBy.user'], '$$assignee'],
+                                },
+                            },
+                        },
+                    },
+                };
+            }
+
+            pipeline.push(...[
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        country: 1,
+                        region: 1,
+                        subRegion: 1,
+                        branch: 1,
+                        status: 1,
+                        publisher: 1,
+                        product: 1,
+                        displayType: 1,
+                        items: mapItemsByAssignee,
+                    },
+                },
+                {
+                    $addFields: {
+                        items: '$items._id',
+                        assignee: {
+                            $setUnion: ['$items.publisher', []],
+                        },
+                    },
+                },
+            ]);
+        }
+
+        pipeline.push(...[
             {
                 $lookup: {
                     from: 'domains',
@@ -893,18 +1052,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                branch: {
-                    $map: {
-                        input: '$branch',
-                        as: 'branch',
-                        in: {
-                            _id: '$$branch._id',
-                            name: '$$branch.name',
-                        },
-                    },
-                },
-                retailSegment: '$branch.retailSegment',
-                outlet: '$branch.outlet',
+                branch: '$branch._id',
             },
         });
 
@@ -938,7 +1086,7 @@ module.exports = (req, res, next) => {
                                                         input: '$$report.branch',
                                                         as: 'branch',
                                                         cond: {
-                                                            $setIsSubset: [['$$report.branch._id'], '$$filters.branch'],
+                                                            $setIsSubset: [['$$report.branch'], '$$filters.branch'],
                                                         },
                                                     },
                                                 },
@@ -989,34 +1137,17 @@ module.exports = (req, res, next) => {
                 country: 1,
                 region: 1,
                 subRegion: 1,
-                branch: '$branch._id',
+                branch: 1,
                 retailSegment: 1,
                 outlet: 1,
                 status: 1,
                 publisher: 1,
+                items: 1,
                 assignee: 1,
                 product: 1,
                 displayType: 1,
             },
         });
-
-        if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
-            pipeline.push({
-                $match: {
-                    _id: queryFilter[CONTENT_TYPES.PROMOTIONS][0],
-                },
-            });
-        }
-
-        if (_.get(queryFilter, 'status.length')) {
-            pipeline.push({
-                $match: {
-                    status: {
-                        $in: queryFilter.status,
-                    },
-                },
-            });
-        }
 
         pipeline.push(...[
             {
@@ -1044,14 +1175,6 @@ module.exports = (req, res, next) => {
             {
                 $lookup: {
                     from: 'personnels',
-                    localField: 'publisher',
-                    foreignField: '_id',
-                    as: 'publisher',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'personnels',
                     localField: 'assignee',
                     foreignField: '_id',
                     as: 'assignee',
@@ -1059,21 +1182,6 @@ module.exports = (req, res, next) => {
             },
             {
                 $addFields: {
-                    publisher: {
-                        $let: {
-                            vars: {
-                                publisher: { $arrayElemAt: ['$publisher', 0] },
-                            },
-                            in: {
-                                _id: '$$publisher._id',
-                                name: {
-                                    en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
-                                    ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
-                                },
-                                position: '$$publisher.position',
-                            },
-                        },
-                    },
                     assignee: {
                         $filter: {
                             input: {
@@ -1098,17 +1206,6 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
-        ]);
-
-        pipeline.push(...[
-            {
-                $lookup: {
-                    from: 'positions',
-                    localField: 'publisher.position',
-                    foreignField: '_id',
-                    as: 'publisher.position',
-                },
-            },
             {
                 $lookup: {
                     from: 'positions',
@@ -1118,18 +1215,14 @@ module.exports = (req, res, next) => {
                 },
             },
             {
-                $addFields: {
-                    'publisher.position': {
-                        $let: {
-                            vars: {
-                                position: { $arrayElemAt: ['$publisher.position', 0] },
-                            },
-                            in: {
-                                _id: '$$position._id',
-                                name: '$$position.name',
-                            },
-                        },
-                    },
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    country: { $arrayElemAt: ['$country', 0] },
+                    branch: 1,
+                    product: 1,
+                    displayType: 1,
+                    publisher: 1,
                     assignee: {
                         $map: {
                             input: '$assignee',
@@ -1160,98 +1253,12 @@ module.exports = (req, res, next) => {
                             },
                         },
                     },
+                    items: 1,
                 },
             },
-            {
-                $lookup: {
-                    from: 'domains',
-                    localField: 'region',
-                    foreignField: '_id',
-                    as: 'region',
-                },
-            },
-            {
-                $addFields: {
-                    region: {
-                        $map: {
-                            input: '$region',
-                            as: 'region',
-                            in: {
-                                _id: '$$region._id',
-                                name: '$$region.name',
-                                parent: '$$region.parent',
-                            },
-                        },
-                    },
-                },
-            },
-            {
-                $lookup: {
-                    from: 'domains',
-                    localField: 'subRegion',
-                    foreignField: '_id',
-                    as: 'subRegion',
-                },
-            },
-            {
-                $addFields: {
-                    subRegion: {
-                        $map: {
-                            input: '$subRegion',
-                            as: 'subRegion',
-                            in: {
-                                _id: '$$subRegion._id',
-                                name: '$$subRegion.name',
-                                parent: '$$subRegion.parent',
-                            },
-                        },
-                    },
-                },
-            },
-            {
-                $lookup: {
-                    from: 'retailSegments',
-                    localField: 'retailSegment',
-                    foreignField: '_id',
-                    as: 'retailSegment',
-                },
-            },
-            {
-                $addFields: {
-                    retailSegment: {
-                        $map: {
-                            input: '$retailSegment',
-                            as: 'retailSegment',
-                            in: {
-                                _id: '$$retailSegment._id',
-                                name: '$$retailSegment.name',
-                            },
-                        },
-                    },
-                },
-            },
-            {
-                $lookup: {
-                    from: 'outlets',
-                    localField: 'outlet',
-                    foreignField: '_id',
-                    as: 'outlet',
-                },
-            },
-            {
-                $addFields: {
-                    outlet: {
-                        $map: {
-                            input: '$outlet',
-                            as: 'outlet',
-                            in: {
-                                _id: '$$outlet._id',
-                                name: '$$outlet.name',
-                            },
-                        },
-                    },
-                },
-            },
+        ]);
+
+        pipeline.push(...[
             {
                 $lookup: {
                     from: 'branches',
@@ -1277,6 +1284,9 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
+        ]);
+
+        pipeline.push(...[
             {
                 $lookup: {
                     from: 'categories',
@@ -1299,6 +1309,9 @@ module.exports = (req, res, next) => {
                     },
                 },
             },
+        ]);
+
+        pipeline.push(...[
             {
                 $lookup: {
                     from: 'displayTypes',
@@ -1325,41 +1338,16 @@ module.exports = (req, res, next) => {
                 $project: {
                     _id: 1,
                     title: 1,
-                    country: { $arrayElemAt: ['$country', 0] },
-                    region: 1,
-                    subRegion: 1,
+                    country: 1,
                     branch: 1,
                     product: { $arrayElemAt: ['$product', 0] },
                     displayType: 1,
                     publisher: 1,
                     assignee: 1,
+                    items: 1,
                 },
             },
         ]);
-
-        {
-            const $match = { $and: [] };
-
-            if (_.get(queryFilter, `${CONTENT_TYPES.PERSONNEL}.length`)) {
-                $match.$and.push({
-                    'publisher._id': {
-                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
-                    },
-                });
-            }
-
-            if (_.get(queryFilter, `${CONTENT_TYPES.POSITION}.length`)) {
-                $match.$and.push({
-                    'publisher.position_id': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                });
-            }
-
-            if ($match.$and.length) {
-                pipeline.push({ $match });
-            }
-        }
 
         pipeline.push({
             $unwind: {

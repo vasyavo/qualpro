@@ -56,10 +56,10 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.RETAILSEGMENT,
             CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
-            CONTENT_TYPES.PERSONNEL,
             CONTENT_TYPES.PROMOTIONS,
+            CONTENT_TYPES.POSITION,
             'publisher',
+            'employee',
             CONTENT_TYPES.CATEGORY,
             'displayType',
         ].forEach((filterName) => {

@@ -67,9 +67,9 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY,
             'displayType',
-            'publisher',
             CONTENT_TYPES.POSITION,
-            CONTENT_TYPES.PERSONNEL,
+            'publisher',
+            'employee',
             CONTENT_TYPES.PROMOTIONS,
         ].forEach((filterName) => {
             if (queryFilter[filterName] && queryFilter[filterName][0]) {
@@ -211,11 +211,11 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+        if (queryFilter.employee && queryFilter.employee.length) {
             pipeline.push({
                 $match: {
                     'promotion.createdBy.user': {
-                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                        $in: queryFilter.employee,
                     },
                 },
             });
