@@ -601,7 +601,7 @@ module.exports = (req, res, next) => {
                 location: 1,
                 branch: 1,
                 promotionType: 1,
-                promotionComment: { $ifNull: [{ $arrayElemAt: ['$promotionComment', 0] }, 'N/A']},
+                promotionComment: { $ifNull: [{ $arrayElemAt: ['$promotionComment', 0] }, 'N/A'] },
                 ppt: 1,
                 country: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
@@ -610,7 +610,7 @@ module.exports = (req, res, next) => {
                     user: 1,
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
-                displayType: { $cond: [{$eq : [{$size : '$displayType'}, 0]}, [{name : {en : 'N/A', ar : 'N/A'}}] , '$displayType']},
+                displayType: { $cond: [{ $eq: [{ $size: '$displayType' }, 0] }, [{ name: { en: 'N/A', ar: 'N/A' } }], '$displayType'] },
                 itemDateStart: { $ifNull: [{ $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } }, 'N/A'] },
                 itemDateEnd: { $ifNull: [{ $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } }, 'N/A'] },
                 opening: { $ifNull: ['$promotion.opening', 0] },
@@ -621,8 +621,6 @@ module.exports = (req, res, next) => {
                 total: 1,
             },
         });
-
-
 
 
         pipeline.push({
@@ -666,9 +664,9 @@ module.exports = (req, res, next) => {
                                 en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
                                 ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
                             },
-                            imageSrc : '$$user.imageSrc',
+                            imageSrc: '$$user.imageSrc',
                         },
-                    }
+                    },
                 },
             },
         });

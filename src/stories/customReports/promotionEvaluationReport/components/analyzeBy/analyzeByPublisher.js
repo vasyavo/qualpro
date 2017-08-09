@@ -43,6 +43,7 @@ module.exports = (pipeline, queryFilter) => {
                             _id: '$$branch._id',
                             subRegion: '$$branch.subRegion',
                             retailSegment: '$$branch.retailSegment',
+                            outlet: '$$branch.outlet',
                         },
                     },
                 },
