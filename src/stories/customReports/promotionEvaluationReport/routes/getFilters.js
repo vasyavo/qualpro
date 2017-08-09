@@ -1459,15 +1459,24 @@ module.exports = (req, res, next) => {
             {
                 $addFields: {
                     publisher: {
-                        $map: {
-                            input: '$publisher',
-                            as: 'publisher',
-                            in: {
-                                _id: '$$publisher._id',
-                                name: {
-                                    en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
-                                    ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
+                        $filter: {
+                            input: {
+                                $map: {
+                                    input: '$publisher',
+                                    as: 'publisher',
+                                    in: {
+                                        _id: '$$publisher._id',
+                                        name: {
+                                            en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
+                                            ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
+                                        },
+                                        position: '$$publisher.position',
+                                    },
                                 },
+                            },
+                            as: 'publisher',
+                            cond: {
+                                $ne: ['$$publisher.position', null],
                             },
                         },
                     },
@@ -1497,6 +1506,15 @@ module.exports = (req, res, next) => {
             },
             {
                 $addFields: {
+                    publisherPosition: {
+                        $setUnion: [{
+                            $map: {
+                                input: '$publisher',
+                                as: 'publisher',
+                                in: '$$publisher.position',
+                            },
+                        }, []],
+                    },
                     assigneePosition: {
                         $setUnion: [{
                             $map: {
@@ -1513,12 +1531,12 @@ module.exports = (req, res, next) => {
         if (_.get(queryFilter, `${CONTENT_TYPES.POSITION}.length`)) {
             pipeline.push({
                 $addFields: {
-                    assignee: {
+                    publisher: {
                         $filter: {
-                            input: '$assignee',
-                            as: 'assignee',
+                            input: '$publisher',
+                            as: 'publisher',
                             cond: {
-                                $setIsSubset: [['$$assignee.position'], queryFilter[CONTENT_TYPES.POSITION]],
+                                $setIsSubset: [['$$publisher.position'], queryFilter[CONTENT_TYPES.POSITION]],
                             },
                         },
                     },
@@ -1530,6 +1548,14 @@ module.exports = (req, res, next) => {
             {
                 $lookup: {
                     from: 'positions',
+                    localField: 'publisherPosition',
+                    foreignField: '_id',
+                    as: 'publisherPosition',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'positions',
                     localField: 'assigneePosition',
                     foreignField: '_id',
                     as: 'assigneePosition',
@@ -1537,6 +1563,26 @@ module.exports = (req, res, next) => {
             },
             {
                 $addFields: {
+                    publisher: {
+                        $map: {
+                            input: '$publisher',
+                            as: 'publisher',
+                            in: {
+                                _id: '$$publisher._id',
+                                name: '$$publisher.name',
+                            },
+                        },
+                    },
+                    publisherPosition: {
+                        $map: {
+                            input: '$publisherPosition',
+                            as: 'position',
+                            in: {
+                                _id: '$$position._id',
+                                name: '$$position.name',
+                            },
+                        },
+                    },
                     assignee: {
                         $map: {
                             input: '$assignee',
@@ -1723,7 +1769,7 @@ module.exports = (req, res, next) => {
                     outlets: '$outlet',
                     retailSegments: '$retailSegment',
                     publishers: '$publisher',
-                    positions: '$assigneePosition',
+                    positions: '$publisherPosition',
                     personnels: '$assignee',
                     statuses: '$status',
                     promotionTypes: '$promotion',
@@ -1811,10 +1857,10 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Category',
+                    en: 'Product',
                     ar: '',
                 },
-                value: 'category',
+                value: 'product',
             },
             {
                 name: {
@@ -1825,17 +1871,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Position',
+                    en: 'Publisher Position',
                     ar: '',
                 },
-                value: 'position',
+                value: 'publisherPosition',
             },
             {
                 name: {
-                    en: 'Personnel',
+                    en: 'Assignee',
                     ar: '',
                 },
-                value: 'personnel',
+                value: 'assignee',
             },
             {
                 name: {

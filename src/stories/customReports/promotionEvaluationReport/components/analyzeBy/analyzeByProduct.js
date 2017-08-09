@@ -3,43 +3,43 @@ module.exports = (pipeline) => {
         {
             $project: {
                 _id: 1,
-                country: 1,
+                product: 1,
             },
         },
         {
             $group: {
                 _id: {
                     promotion: '$_id',
-                    country: '$country._id',
+                    product: '$product._id',
                 },
-                country: { $first: '$country' },
+                product: { $first: '$product' },
             },
         },
         {
             $project: {
                 _id: false,
-                country: 1,
+                product: 1,
             },
         },
         {
             $group: {
                 _id: {
-                    country: '$country._id',
+                    product: '$product._id',
                 },
-                country: { $first: '$country' },
+                product: { $first: '$product' },
                 count: { $sum: 1 },
             },
         },
         {
             $project: {
                 _id: false,
-                country: 1,
+                product: 1,
                 count: 1,
             },
         },
         {
             $sort: {
-                'country.name': 1,
+                'product.name': 1,
             },
         },
         {
@@ -47,13 +47,13 @@ module.exports = (pipeline) => {
                 _id: null,
                 data: {
                     $push: {
-                        _id: '$country._id',
-                        name: '$country.name',
+                        _id: '$product._id',
+                        name: '$product.name',
                         count: '$count',
                     },
                 },
                 labels: {
-                    $push: '$country.name',
+                    $push: '$product.name',
                 },
             },
         },

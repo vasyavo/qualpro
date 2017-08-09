@@ -3,43 +3,44 @@ module.exports = (pipeline) => {
         {
             $project: {
                 _id: 1,
-                country: 1,
+                publisher: 1,
             },
         },
         {
             $group: {
                 _id: {
                     promotion: '$_id',
-                    country: '$country._id',
+                    publisher: '$publisher._id',
+                    position: '$publisher.position._id',
                 },
-                country: { $first: '$country' },
+                position: { $first: '$publisher.position' },
             },
         },
         {
             $project: {
                 _id: false,
-                country: 1,
+                position: 1,
             },
         },
         {
             $group: {
                 _id: {
-                    country: '$country._id',
+                    position: '$position._id',
                 },
-                country: { $first: '$country' },
+                position: { $first: '$position' },
                 count: { $sum: 1 },
             },
         },
         {
             $project: {
                 _id: false,
-                country: 1,
+                position: 1,
                 count: 1,
             },
         },
         {
             $sort: {
-                'country.name': 1,
+                'position.name': 1,
             },
         },
         {
@@ -47,13 +48,13 @@ module.exports = (pipeline) => {
                 _id: null,
                 data: {
                     $push: {
-                        _id: '$country._id',
-                        name: '$country.name',
+                        _id: '$position._id',
+                        name: '$position.name',
                         count: '$count',
                     },
                 },
                 labels: {
-                    $push: '$country.name',
+                    $push: '$position.name',
                 },
             },
         },

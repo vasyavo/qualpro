@@ -1,279 +1,61 @@
-const _ = require('lodash');
 const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
 
-module.exports = (pipeline, queryFilter) => {
-    if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
-        pipeline.push({
-            $match: {
-                _id: {
-                    $in: queryFilter[CONTENT_TYPES.PROMOTIONS],
-                },
-            },
-        });
-    }
-
-    pipeline.push({
-        $lookup: {
-            from: CONTENT_TYPES.PROMOTIONSITEMS,
-            localField: '_id',
-            foreignField: 'promotion',
-            as: 'promotion',
-        },
-    });
-
-    pipeline.push({
-        $unwind: '$promotion',
-    });
-
-    if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
-        pipeline.push({
-            $match: {
-                'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
-            },
-        });
-    }
-
-    pipeline.push(...[
-        {
-            $project: {
-                branch: '$promotion.branch',
-                promotion: {
-                    openingStock: {
-                        $let: {
-                            vars: { openingStock: { $arrayElemAt: ['$promotion.opening', 0] } },
-                            in: { $cond: { if: { $eq: ['$$openingStock', null] }, then: 0, else: '$$openingStock' } },
-                        },
-                    },
-                    sellIn: {
-                        $let: {
-                            vars: { sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] } },
-                            in: { $cond: { if: { $eq: ['$$sellIn', null] }, then: 0, else: '$$sellIn' } },
-                        },
-                    },
-                    closingStock: {
-                        $let: {
-                            vars: { closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] } },
-                            in: { $cond: { if: { $eq: ['$$closingStock', null] }, then: 0, else: '$$closingStock' } },
-                        },
-                    },
-                    sellOut: {
-                        $let: {
-                            vars: { sellOut: { $arrayElemAt: ['$promotion.sellOut', 0] } },
-                            in: { $cond: { if: { $eq: ['$$sellOut', null] }, then: 0, else: '$$sellOut' } },
-                        },
-                    },
-                    filledAt: '$promotion.createdBy.date',
-                },
-            },
-        },
-        {
-            $sort: {
-                branch: 1,
-                'promotion.filledAt': 1,
-            },
-        },
-        {
-            $group: {
-                _id: {
-                    branch: '$branch',
-                },
-                promotion: {
-                    $push: '$promotion',
-                },
-                openingStock: {
-                    $first: '$promotion.openingStock',
-                },
-                closingStock: {
-                    $last: '$promotion.closingStock',
-                },
-                sellIn: {
-                    $sum: '$promotion.sellIn',
-                },
-                sellOut: {
-                    $sum: '$promotion.sellOut',
-                },
-            },
-        },
-        {
-            $project: {
-                _id: false,
-                branch: '$_id.branch',
-                openingStock: 1,
-                closingStock: 1,
-                sellIn: 1,
-                sellOut: 1,
-            },
-        },
-    ]);
-
-    pipeline.push({
-        $lookup: {
-            from: 'branches',
-            localField: 'branch',
-            foreignField: '_id',
-            as: 'branch',
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 1,
-            promotion: 1,
-            domain: {
-                $let: {
-                    vars: {
-                        branch: { $arrayElemAt: ['$branch', 0] },
-                    },
-                    in: {
-                        _id: '$$branch._id',
-                        name: {
-                            en: '$$branch.name.en',
-                            ar: '$$branch.name.ar',
-                        },
-                        outlet: '$$branch.outlet',
-                        retailSegment: '$$branch.retailSegment',
-                        subRegion: '$$branch.subRegion',
-                    },
-                },
-            },
-            openingStock: 1,
-            closingStock: 1,
-            sellIn: 1,
-            sellOut: 1,
-        },
-    });
-
-    if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
-        pipeline.push({
-            $match: {
-                'domain.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
-            },
-        });
-    }
-
-    if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
-        pipeline.push({
-            $match: {
-                'domain.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
-            },
-        });
-    }
-
-    if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
-        pipeline.push({
-            $match: {
-                'domain.outlet': { $in: queryFilter[CONTENT_TYPES.OUTLET] },
-            },
-        });
-    }
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'domain.subRegion',
-            foreignField: '_id',
-            as: 'subRegion',
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            subRegion: {
-                $let: {
-                    vars: {
-                        subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                    },
-                    in: {
-                        _id: '$$subRegion._id',
-                        name: {
-                            en: '$$subRegion.name.en',
-                            ar: '$$subRegion.name.ar',
-                        },
-                        parent: '$$subRegion.parent',
-                    },
-                },
-            },
-        },
-    });
-
-    if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
-        pipeline.push({
-            $match: {
-                'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
-            },
-        });
-    }
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'subRegion.parent',
-            foreignField: '_id',
-            as: 'region',
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            region: {
-                $let: {
-                    vars: {
-                        region: { $arrayElemAt: ['$region', 0] },
-                    },
-                    in: {
-                        _id: '$$region._id',
-                        name: {
-                            en: '$$region.name.en',
-                            ar: '$$region.name.ar',
-                        },
-                        parent: '$$region.parent',
-                    },
-                },
-            },
-        },
-    });
-
-    if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
-        pipeline.push({
-            $match: {
-                'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
-            },
-        });
-    }
-
-    pipeline.push({
-        $lookup: {
-            from: 'domains',
-            localField: 'region.parent',
-            foreignField: '_id',
-            as: 'country',
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            country: {
-                $let: {
-                    vars: {
-                        country: { $arrayElemAt: ['$country', 0] },
-                    },
-                    in: {
-                        _id: '$$country._id',
-                        name: {
-                            en: '$$country.name.en',
-                            ar: '$$country.name.ar',
-                        },
-                    },
-                },
-            },
-        },
-    });
-
+module.exports = (pipeline) => {
     pipeline.push(...[
         {
             $lookup: {
+                from: 'domains',
+                localField: 'subRegion.parent',
+                foreignField: '_id',
+                as: 'region',
+            },
+        },
+        {
+            $addFields: {
+                region: {
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$region', 0] },
+                        },
+                        in: {
+                            _id: '$$region._id',
+                            name: '$$region.name',
+                            parent: '$$region.parent',
+                        },
+                    },
+                },
+            },
+        },
+        {
+            $lookup: {
+                from: 'domains',
+                localField: 'region.parent',
+                foreignField: '_id',
+                as: 'country',
+            },
+        },
+        {
+            $addFields: {
+                country: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: {
+                                en: '$$country.name.en',
+                                ar: '$$country.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        {
+            $lookup: {
                 from: 'outlets',
-                localField: 'domain.outlet',
+                localField: 'branch.outlet',
                 foreignField: '_id',
                 as: 'outlet',
             },
@@ -281,10 +63,9 @@ module.exports = (pipeline, queryFilter) => {
         {
             $addFields: {
                 branch: {
-                    _id: '$domain._id',
-                    name: '$domain.name',
-                    retailSegment: '$domain.retailSegment',
-                    subRegion: '$domain.subRegion',
+                    _id: '$branch._id',
+                    name: '$branch.name',
+                    retailSegment: '$branch.retailSegment',
                 },
                 outlet: {
                     $let: {
@@ -305,7 +86,7 @@ module.exports = (pipeline, queryFilter) => {
         {
             $lookup: {
                 from: 'retailSegments',
-                localField: 'domain.retailSegment',
+                localField: 'branch.retailSegment',
                 foreignField: '_id',
                 as: 'retailSegment',
             },
@@ -315,7 +96,6 @@ module.exports = (pipeline, queryFilter) => {
                 branch: {
                     _id: '$branch._id',
                     name: '$branch.name',
-                    subRegion: '$branch.subRegion',
                 },
                 retailSegment: {
                     $let: {
@@ -333,99 +113,239 @@ module.exports = (pipeline, queryFilter) => {
                 },
             },
         },
+        {
+            $project: {
+                _id: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
+                retailSegment: 1,
+                outlet: 1,
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    promotion: '$_id',
+                    branch: '$branch._id',
+                },
+                country: { $first: '$country' },
+                region: { $first: '$region' },
+                subRegion: { $first: '$subRegion' },
+                branch: { $first: '$branch' },
+                retailSegment: { $first: '$retailSegment' },
+                outlet: { $first: '$outlet' },
+                stocks: { $first: '$stocks' },
+            },
+        },
+        {
+            $project: {
+                _id: '$_id.promotion', // tip: because one promotion analyzing
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
+                retailSegment: 1,
+                outlet: 1,
+            },
+        },
+        {
+            $lookup: {
+                from: CONTENT_TYPES.PROMOTIONSITEMS,
+                localField: '_id',
+                foreignField: 'promotion',
+                as: 'reports',
+            },
+        },
+        {
+            $project: {
+                _id: false,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                branch: 1,
+                retailSegment: 1,
+                outlet: 1,
+                reports: {
+                    $let: {
+                        vars: {
+                            reports: {
+                                $filter: {
+                                    input: '$reports',
+                                    as: 'report',
+                                    cond: {
+                                        $eq: ['$$report.branch', '$branch._id'],
+                                    },
+                                },
+                            },
+                        },
+                        in: {
+                            $map: {
+                                input: '$$reports',
+                                as: 'report',
+                                in: {
+                                    openingStock: {
+                                        $let: {
+                                            vars: { openingStock: { $arrayElemAt: ['$$report.opening', 0] } },
+                                            in: { $cond: { if: { $eq: ['$$openingStock', null] }, then: 0, else: '$$openingStock' } },
+                                        },
+                                    },
+                                    sellIn: {
+                                        $let: {
+                                            vars: { sellIn: { $arrayElemAt: ['$$report.sellIn', 0] } },
+                                            in: { $cond: { if: { $eq: ['$$sellIn', null] }, then: 0, else: '$$sellIn' } },
+                                        },
+                                    },
+                                    closingStock: {
+                                        $let: {
+                                            vars: { closingStock: { $arrayElemAt: ['$$report.closingStock', 0] } },
+                                            in: { $cond: { if: { $eq: ['$$closingStock', null] }, then: 0, else: '$$closingStock' } },
+                                        },
+                                    },
+                                    sellOut: {
+                                        $let: {
+                                            vars: { sellOut: { $arrayElemAt: ['$$report.sellOut', 0] } },
+                                            in: { $cond: { if: { $eq: ['$$sellOut', null] }, then: 0, else: '$$sellOut' } },
+                                        },
+                                    },
+                                    filledAt: '$$report.createdBy.date',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        {
+            $unwind: {
+                path: '$reports',
+            },
+        },
+        {
+            $sort: {
+                'branch.name': 1,
+                'reports.filledAt': 1,
+            },
+        },
+        {
+            $group: {
+                _id: '$branch._id',
+                country: { $first: '$country' },
+                region: { $first: '$region' },
+                subRegion: { $first: '$subRegion' },
+                branch: { $first: '$branch' },
+                retailSegment: { $first: '$retailSegment' },
+                outlet: { $first: '$outlet' },
+                openingStock: {
+                    $first: '$reports.openingStock',
+                },
+                closingStock: {
+                    $last: '$reports.closingStock',
+                },
+                sellIn: {
+                    $sum: '$reports.sellIn',
+                },
+                sellOut: {
+                    $sum: '$reports.sellOut',
+                },
+            },
+        },
+        {
+            $project: {
+                _id: false,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                openingStock: 1,
+                closingStock: 1,
+                sellIn: 1,
+                sellOut: 1,
+            },
+        },
+        {
+            $project: {
+                _id: false,
+                location: {
+                    _id: '$branch._id',
+                    name: {
+                        en: [
+                            {
+                                $concat: [
+                                    '$country.name.en',
+                                    ' / ',
+                                    '$region.name.en',
+                                    ' / ',
+                                    '$subRegion.name.en',
+                                ],
+                            },
+                            {
+                                $concat: [
+                                    '$retailSegment.name.en',
+                                    ' / ',
+                                    '$outlet.name.en',
+                                    ' / ',
+                                    '$branch.name.en',
+                                ],
+                            },
+                        ],
+                        ar: [
+                            {
+                                $concat: [
+                                    '$country.name.ar',
+                                    ' / ',
+                                    '$region.name.ar',
+                                    ' / ',
+                                    '$subRegion.name.ar',
+                                ],
+                            },
+                            {
+                                $concat: [
+                                    '$retailSegment.name.ar',
+                                    ' / ',
+                                    '$outlet.name.ar',
+                                    ' / ',
+                                    '$branch.name.ar',
+                                ],
+                            },
+                        ],
+                    },
+                },
+                branch: 1,
+                openingStock: 1,
+                sellIn: 1,
+                closingStock: 1,
+                sellOut: 1,
+            },
+        },
+        {
+            $sort: {
+                'location.name': 1,
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                data: {
+                    $push: {
+                        _id: '$branch._id',
+                        name: '$branch.name',
+                        country: '$country',
+                        region: '$region',
+                        subRegion: '$subRegion',
+                        openingStock: '$openingStock',
+                        sellIn: '$sellIn',
+                        closingStock: '$closingStock',
+                        sellOut: '$sellOut',
+                    },
+                },
+                labels: {
+                    $push: '$location.name',
+                },
+            },
+        },
     ]);
-
-    pipeline.push({
-        $addFields: {
-            location: {
-                _id: '$domain._id', // <-- important fix magical duplication
-                en: {
-                    $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$retailSegment.name.en', ' / ', '$outlet.name.en', ' -> ', '$domain.name.en'],
-                },
-                ar: {
-                    $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$outlet.name.ar', ' -> ', '$domain.name.ar'],
-                },
-            },
-        },
-    });
-
-    pipeline.push({
-        $group: {
-            _id: null,
-            data: {
-                $push: {
-                    _id: '$domain._id',
-                    name: '$domain.name',
-                    openingStock: '$openingStock',
-                    sellIn: '$sellIn',
-                    closingStock: '$closingStock',
-                    sellOut: '$sellOut',
-                    country: '$country',
-                    region: '$region',
-                    subRegion: '$subRegion',
-                    location: '$location',
-                },
-            },
-            labels: {
-                $addToSet: '$location',
-            },
-        },
-    });
-
-    pipeline.push({
-        $unwind: '$data',
-    });
-
-    pipeline.push({
-        $sort: {
-            'data.location.en': 1,
-        },
-    });
-
-    pipeline.push({
-        $group: {
-            _id: {
-                labels: '$labels',
-            },
-            data: { $push: '$data' },
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 0,
-            labels: '$_id.labels',
-            data: 1,
-        },
-    });
-
-    pipeline.push({
-        $unwind: '$labels',
-    });
-
-    pipeline.push({
-        $sort: {
-            'labels.en': 1,
-        },
-    });
-
-    pipeline.push({
-        $group: {
-            _id: {
-                data: '$data',
-            },
-            labels: { $push: '$labels' },
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 0,
-            data: '$_id.data',
-            labels: {
-                en: 1,
-                ar: 1,
-            },
-        },
-    });
 };
