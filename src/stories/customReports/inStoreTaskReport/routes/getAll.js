@@ -88,7 +88,6 @@ module.exports = (req, res, next) => {
         });
 
         locationFiler(pipeline, personnel, queryFilter);
-
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, 'status', 'priority'], queryFilter, personnel);
 
         if (queryFilter.formType && queryFilter.formType.length) {
@@ -127,6 +126,106 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$subRegion',
+                                    as: 'subRegion',
+                                    cond: {
+                                        $setIsSubset: [['$$subRegion'], '$$filters.subRegion'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    region: queryFilter[CONTENT_TYPES.REGION],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$region',
+                                    as: 'region',
+                                    cond: {
+                                        $setIsSubset: [['$$region'], '$$filters.region'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.RETAILSEGMENT}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    retailSegment: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    retailSegment: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$retailSegment',
+                                    as: 'retailSegment',
+                                    cond: {
+                                        $setIsSubset: [['$$retailSegment'], '$$filters.retailSegment'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.OUTLET}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    outlet: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    outlet: queryFilter[CONTENT_TYPES.OUTLET],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$outlet',
+                                    as: 'outlet',
+                                    cond: {
+                                        $setIsSubset: [['$$outlet'], '$$filters.outlet'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             });
         }
 
