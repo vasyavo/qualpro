@@ -68,12 +68,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                countAnswered: { $gt: 0 },
-            },
-        });
-
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);

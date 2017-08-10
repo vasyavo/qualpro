@@ -68,12 +68,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                countAnswered: { $gt: 0 },
-            },
-        });
-
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
@@ -249,8 +243,12 @@ module.exports = (req, res, next) => {
             },
         });
 
+
         pipeline.push({
-            $unwind: '$answer',
+            $unwind: {
+                path: '$answer',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
@@ -516,17 +514,17 @@ module.exports = (req, res, next) => {
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.country.name[currentLanguage] }</td>
-                                <td>${item.region.name[currentLanguage] }</td>
-                                <td>${item.subRegion.name[currentLanguage] }</td>
-                                <td>${item.retailSegment.name[currentLanguage] }</td>
-                                <td>${item.outlet.name[currentLanguage] }</td>
-                                <td>${item.branch.name[currentLanguage] }</td>
-                                <td>${item.title[currentLanguage] }</td>
-                                <td>${item.question[currentLanguage] || item.question[anotherLanguage] }</td>
-                                <td>${item.answer[currentLanguage] || item.answer[anotherLanguage] }</td>
-                                <td>${item.position.name[currentLanguage] }</td>
-                                <td>${item.personnel.name[currentLanguage] }</td>
+                                <td>${item.country && item.country.name && item.country.name[currentLanguage] || 'N/A' }</td>
+                                <td>${item.region && item.region.name && item.region.name[currentLanguage] || 'N/A' }</td>
+                                <td>${item.subRegion && item.subRegion.name && item.subRegion.name[currentLanguage] || 'N/A' }</td>
+                                <td>${item.retailSegment && item.retailSegment.name && item.retailSegment.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.outlet && item.outlet.name && item.outlet.name[currentLanguage] || 'N/A' }</td>
+                                <td>${item.branch && item.branch.name && item.branch.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.title && item.title[currentLanguage] || 'N/A'}</td>
+                                <td>${item.question && (item.question[currentLanguage] || item.question[anotherLanguage]) || 'N/A'}</td>
+                                <td>${item.answer && (item.answer[currentLanguage] || item.answer[anotherLanguage]) || 'N/A'}</td>
+                                <td>${item.position && item.position.name && item.position.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.personnel && item.personnel.name && item.personnel.name[currentLanguage] || 'N/A'}</td>
                             </tr>
                         `;
                      }).join('')}
