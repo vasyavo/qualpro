@@ -539,6 +539,36 @@ module.exports = (req, res, next) => {
                 sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] },
                 closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] },
                 sellOut: { $arrayElemAt: ['$promotion.sellOut', 0] },
+                assignee: '$promotion.createdBy.user',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'assignee',
+                foreignField: '_id',
+                as: 'assignee',
+            },
+        });
+
+
+        pipeline.push({
+            $addFields: {
+                assignee: {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$assignee', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            name: {
+                                en: { $ifNull: [{ $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] }, 'N/A'] },
+                                ar: { $ifNull: [{ $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] }, 'N/A'] },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -570,8 +600,9 @@ module.exports = (req, res, next) => {
                         <th>Trade channel</th>
                         <th>Customer</th>
                         <th>Branch</th>
-                        <th>Employee</th>
+                        <th>Publisher</th>                       
                         <th>Position</th>
+                        <th>Assignee</th>
                         <th>Promotion description</th>
                         <th>PPT, AED or $</th>
                         <th>RSP</th>
@@ -616,6 +647,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
+                                <td>${item.assignee.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.promotionType[currentLanguage]).trim()}</td>
                                 <td>${itemPrice}</td>
                                 <td>${itemRsp}</td>
