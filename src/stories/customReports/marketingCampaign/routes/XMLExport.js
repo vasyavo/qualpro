@@ -86,6 +86,32 @@ module.exports = (req, res, next) => {
             });
         }
 
+        const $timeMatch = {};
+
+        $timeMatch.$or = [];
+
+        if (timeFilter) {
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
+                    $and: [
+                        {
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -211,34 +237,11 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$marketingCampaign',
+            $unwind: {
+                path: '$marketingCampaign',
+                preserveNullAndEmptyArrays: true,
+            },
         });
-
-        const $timeMatch = {};
-
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
-                    $and: [
-                        {
-                            'marketingCampaign.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'marketingCampaign.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
-                    ],
-                });
-                return frame;
-            });
-        }
-
-        if ($timeMatch.$or.length) {
-            pipeline.push({
-                $match: $timeMatch,
-            });
-        }
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             pipeline.push({
@@ -253,7 +256,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({
                 $match: {
-                    'marketingCampaign.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                    $or: [{
+                        marketingCampaign: null,
+                    }, {
+                        'marketingCampaign.branch': {
+                            $in: queryFilter[CONTENT_TYPES.BRANCH],
+                        },
+                    }],
                 },
             });
         }
@@ -277,8 +286,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$branch._id',
                             name: {
-                                en: '$$branch.name.en',
-                                ar: '$$branch.name.ar',
+                                en: { $ifNull: ['$$branch.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$branch.name.ar', 'N/A'] },
                             },
                             outlet: '$$branch.outlet',
                             retailSegment: '$$branch.retailSegment',
@@ -292,7 +301,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
             pipeline.push({
                 $match: {
-                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                    $or: [{
+                        marketingCampaign: null,
+                    }, {
+                        'branch.subRegion': {
+                            $in: queryFilter[CONTENT_TYPES.SUBREGION],
+                        },
+                    }],
                 },
             });
         }
@@ -300,9 +315,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
             pipeline.push({
                 $match: {
-                    'branch.retailSegment': {
-                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
-                    },
+                    $or: [{
+                        marketingCampaign: null,
+                    }, {
+                        'branch.retailSegment': {
+                            $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                        },
+                    }],
                 },
             });
         }
@@ -330,8 +349,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$subRegion._id',
                             name: {
-                                en: '$$subRegion.name.en',
-                                ar: '$$subRegion.name.ar',
+                                en: { $ifNull: ['$$subRegion.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$subRegion.name.ar', 'N/A'] },
                             },
                             parent: '$$subRegion.parent',
                         },
@@ -343,7 +362,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
             pipeline.push({
                 $match: {
-                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+                    $or: [{
+                        marketingCampaign: null,
+                    }, {
+                        'subRegion.parent': {
+                            $in: queryFilter[CONTENT_TYPES.REGION],
+                        },
+                    }],
                 },
             });
         }
@@ -371,8 +396,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$region._id',
                             name: {
-                                en: '$$region.name.en',
-                                ar: '$$region.name.ar',
+                                en: { $ifNull: ['$$region.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$region.name.ar', 'N/A'] },
                             },
                             parent: '$$region.parent',
                         },
@@ -385,7 +410,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
             pipeline.push({
                 $match: {
-                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                    $or: [{
+                        marketingCampaign: null,
+                    }, {
+                        'region.parent': {
+                            $in: queryFilter[CONTENT_TYPES.COUNTRY],
+                        },
+                    }],
                 },
             });
         }
@@ -413,8 +444,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$country._id',
                             name: {
-                                en: '$$country.name.en',
-                                ar: '$$country.name.ar',
+                                en: { $ifNull: ['$$country.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$country.name.ar', 'N/A'] },
                             },
                         },
                     },
@@ -447,8 +478,8 @@ module.exports = (req, res, next) => {
                             in: {
                                 _id: '$$outlet._id',
                                 name: {
-                                    en: '$$outlet.name.en',
-                                    ar: '$$outlet.name.ar',
+                                    en: { $ifNull: ['$$outlet.name.en', 'N/A'] },
+                                    ar: { $ifNull: ['$$outlet.name.ar', 'N/A'] },
                                 },
                             },
                         },
@@ -478,8 +509,8 @@ module.exports = (req, res, next) => {
                             in: {
                                 _id: '$$retailSegment._id',
                                 name: {
-                                    en: '$$retailSegment.name.en',
-                                    ar: '$$retailSegment.name.ar',
+                                    en: { $ifNull: ['$$retailSegment.name.en', 'N/A'] },
+                                    ar: { $ifNull: ['$$retailSegment.name.ar', 'N/A'] },
                                 },
                             },
                         },
@@ -650,8 +681,8 @@ module.exports = (req, res, next) => {
                             _id: '$$user._id',
                             position: '$$user.position',
                             name: {
-                                en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                                en: { $ifNull: [{ $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] }, 'N/A'] },
+                                ar: { $ifNull: [{ $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] }, 'N/A'] },
                             },
                         },
                     },
@@ -678,8 +709,8 @@ module.exports = (req, res, next) => {
                             in: {
                                 _id: '$$position._id',
                                 name: {
-                                    en: '$$position.name.en',
-                                    ar: '$$position.name.ar',
+                                    en: { $ifNull: ['$$position.name.en', 'N/A'] },
+                                    ar: { $ifNull: ['$$position.name.ar', 'N/A'] },
                                 },
                             },
                         },

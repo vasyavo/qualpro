@@ -87,6 +87,32 @@ module.exports = (req, res, next) => {
             });
         }
 
+        const $timeMatch = {};
+
+        $timeMatch.$or = [];
+
+        if (timeFilter) {
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
+                    $and: [
+                        {
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -208,36 +234,6 @@ module.exports = (req, res, next) => {
                 preserveNullAndEmptyArrays: true,
             },
         });
-
-        const $timeMatch = {};
-
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
-                    $or: [{
-                        marketingCampaign: null,
-                    }, {
-                        $and: [
-                            {
-                                'marketingCampaign.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                            },
-                            {
-                                'marketingCampaign.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                            },
-                        ],
-                    }],
-                });
-                return frame;
-            });
-        }
-
-        if ($timeMatch.$or.length) {
-            pipeline.push({
-                $match: $timeMatch,
-            });
-        }
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             pipeline.push({
