@@ -121,6 +121,14 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $match: {
+                    country: { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                },
+            });
+        }
+
         pipeline.push({
             $project: {
                 _id: 1,
@@ -129,6 +137,7 @@ module.exports = (req, res, next) => {
                 comments: 1,
                 dateStart: 1,
                 dateEnd: 1,
+                parentCountry: '$country',
                 createdBy: {
                     user: {
                         $let: {
@@ -169,19 +178,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        pipeline.push({
-            $lookup: {
-                from: CONTENT_TYPES.PROMOTIONSITEMS,
-                localField: '_id',
-                foreignField: 'promotion',
-                as: 'promotion',
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$promotion',
-        });
-
         const $timeMatch = {};
 
         $timeMatch.$or = [];
@@ -191,10 +187,10 @@ module.exports = (req, res, next) => {
                 $timeMatch.$or.push({
                     $and: [
                         {
-                            'promotion.createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
                         },
                         {
-                            'promotion.createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
                         },
                     ],
                 });
@@ -207,6 +203,22 @@ module.exports = (req, res, next) => {
                 $match: $timeMatch,
             });
         }
+
+        pipeline.push({
+            $lookup: {
+                from: CONTENT_TYPES.PROMOTIONSITEMS,
+                localField: '_id',
+                foreignField: 'promotion',
+                as: 'promotion',
+            },
+        });
+
+        pipeline.push({
+            $unwind: {
+                path: '$promotion',
+                preserveNullAndEmptyArrays: true,
+            },
+        });
 
         if (queryFilter.employee && queryFilter.employee.length) {
             pipeline.push({
@@ -245,8 +257,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$branch._id',
                             name: {
-                                en: '$$branch.name.en',
-                                ar: '$$branch.name.ar',
+                                en: { $ifNull: ['$$branch.name.en', 'N/A'] },
+                                ar: { $ifNull: ['$$branch.name.ar', 'N/A'] },
                             },
                             outlet: '$$branch.outlet',
                             retailSegment: '$$branch.retailSegment',
@@ -268,9 +280,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
             pipeline.push({
                 $match: {
-                    'branch.retailSegment': {
-                        $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
-                    },
+                    $or: [{
+                        'branch.retailSegment': {
+                            $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                        },
+                    }, {
+                        promotion: null,
+                    }],
                 },
             });
         }
@@ -278,9 +294,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
             pipeline.push({
                 $match: {
-                    'branch.outlet': {
-                        $in: queryFilter[CONTENT_TYPES.OUTLET],
-                    },
+                    $or: [{
+                        'branch.outlet': {
+                            $in: queryFilter[CONTENT_TYPES.OUTLET],
+                        },
+                    }, {
+                        promotion: null,
+                    }],
                 },
             });
         }
@@ -358,15 +378,6 @@ module.exports = (req, res, next) => {
                 },
             },
         });
-
-
-        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
-            pipeline.push({
-                $match: {
-                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
-                },
-            });
-        }
 
         pipeline.push({
             $lookup: {
@@ -531,7 +542,7 @@ module.exports = (req, res, next) => {
                     },
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
-                displayType: { $arrayElemAt: ['$displayType', 0] },
+                displayType:  { $ifNull: [{ $arrayElemAt: ['$displayType', 0] }, 'N/A']},
                 itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
                 itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
                 itemRsp: '$promotion.rsp',
@@ -539,6 +550,36 @@ module.exports = (req, res, next) => {
                 sellIn: { $arrayElemAt: ['$promotion.sellIn', 0] },
                 closingStock: { $arrayElemAt: ['$promotion.closingStock', 0] },
                 sellOut: { $arrayElemAt: ['$promotion.sellOut', 0] },
+                assignee: '$promotion.createdBy.user',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'assignee',
+                foreignField: '_id',
+                as: 'assignee',
+            },
+        });
+
+
+        pipeline.push({
+            $addFields: {
+                assignee: {
+                    $let: {
+                        vars: {
+                            user: { $arrayElemAt: ['$assignee', 0] },
+                        },
+                        in: {
+                            _id: '$$user._id',
+                            name: {
+                                en: { $ifNull: [{ $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] }, 'N/A'] },
+                                ar: { $ifNull: [{ $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] }, 'N/A'] },
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -570,8 +611,9 @@ module.exports = (req, res, next) => {
                         <th>Trade channel</th>
                         <th>Customer</th>
                         <th>Branch</th>
-                        <th>Employee</th>
+                        <th>Publisher</th>                       
                         <th>Position</th>
+                        <th>Assignee</th>
                         <th>Promotion description</th>
                         <th>PPT, AED or $</th>
                         <th>RSP</th>
@@ -616,6 +658,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
+                                <td>${item.assignee.name[currentLanguage]}</td>
                                 <td>${sanitizeHtml(item.promotionType[currentLanguage]).trim()}</td>
                                 <td>${itemPrice}</td>
                                 <td>${itemRsp}</td>
