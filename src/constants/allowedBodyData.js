@@ -349,7 +349,11 @@ allowedParams[CONTENT_TYPES.PERSONNEL] = {
     9: {
         create: ['imageSrc', 'firstName', 'lastName', 'country', 'region', 'subRegion', 'branch', 'email', 'phoneNumber', 'manager', 'position', 'dateJoined', 'description', 'accessRole', 'temp'],
         update: ['currentLanguage', 'imageSrc', 'firstName', 'lastName', 'country', 'region', 'subRegion', 'branch', 'email', 'phoneNumber', 'manager', 'position', 'dateJoined', 'description', 'vacation', 'sendPass', 'type', 'accessRole', 'oldPass', 'newPass', 'lastAccess', 'confirmed']
-    }
+    },
+    11: {
+        create: ['imageSrc', 'firstName', 'lastName', 'country', 'email', 'phoneNumber', 'manager', 'position', 'dateJoined', 'description', 'temp'],
+        update: ['currentLanguage', 'imageSrc', 'firstName', 'lastName', 'country', 'email', 'phoneNumber', 'manager', 'position', 'dateJoined', 'description', 'vacation', 'oldPass', 'newPass', 'lastAccess', 'confirmed']
+    },
 };
 
 allowedParams[CONTENT_TYPES.BRANCH] = {

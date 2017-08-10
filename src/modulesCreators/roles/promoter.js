@@ -125,7 +125,7 @@ module.exports = [
         module: ACL_MODULES.PERSONNEL,
         cms   : {
             archive : false,
-            edit    : false,
+            edit    : true,
             write   : false,
             read    : false,
             evaluate: false
@@ -408,7 +408,7 @@ module.exports = [
         cms   : {
             edit : false,
             write: false,
-            read : false
+            read : true
         },
         mobile: {
             edit : true,
