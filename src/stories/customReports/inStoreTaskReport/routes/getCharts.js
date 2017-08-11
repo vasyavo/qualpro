@@ -179,17 +179,7 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
-
-        applyAnalyzeBy(pipeline, analyzeByParam);
+        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter, personnel);
 
         ObjectiveModel.aggregate(pipeline)
             .allowDiskUse(true)
