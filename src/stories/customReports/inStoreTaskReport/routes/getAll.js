@@ -281,16 +281,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
-
         pipeline.push({
             $group: {
                 _id: null,
@@ -503,6 +493,7 @@ module.exports = (req, res, next) => {
                         as: 'personnel',
                         in: {
                             _id: '$$personnel._id',
+                            position: '$$personnel.position',
                             name: {
                                 en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
                                 ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
@@ -512,6 +503,16 @@ module.exports = (req, res, next) => {
                 },
             },
         });
+
+        if (queryFilter.POSITION && queryFilter.POSITION.length) {
+            pipeline.push({
+                $match: {
+                    'assignedTo.position': {
+                        $in: _.union(queryFilter.POSITION, personnel._id),
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {

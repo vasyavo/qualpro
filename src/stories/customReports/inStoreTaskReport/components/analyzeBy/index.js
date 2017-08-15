@@ -8,10 +8,10 @@ const analyzeByMethods = {
     position: require('./analyzeByPosition'),
 };
 
-module.exports = (pipeline, analyzeBy) => {
+module.exports = (pipeline, analyzeBy, queryFilter, personnel) => {
     if (analyzeByMethods[analyzeBy]) {
-        return analyzeByMethods[analyzeBy](pipeline);
+        return analyzeByMethods[analyzeBy](pipeline, queryFilter, personnel);
     }
 
-    return analyzeByMethods.originator(pipeline);
+    return analyzeByMethods.originator(pipeline, queryFilter, personnel);
 };

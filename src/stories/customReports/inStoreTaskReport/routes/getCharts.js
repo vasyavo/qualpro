@@ -179,17 +179,106 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
             pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                $addFields: {
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$subRegion',
+                                            as: 'subRegion',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$subRegion'], '$$filters.subRegion'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'subRegion',
+                                    in: '$$subRegion',
+                                },
+                            },
+                        },
                     },
                 },
             });
         }
 
-        applyAnalyzeBy(pipeline, analyzeByParam);
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    region: queryFilter[CONTENT_TYPES.REGION],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$region',
+                                            as: 'region',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$region'], '$$filters.region'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'region',
+                                    in: '$$region',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+            pipeline.push({
+                $addFields: {
+                    branch: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    branch: queryFilter[CONTENT_TYPES.BRANCH],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$branch',
+                                            as: 'branch',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$branch'], '$$filters.branch'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'branch',
+                                    in: '$$branch',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter, personnel);
 
         ObjectiveModel.aggregate(pipeline)
             .allowDiskUse(true)

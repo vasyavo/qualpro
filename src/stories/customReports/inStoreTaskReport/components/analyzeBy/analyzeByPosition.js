@@ -1,4 +1,6 @@
-module.exports = (pipeline) => {
+const _ = require('lodash');
+
+module.exports = (pipeline, queryFilter, personnel) => {
     pipeline.push({
         $lookup: {
             from: 'personnels',
@@ -21,6 +23,16 @@ module.exports = (pipeline) => {
             count: { $sum: 1 },
         },
     });
+
+    if (queryFilter.position && queryFilter.position.length) {
+        pipeline.push({
+            $match: {
+                '_id.assigneePosition': {
+                    $in: _.union(queryFilter.position, personnel._id),
+                },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {
