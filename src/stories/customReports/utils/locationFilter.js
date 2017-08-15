@@ -47,7 +47,7 @@ module.exports = (pipeline, personnel, filter, forFilter) => {
         }
     });
 
-    if ($locationMatch.$and.length) {
+    if ($locationMatch.$and.length && pipeline) {
         pipeline.push({
             $match: $locationMatch,
         });
