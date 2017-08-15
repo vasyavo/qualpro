@@ -1124,27 +1124,23 @@ module.exports = (req, res, next) => {
                         $setUnion: ['$items.publisher', []],
                     },
                     product: 1,
-                    displayType: 1,
-                    /*
-                     * Returns only submitted display types
-                     * displayType: {
-                     *   $reduce: {
-                     *       input: '$items.displayType',
-                     *       initialValue: [],
-                     *       in: {
-                     *           $cond: {
-                     *               if: {
-                     *                   $ne: ['$$this', []],
-                     *               },
-                     *               then: {
-                     *                   $setUnion: ['$$this', '$$value'],
-                     *               },
-                     *               else: '$$value',
-                     *           },
-                     *       },
-                     *   },
-                     * },
-                     * */
+                    displayType: {
+                        $reduce: {
+                            input: '$items.displayType',
+                            initialValue: [],
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $ne: ['$$this', []],
+                                    },
+                                    then: {
+                                        $setUnion: ['$$this', '$$value'],
+                                    },
+                                    else: '$$value',
+                                },
+                            },
+                        },
+                    },
                 },
             },
             {
@@ -1397,7 +1393,7 @@ module.exports = (req, res, next) => {
                                 input: '$promotion',
                                 as: 'promotion',
                                 cond: {
-                                    $setIsSubset: [['$$promotion.displayType'], queryFilter.displayType],
+                                    $setIsSubset: [queryFilter.displayType, '$$promotion.displayType'],
                                 },
                             },
                         },
@@ -1426,60 +1422,34 @@ module.exports = (req, res, next) => {
             ]);
         }
 
-        pipeline.push({
-            $unwind: {
-                path: '$items',
-            },
-        });
-
-        pipeline.push({
-            $project: {
-                _id: '$items._id',
-                promotion: 1,
-                country: '$items.country',
-                region: '$items.region',
-                subRegion: '$items.subRegion',
-                branch: '$items.branch',
-                retailSegment: '$items.retailSegment',
-                outlet: '$items.outlet',
-                status: '$items.status',
-                publisher: '$items.publisher',
-                assignee: '$items.assignee',
-                product: '$items.product',
-                displayType: '$items.displayType',
-                shared: 1,
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                promotion: {
-                    $map: {
-                        input: '$promotion',
-                        as: 'promotion',
-                        in: {
-                            _id: '$$promotion._id',
-                            name: '$$promotion.name',
-                        },
-                    },
+        pipeline.push(...[
+            {
+                $unwind: {
+                    path: '$items',
                 },
             },
-        });
-
-        pipeline.push(...[
             {
                 $project: {
                     _id: false,
-                    promotion: 1,
-                    country: 1,
-                    region: 1,
-                    subRegion: 1,
-                    branch: 1,
-                    retailSegment: 1,
-                    outlet: 1,
+                    promotion: {
+                        $map: {
+                            input: '$promotion',
+                            as: 'promotion',
+                            in: {
+                                _id: '$$promotion._id',
+                                name: '$$promotion.name',
+                            },
+                        },
+                    },
+                    country: '$items.country',
+                    region: '$items.region',
+                    subRegion: '$items.subRegion',
+                    branch: '$items.branch',
+                    retailSegment: '$items.retailSegment',
+                    outlet: '$items.outlet',
                     status: '$shared.status',
-                    publisher: 1,
-                    assignee: 1,
+                    publisher: '$items.publisher',
+                    assignee: '$items.assignee',
                     product: '$shared.product',
                     displayType: '$shared.displayType',
                 },
