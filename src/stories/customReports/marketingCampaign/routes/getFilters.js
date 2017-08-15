@@ -4,6 +4,7 @@ const _ = require('lodash');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const MarketingCampaignModel = require('./../../../../types/marketingCampaign/model');
+const locationFilter = require('./../../utils/locationFilter');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -69,6 +70,8 @@ module.exports = (req, res, next) => {
                 status: { $ne: 'draft' },
             },
         });
+
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push(...[
             {
@@ -411,7 +414,19 @@ module.exports = (req, res, next) => {
         }
 
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
-            pipeline.push(...[
+            pipeline.push(...[{
+                $addFields: {
+                    region: {
+                        $filter: {
+                            input: '$region',
+                            as: 'region',
+                            cond: {
+                                $setIsSubset: [['$$region'], queryFilter[CONTENT_TYPES.REGION]],
+                            },
+                        },
+                    },
+                },
+            },
                 {
                     $addFields: {
                         acceptable: {
