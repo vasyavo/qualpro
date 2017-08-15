@@ -7,6 +7,7 @@ const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const locationFilter = require('./../../utils/locationFilter');
 const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
@@ -70,6 +71,9 @@ module.exports = (req, res, next) => {
             }
         });
 
+
+
+
         const pipeline = [{
             $project: {
                 createdBy: 1,
@@ -91,6 +95,8 @@ module.exports = (req, res, next) => {
                 distributor: 1,
             },
         }];
+
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         const $locationMatch = generalFiler([
             CONTENT_TYPES.COUNTRY,

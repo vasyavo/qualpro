@@ -7,6 +7,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const PromotionModel = require('./../../../../types/promotion/model');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
+const locationFilter = require('./../../utils/locationFilter');
 const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
@@ -72,6 +73,8 @@ module.exports = (req, res, next) => {
 
         const pipeline = [];
 
+        locationFilter(pipeline, personnel, queryFilter, true);
+
         pipeline.push(...[
             {
                 $project: {
@@ -122,12 +125,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -237,8 +240,15 @@ module.exports = (req, res, next) => {
                     publisher: 1,
                     product: 1,
                     displayType: 1,
-                    assignee: {
-                        $setUnion: ['$items.createdBy.user', []],
+                    items: {
+                        $map: {
+                            input: '$items',
+                            as: 'item',
+                            in: {
+                                displayType: '$$item.displayType',
+                                publisher: '$$item.createdBy.user',
+                            },
+                        },
                     },
                 },
             },
@@ -418,7 +428,20 @@ module.exports = (req, res, next) => {
         }
 
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
-            pipeline.push(...[
+            pipeline.push(...[{
+                $addFields: {
+                    region : {
+                        $filter: {
+                            input: '$region',
+                            as   : 'region',
+                            cond : {
+                                $setIsSubset: [['$$region'],  queryFilter[CONTENT_TYPES.REGION]],
+                            },
+                        },}
+
+                }
+
+            },
                 {
                     $addFields: {
                         acceptable: {
@@ -1113,9 +1136,31 @@ module.exports = (req, res, next) => {
                     outlet: 1,
                     status: 1,
                     publisher: 1,
-                    assignee: 1,
+                    assignee: {
+                        $setUnion: ['$items.publisher', []],
+                    },
                     product: 1,
                     displayType: 1,
+                    /*
+                     * Returns only submitted display types
+                     * displayType: {
+                     *   $reduce: {
+                     *       input: '$items.displayType',
+                     *       initialValue: [],
+                     *       in: {
+                     *           $cond: {
+                     *               if: {
+                     *                   $ne: ['$$this', []],
+                     *               },
+                     *               then: {
+                     *                   $setUnion: ['$$this', '$$value'],
+                     *               },
+                     *               else: '$$value',
+                     *           },
+                     *       },
+                     *   },
+                     * },
+                     * */
                 },
             },
             {
@@ -1126,9 +1171,13 @@ module.exports = (req, res, next) => {
                             _id: '$_id',
                             name: '$title',
                             status: '$status',
+                            product: '$product',
+                            displayType: '$displayType',
                         },
                     },
-                    statuses: { $addToSet: '$status' },
+                    status: { $addToSet: '$status' },
+                    product: { $addToSet: '$product' },
+                    displayType: { $push: '$displayType' },
                     items: {
                         $push: {
                             _id: '$$ROOT._id',
@@ -1148,59 +1197,275 @@ module.exports = (req, res, next) => {
                 },
             },
             {
-                $unwind: {
-                    path: '$items',
+                $addFields: {
+                    displayType: {
+                        $reduce: {
+                            input: '$displayType',
+                            initialValue: [],
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $ne: ['$$this', []],
+                                    },
+                                    then: {
+                                        $setUnion: ['$$this', '$$value'],
+                                    },
+                                    else: '$$value',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: false,
+                    promotion: 1,
+                    shared: {
+                        status: '$status',
+                        product: '$product',
+                        displayType: '$displayType',
+                    },
+                    items: 1,
                 },
             },
         ]);
 
-        if (_.get(queryFilter, 'status.length')) {
-            pipeline.push({
-                $project: {
-                    _id: '$items._id',
-                    promotion: {
-                        $filter: {
-                            input: '$promotion',
-                            as: 'promotion',
-                            cond: {
-                                $setIsSubset: [['$$promotion.status'], queryFilter.status],
+        if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    promotions: queryFilter[CONTENT_TYPES.PROMOTIONS],
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item._id'], '$$promotions'],
+                                        },
+                                    },
+                                },
                             },
                         },
                     },
-                    statuses: 1,
-                    country: '$items.country',
-                    region: '$items.region',
-                    subRegion: '$items.subRegion',
-                    branch: '$items.branch',
-                    retailSegment: '$items.retailSegment',
-                    outlet: '$items.outlet',
-                    status: '$items.status',
-                    publisher: '$items.publisher',
-                    assignee: '$items.assignee',
-                    product: '$items.product',
-                    displayType: '$items.displayType',
                 },
-            });
-        } else {
-            pipeline.push({
-                $project: {
-                    _id: '$items._id',
-                    promotion: 1,
-                    statuses: 1,
-                    country: '$items.country',
-                    region: '$items.region',
-                    subRegion: '$items.subRegion',
-                    branch: '$items.branch',
-                    retailSegment: '$items.retailSegment',
-                    outlet: '$items.outlet',
-                    status: '$items.status',
-                    publisher: '$items.publisher',
-                    assignee: '$items.assignee',
-                    product: '$items.product',
-                    displayType: '$items.displayType',
+                {
+                    $addFields: {
+                        'shared.status': {
+                            $setUnion: ['$items.status', []],
+                        },
+                        'shared.product': {
+                            $setUnion: ['$items.product', []],
+                        },
+                        'shared.displayType': {
+                            $reduce: {
+                                input: '$items.displayType',
+                                initialValue: [],
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $ne: ['$$this', []],
+                                        },
+                                        then: {
+                                            $setUnion: ['$$this', '$$value'],
+                                        },
+                                        else: '$$value',
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
-            });
+            ]);
         }
+
+        if (_.get(queryFilter, 'status.length')) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        promotion: {
+                            $filter: {
+                                input: '$promotion',
+                                as: 'promotion',
+                                cond: {
+                                    $setIsSubset: [['$$promotion.status'], queryFilter.status],
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    promotions: '$promotion._id',
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item._id'], '$$promotions'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        'shared.product': {
+                            $setUnion: ['$items.product', []],
+                        },
+                        'shared.displayType': {
+                            $reduce: {
+                                input: '$items.displayType',
+                                initialValue: [],
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $ne: ['$$this', []],
+                                        },
+                                        then: {
+                                            $setUnion: ['$$this', '$$value'],
+                                        },
+                                        else: '$$value',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            ]);
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.CATEGORY}.length`)) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        promotion: {
+                            $filter: {
+                                input: '$promotion',
+                                as: 'promotion',
+                                cond: {
+                                    $setIsSubset: [['$$promotion.product'], queryFilter[CONTENT_TYPES.CATEGORY]],
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    promotions: '$promotion._id',
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item._id'], '$$promotions'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        'shared.displayType': {
+                            $reduce: {
+                                input: '$items.displayType',
+                                initialValue: [],
+                                in: {
+                                    $cond: {
+                                        if: {
+                                            $ne: ['$$this', []],
+                                        },
+                                        then: {
+                                            $setUnion: ['$$this', '$$value'],
+                                        },
+                                        else: '$$value',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            ]);
+        }
+
+        if (_.get(queryFilter, 'displayType.length')) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        promotion: {
+                            $filter: {
+                                input: '$promotion',
+                                as: 'promotion',
+                                cond: {
+                                    $setIsSubset: [['$$promotion.displayType'], queryFilter.displayType],
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    promotions: '$promotion._id',
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item._id'], '$$promotions'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            ]);
+        }
+
+        pipeline.push({
+            $unwind: {
+                path: '$items',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: '$items._id',
+                promotion: 1,
+                country: '$items.country',
+                region: '$items.region',
+                subRegion: '$items.subRegion',
+                branch: '$items.branch',
+                retailSegment: '$items.retailSegment',
+                outlet: '$items.outlet',
+                status: '$items.status',
+                publisher: '$items.publisher',
+                assignee: '$items.assignee',
+                product: '$items.product',
+                displayType: '$items.displayType',
+                shared: 1,
+            },
+        });
 
         pipeline.push({
             $addFields: {
@@ -1217,26 +1482,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
-            pipeline.push({
-                $match: {
-                    _id: {
-                        $in: queryFilter[CONTENT_TYPES.PROMOTIONS],
-                    },
-                },
-            });
-        }
-
-        if (_.get(queryFilter, 'status.length')) {
-            pipeline.push({
-                $match: {
-                    status: {
-                        $in: queryFilter.status,
-                    },
-                },
-            });
-        }
-
         pipeline.push(...[
             {
                 $project: {
@@ -1248,11 +1493,11 @@ module.exports = (req, res, next) => {
                     branch: 1,
                     retailSegment: 1,
                     outlet: 1,
-                    status: '$statuses',
+                    status: '$shared.status',
                     publisher: 1,
                     assignee: 1,
-                    product: 1,
-                    displayType: 1,
+                    product: '$shared.product',
+                    displayType: '$shared.displayType',
                 },
             },
             {
@@ -1268,7 +1513,7 @@ module.exports = (req, res, next) => {
                     status: { $first: '$status' }, // tip: all available statuses over questionnaires
                     publisher: { $addToSet: '$publisher' },
                     assignee: { $push: '$assignee' },
-                    product: { $addToSet: '$product' },
+                    product: { $push: '$product' },
                     displayType: { $push: '$displayType' },
                 },
             },
@@ -1283,12 +1528,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1300,12 +1545,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1317,12 +1562,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1334,12 +1579,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1351,12 +1596,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1368,12 +1613,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1387,17 +1632,33 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
                     },
-                    product: 1,
+                    product: {
+                        $reduce: {
+                            input: '$product',
+                            initialValue: [],
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $ne: ['$$this', []],
+                                    },
+                                    then: {
+                                        $setUnion: ['$$this', '$$value'],
+                                    },
+                                    else: '$$value',
+                                },
+                            },
+                        },
+                    },
                     displayType: {
                         $reduce: {
                             input: '$displayType',
@@ -1405,12 +1666,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },

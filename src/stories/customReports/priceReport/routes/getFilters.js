@@ -6,7 +6,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const ItemHistoryModel = require('./../../../../types/itemHistory/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-
+const locationFilter = require('./../../utils/locationFilter');
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -43,6 +43,8 @@ module.exports = (req, res, next) => {
                 });
             }
         });
+
+
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -81,6 +83,8 @@ module.exports = (req, res, next) => {
             });
         }
 
+
+
         pipeline.push({
             $lookup: {
                 from: 'items',
@@ -97,6 +101,8 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $replaceRoot: { newRoot: '$itemsList' },
         });
+
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push({
             $group: {
