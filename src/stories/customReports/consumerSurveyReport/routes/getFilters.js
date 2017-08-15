@@ -7,6 +7,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
 const sanitizeHtml = require('../../utils/sanitizeHtml');
+const locationFilter = require('./../../utils/locationFilter');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -61,6 +62,8 @@ module.exports = (req, res, next) => {
                 });
             }
         });
+
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({

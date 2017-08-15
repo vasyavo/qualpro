@@ -5,6 +5,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const DistributionFormModel = require('./../../../../types/distributionForm/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
+const locationFilter = require('./../../utils/locationFilter');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -61,6 +62,8 @@ module.exports = (req, res, next) => {
                 });
             }
         });
+
+        locationFilter(null, personnel, queryFilter, true);
 
         const $timeMatch = {
             $or: timeFilter.map((frame) => {

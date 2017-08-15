@@ -6,7 +6,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const ShelfShareModel = require('./../../../../types/shelfShare/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const locationFiler = require('./../../utils/locationFilter');
+const locationFilter = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 
 const ajv = new Ajv();
@@ -80,7 +80,7 @@ module.exports = (req, res, next) => {
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY], queryFilter, personnel);
 

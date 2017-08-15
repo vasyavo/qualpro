@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
+const locationFilter = require('./../../utils/locationFilter');
 const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
@@ -65,6 +66,8 @@ module.exports = (req, res, next) => {
         });
 
         const pipeline = [];
+
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push(...[
             {
@@ -397,6 +400,20 @@ module.exports = (req, res, next) => {
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
             pipeline.push(...[
                 {
+                    $addFields: {
+                        region : {
+                            $filter: {
+                            input: '$region',
+                            as   : 'region',
+                            cond : {
+                                $setIsSubset: [['$$region'],  queryFilter[CONTENT_TYPES.REGION]],
+                            },
+                        },}
+
+                    }
+
+                }, {
+
                     $addFields: {
                         acceptable: {
                             $let: {

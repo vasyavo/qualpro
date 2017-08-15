@@ -5,7 +5,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const PersonnelModel = require('./../../../../types/personnel/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const locationFiler = require('./../../utils/locationFilter');
+const locationFilter = require('./../../utils/locationFilter');
 const moment = require('moment');
 
 const ajv = new Ajv();
@@ -83,7 +83,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        locationFiler(pipeline, personnel, queryFilter);
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push({
             $lookup: {
