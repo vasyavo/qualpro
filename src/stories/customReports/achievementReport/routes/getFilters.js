@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const async = require('async');
 const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
+const locationFilter = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const AchievementFormModel = require('./../../../../types/achievementForm/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -29,7 +29,7 @@ module.exports = (req, res, next) => {
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
 
