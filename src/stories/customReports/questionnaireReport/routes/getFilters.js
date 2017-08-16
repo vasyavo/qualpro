@@ -125,12 +125,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1259,12 +1259,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1276,12 +1276,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1293,12 +1293,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1310,12 +1310,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1327,12 +1327,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1344,12 +1344,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1362,12 +1362,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1379,12 +1379,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
