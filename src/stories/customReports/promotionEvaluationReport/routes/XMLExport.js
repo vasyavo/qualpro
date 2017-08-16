@@ -216,7 +216,6 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $unwind: {
                 path: '$promotion',
-                preserveNullAndEmptyArrays: true,
             },
         });
 
@@ -516,6 +515,7 @@ module.exports = (req, res, next) => {
                 _id: '$promotion._id',
                 country: 1,
                 region: 1,
+                comment: '$promotion.comment',
                 retailSegment: 1,
                 outlet: 1,
                 subRegion: 1,
@@ -542,7 +542,7 @@ module.exports = (req, res, next) => {
                     },
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
-                displayType:  { $ifNull: [{ $arrayElemAt: ['$displayType', 0] }, 'N/A']},
+                displayType: { $ifNull: [{ $arrayElemAt: ['$displayType', 0] }, 'N/A'] },
                 itemDateStart: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateStart' } },
                 itemDateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$promotion.dateEnd' } },
                 itemRsp: '$promotion.rsp',
@@ -563,6 +563,70 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'comments',
+                localField: 'comment',
+                foreignField: '_id',
+                as: 'comment',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                comment: {
+                    $let: {
+                        vars: {
+                            comment: { $arrayElemAt: ['$comment', 0] },
+                        },
+                        in: {
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
+                            createdBy: '$$comment.createdBy',
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'comment.createdBy.user',
+                foreignField: '_id',
+                as: 'comment.createdBy.user',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                comment: {
+                    $let: {
+                        vars: {
+                            comment: '$comment',
+                        },
+                        in: {
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
+                            createdBy: {
+                                user: {
+                                    $let: {
+                                        vars: {
+                                            user: { $arrayElemAt: ['$$comment.createdBy.user', 0] },
+                                        },
+                                        in: {
+                                            _id: '$$user._id',
+                                            firstName: '$$user.firstName',
+                                            lastName: '$$user.lastName',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
         pipeline.push({
             $addFields: {
@@ -626,6 +690,7 @@ module.exports = (req, res, next) => {
                         <th>Closing stock</th>
                         <th>Sell out</th>
                         <th>Display type</th>
+                        <th>Comments</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -648,6 +713,7 @@ module.exports = (req, res, next) => {
                         } else {
                             itemRsp = `${itemRsp} ${currentCountry.currency}`;
                         }
+                        const comments = item.comment ? `${item.comment.createdBy.user.firstName[currentLanguage]} ${item.comment.createdBy.user.lastName[currentLanguage]} : ${sanitizeHtml(item.comment.body)}` : '';
                         return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
@@ -671,6 +737,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.closingStock}</td>
                                 <td>${item.sellOut}</td>
                                 <td>${item.displayType.name[currentLanguage]}</td>
+                                <td>${comments}</td>
                             </tr>
                         `;
                     }).join('')}

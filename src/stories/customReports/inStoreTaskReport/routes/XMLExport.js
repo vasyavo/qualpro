@@ -265,14 +265,37 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'comments',
+                localField: 'comments',
+                foreignField: '_id',
+                as: 'comments',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 title: '$title',
                 createdBy: '$createdBy',
+                priority: '$priority',
                 description: '$description',
                 status: '$status',
                 dateStart: '$dateStart',
                 dateEnd: '$dateEnd',
-                priority: '$priority',
+                objectiveType: '$objectiveType',
+                comments: '$comments',
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 form: '$form',
                 country: {
                     $reduce: {
@@ -372,6 +395,76 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                title: 1,
+                createdBy: 1,
+                priority: 1,
+                status: 1,
+                form: 1,
+                description: 1,
+                objectiveType: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                position: 1,
+                assignedTo: 1,
+                comments: {
+                    $map: {
+                        input: '$comments',
+                        as: 'comment',
+                        in: {
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$comment.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                            },
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
         ObjectiveModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -411,10 +504,14 @@ module.exports = (req, res, next) => {
                         <th>Creation date</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Comments</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const comments = item.comments.map(comment => {
+                            return `${comment.createdBy.firstName[currentLanguage]} ${comment.createdBy.lastName[currentLanguage]} : ${sanitizeHtml(comment.body)}`
+                        });
                         return `
                             <tr>
                                 <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : 'N/A'}</td>
@@ -434,6 +531,7 @@ module.exports = (req, res, next) => {
                                 <td>${moment(item.createdBy.date).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
+                                <td>${comments}</td>
                             </tr>
                         `;
         }).join('')}
