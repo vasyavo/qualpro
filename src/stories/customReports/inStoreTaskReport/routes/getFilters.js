@@ -1695,10 +1695,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Originator',
+                    en: 'Publisher',
                     ar: '',
                 },
                 value: 'originator',
+            },
+            {
+                name: {
+                    en: 'Assignee Position',
+                    ar: '',
+                },
+                value: 'position',
             },
             {
                 name: {
@@ -1706,13 +1713,6 @@ module.exports = (req, res, next) => {
                     ar: '',
                 },
                 value: 'assignee',
-            },
-            {
-                name: {
-                    en: 'Position',
-                    ar: '',
-                },
-                value: 'position',
             },
         ];
 
