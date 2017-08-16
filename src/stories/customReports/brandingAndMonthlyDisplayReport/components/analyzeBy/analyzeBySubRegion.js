@@ -3,12 +3,15 @@ module.exports = (pipeline) => {
         $unwind: '$category',
     });
 
+
+
     pipeline.push({
         $group: {
             _id: {
                 country: '$country',
                 subRegion: '$subRegion',
                 category: '$category',
+                timeFrames: '$timeFrames',
             },
             region: { $addToSet: '$region' },
             retailSegment: { $addToSet: '$retailSegment' },
@@ -145,14 +148,14 @@ module.exports = (pipeline) => {
             outlet: { $push: '$outlet' },
             branch: { $push: '$branch' },
             category: { $first: '$category' },
-            data: { $push: '$count' },
+            timeFrames: {
+                $push: {
+                    timeFrame: '$_id.timeFrames',
+                    data: '$count',
+                    _id: '$_id.subRegion',
+                },
+            },
             labels: { $push: '$location' },
-        },
-    });
-
-    pipeline.push({
-        $addFields: {
-            datasets: [{ data: '$data' }],
         },
     });
 
@@ -200,7 +203,7 @@ module.exports = (pipeline) => {
                 name: 1,
             },
             category: 1,
-            datasets: 1,
+            timeFrames: 1,
             labels: 1,
         },
     });
@@ -216,7 +219,7 @@ module.exports = (pipeline) => {
                     retailSegment: '$retailSegment',
                     outlet: '$outlet',
                     branch: '$branch',
-                    datasets: '$datasets',
+                    timeFrames: '$timeFrames',
                     labels: '$labels',
                 },
             },

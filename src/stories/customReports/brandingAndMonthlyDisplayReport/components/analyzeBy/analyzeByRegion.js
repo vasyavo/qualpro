@@ -9,6 +9,7 @@ module.exports = (pipeline) => {
                 country: '$country',
                 region: '$region',
                 category: '$category',
+                timeFrames: '$timeFrames',
             },
             subRegion: { $addToSet: '$subRegion' },
             retailSegment: { $addToSet: '$retailSegment' },
@@ -46,13 +47,7 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
-        $project: {
-            _id: 1,
-            count: 1,
-            subRegion: 1,
-            retailSegment: 1,
-            outlet: 1,
-            branch: 1,
+        $addFields: {
             country: {
                 $let: {
                     vars: {
@@ -109,20 +104,26 @@ module.exports = (pipeline) => {
             outlet: { $push: '$outlet' },
             branch: { $push: '$branch' },
             category: { $first: '$category' },
-            data: { $push: '$count' },
+            timeFrames: {
+                $push: {
+                    timeFrame: '$_id.timeFrames',
+                    data: '$count',
+                    _id: '$_id.region',
+                },
+            },
             labels: { $push: '$region' },
         },
     });
 
     pipeline.push({
-        $project: {
-            subRegion: {
+        $addFields: {
+            subRegion    : {
                 $reduce: {
-                    input: '$subRegion',
+                    input       : '$subRegion',
                     initialValue: [],
-                    in: {
+                    in          : {
                         $cond: {
-                            if: {
+                            if  : {
                                 $and: [
                                     {
                                         $ne: ['$$this', []],
@@ -142,11 +143,11 @@ module.exports = (pipeline) => {
             },
             retailSegment: {
                 $reduce: {
-                    input: '$retailSegment',
+                    input       : '$retailSegment',
                     initialValue: [],
-                    in: {
+                    in          : {
                         $cond: {
-                            if: {
+                            if  : {
                                 $and: [
                                     {
                                         $ne: ['$$this', []],
@@ -164,13 +165,13 @@ module.exports = (pipeline) => {
                     },
                 },
             },
-            outlet: {
+            outlet       : {
                 $reduce: {
-                    input: '$outlet',
+                    input       : '$outlet',
                     initialValue: [],
-                    in: {
+                    in          : {
                         $cond: {
-                            if: {
+                            if  : {
                                 $and: [
                                     {
                                         $ne: ['$$this', []],
@@ -188,13 +189,13 @@ module.exports = (pipeline) => {
                     },
                 },
             },
-            branch: {
+            branch       : {
                 $reduce: {
-                    input: '$branch',
+                    input       : '$branch',
                     initialValue: [],
-                    in: {
+                    in          : {
                         $cond: {
-                            if: {
+                            if  : {
                                 $and: [
                                     {
                                         $ne: ['$$this', []],
@@ -212,15 +213,7 @@ module.exports = (pipeline) => {
                     },
                 },
             },
-            country: 1,
-            category: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
-            labels: '$labels',
-        },
+        }
     });
 
     pipeline.push({
@@ -279,7 +272,7 @@ module.exports = (pipeline) => {
             },
             country: 1,
             category: 1,
-            datasets: 1,
+            timeFrames: 1,
             labels: 1,
         },
     });
@@ -295,7 +288,7 @@ module.exports = (pipeline) => {
                     retailSegment: '$retailSegment',
                     outlet: '$outlet',
                     branch: '$branch',
-                    datasets: '$datasets',
+                    timeFrames: '$timeFrames',
                     labels: '$labels',
                 },
             },

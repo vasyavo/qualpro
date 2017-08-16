@@ -8,6 +8,7 @@ module.exports = (pipeline) => {
             _id: {
                 country: '$country',
                 category: '$category',
+                timeFrames: '$timeFrames',
             },
             region: { $addToSet: '$region' },
             subRegion: { $addToSet: '$subRegion' },
@@ -15,6 +16,117 @@ module.exports = (pipeline) => {
             outlet: { $addToSet: '$outlet' },
             branch: { $addToSet: '$branch' },
             count: { $sum: 1 },
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: {
+                country: '$_id.country',
+                category: '$_id.category',
+            },
+            region: { $addToSet: '$region' },
+            subRegion: { $addToSet: '$subRegion' },
+            retailSegment: { $addToSet: '$retailSegment' },
+            outlet: { $addToSet: '$outlet' },
+            branch: { $addToSet: '$branch' },
+            count: {
+                $addToSet: {
+                    timeFrame: '$_id.timeFrames',
+                    data: '$count',
+                    _id : '$_id.country'
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $addFields: {
+            region: {
+                $reduce: {
+                    input: '$region',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            subRegion: {
+                $reduce: {
+                    input: '$subRegion',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            retailSegment: {
+                $reduce: {
+                    input: '$retailSegment',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            outlet: {
+                $reduce: {
+                    input: '$outlet',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
+            branch: {
+                $reduce: {
+                    input: '$branch',
+                    initialValue: [],
+                    in: {
+                        $cond: {
+                            if: {
+                                $ne: ['$$value', []],
+                            },
+                            then: {
+                                $setUnion: ['$$value', '$$this'],
+                            },
+                            else: '$$this',
+                        },
+                    },
+                },
+            },
         },
     });
 
@@ -146,7 +258,7 @@ module.exports = (pipeline) => {
             outlet: 1,
             branch: 1,
             category: 1,
-            datasets: [{ data: ['$count'] }],
+            datasets: '$count',
             labels: ['$country'],
         },
     });
@@ -163,7 +275,7 @@ module.exports = (pipeline) => {
                     outlet: '$outlet',
                     branch: '$branch',
                     category: '$category',
-                    datasets: '$datasets',
+                    timeFrames: '$datasets',
                     labels: '$labels',
                 },
             },
