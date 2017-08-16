@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFilter = require('./../../utils/locationFilter');
 const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
@@ -66,8 +65,6 @@ module.exports = (req, res, next) => {
         });
 
         const pipeline = [];
-
-        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push(...[
             {

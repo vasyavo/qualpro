@@ -7,7 +7,6 @@ const AccessManager = require('./../../../../helpers/access')();
 const PromotionModel = require('./../../../../types/promotion/model');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
-const locationFilter = require('./../../utils/locationFilter');
 const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
@@ -72,8 +71,6 @@ module.exports = (req, res, next) => {
         });
 
         const pipeline = [];
-
-        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push(...[
             {

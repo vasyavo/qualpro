@@ -4,7 +4,6 @@ const _ = require('lodash');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
 const MarketingCampaignModel = require('./../../../../types/marketingCampaign/model');
-const locationFilter = require('./../../utils/locationFilter');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -70,8 +69,6 @@ module.exports = (req, res, next) => {
                 status: { $ne: 'draft' },
             },
         });
-
-        locationFilter(pipeline, personnel, queryFilter, true);
 
         pipeline.push(...[
             {
