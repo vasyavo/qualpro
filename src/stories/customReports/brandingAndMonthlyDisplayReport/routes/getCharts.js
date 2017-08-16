@@ -9,6 +9,7 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
 const applyAnalyzeBy = require('./../components/analyzeBy/index');
+const _ = require('lodash');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -32,9 +33,10 @@ module.exports = (req, res, next) => {
         },
     };
 
+    const query = req.body;
+    const timeFilter = query.timeFilter;
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const timeFilter = query.timeFilter;
         const queryFilter = query.filter || {};
         const analyzeByParam = query.analyzeBy;
         const filters = [
@@ -197,6 +199,38 @@ module.exports = (req, res, next) => {
             });
         }
 
+
+
+
+            let timeFrames = timeFilter.map(function(item){
+                item.from = moment(item.from, 'MM/DD/YYYY')._d;
+                item.to = moment(item.to, 'MM/DD/YYYY')._d;
+
+                return item;
+            });
+
+        pipeline.push({
+            $addFields: {
+                timeFrames: {
+                    $filter: {
+                        input: timeFrames,
+                        as   : 'timeFrameItem',
+                        cond : {
+                            $and: [
+                                {$gt: ['$createdBy.date', '$$timeFrameItem.from']},
+                                {$lt: ['$createdBy.date', '$$timeFrameItem.to']},
+                            ],
+                        },
+                    },
+                }
+            }
+        });
+
+        pipeline.push({
+            $unwind: '$timeFrames',
+        });
+
+
         applyAnalyzeBy(pipeline, analyzeByParam);
 
         BrandingAndMonthlyDisplayModel.aggregate(pipeline)
@@ -223,6 +257,40 @@ module.exports = (req, res, next) => {
                 charts: [],
             };
         }
+
+        response.charts.forEach(element => {
+            const dataset = [];
+
+            element.labels = _.map(_.groupBy(element.labels, function(doc){
+                return doc._id;
+            }), function(grouped){
+                return grouped[0];
+            });
+
+            timeFilter.forEach((timePeriod, index) => {
+                let timeFrames = element.timeFrames.filter((timeFrame) => {
+                    return moment(timePeriod.from).isSame(timeFrame.timeFrame.from) && moment(timePeriod.to).isSame(timeFrame.timeFrame.to)
+                });
+                dataset.push({
+                    data: []
+                });
+
+                element.labels.forEach(label => {
+                    let _idTimeFrame = timeFrames.find((timeFrameEldment) => {
+                        return timeFrameEldment._id.toString() === label._id.toString()
+                    });
+
+                    dataset[index].data.push(_idTimeFrame && _idTimeFrame.data || 0)
+                });
+
+
+            });
+
+
+            element.datasets = dataset;
+        });
+
+
 
         res.status(200).send(response);
     });
