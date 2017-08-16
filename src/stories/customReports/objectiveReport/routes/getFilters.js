@@ -123,12 +123,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1140,92 +1140,108 @@ module.exports = (req, res, next) => {
                 },
             },
             {
-                $unwind: {
-                    path: '$items',
+                $project: {
+                    _id: false,
+                    shared: {
+                        objectiveType: '$objectiveType',
+                        status: '$status',
+                        priority: '$priority',
+                        formType: '$formType',
+                    },
+                    items: 1,
                 },
             },
         ]);
 
-        pipeline.push({
-            $project: {
-                _id: '$items._id',
-                shared: {
-                    objectiveType: '$objectiveType',
-                    formType: '$formType',
-                    priority: '$priority',
-                    status: '$status',
+
+        if (_.get(queryFilter, 'status.length')) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    status: queryFilter.status,
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item.status'], '$$status'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
-                country: '$items.country',
-                region: '$items.region',
-                subRegion: '$items.subRegion',
-                branch: '$items.branch',
-                retailSegment: '$items.retailSegment',
-                outlet: '$items.outlet',
-                objectiveType: '$items.objectiveType',
-                formType: '$items.formType',
-                priority: '$items.priority',
-                status: '$items.status',
-                publisher: '$items.publisher',
-                assignee: '$items.assignee',
-            },
-        });
-
-        {
-            const $match = { $or: [] };
-
-            if (_.get(queryFilter, 'objectiveType.length')) {
-                $match.$or.push({
-                    objectiveType: {
-                        $in: queryFilter.objectiveType,
+                {
+                    $addFields: {
+                        'shared.priority': {
+                            $setUnion: ['$items.priority', []],
+                        },
+                        'shared.formType': {
+                            $setUnion: ['$items.formType', []],
+                        },
                     },
-                });
-            }
+                },
+            ]);
+        }
 
-            if (_.get(queryFilter, 'formType.length')) {
-                $match.$or.push({
-                    'form.contentType': {
-                        $in: queryFilter.formType,
+        if (_.get(queryFilter, 'priority.length')) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    priority: queryFilter.priority,
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item.priority'], '$$priority'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
-                });
-            }
-
-            if (_.get(queryFilter, 'priority.length')) {
-                $match.$or.push({
-                    priority: {
-                        $in: queryFilter.priority,
+                },
+                {
+                    $addFields: {
+                        'shared.formType': {
+                            $setUnion: ['$items.formType', []],
+                        },
                     },
-                });
-            }
-
-            if (_.get(queryFilter, 'status.length')) {
-                $match.$or.push({
-                    status: {
-                        $in: queryFilter.status,
-                    },
-                });
-            }
-
-            if ($match.$or.length) {
-                pipeline.push({ $match });
-            }
+                },
+            ]);
         }
 
         pipeline.push(...[
             {
+                $unwind: {
+                    path: '$items',
+                },
+            },
+            {
                 $project: {
                     _id: false,
-                    country: 1,
-                    region: 1,
-                    subRegion: 1,
-                    branch: 1,
-                    retailSegment: 1,
-                    outlet: 1,
+                    country: '$items.country',
+                    region: '$items.region',
+                    subRegion: '$items.subRegion',
+                    branch: '$items.branch',
+                    retailSegment: '$items.retailSegment',
+                    outlet: '$items.outlet',
                     objectiveType: '$shared.objectiveType',
                     formType: '$shared.formType',
                     priority: '$shared.priority',
                     status: '$shared.status',
-                    publisher: 1,
-                    assignee: 1,
+                    publisher: '$items.publisher',
+                    assignee: '$items.assignee',
                 },
             },
             {
@@ -1255,12 +1271,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1272,12 +1288,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1289,12 +1305,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1306,12 +1322,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1323,12 +1339,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1340,12 +1356,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1361,12 +1377,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1378,12 +1394,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1755,10 +1771,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Originator',
+                    en: 'Publisher',
                     ar: '',
                 },
                 value: 'originator',
+            },
+            {
+                name: {
+                    en: 'Assignee Position',
+                    ar: '',
+                },
+                value: 'position',
             },
             {
                 name: {
@@ -1766,13 +1789,6 @@ module.exports = (req, res, next) => {
                     ar: '',
                 },
                 value: 'assignee',
-            },
-            {
-                name: {
-                    en: 'Position',
-                    ar: '',
-                },
-                value: 'position',
             },
         ];
 

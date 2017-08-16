@@ -610,7 +610,7 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Position',
+                    en: 'Publisher Position',
                     ar: '',
                 },
                 value: 'position',

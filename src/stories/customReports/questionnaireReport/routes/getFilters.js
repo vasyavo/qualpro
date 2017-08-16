@@ -125,12 +125,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1114,7 +1114,7 @@ module.exports = (req, res, next) => {
                             status: '$status',
                         },
                     },
-                    statuses: { $addToSet: '$status' },
+                    status: { $addToSet: '$status' },
                     items: {
                         $push: {
                             _id: '$$ROOT._id',
@@ -1132,105 +1132,118 @@ module.exports = (req, res, next) => {
                 },
             },
             {
-                $unwind: {
-                    path: '$items',
+                $project: {
+                    _id: false,
+                    questionnaire: 1,
+                    shared: {
+                        status: '$status',
+                    },
+                    items: 1,
                 },
             },
         ]);
 
-        if (_.get(queryFilter, 'status.length')) {
-            pipeline.push({
-                $project: {
-                    _id: '$items._id',
-                    questionnaire: {
-                        $filter: {
-                            input: '$questionnaire',
-                            as: 'questionnaire',
-                            cond: {
-                                $setIsSubset: [['$$questionnaire.status'], queryFilter.status],
+
+        if (_.get(queryFilter, 'questionnaire.length')) {
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    questionnaire: queryFilter.questionnaire,
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item._id'], '$$questionnaire'],
+                                        },
+                                    },
+                                },
                             },
                         },
                     },
-                    statuses: 1,
-                    country: '$items.country',
-                    region: '$items.region',
-                    subRegion: '$items.subRegion',
-                    branch: '$items.branch',
-                    retailSegment: '$items.retailSegment',
-                    outlet: '$items.outlet',
-                    status: '$items.status',
-                    publisher: '$items.publisher',
-                    assignee: '$items.assignee',
                 },
-            });
-        } else {
-            pipeline.push({
-                $project: {
-                    _id: '$items._id',
-                    questionnaire: 1,
-                    statuses: 1,
-                    country: '$items.country',
-                    region: '$items.region',
-                    subRegion: '$items.subRegion',
-                    branch: '$items.branch',
-                    retailSegment: '$items.retailSegment',
-                    outlet: '$items.outlet',
-                    status: '$items.status',
-                    publisher: '$items.publisher',
-                    assignee: '$items.assignee',
-                },
-            });
-        }
-
-        pipeline.push({
-            $addFields: {
-                questionnaire: {
-                    $map: {
-                        input: '$questionnaire',
-                        as: 'questionnaire',
-                        in: {
-                            _id: '$$questionnaire._id',
-                            name: '$$questionnaire.name',
+                {
+                    $addFields: {
+                        'shared.status': {
+                            $setUnion: ['$items.status', []],
                         },
                     },
                 },
-            },
-        });
-
-        if (_.get(queryFilter, 'questionnaire.length')) {
-            pipeline.push({
-                $match: {
-                    _id: {
-                        $in: queryFilter.questionnaire,
-                    },
-                },
-            });
+            ]);
         }
+
 
         if (_.get(queryFilter, 'status.length')) {
-            pipeline.push({
-                $match: {
-                    status: {
-                        $in: queryFilter.status,
+            pipeline.push(...[
+                {
+                    $addFields: {
+                        questionnaire: {
+                            $filter: {
+                                input: '$questionnaire',
+                                as: 'questionnaire',
+                                cond: {
+                                    $setIsSubset: [['$$questionnaire.status'], queryFilter.status],
+                                },
+                            },
+                        },
                     },
                 },
-            });
+                {
+                    $addFields: {
+                        items: {
+                            $let: {
+                                vars: {
+                                    questionnaire: '$questionnaire._id',
+                                },
+                                in: {
+                                    $filter: {
+                                        input: '$items',
+                                        as: 'item',
+                                        cond: {
+                                            $setIsSubset: [['$$item._id'], '$$questionnaire'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            ]);
         }
+
 
         pipeline.push(...[
             {
+                $unwind: {
+                    path: '$items',
+                },
+            },
+            {
                 $project: {
                     _id: false,
-                    questionnaire: 1,
-                    country: 1,
-                    region: 1,
-                    subRegion: 1,
-                    branch: 1,
-                    retailSegment: 1,
-                    outlet: 1,
-                    status: '$statuses',
-                    publisher: 1,
-                    assignee: 1,
+                    questionnaire: {
+                        $map: {
+                            input: '$questionnaire',
+                            as: 'questionnaire',
+                            in: {
+                                _id: '$$questionnaire._id',
+                                name: '$$questionnaire.name',
+                            },
+                        },
+                    },
+                    country: '$items.country',
+                    region: '$items.region',
+                    subRegion: '$items.subRegion',
+                    branch: '$items.branch',
+                    retailSegment: '$items.retailSegment',
+                    outlet: '$items.outlet',
+                    status: '$shared.status',
+                    publisher: '$items.publisher',
+                    assignee: '$items.assignee',
                 },
             },
             {
@@ -1259,12 +1272,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1276,12 +1289,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1293,12 +1306,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1310,12 +1323,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1327,12 +1340,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1344,12 +1357,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1362,12 +1375,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1379,12 +1392,12 @@ module.exports = (req, res, next) => {
                             in: {
                                 $cond: {
                                     if: {
-                                        $ne: ['$$value', []],
+                                        $ne: ['$$this', []],
                                     },
                                     then: {
-                                        $setUnion: ['$$value', '$$this'],
+                                        $setUnion: ['$$this', '$$value'],
                                     },
-                                    else: '$$this',
+                                    else: '$$value',
                                 },
                             },
                         },
@@ -1729,17 +1742,17 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Assignee',
-                    ar: '',
-                },
-                value: 'assignee',
-            },
-            {
-                name: {
-                    en: 'Assignee Position',
+                    en: 'Respondent Position',
                     ar: '',
                 },
                 value: 'assigneePosition',
+            },
+            {
+                name: {
+                    en: 'Respondent',
+                    ar: '',
+                },
+                value: 'assignee',
             },
         ];
 
