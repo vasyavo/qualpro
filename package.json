@@ -79,7 +79,7 @@
     "xss-filters": "1.2.6"
   },
   "devDependencies": {
-    "aglio": "2.2.1",
+    "aglio": "^2.2.1",
     "chai": "3.5.0",
     "chai-datetime": "1.4.0",
     "co-mocha": "1.1.3",
