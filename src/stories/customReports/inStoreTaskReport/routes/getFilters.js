@@ -67,7 +67,9 @@ module.exports = (req, res, next) => {
 
         const pipeline = [];
 
-        locationFilter(pipeline, personnel, queryFilter, true);
+        const scopeFilter = {};
+
+        locationFilter(pipeline, personnel, queryFilter, scopeFilter);
 
         pipeline.push(...[
             {
@@ -393,6 +395,22 @@ module.exports = (req, res, next) => {
             pipeline.push({ $addFields });
         }
 
+        if (scopeFilter[CONTENT_TYPES.REGION]) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $filter: {
+                            input: '$region',
+                            as: 'region',
+                            cond: {
+                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.REGION]],
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
             pipeline.push(...[
                 {
@@ -585,6 +603,22 @@ module.exports = (req, res, next) => {
             }
 
             pipeline.push({ $addFields });
+        }
+
+        if (scopeFilter[CONTENT_TYPES.SUBREGION]) {
+            pipeline.push({
+                $addFields: {
+                    subRegion: {
+                        $filter: {
+                            input: '$subRegion',
+                            as: 'region',
+                            cond: {
+                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.SUBREGION]],
+                            },
+                        },
+                    },
+                },
+            });
         }
 
         if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {

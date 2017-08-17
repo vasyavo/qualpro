@@ -432,7 +432,7 @@ module.exports = (req, res, next) => {
         if (scopeFilter[CONTENT_TYPES.REGION]) {
             pipeline.push({
                 $addFields: {
-                    subRegion: {
+                    region: {
                         $filter: {
                             input: '$region',
                             as: 'region',
