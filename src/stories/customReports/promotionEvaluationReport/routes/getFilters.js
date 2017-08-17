@@ -646,9 +646,9 @@ module.exports = (req, res, next) => {
                     subRegion: {
                         $filter: {
                             input: '$subRegion',
-                            as: 'region',
+                            as: 'subRegion',
                             cond: {
-                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.SUBREGION]],
+                                $setIsSubset: [['$$subRegion'], scopeFilter[CONTENT_TYPES.SUBREGION]],
                             },
                         },
                     },
