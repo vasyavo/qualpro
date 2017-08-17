@@ -524,6 +524,8 @@ module.exports = (req, res, next) => {
                         '$retailSegment.name.en',
                         ' -> ',
                         '$outlet.name.en',
+                        ' -> ',
+                        '$branch.name.en',
                     ],
                 },
             },
@@ -532,7 +534,6 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
-                'branch.name.en': 1,
             },
         });
 
@@ -541,7 +542,6 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 location: 1,
                 country: '$country._id',
-                branch: 1,
                 status: 1,
                 attachments: 1,
                 displayType: {
@@ -571,8 +571,8 @@ module.exports = (req, res, next) => {
                 _id: '$marketingCampaign._id',
                 employee: '$marketingCampaign.createdBy.user',
                 location: 1,
-                branch: 1,
                 status: 1,
+                marketingCampaign: '$_id',
                 marketingCampaignComment: 1,
                 description: 1,
                 country: 1,
@@ -674,7 +674,6 @@ module.exports = (req, res, next) => {
                 _id: '$records._id',
                 location: '$records.location',
                 employee: '$records.employee',
-                branch: '$records.branch',
                 country: '$records.country',
                 status: '$records.status',
                 displayType: '$records.displayType',
@@ -741,6 +740,7 @@ module.exports = (req, res, next) => {
                 dateEnd: 1,
                 total: 1,
                 createdBy: 1,
+                marketingCampaign: 1,
                 marketingCampaignComment: {
                     $map: {
                         input: '$marketingCampaignComment',
@@ -784,10 +784,53 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
+                _id: {
+                    marketingCampaign: '$marketingCampaign',
+                    description: '$description',
+                },
+                items: { $push: '$$ROOT' },
+                total: { $first: '$total' },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                _id: '$_id.marketingCampaign',
+                description: '$_id.description',
+                items: {
+                    attachments: 1,
+                    branch: 1,
+                    category: 1,
+                    createdBy: 1,
+                    dateEnd: 1,
+                    dateStart: 1,
+                    displayType: 1,
+                    employee: 1,
+                    location: 1,
+                    marketingCampaignComment: 1,
+                    status: 1,
+                },
+                total: 1,
+            },
+        });
+
+        pipeline.push({
+            $group: {
                 _id: null,
                 total: { $first: '$total' },
                 data: {
                     $push: '$$ROOT',
+                },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                total: 1,
+                data: {
+                    items: 1,
+                    _id: 1,
+                    description: 1,
                 },
             },
         });
@@ -811,7 +854,6 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
-
         response.data.forEach(item => {
             item.description = {
                 en: sanitizeHtml(item.description.en),
