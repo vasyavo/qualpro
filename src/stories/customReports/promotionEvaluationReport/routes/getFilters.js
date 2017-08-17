@@ -73,7 +73,9 @@ module.exports = (req, res, next) => {
 
         const pipeline = [];
 
-        locationFilter(pipeline, personnel, queryFilter, true);
+        const scopeFilter = {};
+
+        locationFilter(pipeline, personnel, queryFilter, scopeFilter);
 
         pipeline.push(...[
             {
@@ -427,21 +429,24 @@ module.exports = (req, res, next) => {
             pipeline.push({ $addFields });
         }
 
-        if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
-            pipeline.push(...[{
+        if (scopeFilter[CONTENT_TYPES.REGION]) {
+            pipeline.push({
                 $addFields: {
-                    region : {
+                    subRegion: {
                         $filter: {
                             input: '$region',
-                            as   : 'region',
-                            cond : {
-                                $setIsSubset: [['$$region'],  queryFilter[CONTENT_TYPES.REGION]],
+                            as: 'region',
+                            cond: {
+                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.REGION]],
                             },
-                        },}
+                        },
+                    },
+                },
+            });
+        }
 
-                }
-
-            },
+        if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
+            pipeline.push(...[
                 {
                     $addFields: {
                         acceptable: {
@@ -634,40 +639,57 @@ module.exports = (req, res, next) => {
             pipeline.push({ $addFields });
         }
 
+
+        if (scopeFilter[CONTENT_TYPES.SUBREGION]) {
+            pipeline.push({
+                $addFields: {
+                    subRegion: {
+                        $filter: {
+                            input: '$subRegion',
+                            as: 'region',
+                            cond: {
+                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.SUBREGION]],
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+
         if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {
-            pipeline.push(...[
-                {
-                    $addFields: {
-                        acceptable: {
-                            $let: {
-                                vars: {
-                                    filters: {
-                                        subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
-                                    },
+            pipeline.push(...[{
+                $addFields: {
+                    acceptable: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
                                 },
-                                in: {
-                                    $cond: {
-                                        if: {
-                                            $gt: [{
-                                                $size: {
-                                                    $filter: {
-                                                        input: '$subRegion',
-                                                        as: 'subRegion',
-                                                        cond: {
-                                                            $setIsSubset: [['$$subRegion'], '$$filters.subRegion'],
-                                                        },
+                            },
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $gt: [{
+                                            $size: {
+                                                $filter: {
+                                                    input: '$subRegion',
+                                                    as: 'subRegion',
+                                                    cond: {
+                                                        $setIsSubset: [['$$subRegion'], '$$filters.subRegion'],
                                                     },
                                                 },
-                                            }, 0],
-                                        },
-                                        then: true,
-                                        else: false,
+                                            },
+                                        }, 0],
                                     },
+                                    then: true,
+                                    else: false,
                                 },
                             },
                         },
                     },
                 },
+            },
                 {
                     $match: {
                         acceptable: true,
