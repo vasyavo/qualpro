@@ -11,7 +11,7 @@ const locations = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SU
  * @param {Boolean} forFilter - condition is this function used for filter query or get docs query
  */
 
-module.exports = (pipeline, personnel, filter, forFilter) => {
+module.exports = (pipeline, personnel, filter, scopeFilter) => {
     const $locationMatch = {
         $and: [],
     };
@@ -20,9 +20,11 @@ module.exports = (pipeline, personnel, filter, forFilter) => {
 
         let locationItems;
 
-        if (forFilter) {
+        if (scopeFilter) {
             locationItems = personnel[location] && personnel[location].length ? personnel[location] : null;
-            filter[location] = locationItems;
+
+            scopeFilter[location] = locationItems || null; // for filter current scope of this location
+            filter[location] = locationItems || filter[location]; // for filter under scope of this location
         } else {
             locationItems = personnel[location] && personnel[location].length ? personnel[location] : filter[location];
         }
