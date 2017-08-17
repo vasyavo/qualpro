@@ -316,7 +316,7 @@ module.exports = [
         cms: {
             edit: false,
             write: true,
-            read: false
+            read: true
         },
         mobile: {
             edit: false,
