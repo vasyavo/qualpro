@@ -199,15 +199,12 @@ module.exports = (req, res, next) => {
             });
         }
 
+        let timeFrames = timeFilter.map(function (item) {
+            item.from = moment(item.from, 'MM/DD/YYYY')._d;
+            item.to = moment(item.to, 'MM/DD/YYYY')._d;
 
-
-
-            let timeFrames = timeFilter.map(function(item){
-                item.from = moment(item.from, 'MM/DD/YYYY')._d;
-                item.to = moment(item.to, 'MM/DD/YYYY')._d;
-
-                return item;
-            });
+            return item;
+        });
 
         pipeline.push({
             $addFields: {
@@ -280,7 +277,8 @@ module.exports = (req, res, next) => {
                         return timeFrameEldment._id.toString() === label._id.toString()
                     });
 
-                    dataset[index].data.push(_idTimeFrame && _idTimeFrame.data || 0)
+                    dataset[index].data.push(_idTimeFrame && _idTimeFrame.data || 0);
+                    dataset[index].label = `${moment(timePeriod.from).format('MM/DD/YYYY')} - ${moment(timePeriod.to).format('MM/DD/YYYY')}`;
                 });
 
 
