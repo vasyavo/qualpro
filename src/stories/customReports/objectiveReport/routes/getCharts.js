@@ -320,7 +320,8 @@ module.exports = (req, res, next) => {
                                 let total = 0;
                                 items.forEach(item => {
                                     total += item.count;
-                                    thisItem[item.status] = item.count;
+                                    thisItem[item.status] = thisItem[item.status] || 0;
+                                    thisItem[item.status] += item.count;
                                 });
                                 thisItem.total = total;
                                 return thisItem;

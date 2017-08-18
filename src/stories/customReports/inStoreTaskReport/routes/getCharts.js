@@ -309,7 +309,8 @@ module.exports = (req, res, next) => {
                                 const thisItem = {};
 
                                 items.forEach(item => {
-                                    thisItem[item.status] = item.count;
+                                    thisItem[item.status] = thisItem[item.status] || 0;
+                                    thisItem[item.status] += item.count;
                                 });
 
                                 return thisItem;
