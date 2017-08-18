@@ -224,7 +224,10 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({
                 $match: {
-                    'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
+                    $or: [
+                        { 'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] } },
+                        { 'promotion.branch': { $eq: null } },
+                    ],
                 },
             });
         }
