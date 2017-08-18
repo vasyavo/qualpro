@@ -11,7 +11,10 @@ module.exports = (pipeline, queryFilter) => {
     });
 
     pipeline.push({
-        $unwind: '$marketingCampaign',
+        $unwind: {
+            path: '$marketingCampaign',
+            preserveNullAndEmptyArrays: true,
+        },
     });
 
     if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -144,7 +147,14 @@ module.exports = (pipeline, queryFilter) => {
     if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
         pipeline.push({
             $match: {
-                'marketingCampaign.region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                $or: [
+                    {
+                        'marketingCampaign.region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                    },
+                    {
+                        'marketingCampaign.region.parent': { $eq: null },
+                    },
+                ],
             },
         });
     }
@@ -190,8 +200,21 @@ module.exports = (pipeline, queryFilter) => {
 
     pipeline.push({
         $group: {
-            _id: '$marketingCampaign.region.parent',
-            marketingCampaign: { $first: '$_id' },
+            _id: '$_id',
+            country: { $first: '$country' },
+        },
+    });
+
+    pipeline.push({
+        $unwind: {
+            path: '$country',
+            preserveNullAndEmptyArrays: true,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$country',
             count: { $sum: 1 },
         },
     });

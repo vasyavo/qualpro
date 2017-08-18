@@ -11,7 +11,10 @@ module.exports = (pipeline, queryFilter) => {
     });
 
     pipeline.push({
-        $unwind: '$marketingCampaign',
+        $unwind: {
+            path: '$marketingCampaign',
+            preserveNullAndEmptyArrays: true,
+        },
     });
 
     if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -103,7 +106,14 @@ module.exports = (pipeline, queryFilter) => {
     if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
         pipeline.push({
             $match: {
-                'marketingCampaign.branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                $or: [
+                    {
+                        'marketingCampaign.branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                    },
+                    {
+                        'marketingCampaign.branch.subRegion': { $eq: null },
+                    },
+                ],
             },
         });
     }
@@ -118,8 +128,21 @@ module.exports = (pipeline, queryFilter) => {
 
     pipeline.push({
         $group: {
-            _id: '$marketingCampaign.branch.subRegion',
-            marketingCampaign: { $first: '$_id' },
+            _id: '$_id',
+            subRegion: { $first: '$subRegion' },
+        },
+    });
+
+    pipeline.push({
+        $unwind: {
+            path: '$subRegion',
+            preserveNullAndEmptyArrays: true,
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: '$subRegion',
             count: { $sum: 1 },
         },
     });

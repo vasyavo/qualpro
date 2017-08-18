@@ -11,7 +11,10 @@ module.exports = (pipeline, queryFilter) => {
     });
 
     pipeline.push({
-        $unwind: '$marketingCampaign',
+        $unwind: {
+            path: '$marketingCampaign',
+            preserveNullAndEmptyArrays: true,
+        },
     });
 
     if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -145,7 +148,15 @@ module.exports = (pipeline, queryFilter) => {
     if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
         pipeline.push({
             $match: {
-                'marketingCampaign.region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                $or: [
+                    {
+                        'marketingCampaign.region.parent': {
+                            $in: queryFilter[CONTENT_TYPES.COUNTRY],
+                        },
+                    },
+                    { 'marketingCampaign.region.parent': { $eq: null } },
+                ],
+
             },
         });
     }
@@ -190,15 +201,23 @@ module.exports = (pipeline, queryFilter) => {
     }
 
     pipeline.push({
-        $project: {
-            category: { $arrayElemAt: ['$category', 0] },
+        $group: {
+            _id: '$_id',
+            category: { $first: '$category' },
         },
+    });
+
+    pipeline.push({
+        $unwind: {
+            path: '$category',
+            preserveNullAndEmptyArrays: true,
+        },
+
     });
 
     pipeline.push({
         $group: {
             _id: '$category',
-            marketingCampaign: { $first: '$_id' },
             count: { $sum: 1 },
         },
     });

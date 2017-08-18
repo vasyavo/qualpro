@@ -123,6 +123,9 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 status: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
                 description: 1,
                 attachments: 1,
                 category: 1,
