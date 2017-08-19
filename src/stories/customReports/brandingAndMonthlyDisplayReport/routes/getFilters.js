@@ -452,6 +452,13 @@ module.exports = (req, res, next) => {
                 },
                 value: 'publisherPosition',
             },
+            {
+                name: {
+                    en: 'Display Type',
+                    ar: '',
+                },
+                value: 'displayType',
+            },
         ];
 
         res.status(200).send(response);
