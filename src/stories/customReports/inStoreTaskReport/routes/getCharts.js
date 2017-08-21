@@ -3,7 +3,7 @@ const async = require('async');
 const Ajv = require('ajv');
 const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
+const locationFiler = require('./../../utils/locationFullMatchFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -124,6 +124,17 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+
+        if (queryFilter.country && queryFilter.country.length) {
+            pipeline.push({
+                $match: {
+                    country: {
+                        $in: queryFilter.country,
+                    },
+                },
             });
         }
 
