@@ -323,7 +323,7 @@ module.exports = (req, res, next) => {
                                     thisItem[item.status] = thisItem[item.status] || 0;
                                     thisItem[item.status] += item.count;
                                 });
-                                thisItem.total = total;
+                                thisItem.total = thisItem.total || total;
                                 return thisItem;
                             }),
                         };
