@@ -32,7 +32,12 @@ module.exports = (req, res, next) => {
                 countries: {
                     $addToSet: {
                         $cond: {
-                            if: { $eq: ['$type', 'country'] },
+                            if: {
+                                $and: [
+                                    { $eq: ['$type', 'country'] },
+                                    { $eq: ['$archived', false] },
+                                ],
+                            },
                             then: {
                                 _id: '$_id',
                                 name: '$name',
@@ -44,7 +49,12 @@ module.exports = (req, res, next) => {
                 regions: {
                     $addToSet: {
                         $cond: {
-                            if: { $eq: ['$type', 'region'] },
+                            if: {
+                                $and: [
+                                    { $eq: ['$type', 'region'] },
+                                    { $eq: ['$archived', false] },
+                                ],
+                            },
                             then: {
                                 _id: '$_id',
                                 name: '$name',
@@ -57,7 +67,12 @@ module.exports = (req, res, next) => {
                 subRegions: {
                     $addToSet: {
                         $cond: {
-                            if: { $eq: ['$type', 'subRegion'] },
+                            if: {
+                                $and: [
+                                    { $eq: ['$type', 'subRegion'] },
+                                    { $eq: ['$archived', false] },
+                                ],
+                            },
                             then: {
                                 _id: '$_id',
                                 name: '$name',
@@ -190,6 +205,37 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
+                branches: {
+                    $let: {
+                        vars: {
+                            items: {
+                                $filter: {
+                                    input: '$branches',
+                                    as: 'item',
+                                    cond: { $eq: ['$$item.archived', false] },
+                                },
+                            },
+                        },
+                        in: {
+                            $map: {
+                                input: '$$items',
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                    retailSegment: '$$item.retailSegment',
+                                    outlet: '$$item.outlet',
+                                    subRegion: '$$item.subRegion',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
                 retailSegments: { $setUnion: ['$branches.retailSegment', []] },
             },
         });
@@ -293,11 +339,67 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $addFields: {
+                retailSegments: {
+                    $let: {
+                        vars: {
+                            items: {
+                                $filter: {
+                                    input: '$retailSegments',
+                                    as: 'item',
+                                    cond: { $eq: ['$$item.archived', false] },
+                                },
+                            },
+                        },
+                        in: {
+                            $map: {
+                                input: '$$items',
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $lookup: {
                 from: 'outlets',
                 localField: 'outlets',
                 foreignField: '_id',
                 as: 'outlets',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                outlets: {
+                    $let: {
+                        vars: {
+                            items: {
+                                $filter: {
+                                    input: '$outlets',
+                                    as: 'item',
+                                    cond: { $eq: ['$$item.archived', false] },
+                                },
+                            },
+                        },
+                        in: {
+                            $map: {
+                                input: '$$items',
+                                as: 'item',
+                                in: {
+                                    _id: '$$item._id',
+                                    name: '$$item.name',
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
 
