@@ -499,11 +499,11 @@ var Rating = function () {
                 conditions.year = query.year;
             }
 
-            const dataKeys = query.dateKeys.split(',').map(item => {
+            const dataKeys = query.dateKeys && query.dateKeys.length &&  query.dateKeys.split(',').map(item => {
                 return item.trim();
             });
 
-            if (dataKeys && dataKeys.length) {
+            if (dataKeys) {
                 conditions.dataKey = {
                     $in: dataKeys,
                 };
