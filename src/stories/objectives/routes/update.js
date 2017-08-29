@@ -147,12 +147,12 @@ module.exports = (req, res, next) => {
                         return cb(error);
                     }
 
-                    if (objective.status === OBJECTIVE_STATUSES.OVER_DUE && toString(objective, 'createdBy.user') !== userId) {
+                 /*   if (objective.status === OBJECTIVE_STATUSES.OVER_DUE && toString(objective, 'createdBy.user') !== userId) {
                         const error = new Error(`You could not update task with status: "${objective.status}"`);
 
                         error.status = 400;
                         return cb(error);
-                    }
+                    }*/
 
                     cb(null);
                 },
