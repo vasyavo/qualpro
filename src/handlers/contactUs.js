@@ -28,7 +28,7 @@ var ContactUs = function() {
                 (cb) => {
                     const files = req.files;
 
-                    if (!files) {
+                    if (!files || !files.files) {
                         return cb(null, []);
                     }
 
