@@ -505,6 +505,7 @@ a {
 .word_icon:after,
 .excel_icon:after,
 .pdf_icon:after,
+.ppt_icon:after,
 .formIcon:after,
 .danger:after,
 .plusIcon:after,
@@ -577,6 +578,7 @@ a {
 .word_icon:before,
 .excel_icon:before,
 .pdf_icon:before,
+.ppt_icon:before,
 .formIcon:before,
 .danger:before,
 .plusIcon:before,
@@ -842,6 +844,9 @@ a {
 }
 .pdf_icon:after {
   content: '\e942';
+}
+.ppt_icon:after {
+  content: 'e946';
 }
 .formIcon:after {
   content: '\e943';
@@ -10981,6 +10986,7 @@ canvas::selection,
 .word_icon,
 .excel_icon,
 .pdf_icon,
+.ppt_icon,
 .filetype-csv,
 .filetype-xlsx,
 .filetype-doc,
