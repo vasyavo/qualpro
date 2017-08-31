@@ -28,7 +28,7 @@ define([
         createdByMe    : 'تم إنشاؤه من قبلي',
         myCoverTasks   : 'المهام المغطاة بالإنابة',
         closed         : 'المغلقة',
-        myCCTasks      : '', //todo translation
+        myCCTasks      : 'المهام المنسوخة',
         newTask        : 'مهمة جديدة',
         priority       : 'الأولوية',
         location       : 'الموقع',

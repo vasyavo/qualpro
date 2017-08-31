@@ -500,7 +500,7 @@ const modules = [
 
     {
         _id     : 46,
-        name    : {en: 'Import/Export', ar: ''}, // todo insert ar translation
+        name    : {en: 'Import/Export', ar: 'استخراج وتحميل​'},
         href    : CONSTANTS.IMPORT_EXPORT,
         sequence: 46,
         parrent : null,

@@ -17,7 +17,7 @@ define([
         createdByMe      : ' تم إنشاؤه من قبلي',
         myCoverObjectives: ' الأهداف المغطاة',
         closed           : 'المغلقة',
-        myCCObjectives   : '', //todo translation
+        myCCObjectives   : 'الأهداف المنسوخة',
         newObjective     : 'هدف جديد',
         // list
         priority         : 'الأولوية',
