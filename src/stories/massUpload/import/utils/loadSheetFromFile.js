@@ -56,6 +56,11 @@ module.exports = function (filePath, opt) {
             headerRow
         } = sheet;
         const incomingSheet = wb.Sheets[sheetName];
+        Object.keys(incomingSheet).forEach(function(s) {
+            if(incomingSheet[s].w) {
+                incomingSheet[s].w = incomingSheet[s].v.toString();
+            }
+        });
         const jsonSheet = XLSX.utils.sheet_to_json(incomingSheet, {header}) || [];
         const firstRow = jsonSheet.shift();
 
