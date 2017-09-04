@@ -107,26 +107,30 @@ module.exports = (req, res, next) => {
                 $match: $timeMatch,
             });
         }
-        pipeline.push({
-            $addFields: {
-                category: {
-                    $let: {
-                        vars: {
-                            allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
-                        },
-                        in: {
-                            $filter: {
-                                input: { $ifNull: ['$category', []] },
-                                as: 'category',
-                                cond: {
-                                    $setIsSubset: [['$$category'], '$$allowedCategory'],
+
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length){
+            pipeline.push({
+                $addFields: {
+                    category: {
+                        $let: {
+                            vars: {
+                                allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
+                            },
+                            in: {
+                                $filter: {
+                                    input: { $ifNull: ['$category', []] },
+                                    as: 'category',
+                                    cond: {
+                                        $setIsSubset: [['$$category'], '$$allowedCategory'],
+                                    },
                                 },
                             },
                         },
                     },
                 },
-            },
-        });
+            });
+        }
+
 
         pipeline.push({
             $lookup: {

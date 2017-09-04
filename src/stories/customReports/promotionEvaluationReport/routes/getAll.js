@@ -644,15 +644,6 @@ module.exports = (req, res, next) => {
             },
         });
 
-        pipeline.push({
-            $lookup: {
-                from: 'personnels',
-                localField: 'promotionComment.createdBy.user',
-                foreignField: '_id',
-                as: 'promotionComment.createdBy.user',
-            },
-        });
-
 
         pipeline.push({
             $addFields: {
@@ -722,6 +713,9 @@ module.exports = (req, res, next) => {
             result[0] : { data: [], total: 0 };
 
         response.data.forEach(item => {
+            if (!item.promotionComment._id) {
+                item.promotionComment = null;
+            }
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
