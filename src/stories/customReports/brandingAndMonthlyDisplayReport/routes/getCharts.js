@@ -203,7 +203,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        let timeFrames = timeFilter.map(function (item) {
+        const timeFrames = timeFilter.map((item) => {
             item.from = moment(item.from, 'MM/DD/YYYY')._d;
             item.to = moment(item.to, 'MM/DD/YYYY')._d;
 
@@ -215,16 +215,16 @@ module.exports = (req, res, next) => {
                 timeFrames: {
                     $filter: {
                         input: timeFrames,
-                        as   : 'timeFrameItem',
-                        cond : {
+                        as: 'timeFrameItem',
+                        cond: {
                             $and: [
-                                {$gt: ['$createdBy.date', '$$timeFrameItem.from']},
-                                {$lt: ['$createdBy.date', '$$timeFrameItem.to']},
+                                { $gt: ['$createdBy.date', '$$timeFrameItem.from'] },
+                                { $lt: ['$createdBy.date', '$$timeFrameItem.to'] },
                             ],
                         },
                     },
-                }
-            }
+                },
+            },
         });
 
         pipeline.push({
@@ -262,36 +262,33 @@ module.exports = (req, res, next) => {
         response.charts.forEach(element => {
             const dataset = [];
 
-            element.labels = _.map(_.groupBy(element.labels, function(doc){
+            element.labels = _.map(_.groupBy(element.labels, (doc) => {
                 return doc._id;
-            }), function(grouped){
+            }), (grouped) => {
                 return grouped[0];
             });
 
             timeFilter.forEach((timePeriod, index) => {
-                let timeFrames = element.timeFrames.filter((timeFrame) => {
-                    return moment(timePeriod.from).isSame(timeFrame.timeFrame.from) && moment(timePeriod.to).isSame(timeFrame.timeFrame.to)
+                const timeFrames = element.timeFrames.filter((timeFrame) => {
+                    return moment(timePeriod.from).isSame(timeFrame.timeFrame.from) && moment(timePeriod.to).isSame(timeFrame.timeFrame.to);
                 });
                 dataset.push({
-                    data: []
+                    data: [],
                 });
 
                 element.labels.forEach(label => {
-                    let _idTimeFrame = timeFrames.find((timeFrameEldment) => {
-                        return timeFrameEldment._id.toString() === label._id.toString()
+                    const _idTimeFrame = timeFrames.find((timeFrameEldment) => {
+                        return timeFrameEldment._id.toString() === label._id.toString();
                     });
 
                     dataset[index].data.push(_idTimeFrame && _idTimeFrame.data || 0);
                     dataset[index].label = `${moment(timePeriod.from).format('MM/DD/YYYY')} - ${moment(timePeriod.to).format('MM/DD/YYYY')}`;
                 });
-
-
             });
 
 
             element.datasets = dataset;
         });
-
 
 
         res.status(200).send(response);
