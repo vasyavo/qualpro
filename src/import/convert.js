@@ -168,7 +168,6 @@ const trimObjectValues = (obj) => {
 
 // sequence is important
 async.series([
-
     importDisplayType,
     importCategory,
     importVariant,
@@ -202,7 +201,6 @@ async.series([
         });
     },
     importPersonnel
-
 ], (err) => {
     if (err) {
         console.log(err);

@@ -42,7 +42,7 @@ var BranchHandler = function () {
         topArchived  : 1,
         creationDate : 1,
         updateDate   : 1,
-        imageSrc: 1,
+        imageSrc     : 1,
     };
 
     this.getLocation = function (req, res, next) {
@@ -352,11 +352,11 @@ var BranchHandler = function () {
                             return next(err);
                         }
 
-                        async.each(idsToArchive, (id, eCb)=>{
+                        async.each(idsToArchive, (id, eCb)=> {
                             BranchModel.findById(id)
                                 .lean()
-                                .exec((err, resp)=>{
-                                    if (err){
+                                .exec((err, resp)=> {
+                                    if (err) {
                                         return eCb(err)
                                     }
 
@@ -371,7 +371,7 @@ var BranchHandler = function () {
                                     eCb();
 
                                 })
-                        }, (err)=>{
+                        }, (err)=> {
                             if (err) {
                                 return next(err);
                             }
@@ -529,7 +529,7 @@ var BranchHandler = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -547,7 +547,7 @@ var BranchHandler = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -566,7 +566,7 @@ var BranchHandler = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -584,7 +584,7 @@ var BranchHandler = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -617,7 +617,7 @@ var BranchHandler = function () {
                 subRegion    : 1,
                 retailSegment: 1,
                 outlet       : 1,
-                imageSrc: 1,
+                imageSrc     : 1,
             })
         };
 
@@ -685,7 +685,7 @@ var BranchHandler = function () {
                 }
 
                 const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.name) {
@@ -808,7 +808,7 @@ var BranchHandler = function () {
                 }
 
                 const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.name) {
