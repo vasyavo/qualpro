@@ -76,7 +76,7 @@ var Promotions = function () {
                 $or: [
                     {
                         'createdBy.user': personnel._id,
-                        status: {
+                        status          : {
                             $in: ['draft', 'expired'],
                         },
                     },
@@ -89,7 +89,7 @@ var Promotions = function () {
                     'createdBy.user': {
                         $ne: personnel._id,
                     },
-                    status: {
+                    status          : {
                         $ne: 'draft',
                     },
                 });
@@ -98,13 +98,13 @@ var Promotions = function () {
                     'createdBy.user': {
                         $ne: personnel._id,
                     },
-                    status: {
+                    status          : {
                         $nin: ['draft', 'expired'],
                     },
                 });
             }
 
-            pipeLine.push({ $match });
+            pipeLine.push({$match});
         }
 
         if (Object.keys(queryObject).length) {
@@ -190,7 +190,7 @@ var Promotions = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -208,7 +208,7 @@ var Promotions = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -236,7 +236,7 @@ var Promotions = function () {
                             position : 1,
                             firstName: 1,
                             lastName : 1,
-                            imageSrc: 1,
+                            imageSrc : 1,
                         }
                     }
                 }
@@ -254,7 +254,7 @@ var Promotions = function () {
                             accessRole: 1,
                             firstName : 1,
                             lastName  : 1,
-                            imageSrc: 1,
+                            imageSrc  : 1,
                         }
                     }
                 }
@@ -353,7 +353,7 @@ var Promotions = function () {
                     const eventPayload = {
                         actionOriginator: userId,
                         accessRoleLevel,
-                        body: modelAsJson,
+                        body            : modelAsJson,
                     };
 
                     if (modelAsJson.status === PROMOTION_STATUSES.DRAFT) {
@@ -479,7 +479,7 @@ var Promotions = function () {
                 }
 
                 const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.promotionType) {
@@ -609,7 +609,7 @@ var Promotions = function () {
                     return next(err);
                 }
 
-                const body = response.length ? response[0] : { data: [], total: 0 };
+                const body = response.length ? response[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.promotionType) {
@@ -653,7 +653,7 @@ var Promotions = function () {
         const store = new ReportUtils({
             actionOriginator: userId,
             accessRoleLevel,
-            reportType: 'al-alali-promo-evaluation',
+            reportType      : 'al-alali-promo-evaluation',
         });
 
         const update = (options, callback) => {
@@ -668,7 +668,7 @@ var Promotions = function () {
             async.waterfall([
 
                 (cb) => {
-                    PromotionModel.findOne({ _id: promotionId }).lean().exec(cb);
+                    PromotionModel.findOne({_id: promotionId}).lean().exec(cb);
                 },
 
                 (report, cb) => {
@@ -754,7 +754,7 @@ var Promotions = function () {
                 },
 
                 (cb) => {
-                    PromotionModel.findByIdAndUpdate(promotionId, fullUpdate, { new: true }, cb);
+                    PromotionModel.findByIdAndUpdate(promotionId, fullUpdate, {new: true}, cb);
                 },
 
                 (report, cb) => {
@@ -950,7 +950,7 @@ var Promotions = function () {
                             position : 1,
                             firstName: 1,
                             lastName : 1,
-                            imageSrc: 1,
+                            imageSrc : 1,
                         }
                     }
                 }
@@ -968,7 +968,7 @@ var Promotions = function () {
                             accessRole: 1,
                             firstName : 1,
                             lastName  : 1,
-                            imageSrc: 1,
+                            imageSrc  : 1,
                         }
                     }
                 }
