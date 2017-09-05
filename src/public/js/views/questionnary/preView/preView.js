@@ -45,8 +45,8 @@ define([
             'keyup #searchInput'                         : 'searchData',
             'keyup #respondentSearchInput'               : 'respondentSearchData',
             'click #goToBtn'                             : 'goTo',
-            'click .edit-answer': 'showEditAnswerView',
-            'click .delete-answer': 'deleteAnswer',
+            'click .edit-answer'                         : 'showEditAnswerView',
+            'click .delete-answer'                       : 'deleteAnswer',
         },
 
         initialize: function (options) {
@@ -74,23 +74,24 @@ define([
             var currentLanguage = App.currentUser.currentLanguage;
             var target = $(event.target);
             var personnelId = target.attr('data-personnel-id');
+            var selectedAnswerId = target.attr('data-answer-id');
             var selectedQuestionId = target.attr('data-question-id') || this.answersCollection.questionId;
             var selectedQuestion = this.model.get('questions').find(function (item) {
                 return item._id === selectedQuestionId;
             });
             var answerForQuestion = this.answersCollection.findWhere({
-                questionId: selectedQuestionId,
+                _id        : selectedAnswerId,
                 personnelId: personnelId,
             });
             answerForQuestion = answerForQuestion.toJSON();
 
             this.editAnswerView = new EditAnswerView({
-                translation: this.translation,
-                questionType: selectedQuestion.type._id,
-                questionOptions: selectedQuestion.options,
-                questionText: selectedQuestion.title.currentLanguage,
+                translation          : this.translation,
+                questionType         : selectedQuestion.type._id,
+                questionOptions      : selectedQuestion.options,
+                questionText         : selectedQuestion.title.currentLanguage,
                 selectedOptionIndexes: answerForQuestion.optionIndex,
-                fullAnswer: answerForQuestion.text,
+                fullAnswer           : answerForQuestion.text,
             });
             this.editAnswerView.on('edit-answer', function (data) {
                 var model = new QuestionnaryAnswerModel();
@@ -216,46 +217,46 @@ define([
                 });
 
             rect = arcs.append("rect").attr({
-                x: function (d) {
+                x     : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
                     x = Math.cos(midAngle) * 110;
                     sign = (x > 0) ? 1 : -1;
                     labelX = x + (5 * sign);
-                    if(centroid[0] > 0) {
+                    if (centroid[0] > 0) {
                         return labelX;
                     }
                     return labelX - 140;
                 },
-                y: function (d) {
+                y     : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
-                    y = Math.sin(midAngle) * 110 -30;
+                    y = Math.sin(midAngle) * 110 - 30;
                     return y + 12;
                 },
-                width    : 16,
-                height   : 16,
-                fill     : function (d, i) {
+                width : 16,
+                height: 16,
+                fill  : function (d, i) {
                     return color(i);
                 }
             });
 
             rectNumber = arcs.append('text').attr({
-                x: function (d) {
+                x            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
                     x = Math.cos(midAngle) * 110;
                     sign = (x > 0) ? 1 : -1;
                     labelX = x + (5 * sign);
-                    if(centroid[0] > 0) {
+                    if (centroid[0] > 0) {
                         return labelX + 8;
                     }
                     return labelX - 140 + 8;
                 },
-                y: function (d) {
+                y            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
-                    y = Math.sin(midAngle) * 110 -30;
+                    y = Math.sin(midAngle) * 110 - 30;
                     return y + 22;
                 },
                 "text-anchor": 'middle',
@@ -266,21 +267,21 @@ define([
             });
 
             percent = arcs.append('text').attr({
-                x: function (d) {
+                x            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
                     x = Math.cos(midAngle) * 110;
                     sign = (x > 0) ? 1 : -1;
                     labelX = x + (5 * sign);
-                    if(centroid[0] > 0) {
+                    if (centroid[0] > 0) {
                         return labelX + 40;
                     }
                     return labelX - 140 + 40;
                 },
-                y: function (d) {
+                y            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
-                    y = Math.sin(midAngle) * 110 -30;
+                    y = Math.sin(midAngle) * 110 - 30;
                     return y + 22;
                 },
                 "text-anchor": 'middle',
@@ -291,21 +292,21 @@ define([
             });
 
             optionsCount = arcs.append('text').attr({
-                x: function (d) {
+                x            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
                     x = Math.cos(midAngle) * 110;
                     sign = (x > 0) ? 1 : -1;
                     labelX = x + (5 * sign);
-                    if(centroid[0] > 0) {
+                    if (centroid[0] > 0) {
                         return labelX + 72;
                     }
                     return labelX - 140 + 72;
                 },
-                y: function (d) {
+                y            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
-                    y = Math.sin(midAngle) * 110 -30;
+                    y = Math.sin(midAngle) * 110 - 30;
                     return y + 22;
                 },
                 "text-anchor": 'middle',
@@ -315,18 +316,18 @@ define([
             });
 
             textLabels = arcs.append("text").attr({
-                x: function (d) {
+                x            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
                     x = Math.cos(midAngle) * 110;
                     sign = (x > 0) ? 1 : -1;
                     labelX = x + (5 * sign);
-                    if(centroid[0] > 0) {
+                    if (centroid[0] > 0) {
                         return labelX;
                     }
                     return labelX - 145;
                 },
-                y: function (d) {
+                y            : function (d) {
                     centroid = arc.centroid(d);
                     midAngle = Math.atan2(centroid[1], centroid[0]);
                     y = Math.sin(midAngle) * 110;
@@ -345,25 +346,25 @@ define([
                     stroke        : 'black',
                     'stroke-width': 1
                 }).attr({
-                points: function (d, i) {
-                    var startPoint = arc.centroid(d);
-                    var endPoint = outerArc.centroid(d);
-                    var horizontalLinePoint;
+                    points  : function (d, i) {
+                        var startPoint = arc.centroid(d);
+                        var endPoint = outerArc.centroid(d);
+                        var horizontalLinePoint;
 
-                    if (endPoint[0] > 0) {
-                        horizontalLinePoint = [endPoint[0] + 150, endPoint[1]];
-                    } else {
-                        horizontalLinePoint = [endPoint[0] - 150, endPoint[1]];
-                    }
+                        if (endPoint[0] > 0) {
+                            horizontalLinePoint = [endPoint[0] + 150, endPoint[1]];
+                        } else {
+                            horizontalLinePoint = [endPoint[0] - 150, endPoint[1]];
+                        }
 
-                    horizontalLinePoints.push(horizontalLinePoint);
+                        horizontalLinePoints.push(horizontalLinePoint);
 
-                    return startPoint.join(', ') + ' ' + endPoint.join(', ') + ' ' + horizontalLinePoint.join(', ');
-                },
-                'class': "label-line",
-                "fill" : "#000",
-                "stroke": '#393939'
-            });
+                        return startPoint.join(', ') + ' ' + endPoint.join(', ') + ' ' + horizontalLinePoint.join(', ');
+                    },
+                    'class' : "label-line",
+                    "fill"  : "#000",
+                    "stroke": '#393939'
+                });
 
             alpha = 0.5;
             spacing = 40;
@@ -376,25 +377,33 @@ define([
                     y1 = da.attr("y");
                     textLabels.each(function (d) {
                         b = this;
-                        if (a == b) return;
+                        if (a == b) {
+                            return;
+                        }
                         db = d3.select(b);
-                        if (da.attr("text-anchor") != db.attr("text-anchor")) return;
-                        if (da.attr("x") < 0 && db.attr("x") > 0 || da.attr("x") > 0 && db.attr("x") < 0) return;
+                        if (da.attr("text-anchor") != db.attr("text-anchor")) {
+                            return;
+                        }
+                        if (da.attr("x") < 0 && db.attr("x") > 0 || da.attr("x") > 0 && db.attr("x") < 0) {
+                            return;
+                        }
                         y2 = db.attr("y");
                         deltaY = y1 - y2;
 
-                        if (Math.abs(deltaY) > spacing) return;
+                        if (Math.abs(deltaY) > spacing) {
+                            return;
+                        }
 
                         again = true;
                         sign = deltaY > 0 ? 1 : -1;
                         adjust = sign * alpha;
-                        da.attr("y",+y1 + adjust);
-                        db.attr("y",+y2 - adjust);
+                        da.attr("y", +y1 + adjust);
+                        db.attr("y", +y2 - adjust);
                     });
                 });
-                if(again) {
+                if (again) {
                     labelElements = textLabels[0];
-                    textLines.attr("y2",function(d, i) {
+                    textLines.attr("y2", function (d, i) {
                         labelForLine = d3.select(labelElements[i]);
                         return labelForLine.attr("y");
                     });
@@ -417,6 +426,7 @@ define([
                     setTimeout(push, 10)
                 }
             }
+
             push();
         },
 
@@ -493,9 +503,9 @@ define([
                     question     : respondentQuestion,
                     answerIndexes: respondentAnswerOptionsIndexes,
                     translation  : self.translation,
-                    personnelId: personnelId,
-                    answerId: respondentAnswer._id,
-                    allowEdit: false,
+                    personnelId  : personnelId,
+                    answerId     : respondentAnswer._id,
+                    allowEdit    : false,
                 };
 
                 var fullAnswerTemplateOptions = {
@@ -503,8 +513,8 @@ define([
                     answerText : respondentAnswerText,
                     translation: self.translation,
                     personnelId: personnelId,
-                    answerId: respondentAnswer._id,
-                    allowEdit: false,
+                    answerId   : respondentAnswer._id,
+                    allowEdit  : false,
                 };
 
                 if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -605,7 +615,7 @@ define([
             var templateOptions = {
                 question   : question,
                 translation: self.translation,
-                allowEdit: false,
+                allowEdit  : false,
             };
 
             if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
