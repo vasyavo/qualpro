@@ -6,6 +6,6 @@ const personnelFilters = require('./routes/personnelFilters');
 const router = express.Router();
 
 router.post('/location/filters', locationFilters);
-router.post('/location/personnel', personnelFilters);
+router.post('/employee/filters', personnelFilters);
 
 module.exports = router;
