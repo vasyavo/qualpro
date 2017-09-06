@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
-        const filters = [CONTENT_TYPES.PERSONNEL];
+        const filters = [CONTENT_TYPES.POSITION];
         const pipeline = [];
 
         filters.forEach((filterName) => {
@@ -21,6 +21,14 @@ module.exports = (req, res, next) => {
                 });
             }
         });
+
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $match: {
+                    position: { $in: queryFilter[CONTENT_TYPES.POSITION] },
+                },
+            });
+        }
 
         pipeline.push({
             $group: {
@@ -49,15 +57,7 @@ module.exports = (req, res, next) => {
                     $reduce: {
                         input: '$positions',
                         initialValue: [],
-                        in: queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length ? {
-                            $cond: {
-                                if: { $setIsSubset: [['$$this.personnelId'], queryFilter[CONTENT_TYPES.PERSONNEL]] },
-                                then: {
-                                    $setUnion: ['$$value', ['$$this._id']],
-                                },
-                                else: '$$value',
-                            },
-                        } : {
+                        in: {
                             $filter: {
                                 input: { $setUnion: ['$positions._id', []] },
                                 as: 'item',
