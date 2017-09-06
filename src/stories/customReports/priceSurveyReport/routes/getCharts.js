@@ -58,6 +58,7 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 category: 1,
                 createdBy: 1,
+                items: 1,
             },
         });
 
@@ -137,7 +138,7 @@ module.exports = (req, res, next) => {
                         },
                         in: {
                             $filter: {
-                                input: { $ifNull: ['$category', []] },
+                                input: { $ifNull: [['$category'], []] },
                                 as: 'category',
                                 cond: {
                                     $setIsSubset: [['$$category'], '$$allowedCategory'],
