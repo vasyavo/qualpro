@@ -312,8 +312,8 @@ module.exports = [
         module: ACL_MODULES.CUSTOM_REPORT,
         cms: {
             edit: false,
-            write: true,
-            read: true
+            write: false,
+            read: false
         },
         mobile: {
             edit: false,

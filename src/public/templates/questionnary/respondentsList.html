@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="<%= allowEdit ? '' : 'hidden' %>">
-        <button class="edit-answer" data-personnel-id="<%- answer.personnelId %>">Edit</button>
+        <button class="edit-answer" data-personnel-id="<%- answer.personnelId %>" data-answer-id="<%- answer._id %>">Edit</button>
         <button class="delete-answer" data-id="<%- answer._id %>"><%- translation.delete %></button>
     </div>
 </div>

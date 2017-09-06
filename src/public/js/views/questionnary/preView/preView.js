@@ -74,12 +74,13 @@ define([
             var currentLanguage = App.currentUser.currentLanguage;
             var target = $(event.target);
             var personnelId = target.attr('data-personnel-id');
+            var selectedAnswerId = target.attr('data-answer-id');
             var selectedQuestionId = target.attr('data-question-id') || this.answersCollection.questionId;
             var selectedQuestion = this.model.get('questions').find(function (item) {
                 return item._id === selectedQuestionId;
             });
             var answerForQuestion = this.answersCollection.findWhere({
-                questionId: selectedQuestionId,
+                _id: selectedAnswerId,
                 personnelId: personnelId,
             });
             answerForQuestion = answerForQuestion.toJSON();

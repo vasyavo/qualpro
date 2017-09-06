@@ -8,7 +8,6 @@ const ObjectiveModel = require('./../types/objective/model');
 const ItemModel = require('./../types/item/model');
 const PlanogramModel = require('./../types/planogram/model');
 const QuestionnaryModel = require('./../types/questionnaries/model');
-const CompetitorItemModel = require('./../types/competitorItem/model');
 const CompetitorPromotionModel = require('./../types/competitorPromotion/model');
 const CompetitorBrandingModel = require('./../types/competitorBranding/model');
 const ContractsYearlyModel = require('./../types/contractYearly/model');
@@ -33,8 +32,10 @@ const logger = require('./../utils/logger');
 const redis = require('./../helpers/redisClient');
 const ObjectId = mongoose.Types.ObjectId;
 const ACL_CONSTANTS = require('./../constants/aclRolesNames');
+const ACL_MODULES = require('../constants/aclModulesNames');
+const access = require('../helpers/access')();
 
-const Filters = function() {
+const Filters = function () {
     const self = this;
 
     const $defProjection = {
@@ -204,7 +205,8 @@ const Filters = function() {
 
         // ToDo: add filtering by time
 
-        const beforeFilter = _.pick(filter, '_id', 'priority', 'objectiveType', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
+        const beforeFilter = _.pick(filter, '_id', 'priority', 'objectiveType', 'status', 'country', 'region',
+            'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
         const pipeLine = [];
         let personnelFilter;
 
@@ -1301,11 +1303,11 @@ const Filters = function() {
         });
     }
 
-    function unionById (arr) {
+    function unionById(arr) {
         return lodash.unionBy(...arr, elem => elem._id && elem._id.toString());
     }
 
-    this.brandingActivityFilters = function(req, res, next) {
+    this.brandingActivityFilters = function (req, res, next) {
         const CONSTANTS = require('../public/js/constants/otherConstants');
         const STATUSES = CONSTANTS.PROMOTION_UI_STATUSES;
         const personnelId = req.personnelModel._id;
@@ -1372,12 +1374,12 @@ const Filters = function() {
         });
 
         /* pipeLine.push({
-            $match : {
-                status : {
-                    $ne : 'expired'
-                }
-            }
-        });*/
+         $match : {
+         status : {
+         $ne : 'expired'
+         }
+         }
+         });*/
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'categories',
@@ -1604,7 +1606,7 @@ const Filters = function() {
         });
     };
 
-    this.shelfSharesFilters = function(req, res, next) {
+    this.shelfSharesFilters = function (req, res, next) {
         const query = req.query;
         const filterMapper = new FilterMapper();
         const queryFilter = query.filter || {};
@@ -1826,7 +1828,7 @@ const Filters = function() {
         });
     };
 
-    this.priceSurveyFilters = function(req, res, next) {
+    this.priceSurveyFilters = function (req, res, next) {
         const query = req.query;
         const currentSelected = query.current;
         const queryFilter = query.filter || {};
@@ -2013,7 +2015,7 @@ const Filters = function() {
         });
     };
 
-    this.itemsAndPricesFilters = function(req, res, next) {
+    this.itemsAndPricesFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -2149,7 +2151,7 @@ const Filters = function() {
         });
     };
 
-    this.itemsToOutletCountry = function(req, res, next) {
+    this.itemsToOutletCountry = function (req, res, next) {
         const personnel = req.personnelModel;
         let pipeLine = [];
         const aggregateHelper = new AggregationHelper($defProjection);
@@ -2401,7 +2403,7 @@ const Filters = function() {
         });
     };
 
-    this.questionnary = function(req, res, next) {
+    this.questionnary = function (req, res, next) {
         const personnelId = req.personnelModel._id;
         const CONSTANTS = require('../public/js/constants/otherConstants');
         const query = req.query;
@@ -2576,10 +2578,10 @@ const Filters = function() {
                             position: '$$item.position',
                             name: {
                                 ar: {
-                                    $concat: ['$$item.firstName.ar', ' ', '$$item.lastName.ar']
+                                    $concat: ['$$item.firstName.ar', ' ', '$$item.lastName.ar'],
                                 },
                                 en: {
-                                    $concat: ['$$item.firstName.en', ' ', '$$item.lastName.en']
+                                    $concat: ['$$item.firstName.en', ' ', '$$item.lastName.en'],
                                 },
                             },
                         },
@@ -2605,10 +2607,10 @@ const Filters = function() {
                                 position: '$$personnel.position',
                                 name: {
                                     ar: {
-                                        $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar']
+                                        $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'],
                                     },
                                     en: {
-                                        $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en']
+                                        $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'],
                                     },
                                 },
                             },
@@ -2796,7 +2798,7 @@ const Filters = function() {
         });
     };
 
-    this.createQuestionnary = function(req, res, next) {
+    this.createQuestionnary = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const currentSelected = query.current;
@@ -3140,7 +3142,7 @@ const Filters = function() {
         });
     };
 
-    this.planogramFilters = function(req, res, next) {
+    this.planogramFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -3289,7 +3291,7 @@ const Filters = function() {
 
     this.competitorsListFilters = require('./../stories/competitorItem/routes/filters');
 
-    this.selectItemsLocationFilters = function(req, res, next) {
+    this.selectItemsLocationFilters = function (req, res, next) {
         let pipeLine = [];
         const $defProjection = {
             _id: 1,
@@ -3835,7 +3837,7 @@ const Filters = function() {
         });
     };
 
-    this.notificationCreateFilters = function(req, res, next) {
+    this.notificationCreateFilters = function (req, res, next) {
         const query = req.query;
         const filterMapper = new FilterMapper();
         const filter = filterMapper.mapFilter({
@@ -4081,7 +4083,7 @@ const Filters = function() {
         });
     };
 
-    this.notificationFilters = function(req, res, next) {
+    this.notificationFilters = function (req, res, next) {
         const $defProjection = {
             _id: 1,
             country: 1,
@@ -4116,7 +4118,7 @@ const Filters = function() {
         let regionIds;
 
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 if (!filter.branch) {
                     return waterfallCb();
                 }
@@ -4166,7 +4168,7 @@ const Filters = function() {
                     waterfallCb();
                 });
             },
-            function(waterfallCb) {
+            function (waterfallCb) {
                 if (!filter || !filter.country) {
                     return waterfallCb(null, null);
                 }
@@ -4183,7 +4185,7 @@ const Filters = function() {
                     waterfallCb(null, regionIds);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 if (!collection) {
                     return waterfallCb(null, null);
                 }
@@ -4200,7 +4202,7 @@ const Filters = function() {
                     waterfallCb(null, subRegionIds);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 const aggregationHelper = new AggregationHelper($defProjection, filter);
                 let pipeLine = [];
                 let aggregation;
@@ -4738,22 +4740,22 @@ const Filters = function() {
         });
     };
 
-    this.objectiveFilters = function(req, res, next) {
+    this.objectiveFilters = function (req, res, next) {
         getObjectiveFilters(req, res, next);
     };
 
-    this.inStoreTaskFilters = function(req, res, next) {
+    this.inStoreTaskFilters = function (req, res, next) {
         getInStoreTaskFilters(req, res, next);
     };
 
-    this.personnelTasks = function(req, res, next) {
+    this.personnelTasks = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const currentSelected = query.current;
         const filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
 
         async.parallel([
-            function(parallelCb) {
+            function (parallelCb) {
                 getObjectiveFilters(req, res, next, (err, result) => {
                     if (err) {
                         return parallelCb(err);
@@ -4762,7 +4764,7 @@ const Filters = function() {
                     return parallelCb(null, result);
                 });
             },
-            function(parallelCb) {
+            function (parallelCb) {
                 getInStoreTaskFilters(req, res, next, (err, result) => {
                     if (err) {
                         return parallelCb(err);
@@ -4806,7 +4808,7 @@ const Filters = function() {
         });
     };
 
-    this.competitorBrandingFilters = function(req, res, next) {
+    this.competitorBrandingFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const filterMapper = new FilterMapper();
@@ -5090,7 +5092,7 @@ const Filters = function() {
         });
     };
 
-    this.competitorPromotionFilters = function(req, res, next) {
+    this.competitorPromotionFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -5354,16 +5356,17 @@ const Filters = function() {
         });
     };
 
-    this.promotionFilters = function(req, res, next) {
+    this.promotionFilters = function (req, res, next) {
         const personnelId = req.personnelModel._id;
         const query = req.query;
         const queryFilter = query.filter || {};
         const filterMapper = new FilterMapper();
         const currentSelected = query.current;
         const filterExists = Object.keys(queryFilter).length && !(Object.keys(queryFilter).length === 1 && queryFilter.archived);
+        const personnel = req.personnelModel;
         const filter = filterMapper.mapFilter({
             filter: queryFilter,
-            personnel: req.personnelModel,
+            personnel,
         });
         let queryForFunction;
         let subRegionIds;
@@ -5373,7 +5376,7 @@ const Filters = function() {
         });
 
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 if (!filter.branch) {
                     return waterfallCb();
                 }
@@ -5429,7 +5432,7 @@ const Filters = function() {
                     waterfallCb();
                 });
             },
-            function(waterfallCb) {
+            function (waterfallCb) {
                 if (!filter || !filter.region) {
                     return waterfallCb(null, null);
                 }
@@ -5446,36 +5449,58 @@ const Filters = function() {
                     waterfallCb(null, subRegionIds);
                 });
             },
-            function(collection, waterfallCb) {
+
+            function (collection, wCb) {
+                access.getReadAccess(req, ACL_MODULES.REPORTING, (err, allowed, personnel) => {
+                    if (err) {
+                        return wCb(err);
+                    }
+
+                    if (!allowed) {
+                        err = new Error();
+                        err.status = 403;
+
+                        return wCb(err);
+                    }
+
+                    wCb(null, personnel, collection);
+                });
+            },
+
+            function (personnel, collection, waterfallCb) {
                 const aggregationHelper = new AggregationHelper($defProjectionExtended, filter);
                 const beforeFilter = _.pick(filter, 'type', 'status', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'createdBy');
                 let pipeLine = [];
                 let aggregation;
+                const $match = {
+                    $or: [],
+                };
 
                 pipeLine.push({
                     $match: beforeFilter,
                 });
 
-                pipeLine.push({
-                    $match: {
-                        $or: [
-                            {
-                                'createdBy.user': personnelId,
-                                status: { $in: ['draft', 'expired'] },
-                            }, {
-                                status: { $nin: ['draft', 'expired'] },
-                            },
-                        ],
-                    },
-                });
-
-                pipeLine.push({
-                    $match: {
-                        status: {
-                            $ne: 'expired',
+                if (personnel.accessRole.level === ACL_CONSTANTS.MASTER_ADMIN) {
+                    $match.$or.push({
+                        'createdBy.user': {
+                            $ne: personnel._id,
                         },
-                    },
-                });
+                        status: {
+                            $ne: 'draft',
+                        },
+                    });
+                } else {
+                    $match.$or.push({
+                        'createdBy.user': {
+                            $ne: personnel._id,
+                        },
+                        status: {
+                            $nin: ['draft', 'expired'],
+                        },
+                    });
+                }
+
+                pipeLine.push({ $match });
 
                 if (filter.personnel) {
                     pipeLine.push({
@@ -5808,7 +5833,7 @@ const Filters = function() {
             });
     };
 
-    this.promotionLocationFilters = function(req, res, next) {
+    this.promotionLocationFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const currentSelected = query.current;
@@ -5833,7 +5858,7 @@ const Filters = function() {
         const result = {};
         const personnel = req.personnelModel;
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 queryForFunction = personnel.country.length ? {
                     type: 'country',
                     _id: { $in: personnel.country.objectID() },
@@ -5851,7 +5876,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 queryForFunction = {
                     type: 'region',
                     parent: countryFromFilter ? countryFromFilter : { $in: _.pluck(collection, '_id') },
@@ -5869,7 +5894,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 queryForFunction = {
                     type: 'subRegion',
                     parent: regionFromFilter ? regionFromFilter : { $in: _.pluck(collection, '_id') },
@@ -5887,7 +5912,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 const addProjection = {
                     retailSegment: 1,
                     outlet: 1,
@@ -5933,7 +5958,7 @@ const Filters = function() {
         });
     };
 
-    this.achievementFormFilters = function(req, res, next) {
+    this.achievementFormFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -6174,7 +6199,7 @@ const Filters = function() {
         });
     };
 
-    this.newProductLaunchFilters = function(req, res, next) {
+    this.newProductLaunchFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -6398,7 +6423,7 @@ const Filters = function() {
         });
     };
 
-    this.getLocationIds = function(model, options, cb) {
+    this.getLocationIds = function (model, options, cb) {
         const aggregationHelper = new AggregationHelper($defProjection);
         const query = _.extend(options.query, { archived: false });
         const addProjection = options.addProjection || null;
@@ -6462,7 +6487,7 @@ const Filters = function() {
         });
     };
 
-    this.contractsYearlyLocationFilters = function(req, res, next) {
+    this.contractsYearlyLocationFilters = function (req, res, next) {
         const query = req.query;
         const edit = query.edit;
         let countryFromFilter;
@@ -6484,7 +6509,7 @@ const Filters = function() {
         let queryForFunction;
         const result = {};
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 queryForFunction = personnel.country.length ? {
                     type: 'country',
                     _id: { $in: personnel.country.objectID() },
@@ -6502,7 +6527,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 queryForFunction = {
                     type: 'region',
                     parent: countryFromFilter ? countryFromFilter : { $in: _.pluck(collection, '_id') },
@@ -6520,7 +6545,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 queryForFunction = {
                     type: 'subRegion',
                     parent: regionFromFilter ? regionFromFilter : { $in: _.pluck(collection, '_id') },
@@ -6538,7 +6563,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 const addProjection = {
                     retailSegment: 1,
                     outlet: 1,
@@ -6583,7 +6608,7 @@ const Filters = function() {
         });
     };
 
-    this.contractsYearlyFilters = function(req, res, next) {
+    this.contractsYearlyFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const filterMapper = new FilterMapper();
@@ -6600,7 +6625,7 @@ const Filters = function() {
         }
 
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 if (!filter || !filter.region) {
                     return waterfallCb(null, null);
                 }
@@ -6617,7 +6642,7 @@ const Filters = function() {
                     waterfallCb(null, subRegionIds);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 const aggregationHelper = new AggregationHelper($defProjection, filter);
                 const beforeFilter = _.pick(filter, 'type', 'status', '$and', '$or', 'createdBy');
                 let pipeLine = [];
@@ -6762,7 +6787,7 @@ const Filters = function() {
             });
     };
 
-    this.contractsSecondaryLocationFilters = function(req, res, next) {
+    this.contractsSecondaryLocationFilters = function (req, res, next) {
         const query = req.query;
         const edit = query.edit;
         let countryFromFilter;
@@ -6784,7 +6809,7 @@ const Filters = function() {
         const result = {};
         const personnel = req.personnelModel;
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 queryForFunction = personnel.country.length ? {
                     type: 'country',
                     _id: { $in: personnel.country.objectID() },
@@ -6802,7 +6827,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 queryForFunction = {
                     type: 'region',
                     parent: countryFromFilter ? countryFromFilter : { $in: _.pluck(collection, '_id') },
@@ -6820,7 +6845,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 queryForFunction = {
                     type: 'subRegion',
                     parent: regionFromFilter ? regionFromFilter : { $in: _.pluck(collection, '_id') },
@@ -6838,7 +6863,7 @@ const Filters = function() {
                     waterfallCb(null, collection);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 const addProjection = {
                     retailSegment: 1,
                     outlet: 1,
@@ -6883,7 +6908,7 @@ const Filters = function() {
         });
     };
 
-    this.contractsSecondaryFilters = function(req, res, next) {
+    this.contractsSecondaryFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -6901,7 +6926,7 @@ const Filters = function() {
         let subRegionIds;
 
         async.waterfall([
-            function(waterfallCb) {
+            function (waterfallCb) {
                 if (!filter || !filter.region) {
                     return waterfallCb(null, null);
                 }
@@ -6918,7 +6943,7 @@ const Filters = function() {
                     waterfallCb(null, subRegionIds);
                 });
             },
-            function(collection, waterfallCb) {
+            function (collection, waterfallCb) {
                 const beforeFilter = _.pick(filter, 'type', 'status', 'category', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'createdBy');
                 let pipeLine = [];
                 let aggregation;
@@ -7080,7 +7105,7 @@ const Filters = function() {
         });
     };
 
-    this.documentsFilters = function(req, res, next) {
+    this.documentsFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -7134,7 +7159,7 @@ const Filters = function() {
         });
     };
 
-    this.notesFilters = function(req, res, next) {
+    this.notesFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
 
@@ -7174,7 +7199,7 @@ const Filters = function() {
         });
     };
 
-    this.contactUsFilters = function(req, res, next) {
+    this.contactUsFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const filterMapper = new FilterMapper();
@@ -7241,7 +7266,6 @@ const Filters = function() {
                 },
             },
         ];
-
 
         if (filter.personnel) {
             pipeLine.push({
@@ -7378,7 +7402,7 @@ const Filters = function() {
         });
     };
 
-    this.brandingAndDisplayFilters = function(req, res, next) {
+    this.brandingAndDisplayFilters = function (req, res, next) {
         const query = req.query;
         const queryFilter = query.filter || {};
         const globalSearch = queryFilter.globalSearch;
@@ -7545,7 +7569,6 @@ const Filters = function() {
                 },
             });
         }
-
 
         const $matchGeneral = {
             $and: [],
@@ -7725,8 +7748,8 @@ const Filters = function() {
                                         $concat: ['$$item.firstName.ar', ' ', '$$item.lastName.ar'],
                                     },
                                 },
-                            }
-                        }
+                            },
+                        },
                     },
                 },
             },
@@ -7881,12 +7904,12 @@ const Filters = function() {
                         $let: {
                             vars: {
                                 setCountry: filter.setCountry && filter.setCountry.length ? filter.setCountry : {
-                                        $map: {
-                                            input: '$country',
-                                            as: 'item',
-                                            in: '$$item._id',
-                                        },
+                                    $map: {
+                                        input: '$country',
+                                        as: 'item',
+                                        in: '$$item._id',
                                     },
+                                },
                                 setRegion: filter.setRegion && filter.setRegion.length ? filter.setRegion : [],
                             },
                             in: {
@@ -7957,12 +7980,12 @@ const Filters = function() {
                         $let: {
                             vars: {
                                 setRegion: filter.setRegion && filter.setRegion.length ? filter.setRegion : {
-                                        $map: {
-                                            input: '$region',
-                                            as: 'item',
-                                            in: '$$item._id',
-                                        },
+                                    $map: {
+                                        input: '$region',
+                                        as: 'item',
+                                        in: '$$item._id',
                                     },
+                                },
                                 setSubRegion: filter.setSubRegion && filter.setSubRegion.length ? filter.setSubRegion : [],
                             },
                             in: {

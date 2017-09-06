@@ -189,6 +189,7 @@ function* createOrUpdate(payload) {
 
     const query = {
         'name.en': enName,
+        packing: packing,
         country  : countryId,
     };
 
