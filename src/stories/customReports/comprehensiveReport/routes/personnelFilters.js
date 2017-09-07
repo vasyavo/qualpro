@@ -22,14 +22,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    position: { $in: queryFilter[CONTENT_TYPES.POSITION] },
-                },
-            });
-        }
-
         pipeline.push({
             $group: {
                 _id: null,
@@ -40,6 +32,7 @@ module.exports = (req, res, next) => {
                             en: { $concat: ['$firstName.en', ' ', '$lastName.en'] },
                             ar: { $concat: ['$firstName.ar', ' ', '$lastName.ar'] },
                         },
+                        position: '$position',
                     },
                 },
                 positions: {
@@ -79,6 +72,22 @@ module.exports = (req, res, next) => {
                 as: 'positions',
             },
         });
+
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $addFields: {
+                    personnels: {
+                        $filter: {
+                            input: '$personnels',
+                            as: 'item',
+                            cond: {
+                                $eq: ['$$item.position', queryFilter[CONTENT_TYPES.POSITION][0]],
+                            },
+                        },
+                    },
+                },
+            });
+        }
 
         pipeline.push({
             $project: {
