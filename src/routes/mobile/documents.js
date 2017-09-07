@@ -26,6 +26,7 @@ module.exports = function () {
     router.get('/', handler.getAllForMobile);
     router.get('/sync', handler.getAllForSync);
     router.get('/:id([0-9a-fA-F]{24})', handler.getById);
+    router.post('/getByIds', handler.getByIds);
 
     return router;
 };
