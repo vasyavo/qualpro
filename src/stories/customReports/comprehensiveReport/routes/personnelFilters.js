@@ -87,6 +87,30 @@ module.exports = (req, res, next) => {
                     _id: 1,
                     name: 1,
                 },
+                categories: null,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'categories',
+                foreignField: 'categories',
+                as: 'categories',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                personnels: 1,
+                positions: {
+                    _id: 1,
+                    name: 1,
+                },
+                categories: {
+                    _id: 1,
+                    name: 1,
+                },
             },
         });
 
