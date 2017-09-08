@@ -1,11 +1,13 @@
 const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const OTHER_CONSTANTS = require('./../../../public/js/constants/otherConstants');
+const _ = require('lodash');
 
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
 module.exports = (options) => {
     const subordinates = options.subordinates;
     const personnel = options.personnel;
+    const personelObj = options.personnelObj || {};
     const aggregateHelper = options.aggregateHelper;
     const queryObject = options.queryObject;
     const parentIds = options.parentIds;
@@ -19,18 +21,32 @@ module.exports = (options) => {
     const pipeline = [];
     const currentUserLevel = options.currentUserLevel;
 
+    const matchForLocation = () => {
+        let locations = _.pick(personelObj, ['country', 'region', 'subRegion', 'branch']);
+        let locationKeys = Object.keys(locations);
+        let matchForLocation = {};
+
+        locationKeys.forEach(function (key) {
+            if (locations[key] && locations[key].length) {
+                matchForLocation[key] = {$in: locations[key]};
+            }
+        });
+
+        return matchForLocation;
+    };
+
     if (parentIds && parentIds.length) {
         pipeline.push({
             $match: {
                 $and: [{
                     $or: [
-                        { 'parent.1': { $in: parentIds } },
-                        { 'parent.2': { $in: parentIds } },
-                        { 'parent.3': { $in: parentIds } },
-                        { 'parent.4': { $in: parentIds } },
+                        {'parent.1': {$in: parentIds}},
+                        {'parent.2': {$in: parentIds}},
+                        {'parent.3': {$in: parentIds}},
+                        {'parent.4': {$in: parentIds}},
                     ],
                 }, {
-                    _id: { $nin: parentIds },
+                    _id: {$nin: parentIds},
                 }],
             },
         });
@@ -53,9 +69,9 @@ module.exports = (options) => {
                 pipeline.push({
                     $match: {
                         $or: [
-                            { assignedTo: { $in: subordinates } },
-                            { assignedTo: { $in: coveredIds } },
-                            { 'createdBy.user': { $in: coveredIds } },
+                            {assignedTo: {$in: subordinates}},
+                            {assignedTo: {$in: coveredIds}},
+                            {'createdBy.user': {$in: coveredIds}},
                         ],
                     },
                 });
@@ -66,10 +82,10 @@ module.exports = (options) => {
         pipeline.push({
             $match: {
                 $or: [{
-                    status: { $ne: OBJECTIVE_STATUSES.DRAFT },
+                    status: {$ne: OBJECTIVE_STATUSES.DRAFT},
                 }, {
-                    status: { $eq: OBJECTIVE_STATUSES.DRAFT },
-                    'createdBy.user': { $eq: personnel },
+                    status          : {$eq: OBJECTIVE_STATUSES.DRAFT},
+                    'createdBy.user': {$eq: personnel},
                 }],
             },
         });
@@ -78,10 +94,14 @@ module.exports = (options) => {
     pipeline.push({
         $match: {
             $or: [
-                { archived: false },
-                { archived: { $exists: false } },
+                {archived: false},
+                {archived: {$exists: false}},
             ],
         },
+    });
+
+    pipeline.push({
+        $match: matchForLocation(),
     });
 
     if (isMobile) {
@@ -98,59 +118,59 @@ module.exports = (options) => {
     }
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'personnels',
-        key: 'assignedTo',
+        from         : 'personnels',
+        key          : 'assignedTo',
         addProjection: ['position', 'accessRole', 'firstName', 'lastName', 'imageSrc'],
-        isArray: true,
+        isArray      : true,
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'files',
-        key: 'attachments',
+        from         : 'files',
+        key          : 'attachments',
         addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'domains',
-        key: 'country',
+        key : 'country',
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'domains',
-        key: 'region',
+        key : 'region',
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'domains',
-        key: 'subRegion',
+        key : 'subRegion',
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'retailSegments',
-        key: 'retailSegment',
+        key : 'retailSegment',
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'outlets',
-        key: 'outlet',
+        key : 'outlet',
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'branches',
-        key: 'branch',
+        key : 'branch',
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'personnels',
-        key: 'createdBy.user',
-        isArray: false,
-        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-        includeSiblings: { createdBy: { date: 1 } },
+        from           : 'personnels',
+        key            : 'createdBy.user',
+        isArray        : false,
+        addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+        includeSiblings: {createdBy: {date: 1}},
     }));
 
     pipeline.push({
         $unwind: {
-            path: '$assignedTo',
+            path                      : '$assignedTo',
             preserveNullAndEmptyArrays: true,
         },
     });
@@ -163,32 +183,32 @@ module.exports = (options) => {
 
     if (!isMobile) {
         pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'accessRoles',
-            key: 'assignedTo.accessRole',
-            isArray: false,
-            addProjection: ['_id', 'name', 'level'],
+            from           : 'accessRoles',
+            key            : 'assignedTo.accessRole',
+            isArray        : false,
+            addProjection  : ['_id', 'name', 'level'],
             includeSiblings: {
                 assignedTo: {
-                    _id: 1,
-                    position: 1,
+                    _id      : 1,
+                    position : 1,
                     firstName: 1,
-                    lastName: 1,
-                    imageSrc: 1,
+                    lastName : 1,
+                    imageSrc : 1,
                 },
             },
         }));
 
         pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'positions',
-            key: 'assignedTo.position',
-            isArray: false,
+            from           : 'positions',
+            key            : 'assignedTo.position',
+            isArray        : false,
             includeSiblings: {
                 assignedTo: {
-                    _id: 1,
+                    _id       : 1,
                     accessRole: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    imageSrc: 1,
+                    firstName : 1,
+                    lastName  : 1,
+                    imageSrc  : 1,
                 },
             },
         }));
@@ -196,42 +216,42 @@ module.exports = (options) => {
 
     pipeline.push({
         $group: aggregateHelper.getGroupObject({
-            assignedTo: { $addToSet: '$assignedTo' },
+            assignedTo: {$addToSet: '$assignedTo'},
         }),
     });
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'accessRoles',
-        key: 'createdBy.user.accessRole',
-        isArray: false,
-        addProjection: ['_id', 'name', 'level'],
+        from           : 'accessRoles',
+        key            : 'createdBy.user.accessRole',
+        isArray        : false,
+        addProjection  : ['_id', 'name', 'level'],
         includeSiblings: {
             createdBy: {
                 date: 1,
                 user: {
-                    _id: 1,
-                    position: 1,
+                    _id      : 1,
+                    position : 1,
                     firstName: 1,
-                    lastName: 1,
-                    imageSrc: 1,
+                    lastName : 1,
+                    imageSrc : 1,
                 },
             },
         },
     }));
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'positions',
-        key: 'createdBy.user.position',
-        isArray: false,
+        from           : 'positions',
+        key            : 'createdBy.user.position',
+        isArray        : false,
         includeSiblings: {
             createdBy: {
                 date: 1,
                 user: {
-                    _id: 1,
+                    _id       : 1,
                     accessRole: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    imageSrc: 1,
+                    firstName : 1,
+                    lastName  : 1,
+                    imageSrc  : 1,
                 },
             },
         },
@@ -239,45 +259,45 @@ module.exports = (options) => {
 
     if (isMobile) {
         pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'editedBy.user',
-            isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-            includeSiblings: { editedBy: { date: 1 } },
+            from           : 'personnels',
+            key            : 'editedBy.user',
+            isArray        : false,
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: {editedBy: {date: 1}},
         }));
 
         pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'accessRoles',
-            key: 'editedBy.user.accessRole',
-            isArray: false,
-            addProjection: ['_id', 'name', 'level'],
+            from           : 'accessRoles',
+            key            : 'editedBy.user.accessRole',
+            isArray        : false,
+            addProjection  : ['_id', 'name', 'level'],
             includeSiblings: {
                 editedBy: {
                     date: 1,
                     user: {
-                        _id: 1,
-                        position: 1,
+                        _id      : 1,
+                        position : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
             },
         }));
 
         pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'positions',
-            key: 'editedBy.user.position',
-            isArray: false,
+            from           : 'positions',
+            key            : 'editedBy.user.position',
+            isArray        : false,
             includeSiblings: {
                 editedBy: {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id       : 1,
                         accessRole: 1,
-                        firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        firstName : 1,
+                        lastName  : 1,
+                        imageSrc  : 1,
                     },
                 },
             },
@@ -289,8 +309,8 @@ module.exports = (options) => {
             assignedTo: {
                 $filter: {
                     input: '$assignedTo',
-                    as: 'oneItem',
-                    cond: { $ne: ['$$oneItem', null] },
+                    as   : 'oneItem',
+                    cond : {$ne: ['$$oneItem', null]},
                 },
             },
         }),
