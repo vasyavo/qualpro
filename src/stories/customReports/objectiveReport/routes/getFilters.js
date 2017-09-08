@@ -1811,6 +1811,13 @@ module.exports = (req, res, next) => {
                 },
                 value: 'assignee',
             },
+            {
+                name: {
+                    en: 'Priority',
+                    ar: '',
+                },
+                value: 'priority',
+            },
         ];
 
         res.status(200).send(response);
