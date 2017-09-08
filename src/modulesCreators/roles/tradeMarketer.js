@@ -380,7 +380,7 @@ module.exports = [
         cms   : {
             edit : false,
             write: false,
-            read : false
+            read : true
         },
         mobile: {
             edit : false,

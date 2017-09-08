@@ -447,7 +447,7 @@ module.exports = (req, res, next) => {
                 return country._id.toString() === item.country._id.toString();
             });
             item.med = getMedian(item.arrayOfPrice);
-            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
                 item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
                 item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
                 item.max = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
