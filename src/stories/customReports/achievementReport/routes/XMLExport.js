@@ -450,7 +450,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.createdBy.user.position.name[currentLanguage]}</td>
                                 <td>${emojiStrip(item.description[currentLanguage])}</td>
-                                <td>${emojiStrip(item.additionalComment[currentLanguage])}</td>
+                                <td>${item.createdBy.user.name[currentLanguage] + ': ' +emojiStrip(item.additionalComment[currentLanguage])}</td>
                             </tr>
                         `;
                     }).join('')}
