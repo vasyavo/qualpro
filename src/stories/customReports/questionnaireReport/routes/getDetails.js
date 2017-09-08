@@ -333,8 +333,8 @@ module.exports = (req, res, next) => {
                 outlet: '$records.answer.outlet',
                 branch: '$records.answer.branch',
                 personnel: '$records.personnel',
-                question: '$records.answer.question',
-                answer: { $arrayElemAt: ['$records.answer.answerText', 0] },
+                question: { $ifNull: ['$records.answer.question', { en: 'N/A', ar: 'N/A' }] },
+                answer: { $ifNull: [{ $arrayElemAt: ['$records.answer.answerText', 0] }, { en: 'N/A', ar: 'N/A' }] },
             },
         });
 
