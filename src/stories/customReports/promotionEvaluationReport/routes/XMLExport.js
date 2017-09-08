@@ -216,6 +216,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $unwind: {
                 path: '$promotion',
+                preserveNullAndEmptyArrays: true,
             },
         });
 
@@ -695,49 +696,52 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
-                        const currentCountry = currency.defaultData.find((country) => {
-                            return country._id.toString() === item.country._id.toString();
-                        });
-                        let itemPrice = item.ppt.toFixed(2);
-                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
-                            itemPrice = parseFloat(itemPrice * currentCountry.currencyInUsd).toFixed(2);
-                            itemPrice = `${itemPrice} $`;
-                        } else {
-                            itemPrice = `${itemPrice} ${currentCountry.currency}`;
-                        }
+                        let itemPrice =  (item.ppt || 0).toFixed(2);
+                        let itemRsp = (item.itemRsp || 0).toFixed(2);
+                        if (item.country._id){
+                            const currentCountry = currency.defaultData.find((country) => {
+                                return country._id.toString() === item.country._id.toString();
+                            });
+                            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                                itemPrice = parseFloat(itemPrice * currentCountry.currencyInUsd).toFixed(2);
+                                itemPrice = `${itemPrice} $`;
+                            } else {
+                                itemPrice = `${itemPrice} ${currentCountry.currency}`;
+                            }
     
-                        let itemRsp = item.itemRsp.toFixed(2);
-                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
-                            itemRsp = parseFloat(itemRsp * currentCountry.currencyInUsd).toFixed(2);
-                            itemRsp = `${itemRsp} $`;
-                        } else {
-                            itemRsp = `${itemRsp} ${currentCountry.currency}`;
+                            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                                itemRsp = parseFloat(itemRsp * currentCountry.currencyInUsd).toFixed(2);
+                                itemRsp = `${itemRsp} $`;
+                            } else {
+                                itemRsp = `${itemRsp} ${currentCountry.currency}`;
+                            }
                         }
-                        const comments = item.comment ? `${item.comment.createdBy.user.firstName[currentLanguage]} ${item.comment.createdBy.user.lastName[currentLanguage]} : ${sanitizeHtml(item.comment.body)}` : '';
+                        
+                        const comments = item.comment && item.comment.createdBy.user.firstName ? `${item.comment.createdBy.user.firstName[currentLanguage]} ${item.comment.createdBy.user.lastName[currentLanguage]} : ${sanitizeHtml(item.comment.body)}` : '';
                         return `
                             <tr>
-                                <td>${item.country.name[currentLanguage]}</td>
-                                <td>${item.region.name[currentLanguage]}</td>
-                                <td>${item.subRegion.name[currentLanguage]}</td>
-                                <td>${item.retailSegment.name[currentLanguage]}</td>
-                                <td>${item.outlet.name[currentLanguage]}</td>
-                                <td>${item.branch.name[currentLanguage]}</td>
-                                <td>${item.createdBy.user.name[currentLanguage]}</td>
-                                <td>${item.createdBy.user.position.name[currentLanguage]}</td>
-                                <td>${item.assignee.name[currentLanguage]}</td>
-                                <td>${sanitizeHtml(item.promotionType[currentLanguage]).trim()}</td>
-                                <td>${itemPrice}</td>
-                                <td>${itemRsp}</td>
-                                <td>${item.dateStart}</td>
-                                <td>${item.dateEnd}</td>
-                                <td>${item.itemDateStart}</td>
-                                <td>${item.itemDateEnd}</td>
-                                <td>${item.opening}</td>
-                                <td>${item.sellIn}</td>
-                                <td>${item.closingStock}</td>
-                                <td>${item.sellOut}</td>
-                                <td>${item.displayType.name[currentLanguage]}</td>
-                                <td>${comments}</td>
+                                <td>${item.country.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.region.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.subRegion.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.retailSegment.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.outlet.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.branch.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.createdBy.user.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.createdBy.user.position.name[currentLanguage] || 'N/A'}</td>
+                                <td>${item.assignee.name[currentLanguage] || 'N/A'}</td>
+                                <td>${sanitizeHtml(item.promotionType[currentLanguage]  || 'N/A').trim()}</td>
+                                <td>${itemPrice || 0}</td>
+                                <td>${itemRsp || 0}</td>
+                                <td>${item.dateStart || 'N/A'}</td>
+                                <td>${item.dateEnd || 'N/A'}</td>
+                                <td>${item.itemDateStart || 'N/A'}</td>
+                                <td>${item.itemDateEnd || 'N/A'}</td>
+                                <td>${item.opening || 0}</td>
+                                <td>${item.sellIn || 0}</td>
+                                <td>${item.closingStock || 0}</td>
+                                <td>${item.sellOut || 0}</td>
+                                <td>${item.displayType.name ? item.displayType.name[currentLanguage] : 'N/A'}</td>
+                                <td>${comments || 'N/A'}</td>
                             </tr>
                         `;
                     }).join('')}
