@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
-        const filters = [CONTENT_TYPES.PERSONNEL];
+        const filters = [CONTENT_TYPES.POSITION];
         const pipeline = [];
 
         filters.forEach((filterName) => {
@@ -32,6 +32,7 @@ module.exports = (req, res, next) => {
                             en: { $concat: ['$firstName.en', ' ', '$lastName.en'] },
                             ar: { $concat: ['$firstName.ar', ' ', '$lastName.ar'] },
                         },
+                        position: '$position',
                     },
                 },
                 positions: {
@@ -49,15 +50,7 @@ module.exports = (req, res, next) => {
                     $reduce: {
                         input: '$positions',
                         initialValue: [],
-                        in: queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length ? {
-                            $cond: {
-                                if: { $setIsSubset: [['$$this.personnelId'], queryFilter[CONTENT_TYPES.PERSONNEL]] },
-                                then: {
-                                    $setUnion: ['$$value', ['$$this._id']],
-                                },
-                                else: '$$value',
-                            },
-                        } : {
+                        in: {
                             $filter: {
                                 input: { $setUnion: ['$positions._id', []] },
                                 as: 'item',
@@ -80,10 +73,50 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+            pipeline.push({
+                $addFields: {
+                    personnels: {
+                        $filter: {
+                            input: '$personnels',
+                            as: 'item',
+                            cond: {
+                                $eq: ['$$item.position', queryFilter[CONTENT_TYPES.POSITION][0]],
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $project: {
                 personnels: 1,
                 positions: {
+                    _id: 1,
+                    name: 1,
+                },
+                categories: null,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'categories',
+                foreignField: 'categories',
+                as: 'categories',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                personnels: 1,
+                positions: {
+                    _id: 1,
+                    name: 1,
+                },
+                categories: {
                     _id: 1,
                     name: 1,
                 },

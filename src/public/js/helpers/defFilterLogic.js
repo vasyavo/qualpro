@@ -224,12 +224,12 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        status: {
+                        /*status: {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
                             options: {$nin: 'true'}
-                        },
+                        },*/
                         $nor  : {
                             type  : 'collection',
                             values: [{
@@ -253,12 +253,12 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        status: {
+                        /*status: {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
                             options: {$nin: 'true'}
-                        },
+                        },*/
                         $or   : {
                             type  : 'collection',
                             values: [
@@ -435,12 +435,12 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        status: {
+                        /*status: {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
                             options: {$nin: 'true'}
-                        },
+                        },*/
                         $nor  : {
                             type  : 'collection',
                             values: [
@@ -466,12 +466,12 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        status: {
+                        /*status: {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
                             names  : ['Closed'],
                             options: {$nin: 'true'}
-                        },
+                        },*/
                         $or   : {
                             type  : 'collection',
                             values: [

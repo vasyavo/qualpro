@@ -74,17 +74,11 @@ var Promotions = function () {
         } else {
             const $match = {
                 $or: [
-                    {
-                        'createdBy.user': personnel._id,
-                        status          : {
-                            $in: ['draft', 'expired'],
-                        },
-                    },
                 ],
             };
 
             // regarding QP-1411 Reporting: Al Alali Promotion Evaluation -> Expired items doesn't displayed for MA
-            if (personnel.accessRole.level === aclRolesNames.MASTER_ADMIN) {
+            if ([aclRolesNames.MASTER_ADMIN].includes(personnel.accessRole.level)) {
                 $match.$or.push({
                     'createdBy.user': {
                         $ne: personnel._id,
@@ -93,16 +87,11 @@ var Promotions = function () {
                         $ne: 'draft',
                     },
                 });
-            } else {
-                $match.$or.push({
-                    'createdBy.user': {
-                        $ne: personnel._id,
-                    },
-                    status          : {
-                        $nin: ['draft', 'expired'],
-                    },
-                });
             }
+
+            $match.$or.push({
+                'createdBy.user': personnel._id
+            });
 
             pipeLine.push({$match});
         }

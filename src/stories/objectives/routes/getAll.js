@@ -148,6 +148,7 @@ module.exports = (req, res, next) => {
                     skip,
                     limit,
                     personnel: ObjectId(userId),
+                    personnelObj: personnel,
                     coveredIds,
                     subordinates: setSubordinateId,
                     currentUserLevel: accessRoleLevel,

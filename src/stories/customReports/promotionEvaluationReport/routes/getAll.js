@@ -719,7 +719,7 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country.toString();
             });
-            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
                 item.ppt = parseFloat(item.ppt * currentCountry.currencyInUsd).toFixed(2);
                 item.ppt = `${item.ppt} $`;
             } else {

@@ -172,22 +172,17 @@ define([
         setSelected: function (options) {
             var $input = this.$el.find('.dropDownInput>input');
             var names = [];
-            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ||
-                Cookies.get('currentLanguage') || 'en';
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage);
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-            var self = this;
-            var selectedValues;
-            var selectedValuesIds;
-            var model;
 
-            selectedValues = _.compact(this.selectedValues);
-            selectedValues.forEach(function (name, index) {
-                names.push(name.currentLanguage || name[currentLanguage] || name[anotherLanguage] || name);
+            var selectedValues = _.compact(this.selectedValues);
+            selectedValues.forEach(function (name) {
+                names.push(name[currentLanguage] || name[anotherLanguage] || name);
             });
 
             $input.val(names.join(', '));
-            selectedValuesIds = _.compact(this.selectedValuesIds);
-            model = this.collection.get(selectedValuesIds[0]);
+            var selectedValuesIds = _.compact(this.selectedValuesIds);
+            var model = this.collection.get(selectedValuesIds[0]);
             if (model && model.get('auto')) {
                 $input.attr('data-auto', true);
             }

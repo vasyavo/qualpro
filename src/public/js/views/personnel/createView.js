@@ -121,13 +121,15 @@ function (Backbone, $, _, CreateTemplate, BaseView, Model, common, populate, cou
             populate.inputDropDown({
                 selector   : '#accessRoleDd',
                 context    : this,
-                contentType: 'accessRole'
+                contentType: 'accessRole',
+                displayText: this.translation.accessRole,
             });
 
             populate.inputDropDown({
                 selector   : '#positionDd',
                 context    : this,
-                contentType: 'position'
+                contentType: 'position',
+                displayText: this.translation.jobPosition,
             });
 
             this.on('changeItem', this.dropDownSelected, this);

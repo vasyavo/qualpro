@@ -58,6 +58,7 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 category: 1,
                 createdBy: 1,
+                items: 1,
             },
         });
 
@@ -128,26 +129,13 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $addFields: {
-                category: {
-                    $let: {
-                        vars: {
-                            allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
-                        },
-                        in: {
-                            $filter: {
-                                input: { $ifNull: ['$category', []] },
-                                as: 'category',
-                                cond: {
-                                    $setIsSubset: [['$$category'], '$$allowedCategory'],
-                                },
-                            },
-                        },
-                    },
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            pipeline.push({
+                $match: {
+                    category: { $in: queryFilter[CONTENT_TYPES.CATEGORY] },
                 },
-            },
-        });
+            });
+        }
 
         pipeline.push({
             $lookup: {

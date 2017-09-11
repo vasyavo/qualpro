@@ -252,6 +252,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
+                from: 'personnels',
+                localField: 'publisher',
+                foreignField: '_id',
+                as: 'publisher',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
                 from: 'domains',
                 localField: 'country',
                 foreignField: '_id',
@@ -328,6 +337,18 @@ module.exports = (req, res, next) => {
                 year: 1,
                 month: 1,
                 rating: 1,
+                publisher: {
+                    $let: {
+                        vars: {
+                            publisher: { $arrayElemAt: ['$publisher', 0] },
+                        },
+                        in: {
+                            _id: '$$publisher._id',
+                            firstName: '$$publisher.firstName',
+                            lastName: '$$publisher.lastName',
+                        },
+                    },
+                },
                 country: {
                     $reduce: {
                         input: { $setDifference: ['$country', [{ $arrayElemAt: ['$country', 0] }]] },
@@ -500,6 +521,7 @@ module.exports = (req, res, next) => {
                         <th>Planning And Organization Skills</th>
                         <th>Overall Performance</th>
                         <th>Date</th>
+                        <th>Evaluator</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -520,6 +542,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.planningAndOrganizationSkills.toFixed(2)}</td>
                                 <td>${OTHER_CONSTANTS.RATING_BIYEARLY.find((rating) => rating._id === item.overallPerformance).name[currentLanguage]}</td>
                                 <td>${moment(item.month, 'MM').format('MMMM') + ' ' + item.year}</td>
+                                <td>${item.publisher.firstName[currentLanguage]} ${item.publisher.lastName[currentLanguage]}</td>
                             </tr>
                         `;
         }).join('')}

@@ -574,6 +574,18 @@ module.exports = (req, res, next) => {
                 status: 1,
                 marketingCampaign: '$_id',
                 marketingCampaignComment: 1,
+                commentsUser: {
+                    $reduce: {
+                        input: '$marketingCampaignComment',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 description: 1,
                 country: 1,
                 commentAttachments: {
@@ -602,6 +614,15 @@ module.exports = (req, res, next) => {
                     user: 1,
                     date: { $dateToString: { format: '%m/%d/%Y', date: '$createdBy.date' } },
                 },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
             },
         });
 
@@ -675,6 +696,7 @@ module.exports = (req, res, next) => {
                 location: '$records.location',
                 employee: '$records.employee',
                 country: '$records.country',
+                commentsUser: '$records.commentsUser',
                 status: '$records.status',
                 displayType: '$records.displayType',
                 category: '$records.category',
@@ -767,6 +789,37 @@ module.exports = (req, res, next) => {
                                         preview: '$$attachment.preview',
                                     },
                                 },
+                            },
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$comment.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                                imageSrc: '$$user.imageSrc',
+                                            },
+
+                                        },
+                                    },
+                                    0,
+                                ],
                             },
                         },
                     },

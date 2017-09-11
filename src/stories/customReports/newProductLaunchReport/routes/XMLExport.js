@@ -748,7 +748,7 @@ module.exports = (req, res, next) => {
                                 <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${item.distributor[currentLanguage]}</td>
-                                <td>${item.additionalComment[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage] +': '+ item.additionalComment[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}

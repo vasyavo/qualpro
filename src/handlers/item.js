@@ -1024,6 +1024,11 @@ const Item = function () {
                 date: Date.now(),
             };
 
+            body.ppt *= 1000;
+            body.pptPerCase *= 1000;
+            body.rspMin *= 1000;
+            body.rspMax *= 1000;
+
             ItemModel.findOneAndUpdate({
                 _id: id,
             }, {
@@ -1045,6 +1050,10 @@ const Item = function () {
                     if (err) {
                         return next(err);
                     }
+                    model.ppt = model.ppt ? (model.ppt / 1000) : 0;
+                    model.pptPerCase = model.pptPerCase ? (model.pptPerCase / 1000) : 0;
+                    model.rspMin = model.rspMin ? (model.rspMin / 1000) : 0;
+                    model.rspMax = model.rspMax ? (model.rspMax / 1000) : 0;
 
                     res.status(200).send(model);
                 });
