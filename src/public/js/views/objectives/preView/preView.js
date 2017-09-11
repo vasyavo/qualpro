@@ -397,6 +397,7 @@ define([
         },
 
         openForm: function () {
+            debugger;
             var self = this;
             var modelJSON = this.model.toJSON();
             var form = modelJSON.form;
@@ -461,7 +462,7 @@ define([
                         branches: branchesForVisibility,
                         location: modelJSON.location,
                         withoutBranches: withoutBranches,
-                        beforeDescription: modelJSON.description.currentLanguage,
+                        beforeDescription: modelJSON.description[App.currentUser.currentLanguage],
                         permittedToEditAfterPart: permittedToEditAfterPart
                     });
                     self.visibilityFormPreview.on('visibility-form-updated', function (vfData) {
