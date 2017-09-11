@@ -95,6 +95,7 @@ define([
         // form
         forms: 'Forms',
         form : 'form',
+        before: 'Before',
 
         // effort
         effort  : 'Effort',
@@ -109,6 +110,7 @@ define([
         },
 
         dialogTitle: 'Objectives files',
+        applyToAll: 'Apply to all',
         countOfAttachedFiles: 'Count of attached files'
     };
 

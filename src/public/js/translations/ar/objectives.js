@@ -93,6 +93,7 @@ define([
         // form
         forms: 'النماذج',
         form : 'النموذج',
+        before: '', // todo
 
         // effort
         effort        : 'الجهود',
@@ -106,6 +107,7 @@ define([
         },
 
         dialogTitle: 'ملفات الاهداف',
+        applyToAll: '', // todo
         countOfAttachedFiles: '' // todo
     };
 

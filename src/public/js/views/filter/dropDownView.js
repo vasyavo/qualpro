@@ -461,8 +461,6 @@ define([
             displayCollection = this.filteredCollection.toJSON().slice(this.start, this.end);
 
             _.map(displayCollection, function (model) {
-                model.name.currentLanguage = model.name[App.currentUser.currentLanguage];
-
                 if (selectedModelsIds.indexOf(model._id) === -1) {
                     return model;
                 }
