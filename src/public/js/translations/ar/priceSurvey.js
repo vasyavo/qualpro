@@ -30,11 +30,12 @@ define([
             value    : 'القيمة',
             employee : 'الموظف',
             options  : 'الخيارات',
-
-            saveBtn       : 'حفظ',
+            okBtn: 'موافق',
+            saveBtn: 'حفظ',
+            delete: '', // todo
+            edit: '', // todo
 
             // topBar
-
             all: ' الدراسة الاستقصائية للأسعار'
         };
         return _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);
