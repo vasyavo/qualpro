@@ -24,8 +24,8 @@ define([
         options  : 'الخيارات',
         saveBtn: 'حفظ',
         okBtn: 'موافق',
-        delete: '', // todo
-        edit: '', // todo
+        delete: 'حذف',
+        edit: 'تعديل',
 
         //top Bar
         all: ' حصة الرف'
