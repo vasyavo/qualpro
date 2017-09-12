@@ -1,6 +1,6 @@
 <div class="form-holder personnelInfo largeHeightPreview">
     <div class="title">
-        <span class="titleDescription"><%- translation.createTitle %></span>
+        <span class="titleDescription" data-translation="createTitle"><%- translation.createTitle %></span>
     </div>
     <div class="promotionForm documentForm">
         <div class="blockObjective scrollingForm">
@@ -9,14 +9,16 @@
                     <div class="table">
                         <div class="row">
                             <div class="cell alignTop">
-                                <span><%- translation.title %></span>
+                                <span data-translation="title"><%- translation.title %></span>
                             </div>
                             <div class="cell mandatory">
                                 <input type="text"
                                        id="title"
                                        class="objectivesInput"
                                        maxlength="32"
-                                       placeholder="<%- translation.titleInput %>"/>
+                                       placeholder="<%- translation.titleInput %>"
+                                       data-translation="titleInput"
+                                />
                             </div>
                         </div>
                     </div>
@@ -26,8 +28,8 @@
                 <div class="scrollable">
                     <div id="attachments" class="attachmentsBlock">
                         <div class="attachmentsHeader">
-                            <span class="attachmentsDescription fontBold mandatory"><%- translation.attachments %></span>
-                            <span id="attach-file" class="greyBtn right"><%- translation.attachFiles %></span>
+                            <span class="attachmentsDescription fontBold mandatory" data-translation="attachments"><%- translation.attachments %></span>
+                            <span id="attach-file" class="greyBtn right" data-translation="attachFiles"><%- translation.attachFiles %></span>
                         </div>
                         <div class="formBlock borderBottom objectivesPaddingBlock">
                             <div id="formThumbnail"></div>

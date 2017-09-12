@@ -1,5 +1,5 @@
 <div class="title">
-    <span class="titleDescription"><%- translation.editTitle %></span>
+    <span class="titleDescription" data-translation="editTitle"><%- translation.editTitle %></span>
 </div>
 <div class="promotionForm documentsForm">
     <div class="blockObjective scrollingForm">
@@ -8,7 +8,7 @@
                 <div class="table">
                     <div class="row">
                         <div class="cell alignTop">
-                            <span><%- translation.title %></span>
+                            <span data-translation="title"><%- translation.title %></span>
                         </div>
                         <div class="cell mandatory">
                             <input type="text"
@@ -16,7 +16,9 @@
                                    class="objectivesInput"
                                    value="<%= title %>"
                                    maxlength="32"
-                                   placeholder="<%- translation.titleInput %>"/>
+                                   placeholder="<%- translation.titleInput %>"
+                                   data-translation="titleInput"
+                            />
                         </div>
                     </div>
                 </div>

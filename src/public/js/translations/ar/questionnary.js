@@ -13,7 +13,7 @@ define([
         aboutSKUFormat   : 'فيما يتعلق برمز الهوية',
         addNewBtn        : 'أضف سلعة جديدة',
         deleteBtn        : 'حذف السلعة',
-        delete: '', // todo
+        delete           : 'حذف',
         questions        : 'الاسئلة',
         type             : 'نوع الاستطلاع',
         options          : 'خيارات',
@@ -22,15 +22,15 @@ define([
         //create Question
         enterQuestion     : {
             en: 'Ar Enter Question in English',
-            ar: 'Ar Enter Question in Arabic' // todo translation
+            ar: 'أدخل السؤال باللغة العربية'
         },
         enterTitle     : {
             en: 'Ar Enter Title in English',
-            ar: 'Ar Enter Title in Arabic' // todo translation
+            ar: 'أدخل العنوان باللغة العربية'
         },
         enterOption     : {
             en: 'Ar Enter Option to choose in English',
-            ar: 'Ar Enter Option to choose in Arabic' // todo translation
+            ar: 'أدخل الخيار للاختيار باللغة العربية'
         },
         title        : 'العنوان',
         dueDate      : 'تاريخ الاستحقاق',
@@ -51,7 +51,7 @@ define([
         okBtn             : 'موافق',
 
         //edit answer
-        editAnswerViewTitle: '', // todo
+        editAnswerViewTitle: 'تعديل اجابة السؤال',
 
         // top Bar
         all   : 'استطلاع العلالى',

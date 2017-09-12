@@ -19,9 +19,9 @@ define([
         goToBtn             : 'الذهاب الى',
         editBtn             : 'تعديل',
         displayType         : 'نوع العرض',
-        manage: '', // todo
-        productsInformation: '', // todo
-        manageProductsInformation: '', // todo
+        manage              : 'إدارة',
+        productsInformation : 'معلومات المنتجات',
+        manageProductsInformation: 'إدارة معلومات المنتجات',
 
         // list
         // create
@@ -37,7 +37,7 @@ define([
         // preview
         viewPlanogram  : 'عرض طريقة العرض',
         configurations : 'أبعاد واحجام التكوين',
-        close: '' // todo
+        close          : 'إغلاق'
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });
