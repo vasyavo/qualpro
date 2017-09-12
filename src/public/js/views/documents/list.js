@@ -8,36 +8,37 @@ define(function (require) {
 
     return Marionette.CompositeView.extend({
 
-        initialize : function (options) {
+        initialize: function (options) {
             this.translation = options.translation;
 
             BadgeStore.cleanupDocuments();
         },
 
-        className : 'thumbnailHolder scrollable',
+        className: 'thumbnailHolder scrollable',
 
-        template : function (ops) {
+        template: function (ops) {
             return _.template(Template)(ops);
         },
 
-        templateContext : function () {
+        templateContext: function () {
             return {
-                breadcrumbs : this.collection.breadcrumbs
+                breadcrumbs: this.collection.breadcrumbs,
+                translation: this.translation
             };
         },
 
-        onRender : function () {
+        onRender: function () {
             var that = this;
             var collection = this.collection;
 
-            this.$el.on('scroll', _.debounce(function (event)  {
+            this.$el.on('scroll', _.debounce(function (event) {
                 if (that.isScrollReachedBottom(event)) {
                     that.collection.getNextPage();
                 }
             }));
         },
 
-        isScrollReachedBottom : function (event) {
+        isScrollReachedBottom: function (event) {
             var target = event.target;
             var scrollTop = target.scrollTop;
             var scrollHeight = target.scrollHeight;
@@ -51,21 +52,21 @@ define(function (require) {
             return false;
         },
 
-        childViewContainer : '.items-container',
+        childViewContainer: '.items-container',
 
-        childView : ChildView,
+        childView: ChildView,
 
-        childViewOptions : function () {
+        childViewOptions: function () {
             return {
-                translation : this.translation
+                translation: this.translation
             };
         },
 
-        childViewEvents : {
-            'checked' : 'childViewChecked'
+        childViewEvents: {
+            'checked': 'childViewChecked'
         },
 
-        childViewChecked : function (child) {
+        childViewChecked: function (child) {
             var arrayOfCheckedItems = this.collection.checked;
 
             if (child.state) {
@@ -81,8 +82,8 @@ define(function (require) {
             this.collection.trigger('item:checked');
         },
 
-        collectionEvents : {
-            'sync' : 'render'
+        collectionEvents: {
+            'sync': 'render'
         }
 
     });
