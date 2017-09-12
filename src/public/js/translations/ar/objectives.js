@@ -93,6 +93,7 @@ define([
         // form
         forms: 'النماذج',
         form : 'النموذج',
+        before: 'قبل',
 
         // effort
         effort        : 'الجهود',
@@ -106,7 +107,8 @@ define([
         },
 
         dialogTitle: 'ملفات الاهداف',
-        countOfAttachedFiles: '' // todo
+        applyToAll: 'تطبيق الصورة على الجميع',
+        countOfAttachedFiles: 'عدد الملفات المرفقة'
     };
 
     return _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

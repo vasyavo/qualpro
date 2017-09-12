@@ -10,7 +10,7 @@ define([
             mid: ' منتصف',
             min: 'الأدنى',
             avg: ' متوسط ',
-            median: '', // todo
+            median: 'متوسط السعر',
 
             // header
             total   : 'المجموع الكلى',
@@ -30,11 +30,12 @@ define([
             value    : 'القيمة',
             employee : 'الموظف',
             options  : 'الخيارات',
-
-            saveBtn       : 'حفظ',
+            okBtn: 'موافق',
+            saveBtn: 'حفظ',
+            delete: 'حذف',
+            edit: 'تعديل',
 
             // topBar
-
             all: ' الدراسة الاستقصائية للأسعار'
         };
         return _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);

@@ -25,11 +25,11 @@ define([
         noTranslation: ' لا يوجد ترجمة',
         files        : 'الملفات',
         all          : 'استمارة الإنجازات',
-        goToBtn : '', //todo
+        goToBtn : 'الذهاب الى',
         edit         : 'تعديل بيانات',
-        delete: '', // todo
-        additionalComment: '', // todo
-        achievementFormEditTitle: '', // todo
+        delete: 'حذف',
+        additionalComment: 'تعليق إضافي',
+        achievementFormEditTitle: 'تعديل نموذج الانجازات',
     };
     return _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
 });

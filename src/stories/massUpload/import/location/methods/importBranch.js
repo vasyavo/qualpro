@@ -101,10 +101,6 @@ function* createOrUpdate(payload) {
         throw new Error(`Validation failed, Name(EN) is required.`);
     }
 
-    if (!arName) {
-        throw new Error(`Validation failed, Name(AR) is required.`);
-    }
-
     if (!subRegion) {
         throw new Error(`Validation failed, Sub-Region is required.`);
     }
@@ -186,7 +182,7 @@ function* createOrUpdate(payload) {
     };
 
     try {
-        yield BranchModel.update(query, modify, opt);
+        yield BranchModel.findOneAndUpdate(query, modify, opt);
     } catch (ex) {
         if(ex.code === 11000){
             throw new Error('Branch duplicates some existing branch in the database');

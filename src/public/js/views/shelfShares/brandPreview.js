@@ -138,7 +138,7 @@ define([
                 showCancelBtn: false,
                 buttons      : {
                     ok: {
-                        text : 'OK',
+                        text : this.translation.okBtn,
                         class: 'btn',
                         click: function () {
                             $(this).dialog('close').dialog('destroy').remove();

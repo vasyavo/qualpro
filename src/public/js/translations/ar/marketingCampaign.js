@@ -22,6 +22,7 @@ define([
         publishBtn         : 'نشر',
         cancelBtn          : ' إلغاء',
         attachments        : 'الملفات المرفقة',
+        attachTitle        : '', // todo
         attachFiles        : ' إرفاق ملفات',
         description        : 'الوصف',
         selectTitle        : ' اختر عنوان النص',

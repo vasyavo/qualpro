@@ -350,7 +350,7 @@ define([
                 }
             });
             this.files = new FileCollection(commentFiles);
-debugger;
+
             $formString.html(this.commentViewTemplate({
                 collection : jsonCollection,
                 translation: this.translation

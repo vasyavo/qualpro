@@ -14,30 +14,31 @@ define([
         action     : 'Action',
         disable    : 'Disable',
         unDisable  : 'Enable',
-        delete : 'Delete',
+        delete     : 'Delete',
         copyButton : 'Copy',
-        cutButton : 'Cut',
-        pasteButton : 'Paste',
+        cutButton  : 'Cut',
+        pasteButton: 'Paste',
+        root       : 'Root',
         // list
 
         // create
-        createTitle : 'Create Document',
-        createFolderTitle : 'Create Folder',
-        titleInput  : 'Input title',
-        title       : 'Title',
-        createBtn   : 'Create',
-        cancelBtn   : 'Cancel',
-        attachments : 'Attachment',
-        attachFiles : 'Attach File',
+        createTitle      : 'Create Document',
+        createFolderTitle: 'Create Folder',
+        titleInput       : 'Input title',
+        title            : 'Title',
+        createBtn        : 'Create',
+        cancelBtn        : 'Cancel',
+        attachments      : 'Attachment',
+        attachFiles      : 'Attach File',
         // edit
-        editTitle   : 'Edit Document',
-        saveBtn     : 'Save',
+        editTitle        : 'Edit Document',
+        saveBtn          : 'Save',
         // preview
-        okBtn       : 'Ok',
-        preViewTitle: 'View Document',
-        goToBtn     : 'Go to',
-        attach      : 'Attach',
-        documentFile: 'Document Files'
+        okBtn            : 'Ok',
+        preViewTitle     : 'View Document',
+        goToBtn          : 'Go to',
+        attach           : 'Attach',
+        documentFile     : 'Document Files'
     };
 
     return _.extend({}, paginationTranslation, filtersTranslation, documentsTranslation);

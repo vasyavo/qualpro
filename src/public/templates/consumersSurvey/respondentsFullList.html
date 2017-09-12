@@ -2,7 +2,7 @@
     <div class="questionsUser"></div>
     <div class="questionsDescription flexGrow">
         <div class="fontBold"><%- answer.customer.name %></div>
-        <div class="fontGray fontSmall"><%- answer.customer.nationality.name[App.currentUser.currentLanguage] %></div>
+        <div class="fontGray fontSmall"><%- answer.customer.nationality.name[currentLanguage] || answer.customer.nationality.name[anotherLanguage] %></div>
         <div class="fontGray fontSmall"><%- answer.customer.gender %></div>
         <div class="fontGray textEllipsis hoverFullText"><%= translation.location %>: <%= answer.location %>
         </div>

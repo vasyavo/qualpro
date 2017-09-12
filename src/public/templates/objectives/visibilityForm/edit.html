@@ -4,11 +4,11 @@
     </div>
     <div class="visibilityContainerWrap scrollable">
         <div class="beforeTitle fontBold fontDefault before--title-container borderBottom">
-            BEFORE
+            <%- translation.before %>
         </div>
         <div class="apply-to-all">
             <input type="checkbox" id="apply-to-all">
-            <label for="apply-to-all">Apply to all</label>
+            <label for="apply-to-all"><%- translation.applyToAll %></label>
         </div>
         <div class="banner_inner bannerFullWidth borderBottom">
             <div class=scrollable">
@@ -19,7 +19,7 @@
                                 <span class="fontDefault"><%- outlet.name %> -> <%- branch.name %></span>
                             </div>
                             <div class="banner_textBlock full-width">
-                                <p class="uploadDescription fontDefault">Description</p>
+                                <p class="uploadDescription fontDefault"><%- translation.description %></p>
                                 <div class="uploadValue fontMedium objectivesDescValue hoverFullText"><%= description %></div>
                             </div>
                             <div class="attachments-<%- branch._id %> attachments-container" data-branch-id="<%- branch._id %>">

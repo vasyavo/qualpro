@@ -1,18 +1,18 @@
 <div class="respondentsItemWrap borderBottom">
     <div class="respondentsItem">
-        <div class="itemTitle"><%= translation.type %>: <%- question.type && question.type.name ? question.type.name.currentLanguage : question.type %></div>
-        <div><%= question.title.currentLanguage %></div>
+        <div class="itemTitle"><%= translation.type %>: <%- question.type && question.type.name ? question.type.name[currentLanguage] : question.type %></div>
+        <div><%= question.title[currentLanguage] || question.title[anotherLanguage] %></div>
     </div>
     <div class="respondentsItem">
         <div class="itemTitle"><%= translation.options %></div>
         <ol class="respondentsList">
             <% question.options.forEach(function(option, index){ %>
-                <li class="<%= answerIndexes.indexOf(++index) !== -1 ? 'active' : '' %>"><%= option.currentLanguage %></li>
+                <li class="<%= answerIndexes.indexOf(++index) !== -1 ? 'active' : '' %>"><%= option[currentLanguage] || option[anotherLanguage] %></li>
             <% }); %>
         </ol>
     </div>
     <div class="<%= allowEdit ? '' : 'hidden' %>">
         <button class="edit-answer" data-question-id="<%- question._id %>" data-customer-name="<%- customerName %>"><%- translation.editBtn %></button>
-        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.delete %></button>
+        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.deleteBtn %></button>
     </div>
 </div>

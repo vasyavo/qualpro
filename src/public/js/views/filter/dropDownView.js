@@ -461,8 +461,6 @@ define([
             displayCollection = this.filteredCollection.toJSON().slice(this.start, this.end);
 
             _.map(displayCollection, function (model) {
-                model.name.currentLanguage = model.name[App.currentUser.currentLanguage];
-
                 if (selectedModelsIds.indexOf(model._id) === -1) {
                     return model;
                 }
@@ -483,13 +481,18 @@ define([
 
         render: function () {
             var $curEl = this.$el;
+            var selectAllText = {
+                en: 'Select all',
+                ar: '',
+            };
 
             $curEl.html(this.template({
                 displayText : this.displayText,
                 forPosition : this.forPosition,
                 contentType : this.contentType,
                 dataProperty: this.dataProperty,
-                showSelectAll : this.showSelectAll
+                showSelectAll : this.showSelectAll,
+                selectAllText: selectAllText[App.currentUser.currentLanguage],
             }));
 
             if (this.selectedValuesIds.length) {

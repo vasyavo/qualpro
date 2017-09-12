@@ -5,7 +5,7 @@ define([
     ],
     function (_, paginationTranslation, filtersTranslation) {
         var translation = {
-            competitorPromotionEditTitle : '', // todo ar
+            competitorPromotionEditTitle : 'تعديل بيانات  ترويج المنافسين',
             all         : ' أنشطة ترويج المنافسين',
             title       : 'تقرير تقيم أنشطة ترويج المنافسين',
             category    : 'الفئة',
@@ -30,14 +30,14 @@ define([
             files       : 'الملفات',
             attach      : 'ارفاق',
             send        : 'ارسال',
-            saveBtn : '', // todo ar
+            saveBtn     : 'حفظ',
             location    : 'الموقع',
             okBtn       : 'موافق',
-            edit     : 'تعديل بيانات',
-            delete: '', // todo
+            edit        : 'تعديل بيانات',
+            delete      : 'حذف',
             dialogTitle : ' التعليقات والمرفقات',
-            goToBtn : '', //todo ar
-            weight : '', // todo ar
+            goToBtn     :  'الذهاب الى',
+            weight      : 'التغليف',
         };
 
         return _.extend({}, paginationTranslation, filtersTranslation, translation);

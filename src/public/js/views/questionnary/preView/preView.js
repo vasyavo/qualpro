@@ -469,6 +469,8 @@ define([
 
         renderRespondentsQuestions: function () {
             var self = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
             var currentUserAccessRole = App.currentUser.accessRole.level;
             var $respondentsList = this.$el.find('#questionFullList');
             var branches = self.answersCollection.branches;
@@ -497,6 +499,8 @@ define([
                     personnelId: personnelId,
                     answerId: respondentAnswer._id,
                     allowEdit: false,
+                    currentLanguage,
+                    anotherLanguage,
                 };
 
                 var fullAnswerTemplateOptions = {
@@ -506,6 +510,8 @@ define([
                     personnelId: personnelId,
                     answerId: respondentAnswer._id,
                     allowEdit: false,
+                    currentLanguage,
+                    anotherLanguage,
                 };
 
                 if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -603,10 +609,19 @@ define([
             var respondentList = '';
             var questions = this.model.get('questions');
             var question = _.findWhere(questions, {_id: self.answersCollection.questionId});
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            var answerClass = {
+                en: 'answer',
+                ar: 'answerAr',
+            };
             var templateOptions = {
                 question   : question,
                 translation: self.translation,
                 allowEdit: false,
+                fullAnswerLabelClass: answerClass[currentLanguage],
+                currentLanguage: currentLanguage,
+                anotherLanguage: anotherLanguage,
             };
 
             if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -654,11 +669,15 @@ define([
                 }
             });
             $curEl = this.$el;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
             jsonModel.questions.forEach(function (question) {
                 questionList += self.questionListTemplate({
                     question   : question,
-                    translation: self.translation
+                    translation: self.translation,
+                    currentLanguage: currentLanguage,
+                    anotherLanguage: anotherLanguage,
                 });
             });
 
