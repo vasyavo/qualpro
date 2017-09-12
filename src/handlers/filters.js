@@ -5648,6 +5648,10 @@ const Filters = function () {
                         });
                     }
 
+                    $match.$or.push({
+                        'createdBy.user': personnel._id
+                    });
+
                     pipeLine.push({$match});
 
                     if (filter.personnel) {
