@@ -151,7 +151,7 @@ module.exports = function* exporter() {
         el.country = el.country.join(', ');
         el.region = el.region.join(', ');
         el.subRegion = el.subRegion.join(', ');
-        el.branch = el.branch.join(', ');
+        el.branch = el.branch.join('|');
 
         return el;
     });
