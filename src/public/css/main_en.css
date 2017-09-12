@@ -8718,12 +8718,12 @@ table:not(.ui-datepicker-calendar) thead tr td {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.productLaunchList .textContainer .newBrand, {
+.productLaunchList .textContainer .newBrand,
 .productLaunchList .textContainer .newBrandAr {
   display: inline-block;
   padding-right: 35px;
 }
-.productLaunchList .textContainer .newBrand:after, {
+.productLaunchList .textContainer .newBrand:after,
 .productLaunchList .textContainer .newBrandAr:after {
   top: 0;
   right: 0;
