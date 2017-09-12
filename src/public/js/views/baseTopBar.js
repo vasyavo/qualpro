@@ -430,12 +430,6 @@ define([
             this.$actionButton = $thisEl.find('.actionBtn');
             this.$editButton = $thisEl.find('#editBtn');
 
-            /* $("html").click(function (e) {
-             if (!$(e.target).hasClass('filterElement')) {
-             thisEl.find('.dropDownContent').toggleClass('showActionDropDown');
-             }
-             }); */
-
             paginationContainer = $thisEl.find('#paginationHolder');
             paginationContainer.html(this.paginationTemplate({translation: this.translation}));
 

@@ -1,7 +1,7 @@
 define([
     'Underscore',
-    'translations/en/pagination',
-    'translations/en/filters'
+    'translations/ar/pagination',
+    'translations/ar/filters'
 ], function (_, paginationTranslation, filtersTranslation) {
     var translation = {
         // list view
