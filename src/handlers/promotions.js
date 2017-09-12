@@ -73,8 +73,7 @@ var Promotions = function () {
             }
         } else {
             const $match = {
-                $or: [
-                ],
+                $or: [],
             };
 
             // regarding QP-1411 Reporting: Al Alali Promotion Evaluation -> Expired items doesn't displayed for MA
@@ -85,6 +84,15 @@ var Promotions = function () {
                     },
                     status          : {
                         $ne: 'draft',
+                    },
+                });
+            } else {
+                $match.$or.push({
+                    'createdBy.user': {
+                        $ne: personnel._id,
+                    },
+                    status          : {
+                        $nin: ['draft', 'expired'],
                     },
                 });
             }

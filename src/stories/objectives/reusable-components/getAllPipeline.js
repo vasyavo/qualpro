@@ -1,6 +1,8 @@
 const ACL_CONSTANTS = require('./../../../constants/aclRolesNames');
 const OTHER_CONSTANTS = require('./../../../public/js/constants/otherConstants');
 const _ = require('lodash');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
@@ -28,7 +30,9 @@ module.exports = (options) => {
 
         locationKeys.forEach(function (key) {
             if (locations[key] && locations[key].length) {
-                matchForLocation[key] = {$in: locations[key]};
+                const locationArray = locations[key].map((id) => ObjectId(id));
+
+                matchForLocation[key] = {$in: locationArray};
             }
         });
 

@@ -10,7 +10,7 @@ define([
             mid: ' منتصف',
             min: 'الأدنى',
             avg: ' متوسط ',
-            median: '', // todo
+            median: 'متوسط السعر',
 
             // header
             total   : 'المجموع الكلى',
@@ -32,8 +32,8 @@ define([
             options  : 'الخيارات',
             okBtn: 'موافق',
             saveBtn: 'حفظ',
-            delete: '', // todo
-            edit: '', // todo
+            delete: 'حذف',
+            edit: 'تعديل',
 
             // topBar
             all: ' الدراسة الاستقصائية للأسعار'

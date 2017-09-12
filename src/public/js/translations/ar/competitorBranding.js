@@ -30,11 +30,11 @@ define([
         skipped      : 'تخطي',
         commentText  : 'التعليق',
         edit         : 'تعديل بيانات',
-        delete: '', // todo
+        delete       : 'حذف',
         saveBtn      : 'حفظ',
 
         // edit
-        competitorBrandingEditTitle: '', // todo ar
+        competitorBrandingEditTitle: 'تعديل بيانات  العلامات التجارية وتقارير العرض للمنافسين',
 
         // topBar
         all        : ' العلامات التجارية وتقارير العرض للمنافسين',
