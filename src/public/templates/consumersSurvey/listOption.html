@@ -2,7 +2,6 @@
 <% var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en'; %>
 
 <li class="option">
-    <!--<input class="js_optionInput" type="text" value="<%= option || '' %>">-->
     <div class="cell options">
         <div>
             <input type="text"
@@ -26,7 +25,7 @@
                    placeholder="<%= translation.enterOption.ar %>"
                    maxlength="56"
                    dir="rtl"
-            >
+            />
         </div>
     </div>
     <span style="cursor: pointer" class="removeOption"></span>
