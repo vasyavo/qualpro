@@ -37,7 +37,7 @@ define([
             delete: '', // todo
             dialogTitle : ' التعليقات والمرفقات',
             goToBtn : '', //todo ar
-            weight : '', // todo ar
+            weight : 'التغليف', // todo ar
         };
 
         return _.extend({}, paginationTranslation, filtersTranslation, translation);
