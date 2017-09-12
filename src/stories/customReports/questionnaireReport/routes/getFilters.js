@@ -410,22 +410,6 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (scopeFilter[CONTENT_TYPES.REGION]) {
-            pipeline.push({
-                $addFields: {
-                    region: {
-                        $filter: {
-                            input: '$region',
-                            as: 'region',
-                            cond: {
-                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.REGION]],
-                            },
-                        },
-                    },
-                },
-            });
-        }
-
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
             pipeline.push(...[
                 {
@@ -618,22 +602,6 @@ module.exports = (req, res, next) => {
             }
 
             pipeline.push({ $addFields });
-        }
-
-        if (scopeFilter[CONTENT_TYPES.SUBREGION]) {
-            pipeline.push({
-                $addFields: {
-                    subRegion: {
-                        $filter: {
-                            input: '$subRegion',
-                            as: 'region',
-                            cond: {
-                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.SUBREGION]],
-                            },
-                        },
-                    },
-                },
-            });
         }
 
         if (scopeFilter[CONTENT_TYPES.SUBREGION]) {
@@ -1196,7 +1164,6 @@ module.exports = (req, res, next) => {
             },
         ]);
 
-
         if (_.get(queryFilter, 'questionnaire.length')) {
             pipeline.push(...[
                 {
@@ -1228,7 +1195,6 @@ module.exports = (req, res, next) => {
                 },
             ]);
         }
-
 
         if (_.get(queryFilter, 'status.length')) {
             pipeline.push(...[
@@ -1267,7 +1233,6 @@ module.exports = (req, res, next) => {
                 },
             ]);
         }
-
 
         pipeline.push(...[
             {
