@@ -405,6 +405,13 @@ module.exports = (req, res, next) => {
                 },
                 value: 'publisherPosition',
             },
+            {
+                name: {
+                    en: 'Brand',
+                    ar: '',
+                },
+                value: 'brand',
+            },
         ];
 
         res.status(200).send(response);

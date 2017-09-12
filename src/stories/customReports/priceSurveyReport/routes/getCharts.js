@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.BRAND,
         ];
         const pipeline = [];
 
@@ -136,6 +136,20 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+
+        pipeline.push({
+            $addFields: {
+                items: {
+                    $filter: {
+                        input: '$items',
+                        as: 'item',
+                        cond: {
+                            $in: ['$$item.brand', queryFilter[CONTENT_TYPES.BRAND]],
+                        },
+                    },
+                },
+            },
+        });
 
         pipeline.push({
             $lookup: {
