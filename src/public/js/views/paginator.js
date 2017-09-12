@@ -784,8 +784,8 @@ define([
                 }
 
                 App.showPopUp({
-                    contentType: this.contentType,
-                    action     : action,
+                    contentType: self.contentType,
+                    action: action,
                     saveCb     : function () {
                         self.archiveItems_(e, idsToArchive);
                         $(this).dialog('destroy').remove();
