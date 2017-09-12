@@ -62,7 +62,8 @@ define(function(require) {
             $holder.empty();
             $holder.html(this.template({
                 collection : jsonCollection,
-                translation: this.translation
+                translation: this.translation,
+                newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
             }));
         },
 
@@ -77,7 +78,8 @@ define(function(require) {
             $holder = $currentEl.find('.reportingWrap');
             $holder.append(this.template({
                 collection : jsonCollection,
-                translation: this.translation
+                translation: this.translation,
+                newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
             }));
 
             return this;
