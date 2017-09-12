@@ -1,13 +1,13 @@
 <div id="respondent-answer-container-<%- answerId %>" class="respondentsItemWrap borderBottom">
     <div class="respondentsItem">
-        <div class="itemTitle"><%= translation.type %>: <%= question.type.name.currentLanguage %></div>
-        <div><%= question.title.currentLanguage %></div>
+        <div class="itemTitle"><%= translation.type %>: <%= question.type.name[currentLanguage] || question.type.name[anotherLanguage] %></div>
+        <div><%= question.title[currentLanguage] || question.title[anotherLanguage] %></div>
     </div>
     <div class="respondentsItem">
         <div class="itemTitle"><%= translation.options %></div>
         <ol class="respondentsList">
             <% question.options.forEach(function(option, index){ %>
-                <li class="<%= answerIndexes.indexOf(++index) !== -1 ? 'active' : '' %>"><%= option.currentLanguage %></li>
+                <li class="<%= answerIndexes.indexOf(++index) !== -1 ? 'active' : '' %>"><%= option[currentLanguage] || option[anotherLanguage] %></li>
             <% }); %>
         </ol>
     </div>
