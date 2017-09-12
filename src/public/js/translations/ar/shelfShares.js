@@ -22,8 +22,9 @@ define([
         value    : 'القيمة',
         employee : 'الموظف',
         options  : 'الخيارات',
-
-        saveBtn       : 'حفظ',
+        saveBtn: 'حفظ',
+        delete: '', // todo
+        edit: '', // todo
 
         //top Bar
         all: ' حصة الرف'

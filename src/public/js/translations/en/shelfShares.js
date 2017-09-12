@@ -23,12 +23,12 @@ define([
             value    : 'Value',
             employee : 'Employee',
             options  : 'Options',
-
             saveBtn  : 'Save',
+            delete: 'Delete',
+            edit: 'Edit',
 
             // top Bar
-            all: 'Shelf shares'
-
+            all: 'Shelf shares',
         };
         return _.extend({}, paginationTranslation, filtersTranslation, shelfSharesTranslation);
     });
