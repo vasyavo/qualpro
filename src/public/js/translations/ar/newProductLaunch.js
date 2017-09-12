@@ -36,8 +36,8 @@ define([
 
         goToBtn      : 'الذهاب الى',
         edit         : 'تعديل بيانات',
-        delete: '', // todo
-        newProductLaunchEditTitle : '', // todo
+        delete       : 'حذف',
+        newProductLaunchEditTitle : 'تعديل بيانات طرح منتج جديد',
     };
     return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
 });

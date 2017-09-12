@@ -5,7 +5,7 @@ define([
     ],
     function (_, paginationTranslation, filtersTranslation) {
         var translation = {
-            competitorPromotionEditTitle : '', // todo ar
+            competitorPromotionEditTitle : 'تعديل بيانات  ترويج المنافسين',
             all         : ' أنشطة ترويج المنافسين',
             title       : 'تقرير تقيم أنشطة ترويج المنافسين',
             category    : 'الفئة',
@@ -34,7 +34,7 @@ define([
             location    : 'الموقع',
             okBtn       : 'موافق',
             edit        : 'تعديل بيانات',
-            delete      : '', // todo
+            delete      : 'حذف',
             dialogTitle : ' التعليقات والمرفقات',
             goToBtn     :  'الذهاب الى',
             weight      : 'التغليف',

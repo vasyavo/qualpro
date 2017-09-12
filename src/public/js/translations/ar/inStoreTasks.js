@@ -65,7 +65,7 @@ define([
         form       : 'النمازج',
         goToBtn    : 'الذهاب الى',
         dialogTitle: ' ملفات المهام في المتاجر',
-        countOfAttachedFiles: '' // todo
+        countOfAttachedFiles: 'عدد الملفات المرفقة'
     };
 
     return _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

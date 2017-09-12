@@ -1,17 +1,17 @@
 <div id="respondent-answer-container-<%- answerId %>" class="respondentsItemWrap borderBottom">
     <div class="respondentsItem">
-        <div class="itemTitle"><%= translation.type %>: <%= question.type.name.currentLanguage %></div>
-        <div><%= question.title.currentLanguage %>
+        <div class="itemTitle"><%= translation.type %>: <%= question.type.name[currentLanguage] || question.type.name[anotherLanguage] %></div>
+        <div><%= question.title[currentLanguage] || question.title[anotherLanguage] %>
         </div>
     </div>
     <div class="respondentsItem">
-        <div class="itemTitle"><%= question.type.name.currentLanguage %></div>
+        <div class="itemTitle"><%= question.type.name[currentLanguage] || question.type.name[anotherLanguage] %></div>
         <div id="respondent-full-answer-<%- answerId %>" class="respondentsInfo">
-            <%= answerText.currentLanguage %>
+            <%= answerText[currentLanguage] || answerText[anotherLanguage] %>
         </div>
     </div>
     <div class="<%= allowEdit ? '' : 'hidden' %>">
         <button class="edit-answer" data-question-id="<%- question._id %>" data-personnel-id="<%- personnelId %>" data-answer-id="<%- answerId %>"><%- translation.editBtn %></button>
-        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.delete %></button>
+        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.deleteBtn %></button>
     </div>
 </div>

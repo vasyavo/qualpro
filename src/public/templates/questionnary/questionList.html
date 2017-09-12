@@ -1,6 +1,6 @@
 <div class="questionsContainerItem" data-id="<%= question._id %>">
-    <div class="questionsType fontSmall fontGray"><%= translation.type%>: <%= question.type.name.currentLanguage %></div>
+    <div class="questionsType fontSmall fontGray"><%= translation.type %>: <%= question.type.name[currentLanguage] || question.type.name[anotherLanguage] %></div>
     <div class="questionsItem">
-        <%= question.title.currentLanguage %>
+        <%= question.title[currentLanguage] || question.title[anotherLanguage] %>
     </div>
 </div>

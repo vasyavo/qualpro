@@ -13,7 +13,7 @@ define([
         aboutSKUFormat   : 'SKU حول',
         addNewBtn        : 'أضف سلعة جديدة',
         deleteBtn        : 'حذف السلعة',
-        delete: '', // todo
+        delete           : 'حذف',
         questions        : ' استطلاعات',
         type             : ' نوع السؤال',
         options          : 'الخيارات',
@@ -51,7 +51,7 @@ define([
         okBtn             : 'موافق',
 
         //edit answer
-        editAnswerViewTitle: '', // todo
+        editAnswerViewTitle: 'تعديل اجابة السؤال',
 
         // top Bar
         all   : 'استطلاع العملاء الخاص بالعلالي',

@@ -342,6 +342,8 @@ define([
         renderFullRespondentsList: function () {
             var self = this;
             var $curEl = this.$el;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
             var answers = self.answersCollection.getAnswerFromPersonnels();
             var $respondentsFullList = $curEl.find('#respondentsFullList');
             var respondentsFullListTemplate = '';
@@ -356,7 +358,9 @@ define([
                 self.$el.find('#allRespondentsCount').html(answers.length);
                 respondentsFullListTemplate += self.respondentsFullListTemplate({
                     answer     : answer,
-                    translation: self.translation
+                    translation: self.translation,
+                    currentLanguage: currentLanguage,
+                    anotherLanguage: anotherLanguage,
                 });
             });
 
@@ -385,6 +389,8 @@ define([
 
         renderRespondentsQuestions: function () {
             var self = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
             var currentUserAccessRole = App.currentUser.accessRole.level;
             var $respondentsList = this.$el.find('#questionFullList');
             var answers = this.answersCollection.getSelected({
@@ -413,6 +419,8 @@ define([
                     customerName: respondentAnswer.customer.name,
                     answerId: respondentAnswer._id,
                     allowEdit: false,
+                    currentLanguage,
+                    anotherLanguage,
                 };
 
                 var fullAnswerTemplateOptions = {
@@ -422,6 +430,8 @@ define([
                     answerId: respondentAnswer._id,
                     customerName: respondentAnswer.customer.name,
                     allowEdit: false,
+                    currentLanguage,
+                    anotherLanguage,
                 };
 
                 var npsAnswerTemplateOptions = {
@@ -431,6 +441,8 @@ define([
                     answerId: respondentAnswer._id,
                     customerName: respondentAnswer.customer.name,
                     allowEdit: false,
+                    currentLanguage,
+                    anotherLanguage,
                 };
 
                 if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -525,6 +537,8 @@ define([
 
         renderRespondents: function () {
             var self = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
             var currentUserAccessRole = App.currentUser.accessRole.level;
             var $respondentsList = this.$el.find('#respondentsList');
             var answers = this.answersCollection.getSelected({modelKey: 'selected'});
@@ -535,6 +549,8 @@ define([
                 question   : question,
                 translation: self.translation,
                 allowEdit: false,
+                currentLanguage: currentLanguage,
+                anotherLanguage: anotherLanguage,
             };
 
             if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -582,11 +598,15 @@ define([
                 }
             });
             $curEl = this.$el;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
             jsonModel.questions.forEach(function (question) {
                 questionList += self.questionListTemplate({
                     question   : question,
-                    translation: self.translation
+                    translation: self.translation,
+                    currentLanguage: currentLanguage,
+                    anotherLanguage: anotherLanguage,
                 });
             });
 

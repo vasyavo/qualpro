@@ -137,19 +137,21 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $addFields: {
-                items: {
-                    $filter: {
-                        input: '$items',
-                        as: 'item',
-                        cond: {
-                            $in: ['$$item.brand', queryFilter[CONTENT_TYPES.BRAND]],
+        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
+            pipeline.push({
+                $addFields: {
+                    items: {
+                        $filter: {
+                            input: '$items',
+                            as: 'item',
+                            cond: {
+                                $in: ['$$item.brand', queryFilter[CONTENT_TYPES.BRAND]],
+                            },
                         },
                     },
                 },
-            },
-        });
+            });
+        }
 
         pipeline.push({
             $lookup: {
