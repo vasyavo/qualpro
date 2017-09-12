@@ -23,6 +23,7 @@ define([
         employee : 'الموظف',
         options  : 'الخيارات',
         saveBtn: 'حفظ',
+        okBtn: 'موافق',
         delete: '', // todo
         edit: '', // todo
 

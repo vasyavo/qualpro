@@ -24,6 +24,7 @@ define([
             employee : 'Employee',
             options  : 'Options',
             saveBtn  : 'Save',
+            okBtn: 'Ok',
             delete: 'Delete',
             edit: 'Edit',
 
