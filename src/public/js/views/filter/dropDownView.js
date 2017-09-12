@@ -481,13 +481,18 @@ define([
 
         render: function () {
             var $curEl = this.$el;
+            var selectAllText = {
+                en: 'Select all',
+                ar: '',
+            };
 
             $curEl.html(this.template({
                 displayText : this.displayText,
                 forPosition : this.forPosition,
                 contentType : this.contentType,
                 dataProperty: this.dataProperty,
-                showSelectAll : this.showSelectAll
+                showSelectAll : this.showSelectAll,
+                selectAllText: selectAllText[App.currentUser.currentLanguage],
             }));
 
             if (this.selectedValuesIds.length) {

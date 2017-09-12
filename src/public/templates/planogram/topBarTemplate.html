@@ -24,17 +24,17 @@
     <% if (((level <=2) || ( (level >= 8) && (level <= 9)))  && App.currentUser.workAccess ) { %>
     <span id="createBtn" class="createBtn" data-translation="newPlanogram"><%- translation.newPlanogram %></span>
     <div class="actionHolder action-manage-btn">
-        <span id="manage-block" class="dropDown downArrow triUp"><%- translation.manage %></span>
+        <span id="manage-block" class="dropDown downArrow triUp" data-translation="manage"><%- translation.manage %></span>
         <ul id="manage-dropdown" class="dropDownContent">
-            <li id="manageBtn" class="editBtn"><%- translation.configurations %></li>
-            <li id="namage-products" class="editBtn"><%- translation.productsInformation %></li>
+            <li id="manageBtn" class="editBtn" data-translation="configurations"><%- translation.configurations %></li>
+            <li id="namage-products" class="editBtn" data-translation="productsInformation"><%- translation.productsInformation %></li>
         </ul>
     </div>
 
     <% if (viewType === 'thumbnails') { %>
     <div class="checkboxArea">
         <input type="checkbox" id="checkAll" class="btnCustomCheckbox"/>
-        <label for="checkAll" class="btnCheckboxLabel" data-translation="selectAll"><%= translation.selectAll%></label>
+        <label for="checkAll" class="btnCheckboxLabel" data-translation="selectAll"><%- translation.selectAll %></label>
     </div>
     <% } %>
 

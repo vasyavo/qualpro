@@ -33,7 +33,7 @@ define([
         delete: '', // todo
 
         // edit
-        saveBtn: '', // todo
+        saveBtn      : 'حفظ',
         brandingAndMonthlyDisplayEditTitle: '', // todo
 
         // topBar
