@@ -30,14 +30,14 @@ define([
             files       : 'الملفات',
             attach      : 'ارفاق',
             send        : 'ارسال',
-            saveBtn : '', // todo ar
+            saveBtn     : 'حفظ',
             location    : 'الموقع',
             okBtn       : 'موافق',
-            edit     : 'تعديل بيانات',
-            delete: '', // todo
+            edit        : 'تعديل بيانات',
+            delete      : '', // todo
             dialogTitle : ' التعليقات والمرفقات',
-            goToBtn : '', //todo ar
-            weight : 'التغليف', // todo ar
+            goToBtn     :  'الذهاب الى',
+            weight      : 'التغليف',
         };
 
         return _.extend({}, paginationTranslation, filtersTranslation, translation);

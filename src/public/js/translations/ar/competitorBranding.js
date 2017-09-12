@@ -31,7 +31,7 @@ define([
         commentText  : 'التعليق',
         edit         : 'تعديل بيانات',
         delete: '', // todo
-        saveBtn : '', // todo ar
+        saveBtn      : 'حفظ',
 
         // edit
         competitorBrandingEditTitle: '', // todo ar
@@ -40,7 +40,7 @@ define([
         all        : ' العلامات التجارية وتقارير العرض للمنافسين',
         okBtn      : 'موافق',
         dialogTitle: ' التعليقات والمرفقات',
-        goToBtn : '' //todo
+        goToBtn    : 'الذهاب الى',
 
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
