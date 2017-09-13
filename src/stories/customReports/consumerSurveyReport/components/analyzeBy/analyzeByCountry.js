@@ -1,8 +1,8 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $group: {
-            _id: '$questionnaryId',
-            country: { $addToSet: '$region.parent' },
+        $project: {
+            _id: false,
+            country: 1,
         },
     });
 
@@ -28,6 +28,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $project: {
+            _id: 1,
             count: 1,
             country: {
                 $let: {
@@ -45,7 +46,7 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'country.name.en': 1,
+            'country.name': 1,
         },
     });
 
@@ -54,20 +55,11 @@ module.exports = (pipeline) => {
             _id: null,
             data: {
                 $push: {
-                    _id: '$country._id',
-                    name: '$country.name',
-                    count: '$count',
                     country: '$country',
+                    count: '$count',
                 },
             },
-            labels: { $push: '$country.name' },
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            datasets: [{ data: '$data' }],
-            labels: 1,
+            labels: { $push: '$country' },
         },
     });
 };
