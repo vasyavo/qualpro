@@ -29,13 +29,13 @@ define([
         noTranslation: ' لا يوجد ترجمة ',
         skipped      : 'تخطي',
         commentText  : 'التعليق',
-        missedData   : '', // todo
+        missedData   : 'البيانات المفقودة',
         edit         : 'تعديل بيانات',
         delete: 'حذف',
 
         // edit
         saveBtn: 'حفظ',
-        brandingAndMonthlyDisplayEditTitle: '', // todo
+        brandingAndMonthlyDisplayEditTitle: 'تعديل العلامات التجارية وتقارير العرض',
 
         // topBar
         all: ' العلامات التجارية وتقارير العرض للمنافسين',
