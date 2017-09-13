@@ -57,7 +57,7 @@ define([
             branch       : []
         },
 
-        fileForVFWithoutBranches : {},
+        fileForVFWithoutBranches: {},
 
         events: {
             'click #attachFile'          : 'showAttachDialog',
@@ -88,22 +88,22 @@ define([
 
             var assigne = this.model.get('assignedTo')[0];
 
-            this.assigneWithoutBranches = !assigne.branch.length;
+            this.assigneWithoutBranches = assigne && assigne.branch && !assigne.branch.length;
             this.locations.location = this.model.get('location');
 
             var branches = this.model.get('branch') || [];
             var outlets = this.model.get('outlet') || [];
             this.outletsForVisibility = _.map(outlets, function (outlet) {
                 let result = {
-                    name : outlet.name[self.currentLanguage],
-                    _id : outlet._id,
-                    branches : []
+                    name    : outlet.name[self.currentLanguage],
+                    _id     : outlet._id,
+                    branches: []
                 };
 
                 branches.map((branch) => {
                     if (outlet._id === branch.outlet) {
                         result.branches.push({
-                            name : branch.name[self.currentLanguage],
+                            name: branch.name[self.currentLanguage],
                             _id : branch._id
                         });
                     }
@@ -231,12 +231,12 @@ define([
             if (contentType === 'visibility' && modelJSON.createdBy.user._id === App.currentUser._id) {
                 function showVF() {
                     self.editVisibilityFormView = new VisibilityFromEditView({
-                        translation: self.translation,
-                        description: description[self.currentLanguage] || description[self.anotherLanguage] || '',
+                        translation    : self.translation,
+                        description    : description[self.currentLanguage] || description[self.anotherLanguage] || '',
                         locationString : self.locations.location,
-                        outlets: self.outletsForVisibility,
+                        outlets        : self.outletsForVisibility,
                         withoutBranches: self.assigneWithoutBranches,
-                        initialData: self.visibilityFormData ? self.visibilityFormData : null
+                        initialData    : self.visibilityFormData ? self.visibilityFormData : null
                     });
 
                     self.editVisibilityFormView.on('save', function (data) {
@@ -260,10 +260,10 @@ define([
                         if (response.before.files.length) {
                             resultFileObjects = response.before.files.map(function (fileObj) {
                                 return {
-                                    _id: fileObj._id,
+                                    _id     : fileObj._id,
                                     fileName: fileObj.originalName,
                                     fileType: fileObj.contentType,
-                                    base64: fileObj.url,
+                                    base64  : fileObj.url,
                                     uploaded: true,
                                     branchId: 'vfwithoutbranch'
                                 };
@@ -280,10 +280,10 @@ define([
                                     resultFileObjects.push({
                                         uploaded: true,
                                         fileName: fileObject.originalName,
-                                        base64: fileObject.url,
+                                        base64  : fileObject.url,
                                         fileType: fileObject.contentType,
                                         branchId: item.branchId,
-                                        _id: fileObject._id
+                                        _id     : fileObject._id
                                     });
                                 });
 
@@ -309,7 +309,7 @@ define([
 
                         if (resultFileObjects.length) {
                             self.visibilityFormData = {
-                                files: applyToAll ? [resultFileObjects[0]] : resultFileObjects,
+                                files     : applyToAll ? [resultFileObjects[0]] : resultFileObjects,
                                 applyToAll: applyToAll,
                             }
                         }
@@ -432,9 +432,9 @@ define([
 
             var value = val.toISOString();
 
-            if (id === 'dateStart'){
+            if (id === 'dateStart') {
                 this.changed.dateStart = value;
-                if (val.diff(moment(this.model.get('dateEnd'), 'DD.MM.YYYY')) > 0){
+                if (val.diff(moment(this.model.get('dateEnd'), 'DD.MM.YYYY')) > 0) {
                     this.changed.dateEnd = value;
                 }
             } else {
@@ -561,15 +561,15 @@ define([
                         });
 
                         $.ajax({
-                            url: '/file',
-                            method: 'POST',
-                            data: filesData,
+                            url        : '/file',
+                            method     : 'POST',
+                            data       : filesData,
                             contentType: false,
                             processData: false,
-                            success: function (response) {
+                            success    : function (response) {
                                 cb(null, model, response);
                             },
-                            error: function () {
+                            error      : function () {
                                 App.renderErrors([
                                     ERROR_MESSAGES.filesNotUploaded[currentLanguage]
                                 ]);
@@ -605,11 +605,11 @@ define([
                             });
 
                             visibilityFormRequestData = {
-                                before: {
+                                before  : {
                                     files: arrayOfFileId
                                 },
-                                after: {
-                                    files: [],
+                                after   : {
+                                    files      : [],
                                     description: ''
                                 },
                                 branches: []
@@ -628,21 +628,21 @@ define([
                             });
 
                             visibilityFormRequestData = {
-                                before: {
+                                before  : {
                                     files: []
                                 },
-                                after: {
-                                    files: [],
+                                after   : {
+                                    files      : [],
                                     description: ''
                                 },
                                 branches: context.branchesForVisibility.map(function (item) {
                                     return {
                                         branchId: item._id,
-                                        before: {
+                                        before  : {
                                             files: arrayOfFilesId
                                         },
-                                        after: {
-                                            files: [],
+                                        after   : {
+                                            files      : [],
                                             description: ''
                                         }
                                     };
@@ -669,11 +669,11 @@ define([
 
                                     return {
                                         branchId: item.branchId,
-                                        before: {
+                                        before  : {
                                             files: arrayOfFileIds
                                         },
-                                        after: {
-                                            files: [],
+                                        after   : {
+                                            files      : [],
                                             description: ''
                                         }
                                     };
@@ -693,15 +693,15 @@ define([
                     }
 
                     $.ajax({
-                        url: '/form/visibility/before/' + form._id,
-                        method: 'PUT',
+                        url        : '/form/visibility/before/' + form._id,
+                        method     : 'PUT',
                         contentType: 'application/json',
-                        dataType: 'json',
-                        data: JSON.stringify(visibilityFormRequestData),
-                        success: function () {
+                        dataType   : 'json',
+                        data       : JSON.stringify(visibilityFormRequestData),
+                        success    : function () {
                             cb(null, model);
                         },
-                        error: function () {
+                        error      : function () {
                             cb(null, model);
                         }
                     });
@@ -888,15 +888,15 @@ define([
             });
             this.outletsForVisibility = _.map(this.outletsForVisibility, function (outlet) {
                 let result = {
-                    name : outlet.name.currentLanguage,
-                    _id : outlet._id,
-                    branches : []
+                    name    : outlet.name.currentLanguage,
+                    _id     : outlet._id,
+                    branches: []
                 };
 
                 self.branchesForVisibility.map((branch) => {
                     if (outlet._id === branch.outlet) {
                         result.branches.push({
-                            name : branch.name.currentLanguage,
+                            name: branch.name.currentLanguage,
                             _id : branch._id
                         });
                     }
@@ -986,7 +986,7 @@ define([
 
             this.treeView.on('locationSelected', this.locationSelected, this);
 
-            if (!this.branchesForVisibility || (this.branchesForVisibility && !this.branchesForVisibility.length) ) {
+            if (!this.branchesForVisibility || (this.branchesForVisibility && !this.branchesForVisibility.length)) {
                 this.branchesForVisibility = [];
 
                 personnels.forEach(function (personnel) {
@@ -994,7 +994,7 @@ define([
                 });
             }
 
-            if (!this.outletsForVisibility || (this.outletsForVisibility && !this.outletsForVisibility.length) ) {
+            if (!this.outletsForVisibility || (this.outletsForVisibility && !this.outletsForVisibility.length)) {
                 this.outletsForVisibility = [];
 
                 personnels.forEach(function (personnel) {
@@ -1151,7 +1151,7 @@ define([
             var endDateObj;
 
             var buttons = {
-                save: {
+                save  : {
                     text : this.translation.saveBtn,
                     class: 'btn saveBtn',
                     click: function () {
@@ -1165,9 +1165,9 @@ define([
                         }
                     }
                 },
-                cancel : {
+                cancel: {
                     text : 'Cancel',
-                    click : function () {
+                    click: function () {
                         self.remove();
                     }
                 }
@@ -1185,8 +1185,8 @@ define([
 
             jsonModel.duplicate = this.duplicate;
             formString = this.template({
-                jsonModel: jsonModel,
-                linkedForm: this.linkedForm,
+                jsonModel  : jsonModel,
+                linkedForm : this.linkedForm,
                 translation: this.translation
             });
 
