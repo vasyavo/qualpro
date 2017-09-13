@@ -1015,7 +1015,6 @@ define([
             if (this.filterView) {
                 this.filterView.changeTranslatedFields();
             }
-
         }
 
     });

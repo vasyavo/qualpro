@@ -20,10 +20,7 @@ function* getDomainId(name, type = 'country') {
         type,
         topArchived : false,
         archived : false,
-        'name.en': {
-            $regex  : getStringForRegex(name),
-            $options: 'i'
-        }
+        'name.en': getStringForRegex(name)
     };
 
     let data;
@@ -313,7 +310,7 @@ function* createOrUpdate(payload) {
     }
 
     if (dateJoined) {
-        const parsedDate = moment(dateJoined);
+        const parsedDate = moment(dateJoined).add(4, 'h');
 
         if (parsedDate.isValid()) {
             rawOpt.dateJoined = parsedDate.toDate();

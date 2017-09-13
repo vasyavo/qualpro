@@ -4,6 +4,7 @@ const analyzeByMethods = {
     subRegion: require('./analyzeBySubRegion'),
     branch: require('./analyzeByBranch'),
     brand: require('./analyzeByBrand'),
+    variant: require('./analyzeByVariant'),
     product: require('./analyzeByProduct'),
     publisherPosition: require('./analyzeByPublisherPosition'),
     publisher: require('./analyzeByPublisher'),

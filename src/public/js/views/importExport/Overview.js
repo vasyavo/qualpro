@@ -1,7 +1,6 @@
 define(function (require) {
 
     var Marionette = require('marionette');
-    var PubNubClient = require('services/pubnub');
     var ImportErrorsView = require('views/importExport/ImportErrors');
     var Template = require('text!templates/importExport/overview.html');
     var MS_EXEL_CONTENT_TYPES = require('constants/otherConstants').MS_EXCEL_CONTENT_TYPES;
@@ -273,7 +272,20 @@ define(function (require) {
                 ui.itemPricesButtonTitle.html(translation.importItemsPricesTitle);
                 ui.competitorListButtonTitle.html(translation.importCompetitorListTitle);
             }
-        }
+        },
+
+        changeTranslatedFields: function (translation) {
+            var that = this;
+            var $elementsForTranslation = this.$el.find('[data-translation]');
+
+            this.translation = translation;
+            $elementsForTranslation.each(function (index, el) {
+                var $element = $(el);
+                var property = $element.attr('data-translation');
+
+                $element.html(that.translation[property]);
+            });
+        },
 
     });
 
