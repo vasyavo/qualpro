@@ -217,7 +217,7 @@
                 _id : 'NPS',
                 name: {
                     en: 'NPS',
-                    ar: '' //todo translation
+                    ar: 'تقييم تصنيف العملاء',
                 },
 
                 sortKey: 0
