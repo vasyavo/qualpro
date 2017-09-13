@@ -40,7 +40,7 @@ var RetailSegmentHandler = function () {
         createdBy     : 1,
         editedBy      : 1,
         topArchived   : 1,
-        imageSrc: 1,
+        imageSrc      : 1,
     };
 
     this.getSubRegionsByCountryOrRegion = function (filter, type, cb) {
@@ -110,13 +110,13 @@ var RetailSegmentHandler = function () {
                 (model, count, cb) => {
                     ActivityLog.emit('trade-channel:created', {
                         actionOriginator: req.session.uId,
-                        accessRoleLevel: req.session.level,
-                        body: model.toJSON(),
+                        accessRoleLevel : req.session.level,
+                        body            : model.toJSON(),
                     });
 
                     PreviewModel.setNewPreview({
                         model,
-                        base64: imageSrc,
+                        base64     : imageSrc,
                         contentType: CONTENT_TYPES.RETAILSEGMENT,
                     }, cb);
                 },
@@ -225,10 +225,10 @@ var RetailSegmentHandler = function () {
                 if (err) {
                     return next(err);
                 }
-                async.each(idsToArchive, (id, eCb)=> {
+                async.each(idsToArchive, (id, eCb) => {
                     RetailSegmentModel.findById(id)
                         .lean()
-                        .exec((err, resp)=> {
+                        .exec((err, resp) => {
                             if (err) {
                                 return eCb(err)
                             }
@@ -244,7 +244,7 @@ var RetailSegmentHandler = function () {
                             eCb();
 
                         })
-                }, (err)=> {
+                }, (err) => {
                     if (err) {
                         logWriter.log('trade channel archived error', err);
                     }
@@ -334,8 +334,8 @@ var RetailSegmentHandler = function () {
 
                     async.each(result.configurations, (config, cb) => {
                         configs.push({
-                            _id : config._id,
-                            configuration : config.configuration
+                            _id          : config._id,
+                            configuration: config.configuration
                         });
 
                         cb(null);
@@ -353,7 +353,7 @@ var RetailSegmentHandler = function () {
             }
 
             res.status(200).send({
-                configurations : configs
+                configurations: configs
             });
         });
     };
@@ -415,17 +415,17 @@ var RetailSegmentHandler = function () {
         };
 
         /*
-        * In case of mobile app pipeline begin from "branches".
-        * */
+         * In case of mobile app pipeline begin from "branches".
+         * */
         if (isMobile) {
             $match.subRegion = queryObject.subRegion;
         }
 
         /*
-        * In case of desktop app pipeline begin from "retailSegments".
-        * Should fix menu "Trade Channels" and section during user flow "Countries"
-        * Roles: MA, CA, AM, AinM.
-        * */
+         * In case of desktop app pipeline begin from "retailSegments".
+         * Should fix menu "Trade Channels" and section during user flow "Countries"
+         * Roles: MA, CA, AM, AinM.
+         * */
         if (!isMobile) {
             if (queryObject.subRegion && queryObject.subRegion.$in.length) {
                 $match.subRegions = queryObject.subRegion;
@@ -469,7 +469,7 @@ var RetailSegmentHandler = function () {
                     archived   : '$retailSegment.archived',
                     topArchived: '$retailSegment.topArchived',
                     subRegions : '$retailSegment.subRegions',
-                    imageSrc: '$retailSegment.imageSrc',
+                    imageSrc   : '$retailSegment.imageSrc',
                 }
             });
         }
@@ -495,7 +495,7 @@ var RetailSegmentHandler = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -513,7 +513,7 @@ var RetailSegmentHandler = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -541,7 +541,7 @@ var RetailSegmentHandler = function () {
                             position : 1,
                             firstName: 1,
                             lastName : 1,
-                            imageSrc: 1,
+                            imageSrc : 1,
                         }
                     }
                 }
@@ -559,7 +559,7 @@ var RetailSegmentHandler = function () {
                             accessRole: 1,
                             firstName : 1,
                             lastName  : 1,
-                            imageSrc: 1,
+                            imageSrc  : 1,
                         }
                     }
                 }
@@ -703,7 +703,7 @@ var RetailSegmentHandler = function () {
                 }
 
                 const body = response.length ?
-                    response[0] : { data: [], total: 0 };
+                    response[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.name) {
@@ -793,6 +793,7 @@ var RetailSegmentHandler = function () {
 
             async.waterfall([
                 function (waterfallCb) {
+                    delete queryObject.globalSearch;
                     self.getSubRegionsByCountryOrRegion(queryObject, 'region', waterfallCb);
                 },
                 function (regionIds, waterfallCb) {
@@ -851,7 +852,7 @@ var RetailSegmentHandler = function () {
                 }
 
                 const body = response.length ?
-                    response[0] : { data: [], total: 0 };
+                    response[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.name) {
@@ -906,18 +907,18 @@ var RetailSegmentHandler = function () {
 
             async.waterfall([
                 (cb) => {
-                    RetailSegmentModel.findByIdAndUpdate(id, body, { new: true }).exec(cb);
+                    RetailSegmentModel.findByIdAndUpdate(id, body, {new: true}).exec(cb);
                 },
                 (model, cb) => {
                     ActivityLog.emit('trade-channel:updated', {
                         actionOriginator: req.session.uId,
-                        accessRoleLevel: req.session.level,
-                        body: model.toJSON(),
+                        accessRoleLevel : req.session.level,
+                        body            : model.toJSON(),
                     });
 
                     PreviewModel.setNewPreview({
                         model,
-                        base64: imageSrc,
+                        base64     : imageSrc,
                         contentType: CONTENT_TYPES.RETAILSEGMENT,
                     }, cb);
                 },
