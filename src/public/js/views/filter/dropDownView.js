@@ -32,6 +32,7 @@ define([
         initialize: function (options) {
             var self = this;
 
+            this.translation = options.translation;
             this.forPosition = options.forPosition === undefined ? true : options.forPosition;
             this.displayText = options.displayText;
             this.contentType = options.contentType;
@@ -481,9 +482,18 @@ define([
 
         render: function () {
             var $curEl = this.$el;
+            var currentLanguage = App.currentUser.currentLanguage;
             var selectAllText = {
                 en: 'Select all',
-                ar: '',
+                ar: 'اختر الكل',
+            };
+            var prev = {
+                en: 'prev',
+                ar: 'السابق',
+            };
+            var next = {
+                en: 'next',
+                ar: 'التالي',
             };
 
             $curEl.html(this.template({
@@ -492,7 +502,9 @@ define([
                 contentType : this.contentType,
                 dataProperty: this.dataProperty,
                 showSelectAll : this.showSelectAll,
-                selectAllText: selectAllText[App.currentUser.currentLanguage],
+                selectAllText: selectAllText[currentLanguage],
+                nextButtonText: next[currentLanguage],
+                prevButtonText: prev[currentLanguage],
             }));
 
             if (this.selectedValuesIds.length) {

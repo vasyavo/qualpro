@@ -910,6 +910,13 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
+                    en: 'Variant',
+                    ar: '',
+                },
+                value: 'variant',
+            },
+            {
+                name: {
                     en: 'Product',
                     ar: '',
                 },

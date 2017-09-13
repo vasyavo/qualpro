@@ -299,7 +299,20 @@ define(function (require) {
 
             ui.actionHolder.addClass('hidden');
             ui.checkAll.prop('checked', false);
-        }
+        },
+
+        changeTranslatedFields: function (translation) {
+            var that = this;
+            var $elementsForTranslation = this.$el.find('[data-translation]');
+
+            this.translation = translation;
+            $elementsForTranslation.each(function (index, el) {
+                var $element = $(el);
+                var property = $element.attr('data-translation');
+
+                $element.html(that.translation[property]);
+            });
+        },
 
     });
 
