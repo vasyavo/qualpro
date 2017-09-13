@@ -30,20 +30,20 @@ define([
         view       : null,
 
         routes: {
-            home                                                                                                                                                                  : 'any',
-            'login(/:confirmed)'                                                                                                                                                  : 'login',
-            'logout'                                                                                                                                                              : 'logout',
-            forgotPass                                                                                                                                                            : 'forgotPass',
-            'qualPro/documents(/filter=:filter)'                                                                                                                                  : 'documentsHomePage',
-            'qualPro/documents/:id(/filter=:filter)'                                                                                                                              : 'showDocumentsView',
-            'qualPro/importExport'                                                                                                                                                : 'goToImportExportView',
-            'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)'                                                                                                 : 'goToCustomReport',
+            'home': 'any',
+            'login(/:confirmed)': 'login',
+            'logout': 'logout',
+            'forgotPass': 'forgotPass',
+            'qualPro/documents(/filter=:filter)': 'documentsHomePage',
+            'qualPro/documents/:id(/filter=:filter)': 'showDocumentsView',
+            'qualPro/importExport': 'goToImportExportView',
+            'qualPro/importExport/*any': 'goToImportExportView',
+            'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)': 'goToCustomReport',
             'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
-            'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)'                                                                      : 'getDomainList',
-            // 'qualPro/:contentType(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getList',
-            'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)'                                                            : 'goToContent',
-            'qualPro/:contentType/form/:contentId'                                                                                                                                : 'goToForm',
-            '*any'                                                                                                                                                                : 'any'
+            'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'getDomainList',
+            'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToContent',
+            'qualPro/:contentType/form/:contentId': 'goToForm',
+            '*any': 'any'
         },
 
         initialize: function () {
@@ -108,10 +108,6 @@ define([
                     $loader.addClass('animated');
                     $loader.addClass('smallLogo').removeClass('ellipseAnimated');
                 }
-
-                that.mainView.topMenu.currentCT = 'documents';
-                that.view.contentType = 'documents';
-                that.topBarView.contentType = 'documents';
 
                 var currentLanguage = App.currentUser.currentLanguage;
                 require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {

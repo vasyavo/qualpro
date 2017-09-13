@@ -1,7 +1,6 @@
 define(function (require) {
 
     var Marionette = require('marionette');
-    var PubNubClient = require('services/pubnub');
     var ImportErrorsView = require('views/importExport/ImportErrors');
     var Template = require('text!templates/importExport/overview.html');
     var MS_EXEL_CONTENT_TYPES = require('constants/otherConstants').MS_EXCEL_CONTENT_TYPES;

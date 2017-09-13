@@ -1,14 +1,25 @@
 define(function (require) {
 
+    var _ = require('underscore');
     var Marionette = require('marionette');
     var Template = require('text!templates/importExport/top-bar.html');
 
     return Marionette.View.extend({
 
+        initialize: function (options) {
+            this.translation = options.translation;
+        },
+
         className: 'import-export-topbar',
 
-        template: function () {
-            return Template;
+        template: function (ops) {
+            return _.template(Template)(ops);
+        },
+
+        templateContext: function () {
+            return {
+                translation: this.translation,
+            };
         },
 
         ui: {
