@@ -53,8 +53,6 @@ define([
             this.leftMenu = new LeftMenuView({
                 collection: this.collection
             });
-/*
-            custom.navigateToDefaultUrl({trigger: true, replace: true});*/
         },
 
         render: function () {
@@ -62,7 +60,6 @@ define([
 
             this.$el.mCustomScrollbar({axis: 'yx'});
             this.$el.html(this.template());
-
             this.createTopMenu();
 
             if (!App) {

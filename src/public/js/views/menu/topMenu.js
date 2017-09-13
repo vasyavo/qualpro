@@ -140,7 +140,6 @@ define(function(require) {
             var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
             var translationUrl;
-
             if (this.currentCT) {
                 translationUrl = 'translations/' + anotherLanguage + '/' + this.currentCT;
             }
@@ -214,7 +213,7 @@ define(function(require) {
             $holder.html(this.descriptionTemplate(currentUser));
         },
 
-            render: function () {
+        render: function () {
             var userAccessLevel = App.currentUser.accessRole.level;
             var templateData = {
                 showContactUsBadge : null

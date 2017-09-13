@@ -169,9 +169,20 @@ define([
                     that.wrapperView.undelegateEvents();
                 }
 
-                if (!that.wrapperView) {
-                    that.main('importExport');
-                }
+                that.main('importExport');
+
+                that.mainView.topMenu.currentCT = 'importExport';
+
+                that.mainView.on('languageChanged', function () {
+                    App.$preLoader.fadeFn({
+                        visibleState: false,
+                    });
+                });
+
+                that.mainView.on('translationLoaded', function (translation) {
+                    that.view.changeTranslatedFields(translation);
+                    that.topBarView.changeTranslatedFields(translation);
+                });
 
                 var $loader = $('#alaliLogo');
                 if (!$loader.hasClass('smallLogo')) {
@@ -192,6 +203,10 @@ define([
                         model      : importExportModel,
                         translation: translation,
                     });
+
+                    that.changeView(importExportOverview);
+                    that.changeTopBarView(importExportTopBar);
+
                     $('#contentHolder').html(importExportOverview.render().$el);
                 });
             });
