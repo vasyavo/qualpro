@@ -21,15 +21,15 @@ define([
 
         //create Question
         enterQuestion     : {
-            en: 'Ar Enter Question in English',
+            en: '', // todo
             ar: 'أدخل السؤال باللغة العربية'
         },
         enterTitle     : {
-            en: 'Ar Enter Title in English',
+            en: '', // todo
             ar: 'أدخل العنوان باللغة العربية'
         },
         enterOption     : {
-            en: 'Ar Enter Option to choose in English',
+            en: '', // todo
             ar: 'أدخل الخيار للاختيار باللغة العربية'
         },
         title        : 'العنوان',

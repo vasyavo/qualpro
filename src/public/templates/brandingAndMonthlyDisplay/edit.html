@@ -1,6 +1,6 @@
 <div class="form-holder personnelInfo promotionEdit largeHeightPreview">
     <div class="title">
-        <span class="titleDescription"><%- translation.brandingAndMonthlyDisplayEditTitle %></span>
+        <span class="titleDescription" data-translation="brandingAndMonthlyDisplayEditTitle"><%- translation.brandingAndMonthlyDisplayEditTitle %></span>
     </div>
     <div class="promotionForm">
         <div class="blockObjective scrollingForm">
@@ -9,7 +9,7 @@
                     <div class="table">
                         <div class="row">
                             <div class="cell">
-                                <span><%- translation.displayType %></span>
+                                <span data-translation="displayType"><%- translation.displayType %></span>
                             </div>
                             <div class="cell mandatory">
                                 <a id="displayTypeDd" href="javascript:;"></a>
@@ -17,7 +17,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%- translation.startDate %></span>
+                                <span data-translation="startDate"><%- translation.startDate %></span>
                             </div>
                             <div class="cell mandatory">
                                 <div class="calendarWrap">
@@ -30,7 +30,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%- translation.endDate %></span>
+                                <span data-translation="endDate"><%- translation.endDate %></span>
                             </div>
                             <div class="cell mandatory">
                                 <div class="calendarWrap">
@@ -49,7 +49,7 @@
                     <div class="description">
                         <div class="objectivesPaddingBlock borderBottom">
                             <div class="descriptionBlock floatBlock">
-                                <span class="description fontBold mandatory"><%- translation.description %></span>
+                                <span class="description fontBold mandatory" data-translation="description"><%- translation.description %></span>
                                 <a class="showHideAr <%= currentLanguage === 'en' ? 'arabicIcon' : 'englishIcon' %>"
                                    data-id="description<%= anotherLanguage.capitalizer('firstCaps') %>Container"
                                    href="javascript:;">
@@ -61,7 +61,9 @@
                                           class="objectivesTextarea"
                                           required
                                           maxlength="150"
-                                          placeholder="<%= translation.description %>"><%- model.description.en %>
+                                          placeholder="<%= translation.description %>"
+                                          data-translation="description"
+                                ><%- model.description.en %>
                                 </textarea>
                             </div>
                         </div>
@@ -72,6 +74,7 @@
                                       data-property="ar"
                                       value=""
                                       placeholder="<%= translation.description %>"
+                                      data-translation="description"
                                       maxlength="150"><%- model.description.ar %>
                             </textarea>
                         </div>

@@ -1,45 +1,46 @@
 define([
     'Underscore',
-    'translations/en/pagination',
-    'translations/en/filters'
+    'translations/ar/pagination',
+    'translations/ar/filters'
 ], function (_, paginationTranslation, filtersTranslation) {
     var translation = {
         // list view
-        brand      : '', // todo
-        category   : '', // todo
-        displayType: '', // todo
-        startDate  : '', // todo
-        endDate    : '', // todo
-        location   : '', // todo
+        brand      : 'المنافس',
+        category   : 'الفئة',
+        displayType: 'نوع العرض',
+
+        startDate: 'تاريخ البدء',
+        endDate  : 'تاريخ الانتهاء',
+        location : 'الموقع',
 
         // preview
-        titlePreview : '', // todo
-        country      : '', // todo
-        region       : '', // todo
-        subRegion    : '', // todo
-        retailSegment: '', // todo
-        outlet       : '', // todo
-        branch       : '', // todo
-        description  : '', // todo
-        attachments  : '', // todo
-        files        : '', // todo
-        attachBtn    : '', // todo
-        sendBtn      : '', // todo
-        noTranslation: '', // todo
-        skipped      : '', // todo
-        commentText  : '', // todo
+        titlePreview : 'عرض بيانات النشاط التسويقي',
+        country      : 'الدولة',
+        region       : 'المنطقة',
+        subRegion    : 'المنطقة الفرعية',
+        retailSegment: 'الفئة التجارية',
+        outlet       : 'العميل',
+        branch       : 'الفرع',
+        description  : 'الوصف',
+        attachments  : 'الملفات المرفقة',
+        files        : 'الملفات',
+        attachBtn    : 'ارفاق',
+        sendBtn      : 'ارسال',
+        noTranslation: ' لا يوجد ترجمة ',
+        skipped      : 'تخطي',
+        commentText  : 'التعليق',
         missedData   : '', // todo
         edit         : 'تعديل بيانات',
-        delete: '', // todo
+        delete: 'حذف',
 
         // edit
-        saveBtn      : 'حفظ',
+        saveBtn: 'حفظ',
         brandingAndMonthlyDisplayEditTitle: '', // todo
 
         // topBar
-        all        : '', // todo
-        okBtn      : '', // todo
-        dialogTitle: '' // todo
+        all: ' العلامات التجارية وتقارير العرض للمنافسين',
+        okBtn: 'موافق',
+        dialogTitle: ' التعليقات والمرفقات',
     };
     return _.extend({}, paginationTranslation, filtersTranslation, translation);
 });

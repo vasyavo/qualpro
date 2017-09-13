@@ -1,6 +1,6 @@
 <div class="form-holder personnelInfo competitorBranding largeHeightPreview">
     <div class="title">
-        <span class="titleDescription"><%= translation.titlePreview %></span>
+        <span class="titleDescription" data-translation="titlePreview"><%= translation.titlePreview %></span>
     </div>
     <div class="objectivesTopBtnBlockSmall borderBottom">
         <div id="topButtons" class="buttonsWrap"></div>
@@ -12,7 +12,7 @@
                     <div class="table">
                         <div class="row">
                             <div class="cell alignTop">
-                                <span><%= translation.category %></span>
+                                <span data-translation="category"><%= translation.category %></span>
                             </div>
                             <div class="cell">
                                 <span id="category" class="textEllipsis hoverFullText"><%=  jsonModel.categoryString || translation.skipped %></span>
@@ -20,7 +20,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span ><%= translation.country %></span>
+                                <span data-translation="category"><%= translation.country %></span>
                             </div>
                             <div class="cell">
                                 <span id="country" class="hoverFullText"><%= jsonModel.countryString || translation.noTranslation %></span>
@@ -28,7 +28,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.region %></span>
+                                <span data-translation="region"><%= translation.region %></span>
                             </div>
                             <div class="cell">
                                 <span id="region" class="hoverFullText"><%= jsonModel.regionString || translation.noTranslation %></span>
@@ -36,15 +36,15 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.subRegion %></span>
+                                <span data-translation="subRegion"><%= translation.subRegion %></span>
                             </div>
                             <div class="cell">
-                                <span id="subRegion" class="hoverFullText"><%= jsonModel.subRegionString || translation.noTranslation %></span>
+                                <span id="subRegion" class="hoverFullText" ><%= jsonModel.subRegionString || translation.noTranslation %></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.outlet %></span>
+                                <span data-translation="outlet"><%= translation.outlet %></span>
                             </div>
                             <div class="cell">
                                 <span id="outlet" class="hoverFullText"><%= jsonModel.outletString || translation.noTranslation %></span>
@@ -52,7 +52,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.retailSegment %></span>
+                                <span data-translation="retailSegment"><%= translation.retailSegment %></span>
                             </div>
                             <div class="cell">
                                 <span id="retailSegment" class="hoverFullText"><%= jsonModel.retailSegmentString || translation.noTranslation %></span>
@@ -60,7 +60,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.branch %></span>
+                                <span data-translation="branch"><%= translation.branch %></span>
                             </div>
                             <div class="cell">
                                 <span id="branch" class="hoverFullText"><%= jsonModel.branchString || translation.noTranslation %></span>
@@ -68,7 +68,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.displayType %></span>
+                                <span data-translation="displayType"><%= translation.displayType %></span>
                             </div>
                             <div class="cell">
                                 <span id="display-type" class="hoverFullText"><%= jsonModel.displayTypeString || translation.skipped %></span>
@@ -76,7 +76,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.startDate %></span>
+                                <span data-translation="startDate"><%= translation.startDate %></span>
                             </div>
                             <div class="cell">
                                 <span id="date-start"><%= jsonModel.dateStart %></span>
@@ -84,7 +84,7 @@
                         </div>
                         <div class="row">
                             <div class="cell">
-                                <span><%= translation.endDate %></span>
+                                <span data-translation="endDate"><%= translation.endDate %></span>
                             </div>
                             <div class="cell">
                                 <span id="date-end"><%= jsonModel.dateEnd %></span>
@@ -99,17 +99,17 @@
                     <div class="scrollable">
                         <div class="objectivesPaddingBlock borderBottom">
                             <div class="descriptionBlock floatBlock">
-                                <span><%- translation.description %></span>
+                                <span data-translation="description"><%- translation.description %></span>
                             </div>
                             <span id="description" class="descriptionValue heightDescription fontBold fontMedium mCustomScrollbar"><%= jsonModel.descriptionString || translation.noTranslation  %></span>
                         </div>
 
                         <div id="attachments" class="attachmentsBlock">
                             <div class="attachmentsHeader">
-                                <span class="attachmentsDescription fontBold"><%= translation.attachments %></span>
+                                <span class="attachmentsDescription fontBold" data-translation="attachments"><%= translation.attachments %></span>
                             </div>
                             <div class="filesBlock borderBottom">
-                                <span class="filesTitle"><%= translation.files %></span>
+                                <span class="filesTitle" data-translation="files"><%= translation.files %></span>
                                 <div id="objectiveFileThumbnail" class="fileThumbnail"></div>
                             </div>
                         </div>
@@ -138,8 +138,8 @@
 
         <div class="blockBottom objectivesPaddingBlock">
             <div class="objectivesBtnBlock">
-                <span class="greyBtn" id="attachFiles"><%= translation.attachBtn %></span>
-                <span class="greyBtn" id="sendComment"><%= translation.sendBtn %></span>
+                <span class="greyBtn" id="attachFiles" data-translation="attachBtn"><%= translation.attachBtn %></span>
+                <span class="greyBtn" id="sendComment" data-translation="sendBtn"><%= translation.sendBtn %></span>
                 <div class="fileBottom">
                     <span class="attachment"></span>
                     <span id="newCommentAttachments"></span>
