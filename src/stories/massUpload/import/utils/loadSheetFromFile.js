@@ -1,5 +1,6 @@
 const XLSX = require('xlsx');
 const _ = require('lodash');
+const moment = require('moment');
 const config = require('../../../../config');
 
 function normalizeString(str) {
@@ -57,7 +58,7 @@ module.exports = function (filePath, opt) {
         } = sheet;
         const incomingSheet = wb.Sheets[sheetName];
         Object.keys(incomingSheet).forEach(function(s) {
-            if(incomingSheet[s].w) {
+            if(incomingSheet[s].w && !moment(incomingSheet[s].w).isValid()) {
                 incomingSheet[s].w = incomingSheet[s].v.toString();
             }
         });
