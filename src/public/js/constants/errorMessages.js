@@ -57,7 +57,7 @@
         },
         subRegion : {
             emptyNameInput : {
-                en : 'Please enter name of sub region.',
+                en : 'Please enter name of sub-region.',
                 ar : ''//todo
             }
         },
@@ -333,7 +333,7 @@
             ar: '' //todo
         },
         fileNotSelected: {
-            en: 'File not selected',
+            en: 'The file is not selected',
             ar: '' //todo
         },
         selectOneFile: {
