@@ -351,7 +351,7 @@ define([
             $respondentsFullList.html('');
 
             answers = lodash.uniqBy(answers, 'customer.name');
-            
+
             answers.forEach(function (answer) {
                 answer.location = self.setLocation(answer);
 

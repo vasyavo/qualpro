@@ -8299,11 +8299,11 @@ table:not(.ui-datepicker-calendar) thead tr td {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.productLaunchList .textContainer .newBrand {
+.productLaunchList .textContainer .newBrandAr {
     display: inline-block;
     padding-left: 35px;
 }
-.productLaunchList .textContainer .newBrand:after {
+.productLaunchList .textContainer .newBrandAr:after {
     top: 0;
     left: 0;
 }
@@ -10541,11 +10541,11 @@ canvas::selection,
 .contractStatus.expired {
     color: #f44336;
 }
-.newBrand {
+.newBrandAr {
     position: relative;
 }
-.newBrand:after {
-    content: 'new';
+.newBrandAr:after {
+    content: 'الجديد';
     position: absolute;
     padding: 0 3px;
     background-color: #f44336;
@@ -10556,7 +10556,7 @@ canvas::selection,
     font-size: 11px;
     font-size: 0.6875rem;
 }
-.cell .newBrand:after {
+.cell .newBrandAr:after {
     top: -3px;
     left: -32px;
 }
@@ -11264,4 +11264,7 @@ a.lSNext {
 }
 .other-type-description {
     height: 30px!important;
+}
+.edit-question button {
+    display: block;
 }
