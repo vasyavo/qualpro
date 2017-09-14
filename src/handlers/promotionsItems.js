@@ -4,6 +4,7 @@ const extractBody = require('./../utils/extractBody');
 var Promotions = function () {
     var async = require('async');
     var _ = require('lodash');
+    var moment = require('moment');
     var logger = require('../utils/logger');
     var EventModel = require('./../types/event/model');
     var mongoose = require('mongoose');
@@ -585,7 +586,9 @@ var Promotions = function () {
                 body.sellOut.push(sellOutSum);
             }
 
-            if (new Date(body.dateEnd) < new Date()) {
+            body.dateEnd = moment(body.dateEnd).add(4, 'h');
+
+            if (body.dateEnd < moment().add(4, 'h')) {
                 body.status = PROMOTION_STATUSES.EXPIRED;
             }
 
