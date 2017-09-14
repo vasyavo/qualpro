@@ -319,7 +319,7 @@ const modules = [
 
     {
         _id     : 31,
-        name    : {en: 'al alali Questionnaire', ar: 'استطلاع العلالي'},
+        name    : {en: 'al alali Questionnaire', ar: 'استبيان العلالي'},
         href    : 'questionnary',
         sequence: 31,
         parrent : 16,
@@ -394,7 +394,7 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'al alali Marketing Campaigns', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
+        name    : {en: 'al alali Marketing Campaigns', ar: 'حملة العلالي التسويقية والدعائية'},
         href    : CONSTANTS.MARKETING_CAMPAIGN,
         sequence: 38,
         parrent : 16,

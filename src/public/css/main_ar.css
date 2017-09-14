@@ -10544,7 +10544,7 @@ canvas::selection,
     position: relative;
 }
 .newBrandAr:after {
-    content: 'new';
+    content: 'الجديد';
     position: absolute;
     padding: 0 3px;
     background-color: #f44336;
