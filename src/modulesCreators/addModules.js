@@ -319,7 +319,7 @@ const modules = [
 
     {
         _id     : 31,
-        name    : {en: 'al alali Questionnaire', ar: 'استبيان العلاليal'},
+        name    : {en: 'al alali Questionnaire', ar: 'استبيان العلالي'},
         href    : 'questionnary',
         sequence: 31,
         parrent : 16,
