@@ -192,6 +192,9 @@ var ShelfShareHandler = function () {
                             },
                             {
                                 'createdBy.user.country': {$exists: false}
+                            },
+                            {
+                                'createdBy.user.country': {$eq: []}
                             }
                         ]
                     }
@@ -207,6 +210,9 @@ var ShelfShareHandler = function () {
                             },
                             {
                                 'createdBy.user.region': {$exists: false}
+                            },
+                            {
+                                'createdBy.user.country': {$eq: []}
                             }
                         ]
                     }
@@ -222,6 +228,9 @@ var ShelfShareHandler = function () {
                             },
                             {
                                 'createdBy.user.subRegion': {$exists: false}
+                            },
+                            {
+                                'createdBy.user.country': {$eq: []}
                             }
                         ]
                     }
